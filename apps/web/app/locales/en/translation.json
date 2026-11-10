@@ -812,6 +812,21 @@
     "validation": {
       "messageRequired": "Message is required.",
       "nameMaxLength": "Must be at most {{max}} characters."
+    },
+    "optionPicker": {
+      "search": "Search",
+      "empty": "No matches found"
+    },
+    "dataTable": {
+      "filters": "Filters",
+      "resetFilters": "Reset all filters",
+      "removeFilter": "Remove filter: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}",
+      "selectedCount": "Selected: {{count}}",
+      "emptyTitle": "No results found",
+      "emptyDescription": "Try a different search or reset the filters.",
+      "selectAll": "Select all",
+      "selectRow": "Select row"
     }
   },
   "lessons": {
@@ -2055,9 +2070,7 @@
         "private": "Private"
       },
       "allCategories": "All categories",
-      "archive": "Archive",
-      "removeFilter": "Remove filter: {{filter}}",
-      "labeledValue": "{{label}}: {{value}}"
+      "archive": "Archive"
     },
     "courses": {
       "header": "Manage courses",
@@ -2142,12 +2155,7 @@
       "bulkStatusUpdateForbidden": "You do not have permission to update one or more selected courses.",
       "noCoursesSelected": "Select at least one course.",
       "deleteCoursesFailed": "Failed to delete courses"
-    },
-    "empty": {
-      "title": "No courses found",
-      "description": "Try a different search or reset the filters."
-    },
-    "selectedCount": "Selected: {{count}}"
+    }
   },
   "adminCategoriesView": {
     "filters": {
@@ -2336,7 +2344,16 @@
         "competencies": "competencies",
         "other": "platform capabilities",
         "gamification": "gamification",
-        "quiz_grading": "quiz grading"
+        "quiz_grading": "quiz grading",
+        "ai_thread": "AI conversations",
+        "automation": "automations",
+        "automation_log": "automation logs",
+        "content_marketplace": "content marketplace",
+        "dashboard": "dashboard",
+        "email_template": "email templates",
+        "managed_group_results": "managed group results",
+        "phishing": "phishing simulations",
+        "todo_task": "tasks"
       },
       "descriptions": {
         "phishing_manage": "Create and manage phishing simulations.",
@@ -7789,11 +7806,7 @@
       "timezone": "Dates use {{timezone}}."
     },
     "title": "Reports",
-    "description": "Understand organisation progress across learning, development paths, courses, and learners.",
-    "picker": {
-      "search": "Search",
-      "empty": "No matches found"
-    }
+    "description": "Understand organisation progress across learning, development paths, courses, and learners."
   },
   "automations": {
     "success": {

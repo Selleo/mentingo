@@ -811,6 +811,21 @@
     "validation": {
       "messageRequired": "Le message est obligatoire.",
       "nameMaxLength": "Doit contenir au maximum {{max}} caractères."
+    },
+    "optionPicker": {
+      "search": "Rechercher",
+      "empty": "Aucun résultat"
+    },
+    "dataTable": {
+      "filters": "Filtres",
+      "resetFilters": "Réinitialiser tous les filtres",
+      "removeFilter": "Supprimer le filtre : {{filter}}",
+      "labeledValue": "{{label}} : {{value}}",
+      "selectedCount": "Sélectionnés : {{count}}",
+      "emptyTitle": "Aucun résultat trouvé",
+      "emptyDescription": "Essayez une autre recherche ou réinitialisez les filtres.",
+      "selectAll": "Tout sélectionner",
+      "selectRow": "Sélectionner la ligne"
     }
   },
   "lessons": {
@@ -2050,9 +2065,7 @@
         "private": "Privé"
       },
       "allCategories": "Toutes les catégories",
-      "archive": "Archives",
-      "removeFilter": "Supprimer le filtre : {{filter}}",
-      "labeledValue": "{{label}} : {{value}}"
+      "archive": "Archives"
     },
     "courses": {
       "header": "Gérer les cours",
@@ -2136,12 +2149,7 @@
       "bulkStatusUpdateForbidden": "Vous n'êtes pas autorisé à mettre à jour un ou plusieurs cours sélectionnés.",
       "noCoursesSelected": "Sélectionnez au moins un cours.",
       "deleteCoursesFailed": "Échec de la suppression des cours"
-    },
-    "empty": {
-      "title": "Aucun cours trouvé",
-      "description": "Essayez une autre recherche ou réinitialisez les filtres."
-    },
-    "selectedCount": "Sélectionnés : {{count}}"
+    }
   },
   "adminCategoriesView": {
     "filters": {
@@ -2330,7 +2338,16 @@
         "competencies": "compétences",
         "other": "capacités de la plateforme",
         "gamification": "gamification",
-        "quiz_grading": "correction des quiz"
+        "quiz_grading": "correction des quiz",
+        "ai_thread": "conversations IA",
+        "automation": "automatisations",
+        "automation_log": "journaux d'automatisation",
+        "content_marketplace": "marketplace de contenus",
+        "dashboard": "tableau de bord",
+        "email_template": "modèles d'e-mail",
+        "managed_group_results": "résultats des groupes gérés",
+        "phishing": "simulations de phishing",
+        "todo_task": "tâches"
       },
       "descriptions": {
         "phishing_manage": "Créer et gérer des simulations de phishing.",
@@ -7521,11 +7538,7 @@
       "timezone": "Les dates utilisent le fuseau horaire {{timezone}}."
     },
     "title": "Rapports",
-    "description": "Suivez la progression de l’organisation dans les parcours, les cours et auprès des apprenants.",
-    "picker": {
-      "search": "Rechercher",
-      "empty": "Aucun résultat"
-    }
+    "description": "Suivez la progression de l’organisation dans les parcours, les cours et auprès des apprenants."
   },
   "automations": {
     "success": {

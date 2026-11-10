@@ -1,15 +1,9 @@
-export const COURSES_TABLE_URL_PARAMS = {
+export const COURSES_TABLE_FILTER_PARAMS = {
   TITLE: "title",
   CATEGORY: "category",
   STATE: "state",
   ARCHIVE: "archive",
-  SORT: "sort",
-  PAGE: "page",
-  PER_PAGE: "perPage",
 } as const;
-
-export type CoursesTableUrlParam =
-  (typeof COURSES_TABLE_URL_PARAMS)[keyof typeof COURSES_TABLE_URL_PARAMS];
 
 export const COURSE_ARCHIVE_FILTERS = {
   ACTIVE: "active",
@@ -29,8 +23,6 @@ export const COURSES_TABLE_SORT_FIELDS = {
   category: "category",
   createdAt: "creationDate",
 } as const;
-
-export type CoursesTableSortColumn = keyof typeof COURSES_TABLE_SORT_FIELDS;
 
 export const COURSES_TABLE_DEFAULT_PAGE_SIZE = 20;
 

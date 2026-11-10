@@ -1,20 +1,24 @@
 import { Link, useNavigate } from "@remix-run/react";
-import {
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  type RowSelectionState,
-  type SortingState,
-  useReactTable,
-} from "@tanstack/react-table";
-import { isEmpty } from "lodash-es";
+import { getCoreRowModel, type RowSelectionState, useReactTable } from "@tanstack/react-table";
 import { Plus, Trash } from "lucide-react";
-import { useMemo, useState, useTransition } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteCategory } from "~/api/mutations/admin/useDeleteCategory";
 import { useDeleteManyCategories } from "~/api/mutations/admin/useDeleteManyCategories";
-import { useCategoriesSuspense } from "~/api/queries";
+import { useCategoriesTableSuspense } from "~/api/queries/useCategoriesTable";
+import { BulkEditDropdown } from "~/components/BulkEditDropdown/BulkEditDropdown";
+import {
+  DataTable,
+  DataTableCard,
+  DataTableEmptyState,
+  DataTablePagination,
+  DataTableSelectionBar,
+  DataTableToolbar,
+  useClampedPage,
+  useRowRangeSelection,
+} from "~/components/DataTable";
+import { PageHeader } from "~/components/PageHeader/PageHeader";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import {
@@ -25,100 +29,94 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
-import { cn } from "~/lib/utils";
-import {
-  type FilterConfig,
-  type FilterValue,
-  SearchFilter,
-} from "~/modules/common/SearchFilter/SearchFilter";
+import { useUrlTableState } from "~/hooks/useUrlTableState";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CATEGORIES_PAGE_HANDLES } from "../../../../e2e/data/categories/handles";
 
-import { getCategoriesColumns } from "./categories.columns";
+import { CATEGORIES_TABLE_SORT_FIELDS, getCategoriesColumns } from "./categories.columns";
 
 import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.categories");
 
+const CATEGORIES_TABLE_SEARCH_PARAM = "title";
+
 const Categories = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [isPending, startTransition] = useTransition();
-
   const appLanguage = useLanguageStore((state) => state.language);
 
-  const [searchParams, setSearchParams] = useState<{
-    title?: string;
-  }>({});
+  const tableState = useUrlTableState({
+    searchParam: CATEGORIES_TABLE_SEARCH_PARAM,
+    filterKeys: [],
+    sortFields: CATEGORIES_TABLE_SORT_FIELDS,
+  });
+  const { search, sort, page, perPage } = tableState;
 
-  const { data } = useCategoriesSuspense({ ...searchParams, language: appLanguage });
+  const categoriesParams = useMemo(
+    () => ({
+      ...(search && { title: search }),
+      ...(sort && { sort }),
+      page,
+      perPage,
+      language: appLanguage,
+    }),
+    [search, sort, page, perPage, appLanguage],
+  );
 
-  const [sorting, setSorting] = useState<SortingState>([]);
+  // Keeps the current rows on screen while categories for the new filters load.
+  const deferredCategoriesParams = useDeferredValue(categoriesParams);
+  const isRefreshingCategories = deferredCategoriesParams !== categoriesParams;
+
+  const {
+    data: { data: categories, pagination },
+  } = useCategoriesTableSuspense(deferredCategoriesParams);
+
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [lastSelectedRowIndex, setLastSelectedRowIndex] = useState<number>(0);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const rowRangeSelection = useRowRangeSelection();
+
+  useEffect(() => {
+    setRowSelection({});
+  }, [categoriesParams]);
+
+  useClampedPage({
+    page,
+    perPage: pagination.perPage,
+    totalItems: pagination.totalItems,
+    setPage: tableState.setPage,
+  });
 
   const { mutate: deleteCategory } = useDeleteCategory();
   const { mutate: deleteManyCategories } = useDeleteManyCategories();
 
-  const filterConfig: FilterConfig[] = [
-    {
-      name: "title",
-      type: "text",
-      placeholder: t("adminCategoriesView.filters.placeholder.title"),
-      testId: CATEGORIES_PAGE_HANDLES.SEARCH_INPUT,
-    },
-  ];
-
-  const handleFilterChange = (name: string, value: FilterValue) => {
-    startTransition(() => {
-      setSearchParams((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    });
-  };
-
-  const columns = useMemo(
-    () =>
-      getCategoriesColumns({
-        lastSelectedRowIndex,
-        setLastSelectedRowIndex,
-        t,
-      }),
-    [lastSelectedRowIndex, t],
-  );
+  const columns = getCategoriesColumns({ rowRangeSelection, t });
 
   const table = useReactTable({
     getRowId: (row) => row.id,
-    data,
+    data: categories,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
+    manualSorting: true,
+    enableMultiSort: false,
+    onSortingChange: tableState.setSorting,
     onRowSelectionChange: setRowSelection,
     state: {
-      sorting,
+      sorting: tableState.sorting,
       rowSelection,
     },
   });
 
   const selectedCategories = table.getSelectedRowModel().rows.map((row) => row.original.id);
 
-  const handleDelete = () => {
-    if (selectedCategories.length === 1) {
-      deleteCategory(selectedCategories[0], {
+  const deleteSelectedCategories = () => {
+    const [firstSelectedCategory] = selectedCategories;
+
+    if (selectedCategories.length === 1 && firstSelectedCategory) {
+      deleteCategory(firstSelectedCategory, {
         onSuccess: () => setRowSelection({}),
       });
 
@@ -146,44 +144,55 @@ const Categories = () => {
     });
   };
 
-  const handleRowClick = (userId: string) => {
-    navigate(userId);
-  };
-
   return (
     <PageWrapper
       breadcrumbs={[
         { title: t("adminCategoriesView.breadcrumbs.categories"), href: "/admin/categories" },
       ]}
     >
-      <div className="flex flex-col" data-testid={CATEGORIES_PAGE_HANDLES.PAGE}>
-        <div className="flex flex-wrap justify-between gap-3">
-          <h4 className="h4" data-testid={CATEGORIES_PAGE_HANDLES.HEADING}>
-            {t("navigationSideBar.categories")}
-          </h4>
-          <div className="flex gap-3">
+      <div className="flex flex-col gap-6" data-testid={CATEGORIES_PAGE_HANDLES.PAGE}>
+        <PageHeader
+          title={t("navigationSideBar.categories")}
+          headingTestId={CATEGORIES_PAGE_HANDLES.HEADING}
+          actions={
             <Link to="new">
               <Button
                 variant="primary"
                 className="gap-2"
                 data-testid={CATEGORIES_PAGE_HANDLES.CREATE_BUTTON}
               >
-                <Plus className="size-4" />
+                <Plus className="size-4" aria-hidden />
                 {t("adminCategoriesView.button.createNew")}
               </Button>
             </Link>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  className="gap-2"
-                  variant="destructive"
-                  disabled={isEmpty(selectedCategories)}
-                  data-testid={CATEGORIES_PAGE_HANDLES.DELETE_SELECTED_BUTTON}
-                >
-                  <Trash className="size-4" />
-                  {t("adminCategoriesView.button.deleteSelected")}
-                </Button>
-              </DialogTrigger>
+          }
+        />
+
+        <DataTableCard>
+          <DataTableToolbar
+            searchValue={tableState.searchInput}
+            onSearchChange={tableState.setSearchInput}
+            searchPlaceholder={t("adminCategoriesView.filters.placeholder.title")}
+            searchTestId={CATEGORIES_PAGE_HANDLES.SEARCH_INPUT}
+            canResetFilters={tableState.activeFilterCount > 0}
+            onResetFilters={tableState.resetFilters}
+          />
+
+          <DataTableSelectionBar selectedCount={selectedCategories.length}>
+            <BulkEditDropdown
+              disabled={selectedCategories.length === 0}
+              triggerTestId={CATEGORIES_PAGE_HANDLES.BULK_EDIT_TRIGGER}
+              dropdownItems={[
+                {
+                  icon: <Trash className="size-4 shrink-0" />,
+                  translationKey: "adminCategoriesView.button.deleteSelected",
+                  action: () => setIsDeleteDialogOpen(true),
+                  destructive: true,
+                  testId: CATEGORIES_PAGE_HANDLES.DELETE_SELECTED_BUTTON,
+                },
+              ]}
+            />
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
               <DialogContent
                 className="max-w-md"
                 data-testid={CATEGORIES_PAGE_HANDLES.DELETE_DIALOG}
@@ -204,7 +213,7 @@ const Categories = () => {
                   </DialogClose>
                   <DialogClose asChild>
                     <Button
-                      onClick={handleDelete}
+                      onClick={deleteSelectedCategories}
                       variant="destructive"
                       data-testid={CATEGORIES_PAGE_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON}
                     >
@@ -214,46 +223,33 @@ const Categories = () => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-          </div>
-        </div>
-        <div className="flex items-center justify-between gap-2">
-          <SearchFilter
-            filters={filterConfig}
-            values={searchParams}
-            onChange={handleFilterChange}
-            isLoading={isPending}
+          </DataTableSelectionBar>
+
+          <DataTable
+            table={table}
+            isRefreshing={isRefreshingCategories}
+            onRowClick={(row) => navigate(row.original.id)}
+            rowRangeSelection={rowRangeSelection}
+            testId={CATEGORIES_PAGE_HANDLES.TABLE}
+            bodyTestId={CATEGORIES_PAGE_HANDLES.TABLE_BODY}
+            getRowTestId={(category) => CATEGORIES_PAGE_HANDLES.row(category.id)}
+            emptyState={
+              <DataTableEmptyState
+                onResetFilters={
+                  tableState.activeFilterCount > 0 ? tableState.resetFilters : undefined
+                }
+              />
+            }
           />
-        </div>
-        <Table data-testid={CATEGORIES_PAGE_HANDLES.TABLE} className="border bg-neutral-50">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header, index) => (
-                  <TableHead key={header.id} className={cn({ "size-12": index === 0 })}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody data-testid={CATEGORIES_PAGE_HANDLES.TABLE_BODY}>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                data-testid={CATEGORIES_PAGE_HANDLES.row(row.original.id)}
-                onClick={() => handleRowClick(row.original.id)}
-                className="cursor-pointer hover:bg-neutral-100"
-              >
-                {row.getVisibleCells().map((cell, index) => (
-                  <TableCell key={cell.id} className={cn({ "size-12": index === 0 })}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+
+          <DataTablePagination
+            totalItems={pagination.totalItems}
+            itemsPerPage={perPage}
+            currentPage={page}
+            onPageChange={tableState.setPage}
+            onItemsPerPageChange={tableState.setPerPage}
+          />
+        </DataTableCard>
       </div>
     </PageWrapper>
   );

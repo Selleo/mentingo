@@ -1,14 +1,6 @@
 import { Link, useNavigate, type MetaFunction } from "@remix-run/react";
 import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS } from "@repo/shared";
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  type RowSelectionState,
-  type SortingState,
-  useReactTable,
-} from "@tanstack/react-table";
-import { format } from "date-fns";
+import { getCoreRowModel, type RowSelectionState, useReactTable } from "@tanstack/react-table";
 import {
   Archive,
   Import,
@@ -20,7 +12,7 @@ import {
   Trash2,
   Users as UsersIcon,
 } from "lucide-react";
-import React, { useCallback, useMemo, useEffect, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useBulkArchiveUsers } from "~/api/mutations/admin/useBulkArchiveUsers";
@@ -32,48 +24,36 @@ import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { useRoles } from "~/api/queries/admin/useRoles";
 import { useAllUsersSuspense } from "~/api/queries/useUsers";
 import { queryClient } from "~/api/queryClient";
-import { PageWrapper } from "~/components/PageWrapper";
-import { Pagination } from "~/components/Pagination/Pagination";
-import SortButton from "~/components/TableSortButton/TableSortButton";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+  DataTable,
+  DataTableCard,
+  DataTableEmptyState,
+  DataTablePagination,
+  DataTableSelectionBar,
+  useClampedPage,
+  useRowRangeSelection,
+} from "~/components/DataTable";
+import { PageHeader } from "~/components/PageHeader/PageHeader";
+import { PageWrapper } from "~/components/PageWrapper";
+import { Button } from "~/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { cn } from "~/lib/utils";
 import { type DropdownItems, EditDropdown } from "~/modules/Admin/Users/components/EditDropdown";
 import { EditModal } from "~/modules/Admin/Users/components/EditModal";
 import { PermissionsMatrix } from "~/modules/Admin/Users/components/PermissionsMatrix";
 import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
-import {
-  type FilterConfig,
-  type FilterValue,
-  SearchFilter,
-} from "~/modules/common/SearchFilter/SearchFilter";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
-import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
-import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
 import { USERS_PAGE_HANDLES } from "../../../../e2e/data/users/handles";
 
 import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
+import { getUsersTableColumns } from "./components/UsersTable.columns";
+import { UsersTableFilters } from "./components/UsersTableFilters";
+import { useUsersTableFilters } from "./hooks/useUsersTableFilters";
 
 import type { PermissionKey } from "@repo/shared";
-import type { BulkAssignUsersToGroupBody, GetUsersResponse } from "~/api/generated-api";
-import type { UsersParams } from "~/api/queries/useUsers";
-import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
-import type { Option } from "~/components/ui/multiselect";
-
-type TUser = GetUsersResponse["data"][number];
+import type { BulkAssignUsersToGroupBody } from "~/api/generated-api";
 
 const MailKey = ({ className }: { className?: string }) => (
   <span className={cn("relative inline-flex size-4 shrink-0", className)}>
@@ -88,32 +68,22 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 
 const Users = () => {
   const navigate = useNavigate();
-
+  const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
 
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+  const filters = useUsersTableFilters();
 
-  const [searchParams, setSearchParams] = React.useState<{
-    keyword?: string;
-    role?: string;
-    archived?: boolean;
-    status?: string;
-    groups?: Option[];
-  }>({ archived: false });
+  // Keeps the current rows on screen while users for the new filters load.
+  const deferredUsersParams = useDeferredValue(filters.usersParams);
+  const isRefreshingUsers = deferredUsersParams !== filters.usersParams;
 
-  const usersQueryParams = useMemo(() => {
-    const sort = tanstackSortingToParam(sorting) as UsersParams["sort"];
-    return { ...searchParams, sort };
-  }, [searchParams, sorting]);
-
-  const [isPending, startTransition] = React.useTransition();
-
-  const { data: userData } = useAllUsersSuspense(usersQueryParams);
+  const { data: userData } = useAllUsersSuspense(deferredUsersParams);
   const { data: groupData } = useGroupsQuerySuspense({ language });
   const { data: roles = [] } = useRoles();
 
-  const [selectedValue, setSelectedValue] = React.useState<string[]>([]);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const rowRangeSelection = useRowRangeSelection();
+  const [selectedValue, setSelectedValue] = useState<string[]>([]);
 
   const { mutateAsync: deleteUsers } = useBulkDeleteUsers();
   const { mutateAsync: updateUsersGroups } = useBulkUpdateUsersGroups();
@@ -121,13 +91,20 @@ const Users = () => {
   const { mutateAsync: updateUsersRoles } = useBulkUpdateUsersRoles();
   const { mutateAsync: sendPasswordEmails } = useBulkSendPasswordEmails();
 
-  const { t } = useTranslation();
+  const [showEditModal, setShowEditModal] = useState<ModalTypes>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isPermissionsMatrixOpen, setIsPermissionsMatrixOpen] = useState(false);
 
-  const [showEditModal, setShowEditModal] = React.useState<ModalTypes>(null);
-  const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
-  const [isPermissionsMatrixOpen, setIsPermissionsMatrixOpen] = React.useState(false);
+  useEffect(() => {
+    setRowSelection({});
+  }, [filters.usersParams]);
 
-  const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
+  useClampedPage({
+    page: filters.page,
+    perPage: userData.pagination.perPage,
+    totalItems: userData.pagination.totalItems,
+    setPage: filters.setPage,
+  });
 
   const permissionsOrder = useMemo(() => Object.values(PERMISSIONS) as PermissionKey[], []);
 
@@ -145,7 +122,6 @@ const Users = () => {
 
   const dropdownItems: DropdownItems[] = [
     {
-      iconName: undefined,
       icon: <ShieldUser className="size-4 shrink-0" />,
       translationKey: "adminUsersView.dropdown.roles",
       action: () => setShowEditModal("role"),
@@ -153,7 +129,6 @@ const Users = () => {
       testId: USERS_PAGE_HANDLES.BULK_EDIT_ROLE_ACTION,
     },
     {
-      iconName: undefined,
       icon: <UsersIcon className="size-4 shrink-0" />,
       translationKey: "adminUsersView.dropdown.groups",
       action: () => setShowEditModal("group"),
@@ -161,7 +136,6 @@ const Users = () => {
       testId: USERS_PAGE_HANDLES.BULK_EDIT_GROUP_ACTION,
     },
     {
-      iconName: undefined,
       icon: <MailKey className="size-4 shrink-0" />,
       translationKey: "adminUsersView.dropdown.passwordEmail",
       action: () => setShowEditModal("passwordEmail"),
@@ -169,7 +143,6 @@ const Users = () => {
       testId: USERS_PAGE_HANDLES.BULK_EDIT_PASSWORD_EMAIL_ACTION,
     },
     {
-      iconName: undefined,
       icon: <Archive className="size-4 shrink-0" />,
       translationKey: "adminUsersView.dropdown.archive",
       action: () => setShowEditModal("archive"),
@@ -177,7 +150,6 @@ const Users = () => {
       testId: USERS_PAGE_HANDLES.BULK_EDIT_ARCHIVE_ACTION,
     },
     {
-      iconName: undefined,
       icon: <Trash2 className="size-4 shrink-0" />,
       translationKey: "adminUsersView.dropdown.delete",
       action: () => setShowEditModal("delete"),
@@ -186,300 +158,60 @@ const Users = () => {
     },
   ];
 
-  const filterConfig: FilterConfig[] = [
-    {
-      name: "keyword",
-      type: "text",
-      placeholder: t("adminUsersView.filters.placeholder.searchByKeyword"),
-      testId: USERS_PAGE_HANDLES.SEARCH_INPUT,
-    },
-    {
-      name: "role",
-      type: "select",
-      placeholder: t("adminUsersView.filters.placeholder.roles"),
-      testId: USERS_PAGE_HANDLES.ROLE_FILTER,
-      optionTestId: (option) => USERS_PAGE_HANDLES.roleFilterOption(option.value),
-      options: roles.map((role) => ({
-        value: role.slug,
-        label: getRoleLabel(role.slug, t, roles),
-      })),
-    },
-    {
-      name: "archived",
-      type: "status",
-      testId: USERS_PAGE_HANDLES.STATUS_FILTER,
-      optionTestId: (option) =>
-        USERS_PAGE_HANDLES.statusFilterOption(option.value as "all" | "active" | "archived"),
-    },
-    {
-      name: "groups",
-      type: "multiselect",
-      placeholder: t("adminUsersView.filters.placeholder.groups"),
-      testId: USERS_PAGE_HANDLES.GROUPS_FILTER,
-      optionTestId: (option) => USERS_PAGE_HANDLES.groupFilterOption(option.value),
-      options:
-        groupData.map((item) => ({
-          value: item.id,
-          label: item.name,
-        })) ?? [],
-    },
-  ];
-
-  const handleFilterChange = (name: string, value: FilterValue) => {
-    startTransition(() => {
-      setSearchParams((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    });
-  };
-
-  const columns: ColumnDef<TUser>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          data-testid={USERS_PAGE_HANDLES.SELECT_ALL_CHECKBOX}
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          aria-label="Select row"
-          data-testid={USERS_PAGE_HANDLES.rowCheckbox(row.original.id)}
-          onClick={(event) => {
-            event.stopPropagation();
-            handleRowSelectionRange({
-              table,
-              event,
-              id: row.id,
-              value: row.getIsSelected(),
-              lastSelectedRowIndex,
-              setLastSelectedRowIndex,
-            });
-          }}
-        />
-      ),
-      enableSorting: false,
-    },
-    {
-      accessorKey: "firstName",
-      header: ({ column }) => (
-        <SortButton<TUser> testId={USERS_PAGE_HANDLES.SORT_FIRST_NAME} column={column}>
-          {t("adminUsersView.field.firstName")}
-        </SortButton>
-      ),
-    },
-    {
-      accessorKey: "lastName",
-      header: ({ column }) => (
-        <SortButton<TUser> testId={USERS_PAGE_HANDLES.SORT_LAST_NAME} column={column}>
-          {t("adminUsersView.field.lastName")}
-        </SortButton>
-      ),
-    },
-    {
-      accessorKey: "email",
-      header: ({ column }) => (
-        <SortButton<TUser> testId={USERS_PAGE_HANDLES.SORT_EMAIL} column={column}>
-          {t("adminUsersView.field.email")}
-        </SortButton>
-      ),
-    },
-    {
-      accessorKey: "roleSlugs",
-      header: t("adminUsersView.dropdown.roles"),
-      cell: ({ row }) => {
-        const roleSlugs = (row.original as TUser & { roleSlugs?: string[] }).roleSlugs ?? [];
-        const visibleRoleSlugs = roleSlugs.slice(0, 2);
-        const remainingCount = roleSlugs.length - visibleRoleSlugs.length;
-
-        if (!roleSlugs.length) return "-";
-
-        return (
-          <div className="flex gap-1">
-            {visibleRoleSlugs.map((roleSlug) => (
-              <Badge key={roleSlug} variant="secondary">
-                {getRoleLabel(roleSlug, t, roles)}
-              </Badge>
-            ))}
-            {remainingCount > 0 && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Badge variant="default" className="cursor-help">
-                      +{remainingCount}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent className="p-2 rounded-lg">
-                    <div className="flex flex-col gap-1 !px-0">
-                      {roleSlugs.slice(2).map((roleSlug) => (
-                        <Badge key={roleSlug} variant="secondary">
-                          {getRoleLabel(roleSlug, t, roles)}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "groups",
-      header: t("adminUsersView.field.group"),
-      cell: ({ row }) => {
-        const groups = row.original.groups;
-        const visibleGroups = groups.slice(0, 1);
-        const remainingCount = groups.length - visibleGroups.length;
-
-        return (
-          <div className="flex gap-1">
-            {visibleGroups.map((group) => (
-              <Badge key={group.id} variant="secondary">
-                {group.name}
-              </Badge>
-            ))}
-            {remainingCount > 0 && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Badge variant="default" className="cursor-help">
-                      +{remainingCount}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent className="p-2 rounded-lg">
-                    <div className="flex flex-col gap-1 !px-0">
-                      {groups.slice(1).map((group) => (
-                        <Badge key={group.id} variant="secondary">
-                          {group.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "archived",
-      header: t("adminUsersView.field.status"),
-      cell: ({ row }) => {
-        const isArchived = row.original.archived;
-        return (
-          <Badge variant={isArchived ? "outline" : "secondary"} className="w-max">
-            {isArchived ? t("common.other.archived") : t("common.other.active")}
-          </Badge>
-        );
-      },
-    },
-    {
-      accessorKey: "createdAt",
-      header: ({ column }) => (
-        <SortButton<TUser> testId={USERS_PAGE_HANDLES.SORT_CREATED_AT} column={column}>
-          {t("adminUsersView.field.createdAt")}
-        </SortButton>
-      ),
-      cell: ({ row }) => row.original.createdAt && format(new Date(row.original.createdAt), "PPpp"),
-    },
-  ];
-
-  const resetPage = useCallback(() => handleFilterChange("page", "1"), []);
-
-  const handleSortingChange = useCallback(
-    (updaterOrValue: SortingState | ((old: SortingState) => SortingState)) => {
-      setSorting(updaterOrValue);
-      resetPage();
-    },
-    [resetPage],
-  );
+  const columns = getUsersTableColumns({ t, roles, rowRangeSelection });
 
   const table = useReactTable({
     getRowId: (row) => row.id,
-    data: userData.data || [],
+    data: userData.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: handleSortingChange,
-    onRowSelectionChange: setRowSelection,
     manualSorting: true,
+    enableMultiSort: false,
+    onSortingChange: filters.setSorting,
+    onRowSelectionChange: setRowSelection,
     state: {
-      sorting,
+      sorting: filters.sorting,
       rowSelection,
     },
   });
 
-  const [selectedUsers, setSelectedUsers] = useState<BulkAssignUsersToGroupBody>([]);
+  const selectedUsers: BulkAssignUsersToGroupBody = table.getSelectedRowModel().rows.map((row) => ({
+    userId: row.original.id,
+    groups: row.original.groups.map((group) => group.id),
+  }));
+  const selectedUserIds = selectedUsers.map(({ userId }) => userId);
 
-  useEffect(() => {
-    setSelectedUsers(
-      table.getSelectedRowModel().rows.map((row) => ({
-        userId: row.original.id,
-        groups: row.original.groups.map((group) => group.id),
-      })),
-    );
-  }, [table, rowSelection]);
+  const closeModalAndClearSelection = useCallback(() => {
+    setRowSelection({});
+    setShowEditModal(null);
+  }, []);
 
-  const handleDeleteUsers = useCallback(() => {
-    deleteUsers({ data: { userIds: selectedUsers.map((user) => user.userId) } }).then(() => {
-      table.resetRowSelection();
+  const handleDeleteUsers = () => {
+    deleteUsers({ data: { userIds: selectedUserIds } }).then(() => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      setShowEditModal(null);
+      closeModalAndClearSelection();
     });
-  }, [deleteUsers, selectedUsers, table]);
+  };
 
-  const handleArchiveUsers = useCallback(() => {
+  const handleArchiveUsers = () => {
     archiveUsers({
-      data: { userIds: selectedUsers.map((user) => user.userId) },
-      searchParams,
-    }).then(() => {
-      table.resetRowSelection();
-      setShowEditModal(null);
-    });
-  }, [archiveUsers, searchParams, selectedUsers, table]);
+      data: { userIds: selectedUserIds },
+      searchParams: filters.usersParams,
+    }).then(closeModalAndClearSelection);
+  };
 
-  const handleUsersGroups = useCallback(
-    (payload?: BulkAssignUsersToGroupBody) => {
-      const data = payload ?? selectedUsers;
+  const handleUsersGroups = (payload?: BulkAssignUsersToGroupBody) => {
+    updateUsersGroups({ data: payload ?? selectedUsers }).then(closeModalAndClearSelection);
+  };
 
-      updateUsersGroups({
-        data,
-      }).then(() => {
-        table.resetRowSelection();
-        setShowEditModal(null);
-      });
-    },
-    [selectedUsers, table, updateUsersGroups],
-  );
+  const handleUsersRoles = () => {
+    updateUsersRoles({ userIds: selectedUserIds, roleSlugs: selectedValue }).then(
+      closeModalAndClearSelection,
+    );
+  };
 
-  const handleUsersRoles = useCallback(() => {
-    updateUsersRoles({
-      userIds: selectedUsers.map(({ userId }) => userId),
-      roleSlugs: selectedValue,
-    }).then(() => {
-      table.resetRowSelection();
-      setShowEditModal(null);
-    });
-  }, [selectedUsers, selectedValue, table, updateUsersRoles]);
-
-  const handlePasswordEmails = useCallback(() => {
-    sendPasswordEmails({
-      userIds: selectedUsers.map(({ userId }) => userId),
-    }).then(() => {
-      table.resetRowSelection();
-      setShowEditModal(null);
-    });
-  }, [selectedUsers, sendPasswordEmails, table]);
-
-  const handleRowClick = (userId: string) => {
-    navigate(userId);
+  const handlePasswordEmails = () => {
+    sendPasswordEmails({ userIds: selectedUserIds }).then(closeModalAndClearSelection);
   };
 
   const editMutation: Record<string, (payload?: BulkAssignUsersToGroupBody) => void> = {
@@ -490,7 +222,11 @@ const Users = () => {
     passwordEmail: handlePasswordEmails,
   };
 
-  const { totalItems, perPage, page } = userData?.pagination || {};
+  const roleOptions = roles.map((role) => ({
+    id: role.slug,
+    label: getRoleLabel(role.slug, t, roles),
+  }));
+  const groupOptions = groupData.map((group) => ({ id: group.id, label: group.name }));
 
   return (
     <PageWrapper
@@ -501,7 +237,7 @@ const Users = () => {
         },
       ]}
     >
-      <div className="flex flex-col">
+      <div data-testid={USERS_PAGE_HANDLES.PAGE} className="flex flex-col gap-6">
         {showEditModal && (
           <EditModal
             type={showEditModal}
@@ -515,7 +251,7 @@ const Users = () => {
           />
         )}
         <Dialog open={isPermissionsMatrixOpen} onOpenChange={setIsPermissionsMatrixOpen}>
-          <DialogContent className="max-w-5xl max-h-[85vh] flex flex-col">
+          <DialogContent className="flex max-h-[85vh] max-w-5xl flex-col">
             <DialogHeader>
               <DialogTitle>{t("adminUsersView.permissionsMatrix.title")}</DialogTitle>
             </DialogHeader>
@@ -528,108 +264,95 @@ const Users = () => {
           <ImportUsersModal
             open={isImportModalOpen}
             onClose={() => setIsImportModalOpen(false)}
-            searchParams={searchParams}
+            searchParams={filters.usersParams}
           />
         )}
-        <div className="flex flex-wrap justify-between gap-3">
-          <h4 className="h4" data-testid={USERS_PAGE_HANDLES.HEADING}>
-            {t("navigationSideBar.users")}
-          </h4>
-          <div className="flex gap-3">
-            <Link to="new">
+
+        <PageHeader
+          title={t("navigationSideBar.users")}
+          headingTestId={USERS_PAGE_HANDLES.HEADING}
+          actions={
+            <>
               <Button
-                data-testid={USERS_PAGE_HANDLES.CREATE_BUTTON}
-                variant="primary"
+                data-testid={USERS_PAGE_HANDLES.PERMISSIONS_MATRIX_BUTTON}
+                onClick={() => setIsPermissionsMatrixOpen(true)}
                 className="gap-2"
+                variant="outline"
               >
-                <Plus className="size-4" />
-                {t("adminUsersView.button.createNew")}
+                <Shield className="size-4" aria-hidden />
+                {t("adminUsersView.button.permissionsMatrix")}
               </Button>
-            </Link>
-            <Button
-              data-testid={USERS_PAGE_HANDLES.IMPORT_BUTTON}
-              onClick={() => setIsImportModalOpen(true)}
-              className="gap-2"
-            >
-              <Import className="size-4" />
-              {t("adminUsersView.button.import")}
-            </Button>
-            <Button
-              data-testid={USERS_PAGE_HANDLES.PERMISSIONS_MATRIX_BUTTON}
-              onClick={() => setIsPermissionsMatrixOpen(true)}
-              className="gap-2"
-              variant="outline"
-            >
-              <Shield className="size-4" />
-              {t("adminUsersView.button.permissionsMatrix")}
-            </Button>
+              <Button
+                data-testid={USERS_PAGE_HANDLES.IMPORT_BUTTON}
+                onClick={() => setIsImportModalOpen(true)}
+                className="gap-2"
+                variant="outline"
+              >
+                <Import className="size-4" aria-hidden />
+                {t("adminUsersView.button.import")}
+              </Button>
+              <Link to="new">
+                <Button
+                  data-testid={USERS_PAGE_HANDLES.CREATE_BUTTON}
+                  variant="primary"
+                  className="gap-2"
+                >
+                  <Plus className="size-4" aria-hidden />
+                  {t("adminUsersView.button.createNew")}
+                </Button>
+              </Link>
+            </>
+          }
+        />
+
+        <DataTableCard>
+          <UsersTableFilters
+            filters={filters}
+            roleOptions={roleOptions}
+            groupOptions={groupOptions}
+          />
+
+          <DataTableSelectionBar
+            selectedCount={selectedUserIds.length}
+            countTestId={USERS_PAGE_HANDLES.SELECTED_COUNT}
+          >
             <EditDropdown
               dropdownItems={dropdownItems}
-              disabled={!selectedUsers.length}
+              disabled={!selectedUserIds.length}
               triggerTestId={USERS_PAGE_HANDLES.BULK_EDIT_TRIGGER}
             />
-          </div>
-        </div>
-        <div className="flex items-center justify-between gap-2">
-          <SearchFilter
-            filters={filterConfig}
-            values={searchParams}
-            onChange={(key, value) => {
-              resetPage();
-              handleFilterChange(key, value);
-            }}
-            isLoading={isPending}
-            clearAllTestId={USERS_PAGE_HANDLES.CLEAR_FILTERS_BUTTON}
+          </DataTableSelectionBar>
+
+          <DataTable
+            table={table}
+            isRefreshing={isRefreshingUsers}
+            onRowClick={(row) => navigate(row.original.id)}
+            rowRangeSelection={rowRangeSelection}
+            testId={USERS_PAGE_HANDLES.TABLE}
+            bodyTestId={USERS_PAGE_HANDLES.TABLE_BODY}
+            getRowTestId={(user) => USERS_PAGE_HANDLES.row(user.id)}
+            emptyState={
+              <DataTableEmptyState
+                testId={USERS_PAGE_HANDLES.EMPTY_STATE}
+                onResetFilters={filters.activeFilterCount > 0 ? filters.resetFilters : undefined}
+              />
+            }
           />
-        </div>
-        <Table data-testid={USERS_PAGE_HANDLES.TABLE} className="border bg-neutral-50">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody data-testid={USERS_PAGE_HANDLES.TABLE_BODY}>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-testid={USERS_PAGE_HANDLES.row(row.original.id)}
-                data-state={row.getIsSelected() && "selected"}
-                onClick={() => handleRowClick(row.original.id)}
-                className="cursor-pointer hover:bg-neutral-100"
-              >
-                {row.getVisibleCells().map((cell, index) => (
-                  <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <Pagination
-          className="border-b border-x bg-neutral-50 rounded-b-lg"
-          emptyDataClassName="border-b border-x bg-neutral-50 rounded-b-lg"
-          totalItems={totalItems}
-          itemsPerPage={perPage as (typeof ITEMS_PER_PAGE_OPTIONS)[number]}
-          currentPage={page}
-          onPageChange={(newPage) => handleFilterChange("page", String(newPage))}
-          onItemsPerPageChange={(newPerPage) => {
-            resetPage();
-            handleFilterChange("perPage", newPerPage);
-          }}
-          testIds={{
-            previous: USERS_PAGE_HANDLES.PAGINATION_PREVIOUS,
-            next: USERS_PAGE_HANDLES.PAGINATION_NEXT,
-            page: USERS_PAGE_HANDLES.paginationPage,
-            itemsPerPage: USERS_PAGE_HANDLES.PAGINATION_ITEMS_PER_PAGE,
-          }}
-        />
+
+          <DataTablePagination
+            totalItems={userData.pagination.totalItems}
+            itemsPerPage={filters.perPage}
+            currentPage={filters.page}
+            onPageChange={filters.setPage}
+            onItemsPerPageChange={filters.setPerPage}
+            testIds={{
+              previous: USERS_PAGE_HANDLES.PAGINATION_PREVIOUS,
+              next: USERS_PAGE_HANDLES.PAGINATION_NEXT,
+              page: USERS_PAGE_HANDLES.paginationPage,
+              itemsPerPage: USERS_PAGE_HANDLES.PAGINATION_ITEMS_PER_PAGE,
+            }}
+          />
+        </DataTableCard>
       </div>
     </PageWrapper>
   );

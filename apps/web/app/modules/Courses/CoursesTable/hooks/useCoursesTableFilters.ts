@@ -1,25 +1,16 @@
-import { useSearchParams } from "@remix-run/react";
-import { functionalUpdate, type SortingState, type Updater } from "@tanstack/react-table";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { match } from "ts-pattern";
 
-import { useDebounce } from "~/hooks/useDebounce";
+import { useUrlTableState } from "~/hooks/useUrlTableState";
 
 import {
   COURSE_ARCHIVE_FILTERS,
   COURSES_TABLE_DEFAULT_PAGE_SIZE,
-  COURSES_TABLE_URL_PARAMS,
+  COURSES_TABLE_FILTER_PARAMS,
+  COURSES_TABLE_SORT_FIELDS,
   type CourseArchiveFilter,
-  type CoursesTableUrlParam,
 } from "../coursesTable.constants";
-import {
-  isCourseArchiveFilter,
-  isCourseStatus,
-  isCoursesTablePageSize,
-  parsePageNumber,
-  toCoursesTableSort,
-  toCoursesTableSorting,
-} from "../coursesTable.utils";
+import { isCourseArchiveFilter, isCourseStatus } from "../coursesTable.utils";
 
 import type { CourseStatus } from "@repo/shared";
 import type { CourseParams } from "~/api/queries/useCourses";
@@ -29,7 +20,11 @@ type UseCoursesTableFiltersOptions = {
   canFilterByManagementState: boolean;
 };
 
-type CoursesTableUrlValues = Partial<Record<CoursesTableUrlParam, string>>;
+const COURSES_TABLE_FILTER_KEYS = [
+  COURSES_TABLE_FILTER_PARAMS.CATEGORY,
+  COURSES_TABLE_FILTER_PARAMS.STATE,
+  COURSES_TABLE_FILTER_PARAMS.ARCHIVE,
+] as const;
 
 const toArchiveCourseParams = (
   archive: CourseArchiveFilter,
@@ -41,67 +36,28 @@ const toArchiveCourseParams = (
     .exhaustive();
 
 /**
- * Keeps the courses table filters, sorting and page in the URL so a view can be shared. Narrowing
- * the list returns to the first page. State and archive filters are ignored for users who cannot
- * manage courses.
+ * Courses table state kept in the URL. State and archive filters are ignored for users who cannot
+ * manage courses; an absent archive filter means active courses only.
  */
 export function useCoursesTableFilters({
   canFilterByManagementState,
 }: UseCoursesTableFiltersOptions) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const tableState = useUrlTableState({
+    searchParam: COURSES_TABLE_FILTER_PARAMS.TITLE,
+    filterKeys: COURSES_TABLE_FILTER_KEYS,
+    sortFields: COURSES_TABLE_SORT_FIELDS,
+    defaultPerPage: COURSES_TABLE_DEFAULT_PAGE_SIZE,
+  });
+  const { search: title, filters, sort, page, perPage } = tableState;
 
-  const title = searchParams.get(COURSES_TABLE_URL_PARAMS.TITLE) ?? "";
-  const category = searchParams.get(COURSES_TABLE_URL_PARAMS.CATEGORY) ?? undefined;
-  const stateParam = searchParams.get(COURSES_TABLE_URL_PARAMS.STATE);
-  const archiveParam = searchParams.get(COURSES_TABLE_URL_PARAMS.ARCHIVE);
-  const sortParam = searchParams.get(COURSES_TABLE_URL_PARAMS.SORT);
-  const perPageParam = Number(searchParams.get(COURSES_TABLE_URL_PARAMS.PER_PAGE));
-
+  const category = filters.category;
+  const stateParam = filters.state ?? null;
+  const archiveParam = filters.archive ?? null;
   const state = canFilterByManagementState && isCourseStatus(stateParam) ? stateParam : undefined;
   const archive =
     canFilterByManagementState && isCourseArchiveFilter(archiveParam)
       ? archiveParam
       : COURSE_ARCHIVE_FILTERS.ACTIVE;
-  const page = parsePageNumber(searchParams.get(COURSES_TABLE_URL_PARAMS.PAGE));
-  const perPage = isCoursesTablePageSize(perPageParam)
-    ? perPageParam
-    : COURSES_TABLE_DEFAULT_PAGE_SIZE;
-  const sorting = useMemo(() => toCoursesTableSorting(sortParam), [sortParam]);
-  const sort = toCoursesTableSort(sorting);
-
-  const [titleInput, setTitleInput] = useState(title);
-  const debouncedTitle = useDebounce(titleInput.trim());
-
-  const updateUrlParams = (values: CoursesTableUrlValues) => {
-    setSearchParams(
-      (currentParams) => {
-        const nextParams = new URLSearchParams(currentParams);
-
-        Object.entries(values).forEach(([param, value]) => {
-          if (value) nextParams.set(param, value);
-          else nextParams.delete(param);
-        });
-
-        return nextParams;
-      },
-      { replace: true, preventScrollReset: true },
-    );
-  };
-
-  const updateListParams = (values: CoursesTableUrlValues) =>
-    updateUrlParams({ ...values, [COURSES_TABLE_URL_PARAMS.PAGE]: undefined });
-
-  useEffect(() => {
-    setTitleInput((currentInput) => (currentInput.trim() === title ? currentInput : title));
-  }, [title]);
-
-  useEffect(() => {
-    if (debouncedTitle === title) return;
-
-    updateListParams({ [COURSES_TABLE_URL_PARAMS.TITLE]: debouncedTitle });
-    // Only typing writes the title; URL changes flow back through the effect above.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedTitle]);
 
   const courseParams = useMemo<Omit<CoursesTableParams, "language">>(
     () => ({
@@ -116,59 +72,21 @@ export function useCoursesTableFilters({
     [title, category, state, archive, sort, page, perPage],
   );
 
-  const activeFilterCount = [
-    title,
-    category,
-    state,
-    archive !== COURSE_ARCHIVE_FILTERS.ACTIVE,
-  ].filter(Boolean).length;
-
-  const resetFilters = () => {
-    setTitleInput("");
-    updateListParams({
-      [COURSES_TABLE_URL_PARAMS.TITLE]: undefined,
-      [COURSES_TABLE_URL_PARAMS.CATEGORY]: undefined,
-      [COURSES_TABLE_URL_PARAMS.STATE]: undefined,
-      [COURSES_TABLE_URL_PARAMS.ARCHIVE]: undefined,
-    });
-  };
-
   return {
+    ...tableState,
     courseParams,
-    titleInput,
     category,
     state,
     archive,
-    sorting,
-    page,
-    perPage,
-    activeFilterCount,
-    setTitleInput,
     setCategory: (nextCategory?: string) =>
-      updateListParams({ [COURSES_TABLE_URL_PARAMS.CATEGORY]: nextCategory }),
+      tableState.setFilter(COURSES_TABLE_FILTER_PARAMS.CATEGORY, nextCategory),
     setState: (nextState?: CourseStatus) =>
-      updateListParams({ [COURSES_TABLE_URL_PARAMS.STATE]: nextState }),
+      tableState.setFilter(COURSES_TABLE_FILTER_PARAMS.STATE, nextState),
     setArchive: (nextArchive: CourseArchiveFilter) =>
-      updateListParams({
-        [COURSES_TABLE_URL_PARAMS.ARCHIVE]:
-          nextArchive === COURSE_ARCHIVE_FILTERS.ACTIVE ? undefined : nextArchive,
-      }),
-    setSorting: (sortingUpdater: Updater<SortingState>) =>
-      updateListParams({
-        [COURSES_TABLE_URL_PARAMS.SORT]: toCoursesTableSort(
-          functionalUpdate(sortingUpdater, sorting),
-        ),
-      }),
-    setPage: (nextPage: number) =>
-      updateUrlParams({
-        [COURSES_TABLE_URL_PARAMS.PAGE]: nextPage > 1 ? String(nextPage) : undefined,
-      }),
-    setPerPage: (nextPerPage: string) =>
-      updateListParams({
-        [COURSES_TABLE_URL_PARAMS.PER_PAGE]:
-          Number(nextPerPage) === COURSES_TABLE_DEFAULT_PAGE_SIZE ? undefined : nextPerPage,
-      }),
-    resetFilters,
+      tableState.setFilter(
+        COURSES_TABLE_FILTER_PARAMS.ARCHIVE,
+        nextArchive === COURSE_ARCHIVE_FILTERS.ACTIVE ? undefined : nextArchive,
+      ),
   };
 }
 

@@ -815,6 +815,21 @@
     "validation": {
       "messageRequired": "Wiadomość jest wymagana.",
       "nameMaxLength": "Może mieć maksymalnie {{max}} znaków."
+    },
+    "optionPicker": {
+      "search": "Szukaj",
+      "empty": "Brak wyników"
+    },
+    "dataTable": {
+      "filters": "Filtry",
+      "resetFilters": "Wyczyść wszystkie filtry",
+      "removeFilter": "Usuń filtr: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}",
+      "selectedCount": "Zaznaczono: {{count}}",
+      "emptyTitle": "Brak wyników",
+      "emptyDescription": "Spróbuj innego wyszukiwania lub wyczyść filtry.",
+      "selectAll": "Zaznacz wszystkie",
+      "selectRow": "Zaznacz wiersz"
     }
   },
   "lessons": {
@@ -2302,9 +2317,7 @@
         "private": "Niepubliczne"
       },
       "allCategories": "Wszystkie kategorie",
-      "archive": "Archiwum",
-      "removeFilter": "Usuń filtr: {{filter}}",
-      "labeledValue": "{{label}}: {{value}}"
+      "archive": "Archiwum"
     },
     "courses": {
       "header": "Zarządzaj kursami",
@@ -2390,12 +2403,7 @@
       "bulkStatusUpdateForbidden": "Nie masz uprawnień do aktualizacji co najmniej jednego z wybranych kursów.",
       "noCoursesSelected": "Wybierz co najmniej jeden kurs.",
       "deleteCoursesFailed": "Nie udało się usunąć kursów"
-    },
-    "empty": {
-      "title": "Nie znaleziono kursów",
-      "description": "Spróbuj innego wyszukiwania lub wyczyść filtry."
-    },
-    "selectedCount": "Zaznaczono: {{count}}"
+    }
   },
   "adminCategoriesView": {
     "filters": {
@@ -2584,7 +2592,16 @@
         "competencies": "kompetencje",
         "other": "funkcje platformy",
         "gamification": "grywalizację",
-        "quiz_grading": "ocenianie quizów"
+        "quiz_grading": "ocenianie quizów",
+        "ai_thread": "rozmowy z AI",
+        "automation": "automatyzacje",
+        "automation_log": "logi automatyzacji",
+        "content_marketplace": "marketplace treści",
+        "dashboard": "pulpit",
+        "email_template": "szablony e-mail",
+        "managed_group_results": "wyniki zarządzanych grup",
+        "phishing": "symulacje phishingu",
+        "todo_task": "zadania"
       },
       "descriptions": {
         "phishing_manage": "Może tworzyć i zarządzać symulacjami phishingu.",
@@ -8535,11 +8552,7 @@
       "timezone": "Daty używają strefy {{timezone}}."
     },
     "title": "Raporty",
-    "description": "Poznaj postępy organizacji w nauce, ścieżkach rozwoju, kursach i wśród uczestników.",
-    "picker": {
-      "search": "Szukaj",
-      "empty": "Brak wyników"
-    }
+    "description": "Poznaj postępy organizacji w nauce, ścieżkach rozwoju, kursach i wśród uczestników."
   },
   "contentMarketplace": {
     "category": "Kategoria / temat",

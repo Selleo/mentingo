@@ -54,6 +54,7 @@ function AssistantWorkspace({ sessionKey }: { sessionKey: string }) {
 
   return (
     <PageWrapper
+      breadcrumbs={[{ title: t("navigationSideBar.aiAssistant"), href: "/assistant" }]}
       className="flex min-h-0 flex-1 flex-col"
       wrapperClassName="h-full min-h-0 overflow-hidden bg-primary-50 dark:bg-neutral-950"
     >

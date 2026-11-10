@@ -818,6 +818,21 @@
     "validation": {
       "messageRequired": "Zpráva je povinná.",
       "nameMaxLength": "Může mít nejvýše {{max}} znaků."
+    },
+    "optionPicker": {
+      "search": "Hledat",
+      "empty": "Žádné výsledky"
+    },
+    "dataTable": {
+      "filters": "Filtry",
+      "resetFilters": "Resetovat všechny filtry",
+      "removeFilter": "Odebrat filtr: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}",
+      "selectedCount": "Vybráno: {{count}}",
+      "emptyTitle": "Nebyly nalezeny žádné výsledky",
+      "emptyDescription": "Zkuste jiné vyhledávání nebo resetujte filtry.",
+      "selectAll": "Vybrat vše",
+      "selectRow": "Vybrat řádek"
     }
   },
   "lessons": {
@@ -2060,9 +2075,7 @@
         "private": "Soukromé"
       },
       "allCategories": "Všechny kategorie",
-      "archive": "Archiv",
-      "removeFilter": "Odebrat filtr: {{filter}}",
-      "labeledValue": "{{label}}: {{value}}"
+      "archive": "Archiv"
     },
     "courses": {
       "header": "Spravovat kurzy",
@@ -2147,12 +2160,7 @@
       "bulkStatusUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
       "noCoursesSelected": "Vyberte alespoň jeden kurz.",
       "deleteCoursesFailed": "Kurzy se nepodařilo smazat"
-    },
-    "empty": {
-      "title": "Nebyly nalezeny žádné kurzy",
-      "description": "Zkuste jiné vyhledávání nebo resetujte filtry."
-    },
-    "selectedCount": "Vybráno: {{count}}"
+    }
   },
   "adminCategoriesView": {
     "filters": {
@@ -2341,7 +2349,16 @@
         "competencies": "kompetence",
         "other": "funkce platformy",
         "gamification": "gamifikaci",
-        "quiz_grading": "hodnocení kvízů"
+        "quiz_grading": "hodnocení kvízů",
+        "ai_thread": "AI konverzace",
+        "automation": "automatizace",
+        "automation_log": "logy automatizací",
+        "content_marketplace": "tržiště obsahu",
+        "dashboard": "nástěnka",
+        "email_template": "e-mailové šablony",
+        "managed_group_results": "výsledky spravovaných skupin",
+        "phishing": "phishingové simulace",
+        "todo_task": "úkoly"
       },
       "descriptions": {
         "phishing_manage": "Může vytvářet a spravovat phishingové simulace.",
@@ -7788,11 +7805,7 @@
       "timezone": "Data jsou v časovém pásmu {{timezone}}."
     },
     "title": "Přehledy",
-    "description": "Sledujte pokrok organizace v rozvojových cestách, kurzech a u jednotlivých uživatelů.",
-    "picker": {
-      "search": "Hledat",
-      "empty": "Žádné výsledky"
-    }
+    "description": "Sledujte pokrok organizace v rozvojových cestách, kurzech a u jednotlivých uživatelů."
   },
   "automations": {
     "success": {

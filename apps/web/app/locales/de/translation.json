@@ -812,6 +812,21 @@
     "validation": {
       "messageRequired": "Eine Nachricht ist erforderlich.",
       "nameMaxLength": "Darf höchstens {{max}} Zeichen lang sein."
+    },
+    "optionPicker": {
+      "search": "Suchen",
+      "empty": "Keine Treffer"
+    },
+    "dataTable": {
+      "filters": "Filter",
+      "resetFilters": "Alle Filter zurücksetzen",
+      "removeFilter": "Filter entfernen: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}",
+      "selectedCount": "Ausgewählt: {{count}}",
+      "emptyTitle": "Keine Ergebnisse gefunden",
+      "emptyDescription": "Versuche eine andere Suche oder setze die Filter zurück.",
+      "selectAll": "Alle auswählen",
+      "selectRow": "Zeile auswählen"
     }
   },
   "lessons": {
@@ -2054,9 +2069,7 @@
         "private": "Privat"
       },
       "allCategories": "Alle Kategorien",
-      "archive": "Archiv",
-      "removeFilter": "Filter entfernen: {{filter}}",
-      "labeledValue": "{{label}}: {{value}}"
+      "archive": "Archiv"
     },
     "courses": {
       "header": "Kurse verwalten",
@@ -2141,12 +2154,7 @@
       "bulkStatusUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
       "noCoursesSelected": "Wählen Sie mindestens einen Kurs aus.",
       "deleteCoursesFailed": "Die Kurse konnten nicht gelöscht werden"
-    },
-    "empty": {
-      "title": "Keine Kurse gefunden",
-      "description": "Versuche eine andere Suche oder setze die Filter zurück."
-    },
-    "selectedCount": "Ausgewählt: {{count}}"
+    }
   },
   "adminCategoriesView": {
     "filters": {
@@ -2335,7 +2343,16 @@
         "competencies": "Kompetenzen",
         "other": "Plattformfunktionen",
         "gamification": "Gamification",
-        "quiz_grading": "Quiz-Bewertung"
+        "quiz_grading": "Quiz-Bewertung",
+        "ai_thread": "KI-Unterhaltungen",
+        "automation": "Automatisierungen",
+        "automation_log": "Automatisierungsprotokolle",
+        "content_marketplace": "Content-Marktplatz",
+        "dashboard": "Dashboard",
+        "email_template": "E-Mail-Vorlagen",
+        "managed_group_results": "Ergebnisse verwalteter Gruppen",
+        "phishing": "Phishing-Simulationen",
+        "todo_task": "Aufgaben"
       },
       "descriptions": {
         "phishing_manage": "Phishing-Simulationen erstellen und verwalten.",
@@ -8432,11 +8449,7 @@
       "timezone": "Datumsangaben verwenden {{timezone}}."
     },
     "title": "Berichte",
-    "description": "Verfolgen Sie den Lernfortschritt der Organisation über Entwicklungspfade, Kurse und Lernende.",
-    "picker": {
-      "search": "Suchen",
-      "empty": "Keine Treffer"
-    }
+    "description": "Verfolgen Sie den Lernfortschritt der Organisation über Entwicklungspfade, Kurse und Lernende."
   },
   "contentMarketplace": {
     "category": "Kategorie / Thema",

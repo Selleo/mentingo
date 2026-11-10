@@ -80,7 +80,7 @@ export const BulkEditDropdown = ({
             "w-60": !iconOnly,
           },
         )}
-        align="end"
+        align={iconOnly ? "end" : "start"}
         onClick={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
       >

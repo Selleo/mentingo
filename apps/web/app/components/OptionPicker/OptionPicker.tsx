@@ -13,23 +13,27 @@ import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover
 import { useDebounce } from "~/hooks/useDebounce";
 import { cn } from "~/lib/utils";
 
-type ReportOption = { id: string; label: string };
+export type PickerOption = { id: string; label: string };
 
-type ReportOptionPickerProps = {
+type OptionPickerProps = {
   label: string;
   placeholder: string;
-  options: ReportOption[] | undefined;
+  options: PickerOption[] | undefined;
   selectedIds: string[];
   selectedLabel?: string;
   multiple?: boolean;
   className?: string;
   testId?: string;
-  optionTestId?: (option: ReportOption) => string;
+  optionTestId?: (option: PickerOption) => string;
   onSearchChange?: (search: string) => void;
-  onToggle: (option: ReportOption) => void;
+  onToggle: (option: PickerOption) => void;
 };
 
-export function ReportOptionPicker({
+/**
+ * Searchable select built on a popover command list. Picks one option, or several with `multiple`;
+ * pass `onSearchChange` to filter on the server instead of in the list.
+ */
+export function OptionPicker({
   label,
   placeholder,
   options = [],
@@ -41,7 +45,7 @@ export function ReportOptionPicker({
   optionTestId,
   onSearchChange,
   onToggle,
-}: ReportOptionPickerProps) {
+}: OptionPickerProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const listId = useId();
@@ -84,12 +88,12 @@ export function ReportOptionPicker({
       <PopoverContent align="start" className="w-[--radix-popover-trigger-width] min-w-64 p-0">
         <Command shouldFilter={!onSearchChange}>
           <CommandInput
-            placeholder={t("reports.picker.search")}
+            placeholder={t("common.optionPicker.search")}
             value={search}
             onValueChange={setSearch}
           />
           <CommandList id={listId} className="max-h-64 p-1">
-            <CommandEmpty>{t("reports.picker.empty")}</CommandEmpty>
+            <CommandEmpty>{t("common.optionPicker.empty")}</CommandEmpty>
             {options.map((option) => {
               const isSelected = selectedIds.includes(option.id);
               return (

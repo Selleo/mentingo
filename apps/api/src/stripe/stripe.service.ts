@@ -12,10 +12,13 @@ import { EnvService } from "src/env/services/env.service";
 import { DB } from "src/storage/db/db.providers";
 import { courses } from "src/storage/schema";
 
+import { MAX_LISTED_PROMOTION_CODES, STRIPE_LIST_PAGE_SIZE } from "./stripe.constants";
+
 import type { CreateCheckoutSessionBody } from "./schemas/checkoutSession.schema";
 import type { CreatePromotionCode } from "./schemas/createPromotionCode";
 import type { PromotionCode } from "./schemas/promotionCode.schema";
 import type { UpdatePromotionCode } from "./schemas/updatePromotionCode.schema";
+import type { PromotionCodesQuery } from "./stripe.types";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -171,10 +174,25 @@ export class StripeService {
     return coupon;
   }
 
-  async getPromotionCodes() {
+  /**
+   * Stripe lists promotion codes by cursor without a total, so all codes are read and paged here.
+   * Code counts stay small, and the cap guards against runaway listing.
+   */
+  async getPromotionCodes({ search, page, perPage }: PromotionCodesQuery) {
     const client = await this.getClient();
-    const promotionCodes = await client.promotionCodes.list();
-    return promotionCodes?.data?.map(this.promotionCodeToCamelCase) ?? [];
+    const promotionCodes = await client.promotionCodes
+      .list({ limit: STRIPE_LIST_PAGE_SIZE })
+      .autoPagingToArray({ limit: MAX_LISTED_PROMOTION_CODES });
+
+    const searchTerm = search?.trim().toLowerCase();
+    const matchingCodes = promotionCodes
+      .map(this.promotionCodeToCamelCase)
+      .filter(({ code }) => !searchTerm || code.toLowerCase().includes(searchTerm));
+
+    return {
+      data: matchingCodes.slice((page - 1) * perPage, page * perPage),
+      pagination: { totalItems: matchingCodes.length, page, perPage },
+    };
   }
 
   async getPromotionCode(id: string) {

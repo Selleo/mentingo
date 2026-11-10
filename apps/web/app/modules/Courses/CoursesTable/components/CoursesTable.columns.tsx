@@ -2,9 +2,9 @@ import { COURSE_ORIGIN_TYPES, COURSE_TYPE } from "@repo/shared";
 import { format } from "date-fns";
 import { BookOpen } from "lucide-react";
 
+import { createSelectColumn, type RowRangeSelection } from "~/components/DataTable";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
-import { Checkbox } from "~/components/ui/checkbox";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { CourseBulkActions } from "~/modules/Admin/Courses/components/CourseBulkActions";
 import {
@@ -14,7 +14,6 @@ import {
   getCourseStatus,
 } from "~/modules/Admin/Courses/utils";
 import { formatDuration } from "~/modules/Courses/utils/formatDuration";
-import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 
 import { COURSES_PAGE_HANDLES } from "../../../../../e2e/data/courses/handles";
 
@@ -32,8 +31,7 @@ type CoursesTableColumnsOptions = {
   t: TFunction;
   canManageCourses: boolean;
   categories: GetAllCategoriesResponse["data"];
-  lastSelectedRowIndex: number;
-  setLastSelectedRowIndex: (index: number) => void;
+  rowRangeSelection: RowRangeSelection;
   onDuplicateCourse: (courseId: string) => void;
 };
 
@@ -128,39 +126,15 @@ const buildDurationColumn = (t: TFunction): ColumnDef<CoursesTableCourse> => ({
 const buildManagementColumns = ({
   t,
   categories,
-  lastSelectedRowIndex,
-  setLastSelectedRowIndex,
+  rowRangeSelection,
   onDuplicateCourse,
 }: CoursesTableColumnsOptions) => {
-  const selectColumn: ColumnDef<CoursesTableCourse> = {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(Boolean(value))}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row, table }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        aria-label="Select row"
-        data-testid={COURSES_PAGE_HANDLES.rowCheckbox(row.original.id)}
-        onClick={(event) => {
-          event.stopPropagation();
-          handleRowSelectionRange({
-            table,
-            event,
-            id: row.id,
-            value: row.getIsSelected(),
-            lastSelectedRowIndex,
-            setLastSelectedRowIndex,
-          });
-        }}
-      />
-    ),
-    enableSorting: false,
-  };
+  const selectColumn = createSelectColumn<CoursesTableCourse>({
+    rowRangeSelection,
+    getCheckboxTestId: (course) => COURSES_PAGE_HANDLES.rowCheckbox(course.id),
+    selectAllLabel: t("common.dataTable.selectAll"),
+    selectRowLabel: t("common.dataTable.selectRow"),
+  });
 
   const statusColumn: ColumnDef<CoursesTableCourse> = {
     accessorKey: "status",

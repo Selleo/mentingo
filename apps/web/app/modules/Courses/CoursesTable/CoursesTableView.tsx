@@ -1,12 +1,7 @@
 import { Link, useNavigate } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
-import {
-  flexRender,
-  getCoreRowModel,
-  type RowSelectionState,
-  useReactTable,
-} from "@tanstack/react-table";
-import { Plus, SearchX } from "lucide-react";
+import { getCoreRowModel, type RowSelectionState, useReactTable } from "@tanstack/react-table";
+import { Plus } from "lucide-react";
 import { useDeferredValue, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,32 +9,29 @@ import { useDuplicateCourse } from "~/api/mutations/admin/useDuplicateCourse";
 import { useCategoriesSuspense, useCurrentUserSuspense } from "~/api/queries";
 import { useCoursesTableSuspense } from "~/api/queries/useCoursesTable";
 import { hasAnyPermission } from "~/common/permissions/permission.utils";
-import { PageWrapper } from "~/components/PageWrapper/PageWrapper";
-import { Pagination } from "~/components/Pagination/Pagination";
-import { Button } from "~/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
-import { cn } from "~/lib/utils";
+  DataTable,
+  DataTableCard,
+  DataTableEmptyState,
+  DataTablePagination,
+  DataTableSelectionBar,
+  useClampedPage,
+  useRowRangeSelection,
+} from "~/components/DataTable";
+import { PageHeader } from "~/components/PageHeader/PageHeader";
+import { PageWrapper } from "~/components/PageWrapper/PageWrapper";
+import { Button } from "~/components/ui/button";
 import { CourseBulkActions } from "~/modules/Admin/Courses/components/CourseBulkActions";
 import { ContentMarketplaceLink } from "~/modules/ContentMarketplace/components/ContentMarketplaceLink";
 import { CoursesViewToggle } from "~/modules/Courses/components/CoursesViewToggle";
 import { COURSES_TABLE_PATH, COURSES_VIEWS } from "~/modules/Courses/utils/coursesView";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
-import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 
 import { COURSES_PAGE_HANDLES } from "../../../../e2e/data/courses/handles";
 
 import { getCoursesTableColumns } from "./components/CoursesTable.columns";
 import { CoursesTableFilters } from "./components/CoursesTableFilters";
 import { useCoursesTableFilters } from "./hooks/useCoursesTableFilters";
-
-const SELECT_COLUMN_ID = "select";
 
 const CoursesTableView = () => {
   const navigate = useNavigate();
@@ -54,6 +46,7 @@ const CoursesTableView = () => {
   ]);
   const filters = useCoursesTableFilters({ canFilterByManagementState: canManageCourses });
 
+  // Keeps the current rows on screen while courses for the new filters load.
   const deferredCourseParams = useDeferredValue(filters.courseParams);
   const isRefreshingCourses = deferredCourseParams !== filters.courseParams;
 
@@ -61,20 +54,20 @@ const CoursesTableView = () => {
   const {
     data: { data: courses, pagination },
   } = useCoursesTableSuspense({ ...deferredCourseParams, language });
-  const lastPage = Math.max(1, Math.ceil(pagination.totalItems / pagination.perPage));
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [lastSelectedRowIndex, setLastSelectedRowIndex] = useState<number>(0);
+  const rowRangeSelection = useRowRangeSelection();
 
   useEffect(() => {
     setRowSelection({});
   }, [filters.courseParams]);
 
-  // A page can disappear after deletions or archiving; land on the last page that still exists.
-  useEffect(() => {
-    if (filters.page > lastPage) filters.setPage(lastPage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.page, lastPage]);
+  useClampedPage({
+    page: filters.page,
+    perPage: pagination.perPage,
+    totalItems: pagination.totalItems,
+    setPage: filters.setPage,
+  });
 
   const { mutateAsync: duplicateCourse } = useDuplicateCourse();
 
@@ -89,8 +82,7 @@ const CoursesTableView = () => {
     t,
     canManageCourses,
     categories: categories ?? [],
-    lastSelectedRowIndex,
-    setLastSelectedRowIndex,
+    rowRangeSelection,
     onDuplicateCourse: (courseId) => void duplicateCourseAndOpenCopy(courseId),
   });
 
@@ -113,10 +105,6 @@ const CoursesTableView = () => {
   const selectedRows = table.getSelectedRowModel().rows;
   const selectedCourseIds = selectedRows.map((row) => row.original.id);
   const selectedArchivedStates = selectedRows.map((row) => row.original.isArchived ?? false);
-  const tableRows = table.getRowModel().rows;
-  const hasSelectedCourses = selectedCourseIds.length > 0;
-
-  const openCourse = (courseId: string) => navigate(`/course/${courseId}`);
 
   return (
     <PageWrapper
@@ -131,26 +119,29 @@ const CoursesTableView = () => {
       ]}
     >
       <div data-testid={COURSES_PAGE_HANDLES.PAGE} className="flex flex-col gap-6">
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <h4 data-testid={COURSES_PAGE_HANDLES.HEADING} className="h4 min-w-0 text-neutral-950">
-            {canManageCourses
+        <PageHeader
+          title={
+            canManageCourses
               ? t("adminCoursesView.courses.header")
-              : t("adminCoursesView.courses.learnerHeader")}
-          </h4>
-          <div className="flex flex-wrap items-center gap-3">
-            <ContentMarketplaceLink />
-            {canManageCourses && (
-              <Link data-testid={COURSES_PAGE_HANDLES.CREATE_BUTTON} to="/admin/beta-courses/new">
-                <Button variant="primary" className="gap-2">
-                  <Plus className="size-4" aria-hidden />
-                  {t("adminCoursesView.button.createNew")}
-                </Button>
-              </Link>
-            )}
-          </div>
-        </header>
+              : t("adminCoursesView.courses.learnerHeader")
+          }
+          headingTestId={COURSES_PAGE_HANDLES.HEADING}
+          actions={
+            <>
+              <ContentMarketplaceLink />
+              {canManageCourses && (
+                <Link data-testid={COURSES_PAGE_HANDLES.CREATE_BUTTON} to="/admin/beta-courses/new">
+                  <Button variant="primary" className="gap-2">
+                    <Plus className="size-4" aria-hidden />
+                    {t("adminCoursesView.button.createNew")}
+                  </Button>
+                </Link>
+              )}
+            </>
+          }
+        />
 
-        <section className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+        <DataTableCard>
           <CoursesTableFilters
             filters={filters}
             categoryTitles={(categories ?? []).map(({ title }) => title)}
@@ -158,150 +149,51 @@ const CoursesTableView = () => {
           />
 
           {canManageCourses && (
-            // Collapsing the grid row animates the bar's height without measuring its content.
-            <div
-              aria-hidden={!hasSelectedCourses}
-              className={cn(
-                "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
-                hasSelectedCourses && "grid-rows-[1fr] opacity-100",
-                !hasSelectedCourses && "grid-rows-[0fr] opacity-0",
-              )}
+            <DataTableSelectionBar
+              selectedCount={selectedCourseIds.length}
+              countTestId={COURSES_PAGE_HANDLES.SELECTED_COUNT}
             >
-              <div className="overflow-hidden">
-                <div className="flex items-center border-t border-neutral-200 bg-primary-50 p-2">
-                  <CourseBulkActions
-                    selectedCourseIds={selectedCourseIds}
-                    selectedArchivedStates={selectedArchivedStates}
-                    categories={categories ?? []}
-                    onBulkActionComplete={() => setRowSelection({})}
-                    className="ml-0 p-0"
-                  />
-                  <span
-                    data-testid={COURSES_PAGE_HANDLES.SELECTED_COUNT}
-                    className="ml-3 text-sm font-medium text-neutral-700"
-                  >
-                    {t("adminCoursesView.selectedCount", { count: selectedCourseIds.length })}
-                  </span>
-                </div>
-              </div>
-            </div>
+              <CourseBulkActions
+                selectedCourseIds={selectedCourseIds}
+                selectedArchivedStates={selectedArchivedStates}
+                categories={categories ?? []}
+                onBulkActionComplete={() => setRowSelection({})}
+                className="ml-0 p-0"
+              />
+            </DataTableSelectionBar>
           )}
 
-          <div
-            aria-busy={isRefreshingCourses}
-            className={cn(
-              "border-t border-neutral-200 transition-opacity",
-              isRefreshingCourses && "opacity-60",
-            )}
-          >
-            <Table data-testid={COURSES_PAGE_HANDLES.TABLE}>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                    {headerGroup.headers.map((header) => (
-                      <TableHead
-                        key={header.id}
-                        className={cn({ "size-12": header.column.id === SELECT_COLUMN_ID })}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody data-testid={COURSES_PAGE_HANDLES.TABLE_BODY}>
-                {tableRows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-course-id={row.original.id}
-                    data-testid={COURSES_PAGE_HANDLES.row(row.original.id)}
-                    data-state={row.getIsSelected() && "selected"}
-                    onClick={(event) => {
-                      if (
-                        event.target instanceof HTMLElement &&
-                        (event.target.closest("[data-course-row-action]") ||
-                          event.target.closest(".course-row-action-overlay"))
-                      ) {
-                        return;
-                      }
+          <DataTable
+            table={table}
+            isRefreshing={isRefreshingCourses}
+            onRowClick={(row) => navigate(`/course/${row.original.id}`)}
+            rowRangeSelection={rowRangeSelection}
+            testId={COURSES_PAGE_HANDLES.TABLE}
+            bodyTestId={COURSES_PAGE_HANDLES.TABLE_BODY}
+            getRowTestId={(course) => COURSES_PAGE_HANDLES.row(course.id)}
+            getRowAttributes={(course) => ({ "data-course-id": course.id })}
+            emptyState={
+              <DataTableEmptyState
+                testId={COURSES_PAGE_HANDLES.EMPTY_STATE}
+                onResetFilters={filters.activeFilterCount > 0 ? filters.resetFilters : undefined}
+              />
+            }
+          />
 
-                      openCourse(row.original.id);
-                    }}
-                    className="cursor-pointer hover:bg-neutral-50"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className={cn("py-2", {
-                          "size-12": cell.column.id === SELECT_COLUMN_ID,
-                        })}
-                        onClick={(event) => {
-                          if (cell.column.id !== SELECT_COLUMN_ID) return;
-
-                          event.stopPropagation();
-                          handleRowSelectionRange({
-                            table,
-                            event,
-                            id: row.id,
-                            value: row.getIsSelected(),
-                            lastSelectedRowIndex,
-                            setLastSelectedRowIndex,
-                          });
-                        }}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-                {tableRows.length === 0 && (
-                  <TableRow className="hover:bg-transparent">
-                    <TableCell colSpan={columns.length}>
-                      <div
-                        data-testid={COURSES_PAGE_HANDLES.EMPTY_STATE}
-                        className="flex flex-col items-center gap-3 py-12 text-center"
-                      >
-                        <span className="flex size-12 items-center justify-center rounded-full bg-primary-50 text-primary-700">
-                          <SearchX className="size-6" aria-hidden />
-                        </span>
-                        <div>
-                          <p className="font-medium text-neutral-950">
-                            {t("adminCoursesView.empty.title")}
-                          </p>
-                          <p className="text-sm text-neutral-700">
-                            {t("adminCoursesView.empty.description")}
-                          </p>
-                        </div>
-                        {filters.activeFilterCount > 0 && (
-                          <Button type="button" variant="outline" onClick={filters.resetFilters}>
-                            {t("reports.filters.resetAll")}
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          {pagination.totalItems > 0 && (
-            <Pagination
-              className="border-t border-neutral-200"
-              totalItems={pagination.totalItems}
-              itemsPerPage={filters.perPage}
-              currentPage={filters.page}
-              onPageChange={filters.setPage}
-              onItemsPerPageChange={filters.setPerPage}
-              testIds={{
-                previous: COURSES_PAGE_HANDLES.PAGINATION_PREVIOUS,
-                next: COURSES_PAGE_HANDLES.PAGINATION_NEXT,
-                page: COURSES_PAGE_HANDLES.paginationPage,
-                itemsPerPage: COURSES_PAGE_HANDLES.PAGINATION_ITEMS_PER_PAGE,
-              }}
-            />
-          )}
-        </section>
+          <DataTablePagination
+            totalItems={pagination.totalItems}
+            itemsPerPage={filters.perPage}
+            currentPage={filters.page}
+            onPageChange={filters.setPage}
+            onItemsPerPageChange={filters.setPerPage}
+            testIds={{
+              previous: COURSES_PAGE_HANDLES.PAGINATION_PREVIOUS,
+              next: COURSES_PAGE_HANDLES.PAGINATION_NEXT,
+              page: COURSES_PAGE_HANDLES.paginationPage,
+              itemsPerPage: COURSES_PAGE_HANDLES.PAGINATION_ITEMS_PER_PAGE,
+            }}
+          />
+        </DataTableCard>
       </div>
     </PageWrapper>
   );

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -13,6 +13,8 @@ export function useAutomations(query: AutomationListQuery = {}) {
 
   return useQuery({
     queryKey: AUTOMATIONS_QUERY_KEYS.list({ ...query, language }),
+    // Keeps the current page on screen while the next page or filter result loads.
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       const response = (
         await ApiClient.api.automationManagementControllerListAutomations({ ...query, language })

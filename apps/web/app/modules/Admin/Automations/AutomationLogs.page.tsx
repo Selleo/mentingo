@@ -1,9 +1,21 @@
+import { AUTOMATION_RUN_STATUSES, type AutomationRunStatus } from "@repo/shared";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useAutomationRuns } from "~/api/queries/useAutomationRuns";
+import {
+  type ActiveTableFilter,
+  DataTable,
+  DataTableCard,
+  DataTableEmptyState,
+  DataTablePagination,
+  DataTableToolbar,
+  useClampedPage,
+} from "~/components/DataTable";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
-import { Pagination } from "~/components/Pagination/Pagination";
+import { OptionPicker } from "~/components/OptionPicker/OptionPicker";
+import { PageHeader } from "~/components/PageHeader/PageHeader";
 import {
   Dialog,
   DialogContent,
@@ -11,26 +23,77 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { useUrlTableState } from "~/hooks/useUrlTableState";
 
+import {
+  AUTOMATION_LOGS_PAGE_HANDLES,
+  AUTOMATIONS_TABLE_ANY_STATUS,
+  AUTOMATIONS_TABLE_DEFAULT_PAGE_SIZE,
+  AUTOMATIONS_TABLE_FILTER_KEYS,
+  AUTOMATIONS_TABLE_FILTER_PARAMS,
+} from "./automationsTable.constants";
 import { AutomationRunDetail } from "./Runs/components/AutomationRunDetail";
-import { AutomationRunsFilters } from "./Runs/components/AutomationRunsFilters";
-import { AutomationRunsTable } from "./Runs/components/AutomationRunsTable";
+import { getAutomationRunsTableColumns } from "./Runs/components/AutomationRunsTable.columns";
 
-import type { AutomationRunStatus } from "@repo/shared";
-import type { ItemsPerPageOption } from "~/components/Pagination/Pagination";
+const isAutomationRunStatus = (value: string | undefined): value is AutomationRunStatus =>
+  Object.values(AUTOMATION_RUN_STATUSES).some((status) => status === value);
 
 export default function AutomationLogsContent() {
-  const { t } = useTranslation();
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<AutomationRunStatus | undefined>();
+  const { t, i18n } = useTranslation();
   const [selectedAutomationRunId, setSelectedAutomationRunId] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState<ItemsPerPageOption>(10);
-  const { data, isPending, isError } = useAutomationRuns({
-    page,
-    perPage,
+
+  const tableState = useUrlTableState({
+    filterKeys: AUTOMATIONS_TABLE_FILTER_KEYS,
+    defaultPerPage: AUTOMATIONS_TABLE_DEFAULT_PAGE_SIZE,
+  });
+  const statusParam = tableState.filters.status;
+  const status = isAutomationRunStatus(statusParam) ? statusParam : undefined;
+
+  const { data, isPending, isFetching, isError } = useAutomationRuns({
+    page: tableState.page,
+    perPage: tableState.perPage,
+    search: tableState.search,
     status,
-    search,
+  });
+
+  useClampedPage({
+    page: tableState.page,
+    perPage: tableState.perPage,
+    totalItems: data?.pagination.totalItems ?? 0,
+    setPage: tableState.setPage,
+  });
+
+  const statusOptions = [
+    { id: AUTOMATIONS_TABLE_ANY_STATUS, label: t("automations.allStatuses") },
+    ...Object.values(AUTOMATION_RUN_STATUSES).map((runStatus) => ({
+      id: runStatus,
+      label: t(`automations.executionStatuses.${runStatus}`),
+    })),
+  ];
+
+  const setStatus = (nextStatus?: AutomationRunStatus) =>
+    tableState.setFilter(AUTOMATIONS_TABLE_FILTER_PARAMS.STATUS, nextStatus);
+
+  const activeFilters: ActiveTableFilter[] = status
+    ? [
+        {
+          id: AUTOMATIONS_TABLE_FILTER_PARAMS.STATUS,
+          label: t("automationLogs.table.status"),
+          value: statusOptions.find(({ id }) => id === status)?.label ?? status,
+          onRemove: () => setStatus(undefined),
+        },
+      ]
+    : [];
+
+  const table = useReactTable({
+    getRowId: (automationRun) => automationRun.id,
+    data: data?.data ?? [],
+    columns: getAutomationRunsTableColumns({
+      t,
+      language: i18n.language,
+      onOpenDetail: setSelectedAutomationRunId,
+    }),
+    getCoreRowModel: getCoreRowModel(),
   });
 
   if (isError)
@@ -44,45 +107,63 @@ export default function AutomationLogsContent() {
     );
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h4 className="h4">{t("automationLogs.title")}</h4>
-          <p className="mt-2 text-sm text-neutral-600">{t("automationLogs.description")}</p>
-        </div>
-      </div>
-      <AutomationRunsFilters
-        search={search}
-        onSearch={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
-        status={status}
-        onStatus={(value) => {
-          setStatus(value);
-          setPage(1);
-        }}
-      />
-      <div>
-        <AutomationRunsTable
-          runs={data?.data ?? []}
-          loading={isPending}
-          onOpenDetail={setSelectedAutomationRunId}
-        />
-        {!isPending && (data?.pagination.totalItems ?? 0) > 0 && (
-          <Pagination
-            className="rounded-b-lg border-x border-b bg-neutral-50"
-            totalItems={data?.pagination.totalItems}
-            currentPage={page}
-            itemsPerPage={perPage}
-            onPageChange={setPage}
-            onItemsPerPageChange={(value) => {
-              setPerPage(Number(value) as ItemsPerPageOption);
-              setPage(1);
-            }}
+    <div className="flex flex-col gap-6">
+      <PageHeader title={t("automationLogs.title")} />
+
+      <DataTableCard>
+        <DataTableToolbar
+          searchValue={tableState.searchInput}
+          onSearchChange={tableState.setSearchInput}
+          searchPlaceholder={t("automationLogs.filters.searchPlaceholder")}
+          searchTestId={AUTOMATION_LOGS_PAGE_HANDLES.SEARCH_INPUT}
+          activeFilters={activeFilters}
+          canResetFilters={tableState.activeFilterCount > 0}
+          onResetFilters={tableState.resetFilters}
+        >
+          <OptionPicker
+            label={t("automationLogs.table.status")}
+            placeholder={t("automations.allStatuses")}
+            className="w-full sm:w-44"
+            options={statusOptions}
+            selectedIds={[status ?? AUTOMATIONS_TABLE_ANY_STATUS]}
+            testId={AUTOMATION_LOGS_PAGE_HANDLES.STATUS_FILTER}
+            optionTestId={({ id }) => AUTOMATION_LOGS_PAGE_HANDLES.statusFilterOption(id)}
+            onToggle={({ id }) => setStatus(isAutomationRunStatus(id) ? id : undefined)}
           />
-        )}
-      </div>
+        </DataTableToolbar>
+
+        <DataTable
+          table={table}
+          isRefreshing={isFetching && !isPending}
+          onRowClick={(row) => setSelectedAutomationRunId(row.original.id)}
+          testId={AUTOMATION_LOGS_PAGE_HANDLES.TABLE}
+          getRowTestId={(automationRun) => AUTOMATION_LOGS_PAGE_HANDLES.row(automationRun.id)}
+          emptyState={
+            isPending ? (
+              <p role="status" className="py-12 text-center text-sm text-muted-foreground">
+                {t("automations.loading")}
+              </p>
+            ) : (
+              <DataTableEmptyState
+                testId={AUTOMATION_LOGS_PAGE_HANDLES.EMPTY_STATE}
+                title={t("automationLogs.table.empty")}
+                onResetFilters={
+                  tableState.activeFilterCount > 0 ? tableState.resetFilters : undefined
+                }
+              />
+            )
+          }
+        />
+
+        <DataTablePagination
+          totalItems={data?.pagination.totalItems}
+          itemsPerPage={tableState.perPage}
+          currentPage={tableState.page}
+          onPageChange={tableState.setPage}
+          onItemsPerPageChange={tableState.setPerPage}
+        />
+      </DataTableCard>
+
       <Dialog
         open={Boolean(selectedAutomationRunId)}
         onOpenChange={(open) => {

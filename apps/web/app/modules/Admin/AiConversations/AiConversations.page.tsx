@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useAdminAiThreads } from "~/api/queries/admin/useAdminAiThreads";
+import { PageHeader } from "~/components/PageHeader/PageHeader";
 import { PageWrapper } from "~/components/PageWrapper";
 import { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 import { Button } from "~/components/ui/button";
@@ -112,13 +113,14 @@ export default function AiConversationsPage() {
   const totalPages = Math.ceil(totalItems / filters.perPage);
 
   return (
-    <PageWrapper>
-      <header className="mb-6">
-        <h1 className="h4">{t("aiConversations.title")}</h1>
-      </header>
+    <PageWrapper breadcrumbs={[{ title: t("aiConversations.title"), href: AI_CONVERSATIONS_PATH }]}>
+      <div className="mb-6">
+        <PageHeader title={t("aiConversations.title")} />
+      </div>
+      {/* The list and reader share one split view, so this page keeps its own layout. */}
       <div
         data-testid={AI_CONVERSATIONS_HANDLES.PAGE}
-        className="flex h-[calc(100dvh-11rem)] min-h-[28rem] overflow-hidden rounded-lg border border-neutral-200 bg-white 2xl:h-[calc(100dvh-7rem)]"
+        className="flex h-[calc(100dvh-14rem)] min-h-[28rem] overflow-hidden rounded-lg border border-neutral-200 bg-white 2xl:h-[calc(100dvh-10rem)]"
       >
         <aside
           className={cn(

@@ -812,6 +812,21 @@
     "validation": {
       "messageRequired": "Žinutė yra privaloma.",
       "nameMaxLength": "Gali būti ne daugiau kaip {{max}} simbolių."
+    },
+    "optionPicker": {
+      "search": "Ieškoti",
+      "empty": "Atitikmenų nerasta"
+    },
+    "dataTable": {
+      "filters": "Filtrai",
+      "resetFilters": "Išvalyti visus filtrus",
+      "removeFilter": "Pašalinti filtrą: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}",
+      "selectedCount": "Pasirinkta: {{count}}",
+      "emptyTitle": "Rezultatų nerasta",
+      "emptyDescription": "Pabandykite kitą paiešką arba atstatykite filtrus.",
+      "selectAll": "Pasirinkti visus",
+      "selectRow": "Pasirinkti eilutę"
     }
   },
   "lessons": {
@@ -2054,9 +2069,7 @@
         "private": "Privatus"
       },
       "allCategories": "Visos kategorijos",
-      "archive": "Archyvas",
-      "removeFilter": "Pašalinti filtrą: {{filter}}",
-      "labeledValue": "{{label}}: {{value}}"
+      "archive": "Archyvas"
     },
     "courses": {
       "header": "Tvarkyti kursus",
@@ -2141,12 +2154,7 @@
       "bulkStatusUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
       "noCoursesSelected": "Pasirinkite bent vieną kursą.",
       "deleteCoursesFailed": "Nepavyko ištrinti kursų"
-    },
-    "empty": {
-      "title": "Kursų nerasta",
-      "description": "Pabandykite kitą paiešką arba atstatykite filtrus."
-    },
-    "selectedCount": "Pasirinkta: {{count}}"
+    }
   },
   "adminCategoriesView": {
     "filters": {
@@ -2335,7 +2343,16 @@
         "competencies": "kompetencijos",
         "other": "platformos funkcijas",
         "gamification": "žaidybinimą",
-        "quiz_grading": "testų vertinimas"
+        "quiz_grading": "testų vertinimas",
+        "ai_thread": "AI pokalbius",
+        "automation": "automatizacijas",
+        "automation_log": "automatizacijų žurnalus",
+        "content_marketplace": "turinio prekyvietę",
+        "dashboard": "skydelį",
+        "email_template": "el. laiškų šablonus",
+        "managed_group_results": "valdomų grupių rezultatus",
+        "phishing": "sukčiavimo simuliacijas",
+        "todo_task": "užduotis"
       },
       "descriptions": {
         "phishing_manage": "Gali kurti ir valdyti sukčiavimo el. paštu simuliacijas.",
@@ -8449,11 +8466,7 @@
       "timezone": "Datos rodomos laiko juostoje {{timezone}}."
     },
     "title": "Ataskaitos",
-    "description": "Stebėkite organizacijos pažangą mokymosi keliuose, kursuose ir tarp besimokančiųjų.",
-    "picker": {
-      "search": "Ieškoti",
-      "empty": "Atitikmenų nerasta"
-    }
+    "description": "Stebėkite organizacijos pažangą mokymosi keliuose, kursuose ir tarp besimokančiųjų."
   },
   "contentMarketplace": {
     "category": "Kategorija / tema",
