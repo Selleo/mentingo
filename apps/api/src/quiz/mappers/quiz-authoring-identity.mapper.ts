@@ -23,11 +23,18 @@ const preserveOrderedConfigurationIds = <Incoming extends OrderedConfiguration>(
     existingConfigurations.map((configuration) => [configuration.displayOrder, configuration]),
   );
   const preservedIds = new Set<string>();
+  // A configuration still submitted under its own id must not be claimed by position.
+  const incomingIds = new Set(incomingConfigurations.map(({ id }) => id));
 
   return incomingConfigurations.map((incomingConfiguration) => {
+    const configurationAtSamePosition = existingByDisplayOrder.get(
+      incomingConfiguration.displayOrder,
+    );
     const matchingConfiguration =
       existingById.get(incomingConfiguration.id) ??
-      existingByDisplayOrder.get(incomingConfiguration.displayOrder);
+      (configurationAtSamePosition && !incomingIds.has(configurationAtSamePosition.id)
+        ? configurationAtSamePosition
+        : undefined);
 
     if (!matchingConfiguration || preservedIds.has(matchingConfiguration.id)) {
       return incomingConfiguration;
