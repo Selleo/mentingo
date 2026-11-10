@@ -17,9 +17,14 @@ import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useTopCourses } from "~/api/queries/useTopCourses";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
+import { COURSES_TABLE_PERMISSIONS } from "~/config/routeAccessConfig";
 import { usePermissions } from "~/hooks/usePermissions";
 import { ContentMarketplaceCoursesRow } from "~/modules/ContentMarketplace/components/ContentMarketplaceCoursesRow";
-import { CoursesViewToggle } from "~/modules/Courses/components/CoursesViewToggle";
+import {
+  COURSES_VIEW_TOGGLE_CORNER_CLASS_NAME,
+  CoursesViewToggle,
+} from "~/modules/Courses/components/CoursesViewToggle";
+import { COURSES_VIEWS } from "~/modules/Courses/utils/coursesView";
 import { sumChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -154,7 +159,6 @@ const CategoryCoursesRow = ({
       watchSlideIndex={watchedSlideIndex}
       onWatchedSlideVisible={handleWatchedSlideVisible}
       rowRef={rowRef}
-      morphTitles
       headerAction={
         canAddCourses && (
           <AddCourseToCategoryButton categoryId={category.id} categoryTitle={category.title} />
@@ -178,8 +182,8 @@ const ModernCoursesView = () => {
   const { hasAccess: canManageFeaturedCourse } = usePermissions({
     required: PERMISSIONS.SETTINGS_MANAGE,
   });
-  const { hasAccess: canManageCourses } = usePermissions({
-    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  const { hasAccess: canOpenCoursesTable } = usePermissions({
+    required: COURSES_TABLE_PERMISSIONS,
   });
   const { hasAccess: canManageCategories } = usePermissions({
     required: PERMISSIONS.CATEGORY_MANAGE,
@@ -488,10 +492,10 @@ const ModernCoursesView = () => {
   return (
     <PageWrapper isBarebones className="mb-4 min-h-screen w-full p-0" wrapperClassName="h-full">
       <div className="relative min-h-screen">
-        {canManageCourses && (
+        {canOpenCoursesTable && (
           <CoursesViewToggle
-            active="catalogue"
-            className="absolute right-4 top-4 z-30 md:right-8 md:top-8"
+            active={COURSES_VIEWS.CATALOGUE}
+            className={COURSES_VIEW_TOGGLE_CORNER_CLASS_NAME}
           />
         )}
         <div className="overflow-x-hidden">{renderCourses()}</div>

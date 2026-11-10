@@ -2052,11 +2052,15 @@
         "draft": "Juodraštis",
         "published": "Paskelbta",
         "private": "Privatus"
-      }
+      },
+      "allCategories": "Visos kategorijos",
+      "archive": "Archyvas",
+      "removeFilter": "Pašalinti filtrą: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}"
     },
     "courses": {
       "header": "Tvarkyti kursus",
-      "subHeader": "Visus kursus galite peržiūrėti ir redaguoti"
+      "learnerHeader": "Visi kursai"
     },
     "field": {
       "title": "Pavadinimas",
@@ -2068,7 +2072,8 @@
       "state": "valstybė",
       "status": "Būsena",
       "sharedCourse": "Bendrinama",
-      "createdAt": "Sukurta"
+      "createdAt": "Sukurta",
+      "duration": "Trukmė"
     },
     "lessonCard": {
       "mappedTypes": {
@@ -2136,7 +2141,12 @@
       "bulkStatusUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
       "noCoursesSelected": "Pasirinkite bent vieną kursą.",
       "deleteCoursesFailed": "Nepavyko ištrinti kursų"
-    }
+    },
+    "empty": {
+      "title": "Kursų nerasta",
+      "description": "Pabandykite kitą paiešką arba atstatykite filtrus."
+    },
+    "selectedCount": "Pasirinkta: {{count}}"
   },
   "adminCategoriesView": {
     "filters": {
@@ -9575,5 +9585,10 @@
         "invalidBadgeImage": "Ženklelio paveikslėlis netinkamas. Įkelkite jį iš naujo."
       }
     }
+  },
+  "coursesViewToggle": {
+    "label": "Kursų rodinys",
+    "catalogue": "Katalogas",
+    "table": "Lentelė"
   }
 }

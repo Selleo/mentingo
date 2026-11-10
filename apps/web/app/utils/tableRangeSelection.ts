@@ -3,7 +3,7 @@ import type React from "react";
 
 export function handleRowSelectionRange<TData>(params: {
   table: Table<TData>;
-  event: React.MouseEvent<HTMLButtonElement>;
+  event: React.MouseEvent<HTMLElement>;
   id: string;
   value: boolean;
   lastSelectedRowIndex: number;

@@ -9,8 +9,6 @@ import {
   CarouselPrevious,
 } from "~/components/ui/carousel";
 
-import { getCourseTitleMorphName } from "../../utils/coursesMorph";
-
 import ModernCourseCard from "./ModernCourseCard";
 
 import type {
@@ -39,7 +37,6 @@ type ModernCourseCarouselProps = {
   onWatchedSlideVisible?: (index: number) => void;
   rowRef?: Ref<HTMLElement>;
   headerAction?: ReactNode;
-  morphTitles?: boolean;
 };
 
 const ModernCourseCarousel = ({
@@ -53,7 +50,6 @@ const ModernCourseCarousel = ({
   onWatchedSlideVisible,
   rowRef,
   headerAction,
-  morphTitles = false,
 }: ModernCourseCarouselProps) => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -220,7 +216,6 @@ const ModernCourseCarousel = ({
                     dueDate={
                       "dueDate" in course && course.dueDate ? new Date(course.dueDate) : null
                     }
-                    titleMorphName={morphTitles ? getCourseTitleMorphName(course.id) : undefined}
                   />
                 </CarouselItem>
               ))}

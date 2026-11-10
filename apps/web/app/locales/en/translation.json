@@ -2053,11 +2053,15 @@
         "draft": "Draft",
         "published": "Published",
         "private": "Private"
-      }
+      },
+      "allCategories": "All categories",
+      "archive": "Archive",
+      "removeFilter": "Remove filter: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}"
     },
     "courses": {
       "header": "Manage courses",
-      "subHeader": "All courses you can view and edit"
+      "learnerHeader": "All courses"
     },
     "field": {
       "title": "Title",
@@ -2069,7 +2073,8 @@
       "state": "State",
       "status": "Status",
       "sharedCourse": "Shared",
-      "createdAt": "Created At"
+      "createdAt": "Created At",
+      "duration": "Duration"
     },
     "lessonCard": {
       "mappedTypes": {
@@ -2137,7 +2142,12 @@
       "bulkStatusUpdateForbidden": "You do not have permission to update one or more selected courses.",
       "noCoursesSelected": "Select at least one course.",
       "deleteCoursesFailed": "Failed to delete courses"
-    }
+    },
+    "empty": {
+      "title": "No courses found",
+      "description": "Try a different search or reset the filters."
+    },
+    "selectedCount": "Selected: {{count}}"
   },
   "adminCategoriesView": {
     "filters": {
@@ -9554,5 +9564,10 @@
         "invalidBadgeImage": "The badge image is invalid. Upload it again."
       }
     }
+  },
+  "coursesViewToggle": {
+    "label": "Courses view",
+    "catalogue": "Catalogue",
+    "table": "Table"
   }
 }

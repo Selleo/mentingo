@@ -1,5 +1,5 @@
 import { CopyPlus, MoreVertical } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
@@ -8,6 +8,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
@@ -73,35 +74,42 @@ export const BulkEditDropdown = ({
 
       <DropdownMenuContent
         className={cn(
-          "flex flex-col gap-1 rounded bg-white p-2 text-black shadow-lg transition-all duration-200",
+          "flex flex-col gap-0.5 rounded-lg border border-neutral-200 bg-white p-1 text-neutral-900 shadow-lg",
           {
-            "w-64": iconOnly,
-            "w-80": !iconOnly,
+            "w-52": iconOnly,
+            "w-60": !iconOnly,
           },
         )}
         align="end"
         onClick={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
       >
-        {dropdownItems.map((item) => (
-          <DropdownMenuItem
-            key={item.translationKey}
-            data-testid={item.testId}
-            className={cn(
-              "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-neutral-900 outline-none focus:bg-accent focus:text-accent-foreground",
-              { "text-error-700 focus:bg-error-50 focus:text-error-700": item.destructive },
+        {dropdownItems.map((item, index) => (
+          <Fragment key={item.translationKey}>
+            {item.destructive && index > 0 && !dropdownItems[index - 1].destructive && (
+              <DropdownMenuSeparator className="bg-neutral-200" />
             )}
-            onSelect={item.action}
-          >
-            <span className="flex size-4 shrink-0 items-center justify-center [&>svg]:size-4">
-              {item.iconName ? (
-                <Icon name={item.iconName} className="size-4" aria-hidden="true" />
-              ) : (
-                item.icon
+            <DropdownMenuItem
+              data-testid={item.testId}
+              className={cn(
+                "flex h-9 cursor-pointer items-center gap-2.5 rounded-md px-2.5 text-sm font-medium outline-none transition-colors",
+                {
+                  "text-neutral-800 focus:bg-neutral-100 focus:text-neutral-950": !item.destructive,
+                  "text-error-700 focus:bg-error-50 focus:text-error-700": item.destructive,
+                },
               )}
-            </span>
-            <span className="min-w-0 truncate">{t(item.translationKey)}</span>
-          </DropdownMenuItem>
+              onSelect={item.action}
+            >
+              <span className="flex size-4 shrink-0 items-center justify-center [&>svg]:size-4">
+                {item.iconName ? (
+                  <Icon name={item.iconName} className="size-4" aria-hidden="true" />
+                ) : (
+                  item.icon
+                )}
+              </span>
+              <span className="min-w-0 truncate">{t(item.translationKey)}</span>
+            </DropdownMenuItem>
+          </Fragment>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>

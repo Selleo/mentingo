@@ -2058,11 +2058,15 @@
         "draft": "Návrh",
         "published": "Publikováno",
         "private": "Soukromé"
-      }
+      },
+      "allCategories": "Všechny kategorie",
+      "archive": "Archiv",
+      "removeFilter": "Odebrat filtr: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}"
     },
     "courses": {
       "header": "Spravovat kurzy",
-      "subHeader": "Všechny kurzy si můžete prohlížet a upravovat"
+      "learnerHeader": "Všechny kurzy"
     },
     "field": {
       "title": "Titul",
@@ -2074,7 +2078,8 @@
       "state": "Stát",
       "status": "Postavení",
       "sharedCourse": "Sdíleno",
-      "createdAt": "Vytvořeno v"
+      "createdAt": "Vytvořeno v",
+      "duration": "Délka"
     },
     "lessonCard": {
       "mappedTypes": {
@@ -2142,7 +2147,12 @@
       "bulkStatusUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
       "noCoursesSelected": "Vyberte alespoň jeden kurz.",
       "deleteCoursesFailed": "Kurzy se nepodařilo smazat"
-    }
+    },
+    "empty": {
+      "title": "Nebyly nalezeny žádné kurzy",
+      "description": "Zkuste jiné vyhledávání nebo resetujte filtry."
+    },
+    "selectedCount": "Vybráno: {{count}}"
   },
   "adminCategoriesView": {
     "filters": {
@@ -9577,5 +9587,10 @@
         "invalidBadgeImage": "Obrázek odznaku je neplatný. Nahrajte ho znovu."
       }
     }
+  },
+  "coursesViewToggle": {
+    "label": "Zobrazení kurzů",
+    "catalogue": "Katalog",
+    "table": "Tabulka"
   }
 }

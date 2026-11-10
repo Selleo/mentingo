@@ -14,6 +14,7 @@ import {
   countDistinct,
   desc,
   eq,
+  exists,
   getTableColumns,
   gte,
   inArray,
@@ -31,7 +32,7 @@ import { DatabasePg, type UUIDType } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination } from "src/common/pagination";
 import { getGroupManagerCourseScopeCondition } from "src/common/permissions/group-manager-scope.utils";
-import { hasPermission } from "src/common/permissions/permission.utils";
+import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
@@ -592,7 +593,8 @@ export class CourseCatalogRepository {
 
   /**
    * Course editors with `COURSE_UPDATE` see every course; others see their own courses and, when
-   * they manage groups, the courses assigned to those groups.
+   * they manage groups, the courses assigned to those groups. Learners who cannot manage courses
+   * see only the courses visible to them in the catalogue.
    */
   private buildCourseListAccessCondition({
     currentUser,
@@ -600,6 +602,15 @@ export class CourseCatalogRepository {
     currentUserPermissions = [],
   }: CourseListAccessScope): SQL | undefined {
     if (hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE)) return undefined;
+
+    const canReadManagedCourses = hasAnyPermission(currentUserPermissions, [
+      PERMISSIONS.COURSE_READ_MANAGEABLE,
+      PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+    ]);
+
+    if (!canReadManagedCourses) {
+      return currentUserId ? this.buildLearnerVisibleCourseCondition(currentUserId) : sql`FALSE`;
+    }
 
     const canUpdateOwnCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN);
     const ownCourseCondition =
@@ -615,6 +626,28 @@ export class CourseCatalogRepository {
     const managedCourseCondition = getGroupManagerCourseScopeCondition(currentUser, courses.id, []);
 
     return or(ownCourseCondition, managedCourseCondition) ?? sql`FALSE`;
+  }
+
+  /** Published courses open to everyone, plus published or private courses the learner is enrolled in. */
+  private buildLearnerVisibleCourseCondition(learnerId: UUIDType) {
+    const enrollmentSubquery = this.db
+      .select({ id: studentCourses.id })
+      .from(studentCourses)
+      .where(
+        and(
+          eq(studentCourses.courseId, courses.id),
+          eq(studentCourses.studentId, learnerId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      );
+
+    return or(
+      and(eq(courses.status, COURSE_STATUSES.PUBLISHED), eq(courses.isArchived, false)),
+      and(
+        inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
+        exists(enrollmentSubquery),
+      ),
+    );
   }
 
   private buildStudentCoursesConditions({ studentId, filters, language }: StudentCoursesFilters) {
