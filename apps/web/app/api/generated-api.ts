@@ -3644,6 +3644,34 @@ export interface GetLessonByIdResponse {
     thresholdScore: number | null;
     attemptsLimit: number | null;
     quizCooldownInHours: number | null;
+    timeLimitMinutes?: number | null;
+    quizAttempt?: {
+      /** @format uuid */
+      attemptId: string;
+      startedAt: string;
+      expiresAt: string;
+      serverNow: string;
+      submitGraceSeconds: number;
+      draftAnswers: {
+        /** @format uuid */
+        questionId: string;
+        answers: (
+          | {
+              /** @format uuid */
+              answerId: string;
+            }
+          | {
+              value: string;
+            }
+          | {
+              /** @format uuid */
+              answerId: string;
+              value: string;
+            }
+        )[];
+      }[];
+      draftSavedAt: string | null;
+    } | null;
     isQuizPassed: boolean | null;
     attempts: number | null;
     updatedAt: string | null;
@@ -4187,6 +4215,7 @@ export type BetaCreateQuizLessonBody = {
   thresholdScore: number;
   attemptsLimit: number | null;
   quizCooldownInHours: number | null;
+  timeLimitMinutes?: number | null;
   questions?: {
     /** @format uuid */
     id?: string;
@@ -4249,6 +4278,7 @@ export type BetaUpdateQuizLessonBody = ({
   thresholdScore?: number;
   attemptsLimit?: number | null;
   quizCooldownInHours?: number | null;
+  timeLimitMinutes?: number | null;
   questions?: {
     /** @format uuid */
     id?: string;
@@ -4415,6 +4445,76 @@ export interface EvaluationQuizResponse {
       questionCount: number;
       score: number;
     };
+  };
+}
+
+export interface StartQuizAttemptBody {
+  /** @format uuid */
+  lessonId: string;
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface StartQuizAttemptResponse {
+  data: {
+    status: "in_progress" | "finalized";
+    attempt: {
+      /** @format uuid */
+      attemptId: string;
+      startedAt: string;
+      expiresAt: string;
+      serverNow: string;
+      submitGraceSeconds: number;
+      draftAnswers: {
+        /** @format uuid */
+        questionId: string;
+        answers: (
+          | {
+              /** @format uuid */
+              answerId: string;
+            }
+          | {
+              value: string;
+            }
+          | {
+              /** @format uuid */
+              answerId: string;
+              value: string;
+            }
+        )[];
+      }[];
+      draftSavedAt: string | null;
+    } | null;
+  };
+}
+
+export interface SaveQuizAttemptDraftBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  attemptId: string;
+  questionsAnswers: {
+    /** @format uuid */
+    questionId: string;
+    answers: (
+      | {
+          /** @format uuid */
+          answerId: string;
+        }
+      | {
+          value: string;
+        }
+      | {
+          /** @format uuid */
+          answerId: string;
+          value: string;
+        }
+    )[];
+  }[];
+}
+
+export interface SaveQuizAttemptDraftResponse {
+  data: {
+    draftSavedAt: string;
   };
 }
 
@@ -41946,6 +42046,41 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<EvaluationQuizResponse, any>({
         path: `/api/lesson/evaluation-quiz`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerStartQuizAttempt
+     * @request POST:/api/lesson/quiz-attempt/start
+     */
+    lessonControllerStartQuizAttempt: (data: StartQuizAttemptBody, params: RequestParams = {}) =>
+      this.request<StartQuizAttemptResponse, any>({
+        path: `/api/lesson/quiz-attempt/start`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerSaveQuizAttemptDraft
+     * @request PUT:/api/lesson/quiz-attempt/draft
+     */
+    lessonControllerSaveQuizAttemptDraft: (
+      data: SaveQuizAttemptDraftBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SaveQuizAttemptDraftResponse, any>({
+        path: `/api/lesson/quiz-attempt/draft`,
+        method: "PUT",
         body: data,
         type: ContentType.Json,
         format: "json",

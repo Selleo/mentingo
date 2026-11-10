@@ -83,3 +83,20 @@ export const LEARNER_PROGRESS_STATUSES = {
 } as const;
 export type LearnerProgressStatus =
   (typeof LEARNER_PROGRESS_STATUSES)[keyof typeof LEARNER_PROGRESS_STATUSES];
+
+/** Single source for the quiz time limit range (API validation, editor slider); the DB only enforces >= 1, so changing MAX needs no migration. */
+export const ASSESSMENT_TIME_LIMIT_MINUTES = {
+  MIN: 1,
+  MAX: 300,
+} as const;
+
+/** Extra time after `expiresAt` in which a timed quiz submit still accepts the sent answers. */
+export const ASSESSMENT_TIMED_ATTEMPT_SUBMIT_GRACE_SECONDS = 30;
+
+/** Outcome of `POST /lesson/quiz-attempt/start`; `finalized` means the open attempt had already expired. */
+export const QUIZ_ATTEMPT_START_STATUSES = {
+  IN_PROGRESS: "in_progress",
+  FINALIZED: "finalized",
+} as const;
+export type QuizAttemptStartStatus =
+  (typeof QUIZ_ATTEMPT_START_STATUSES)[keyof typeof QUIZ_ATTEMPT_START_STATUSES];

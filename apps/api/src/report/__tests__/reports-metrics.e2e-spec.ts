@@ -120,7 +120,7 @@ describe("Report metric definitions (e2e)", () => {
             availablePoints: "100",
             gradingStatus: "pending",
             submissionStatus: "in_progress",
-            submittedAt: "2026-01-05T10:00:00Z",
+            expiresAt: "2026-01-05T10:00:00Z",
           },
         ]);
         if (quiz === 0)

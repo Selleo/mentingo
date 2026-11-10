@@ -587,12 +587,16 @@ export class StudentLessonProgressService {
     if (!lessonProgress) {
       const [lesson] = await dbInstance.select().from(lessons).where(eq(lessons.id, id));
 
-      await dbInstance.insert(studentLessonProgress).values({
-        studentId,
-        learningStateId: await activeLearningStateId(dbInstance, studentId, id),
-        lessonId: id,
-        chapterId: lesson.chapterId,
-      });
+      // A concurrent request (e.g. timed quiz finalization) may have created the row meanwhile.
+      await dbInstance
+        .insert(studentLessonProgress)
+        .values({
+          studentId,
+          learningStateId: await activeLearningStateId(dbInstance, studentId, id),
+          lessonId: id,
+          chapterId: lesson.chapterId,
+        })
+        .onConflictDoNothing();
     }
 
     if (

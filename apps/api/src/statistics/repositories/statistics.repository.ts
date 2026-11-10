@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   COURSE_ENROLLMENT,
   DASHBOARD_DEADLINE_RISK_TYPES,
   DASHBOARD_DEADLINE_RISK_GROUP_SORT_FIELDS,
@@ -115,6 +116,7 @@ export class StatisticsRepository {
       .where(
         and(
           eq(assessmentAttempts.learnerId, userId),
+          eq(assessmentAttempts.submissionStatus, ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED),
           currentLearningState(assessmentAttempts.learningStateId),
         ),
       );
@@ -662,7 +664,12 @@ export class StatisticsRepository {
         assessmentAttemptQuestionAnswers,
         eq(assessmentAttemptQuestionAnswers.attemptId, assessmentAttempts.id),
       )
-      .where(userId ? eq(courses.authorId, userId) : undefined);
+      .where(
+        and(
+          eq(assessmentAttempts.submissionStatus, ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED),
+          userId ? eq(courses.authorId, userId) : undefined,
+        ),
+      );
   }
 
   async upsertUserStatistic(userId: UUIDType, upsertUserStatistic: UserStatistic) {

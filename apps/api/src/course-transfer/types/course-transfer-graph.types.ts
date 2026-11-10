@@ -281,6 +281,7 @@ export type AssessmentUpsertValues = Pick<
   | "attemptLimitMode"
   | "maximumAttempts"
   | "attemptCooldown"
+  | "timeLimitMinutes"
   | "feedbackMode"
   | "baseLanguage"
   | "availableLocales"

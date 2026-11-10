@@ -20,6 +20,7 @@ import {
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   index,
   integer,
   interval,
@@ -46,6 +47,11 @@ import {
 
 import { courseLearningStates, lessons, users } from ".";
 
+export type AssessmentAttemptDraftAnswers = Array<{
+  questionId: string;
+  answers: Array<{ answerId: string } | { value: string } | { answerId: string; value: string }>;
+}>;
+
 export const assessments = pgTable(
   "assessments",
   {
@@ -63,6 +69,7 @@ export const assessments = pgTable(
       .default(ASSESSMENT_ATTEMPT_LIMIT_MODES.NONE),
     maximumAttempts: integer("maximum_attempts"),
     attemptCooldown: interval("attempt_cooldown"),
+    timeLimitMinutes: integer("time_limit_minutes"),
     feedbackMode: text("feedback_mode")
       .$type<AssessmentFeedbackMode>()
       .notNull()
@@ -81,6 +88,10 @@ export const assessments = pgTable(
     idTenantUniqueIdx: uniqueIndex("assessments_tenant_id_id_unique_idx").on(
       table.tenantId,
       table.id,
+    ),
+    timeLimitMinutesCheck: check(
+      "assessments_time_limit_minutes_check",
+      sql`${table.timeLimitMinutes} IS NULL OR ${table.timeLimitMinutes} >= 1`,
     ),
   })),
 );
@@ -307,8 +318,11 @@ export const assessmentAttempts = pgTable(
     startedAt: timestampWithTimezone({ name: "started_at" })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    submittedAt: timestampWithTimezone({ name: "submitted_at" }).notNull(),
+    submittedAt: timestampWithTimezone({ name: "submitted_at" }),
     gradedAt: timestampWithTimezone({ name: "graded_at" }),
+    expiresAt: timestampWithTimezone({ name: "expires_at" }),
+    draftAnswers: jsonb("draft_answers").$type<AssessmentAttemptDraftAnswers>(),
+    draftSavedAt: timestampWithTimezone({ name: "draft_saved_at" }),
     tenantId,
   },
   (table) => ({
@@ -337,6 +351,14 @@ export const assessmentAttempts = pgTable(
       table.tenantId,
       table.gradingStatus,
       table.submittedAt,
+    ),
+    submittedAtCheck: check(
+      "assessment_attempts_submitted_at_check",
+      sql`${table.submissionStatus} <> 'submitted' OR ${table.submittedAt} IS NOT NULL`,
+    ),
+    inProgressExpiresCheck: check(
+      "assessment_attempts_in_progress_expires_check",
+      sql`${table.submissionStatus} <> 'in_progress' OR ${table.expiresAt} IS NOT NULL`,
     ),
   }),
 );

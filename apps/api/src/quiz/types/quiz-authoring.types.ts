@@ -26,6 +26,8 @@ export type QuizAuthoringInput = {
   thresholdScore: number;
   attemptsLimit: number | null;
   quizCooldownInHours: number | null;
+  /** Undefined keeps the stored value on update; null removes the limit. */
+  timeLimitMinutes?: number | null;
   displayOrder?: number;
   language: SupportedLanguages;
   questions?: QuizAuthoringQuestion[];
@@ -109,6 +111,7 @@ export type QuizLessonCreateData = {
     attemptLimitMode: AssessmentAttemptLimitMode;
     maximumAttempts: number | null;
     attemptCooldown: string | null;
+    timeLimitMinutes: number | null;
     baseLanguage: SupportedLanguages;
     availableLocales: SupportedLanguages[];
   };
@@ -130,6 +133,7 @@ export type QuizLessonUpdateData = {
     attemptLimitMode?: AssessmentAttemptLimitMode;
     maximumAttempts?: number | null;
     attemptCooldown?: string | null;
+    timeLimitMinutes?: number | null;
   };
   questions?: QuizAuthoringQuestion[];
 };
@@ -140,6 +144,7 @@ export type QuizAuthoringAssessment = {
   attemptLimitMode: AssessmentAttemptLimitMode;
   maximumAttempts: number | null;
   attemptCooldown: string | null;
+  timeLimitMinutes: number | null;
   baseLanguage: SupportedLanguages;
   availableLocales: SupportedLanguages[];
 };
