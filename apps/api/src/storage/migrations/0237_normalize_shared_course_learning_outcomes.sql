@@ -1,5 +1,5 @@
--- Course transfers used to double-encode localized outcomes as a JSON string.
--- Decode only valid objects on shared copies; leave regular courses and other values alone.
+-- Course transfers and archive imports used to double-encode localized outcomes as a JSON string.
+-- Decode only strings holding a valid object; leave every other value alone.
 WITH candidates AS (
   SELECT
     "id",
@@ -9,8 +9,7 @@ WITH candidates AS (
       ELSE NULL
     END AS "outcomes"
   FROM "courses"
-  WHERE "origin_type" = 'exported'
-    AND jsonb_typeof("learning_outcomes") = 'string'
+  WHERE jsonb_typeof("learning_outcomes") = 'string'
 )
 UPDATE "courses"
 SET "learning_outcomes" = candidates."outcomes"

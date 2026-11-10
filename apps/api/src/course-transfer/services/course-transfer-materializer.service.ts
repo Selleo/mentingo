@@ -365,6 +365,8 @@ export class CourseTransferMaterializerService {
       authorMetadata: toNullableJsonbBuildObject(duplicatedCourseValues.authorMetadata),
       title: toJsonbBuildObject(targetCourse.title),
       description: toJsonbBuildObject(sourceSnapshot.course.description),
+      learningOutcomes: toJsonbBuildObject(duplicatedCourseValues.learningOutcomes),
+      durationEstimates: toJsonbBuildObject(duplicatedCourseValues.durationEstimates),
       thumbnailS3Key: getCopiedInternalReference(
         resourceCollection,
         COURSE_TRANSFER_RESOURCE_GROUPS.COURSES,

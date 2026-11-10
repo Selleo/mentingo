@@ -19,6 +19,7 @@ import {
   resources,
   users,
 } from "src/storage/schema";
+import { toJsonbBuildObject } from "src/utils/jsonb";
 
 import type {
   NativeArchiveCalendarEventInsert,
@@ -79,12 +80,13 @@ export class NativeArchiveImportRepository {
   }
 
   createCourse(values: NativeArchiveCourseInsert) {
-    const { title, description } = values;
+    const { title, description, learningOutcomes } = values;
 
     return this.db.insert(courses).values({
       ...values,
       title: buildJsonbFieldWithMultipleEntries(title),
       description: buildJsonbFieldWithMultipleEntries(description),
+      learningOutcomes: toJsonbBuildObject(learningOutcomes),
     });
   }
 
