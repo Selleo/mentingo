@@ -548,6 +548,9 @@ importers:
       prettier:
         specifier: 3.0.0
         version: 3.0.0
+      socket.io-client:
+        specifier: 4.8.0
+        version: 4.8.0
       source-map-support:
         specifier: 0.5.21
         version: 0.5.21

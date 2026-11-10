@@ -52,11 +52,16 @@ export class WsJwtGuard implements CanActivate {
         tenantId: payload.tenantId,
       };
 
+      // A queued voice packet may finish authentication after cancellation/queue overflow
+      // disconnected its socket. Never let that late guard invoke the audio handler.
+      this.assertSocketConnected(client);
+
       client.data = { ...client.data, user };
 
       await client.join(getUserRoomName(user.userId));
       await client.join(getSessionRoomName(user.sessionId));
 
+      this.assertSocketConnected(client);
       this.logger.debug(`WebSocket authenticated for user: ${user.userId}`);
 
       return true;
@@ -70,6 +75,10 @@ export class WsJwtGuard implements CanActivate {
       this.logger.debug(`WebSocket authentication failed: ${error}`);
       throw new WsException("Unauthorized: Invalid token");
     }
+  }
+
+  private assertSocketConnected(client: AuthenticatedSocket): void {
+    if (client.connected === false) throw new WsException("Unauthorized: Socket disconnected");
   }
 
   private extractToken(client: AuthenticatedSocket): string | null {
