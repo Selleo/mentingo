@@ -3,6 +3,7 @@ import {
   DASHBOARD_SCHEMA_VERSION,
   DASHBOARD_WIDGET_SIZES,
   DASHBOARD_WIDGET_TYPES,
+  LEADERBOARD_VISIBILITY,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -25,8 +26,12 @@ export const companyInformationJSONSchema = Type.Object({
 export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
   modernCourseListEnabled: Type.Boolean(),
+  publicCoursePreviewEnabled: Type.Boolean(),
   featuredCourseId: Type.Union([UUIDSchema, Type.Null()]),
   courseDiscussionsEnabled: Type.Boolean(),
+  gamificationEnabled: Type.Boolean(),
+  leaderboardsEnabled: Type.Boolean(),
+  leaderboardVisibility: Type.Enum(LEADERBOARD_VISIBILITY),
   calendarEnabled: Type.Boolean(),
   liveTrainingEnabled: Type.Boolean(),
   liveTrainingMaxParallelSessions: Type.Number({ minimum: 1 }),
@@ -42,6 +47,8 @@ export const globalSettingsJSONSchema = Type.Object({
   inviteOnlyRegistration: Type.Boolean(),
   primaryColor: Type.Union([Type.String(), Type.Null()]),
   contrastColor: Type.Union([Type.String(), Type.Null()]),
+  backgroundColor: Type.Union([Type.String(), Type.Null()]),
+  accentColor: Type.Union([Type.String(), Type.Null()]),
   unregisteredUserQAAccessibility: Type.Boolean(),
   QAEnabled: Type.Boolean(),
   unregisteredUserNewsAccessibility: Type.Boolean(),
@@ -129,3 +136,20 @@ export type UserSettingsJSONContentSchema = Static<typeof userSettingsJSONConten
 
 export type CompanyInformationSchema = Static<typeof companyInformationJSONSchema>;
 export type GlobalSettingsJSONContentSchema = Static<typeof globalSettingsJSONSchema>;
+
+export const publicStudentSettingsSchema = Type.Omit(studentSettingsJSONContentSchema, [
+  "MFASecret",
+]);
+export const publicAdminSettingsSchema = Type.Omit(adminSettingsJSONContentSchema, ["MFASecret"]);
+export const publicUserSettingsSchema = Type.Union([
+  publicStudentSettingsSchema,
+  publicAdminSettingsSchema,
+]);
+export type PublicUserSettings = Static<typeof publicUserSettingsSchema>;
+export type PublicAdminSettings = Static<typeof publicAdminSettingsSchema>;
+export function toPublicUserSettings<T extends { MFASecret: string | null }>(
+  value: T,
+): Omit<T, "MFASecret"> {
+  const { MFASecret: _secret, ...publicSettings } = value;
+  return publicSettings;
+}

@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { DEFAULT_TUS_CHUNK_SIZE } from "@repo/shared";
+import { DEFAULT_TUS_CHUNK_SIZE, SCORM_CONTENT_PATHS } from "@repo/shared";
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import bodyParser from "body-parser";
@@ -23,6 +23,7 @@ import { IntegrationModule } from "./integration/integration.module";
 import { startInstrumentation } from "./langfuse/instrumentation";
 import { McpOAuthService } from "./mcp/mcp-oauth.service";
 import { REDIS_PUBLISHER_CLIENT, REDIS_SUBSCRIBER_CLIENT, type RedisClient } from "./redis";
+import { isScormContentHost } from "./scorm/content/scorm-content.config";
 import { DB_ADMIN } from "./storage/db/db.providers";
 import { createCorsOriginOption } from "./utils/cors";
 import { Environment, environmentValidation } from "./utils/environment-validation";
@@ -30,7 +31,7 @@ import { exportSchemaToFile } from "./utils/save-swagger-to-file";
 import { setupValidation } from "./utils/setup-validation";
 import { RedisIoAdapter } from "./websocket/websocket.adapter";
 
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 
 patchNestJsSwagger();
 applyFormats();
@@ -63,12 +64,18 @@ async function bootstrap() {
 
   const dbBase = app.get(DB_ADMIN);
 
-  app.use(
-    cors({
-      origin: createCorsOriginOption(dbBase),
-      credentials: true,
-    }),
-  );
+  const appCors = cors({
+    origin: createCorsOriginOption(dbBase),
+    credentials: true,
+  });
+
+  app.use((request: Request, response: Response, next: NextFunction) => {
+    if (request.path.startsWith(SCORM_CONTENT_PATHS.PREFIX) && isScormContentHost(request))
+      return next();
+
+    return appCors(request, response, next);
+  });
+
   app.use(cookieParser());
   app.use(
     "/api/live-training/livekit/webhook",
@@ -99,7 +106,7 @@ async function bootstrap() {
     }
   });
   const jwtService = app.get(JwtService);
-  const jwtSecret = app.get(ConfigService).get<string>("jwt.secret");
+  const jwtSecret = app.get(ConfigService).getOrThrow<string>("jwt.secret");
 
   const isDevelopment =
     environmentValidation(process.env.NODE_ENV as string) === Environment.DEVELOPMENT;
@@ -137,6 +144,9 @@ async function bootstrap() {
   const redisIoAdapter = new RedisIoAdapter(app, redisPublisher, redisSubscriber);
   app.useWebSocketAdapter(redisIoAdapter);
 
-  await app.listen(3000);
+  const port = Number(process.env.PORT ?? 3000);
+  if (!Number.isInteger(port) || port < 1 || port > 65535)
+    throw new Error("PORT must be a valid TCP port");
+  await app.listen(port);
 }
 bootstrap();

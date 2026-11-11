@@ -6,6 +6,8 @@ export const clickScormIframeButtonFlow = async (page: Page, buttonTestId: strin
   await page
     .getByTestId(LEARNING_HANDLES.SCORM_IFRAME)
     .contentFrame()
+    .getByTestId(LEARNING_HANDLES.SCORM_PACKAGE_IFRAME)
+    .contentFrame()
     .getByTestId(buttonTestId)
     .click();
 };

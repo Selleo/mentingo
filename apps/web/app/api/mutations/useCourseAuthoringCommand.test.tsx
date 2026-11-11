@@ -92,4 +92,30 @@ describe("useCourseAuthoringCommand", () => {
     expect(result.current.isError).toBe(false);
     client.clear();
   });
+
+  it("refreshes the durable session after a rejected review without resending it", async () => {
+    const error = { isAxiosError: true, response: { status: 409 } };
+    vi.mocked(sendAuthoringCommand).mockRejectedValue(error);
+    vi.mocked(refreshAuthoringSession).mockReset();
+    const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(
+      () => useCourseAuthoringCommand({ courseId: "course", language: "en", sessionId: "session" }),
+      { wrapper },
+    );
+    await act(async () => {
+      await expect(
+        result.current.mutateAsync({
+          action: "proposal.accept",
+          targetId: "proposal",
+          expectedRevision: 1,
+        }),
+      ).rejects.toBe(error);
+    });
+    expect(refreshAuthoringSession).toHaveBeenCalledWith("course", "session");
+    expect(sendAuthoringCommand).toHaveBeenCalledTimes(1);
+    client.clear();
+  });
 });

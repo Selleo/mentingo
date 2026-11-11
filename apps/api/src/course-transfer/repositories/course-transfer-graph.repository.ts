@@ -319,6 +319,7 @@ export class CourseTransferGraphRepository {
           attemptLimitMode: values.attemptLimitMode,
           maximumAttempts: values.maximumAttempts,
           attemptCooldown: values.attemptCooldown,
+          timeLimitMinutes: values.timeLimitMinutes,
           feedbackMode: values.feedbackMode,
           baseLanguage: values.baseLanguage,
           availableLocales: values.availableLocales,

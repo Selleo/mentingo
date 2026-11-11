@@ -10,7 +10,12 @@ export const ThemeWrapper: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     if (isSuccess && globalSettingsData?.primaryColor && globalSettingsData?.contrastColor) {
-      setColorSchema(globalSettingsData.primaryColor, globalSettingsData.contrastColor);
+      setColorSchema({
+        primaryColor: globalSettingsData.primaryColor,
+        contrastColor: globalSettingsData.contrastColor,
+        backgroundColor: globalSettingsData.backgroundColor,
+        accentColor: globalSettingsData.accentColor,
+      });
     }
   }, [isSuccess, globalSettingsData, setColorSchema]);
 

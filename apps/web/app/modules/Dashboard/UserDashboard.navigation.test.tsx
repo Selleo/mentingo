@@ -1,4 +1,4 @@
-import { PERMISSIONS } from "@repo/shared";
+import { AUTH_SESSION_STATUS, PERMISSIONS } from "@repo/shared";
 import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { StrictMode } from "react";
 import {
@@ -25,7 +25,12 @@ import UserDashboardLayout from "./UserDashboard.layout";
 
 import type { CurrentUserResponse } from "~/api/generated-api";
 
-const mocks = vi.hoisted(() => ({ user: null as CurrentUserResponse["data"] | null }));
+type AuthSession = { status: string; setupRequired?: boolean } | null;
+
+const mocks = vi.hoisted(() => ({
+  user: null as CurrentUserResponse["data"] | null,
+  session: null as AuthSession,
+}));
 vi.mock("~/modules/Dashboard/hooks/useSyncUserAfterLogin", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./hooks/useSyncUserAfterLogin")>();
   return { useSyncUserAfterLogin: vi.fn(actual.useSyncUserAfterLogin) };
@@ -33,6 +38,9 @@ vi.mock("~/modules/Dashboard/hooks/useSyncUserAfterLogin", async (importOriginal
 vi.mock("~/api/queries/useCurrentUser", () => ({
   useCurrentUser: () => ({ data: mocks.user, isLoading: false }),
   useCurrentUserSuspense: () => ({ data: mocks.user }),
+}));
+vi.mock("~/api/queries/useAuthSession", () => ({
+  useAuthSession: () => ({ data: mocks.session, isLoading: false, isError: false }),
 }));
 vi.mock("~/api/queries/useCurrentUserSessionSuspense", () => ({
   useCurrentUserSessionSuspense: () => ({ data: mocks.user }),
@@ -42,6 +50,9 @@ vi.mock("~/api/queries/useGlobalSettings", () => ({
   useGlobalSettingsSuspense: () => ({ data: {} }),
 }));
 vi.mock("~/modules/Dashboard/Dashboard", () => ({ Dashboard: () => <Outlet /> }));
+vi.mock("~/modules/Gamification/GamificationRewardToasts", () => ({
+  GamificationRewardToasts: () => null,
+}));
 
 function Trace({ paths }: { paths: string[] }) {
   useNavigationTracker();
@@ -116,9 +127,10 @@ describe("post-auth navigation", () => {
       shouldVerifyMFA: false,
       requiresPasswordChange: false,
     } as CurrentUserResponse["data"];
+    mocks.session = { status: AUTH_SESSION_STATUS.AUTHENTICATED };
     sessionStorage.clear();
     useNavigationHistoryStore.getState().clearHistory();
-    useCurrentUserStore.setState({ currentUser: mocks.user, hasVerifiedMFA: true });
+    useCurrentUserStore.setState({ currentUser: mocks.user });
   });
 
   it("has one session synchronization owner for the protected dashboard", () => {
@@ -199,41 +211,46 @@ describe("post-auth navigation", () => {
     expect(useNavigationHistoryStore.getState().navigationHistory).toEqual([]);
   });
 
-  it.each([
-    {
-      name: "MFA",
-      shouldVerifyMFA: true,
-      requiresPasswordChange: false,
-      destination: "MFA destination",
-    },
-    {
-      name: "password change",
-      shouldVerifyMFA: false,
-      requiresPasswordChange: true,
-      destination: "Password destination",
-    },
-  ])(
-    "preserves pending history until $name completes",
-    async ({ shouldVerifyMFA, requiresPasswordChange, destination }) => {
-      Object.assign(mocks.user!, { shouldVerifyMFA, requiresPasswordChange });
-      useCurrentUserStore.setState({ hasVerifiedMFA: false });
-      save("/course/intro?language=pl");
-      const paths: string[] = [];
-      const view = render(router(paths));
-      await waitFor(() => expect(view.getByText(destination)).toBeInTheDocument());
-      expect(paths).not.toContain("/course/intro?language=pl");
-      expect(useNavigationHistoryStore.getState().navigationHistory[0]?.pathname).toBe(
-        "/course/intro?language=pl",
-      );
-      view.unmount();
+  it("preserves pending history until MFA completes", async () => {
+    const user = mocks.user;
+    mocks.user = null;
+    mocks.session = { status: AUTH_SESSION_STATUS.MFA_REQUIRED, setupRequired: false };
+    useCurrentUserStore.setState({ currentUser: undefined });
+    save("/course/intro?language=pl");
+    const paths: string[] = [];
+    const view = render(router(paths));
+    await waitFor(() => expect(view.getByText("MFA destination")).toBeInTheDocument());
+    expect(paths).not.toContain("/course/intro?language=pl");
+    expect(useNavigationHistoryStore.getState().navigationHistory[0]?.pathname).toBe(
+      "/course/intro?language=pl",
+    );
+    view.unmount();
 
-      Object.assign(mocks.user!, { requiresPasswordChange: false });
-      act(() => useCurrentUserStore.setState({ hasVerifiedMFA: true }));
-      const next = render(router([]));
-      await waitFor(() => expect(next.getByText("Course destination")).toBeInTheDocument());
-      expect(useNavigationHistoryStore.getState().navigationHistory).toEqual([]);
-    },
-  );
+    mocks.user = user;
+    mocks.session = { status: AUTH_SESSION_STATUS.AUTHENTICATED };
+    act(() => useCurrentUserStore.setState({ currentUser: user ?? undefined }));
+    const next = render(router([]));
+    await waitFor(() => expect(next.getByText("Course destination")).toBeInTheDocument());
+    expect(useNavigationHistoryStore.getState().navigationHistory).toEqual([]);
+  });
+
+  it("preserves pending history until password change completes", async () => {
+    Object.assign(mocks.user ?? {}, { requiresPasswordChange: true });
+    save("/course/intro?language=pl");
+    const paths: string[] = [];
+    const view = render(router(paths));
+    await waitFor(() => expect(view.getByText("Password destination")).toBeInTheDocument());
+    expect(paths).not.toContain("/course/intro?language=pl");
+    expect(useNavigationHistoryStore.getState().navigationHistory[0]?.pathname).toBe(
+      "/course/intro?language=pl",
+    );
+    view.unmount();
+
+    Object.assign(mocks.user ?? {}, { requiresPasswordChange: false });
+    const next = render(router([]));
+    await waitFor(() => expect(next.getByText("Course destination")).toBeInTheDocument());
+    expect(useNavigationHistoryStore.getState().navigationHistory).toEqual([]);
+  });
 
   it("records the full anonymous destination before showing login", async () => {
     mocks.user = null;

@@ -44,6 +44,40 @@ const retryAssetTask: AssetTaskView = {
 };
 
 describe("AuthoringActivityRail asset decisions", () => {
+  it("counts paginated source reads as one activity in Live work", async () => {
+    const user = userEvent.setup();
+    renderWith().render(
+      <AuthoringActivityRail
+        compact
+        tasks={[]}
+        tools={Array.from({ length: 20 }, (_, index) => ({
+          taskId: "plan",
+          sequence: index + 1,
+          tool: {
+            toolCallId: `read-${index}`,
+            toolName: "read_selected_sources",
+            display: "Selected file evidence loaded",
+            status: "completed" as const,
+            result: null,
+          },
+        }))}
+        questions={[]}
+        assetTasks={[]}
+        applications={[]}
+        connection="live"
+        onRetry={vi.fn()}
+        onStopRequest={vi.fn()}
+        onAnswer={vi.fn()}
+        onAssetAction={vi.fn()}
+        onSkipAsset={vi.fn()}
+      />,
+    );
+    const liveWork = screen.getByRole("button", { name: /Live work/ });
+    expect(liveWork).toHaveTextContent("1 of 1 complete");
+    await user.click(liveWork);
+    expect(screen.getAllByText("Selected file evidence loaded")).toHaveLength(1);
+  });
+
   it("explains paid retry approval in Polish while retaining the provider message in Details", async () => {
     await i18next.changeLanguage("pl");
     try {
@@ -88,7 +122,7 @@ describe("AuthoringActivityRail asset decisions", () => {
             request: {
               ...assetTask.request,
               altText: longTitle,
-              source: { ...assetTask.request.source, content: prompt },
+              source: { type: "generated", visualQuery: "safety", content: prompt },
             },
           },
         ]}

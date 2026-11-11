@@ -16,6 +16,12 @@ const validBaseData = {
 };
 
 describe("makeRegisterSchema", () => {
+  it.each(["firstName", "lastName"])("limits %s to 64 characters", (field) => {
+    const schema = makeRegisterSchema(t, undefined, []);
+    expect(schema.safeParse({ ...validBaseData, [field]: "é".repeat(64) }).success).toBe(true);
+    expect(schema.safeParse({ ...validBaseData, [field]: "é".repeat(65) }).success).toBe(false);
+  });
+
   it("validates required checkboxes even when age limit is not configured", () => {
     const schema = makeRegisterSchema(t, undefined, ["consent-1"]);
 

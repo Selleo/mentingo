@@ -455,10 +455,24 @@ function renderContentLesson(container: HTMLElement, lesson: ContentLesson) {
   container.append(renderTitle(lesson.title), renderHtmlContent(lesson.html));
 }
 
+function toHttpsUrl(value: string): URL | null {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 function renderEmbedLesson(container: HTMLElement, lesson: EmbedLesson, complete: () => void) {
   container.append(renderTitle(lesson.title));
+  const embedUrl = toHttpsUrl(lesson.url);
+  if (!embedUrl) {
+    complete();
+    return;
+  }
   const frame = element("iframe", "embed-frame") as HTMLIFrameElement;
-  frame.src = lesson.url;
+  frame.src = embedUrl.href;
   frame.title = lesson.title;
   frame.loading = "eager";
   frame.referrerPolicy = "no-referrer-when-downgrade";

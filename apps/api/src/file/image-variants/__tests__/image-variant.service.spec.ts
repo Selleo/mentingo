@@ -81,7 +81,8 @@ describe("ImageVariantService", () => {
 
     expect(uploadByKey.has(result?.referenceKey ?? "")).toBe(false);
 
-    for (const { quality, width } of IMAGE_VARIANT_DEFINITIONS) {
+    for (const { quality, width: variantWidth } of IMAGE_VARIANT_DEFINITIONS) {
+      const width = Math.min(variantWidth, 100);
       const variant = result?.metadata.variants[quality];
       expect(variant?.key).toBe(`${result?.referenceKey.replace(".webp", "")}-${quality}.webp`);
       expect(variant?.width).toBe(width);

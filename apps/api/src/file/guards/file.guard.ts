@@ -1,6 +1,15 @@
 import { BadRequestException } from "@nestjs/common";
-import { Jimp } from "jimp";
-import { loadEsm } from "load-esm";
+import sharp from "sharp";
+
+import {
+  UPLOAD_ERROR_KEYS,
+  fileTooLargeException,
+  imageAspectRatioMismatchException,
+  imageResolutionTooLargeException,
+} from "../utils/uploadErrors";
+import { detectFileType } from "../validation/detectFileType";
+import { getDeclaredUpload, normalizeUploadedFile } from "../validation/normalizeUploadedFile";
+import { UPLOAD_CONTENT_SOURCE } from "../validation/upload-validation.constants";
 
 export type FileValidationOptions = {
   allowedTypes: readonly string[];
@@ -15,43 +24,37 @@ export type FileValidationOptions = {
 
 export class FileGuard {
   static async validateFile(file: Express.Multer.File, options: FileValidationOptions) {
-    const resolvedType = await this.getFileType(file);
-    const resolvedMime = this.normalizeMime(resolvedType?.mime ?? file.mimetype);
-    const fileMime = this.normalizeMime(file.mimetype);
-
     if (!file.originalname || !file.buffer || file.buffer.length === 0) {
       throw new BadRequestException("files.toast.invalidData");
     }
 
-    if (resolvedType?.mime && fileMime && resolvedMime !== fileMime) {
+    this.validateSize(file, Math.max(options.maxSize, options.maxVideoSize ?? 0));
+
+    const verified = await normalizeUploadedFile(file).catch(() => {
+      throw new BadRequestException(UPLOAD_ERROR_KEYS.INVALID_TYPE);
+    });
+
+    const declaredMime = this.normalizeMime(getDeclaredUpload(file).mimetype);
+
+    if (
+      verified.source === UPLOAD_CONTENT_SOURCE.BINARY &&
+      declaredMime &&
+      declaredMime !== verified.sourceMime
+    ) {
       throw new BadRequestException("files.toast.contentTypeMismatch");
     }
 
-    if (!resolvedMime || !options.allowedTypes.includes(resolvedMime)) {
-      throw new BadRequestException(
-        `File type ${
-          resolvedMime || "unknown"
-        } is not allowed. Allowed types are: ${options.allowedTypes.join(", ")}`,
-      );
+    if (!options.allowedTypes.includes(verified.sourceMime)) {
+      throw new BadRequestException(UPLOAD_ERROR_KEYS.INVALID_TYPE);
     }
 
-    const isVideo = resolvedType?.mime.startsWith("video/");
+    const isVideo = verified.sourceMime.startsWith("video/");
     const maxSize = isVideo && options.maxVideoSize ? options.maxVideoSize : options.maxSize;
     const size = this.validateSize(file, maxSize);
-
-    let resolution = null;
-    let aspectRatio = null;
-
-    if (options?.maxResolution !== undefined) {
-      resolution = await this.validateImageResolution(file, options.maxResolution);
-    }
-
-    if (options?.aspectRatio !== undefined) {
-      aspectRatio = await this.validateImageAspectRatio(file, options.aspectRatio);
-    }
+    const { resolution, aspectRatio } = await this.validateImageConstraints(file, options);
 
     return {
-      type: { mime: resolvedType?.mime, ext: resolvedType?.ext },
+      type: { mime: verified.mime, ext: verified.extension },
       size,
       resolution,
       aspectRatio,
@@ -59,12 +62,38 @@ export class FileGuard {
   }
 
   static async getFileType(file: Express.Multer.File | Buffer) {
-    // Resolve the API dependency through an explicit export supported by Node and Jest.
-    const { fileTypeFromBuffer } = await loadEsm<typeof import("file-type")>(
-      require.resolve("file-type/node"),
-    );
+    return detectFileType(file instanceof Buffer ? file : file.buffer);
+  }
 
-    return fileTypeFromBuffer(file instanceof Buffer ? file : file.buffer);
+  static validateSize(file: Express.Multer.File, maxSize: number) {
+    if (!file.size) throw new BadRequestException(UPLOAD_ERROR_KEYS.EMPTY);
+    if (file.size > maxSize) throw fileTooLargeException(maxSize);
+
+    return file.size;
+  }
+
+  static async validateImageConstraints(
+    file: Express.Multer.File,
+    { maxResolution, aspectRatio }: Pick<FileValidationOptions, "maxResolution" | "aspectRatio">,
+  ) {
+    if (!maxResolution && aspectRatio === undefined) {
+      return { resolution: null, aspectRatio: null };
+    }
+
+    const { width, height } = await this.getImageDimensions(file);
+
+    if (maxResolution && (width > maxResolution.width || height > maxResolution.height)) {
+      throw imageResolutionTooLargeException(maxResolution);
+    }
+
+    if (aspectRatio !== undefined && (width / height).toFixed(2) !== aspectRatio.toFixed(2)) {
+      throw imageAspectRatioMismatchException(aspectRatio);
+    }
+
+    return {
+      resolution: maxResolution ? { width, height } : null,
+      aspectRatio: aspectRatio ?? null,
+    };
   }
 
   private static normalizeMime(mime?: string) {
@@ -73,47 +102,13 @@ export class FileGuard {
     return mime;
   }
 
-  static validateSize(file: Express.Multer.File, maxSize: number) {
-    if (!file.size || file.size > maxSize) {
-      throw new BadRequestException(
-        `File size exceeds the maximum allowed size of ${maxSize} bytes`,
-      );
-    }
+  private static async getImageDimensions(file: Express.Multer.File) {
+    const { width, height } = await sharp(file.buffer)
+      .metadata()
+      .catch(() => ({ width: undefined, height: undefined }));
 
-    return file.size;
-  }
-
-  private static async validateImageResolution(
-    file: Express.Multer.File,
-    maxResolution: {
-      width: number;
-      height: number;
-    },
-  ) {
-    const {
-      bitmap: { width, height },
-    } = await Jimp.read(file.buffer);
-
-    if (width > maxResolution.width || height > maxResolution.height) {
-      throw new BadRequestException(
-        `Image size exceeds the maximum allowed resolution of ${maxResolution.width}x${maxResolution.height}`,
-      );
-    }
+    if (!width || !height) throw new BadRequestException(UPLOAD_ERROR_KEYS.INVALID_TYPE);
 
     return { width, height };
-  }
-
-  private static async validateImageAspectRatio(file: Express.Multer.File, aspectRatio: number) {
-    const {
-      bitmap: { width, height },
-    } = await Jimp.read(file.buffer);
-
-    if ((width / height).toFixed(2) !== aspectRatio.toFixed(2)) {
-      throw new BadRequestException(
-        `Image aspect ratio is different than the allowed aspect ratio of ${aspectRatio.toFixed()}/1`,
-      );
-    }
-
-    return aspectRatio;
   }
 }

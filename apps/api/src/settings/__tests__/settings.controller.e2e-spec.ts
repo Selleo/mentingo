@@ -647,6 +647,109 @@ describe("SettingsController (e2e)", () => {
       });
     });
 
+    describe("PATCH /api/settings/admin/leaderboards", () => {
+      const LEADERBOARDS_URL = "/api/settings/admin/leaderboards";
+      let adminCookies: string;
+
+      const getGlobalSettings = async () =>
+        (await request(app.getHttpServer()).get("/api/settings/global").expect(200)).body.data;
+
+      beforeEach(async () => {
+        const adminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withAdminSettings(db)
+          .create();
+
+        adminCookies = await cookieFor(adminUser, app);
+      });
+
+      it("should default to disabled, closed leaderboards", async () => {
+        expect(await getGlobalSettings()).toMatchObject({
+          leaderboardsEnabled: false,
+          leaderboardVisibility: "closed",
+        });
+
+        // Tenants created before the feature have no stored keys and fall back to the same defaults.
+        await db
+          .update(settings)
+          .set({
+            settings: sql`${settings.settings} - 'leaderboardsEnabled' - 'leaderboardVisibility'`,
+          })
+          .where(isNull(settings.userId));
+
+        expect(await getGlobalSettings()).toMatchObject({
+          leaderboardsEnabled: false,
+          leaderboardVisibility: "closed",
+        });
+      });
+
+      it("should keep the visibility when only enabling leaderboards", async () => {
+        await request(app.getHttpServer())
+          .patch(LEADERBOARDS_URL)
+          .set("Cookie", adminCookies)
+          .send({ leaderboardVisibility: "public" })
+          .expect(200);
+
+        const response = await request(app.getHttpServer())
+          .patch(LEADERBOARDS_URL)
+          .set("Cookie", adminCookies)
+          .send({ leaderboardsEnabled: true })
+          .expect(200);
+
+        expect(response.body.data).toMatchObject({
+          leaderboardsEnabled: true,
+          leaderboardVisibility: "public",
+        });
+        expect(await getGlobalSettings()).toMatchObject({
+          leaderboardsEnabled: true,
+          leaderboardVisibility: "public",
+        });
+      });
+
+      it("should return 400 for an invalid visibility", async () => {
+        await request(app.getHttpServer())
+          .patch(LEADERBOARDS_URL)
+          .set("Cookie", adminCookies)
+          .send({ leaderboardVisibility: "everyone" })
+          .expect(400);
+
+        expect((await getGlobalSettings()).leaderboardVisibility).toBe("closed");
+      });
+
+      it("should return 400 for unknown keys without changing other global settings", async () => {
+        for (const body of [
+          { leaderboardsEnabled: true, gamificationEnabled: true },
+          { leaderboardsEnabled: true, foo: "bar" },
+        ]) {
+          await request(app.getHttpServer())
+            .patch(LEADERBOARDS_URL)
+            .set("Cookie", adminCookies)
+            .send(body)
+            .expect(400);
+        }
+
+        expect(await getGlobalSettings()).toMatchObject({
+          gamificationEnabled: false,
+          leaderboardsEnabled: false,
+        });
+      });
+
+      it("should return 403 if user is not an admin", async () => {
+        const nonAdminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withUserSettings(db)
+          .create();
+
+        await request(app.getHttpServer())
+          .patch(LEADERBOARDS_URL)
+          .set("Cookie", await cookieFor(nonAdminUser, app))
+          .send({ leaderboardsEnabled: true })
+          .expect(403);
+
+        expect((await getGlobalSettings()).leaderboardsEnabled).toBe(false);
+      });
+    });
+
     describe("PATCH /api/settings/admin/enforce-sso", () => {
       let adminUser: UserWithCredentials;
       let adminCookies: string;

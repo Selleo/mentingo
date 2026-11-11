@@ -22,6 +22,7 @@ export class PermissionsBackfillService {
     [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
     [SYSTEM_ROLE_SLUGS.TRAINER]: "Trainer",
     [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: "Group Manager",
+    [SYSTEM_ROLE_SLUGS.REVIEWER]: "Reviewer",
     [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
   };
 

@@ -1,4 +1,4 @@
-import { act, screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -15,6 +15,7 @@ const state = vi.hoisted(() => ({
   questionCapability: "web_search",
   questionAnswer: "allow",
   accepted: false,
+  proposalRevision: 1,
   outlineOnly: false,
   groupedReview: false,
   additionalRequestProposals: 0,
@@ -22,6 +23,7 @@ const state = vi.hoisted(() => ({
     taskId: string;
     requestId: string;
     kind: string;
+    phase?: string;
     status: string;
     errorCode: null;
     outputId: null;
@@ -59,7 +61,7 @@ vi.mock("./hooks/useCourseAuthoringSession", () => ({
         payload: {
           id: "content-proposal",
           ...(state.groupedReview ? { taskId: "task-1" } : {}),
-          revision: 1,
+          revision: state.proposalRevision,
           summary: "Add the content lesson",
           assetRequests: state.assetRequests,
           assetIds: state.assetRequests.map((asset) => asset.assetId),
@@ -188,7 +190,7 @@ vi.mock("./hooks/useCourseAuthoringSession", () => ({
                   outputId: `lesson-proposal-${index}`,
                 })),
               ]
-            : [],
+            : state.siblingTasks,
         },
         isError: false,
       },
@@ -380,6 +382,7 @@ vi.mock("./components/ProposalReview", () => ({
 
 describe("CourseGenerationSession proposal decisions", () => {
   beforeEach(() => {
+    state.proposalRevision = 1;
     state.questionCapability = "web_search";
     state.questionAnswer = "allow";
     state.assetRequests = [];
@@ -876,6 +879,66 @@ describe("CourseGenerationSession proposal decisions", () => {
     expect(state.commandCalls).toHaveLength(0);
   });
 
+  it("retries an open review using the current accepted decision without accepting twice", async () => {
+    state.groupedReview = true;
+    const preview = vi.fn();
+    const element = () => (
+      <CourseGenerationSession
+        courseId="course"
+        language="en"
+        sessionId="session"
+        embedded
+        onPreviewProposalInCurriculum={preview}
+      />
+    );
+    const rendered = renderWith().render(element());
+    await userEvent
+      .setup()
+      .click(await screen.findByRole("button", { name: "Review grouped changes" }));
+    const actions = preview.mock.calls[0]?.[1] as CurriculumPreviewActions;
+    state.accepted = true;
+    rendered.rerender(element());
+    await act(async () => {
+      await actions.applyReview?.({
+        acceptedProposalIds: ["content-proposal"],
+        rejectedProposalIds: [],
+        acknowledgeAssessmentChanges: false,
+      });
+    });
+    expect(state.commandCalls).toHaveLength(0);
+    expect(state.applyCalls).toHaveLength(1);
+  });
+
+  it("requires another review when an open preview's proposal revision changes", async () => {
+    state.groupedReview = true;
+    const preview = vi.fn();
+    const element = () => (
+      <CourseGenerationSession
+        courseId="course"
+        language="en"
+        sessionId="session"
+        embedded
+        onPreviewProposalInCurriculum={preview}
+      />
+    );
+    const rendered = renderWith().render(element());
+    await userEvent
+      .setup()
+      .click(await screen.findByRole("button", { name: "Review grouped changes" }));
+    const actions = preview.mock.calls[0]?.[1] as CurriculumPreviewActions;
+    state.proposalRevision = 2;
+    rendered.rerender(element());
+    await expect(
+      actions.applyReview?.({
+        acceptedProposalIds: ["content-proposal"],
+        rejectedProposalIds: [],
+        acknowledgeAssessmentChanges: false,
+      }),
+    ).rejects.toThrow();
+    expect(state.commandCalls).toHaveLength(0);
+    expect(state.applyCalls).toHaveLength(0);
+  });
+
   it("submits staged proposal feedback in one batch command with revision fencing", async () => {
     state.groupedReview = true;
     state.applicationResult = { exportId: "earlier-export", status: "applied" };
@@ -987,6 +1050,77 @@ describe("CourseGenerationSession proposal decisions", () => {
       }
     },
   );
+
+  it("keeps attachment OCR on the chip without failed status or live agent work", () => {
+    state.renderWork = true;
+    state.sourceRecords = [
+      {
+        id: "image-record",
+        kind: "source",
+        payload: {
+          sourceVersionId: "image-source",
+          taskId: "image-ingest",
+          filename: "cover.jpg",
+          mediaType: "image/jpeg",
+          status: "partial",
+          vision: { total: 1, pending: 1 },
+          sections: [{ id: "image", kind: "visual", sequence: 0, status: "unprocessed" }],
+        },
+      },
+    ];
+    state.sourceSelection = {
+      sourceVersionIds: ["image-source"],
+      webEnabled: false,
+      generalKnowledgeEnabled: false,
+      researchDepth: "standard",
+      requiredSectionIds: [],
+      excludedSectionIds: [],
+    };
+    state.siblingTasks = [
+      {
+        taskId: "image-ingest",
+        requestId: "image-upload",
+        kind: "source",
+        status: "succeeded",
+        errorCode: null,
+        outputId: null,
+      },
+      {
+        taskId: "image-vision",
+        requestId: "image-upload",
+        kind: "source_vision",
+        phase: "source_working",
+        status: "running",
+        errorCode: null,
+        outputId: null,
+      },
+    ];
+    const view = renderWith().render(
+      <CourseGenerationSession courseId="course" language="en" sessionId="session" embedded />,
+    );
+
+    const chips = screen.getByTestId("course-authoring-composer-attachments");
+    expect(within(chips).getByText("Processing")).toBeVisible();
+    expect(within(chips).queryByText("Failed")).not.toBeInTheDocument();
+    expect(screen.queryByText("Live work")).not.toBeInTheDocument();
+    expect(screen.queryByText("Searching sources…")).not.toBeInTheDocument();
+
+    state.sourceRecords[0].payload = {
+      ...state.sourceRecords[0].payload,
+      status: "ready",
+      vision: { total: 1, pending: 0 },
+      sections: [{ id: "image", kind: "visual", sequence: 0, status: "ready" }],
+    };
+    state.siblingTasks = state.siblingTasks.map((task) => ({ ...task, status: "succeeded" }));
+    view.rerender(
+      <CourseGenerationSession courseId="course" language="en" sessionId="session" embedded />,
+    );
+
+    expect(screen.queryByText("Processing")).not.toBeInTheDocument();
+    expect(screen.queryByText("Failed")).not.toBeInTheDocument();
+    expect(screen.queryByText("Live work")).not.toBeInTheDocument();
+    expect(screen.queryByText("Searching sources…")).not.toBeInTheDocument();
+  });
 
   it("does not auto-select a removed source when the session inventory changes", async () => {
     state.sourceRecords = [

@@ -19,6 +19,7 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
           type: z.nativeEnum(QuestionType),
           description: z.optional(z.string()),
           photoS3Key: z.optional(z.string()),
+          requiresReview: z.optional(z.boolean()),
           displayOrder: z.number(),
           thumbnailS3: z.optional(
             z.object({

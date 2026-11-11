@@ -1,3 +1,7 @@
+import {
+  ALLOWED_SCORM_PACKAGE_FILE_EXTENSIONS,
+  ALLOWED_SCORM_PACKAGE_MIME_TYPES,
+} from "@repo/shared";
 import { FileArchive, Info, Replace, Trash2, UploadCloud } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { useTranslation } from "react-i18next";
@@ -68,10 +72,12 @@ export const ScormPackageUploadField = ({
   const EmptyIcon = PackageIcon ?? UploadCloud;
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
-    accept: {
-      "application/zip": [".zip"],
-      "application/x-zip-compressed": [".zip"],
-    },
+    accept: Object.fromEntries(
+      ALLOWED_SCORM_PACKAGE_MIME_TYPES.map((type) => [
+        type,
+        [...ALLOWED_SCORM_PACKAGE_FILE_EXTENSIONS],
+      ]),
+    ),
     multiple: false,
     disabled,
     noClick: Boolean(file) || disabled,

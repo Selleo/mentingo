@@ -20,20 +20,39 @@ import {
 } from "../../flows/reports/save-report-configuration.flow";
 import { selectReportSubjectFlow } from "../../flows/reports/select-report-subject.flow";
 
-test("reports render results, reset, switch subjects, filter nested groups, save and download", async ({
-  withReadonlyPage,
-}) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
-    const reportsApi = await mockReportsApiFlow(page);
-    const lastSubmittedQuery = () => reportsApi.submittedQueries.at(-1);
+import type { Page } from "@playwright/test";
 
-    await openReportsPageFlow(page);
+const LEARNER_SUBJECT = {
+  tab: /Learner progress/,
+  subjectLabel: "Learner",
+  subjectName: "Mina Shah",
+};
+
+const openMockedReportsPage = async (page: Page) => {
+  const reportsApi = await mockReportsApiFlow(page);
+  const lastSubmittedQuery = () => reportsApi.submittedQueries.at(-1);
+
+  await openReportsPageFlow(page);
+
+  return { reportsApi, lastSubmittedQuery };
+};
+
+test("reports render learner results", async ({ withReadonlyPage }) => {
+  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    await openMockedReportsPage(page);
+
     const learnerRow = page.getByRole("row").filter({ hasText: "Mina Shah" });
     await expect(learnerRow).toContainText("Security Essentials");
     await expect(learnerRow).toContainText("Customer journey");
     await expect(learnerRow).toContainText("87%");
     await expect(learnerRow).toContainText("2026");
     await expect(page.getByText("1", { exact: true }).first()).toBeVisible();
+  });
+});
+
+test("reports filter by learner condition and nested groups", async ({ withReadonlyPage }) => {
+  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    const { lastSubmittedQuery } = await openMockedReportsPage(page);
 
     await openReportFiltersFlow(page);
     await addReportConditionFlow(page);
@@ -84,6 +103,14 @@ test("reports render results, reset, switch subjects, filter nested groups, save
         ],
       },
     });
+  });
+});
+
+test("reports switch between course, development path and learner subjects", async ({
+  withReadonlyPage,
+}) => {
+  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    const { lastSubmittedQuery } = await openMockedReportsPage(page);
 
     await selectReportSubjectFlow(page, {
       tab: /Course performance/,
@@ -108,15 +135,18 @@ test("reports render results, reset, switch subjects, filter nested groups, save
       .poll(lastSubmittedQuery)
       .toMatchObject({ view: "developmentPaths", subjectId: REPORTS_IDS.path });
 
-    await selectReportSubjectFlow(page, {
-      tab: /Learner progress/,
-      subjectLabel: "Learner",
-      subjectName: "Mina Shah",
-    });
+    await selectReportSubjectFlow(page, LEARNER_SUBJECT);
     await expect(page.locator("h2").filter({ hasText: "Mina Shah" })).toBeVisible();
     await expect
       .poll(lastSubmittedQuery)
       .toMatchObject({ view: "learner", subjectId: REPORTS_IDS.learner });
+  });
+});
+
+test("reports save a configuration and download the spreadsheet", async ({ withReadonlyPage }) => {
+  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    const { reportsApi } = await openMockedReportsPage(page);
+    await selectReportSubjectFlow(page, LEARNER_SUBJECT);
 
     await saveReportConfigurationFlow(page, "Quarterly learner review");
     await openSavedReportConfigurationsFlow(page);
@@ -134,11 +164,23 @@ test("reports render results, reset, switch subjects, filter nested groups, save
       query: { view: "learner", subjectId: REPORTS_IDS.learner, page: 1, pageSize: 100 },
     });
     expect(download.suggestedFilename()).toBe("mentingo-report.xlsx");
+  });
+});
+
+test("reports reset filters while keeping the selected subject", async ({ withReadonlyPage }) => {
+  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    const { lastSubmittedQuery } = await openMockedReportsPage(page);
+    await selectReportSubjectFlow(page, LEARNER_SUBJECT);
+    await openReportFiltersFlow(page);
+    await addReportConditionFlow(page);
+    await applyReportFlow(page);
+    await expect
+      .poll(lastSubmittedQuery)
+      .toMatchObject({ filter: { match: "all", rules: [{ field: "status", operator: "eq" }] } });
 
     await resetReportFlow(page);
     await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveText(/0.*30/);
-    await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeEnabled();
-    await applyReportFlow(page);
+    await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeDisabled();
     await expect
       .poll(() => {
         const config = new URL(page.url()).searchParams.get("reportConfig");
@@ -158,9 +200,17 @@ test("reports render results, reset, switch subjects, filter nested groups, save
     await expect
       .poll(lastSubmittedQuery)
       .toMatchObject({ filter: { match: "all", rules: [{ field: "status", operator: "eq" }] } });
+  });
+});
 
+test("reports recover from a saved configuration with inaccessible references", async ({
+  withReadonlyPage,
+}) => {
+  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    const { reportsApi, lastSubmittedQuery } = await openMockedReportsPage(page);
     reportsApi.savedConfigurations.push(REPORTS_INACCESSIBLE_CONFIGURATION);
     await page.reload();
+
     await openSavedReportConfigurationsFlow(page);
     await page.getByRole("button", { name: /Inaccessible course filter Personal/ }).click();
     await expect(page.getByRole("alert")).toContainText("no longer access");

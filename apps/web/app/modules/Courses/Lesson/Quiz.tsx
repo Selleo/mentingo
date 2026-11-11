@@ -9,6 +9,7 @@ import { courseQueryOptions, lessonQueryOptions } from "~/api/queries";
 import { certificatesQueryOptions } from "~/api/queries/useCertificates";
 import { queryClient } from "~/api/queryClient";
 import { invalidateLearningPathProgressionData } from "~/api/utils/invalidateLearningPathProgressionData";
+import { ProgressBadge } from "~/components/Badges/ProgressBadge";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import {
@@ -59,7 +60,9 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
     [lesson.quizDetails?.questions],
   );
   const [isRetakingQuiz, setIsRetakingQuiz] = useState(false);
-  const isUserSubmittedAnswer = Boolean(lesson.lessonCompleted) && !isRetakingQuiz;
+  const isAwaitingReview = Boolean(lesson.isQuizAwaitingReview);
+  const isUserSubmittedAnswer =
+    (Boolean(lesson.lessonCompleted) || isAwaitingReview) && !isRetakingQuiz;
 
   const methods = useForm<QuizForm>({
     mode: "onSubmit",
@@ -107,6 +110,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
   if (!questions.length) return null;
 
   const handleOnSubmit = async (data: QuizForm) => {
+    if (isPreviewMode) return;
     const parsedQuestionsAnswers = parseQuizFormData(data);
 
     submitQuiz.mutate({
@@ -118,6 +122,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
   };
 
   const handleRetake = () => {
+    if (isPreviewMode) return;
     retakeQuiz.mutate(lesson.learningStateId);
   };
 
@@ -128,6 +133,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
       <QuizContextProvider
         isQuizFeedbackRedacted={lesson.isQuizFeedbackRedacted}
         isQuizSubmitted={isUserSubmittedAnswer}
+        isQuizAwaitingReview={isAwaitingReview}
       >
         <form
           data-testid={LEARNING_HANDLES.QUIZ_FORM}
@@ -142,13 +148,31 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
           {!isPreviewMode && (
             <div className="flex w-full justify-between">
               <span className="group relative">
-                <span data-testid={LEARNING_HANDLES.QUIZ_SCORE}>
-                  {t("studentLessonView.other.score", {
-                    score: lesson.quizDetails?.score ?? 0,
-                    correct: lesson.quizDetails?.correctAnswerCount ?? 0,
-                    questionsNumber: questions.length,
-                  })}
-                </span>
+                {isAwaitingReview ? (
+                  <span className="flex items-center gap-x-2">
+                    <span data-testid={LEARNING_HANDLES.QUIZ_AWAITING_REVIEW}>
+                      <ProgressBadge progress="awaitingReview" />
+                    </span>
+                    {!lesson.isQuizFeedbackRedacted && (
+                      <span data-testid={LEARNING_HANDLES.QUIZ_PARTIAL_SCORE}>
+                        {t("studentLessonView.other.partialScore", {
+                          correct: lesson.quizDetails?.correctAnswerCount ?? 0,
+                          graded:
+                            (lesson.quizDetails?.correctAnswerCount ?? 0) +
+                            (lesson.quizDetails?.wrongAnswerCount ?? 0),
+                        })}
+                      </span>
+                    )}
+                  </span>
+                ) : (
+                  <span data-testid={LEARNING_HANDLES.QUIZ_SCORE}>
+                    {t("studentLessonView.other.score", {
+                      score: lesson.quizDetails?.score ?? 0,
+                      correct: lesson.quizDetails?.correctAnswerCount ?? 0,
+                      questionsNumber: questions.length,
+                    })}
+                  </span>
+                )}
               </span>
               <span data-testid={LEARNING_HANDLES.QUIZ_PASSING_THRESHOLD}>
                 {t("studentLessonView.other.passingThreshold", {
@@ -160,11 +184,13 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
             </div>
           )}
 
-          <Questions
-            questions={questions}
-            isQuizCompleted={isUserSubmittedAnswer}
-            lessonId={lesson.id}
-          />
+          <fieldset disabled={isPreviewMode} className="flex flex-col gap-y-4">
+            <Questions
+              questions={questions}
+              isQuizCompleted={isUserSubmittedAnswer}
+              lessonId={lesson.id}
+            />
+          </fieldset>
           {!isPreviewMode && (
             <div className="flex gap-x-2 self-end">
               <div className="group relative">
@@ -178,7 +204,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
                           type="button"
                           onClick={handleRetake}
                           className="gap-x-1"
-                          disabled={!isUserSubmittedAnswer || !canRetake}
+                          disabled={!isUserSubmittedAnswer || !canRetake || isAwaitingReview}
                         >
                           <span>
                             {`${t("studentLessonView.button.retake")} ${leftAttemptsToDisplay(
@@ -196,12 +222,14 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
                       align="center"
                       className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
                     >
-                      {getQuizTooltipText(
-                        isUserSubmittedAnswer,
-                        canRetake,
-                        hoursLeft,
-                        lesson.quizCooldownInHours,
-                      )}
+                      {isAwaitingReview
+                        ? t("studentLessonView.tooltip.awaitingReview")
+                        : getQuizTooltipText(
+                            isUserSubmittedAnswer,
+                            canRetake,
+                            hoursLeft,
+                            lesson.quizCooldownInHours,
+                          )}
                       <TooltipArrow className="fill-black" />
                     </TooltipContent>
                   </Tooltip>

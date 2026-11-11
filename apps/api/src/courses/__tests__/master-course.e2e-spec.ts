@@ -60,6 +60,7 @@ import {
   resources,
   tenants,
 } from "src/storage/schema";
+import { toJsonbBuildObject } from "src/utils/jsonb";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -70,6 +71,13 @@ import { createUserFactory } from "../../../test/factory/user.factory";
 import { DEFAULT_TEST_TENANT_HOST } from "../../../test/helpers/tenant-helpers";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 import { waitForOutbox } from "../../../test/helpers/wait-for-outbox";
+
+import {
+  JSONB_TYPES,
+  SHARED_LEARNING_OUTCOME_LANGUAGES,
+  SOURCE_LEARNING_OUTCOMES,
+  UPDATED_LEARNING_OUTCOMES,
+} from "./master-course.scenarios";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
@@ -373,10 +381,7 @@ describe("Master course export and sync (e2e)", () => {
             en: "Master Source Description",
             pl: "Opis kursu zrodlowego master",
           }),
-          learningOutcomes: {
-            en: ["Understand the source course"],
-            pl: ["Zrozumiec kurs zrodlowy"],
-          },
+          learningOutcomes: toJsonbBuildObject(SOURCE_LEARNING_OUTCOMES),
           authorMetadata: {
             authorId: sourceAdmin.id,
             firstName: sourceAdmin.firstName,
@@ -524,6 +529,32 @@ describe("Master course export and sync (e2e)", () => {
     };
   };
 
+  const getCourseDetails = async (
+    courseId: string,
+    language: string,
+    cookie: string[],
+    host: string,
+  ) => {
+    const response = await withTenantHost(
+      request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: courseId, language })
+        .set("Cookie", cookie),
+      host,
+    ).expect(200);
+
+    return response.body.data;
+  };
+
+  const selectStoredLearningOutcomes = (courseIds: string[]) =>
+    baseDb
+      .select({
+        kind: sql<string>`jsonb_typeof(${courses.learningOutcomes})`,
+        outcomes: courses.learningOutcomes,
+      })
+      .from(courses)
+      .where(inArray(courses.id, courseIds));
+
   it("forbids export when caller is not a managing-tenant admin", async () => {
     const targetAdmin = await runAsTenant(targetTenantId, async () =>
       userFactory
@@ -617,6 +648,42 @@ describe("Master course export and sync (e2e)", () => {
         .set({ status: TENANT_STATUSES.ACTIVE })
         .where(eq(tenants.id, targetTenantId));
     }
+  });
+
+  it.each(SHARED_LEARNING_OUTCOME_LANGUAGES)(
+    "shows shared learning outcomes to recipient admins in $language",
+    async ({ language }) => {
+      const { sourceCourseId, sourceCookie, targetCourseId, targetCookie } = await setupAndExport();
+
+      const sourceCourse = await getCourseDetails(
+        sourceCourseId,
+        language,
+        sourceCookie,
+        SOURCE_HOST,
+      );
+      const targetCourse = await getCourseDetails(
+        targetCourseId,
+        language,
+        targetCookie,
+        TARGET_HOST,
+      );
+
+      expect(sourceCourse).toMatchObject({ learningOutcomes: SOURCE_LEARNING_OUTCOMES[language] });
+      expect(targetCourse).toMatchObject({
+        isContentReadonly: true,
+        learningOutcomes: SOURCE_LEARNING_OUTCOMES[language],
+      });
+    },
+  );
+
+  it("stores shared learning outcomes as a language map", async () => {
+    const { targetCourseId } = await setupAndExport();
+
+    const storedTargetCourses = await selectStoredLearningOutcomes([targetCourseId]);
+
+    expect(storedTargetCourses).toEqual([
+      { kind: JSONB_TYPES.OBJECT, outcomes: SOURCE_LEARNING_OUTCOMES },
+    ]);
   });
 
   it("exports source course to target tenant and keeps exported copy readonly", async () => {
@@ -813,10 +880,7 @@ describe("Master course export and sync (e2e)", () => {
             en: updatedTitle,
             pl: "Kurs zrodlowy master",
           }),
-          learningOutcomes: {
-            en: ["Apply the updated course"],
-            pl: ["Zastosowac zaktualizowany kurs"],
-          },
+          learningOutcomes: toJsonbBuildObject(UPDATED_LEARNING_OUTCOMES),
           showAuthorSection: true,
           thumbnailPositionY: 28,
           authorMetadata: {
@@ -851,6 +915,7 @@ describe("Master course export and sync (e2e)", () => {
         .select({
           title: courses.title,
           learningOutcomes: courses.learningOutcomes,
+          learningOutcomesType: sql<string>`jsonb_typeof(${courses.learningOutcomes})`,
           showAuthorSection: courses.showAuthorSection,
           thumbnailPositionY: courses.thumbnailPositionY,
           status: courses.status,
@@ -865,9 +930,9 @@ describe("Master course export and sync (e2e)", () => {
     });
 
     expect(syncedTargetCourse?.title.en).toBe(updatedTitle);
-    expect(syncedTargetCourse?.learningOutcomes).toEqual({
-      en: ["Apply the updated course"],
-      pl: ["Zastosowac zaktualizowany kurs"],
+    expect(syncedTargetCourse).toMatchObject({
+      learningOutcomesType: JSONB_TYPES.OBJECT,
+      learningOutcomes: UPDATED_LEARNING_OUTCOMES,
     });
     expect(syncedTargetCourse?.showAuthorSection).toBe(true);
     expect(syncedTargetCourse?.thumbnailPositionY).toBe(28);
@@ -1788,12 +1853,16 @@ describe("Master course export and sync (e2e)", () => {
     const questionId = faker.string.uuid();
     const firstId = faker.string.uuid();
     const secondId = faker.string.uuid();
-    const { sourceCourseId, targetCourseId } = await setupAndExport({
+    const { sourceCourseId, targetCourseId, sourceLessonId } = await setupAndExport({
       beforeExport: async ({ sourceLessonId }) => {
         await runAsTenant(sourceTenantId, async () => {
           const [assessment] = await db
             .insert(assessments)
-            .values({ lessonId: sourceLessonId, passingScorePercentage: "50" })
+            .values({
+              lessonId: sourceLessonId,
+              passingScorePercentage: "50",
+              timeLimitMinutes: 15,
+            })
             .returning();
           await db.insert(assessmentQuestions).values({
             id: questionId,
@@ -1844,6 +1913,18 @@ describe("Master course export and sync (e2e)", () => {
           .where(eq(chapters.courseId, targetCourseId))
           .orderBy(asc(assessmentQuestionChoiceOptions.displayOrder)),
       );
+    const readTimeLimit = async () =>
+      (
+        await runAsTenant(targetTenantId, () =>
+          db
+            .select({ timeLimitMinutes: assessments.timeLimitMinutes })
+            .from(assessments)
+            .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
+            .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+            .where(eq(chapters.courseId, targetCourseId)),
+        )
+      )[0]?.timeLimitMinutes;
+    expect(await readTimeLimit()).toBe(15);
     const original = await readOptions();
     const [exportLink] = await baseDb
       .select()
@@ -1871,11 +1952,18 @@ describe("Master course export and sync (e2e)", () => {
         .set({ displayOrder: 2 })
         .where(eq(assessmentQuestionChoiceOptions.id, firstId));
     });
+    await runAsTenant(sourceTenantId, () =>
+      db
+        .update(assessments)
+        .set({ timeLimitMinutes: 25 })
+        .where(eq(assessments.lessonId, sourceLessonId)),
+    );
     await sync();
     expect(await readOptions()).toEqual([
       { ...original[1], displayOrder: 1 },
       { ...original[0], displayOrder: 2 },
     ]);
+    expect(await readTimeLimit()).toBe(25);
     await runAsTenant(sourceTenantId, async () => {
       await db
         .delete(assessmentQuestionChoiceOptions)

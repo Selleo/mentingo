@@ -13,6 +13,7 @@ import {
   studentCoursesQueryOptions,
   useCourse,
 } from "~/api/queries";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
@@ -57,6 +58,7 @@ const HeroBanner = ({
   const navigate = useNavigate();
 
   const { data: currentUser } = useCurrentUser();
+  const { data: globalSettings } = useGlobalSettings();
   const { hasAccess: canUseLearningMode } = usePermissions({
     required: PERMISSIONS.LEARNING_MODE_USE,
   });
@@ -94,11 +96,13 @@ const HeroBanner = ({
       canUseLearningMode,
       canUpdateLearningProgress,
       activeLearningModeCourseIds: currentUser?.studentModeCourseIds ?? [],
+      publicCoursePreviewEnabled: globalSettings?.publicCoursePreviewEnabled,
     });
   }, [
     heroCourseData,
     currentUser?.id,
     currentUser?.studentModeCourseIds,
+    globalSettings?.publicCoursePreviewEnabled,
     canUseLearningMode,
     canUpdateLearningProgress,
   ]);
@@ -117,7 +121,7 @@ const HeroBanner = ({
     .exhaustive();
 
   const handleNavigateToLesson = useCallback(async () => {
-    if (!heroCourseData) return;
+    if (!heroCourseData || (!globalSettings && !heroCourseData.enrolled)) return;
 
     if (isGroupManager) {
       navigate(`/course/${heroCourseData.id}`);
@@ -147,6 +151,7 @@ const HeroBanner = ({
     });
   }, [
     heroCourseData,
+    globalSettings,
     isGroupManager,
     isPreviewMode,
     navigate,
@@ -166,26 +171,24 @@ const HeroBanner = ({
             (event.target as HTMLImageElement).src = DefaultPhotoCourse;
           }}
         />
-        <div
-          className="pointer-events-none absolute bottom-0 left-0 h-1/2 w-full md:inset-x-0 md:top-0 md:-bottom-0.5 md:h-auto"
-          style={{
-            backgroundImage: `
-              linear-gradient(0deg, var(--primary-50) 0%, color-mix(in srgb, var(--primary-50) 72%, var(--primary-200)) 8%, color-mix(in srgb, var(--primary-200) 24%, transparent) 25%, color-mix(in srgb, var(--primary-200) 5%, transparent) 50%, transparent 75%),
-              radial-gradient(80% 70% at 0% 100%, var(--primary-50) 0%, color-mix(in srgb, var(--primary-200) 42%, transparent) 30%, color-mix(in srgb, var(--primary-200) 12%, transparent) 55%, transparent 100%),
-              radial-gradient(80% 70% at 100% 100%, var(--primary-50) 0%, color-mix(in srgb, var(--primary-200) 42%, transparent) 30%, color-mix(in srgb, var(--primary-200) 12%, transparent) 55%, transparent 100%)
-            `,
-          }}
-        />
       </div>
 
       {trailerUrl && (
         <div className="absolute inset-0 z-10 hidden md:block">
           <HeroTrailerVideo src={trailerUrl} />
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-200/75 via-primary-200/45 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary-200/55 via-primary-200/18 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-primary-50 via-primary-200/32 to-transparent" />
         </div>
       )}
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[12] hidden md:block"
+        style={{
+          backgroundImage: `
+            linear-gradient(90deg, rgb(41 41 41 / 0.82) 0%, rgb(41 41 41 / 0.62) 32%, rgb(41 41 41 / 0.18) 62%, rgb(41 41 41 / 0) 80%),
+            linear-gradient(0deg, rgb(41 41 41 / 0.55) 0%, rgb(41 41 41 / 0) 45%)
+          `,
+        }}
+      />
 
       {onEditFeatured && (
         <button
@@ -197,7 +200,7 @@ const HeroBanner = ({
         >
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-1 top-0 border-2 border-transparent transition-colors duration-200 group-hover/edit:border-primary-500 group-focus-visible/edit:border-primary-500 md:bottom-8"
+            className="pointer-events-none absolute inset-x-0 bottom-1 top-0 border-2 border-transparent transition-colors duration-200 group-hover/edit:border-primary-500 group-focus-visible/edit:border-primary-500 md:bottom-0"
           />
           <span className="absolute left-0 top-0 flex items-center gap-1.5 rounded-br-md bg-primary-500 px-2.5 py-1 text-xs font-semibold text-white transition-opacity duration-200 md:opacity-0 md:group-hover/edit:opacity-100 md:group-focus-visible/edit:opacity-100">
             <Star className="size-3" fill="currentColor" aria-hidden="true" />
@@ -216,12 +219,12 @@ const HeroBanner = ({
         )}
       >
         <div className="max-w-2xl space-y-3 md:space-y-4">
-          <h1 className="h1 -mt-3 text-3xl leading-tight md:mt-0 md:text-4xl md:leading-relaxed">
+          <h1 className="h1 -mt-3 text-3xl leading-tight md:mt-0 md:text-4xl md:leading-relaxed md:text-white md:[text-shadow:0_1px_12px_rgb(0_0_0/0.25)]">
             {title}
           </h1>
 
           {(durationLabel || lessonsLabel) && (
-            <div className="flex gap-3 font-medium md:gap-4 md:text-sm">
+            <div className="flex gap-3 font-medium md:gap-4 md:text-sm md:text-white">
               {durationLabel && (
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-4 w-4" />
@@ -238,7 +241,10 @@ const HeroBanner = ({
           )}
 
           <div className="pointer-events-auto flex flex-wrap gap-2 pt-1 md:gap-3 md:pt-2">
-            <Button onClick={handleNavigateToLesson}>
+            <Button
+              onClick={handleNavigateToLesson}
+              disabled={!heroCourseData || (!globalSettings && !heroCourseData.enrolled)}
+            >
               <Play className="mr-2 h-4 w-4" fill="currentColor" />
               {t(primaryActionLabel)}
             </Button>

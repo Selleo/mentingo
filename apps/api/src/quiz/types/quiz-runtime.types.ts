@@ -1,3 +1,4 @@
+import type { QuizRuntimeRepository } from "../repositories/quiz-runtime.repository";
 import type {
   AssessmentAnswerGradingStatus,
   AssessmentAttemptGradingStatus,
@@ -9,18 +10,38 @@ import type { AnswerQuestionBody, QuestionBody } from "src/lesson/lesson.schema"
 
 export type QuizDelivery = {
   assessmentId: UUIDType;
+  timeLimitMinutes: number | null;
   questions: QuestionBody[];
+};
+
+export type QuizTimedAttemptStart = {
+  assessmentId: UUIDType;
+  learnerId: UUIDType;
+  language: SupportedLanguages;
+  availablePoints: string;
+  timeLimitMinutes: number;
+};
+
+export type QuizOpenAttempt = NonNullable<
+  Awaited<ReturnType<QuizRuntimeRepository["findOpenAttemptById"]>>
+>;
+
+export type QuizTimedSubmissionOptions = {
+  /** Drops answers to questions/options that no longer exist (stale draft), scoring them 0. */
+  dropInvalidAnswers?: boolean;
 };
 
 export type QuizAttemptFeedback = {
   attempt: {
     id: UUIDType;
     scorePercentage: string | null;
+    gradingStatus: AssessmentAttemptGradingStatus;
   };
   questionAnswers: Array<{
     id: UUIDType;
     questionId: UUIDType;
     awardedPoints: string | null;
+    gradingStatus: AssessmentAnswerGradingStatus;
   }>;
   choiceSelections: Array<{ questionAnswerId: UUIDType; selectedOptionId: UUIDType }>;
   statementAnswers: Array<{
@@ -43,12 +64,12 @@ export type PreparedQuizAttempt = {
   learnerId: UUIDType;
   language: SupportedLanguages;
   availablePoints: string;
-  awardedPoints: string;
-  scorePercentage: string;
+  awardedPoints: string | null;
+  scorePercentage: string | null;
   gradingStatus: AssessmentAttemptGradingStatus;
   result: AssessmentAttemptResult;
   submittedAt: string;
-  gradedAt: string;
+  gradedAt: string | null;
   questionAnswers: Array<{
     id: UUIDType;
     questionId: UUIDType;
@@ -80,6 +101,7 @@ export type QuizRuntimeSubmissionResult = {
   questionCount: number;
   score: number;
   passed: boolean;
+  awaitingReview: boolean;
   attemptId: UUIDType;
   attemptNumber: number;
 };

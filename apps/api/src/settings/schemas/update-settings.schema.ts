@@ -1,4 +1,4 @@
-import { ALLOWED_AGE_LIMITS, HEX_COLOR_REGEX } from "@repo/shared";
+import { ALLOWED_AGE_LIMITS, HEX_COLOR_REGEX, LEADERBOARD_VISIBILITY } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -17,7 +17,16 @@ export type AllowedCurrency = (typeof ALLOWED_CURRENCIES)[number];
 export type AllowedAgeLimit = (typeof ALLOWED_AGE_LIMITS)[number];
 
 export const updateSettingsBodySchema = Type.Partial(
-  Type.Union([studentSettingsJSONContentSchema, adminSettingsJSONContentSchema]),
+  Type.Object(
+    {
+      language: studentSettingsJSONContentSchema.properties.language,
+      adminNewUserNotification: adminSettingsJSONContentSchema.properties.adminNewUserNotification,
+      adminFinishedCourseNotification:
+        adminSettingsJSONContentSchema.properties.adminFinishedCourseNotification,
+      configWarningDismissed: adminSettingsJSONContentSchema.properties.configWarningDismissed,
+    },
+    { additionalProperties: false },
+  ),
 );
 
 export const updateDashboardSettingsBodySchema = Type.Object({
@@ -45,6 +54,12 @@ export const updateGlobalColorSchema = Type.Object({
   contrastColor: Type.String({
     pattern: HEX_COLOR_REGEX.source,
   }),
+  backgroundColor: Type.Optional(
+    Type.Union([Type.String({ pattern: HEX_COLOR_REGEX.source }), Type.Null()]),
+  ),
+  accentColor: Type.Optional(
+    Type.Union([Type.String({ pattern: HEX_COLOR_REGEX.source }), Type.Null()]),
+  ),
 });
 
 export const updateConfigWarningDismissedSchema = Type.Object({
@@ -63,6 +78,16 @@ export const updateFeaturedCourseSchema = Type.Object({
   featuredCourseId: Type.Union([UUIDSchema, Type.Null()]),
 });
 
+export const updateLeaderboardSettingsSchema = Type.Partial(
+  Type.Object(
+    {
+      leaderboardsEnabled: Type.Boolean(),
+      leaderboardVisibility: Type.Enum(LEADERBOARD_VISIBILITY),
+    },
+    { additionalProperties: false },
+  ),
+);
+
 export type UpdateSettingsBody = Static<typeof updateSettingsBodySchema>;
 export type UpdateDashboardSettingsBody = Static<typeof updateDashboardSettingsBodySchema>;
 export type ResetDashboardSettingsBody = Static<typeof resetDashboardSettingsBodySchema>;
@@ -75,3 +100,4 @@ export type UpdateLiveTrainingMaxParallelSessionsBody = Static<
   typeof updateLiveTrainingMaxParallelSessionsSchema
 >;
 export type UpdateFeaturedCourseBody = Static<typeof updateFeaturedCourseSchema>;
+export type UpdateLeaderboardSettingsBody = Static<typeof updateLeaderboardSettingsSchema>;

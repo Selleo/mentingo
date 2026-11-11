@@ -8,6 +8,7 @@ const resourceUrl = "https://tenant.example.com/api/mcp";
 const grant: Omit<McpAccessGrant, "expiresAt"> = {
   userId: "11111111-1111-4111-8111-111111111111",
   tenantId: "22222222-2222-4222-8222-222222222222",
+  sessionVersion: "session-version",
   clientId: "client",
   resource: resourceUrl,
   scopes: ["search"],
@@ -30,7 +31,15 @@ function buildService() {
   const resources = {
     forTenant: jest.fn(() => Promise.resolve({ url: resourceUrl })),
   };
-  const service = new McpTokenService(redis as never, {} as never, resources as never, {} as never);
+  const service = new McpTokenService(
+    redis as never,
+    {} as never,
+    resources as never,
+    {
+      assertUserSessionVersion: jest.fn().mockResolvedValue(undefined),
+    } as never,
+    { assertMfaAssurance: jest.fn().mockResolvedValue(undefined) } as never,
+  );
   const identity = jest.spyOn(service, "resolveIdentity").mockResolvedValue("actor@example.com");
   return { service, redis, values, resources, identity };
 }
@@ -48,7 +57,13 @@ describe("McpTokenService integration scopes", () => {
         grant: expect.objectContaining({ ...grant, scopes: [scope] }),
       });
       expect(resources.forTenant).toHaveBeenCalledWith(grant.tenantId);
-      expect(identity).toHaveBeenCalledWith(grant.userId, grant.tenantId);
+      expect(identity).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: grant.userId,
+          tenantId: grant.tenantId,
+          sessionVersion: grant.sessionVersion,
+        }),
+      );
     },
   );
 

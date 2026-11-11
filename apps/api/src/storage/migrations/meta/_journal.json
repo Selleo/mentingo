@@ -1604,6 +1604,76 @@
       "when": 1793278990402,
       "tag": "0228_external_conversation_transcripts",
       "breakpoints": true
+    },
+    {
+      "idx": 229,
+      "version": "7",
+      "when": 1793879230342,
+      "tag": "0229_certificate_share_tokens",
+      "breakpoints": true
+    },
+    {
+      "idx": 230,
+      "version": "7",
+      "when": 1793968920474,
+      "tag": "0230_create_gamification_core",
+      "breakpoints": true
+    },
+    {
+      "idx": 231,
+      "version": "7",
+      "when": 1793968932438,
+      "tag": "0231_enable_gamification_tenant_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 232,
+      "version": "7",
+      "when": 1793968935241,
+      "tag": "0232_add_gamification_check_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 233,
+      "version": "7",
+      "when": 1793969458600,
+      "tag": "0233_add_achievement_badges_and_time_windows",
+      "breakpoints": true
+    },
+    {
+      "idx": 234,
+      "version": "7",
+      "when": 1793969468346,
+      "tag": "0234_add_achievement_admin_check_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 235,
+      "version": "7",
+      "when": 1794210860460,
+      "tag": "0235_add_quiz_time_limit_and_timed_attempts",
+      "breakpoints": true
+    },
+    {
+      "idx": 236,
+      "version": "7",
+      "when": 1794215273004,
+      "tag": "0236_add_quiz_attempt_check_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 237,
+      "version": "7",
+      "when": 1794304666305,
+      "tag": "0237_normalize_shared_course_learning_outcomes",
+      "breakpoints": true
+    },
+    {
+      "idx": 238,
+      "version": "7",
+      "when": 1794324839166,
+      "tag": "0238_keep_open_questions_participation_graded",
+      "breakpoints": true
     }
   ]
 }

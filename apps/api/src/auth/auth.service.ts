@@ -11,20 +11,26 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import {
+  AUTH_ERROR_KEYS,
+  AUTH_SESSION_STATUS,
+  AUTH_TOKEN_PURPOSE,
   AUTOMATION_EVENT_KINDS,
   LOGIN_METHODS,
+  type PermissionKey,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
   type SupportedLanguages,
   SYSTEM_ROLE_SLUGS,
-  type PermissionKey,
 } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { authenticator } from "otplib";
 
-import { CORS_ORIGIN, MAGIC_LINK_EXPIRATION_TIME } from "src/auth/consts";
+import {
+  CORS_ORIGIN,
+  MAGIC_LINK_EXPIRATION_TIME,
+  REFRESH_TOKEN_EXPIRATION_SECONDS,
+} from "src/auth/consts";
 import { hashToken } from "src/auth/utils/hash-auth-token";
 import { NOTIFICATION_ACCOUNT_ACTION_KINDS } from "src/automation-execution/automation-execution.constants";
 import { NotificationAccountActionService } from "src/automation-execution/services/notification-account-action.service";
@@ -61,10 +67,14 @@ import { USER_CREATION_FLOW_TYPE } from "../user/user.types";
 
 import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
+import { AUTH_TOKEN_VERSION } from "./session/session.constants";
+import { SessionService } from "./session/session.service";
 import { TokenService } from "./token.service";
 
 import type { CreateAccountBody } from "./schemas/create-account.schema";
 import type { CreatePasswordBody } from "./schemas/create-password.schema";
+import type { LoginBody } from "./schemas/login.schema";
+import type { AuthContext } from "./session/session.types";
 import type { AuthFailedData, RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
 import type { ActorUserType } from "src/common/types/actor-user.type";
@@ -80,6 +90,7 @@ export class AuthService {
     @Inject(DB) private readonly db: DatabasePg,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
+    private readonly sessionService: SessionService,
     private jwtService: JwtService,
     private configService: ConfigService,
     private emailService: EmailService,
@@ -231,7 +242,7 @@ export class AuthService {
       }));
   }
 
-  public async login(data: { email: string; password: string }, MFAEnforcedRoles: string[]) {
+  public async login(data: LoginBody) {
     const user = await this.validateUser(data.email, data.password);
 
     if (!user) {
@@ -242,13 +253,15 @@ export class AuthService {
       throw new UnauthorizedException("user.error.archived");
     }
 
-    const { accessToken, refreshToken } = await this.issueSessionTokens(user);
+    const { accessToken, refreshToken, shouldVerifyMFA } = await this.getTokens(user, {
+      rememberMe: data.rememberMe,
+      loginMethod: USER_LOGIN_METHOD.PASSWORD,
+    });
 
     const { avatarReference, ...userWithoutAvatar } = user;
     const usersProfilePictureUrl =
       await this.userService.getUsersProfilePictureUrl(avatarReference);
 
-    const userSettings = await this.settingsService.getUserSettings(user.id);
     const { permissions, roleSlugs } = await this.permissionsService.getUserAccess(user.id);
 
     const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
@@ -262,11 +275,7 @@ export class AuthService {
       tenantId: user.tenantId,
     };
 
-    await this.outboxPublisher.publish(
-      new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.PASSWORD, actor }),
-    );
-
-    if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
+    if (shouldVerifyMFA) {
       return {
         ...userWithoutAvatar,
         profilePictureUrl: usersProfilePictureUrl,
@@ -278,6 +287,10 @@ export class AuthService {
         isManagingTenantAdmin,
       };
     }
+
+    await this.outboxPublisher.publish(
+      new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.PASSWORD, actor }),
+    );
 
     return {
       ...userWithoutAvatar,
@@ -301,26 +314,10 @@ export class AuthService {
     const user = await this.userService.getUserById(userId);
 
     const onboardingStatus = await this.getOnboardingStatus(userId);
-    const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
-    const userSettings = await this.settingsService.getUserSettings(userId);
     const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(userId);
 
     const isManagingTenantAdmin = await this.isManagingTenantAdmin(tenantId, permissions);
     const studentModeCourseIds = await this.getStudentModeCourseIds(userId, this.db);
-
-    if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
-      return {
-        ...user,
-        shouldVerifyMFA: true,
-        requiresPasswordChange: user.requiresPasswordChange ?? false,
-        onboardingStatus,
-        isManagingTenantAdmin,
-        isSupportMode: false,
-        studentModeCourseIds,
-        roleSlugs,
-        permissions,
-      };
-    }
 
     return {
       ...user,
@@ -381,22 +378,28 @@ export class AuthService {
 
   public async refreshTokens(refreshToken: string) {
     try {
-      const payload = await this.jwtService.verifyAsync(refreshToken, {
-        secret: this.configService.get<string>("jwt.refreshSecret"),
-        ignoreExpiration: false,
-      });
+      const payload = await this.sessionService.verifySessionToken(
+        refreshToken,
+        AUTH_TOKEN_PURPOSE.REFRESH,
+      );
 
       if (payload.isSupportMode && payload.supportSessionId) {
         const session = await this.supportModeService.assertActiveSession(payload.supportSessionId);
 
-        const tokens = await this.getSupportTokensForSession(session);
+        const tokens = await this.getSupportTokensForSession(session, payload);
 
         return tokens;
       }
 
       const user = await this.userService.getUserById(payload.userId);
 
-      const tokens = await this.issueSessionTokens(user);
+      const tokens = await this.getTokens(user, {
+        loginMethod: USER_LOGIN_METHOD.REFRESH_TOKEN,
+        mfaVerified: payload.mfaVerified,
+        rememberMe: payload.rememberMe,
+        sessionId: payload.sessionId,
+        sessionVersion: payload.sessionVersion,
+      });
 
       const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(user.id);
 
@@ -462,15 +465,27 @@ export class AuthService {
   }
 
   /**
-   * Signs tokens with the user's current permissions. A new session supersedes any earlier
-   * revocation (for example after a role change), so the revocation is cleared for every login
-   * method; otherwise the guard would reject the tokens that were just issued.
+   * Issues session tokens with the user's current permissions, or a short-lived MFA challenge
+   * when the user's MFA policy requires verification that this session has not completed yet.
    */
-  private async issueSessionTokens(user: TokenUser) {
+  public async getTokens(
+    user: Pick<TokenUser, "id" | "email" | "tenantId">,
+    authContext: AuthContext = {},
+  ) {
     const { id: userId, email, tenantId } = user;
+    const policy = await this.sessionService.getUserMfaPolicy(tenantId, userId);
+
+    if (policy.required && !authContext.mfaVerified) {
+      return this.sessionService.createMfaChallenge({ userId, email, tenantId }, authContext);
+    }
+
     const { permissions, roleSlugs } = await this.permissionsService.getUserAccess(userId);
 
     const tokens = await this.signTokens({
+      sessionId: authContext.sessionId,
+      sessionVersion: authContext.sessionVersion,
+      mfaVerified: authContext.mfaVerified ?? false,
+      rememberMe: authContext.rememberMe ?? false,
       userId,
       email,
       tenantId,
@@ -478,12 +493,10 @@ export class AuthService {
       permissions,
     });
 
-    await this.sessionRevocationService.clearUserRevocation(userId);
-
-    return tokens;
+    return { ...tokens, shouldVerifyMFA: false };
   }
 
-  async getSupportTokensForSession(session: SupportSession) {
+  async getSupportTokensForSession(session: SupportSession, context: AuthContext = {}) {
     const now = Date.now();
 
     const sessionExpiresAtMs = new Date(session.expiresAt).getTime();
@@ -521,7 +534,20 @@ export class AuthService {
       this.dbAdmin,
     );
 
+    const mfaVerified = await this.sessionService.isSupportSessionMfaVerified(session.id);
+
+    const sourcePolicy = await this.sessionService.getUserMfaPolicy(
+      session.originalTenantId,
+      session.originalUserId,
+    );
+
+    if (sourcePolicy.required && !mfaVerified)
+      throw new ForbiddenException(AUTH_ERROR_KEYS.MFA_REQUIRED);
+
     const supportPayload = {
+      sessionId: context.sessionId,
+      sessionVersion: context.sessionVersion,
+      mfaVerified,
       userId: targetUser.id,
       email: targetUser.email,
       roleSlugs,
@@ -537,23 +563,46 @@ export class AuthService {
       returnUrl: session.returnUrl,
     };
 
-    return this.signTokens(supportPayload, `${remainingSeconds}s`, `${remainingSeconds}s`);
+    return this.signTokens(supportPayload, `${remainingSeconds}s`, remainingSeconds);
   }
 
+  /** Signs access and refresh tokens bound to a Redis session, extending it when one exists. */
   private async signTokens(
     payload: Record<string, unknown>,
     accessExpiresIn?: string,
-    refreshExpiresIn: string = "7d",
+    refreshExpiresInSeconds = REFRESH_TOKEN_EXPIRATION_SECONDS,
   ) {
+    const identity = {
+      userId: String(payload.userId),
+      sessionId: payload.sessionId as string | undefined,
+      sessionVersion: payload.sessionVersion as string | undefined,
+    };
+
+    const session = identity.sessionId
+      ? await this.sessionRevocationService.extendSession(identity, refreshExpiresInSeconds)
+      : await this.sessionRevocationService.createSession(
+          identity.userId,
+          identity.sessionVersion,
+          refreshExpiresInSeconds,
+        );
+
+    const sessionPayload = { ...payload, ...session, tokenVersion: AUTH_TOKEN_VERSION };
+
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        expiresIn: accessExpiresIn ?? this.configService.get<string>("jwt.expirationTime"),
-        secret: this.configService.get<string>("jwt.secret"),
-      }),
-      this.jwtService.signAsync(payload, {
-        expiresIn: refreshExpiresIn,
-        secret: this.configService.get<string>("jwt.refreshSecret"),
-      }),
+      this.jwtService.signAsync(
+        { ...sessionPayload, tokenPurpose: AUTH_TOKEN_PURPOSE.ACCESS, jti: nanoid(32) },
+        {
+          expiresIn: accessExpiresIn ?? this.configService.get<string>("jwt.expirationTime"),
+          secret: this.configService.get<string>("jwt.secret"),
+        },
+      ),
+      this.jwtService.signAsync(
+        { ...sessionPayload, tokenPurpose: AUTH_TOKEN_PURPOSE.REFRESH, jti: nanoid(32) },
+        {
+          expiresIn: refreshExpiresInSeconds,
+          secret: this.configService.get<string>("jwt.refreshSecret"),
+        },
+      ),
     ]);
 
     return { accessToken, refreshToken };
@@ -569,6 +618,7 @@ export class AuthService {
 
   async revokeSupportSession(sessionId: string) {
     await this.supportModeService.revokeSession(sessionId);
+    await this.sessionService.revokeSupportSessionMfaAssurance(sessionId);
   }
 
   public async forgotPassword(email: string) {
@@ -721,11 +771,11 @@ export class AuthService {
       );
     }
 
-    const tokens = await this.issueSessionTokens(user);
+    const tokens = await this.getTokens(user, {
+      loginMethod: USER_LOGIN_METHOD.PROVIDER,
+      rememberMe: true,
+    });
     const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(user.id);
-
-    const userSettings = await this.settingsService.getUserSettings(user.id);
-    const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
 
     const actor: ActorUserType = {
       userId: user.id,
@@ -735,73 +785,100 @@ export class AuthService {
       tenantId: user.tenantId,
     };
 
-    await this.outboxPublisher.publish(
-      new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.PROVIDER, actor }),
-    );
+    if (!tokens.shouldVerifyMFA)
+      await this.outboxPublisher.publish(
+        new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.PROVIDER, actor }),
+      );
 
-    if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
+    return tokens;
+  }
+
+  async getSessionStatus(user: CurrentUserType) {
+    if (user.isSupportMode) return { status: AUTH_SESSION_STATUS.AUTHENTICATED };
+
+    const policy = await this.sessionService.getUserMfaPolicy(user.tenantId, user.userId);
+
+    if (user.tokenPurpose === AUTH_TOKEN_PURPOSE.MFA || (policy.required && !user.mfaVerified)) {
       return {
-        ...tokens,
-        shouldVerifyMFA: true,
+        status: AUTH_SESSION_STATUS.MFA_REQUIRED,
+        setupRequired: !policy.enabled,
+        expiresAt: user.exp,
       };
     }
 
-    return {
-      ...tokens,
-      shouldVerifyMFA: false,
-    };
+    return { status: AUTH_SESSION_STATUS.AUTHENTICATED };
   }
 
-  async generateMFASecret(userId: string) {
-    const user = await this.userService.getUserById(userId);
+  /** Swaps a full session for a pending MFA challenge, e.g. before enrolling MFA from settings. */
+  async startMfaChallenge(user: CurrentUserType, response: Response) {
+    if (user.isSupportMode) throw new ForbiddenException(AUTH_ERROR_KEYS.MFA_REQUIRED);
 
-    const secret = authenticator.generateSecret();
+    if (user.tokenPurpose === AUTH_TOKEN_PURPOSE.MFA) return user;
 
-    const newSettings = await this.settingsService.updateUserSettings(userId, {
-      MFASecret: secret,
+    // A session that has already verified MFA is never downgraded into a new challenge.
+    if (user.mfaVerified) return user;
+
+    const tokens = await this.sessionService.createMfaChallenge(user, {
+      rememberMe: user.rememberMe,
+      sessionVersion: user.sessionVersion,
     });
 
-    if (!newSettings.MFASecret) {
-      throw new BadRequestException("Failed to generate secret");
-    }
+    await this.sessionService.revokeSession(user);
+    this.tokenService.setTemporaryTokenCookies(response, tokens.accessToken);
 
-    return {
-      secret,
-      otpauth: await this.buildMfaOtpAuthUri(user.email, secret),
-    };
+    return this.sessionService.verifySessionToken(
+      tokens.accessToken,
+      AUTH_TOKEN_PURPOSE.ACCESS,
+      true,
+    );
   }
 
-  async verifyMFACode(userId: string, token: string, response: Response) {
-    if (!userId || !token) {
-      throw new BadRequestException("User ID and token are required");
-    }
+  async generateMFASecret(currentUser: CurrentUserType, response: Response) {
+    if (currentUser.isSupportMode) throw new ForbiddenException(AUTH_ERROR_KEYS.MFA_REQUIRED);
 
-    const user = await this.userService.getUserById(userId);
+    const policy = await this.sessionService.getUserMfaPolicy(
+      currentUser.tenantId,
+      currentUser.userId,
+    );
 
-    if (!user) {
-      throw new NotFoundException("Failed to retrieve user");
-    }
+    if (policy.enabled) throw new ForbiddenException(AUTH_ERROR_KEYS.MFA_ALREADY_ENABLED);
 
-    const settings = await this.settingsService.getUserSettings(userId);
+    const user = await this.startMfaChallenge(currentUser, response);
+    const secret = await this.sessionService.getOrCreateMfaEnrollmentSecret(user);
 
-    if (!settings.MFASecret) return false;
+    return { secret, otpauth: await this.buildMfaOtpAuthUri(user.email, secret) };
+  }
 
-    const isValid = authenticator.check(token, settings.MFASecret);
+  async verifyMFACode(currentUser: CurrentUserType, token: string, response: Response) {
+    if (currentUser.isSupportMode) throw new ForbiddenException(AUTH_ERROR_KEYS.MFA_REQUIRED);
 
-    if (!isValid) {
-      throw new BadRequestException("Invalid MFA token");
-    }
+    const context = await this.sessionService.verifyAndConsumeMfaChallenge(currentUser, token);
+    const user = await this.userService.getUserById(currentUser.userId);
 
-    const { refreshToken, accessToken } = await this.issueSessionTokens(user);
+    const { refreshToken, accessToken } = await this.getTokens(user, {
+      ...context,
+      mfaVerified: true,
+    });
 
+    const { permissions, roleSlugs } = await this.permissionsService.getUserAccess(user.id);
+
+    await this.outboxPublisher.publish(
+      new UserLoginEvent({
+        userId: user.id,
+        method: context.loginMethod ?? USER_LOGIN_METHOD.PASSWORD,
+        actor: {
+          userId: user.id,
+          tenantId: user.tenantId,
+          email: user.email,
+          permissions,
+          roleSlugs,
+        },
+      }),
+    );
     this.tokenService.clearTokenCookies(response);
-    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, context.rememberMe);
 
-    await this.settingsService.updateUserSettings(userId, {
-      isMFAEnabled: true,
-    });
-
-    return isValid;
+    return true;
   }
 
   async createMagicLink(email: string) {
@@ -842,83 +919,87 @@ export class AuthService {
 
   async handleMagicLinkLogin(response: Response, token: string) {
     await this.loginMethodsService.assertLoginMethodEnabled(LOGIN_METHODS.MAGIC_LINK);
-    const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
 
     const dateNow = new Date();
 
     const hashedToken = hashToken(token);
 
-    const { user, accessToken, refreshToken } = await this.db.transaction(async (trx) => {
-      const [magicLinkToken] = await trx
-        .select()
-        .from(magicLinkTokens)
-        .where(eq(magicLinkTokens.tokenHash, hashedToken))
-        .limit(1)
-        .for("update");
+    const { user, accessToken, refreshToken, shouldVerifyMFA } = await this.db.transaction(
+      async (trx) => {
+        const [magicLinkToken] = await trx
+          .select()
+          .from(magicLinkTokens)
+          .where(eq(magicLinkTokens.tokenHash, hashedToken))
+          .limit(1)
+          .for("update");
 
-      if (!magicLinkToken) throw new UnauthorizedException("magicLink.error.invalidToken");
+        if (!magicLinkToken) throw new UnauthorizedException("magicLink.error.invalidToken");
 
-      if (magicLinkToken.expiryDate < dateNow)
-        throw new UnauthorizedException("magicLink.error.expiredToken");
+        if (magicLinkToken.expiryDate < dateNow)
+          throw new UnauthorizedException("magicLink.error.expiredToken");
 
-      const [currentAccount] = await trx
-        .select({ email: users.email })
-        .from(users)
-        .where(eq(users.id, magicLinkToken.userId))
-        .for("update");
+        const [currentAccount] = await trx
+          .select({ email: users.email })
+          .from(users)
+          .where(eq(users.id, magicLinkToken.userId))
+          .for("update");
 
-      if (!currentAccount) throw new UnauthorizedException("magicLink.error.invalidToken");
+        if (!currentAccount) throw new UnauthorizedException("magicLink.error.invalidToken");
 
-      const user = await this.userService.getUserById(magicLinkToken.userId);
+        const user = await this.userService.getUserById(magicLinkToken.userId);
 
-      if (user.archived) throw new UnauthorizedException("user.error.archived");
+        if (user.archived) throw new UnauthorizedException("user.error.archived");
 
-      const [accountAction] = await trx
-        .select({ recipientEmail: notificationAccountActionIntents.recipientEmail })
-        .from(notificationAccountActionIntents)
-        .where(
-          and(
-            eq(notificationAccountActionIntents.authTokenId, magicLinkToken.id),
-            eq(notificationAccountActionIntents.userId, user.id),
-            eq(notificationAccountActionIntents.kind, NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN),
-          ),
-        )
-        .limit(1);
+        const [accountAction] = await trx
+          .select({ recipientEmail: notificationAccountActionIntents.recipientEmail })
+          .from(notificationAccountActionIntents)
+          .where(
+            and(
+              eq(notificationAccountActionIntents.authTokenId, magicLinkToken.id),
+              eq(notificationAccountActionIntents.userId, user.id),
+              eq(notificationAccountActionIntents.kind, NOTIFICATION_ACCOUNT_ACTION_KINDS.SIGN_IN),
+            ),
+          )
+          .limit(1);
 
-      if (accountAction && accountAction.recipientEmail !== currentAccount.email) {
-        throw new UnauthorizedException("magicLink.error.invalidToken");
-      }
+        if (accountAction && accountAction.recipientEmail !== currentAccount.email) {
+          throw new UnauthorizedException("magicLink.error.invalidToken");
+        }
 
-      await trx.delete(magicLinkTokens).where(eq(magicLinkTokens.id, magicLinkToken.id));
+        await trx.delete(magicLinkTokens).where(eq(magicLinkTokens.id, magicLinkToken.id));
 
-      const { refreshToken, accessToken } = await this.issueSessionTokens(user);
+        const { refreshToken, accessToken, shouldVerifyMFA } = await this.getTokens(user, {
+          rememberMe: true,
+          loginMethod: USER_LOGIN_METHOD.MAGIC_LINK,
+        });
 
-      return { user, accessToken, refreshToken };
-    });
+        return { user, accessToken, refreshToken, shouldVerifyMFA };
+      },
+    );
 
     const { id: userId, email } = user;
     const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(userId);
 
-    const userSettings = await this.settingsService.getUserSettings(userId);
     const onboardingStatus = await this.userService.getAllOnboardingStatus(userId);
 
-    await this.outboxPublisher.publish(
-      new UserLoginEvent({
-        userId,
-        method: USER_LOGIN_METHOD.MAGIC_LINK,
-        actor: {
+    if (!shouldVerifyMFA)
+      await this.outboxPublisher.publish(
+        new UserLoginEvent({
           userId,
-          email,
-          roleSlugs,
-          permissions,
-          tenantId: user.tenantId,
-        },
-      }),
-    );
+          method: USER_LOGIN_METHOD.MAGIC_LINK,
+          actor: {
+            userId,
+            email,
+            roleSlugs,
+            permissions,
+            tenantId: user.tenantId,
+          },
+        }),
+      );
 
     const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, permissions);
 
-    if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
+    if (shouldVerifyMFA) {
       this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
 
       return {
@@ -954,12 +1035,6 @@ export class AuthService {
       .limit(1);
 
     return Boolean(tenant?.isManaging);
-  }
-
-  private isMfaRoleEnforced(enforcedRoles: string[], roleSlugs: string[]): boolean {
-    if (!enforcedRoles.length || !roleSlugs.length) return false;
-
-    return roleSlugs.some((roleSlug) => enforcedRoles.includes(roleSlug));
   }
 
   private async getMfaIssuerName(): Promise<string> {

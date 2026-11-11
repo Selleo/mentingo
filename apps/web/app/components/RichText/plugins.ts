@@ -1,4 +1,3 @@
-import { mergeAttributes } from "@tiptap/core";
 import { Heading } from "@tiptap/extension-heading";
 import { Link } from "@tiptap/extension-link";
 import { Placeholder } from "@tiptap/extension-placeholder";
@@ -60,9 +59,6 @@ const LinkWithDownload = Link.extend({
         renderHTML: (attrs) => (attrs.download ? { download: attrs.download } : {}),
       },
     };
-  },
-  renderHTML({ HTMLAttributes }) {
-    return ["a", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
   },
 });
 

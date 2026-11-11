@@ -1,3 +1,8 @@
+import {
+  ALLOWED_IMAGE_FILE_EXTENSIONS,
+  MAX_IMAGE_FILE_SIZE_BYTES,
+  formatFileSize,
+} from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { useRichTextMediaUrl } from "~/components/RichText/contentPolicyContext";
@@ -23,6 +28,7 @@ interface ImageUploadProps {
   imageFit?: "cover" | "contain";
   detailsText?: string;
   inputTestId?: string;
+  actions?: React.ReactNode;
 }
 
 const ImageUploadInput = ({
@@ -35,18 +41,20 @@ const ImageUploadInput = ({
   inputId,
   variant = "square",
   size = IMAGE_UPLOAD_SIZES.DEFAULT,
-  accept = ".png, .jpg, .jpeg",
+  accept = ALLOWED_IMAGE_FILE_EXTENSIONS.join(","),
   imageFit = "cover",
   detailsText,
   inputTestId,
+  actions,
 }: ImageUploadProps) => {
   const { t } = useTranslation();
   const safeImageUrl = useRichTextMediaUrl(imageUrl || field.value);
   const isSmall = size === IMAGE_UPLOAD_SIZES.SMALL;
-  const fallbackDetails =
-    variant === "video"
-      ? "PNG, JPG or JPEG (max. 20 MB, recommended 1920x1080 or higher)"
-      : "PNG, JPG or JPEG (max. 20 MB, recommended 1200x1200 or higher)";
+  const isCompact = size === IMAGE_UPLOAD_SIZES.COMPACT;
+  const hasImage = Boolean(field.value);
+  const fallbackDetails = t("uploadFile.details.imageCrop", {
+    maxSize: formatFileSize(MAX_IMAGE_FILE_SIZE_BYTES),
+  });
 
   return (
     <div className="flex flex-col items-center justify-center gap-y-2">
@@ -56,7 +64,12 @@ const ImageUploadInput = ({
           disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
           { "aspect-video": variant === "video" && size === IMAGE_UPLOAD_SIZES.DEFAULT },
           { "aspect-square": variant === "square" && size === IMAGE_UPLOAD_SIZES.DEFAULT },
-          { "h-36": size === IMAGE_UPLOAD_SIZES.COMPACT, "h-20 border": isSmall },
+          { "h-20 border": isSmall },
+          {
+            "group h-40 border border-dashed border-neutral-300 bg-neutral-50 transition-colors hover:border-primary-500":
+              isCompact,
+            "border-solid border-neutral-200 bg-white": isCompact && hasImage,
+          },
         )}
       >
         {safeImageUrl && (
@@ -75,18 +88,21 @@ const ImageUploadInput = ({
             {
               "bg-black/50 text-white backdrop-blur-[1px]": field.value,
               "bg-gradient-to-b from-white/95 to-neutral-100/95 text-neutral-900": !field.value,
+              "bg-transparent from-transparent to-transparent": isCompact && !hasImage,
+              "opacity-0 transition-opacity group-hover:opacity-100": isCompact && hasImage,
             },
           )}
         >
-          <Icon name="UploadImageIcon" className={cn({ "size-8": isSmall })} />
+          <Icon name="UploadImageIcon" className={cn({ "size-8": isSmall || isCompact })} />
 
           <div
             className={cn(
               "mt-2 flex items-center justify-center rounded-md border bg-white px-2 py-1 font-semibold text-neutral-900",
               {
-                "text-sm sm:text-base": !isSmall,
+                "text-sm sm:text-base": !isSmall && !isCompact,
                 "mt-1 border-0 bg-transparent p-0 text-xs": isSmall,
-                "text-white": isSmall && Boolean(field.value),
+                "border-0 bg-transparent p-0 text-sm": isCompact,
+                "text-white": (isSmall || isCompact) && hasImage,
               },
             )}
           >
@@ -96,10 +112,14 @@ const ImageUploadInput = ({
             {!isSmall && <span className="ml-1 text-current">{t("uploadFile.subHeader")}</span>}
           </div>
 
-          {!isSmall && (
+          {!isSmall && !(isCompact && hasImage) && (
             <div
               className={cn(
                 "mt-2 w-fit rounded-md border px-2 py-1 text-[13px] font-medium leading-5 bg-white text-neutral-900",
+                {
+                  "mt-1 border-0 bg-transparent p-0 text-xs font-normal text-neutral-500":
+                    isCompact,
+                },
               )}
             >
               {detailsText ?? fallbackDetails}
@@ -124,6 +144,7 @@ const ImageUploadInput = ({
             disabled ? "cursor-not-allowed" : "cursor-pointer",
           )}
         />
+        {actions && <div className="absolute right-2 top-2 z-10 flex gap-1">{actions}</div>}
       </div>
     </div>
   );

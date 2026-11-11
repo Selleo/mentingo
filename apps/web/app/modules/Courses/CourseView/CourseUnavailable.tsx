@@ -1,3 +1,4 @@
+import { useLocation } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
@@ -12,6 +13,7 @@ type CourseUnavailableProps = {
 
 export default function CourseUnavailable({ reason, canAccessCourseList }: CourseUnavailableProps) {
   const { t } = useTranslation();
+  const location = useLocation();
 
   if (reason === COURSE_UNAVAILABLE_REASONS.NOT_FOUND) {
     return (
@@ -32,11 +34,12 @@ export default function CourseUnavailable({ reason, canAccessCourseList }: Cours
 
   return (
     <ErrorPage
+      iconName="LogIn"
       title={t("studentCoursesView.courseUnavailable.accessTitle")}
       description={t("studentCoursesView.courseUnavailable.accessDescription")}
       actionLabel={t("studentCoursesView.courseUnavailable.goToLogin")}
       actionIcon="ArrowRight"
-      to="/auth/login"
+      to={`/auth/login?returnTo=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`}
     />
   );
 }

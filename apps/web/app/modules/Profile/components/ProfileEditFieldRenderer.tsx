@@ -4,6 +4,7 @@ import { Icon } from "~/components/Icon";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { getUserFieldMaxLength } from "~/utils/getUserFieldMaxLength";
 
 import type { UpdateUserProfileBody } from "../types";
 import type { Control } from "react-hook-form";
@@ -53,6 +54,7 @@ export const ProfileEditFieldRenderer = ({ field, control, user, t }: FieldRende
                 id={name}
                 value={formField.value as string}
                 type={type}
+                maxLength={getUserFieldMaxLength(name)}
                 data-testid={name}
                 className="peer w-full rounded-md border border-neutral-300 px-2 py-1 ps-9"
                 placeholder={t(`contentCreatorView.field.${name}Placeholder`)}

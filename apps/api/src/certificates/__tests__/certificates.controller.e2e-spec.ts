@@ -2139,4 +2139,39 @@ describe("CertificatesController (e2e)", () => {
       expect(response.body.pagination.totalItems).toBe(1);
     });
   });
+
+  describe("public certificate sharing", () => {
+    it("does not open a certificate's share page or image by its ID or a malformed token", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        thumbnailS3Key: null,
+        hasCertificate: true,
+      });
+      const [certificate] = await db
+        .insert(certificates)
+        .values({ userId: student.id, courseId: course.id })
+        .returning({ id: certificates.id });
+
+      for (const path of ["/api/certificates/share", "/api/certificates/share-image"]) {
+        await request(app.getHttpServer())
+          .get(path)
+          .query({ token: certificate.id, lang: "en" })
+          .expect(404);
+        await request(app.getHttpServer())
+          .get(path)
+          .query({ token: "not-a-token", lang: "en" })
+          .expect(400);
+      }
+    });
+  });
 });

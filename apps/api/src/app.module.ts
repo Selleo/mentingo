@@ -1,10 +1,11 @@
 import { Module } from "@nestjs/common";
 import { ConditionalModule, ConfigModule } from "@nestjs/config";
-import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerModule } from "@nestjs/throttler";
+import { MAX_FILE_SIZE_BYTES } from "@repo/shared";
 
 import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { AppStartupService } from "src/app-startup.service";
@@ -12,6 +13,7 @@ import { AutomationExecutionModule } from "src/automation-execution/automation-e
 import { AutomationModule } from "src/automations/automation.module";
 import { CourseRepetitionModule } from "src/course-repetition/course-repetition.module";
 import { EnvModule } from "src/env/env.module";
+import { UploadTooLargeFilter } from "src/file/filters/upload-too-large.filter";
 import { LangfuseShutdownService } from "src/langfuse/instrumentation";
 import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LearningTimeModule } from "src/learning-time";
@@ -28,6 +30,7 @@ import { ArticlesModule } from "./articles/articles.module";
 import { AssistantModule } from "./assistant/assistant.module";
 import { AudioModule } from "./audio/audio.module";
 import { AuthModule } from "./auth/auth.module";
+import { SessionModule } from "./auth/session/session.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
@@ -47,9 +50,11 @@ import { CompetenciesModule } from "./competencies/competencies.module";
 import { ContentMarketplaceModule } from "./content-marketplace/content-marketplace.module";
 import { CourseChatModule } from "./course-chat/course-chat.module";
 import { CourseModule } from "./courses/course.module";
+import { DevToolsModule, isDevToolsEnabled } from "./dev-tools/dev-tools.module";
 import { EmailTemplateModule } from "./email-templates/email-template.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
+import { GamificationModule } from "./gamification/gamification.module";
 import { GlobalSearchModule } from "./global-search/global-search.module";
 import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";
@@ -91,6 +96,7 @@ import type { RedisClient } from "src/redis";
 
 @Module({
   imports: [
+    SessionModule,
     ConfigModule.forRoot({
       load: getAppConfigLoaders(),
       isGlobal: true,
@@ -98,11 +104,7 @@ import type { RedisClient } from "src/redis";
     DbModule,
     SupportModeModule,
     JwtModule.registerAsync(jwtModuleOptions),
-    MulterModule.register({
-      limits: {
-        fileSize: 5 * 1024 * 1024 * 1024, // 5GB for videos
-      },
-    }),
+    { ...MulterModule.register({ limits: { fileSize: MAX_FILE_SIZE_BYTES } }), global: true },
     ThrottlerModule.forRootAsync({
       inject: [REDIS_CLIENT],
       useFactory: (redisClient: RedisClient) => ({
@@ -128,6 +130,7 @@ import type { RedisClient } from "src/redis";
     AutomationExecutionModule,
     NotificationsModule,
     TestConfigModule,
+    ConditionalModule.registerWhen(DevToolsModule, isDevToolsEnabled),
     CategoryModule,
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
@@ -181,9 +184,14 @@ import type { RedisClient } from "src/redis";
     LiveTrainingModule,
     CalendarModule,
     TodoTasksModule,
+    GamificationModule,
   ],
   controllers: [],
   providers: [
+    {
+      provide: APP_FILTER,
+      useClass: UploadTooLargeFilter,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: TenantRlsInterceptor,

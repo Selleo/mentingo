@@ -1,4 +1,9 @@
 import { useNavigate } from "@remix-run/react";
+import {
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
+  ALLOWED_SCORM_PACKAGE_FILE_EXTENSIONS,
+  formatFileSize,
+} from "@repo/shared";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -37,7 +42,7 @@ export function ScormUploadStep({ handleNext, handleBack: _ }: StepComponentProp
     <div className="flex flex-col gap-8 p-6">
       <input
         type="file"
-        accept=".zip"
+        accept={ALLOWED_SCORM_PACKAGE_FILE_EXTENSIONS.join(",")}
         onChange={handleFileChange}
         className="hidden"
         id="scorm-upload"
@@ -56,7 +61,11 @@ export function ScormUploadStep({ handleNext, handleBack: _ }: StepComponentProp
         ) : (
           <div className="space-y-2">
             <p className="font-medium">{t("adminScorm.other.uploadFileHeader")}</p>
-            <p className="text-sm text-muted-foreground">{t("adminScorm.other.uploadFileBody")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("adminScorm.other.uploadFileBody", {
+                maxSize: formatFileSize(MAX_SCORM_PACKAGE_SIZE_BYTES),
+              })}
+            </p>
           </div>
         )}
       </label>

@@ -1,59 +1,53 @@
 import { createContext, useEffect, type ReactNode, useState, useCallback } from "react";
 import { match } from "ts-pattern";
 
-import { getContrastColor, hexToHslTuple, hslToHex } from "./helpers";
+import { buildColorPalette, pickMostReadableColor, readCssVariable } from "./helpers";
+import { PALETTE_SHADES } from "./theme.constants";
 import { useThemeStore } from "./themeStore";
 
+import type { ColorPalette } from "./helpers";
+import type { ColorSchema } from "./theme.types";
+
 type ThemeContextType = {
-  primaryColor: string;
-  contrastColor: string;
-  setColorSchema: (primaryColor: string, contrastColor: string) => void;
+  colorSchema: ColorSchema;
+  palette: ColorPalette;
+  setColorSchema: (colorSchema: ColorSchema) => void;
 };
 
 export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const readPaletteFromDocument = () =>
+  Object.fromEntries(
+    PALETTE_SHADES.map((shade) => [shade, readCssVariable(`--primary-${shade}`)]),
+  ) as ColorPalette;
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const theme = useThemeStore((state) => state.theme);
 
-  const [primaryColor, setPrimaryColor] = useState(
-    getComputedStyle(document.documentElement).getPropertyValue("--primary-700").trim(),
-  );
-  const [contrastColor, setContrastColor] = useState(
-    getComputedStyle(document.documentElement).getPropertyValue("--color-white").trim(),
-  );
+  const [colorSchema, setColorSchemaState] = useState<ColorSchema>(() => ({
+    primaryColor: readCssVariable("--brand"),
+    contrastColor: readCssVariable("--color-white"),
+    backgroundColor: null,
+    accentColor: null,
+  }));
+  const [palette, setPalette] = useState<ColorPalette>(readPaletteFromDocument);
 
-  const handleSetColorSchema = useCallback((primaryColor: string, contrastColor: string) => {
-    setPrimaryColor(primaryColor);
-    setContrastColor(contrastColor);
+  const writeColorSchemaToDocument = useCallback((nextColorSchema: ColorSchema) => {
+    const { primaryColor, contrastColor, backgroundColor, accentColor } = nextColorSchema;
+    const nextPalette = buildColorPalette(primaryColor, { backgroundColor, accentColor });
 
-    const [h, s, l] = hexToHslTuple(primaryColor);
+    setColorSchemaState(nextColorSchema);
+    setPalette(nextPalette);
 
-    const shades = {
-      50: 97,
-      100: 90,
-      200: 80,
-      300: 70,
-      400: 60,
-      500: 50,
-      600: 40,
-      700: l, // selected color
-      800: 25,
-      900: 15,
-      950: 10,
-    };
-
-    Object.entries(shades).forEach(([key, lightness]) => {
-      const hexShade = hslToHex(h, s, lightness);
-
-      document.documentElement.style.setProperty(`--primary-${key}`, hexShade);
+    Object.entries(nextPalette).forEach(([shade, hex]) => {
+      document.documentElement.style.setProperty(`--primary-${shade}`, hex);
     });
 
+    document.documentElement.style.setProperty(`--brand`, primaryColor);
     document.documentElement.style.setProperty(`--contrast`, contrastColor);
     document.documentElement.style.setProperty(
       `--color-contrast`,
-      getComputedStyle(document.documentElement)
-        .getPropertyValue(getContrastColor(primaryColor, "--primary-800", "--primary-100"))
-        .trim(),
+      pickMostReadableColor(primaryColor, [nextPalette[800], nextPalette[100]]),
     );
   }, []);
 
@@ -70,7 +64,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   return (
     <ThemeContext.Provider
-      value={{ primaryColor, contrastColor, setColorSchema: handleSetColorSchema }}
+      value={{
+        colorSchema,
+        palette,
+        setColorSchema: writeColorSchemaToDocument,
+      }}
     >
       {children}
     </ThemeContext.Provider>

@@ -11,7 +11,7 @@ import { Type, type Static } from "@sinclair/typebox";
 
 import { UUIDSchema, paginatedResponse } from "src/common";
 
-import { authoringOperationSchema } from "./course-authoring-operations.schema";
+import { manualAuthoringOperationSchema } from "./course-authoring-operations.schema";
 
 const strict = { additionalProperties: false };
 const nullableString = Type.Union([Type.String(), Type.Null()]);
@@ -137,7 +137,7 @@ const commandFields = {
   expectedRevision: Type.Optional(Type.Integer({ minimum: 0 })),
   answer: Type.Optional(Type.String()),
   acceptQualityConcerns: Type.Optional(Type.Boolean()),
-  operations: Type.Optional(Type.Array(authoringOperationSchema)),
+  operations: Type.Optional(Type.Array(manualAuthoringOperationSchema)),
   sourcePolicy: Type.Optional(sourcePolicy),
 };
 const nonBatchCommandActions = [

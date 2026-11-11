@@ -119,6 +119,11 @@ export class CourseEditingService {
       trx,
     );
 
+    await this.fileService.assertImageReference(
+      createCourseBody.thumbnailS3Key,
+      currentUser.tenantId,
+    );
+
     const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
 
     if (!categoryExists) {
@@ -241,6 +246,13 @@ export class CourseEditingService {
 
         if (!canUpdateCourseByAuthor(currentUser, existingCourse.authorId)) {
           throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
+        }
+
+        if (updateCourseBody.thumbnailS3Key !== existingCourse.thumbnailS3Key) {
+          await this.fileService.assertImageReference(
+            updateCourseBody.thumbnailS3Key,
+            currentUser.tenantId,
+          );
         }
 
         const previousSnapshot =

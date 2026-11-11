@@ -503,6 +503,9 @@ class WorkflowsTest(unittest.TestCase):
                         self.assertIn('inputs.test_mode', step['if'])
                     self.assertNotIn('state.json', step['with']['path'])
         self.assertIn('default_branch', generation['if'])
+        for job in (generation, publication):
+            self.assertIn("github.ref == 'refs/heads/staging'", job['if'])
+            self.assertIn("github.event_name == 'workflow_dispatch'", job['if'])
         self.assertIn('github.sha == vars.SELF_ONBOARDING_PUBLISH_SHA', generation['if'])
         self.assertIn('github.sha == vars.SELF_ONBOARDING_PUBLISH_SHA', workflow['jobs']['publish']['if'])
 

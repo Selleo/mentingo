@@ -1,6 +1,7 @@
 import {
   ConflictException,
   ForbiddenException,
+  HttpException,
   Inject,
   Injectable,
   Logger,
@@ -8,10 +9,13 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import {
+  ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
+  ASSESSMENT_TIMED_ATTEMPT_SUBMIT_GRACE_SECONDS,
   COURSE_ENROLLMENT,
   COURSE_STATUSES,
   ENTITY_TYPES,
   PERMISSIONS,
+  QUIZ_ATTEMPT_START_STATUSES,
   type PermissionKey,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -44,6 +48,11 @@ import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PermissionsService } from "src/permissions/permissions.service";
+import { QUEUE_NAMES, QueueService } from "src/queue";
+import {
+  getQuizOpenAttemptTiming,
+  mapQuizOpenAttemptToState,
+} from "src/quiz/mappers/quiz-runtime.mapper";
 import { QuizRuntimeService } from "src/quiz/services/quiz-runtime.service";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import {
@@ -62,8 +71,18 @@ import {
   extractLessonResourceIds,
 } from "../lesson-resource-references";
 import { LESSON_TYPES } from "../lesson.type";
+import {
+  QUIZ_ATTEMPT_EXPIRATION_JOB_NAME,
+  QUIZ_ATTEMPT_FINALIZATION_STATUSES,
+} from "../repositories/lesson.constants";
 import { LessonRepository } from "../repositories/lesson.repository";
 
+import type {
+  ExpiredQuizAttemptFinalization,
+  LessonQuizSubmissionOptions,
+  QuizEvaluationResult,
+  QuizSubmissionAccess,
+} from "../lesson-quiz-attempt.types";
 import type { LessonResourceMetadata, ResourceWithUrlError } from "../lesson-resource.types";
 import type {
   AnswerQuestionBody,
@@ -71,6 +90,10 @@ import type {
   LessonShow,
   QuestionBody,
   QuestionDetails,
+  SaveQuizAttemptDraftBody,
+  SaveQuizAttemptDraftResponse,
+  StartQuizAttemptBody,
+  StartQuizAttemptResponse,
 } from "../lesson.schema";
 import type {
   AudioResourceLesson,
@@ -80,6 +103,8 @@ import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { FilePreviewFormat, FilePreviewOptions } from "src/file/types/file-preview.type";
+import type { QuizAttemptExpirationJobData } from "src/queue";
+import type { QuizOpenAttempt } from "src/quiz/types/quiz-runtime.types";
 
 @Injectable()
 export class LessonService {
@@ -99,6 +124,7 @@ export class LessonService {
     private readonly resourceLibraryService: ResourceLibraryService,
     private readonly quizRuntimeService: QuizRuntimeService,
     private readonly hostedVideoStatusService: HostedVideoStatusService,
+    private readonly queueService: QueueService,
   ) {}
 
   async getLessonById(
@@ -106,6 +132,7 @@ export class LessonService {
     userId: UUIDType | null | undefined,
     currentUser: CurrentUserType | null,
     language?: SupportedLanguages,
+    allowLazyQuizFinalize = true,
   ): Promise<LessonShow> {
     if (!currentUser) {
       return this.getPublicLessonById(id, language);
@@ -165,13 +192,20 @@ export class LessonService {
     const effectiveUserId = userId ?? currentUser.userId;
     const isStudent = this.isLearnerOnly(currentUser.permissions);
 
+    const isPublicCoursePreview =
+      !isManagerPreview &&
+      isStudent &&
+      hasPermission(currentUser.permissions, PERMISSIONS.COURSE_READ) &&
+      (await this.lessonRepository.getHasPublicCoursePreviewAccess(id, effectiveUserId));
+
     const hasLessonAccess =
+      isPublicCoursePreview ||
       isManagerPreview ||
       (await this.lessonRepository.getHasLessonAccess(id, effectiveUserId, isStudent));
 
     if (!hasLessonAccess) throw new UnauthorizedException("common.toast.lessonAccessDenied");
     const learningContext = courseLearningContext.getStore();
-    if (learningContext?.readOnly) isManagerPreview = true;
+    if (learningContext?.readOnly || isPublicCoursePreview) isManagerPreview = true;
     if (isManagerPreview && learningContext) learningContext.readOnly = true;
 
     const { language: actualLanguage } = await this.localizationService.getBaseLanguage(
@@ -185,13 +219,27 @@ export class LessonService {
       isNotNull(studentLessonProgress.completedAt),
     ]);
 
-    const lesson = await this.lessonRepository.getLessonDetails(
+    const lessonDetails = await this.lessonRepository.getLessonDetails(
       id,
       effectiveUserId,
       actualLanguage,
     );
 
-    if (!lesson) throw new NotFoundException("common.toast.notFound");
+    if (!lessonDetails) throw new NotFoundException("common.toast.notFound");
+
+    const lesson = isPublicCoursePreview
+      ? {
+          ...lessonDetails,
+          lessonCompleted: false,
+          quizScore: null,
+          updatedAt: null,
+          isQuizPassed: null,
+          attempts: null,
+          aiMentorDetails: null,
+          studentCourses: null,
+          nextLessonId: null,
+        }
+      : lessonDetails;
 
     if (!isManagerPreview && isStudent && !lesson.isFreemium && !lesson.isEnrolled)
       throw new UnauthorizedException("common.toast.lessonAccessDenied");
@@ -210,10 +258,22 @@ export class LessonService {
     }
 
     if (lesson.type === LESSON_TYPES.CONTENT) {
-      return this.getContentLessonWithResources(lesson, id, actualLanguage, effectiveUserId);
+      return this.getContentLessonWithResources(
+        lesson,
+        id,
+        actualLanguage,
+        isPublicCoursePreview ? undefined : effectiveUserId,
+        !isPublicCoursePreview,
+      );
     }
 
-    if (lesson.type === LESSON_TYPES.AI_MENTOR && !isManagerPreview) {
+    if (
+      lesson.type === LESSON_TYPES.AI_MENTOR &&
+      (!isManagerPreview ||
+        (isPublicCoursePreview &&
+          effectiveUserId === currentUser.userId &&
+          hasPermission(currentUser.permissions, PERMISSIONS.AI_USE)))
+    ) {
       const { data: thread } = await this.aiService.getOrCreateLessonThread({
         lessonId: id,
         status: THREAD_STATUS.ACTIVE,
@@ -242,7 +302,9 @@ export class LessonService {
     }
 
     if (lesson.type === LESSON_TYPES.AI_MENTOR) {
-      const existingThread = await this.aiService.getExistingThreadForLesson(id, effectiveUserId);
+      const existingThread = isPublicCoursePreview
+        ? undefined
+        : await this.aiService.getExistingThreadForLesson(id, effectiveUserId);
       let avatarUrl = undefined;
 
       if (lesson.aiMentor?.avatarReferenceUrl) {
@@ -292,32 +354,54 @@ export class LessonService {
     }
 
     if (lesson.type === LESSON_TYPES.LIVE_TRAINING) {
-      const liveTraining = lesson.liveTrainingId
-        ? await this.liveTrainingService.getLiveTraining(
-            lesson.liveTrainingId,
-            actualLanguage,
-            currentUser,
-          )
-        : null;
+      const liveTraining =
+        !isPublicCoursePreview && lesson.liveTrainingId
+          ? await this.liveTrainingService.getLiveTraining(
+              lesson.liveTrainingId,
+              actualLanguage,
+              currentUser,
+            )
+          : null;
 
       return { ...lesson, liveTraining };
     }
 
-    const questionLanguage = basicInfo?.languageAnswered ?? actualLanguage;
+    const questionLanguage = isPublicCoursePreview
+      ? actualLanguage
+      : (basicInfo?.languageAnswered ?? actualLanguage);
 
-    const questionList =
+    const openQuizAttempt =
+      lesson.type === LESSON_TYPES.QUIZ &&
+      !isManagerPreview &&
+      !lesson.lessonCompleted &&
+      effectiveUserId === currentUser.userId
+        ? await this.quizRuntimeService.findOpenAttempt(lesson.id, effectiveUserId)
+        : null;
+
+    if (
+      allowLazyQuizFinalize &&
+      openQuizAttempt &&
+      getQuizOpenAttemptTiming(openQuizAttempt).isPastGrace &&
+      (await this.tryFinalizeExpiredQuizAttempt(openQuizAttempt.id, currentUser))
+    )
+      return this.getLessonById(id, userId, currentUser, language, false);
+
+    const quizDelivery =
       lesson.type === LESSON_TYPES.QUIZ
-        ? (
-            await this.quizRuntimeService.getQuizForDelivery(
-              lesson.id,
-              questionLanguage,
-              effectiveUserId,
-              lesson.lessonCompleted,
-            )
-          ).questions
-        : [];
+        ? await this.quizRuntimeService.getQuizForDelivery(
+            lesson.id,
+            questionLanguage,
+            isPublicCoursePreview ? undefined : effectiveUserId,
+            !isPublicCoursePreview && (lesson.lessonCompleted || lesson.isQuizAwaitingReview),
+          )
+        : null;
+    const questionList = quizDelivery?.questions ?? [];
+    const timedQuizState = {
+      timeLimitMinutes: quizDelivery?.timeLimitMinutes ?? null,
+      quizAttempt: openQuizAttempt ? mapQuizOpenAttemptToState(openQuizAttempt) : null,
+    };
 
-    const isQuizFeedbackRedacted = !lesson.quizFeedbackEnabled;
+    const isQuizFeedbackRedacted = isPublicCoursePreview || !lesson.quizFeedbackEnabled;
 
     const questionListWithUrls: QuestionBody[] = await Promise.all(
       questionList.map(async (question) => {
@@ -362,6 +446,21 @@ export class LessonService {
         wrongAnswerCount,
       };
 
+      return { ...lesson, ...timedQuizState, quizDetails, isQuizFeedbackRedacted };
+    }
+
+    // Partial result: counts only already graded questions, the rest waits for a reviewer.
+    if (lesson.isQuizAwaitingReview && !isQuizFeedbackRedacted) {
+      const quizDetails: QuestionDetails = {
+        questions: redactedQuestionList,
+        questionCount: redactedQuestionList.length,
+        score: null,
+        correctAnswerCount: questionListWithUrls.filter(({ passQuestion }) => passQuestion === true)
+          .length,
+        wrongAnswerCount: questionListWithUrls.filter(({ passQuestion }) => passQuestion === false)
+          .length,
+      };
+
       return { ...lesson, quizDetails, isQuizFeedbackRedacted };
     }
 
@@ -373,7 +472,7 @@ export class LessonService {
       wrongAnswerCount: null,
     };
 
-    return { ...lesson, quizDetails, isQuizFeedbackRedacted };
+    return { ...lesson, ...timedQuizState, quizDetails, isQuizFeedbackRedacted };
   }
 
   private async getPublicLessonById(
@@ -396,18 +495,268 @@ export class LessonService {
   async evaluationQuiz(
     studentQuizAnswers: AnswerQuestionBody,
     currentUser: CurrentUserType,
-  ): Promise<{
-    correctAnswerCount: number;
-    wrongAnswerCount: number;
-    questionCount: number;
-    score: number;
-  }> {
-    const { userId } = currentUser;
+  ): Promise<QuizEvaluationResult> {
+    const accessCourseLessonWithDetails = await this.getQuizSubmissionAccess(
+      studentQuizAnswers.lessonId,
+      currentUser,
+      { allowCompleted: true },
+    );
 
-    await this.assertStudentProgressMutationAllowed(studentQuizAnswers.lessonId, currentUser);
+    if (accessCourseLessonWithDetails.lessonIsCompleted)
+      throw new ConflictException(
+        await this.getClosedQuizAttemptErrorKey(
+          studentQuizAnswers.lessonId,
+          currentUser.userId,
+          "studentLessonView.validation.quizAlreadyAnswered",
+        ),
+      );
+
+    // An open attempt is finalized even if the time limit was removed after it started.
+    const openAttempt = await this.quizRuntimeService.findOpenAttempt(
+      studentQuizAnswers.lessonId,
+      currentUser.userId,
+    );
+
+    if (!openAttempt) {
+      if (await this.quizRuntimeService.getTimeLimitMinutes(studentQuizAnswers.lessonId))
+        throw new ConflictException(
+          await this.getClosedQuizAttemptErrorKey(
+            studentQuizAnswers.lessonId,
+            currentUser.userId,
+            "studentLessonView.validation.quizAttemptNotStarted",
+          ),
+        );
+
+      return this.gradeQuizSubmissionOrThrow(
+        studentQuizAnswers,
+        currentUser,
+        accessCourseLessonWithDetails,
+      );
+    }
+
+    // After the grace period the sent answers are ignored; only the autosaved draft counts.
+    const { isPastGrace } = getQuizOpenAttemptTiming(openAttempt);
+    const result = await this.gradeQuizSubmission(
+      isPastGrace ? this.buildDraftSubmission(openAttempt) : studentQuizAnswers,
+      currentUser,
+      accessCourseLessonWithDetails,
+      { attemptId: openAttempt.id, dropInvalidAnswers: isPastGrace },
+    );
+
+    // Lost the race against another finalizer (worker, lesson view or a second tab).
+    if (!result)
+      throw new ConflictException(
+        isPastGrace
+          ? "studentLessonView.validation.quizAttemptExpired"
+          : "studentLessonView.validation.quizAlreadyAnswered",
+      );
+
+    return result;
+  }
+
+  async startQuizAttempt(
+    { lessonId, language }: StartQuizAttemptBody,
+    currentUser: CurrentUserType,
+  ): Promise<StartQuizAttemptResponse> {
+    const accessCourseLessonWithDetails = await this.getQuizSubmissionAccess(lessonId, currentUser);
+    const openAttempt = await this.quizRuntimeService.findOpenAttempt(lessonId, currentUser.userId);
+
+    // Not thrown: an error would roll back the finalization in this request's transaction.
+    if (openAttempt && getQuizOpenAttemptTiming(openAttempt).isPastGrace) {
+      await this.finalizeTimedQuizAttempt(openAttempt, currentUser, accessCourseLessonWithDetails);
+      return { status: QUIZ_ATTEMPT_START_STATUSES.FINALIZED, attempt: null };
+    }
+
+    const attempt =
+      openAttempt ??
+      (await this.quizRuntimeService.startTimedAttempt(lessonId, currentUser.userId, language));
+
+    // Also on resume: jobId dedupes, and a lost or failed earlier enqueue gets another chance.
+    await this.scheduleQuizAttemptExpiration(attempt, currentUser);
+
+    return {
+      status: QUIZ_ATTEMPT_START_STATUSES.IN_PROGRESS,
+      attempt: mapQuizOpenAttemptToState(attempt),
+    };
+  }
+
+  async saveQuizAttemptDraft(
+    { lessonId, attemptId, questionsAnswers }: SaveQuizAttemptDraftBody,
+    currentUser: CurrentUserType,
+  ): Promise<SaveQuizAttemptDraftResponse> {
+    const openAttempt = await this.quizRuntimeService.findOpenAttempt(lessonId, currentUser.userId);
+
+    if (openAttempt && openAttempt.id !== attemptId)
+      throw new ConflictException("studentLessonView.validation.quizAttemptNotStarted");
+
+    if (!openAttempt)
+      throw new ConflictException(
+        await this.getClosedQuizAttemptErrorKey(
+          lessonId,
+          currentUser.userId,
+          "studentLessonView.validation.quizAttemptNotStarted",
+        ),
+      );
+
+    if (getQuizOpenAttemptTiming(openAttempt).isExpired)
+      throw new ConflictException("studentLessonView.validation.quizAttemptExpired");
+
+    const savedDraft = await this.quizRuntimeService.saveDraftAnswers(
+      openAttempt,
+      questionsAnswers,
+    );
+
+    // The deadline passed or another request finalized the attempt between the checks and the write.
+    if (!savedDraft?.draftSavedAt)
+      throw new ConflictException(
+        await this.getClosedQuizAttemptErrorKey(
+          lessonId,
+          currentUser.userId,
+          "studentLessonView.validation.quizAttemptExpired",
+        ),
+      );
+
+    return { draftSavedAt: new Date(savedDraft.draftSavedAt).toISOString() };
+  }
+
+  /** Background/lazy finalization of an abandoned timed attempt with its last saved draft. */
+  async finalizeExpiredQuizAttempt(
+    attemptId: UUIDType,
+    actor: CurrentUserType,
+  ): Promise<ExpiredQuizAttemptFinalization> {
+    const closed = { status: QUIZ_ATTEMPT_FINALIZATION_STATUSES.CLOSED } as const;
+    const openAttempt = await this.quizRuntimeService.findOpenAttemptById(attemptId);
+
+    if (!openAttempt) return closed;
+
+    const { isPastGrace, msUntilGraceEnds } = getQuizOpenAttemptTiming(openAttempt);
+
+    if (!isPastGrace)
+      return { status: QUIZ_ATTEMPT_FINALIZATION_STATUSES.NOT_EXPIRED, msUntilGraceEnds };
 
     const [accessCourseLessonWithDetails] = await this.lessonRepository.checkLessonAssignment(
-      studentQuizAnswers.lessonId,
+      openAttempt.lessonId,
+      openAttempt.learnerId,
+    );
+
+    if (
+      !accessCourseLessonWithDetails ||
+      accessCourseLessonWithDetails.lessonIsCompleted ||
+      (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
+    ) {
+      this.logger.warn(
+        `Cancelling expired quiz attempt without learner access or after completion (attemptId=${attemptId}, lessonId=${openAttempt.lessonId}, learnerId=${openAttempt.learnerId})`,
+      );
+      await this.quizRuntimeService.cancelOpenAttempt(attemptId);
+      return closed;
+    }
+
+    await this.finalizeTimedQuizAttempt(openAttempt, actor, accessCourseLessonWithDetails);
+    return closed;
+  }
+
+  private async finalizeTimedQuizAttempt(
+    openAttempt: QuizOpenAttempt,
+    actor: CurrentUserType,
+    accessCourseLessonWithDetails: QuizSubmissionAccess,
+  ) {
+    // A null result means a concurrent finalizer won, which is equally a closed attempt.
+    await courseLearningContext.run({ learningStateId: openAttempt.learningStateId }, () =>
+      this.gradeQuizSubmission(
+        this.buildDraftSubmission(openAttempt),
+        actor,
+        accessCourseLessonWithDetails,
+        { attemptId: openAttempt.id, dropInvalidAnswers: true },
+      ),
+    );
+  }
+
+  /** The lesson view must still load when finalizing the expired attempt fails. */
+  private async tryFinalizeExpiredQuizAttempt(attemptId: UUIDType, currentUser: CurrentUserType) {
+    try {
+      const finalization = await this.finalizeExpiredQuizAttempt(attemptId, currentUser);
+      return finalization.status === QUIZ_ATTEMPT_FINALIZATION_STATUSES.CLOSED;
+    } catch (error) {
+      this.logger.error(
+        `Lazy finalization of expired quiz attempt failed (attemptId=${attemptId}, userId=${currentUser.userId})`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      return false;
+    }
+  }
+
+  private async scheduleQuizAttemptExpiration(
+    attempt: QuizOpenAttempt,
+    currentUser: CurrentUserType,
+  ) {
+    try {
+      await this.queueService.enqueue<QuizAttemptExpirationJobData>(
+        QUEUE_NAMES.QUIZ_ATTEMPT_EXPIRATION,
+        QUIZ_ATTEMPT_EXPIRATION_JOB_NAME,
+        { tenantId: currentUser.tenantId, attemptId: attempt.id, actor: currentUser },
+        {
+          jobId: attempt.id,
+          delay: getQuizOpenAttemptTiming(attempt).msUntilGraceEnds + 1000,
+          attempts: 5,
+          backoff: { type: "fixed", delay: 5000 },
+          removeOnComplete: true,
+          removeOnFail: false,
+        },
+      );
+    } catch (error) {
+      // Lazy finalization on the next start, submit or lesson view still closes the attempt.
+      this.logger.error(
+        `Failed to schedule quiz attempt expiration (attemptId=${attempt.id}, lessonId=${attempt.lessonId})`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
+
+  /** Error key for a quiz attempt that is no longer open, based on how the latest one was closed. */
+  private async getClosedQuizAttemptErrorKey(
+    lessonId: UUIDType,
+    learnerId: UUIDType,
+    fallbackKey: string,
+  ) {
+    const latestAttempt = await this.quizRuntimeService.findLatestAttemptByLesson(
+      lessonId,
+      learnerId,
+    );
+
+    if (!latestAttempt?.expiresAt) return fallbackKey;
+
+    const graceEndsAt =
+      new Date(latestAttempt.expiresAt).getTime() +
+      ASSESSMENT_TIMED_ATTEMPT_SUBMIT_GRACE_SECONDS * 1000;
+    const wasSubmittedInTime =
+      latestAttempt.submissionStatus === ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED &&
+      latestAttempt.submittedAt !== null &&
+      new Date(latestAttempt.submittedAt).getTime() <= graceEndsAt;
+
+    return wasSubmittedInTime
+      ? "studentLessonView.validation.quizAlreadyAnswered"
+      : "studentLessonView.validation.quizAttemptExpired";
+  }
+
+  private buildDraftSubmission(openAttempt: QuizOpenAttempt): AnswerQuestionBody {
+    return {
+      lessonId: openAttempt.lessonId,
+      language: openAttempt.language,
+      questionsAnswers: openAttempt.draftAnswers ?? [],
+    };
+  }
+
+  private async getQuizSubmissionAccess(
+    lessonId: UUIDType,
+    currentUser: CurrentUserType,
+    { allowCompleted = false } = {},
+  ) {
+    const { userId } = currentUser;
+
+    await this.assertStudentProgressMutationAllowed(lessonId, currentUser);
+
+    const [accessCourseLessonWithDetails] = await this.lessonRepository.checkLessonAssignment(
+      lessonId,
       userId,
     );
 
@@ -415,23 +764,46 @@ export class LessonService {
       throw new NotFoundException("common.toast.notFound");
     }
 
-    if (accessCourseLessonWithDetails.lessonIsCompleted) {
+    if (!allowCompleted && accessCourseLessonWithDetails.lessonIsCompleted) {
       throw new ConflictException("studentLessonView.validation.quizAlreadyAnswered");
+    }
+
+    if (accessCourseLessonWithDetails.quizAwaitingReview) {
+      throw new ConflictException("studentLessonView.validation.quizAwaitingReview");
     }
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("studentLessonView.validation.lessonAssignmentRequired");
 
+    return accessCourseLessonWithDetails;
+  }
+
+  private async gradeQuizSubmission(
+    studentQuizAnswers: AnswerQuestionBody,
+    currentUser: CurrentUserType,
+    accessCourseLessonWithDetails: QuizSubmissionAccess,
+    submissionOptions: LessonQuizSubmissionOptions = {},
+  ): Promise<QuizEvaluationResult | null> {
+    const { userId } = currentUser;
+
     return await this.db.transaction(async (trx) => {
       try {
-        const evaluationResult = await this.quizRuntimeService.submitQuiz(
-          studentQuizAnswers,
-          userId,
-          trx,
-        );
+        const evaluationResult = submissionOptions.attemptId
+          ? await this.quizRuntimeService.finalizeTimedAttempt(
+              studentQuizAnswers,
+              userId,
+              submissionOptions.attemptId,
+              trx,
+              submissionOptions,
+            )
+          : await this.quizRuntimeService.submitQuiz(studentQuizAnswers, userId, trx);
+
+        if (!evaluationResult) return null;
 
         const isQuizPassed = evaluationResult.passed;
+        const { awaitingReview } = evaluationResult;
 
+        // A pending attempt keeps the lesson incomplete; grading completes it and emits the events.
         await this.studentLessonProgressService.updateQuizProgress(
           accessCourseLessonWithDetails.chapterId,
           studentQuizAnswers.lessonId,
@@ -440,10 +812,20 @@ export class LessonService {
           evaluationResult.score,
           evaluationResult.attemptNumber,
           isQuizPassed,
-          true,
+          !awaitingReview,
           trx,
           studentQuizAnswers.language,
         );
+
+        if (awaitingReview) {
+          return {
+            correctAnswerCount: 0,
+            wrongAnswerCount: 0,
+            questionCount: evaluationResult.questionCount,
+            score: 0,
+            awaitingReview,
+          };
+        }
 
         if (isQuizPassed) {
           await this.studentLessonProgressService.markLessonAsCompleted({
@@ -467,6 +849,7 @@ export class LessonService {
             correctAnswers: evaluationResult.correctAnswerCount,
             wrongAnswers: evaluationResult.wrongAnswerCount,
             score: evaluationResult.score,
+            isSupportMode: Boolean(currentUser.isSupportMode),
           }),
           trx,
         );
@@ -476,11 +859,35 @@ export class LessonService {
           wrongAnswerCount: evaluationResult.wrongAnswerCount,
           questionCount: evaluationResult.questionCount,
           score: evaluationResult.score,
+          awaitingReview,
         };
       } catch (error) {
+        if (error instanceof HttpException) throw error;
+
+        this.logger.error(
+          `Quiz evaluation failed (lessonId=${studentQuizAnswers.lessonId}, userId=${userId}, attemptId=${submissionOptions.attemptId ?? "none"})`,
+          error instanceof Error ? error.stack : String(error),
+        );
         throw new ConflictException("studentLessonView.validation.quizEvaluationFailed");
       }
     });
+  }
+
+  private async gradeQuizSubmissionOrThrow(
+    studentQuizAnswers: AnswerQuestionBody,
+    currentUser: CurrentUserType,
+    accessCourseLessonWithDetails: QuizSubmissionAccess,
+  ): Promise<QuizEvaluationResult> {
+    const result = await this.gradeQuizSubmission(
+      studentQuizAnswers,
+      currentUser,
+      accessCourseLessonWithDetails,
+    );
+
+    // Untimed submissions always insert a new attempt, so a result is always returned.
+    if (!result) throw new ConflictException("studentLessonView.validation.quizEvaluationFailed");
+
+    return result;
   }
 
   async deleteStudentQuizAnswers(lessonId: UUIDType, currentUser: CurrentUserType): Promise<void> {
@@ -495,6 +902,10 @@ export class LessonService {
 
     if (!accessCourseLessonWithDetails) {
       throw new NotFoundException("common.toast.notFound");
+    }
+
+    if (accessCourseLessonWithDetails.quizAwaitingReview) {
+      throw new ConflictException("studentLessonView.validation.quizAwaitingReview");
     }
 
     if (!accessCourseLessonWithDetails.lessonIsCompleted) {
@@ -555,6 +966,13 @@ export class LessonService {
     lessonId: UUIDType,
     currentUser: CurrentUserType,
   ) {
+    if (
+      this.isLearnerOnly(currentUser.permissions) &&
+      (await this.lessonRepository.getHasPublicCoursePreviewAccess(lessonId, currentUser.userId))
+    ) {
+      throw new ForbiddenException("studentLessonView.validation.lessonAssignmentRequired");
+    }
+
     const { permissions } = await this.permissionsService.getUserAccess(currentUser.userId);
 
     const [access] = await this.db
@@ -677,7 +1095,15 @@ export class LessonService {
       throw new NotFoundException("common.toast.notFound");
     }
 
-    if (!lesson.isAssigned && isStudent && !lesson.isFreemium) {
+    if (
+      !lesson.isAssigned &&
+      isStudent &&
+      !lesson.isFreemium &&
+      !(await this.lessonRepository.getHasPublicCoursePreviewAccess(
+        lessonResource.entityId,
+        currentUser.userId,
+      ))
+    ) {
       throw new ForbiddenException("common.toast.lessonAccessDenied");
     }
 
@@ -744,6 +1170,13 @@ export class LessonService {
       !audioLesson.isArchived &&
       (audioLesson.isEnrolled || audioLesson.isFreemium);
 
+    if (
+      !audioLesson.isEnrolled &&
+      hasPermission(permissions, PERMISSIONS.COURSE_READ) &&
+      (await this.lessonRepository.getHasPublicCoursePreviewAccess(audioLesson.lessonId, userId))
+    )
+      return true;
+
     if (!isLearnerReachable) return false;
 
     return this.lessonRepository.getHasLessonAccess(audioLesson.lessonId, userId, true);
@@ -785,6 +1218,7 @@ export class LessonService {
     id: UUIDType,
     actualLanguage: SupportedLanguages,
     userId?: UUIDType | null,
+    repairAssetRelations = true,
   ): Promise<LessonShow> {
     let lessonResources = await this.fileService.getResourcesForEntity(
       id,
@@ -801,7 +1235,7 @@ export class LessonService {
       (resourceId) => !attachedResourceReferences.has(resourceId),
     );
 
-    if (hasMissingResourceRelation) {
+    if (hasMissingResourceRelation && repairAssetRelations) {
       await this.resourceLibraryService.syncLessonAssetRelations(id);
       lessonResources = await this.fileService.getResourcesForEntity(
         id,

@@ -22,9 +22,7 @@ describe("Tiptap iframe URL boundary", () => {
       });
       const html = editor.getHTML();
       const element = new DOMParser().parseFromString(html, "text/html").querySelector("iframe");
-      expect(element?.hasAttribute("src")).toBe(false);
-      expect(element?.hasAttribute("srcdoc")).toBe(false);
-      expect(element?.hasAttribute("onload")).toBe(false);
+      expect(element).toBeNull();
       editor.destroy();
     }
   });
@@ -39,7 +37,7 @@ describe("Tiptap iframe URL boundary", () => {
     const editor = new Editor({
       extensions: [StarterKit, Iframe],
       content:
-        '<iframe src="/uploaded-active-content" sandbox="allow-scripts allow-same-origin allow-top-navigation"></iframe>',
+        '<iframe src="https://www.youtube.com/embed/video" sandbox="allow-scripts allow-same-origin allow-top-navigation"></iframe>',
     });
     const iframe = new DOMParser()
       .parseFromString(editor.getHTML(), "text/html")

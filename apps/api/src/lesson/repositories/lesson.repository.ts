@@ -11,8 +11,10 @@ import { DatabasePg, type UUIDType } from "src/common";
 import { getGroupManagerCourseScopeCondition } from "src/common/permissions/group-manager-scope.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
+import { hasPublicCoursePreviewAccess } from "src/lesson/repositories/public-course-preview-access";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { quizAwaitingReview } from "src/quiz/quiz-awaiting-review.sql";
 import {
   aiJudgeConfigurations,
   aiJudgeCriteria,
@@ -80,6 +82,10 @@ export class LessonRepository {
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(lessons.id, id));
     return lesson;
+  }
+
+  async getHasPublicCoursePreviewAccess(id: UUIDType, userId: UUIDType) {
+    return hasPublicCoursePreviewAccess(this.db, id, userId);
   }
 
   async getHasLessonAccess(id: UUIDType, userId: UUIDType, isStudent: boolean) {
@@ -156,6 +162,7 @@ export class LessonRepository {
         quizScore: sql<number | null>`${studentLessonProgress.quizScore}`,
         updatedAt: studentLessonProgress.updatedAt,
         isQuizPassed: sql<boolean | null>`${studentLessonProgress.isQuizPassed}`,
+        isQuizAwaitingReview: quizAwaitingReview(lessons.id, userId),
         attempts: sql<number | null>`${studentLessonProgress.attempts}`,
         quizFeedbackEnabled: coursesSettingsHelpers.select("quizFeedbackEnabled"),
         videoCompletionTrackingEnabled: coursesSettingsHelpers.select(
@@ -460,6 +467,7 @@ export class LessonRepository {
         updatedAt: studentLessonProgress.updatedAt,
         attempts: sql<number | null>`${studentLessonProgress.attempts}`,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        quizAwaitingReview: quizAwaitingReview(lessons.id, userId),
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,
       })

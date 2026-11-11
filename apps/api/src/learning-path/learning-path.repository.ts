@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { Inject, Injectable } from "@nestjs/common";
 import {
   LEARNING_PATH_STATUSES,
@@ -1723,6 +1725,26 @@ export class LearningPathRepository {
       .limit(1);
 
     return certificate;
+  }
+
+  /** Returns the certificate's persistent share token, creating it on first share. */
+  async issueLearningPathCertificateShareToken(certificateId: UUIDType): Promise<string | null> {
+    const token = randomUUID();
+    const [certificate] = await this.db
+      .update(learningPathCertificates)
+      .set({ shareToken: sql`COALESCE(${learningPathCertificates.shareToken}, ${token}::uuid)` })
+      .where(eq(learningPathCertificates.id, certificateId))
+      .returning({ shareToken: learningPathCertificates.shareToken });
+    return certificate?.shareToken ?? null;
+  }
+
+  async findLearningPathCertificateIdByShareToken(token: string): Promise<string | undefined> {
+    const [certificate] = await this.dbAdmin
+      .select({ id: learningPathCertificates.id })
+      .from(learningPathCertificates)
+      .where(eq(learningPathCertificates.shareToken, token))
+      .limit(1);
+    return certificate?.id;
   }
 
   async createLearningPathCertificate(

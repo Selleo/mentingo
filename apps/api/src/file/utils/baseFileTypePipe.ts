@@ -1,19 +1,14 @@
 import { ParseFilePipeBuilder } from "@nestjs/common";
+import { MAX_FILE_SIZE_BYTES } from "@repo/shared";
 
-import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { MagicFileTypeValidator } from "src/file/validators/magic-file-type.validator";
+import { MaxUploadSizeValidator } from "src/file/validators/max-upload-size.validator";
 
 export function getBaseFileTypePipe(
   fileType: string | RegExp,
-  maxSize: number = MAX_FILE_SIZE,
-  fallbackToMimetype: boolean = false,
+  maxSize: number = MAX_FILE_SIZE_BYTES,
 ) {
   return new ParseFilePipeBuilder()
-    .addValidator(
-      new MagicFileTypeValidator({
-        fileType,
-        fallbackToMimetype,
-      }),
-    )
-    .addMaxSizeValidator({ maxSize });
+    .addValidator(new MaxUploadSizeValidator({ maxSize }))
+    .addValidator(new MagicFileTypeValidator({ fileType }));
 }

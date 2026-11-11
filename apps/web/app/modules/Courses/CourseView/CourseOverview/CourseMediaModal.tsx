@@ -1,4 +1,9 @@
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import {
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  MAX_IMAGE_FILE_SIZE_BYTES,
+  MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES,
+  formatFileSize,
+} from "@repo/shared";
 import { Upload, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -118,7 +123,7 @@ export default function CourseMediaModal({
               inputId="course-hero-image-upload"
               variant="video"
               accept={ALLOWED_LESSON_IMAGE_FILE_TYPES.join(",")}
-              detailsText={`${t("modernCourseView.media.imageLimit")} · ${t(
+              detailsText={`${t("modernCourseView.media.imageLimit", { maxSize: formatFileSize(MAX_IMAGE_FILE_SIZE_BYTES) })} · ${t(
                 "modernCourseView.media.imageRecommendation",
               )}`}
             />
@@ -138,7 +143,7 @@ export default function CourseMediaModal({
               file={selectedTrailerFile}
               fileInputRef={trailerInputRef}
               inputId="course-trailer-upload"
-              detailsText={`${t("modernCourseView.media.videoLimit")} · ${t(
+              detailsText={`${t("modernCourseView.media.videoLimit", { maxSize: formatFileSize(MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES) })} · ${t(
                 "modernCourseView.media.videoRecommendation",
               )}`}
             />

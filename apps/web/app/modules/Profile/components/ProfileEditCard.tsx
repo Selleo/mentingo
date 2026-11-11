@@ -1,3 +1,4 @@
+import { MAX_AVATAR_FILE_SIZE_BYTES } from "@repo/shared";
 import { useMemo, useRef } from "react";
 import { Controller, type Control, type UseFormSetValue } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -140,6 +141,7 @@ export const ProfileEditCard = ({
                   fileInputRef={fileInputRef}
                   aspect={1 / 1}
                   cropShape="round"
+                  maxSizeBytes={MAX_AVATAR_FILE_SIZE_BYTES}
                   maxResolution={AVATAR_MAX_RESOLUTION}
                 />
               </div>

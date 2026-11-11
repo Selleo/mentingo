@@ -1,3 +1,4 @@
+import { stripHtmlTags } from "@repo/shared";
 import { escape } from "lodash-es";
 
 const INLINE_CODE_REGEX = /(?<!`)`([^`\n]+)`(?!`)/g;
@@ -21,3 +22,7 @@ export const normalizeMarkdownCode = (content: string) => {
     return `<code>${escape(code)}</code>`;
   });
 };
+
+/** Plain-text preview of rich text that may still hold Markdown code, keeping code examples. */
+export const toPlainTextPreview = (content: string) =>
+  stripHtmlTags(normalizeMarkdownCode(content));

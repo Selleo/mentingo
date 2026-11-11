@@ -107,7 +107,7 @@ const createSeedAssessmentQuestion = async (
     : questionData.description;
   const questionType =
     questionData.type as (typeof ASSESSMENT_QUESTION_TYPES)[keyof typeof ASSESSMENT_QUESTION_TYPES];
-  const isManual =
+  const isOpenQuestion =
     questionData.type === QUESTION_TYPE.BRIEF_RESPONSE ||
     questionData.type === QUESTION_TYPE.DETAILED_RESPONSE;
 
@@ -117,7 +117,9 @@ const createSeedAssessmentQuestion = async (
     questionType,
     displayOrder,
     maximumPoints: "1",
-    gradingMode: isManual ? ASSESSMENT_GRADING_MODES.MANUAL : ASSESSMENT_GRADING_MODES.AUTOMATIC,
+    gradingMode: isOpenQuestion
+      ? ASSESSMENT_GRADING_MODES.PARTICIPATION
+      : ASSESSMENT_GRADING_MODES.AUTOMATIC,
     prompt: buildJsonbField(language, description ?? questionData.title),
     title: buildJsonbField(language, questionData.title),
     description: questionData.description
@@ -580,6 +582,7 @@ const SYSTEM_ROLE_DISPLAY_NAME: Record<SystemRoleSlug, string> = {
   [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
   [SYSTEM_ROLE_SLUGS.TRAINER]: "Trainer",
   [SYSTEM_ROLE_SLUGS.GROUP_MANAGER]: "Group Manager",
+  [SYSTEM_ROLE_SLUGS.REVIEWER]: "Reviewer",
   [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
 };
 

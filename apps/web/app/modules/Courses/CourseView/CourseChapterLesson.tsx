@@ -18,6 +18,7 @@ const progressBadge = {
   in_progress: "inProgress",
   not_started: "notStarted",
   blocked: "blocked",
+  awaiting_review: "awaitingReview",
 } as const;
 
 type CourseChapterLessonProps = {

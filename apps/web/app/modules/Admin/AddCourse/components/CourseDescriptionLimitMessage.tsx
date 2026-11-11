@@ -1,5 +1,6 @@
+import { stripHtmlTags } from "@repo/shared";
+
 import { cn } from "~/lib/utils";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { MAX_COURSE_DESCRIPTION_HTML_LENGTH, MAX_COURSE_DESCRIPTION_LENGTH } from "../constants";
 

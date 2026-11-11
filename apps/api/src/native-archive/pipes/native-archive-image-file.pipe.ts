@@ -1,7 +1,7 @@
 import { HttpStatus } from "@nestjs/common";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, MAX_FILE_SIZE_BYTES } from "@repo/shared";
 
-import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from "src/file/file.constants";
+import { ALLOWED_MIME_TYPES } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 
@@ -14,6 +14,5 @@ const imageMimeTypes = [
 
 export const nativeArchiveImageFilePipe = getBaseFileTypePipe(
   buildFileTypeRegex(imageMimeTypes),
-  MAX_FILE_SIZE,
-  true,
+  MAX_FILE_SIZE_BYTES,
 ).build({ fileIsRequired: true, errorHttpStatusCode: HttpStatus.BAD_REQUEST });

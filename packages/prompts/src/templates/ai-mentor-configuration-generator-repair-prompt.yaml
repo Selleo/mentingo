@@ -1,6 +1,6 @@
 id: aiMentorConfigurationGeneratorRepair
 description: Repair-mode instructions for AI Mentor configuration generation
-version: 1
+version: 2
 
 template: |
   <generation_mode>
@@ -9,7 +9,10 @@ template: |
 
   <mode_rules>
   - Return a complete replacement and change only fields needed to resolve the findings.
-  - Preserve the creator instruction and valid unaffected content.
+  - Preserve the creator instruction and copy unaffected fields exactly, character for character, including the AI character goal. Do not paraphrase, polish, or reinterpret roles outside the repair scope.
+  - The output schema remains mandatory. If current input contains a structurally invalid value, normalize only that invalid field to satisfy the schema; this does not authorize rewriting other fields.
+  - Supplied findings define the repair scope. If findings are absent or empty and the requested defect is not present, return the current configuration unchanged. Do not invent a defect or regenerate the scene.
+  - Repair-mode preservation overrides general drafting preferences for unchanged fields. If a dependent field needs correction, identify it through validation rather than silently broadening this repair.
   - Do not copy a finding's explanation verbatim into the configuration.
   - Never change, return, or recommend the configuration type.
   </mode_rules>

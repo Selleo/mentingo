@@ -77,7 +77,10 @@ const requestStatuses = (session: AuthoringSession) => {
     if (
       !turn &&
       tasks.every(
-        (task) => task.kind === AUTHORING_TASK_KIND.SOURCE || sourceTaskIds.has(task.taskId),
+        (task) =>
+          [AUTHORING_TASK_KIND.SOURCE, AUTHORING_TASK_KIND.SOURCE_VISION].some(
+            (kind) => kind === task.kind,
+          ) || sourceTaskIds.has(task.taskId),
       )
     )
       return;

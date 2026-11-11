@@ -119,7 +119,9 @@ describe("HelpdeskService compatibility and privacy", () => {
     await service().getDomains({ language: "pl" });
     expect(client.getDomains).toHaveBeenCalledWith({ language: "pl" });
     expect(() =>
-      service().getDomains({ language: "xx" } as unknown as Parameters<HelpdeskService["getDomains"]>[0]),
+      service().getDomains({ language: "xx" } as unknown as Parameters<
+        HelpdeskService["getDomains"]
+      >[0]),
     ).toThrow(BadRequestException);
     await expect(
       service().search({ query: "", language: "en", domain: "INVALID/key" }),

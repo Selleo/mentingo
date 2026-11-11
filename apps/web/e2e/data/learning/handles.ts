@@ -1,8 +1,14 @@
+import { SCORM_PLAYER_ATTRIBUTES } from "@repo/shared";
+
 export const LEARNING_HANDLES = {
+  SCORM_PACKAGE_IFRAME: SCORM_PLAYER_ATTRIBUTES.CONTENT_FRAME_TEST_ID,
   LESSON_TITLE: "learning-lesson-title",
   NEXT_LESSON_BUTTON: "learning-next-lesson-button",
   QUIZ_FORM: "learning-quiz-form",
   QUIZ_SCORE: "learning-quiz-score",
+  QUIZ_AWAITING_REVIEW: "learning-quiz-awaiting-review",
+  QUIZ_PARTIAL_SCORE: "learning-quiz-partial-score",
+  QUESTION_AWAITING_REVIEW: "learning-question-awaiting-review",
   QUIZ_PASSING_THRESHOLD: "learning-quiz-passing-threshold",
   QUIZ_SUBMIT_BUTTON: "learning-quiz-submit-button",
   QUIZ_RETAKE_BUTTON: "learning-quiz-retake-button",

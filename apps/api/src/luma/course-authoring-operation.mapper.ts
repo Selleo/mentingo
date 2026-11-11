@@ -1,12 +1,12 @@
 /** Converts validated API operations to the wire shape expected by the authoring service. */
 import { BadRequestException } from "@nestjs/common";
 
-import type { AuthoringOperation } from "./schema/course-authoring-operations.schema";
+import type { ManualAuthoringOperation } from "./schema/course-authoring-operations.schema";
 import type { AuthoringOperation as WireOperation } from "@mentingo/luma-sdk";
 
 /** Preserve the operation discriminant when converting the grouped TypeBox union. */
 /** Maps validated Core operation payloads to the generated client wire contract. */
-export function toWireAuthoringOperation(operation: AuthoringOperation): WireOperation {
+export function toWireAuthoringOperation(operation: ManualAuthoringOperation): WireOperation {
   switch (operation.type) {
     case "lesson.create": {
       if (operation.payload.lessonType === "ai_mentor") {

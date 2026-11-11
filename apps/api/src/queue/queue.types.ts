@@ -27,6 +27,8 @@ export const QUEUE_NAMES = {
   VIDEO_METADATA: "video-metadata",
   REPORT_EXPORT: "report-export",
   CONTENT_MARKETPLACE_EVENTS: "content-marketplace-events",
+  GAMIFICATION: "gamification",
+  QUIZ_ATTEMPT_EXPIRATION: "quiz-attempt-expiration",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -85,6 +87,13 @@ export interface CourseDuplicationJobData {
   tenantId: UUIDType;
   sourceCourseId: UUIDType;
   targetCourseId: UUIDType;
+  actor: CurrentUserType;
+}
+
+export interface QuizAttemptExpirationJobData {
+  tenantId: UUIDType;
+  attemptId: UUIDType;
+  /** Learner snapshot from the start request, used to record progress on their behalf. */
   actor: CurrentUserType;
 }
 

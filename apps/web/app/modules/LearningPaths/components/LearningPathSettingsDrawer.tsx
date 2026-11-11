@@ -1,5 +1,10 @@
 import { useSearchParams } from "@remix-run/react";
-import { ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES, LEARNING_PATH_STATUSES } from "@repo/shared";
+import {
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  LEARNING_PATH_STATUSES,
+  MAX_IMAGE_FILE_SIZE_BYTES,
+  formatFileSize,
+} from "@repo/shared";
 import { Award, Eye, PackageOpen, Settings, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -95,7 +100,7 @@ export function LearningPathSettingsDrawer({
   const colorSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedColorRef = useRef<string | null>(certificateFontColor ?? null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const acceptedSignatureTypes = [...ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES];
+  const acceptedSignatureTypes = [...ALLOWED_LESSON_IMAGE_FILE_TYPES];
   const { data: globalSettings } = useGlobalSettings();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -331,6 +336,7 @@ export function LearningPathSettingsDrawer({
                       imageFit="contain"
                       detailsText={t(
                         "adminCourseView.settings.other.certificateSignatureRequirements",
+                        { maxSize: formatFileSize(MAX_IMAGE_FILE_SIZE_BYTES) },
                       )}
                       inputId="learning-path-settings-certificate-signature"
                     />

@@ -44,9 +44,8 @@ function buildService(
   email: string | null,
   tokenStore: jest.Mock = jest.fn(),
 ) {
-  const config = { get: jest.fn(() => "jwt-secret") };
-  const jwt = {
-    verifyAsync: jest.fn(() =>
+  const sessionService = {
+    verifySessionToken: jest.fn(() =>
       webUserPayload ? Promise.resolve(webUserPayload) : Promise.reject(new Error("invalid")),
     ),
   };
@@ -75,8 +74,7 @@ function buildService(
 
   return new McpOAuthService(
     redis as never,
-    config as never,
-    jwt as never,
+    sessionService as never,
     mcpTokens as never,
     resources as never,
   );

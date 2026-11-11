@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
 
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import {
   ASSESSMENT_ANSWER_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_RESULTS,
+  ASSESSMENT_GRADING_MODES,
   ASSESSMENT_QUESTION_TYPES,
   ASSESSMENT_TEXT_COMPARISON_MODES,
   type SupportedLanguages,
@@ -19,10 +20,13 @@ import {
   mapQuizAttemptToRuntimeSubmissionResult,
   mapQuizQuestionDescriptionForDelivery,
 } from "../mappers/quiz-runtime.mapper";
+import { QuizRuntimeRepository } from "../repositories/quiz-runtime.repository";
+import { isAttemptNumberConflict } from "../utils/quiz-attempt-conflict";
 
 import { QuizAttemptService } from "./quiz-attempt.service";
 import { QuizAuthoringService } from "./quiz-authoring.service";
 
+import type { QuizAttemptDraftAnswers } from "../repositories/quiz-runtime.repository.types";
 import type {
   QuizAuthoringLocalizedQuestion,
   QuizAuthoringLocalizedReadModel,
@@ -31,17 +35,22 @@ import type {
   PreparedQuizAttempt,
   QuizDelivery,
   QuizAttemptFeedback,
+  QuizOpenAttempt,
   QuizRuntimeSubmissionResult,
   QuizSubmission,
+  QuizTimedSubmissionOptions,
 } from "../types/quiz-runtime.types";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { QuestionBody } from "src/lesson/lesson.schema";
 
 @Injectable()
 export class QuizRuntimeService {
+  private readonly logger = new Logger(QuizRuntimeService.name);
+
   constructor(
     private readonly quizAuthoringService: QuizAuthoringService,
     private readonly quizAttemptService: QuizAttemptService,
+    private readonly quizRuntimeRepository: QuizRuntimeRepository,
   ) {}
 
   async getQuizForDelivery(
@@ -67,6 +76,7 @@ export class QuizRuntimeService {
 
     return {
       assessmentId: quizDefinition.assessment.id,
+      timeLimitMinutes: quizDefinition.assessment.timeLimitMinutes,
       questions: quizDefinition.questions.map((question) =>
         this.mapQuestionForDelivery(question, attemptFeedback),
       ),
@@ -78,18 +88,128 @@ export class QuizRuntimeService {
     learnerId: UUIDType,
     db?: DatabasePg,
   ): Promise<QuizRuntimeSubmissionResult> {
+    const quizDefinition = await this.getQuizDefinitionForSubmission(submission);
+    const attemptData = this.prepareAttempt(quizDefinition, submission, learnerId);
+    const persistedAttempt = await this.quizAttemptService.createSubmittedAttempt(attemptData, db);
+
+    return mapQuizAttemptToRuntimeSubmissionResult(attemptData, persistedAttempt);
+  }
+
+  /** Grades an open timed attempt in place; null when another request already finalized it. */
+  async finalizeTimedAttempt(
+    submission: QuizSubmission,
+    learnerId: UUIDType,
+    attemptId: UUIDType,
+    db?: DatabasePg,
+    { dropInvalidAnswers = false }: QuizTimedSubmissionOptions = {},
+  ): Promise<QuizRuntimeSubmissionResult | null> {
+    const quizDefinition = await this.getQuizDefinitionForSubmission(submission);
+    const attemptData = this.prepareAttempt(
+      quizDefinition,
+      dropInvalidAnswers
+        ? this.dropInvalidAnswers(quizDefinition, submission, learnerId, attemptId)
+        : submission,
+      learnerId,
+      true,
+    );
+    const finalizedAttempt = await this.quizAttemptService.finalizeTimedAttempt(
+      attemptId,
+      attemptData,
+      db,
+    );
+
+    return finalizedAttempt
+      ? mapQuizAttemptToRuntimeSubmissionResult(attemptData, finalizedAttempt)
+      : null;
+  }
+
+  async getTimeLimitMinutes(lessonId: UUIDType) {
+    const assessment = await this.quizRuntimeRepository.findAssessmentTimeLimit(lessonId);
+    return assessment?.timeLimitMinutes ?? null;
+  }
+
+  findOpenAttempt(lessonId: UUIDType, learnerId: UUIDType): Promise<QuizOpenAttempt | null> {
+    return this.quizRuntimeRepository.findOpenAttemptByLesson(lessonId, learnerId);
+  }
+
+  findOpenAttemptById(attemptId: UUIDType): Promise<QuizOpenAttempt | null> {
+    return this.quizRuntimeRepository.findOpenAttemptById(attemptId);
+  }
+
+  async startTimedAttempt(
+    lessonId: UUIDType,
+    learnerId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<QuizOpenAttempt> {
+    const quizDefinition = await this.getQuizDefinitionForSubmission({ lessonId, language });
+    const { timeLimitMinutes } = quizDefinition.assessment;
+
+    if (!timeLimitMinutes)
+      throw new BadRequestException("studentLessonView.validation.quizNotTimed");
+
+    const attempt = await this.quizAttemptService
+      .startTimedAttempt({
+        assessmentId: quizDefinition.assessment.id,
+        learnerId,
+        language,
+        availablePoints: this.sumAvailablePoints(quizDefinition).toString(),
+        timeLimitMinutes,
+      })
+      .catch(async (error: unknown) => {
+        // A concurrent start (e.g. two tabs) already took this attempt number.
+        if (!isAttemptNumberConflict(error)) throw error;
+        return this.quizRuntimeRepository.findOpenAttemptByLesson(lessonId, learnerId);
+      });
+
+    if (!attempt) throw this.invalidSubmission();
+
+    return attempt;
+  }
+
+  findLatestAttemptByLesson(lessonId: UUIDType, learnerId: UUIDType) {
+    return this.quizRuntimeRepository.findLatestAttemptByLesson(lessonId, learnerId);
+  }
+
+  cancelOpenAttempt(attemptId: UUIDType) {
+    return this.quizRuntimeRepository.cancelOpenAttempt(attemptId);
+  }
+
+  /** Validates the draft like a lenient submission, then stores it while the attempt is open. */
+  async saveDraftAnswers(attempt: QuizOpenAttempt, draftAnswers: QuizAttemptDraftAnswers) {
+    const submission = {
+      lessonId: attempt.lessonId,
+      language: attempt.language,
+      questionsAnswers: draftAnswers,
+    };
+    const quizDefinition = await this.getQuizDefinitionForSubmission(submission);
+
+    try {
+      this.prepareAttempt(quizDefinition, submission, attempt.learnerId, true);
+    } catch {
+      throw new BadRequestException("studentLessonView.validation.quizDraftInvalid");
+    }
+
+    return this.quizRuntimeRepository.saveDraftAnswers(attempt.id, attempt.learnerId, draftAnswers);
+  }
+
+  private async getQuizDefinitionForSubmission(
+    submission: Pick<QuizSubmission, "lessonId" | "language">,
+  ) {
     const quizDefinition = await this.quizAuthoringService.getQuizLessonForAuthoring(
       submission.lessonId,
       submission.language,
     );
 
-    if (!quizDefinition)
-      throw new BadRequestException("studentLessonView.validation.quizEvaluationFailed");
+    if (!quizDefinition) throw this.invalidSubmission();
 
-    const attemptData = this.prepareAttempt(quizDefinition, submission, learnerId);
-    const persistedAttempt = await this.quizAttemptService.createSubmittedAttempt(attemptData, db);
+    return quizDefinition;
+  }
 
-    return mapQuizAttemptToRuntimeSubmissionResult(attemptData, persistedAttempt);
+  private sumAvailablePoints(quizDefinition: QuizAuthoringLocalizedReadModel) {
+    return quizDefinition.questions.reduce(
+      (total, question) => total + Number(question.maximumPoints),
+      0,
+    );
   }
 
   private mapQuestionForDelivery(
@@ -107,6 +227,9 @@ export class QuizRuntimeService {
       (answer) => answer.questionId === question.id,
     );
     const hasFeedback = Boolean(questionAnswer);
+    // Answers waiting for a reviewer show the learner's own answer but no correctness yet.
+    const showsCorrectness =
+      hasFeedback && questionAnswer?.gradingStatus === ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED;
 
     const choiceSelections = new Set(
       attemptFeedback?.choiceSelections
@@ -136,7 +259,7 @@ export class QuizRuntimeService {
             undefined,
             true,
             true,
-            true,
+            showsCorrectness || null,
             openTextAnswer.submittedText,
           )
         : null;
@@ -191,7 +314,7 @@ export class QuizRuntimeService {
             return this.mapDeliveryOption(
               question.id,
               blank.id,
-              hasFeedback ? preferredAnswer : null,
+              showsCorrectness ? preferredAnswer : null,
               index + 1,
               undefined,
               hasFeedback,
@@ -236,10 +359,13 @@ export class QuizRuntimeService {
       title: question.title,
       description: mapQuizQuestionDescriptionForDelivery(deliveryQuestion),
       displayOrder: question.displayOrder,
-      solutionExplanation: hasFeedback ? this.buildSolutionExplanation(deliveryQuestion) : null,
+      solutionExplanation: showsCorrectness
+        ? this.buildSolutionExplanation(deliveryQuestion)
+        : null,
       photoS3Key: question.photoS3Key,
+      requiresReview: question.gradingMode === ASSESSMENT_GRADING_MODES.MANUAL,
       options: deliveryOptions,
-      passQuestion: hasFeedback ? Number(questionAnswer?.awardedPoints ?? 0) > 0 : null,
+      passQuestion: showsCorrectness ? Number(questionAnswer?.awardedPoints ?? 0) > 0 : null,
     };
   }
 
@@ -323,33 +449,85 @@ export class QuizRuntimeService {
     return unresolvedBlank ? null : sentence;
   }
 
-  private prepareAttempt(
+  /** A stored draft may reference questions or options removed since it was saved; those score 0. */
+  private dropInvalidAnswers(
     quizDefinition: QuizAuthoringLocalizedReadModel,
     submission: QuizSubmission,
     learnerId: UUIDType,
-  ): PreparedQuizAttempt {
+    attemptId?: UUIDType,
+  ): QuizSubmission {
     const questionById = new Map(
       quizDefinition.questions.map((question) => [question.id, question]),
     );
-    const submittedQuestionIds = new Set<string>();
+    const keptQuestionIds = new Set<string>();
+    const droppedQuestionIds: string[] = [];
 
-    const submittedAt = new Date().toISOString();
-    const availablePoints = quizDefinition.questions.reduce(
-      (total, question) => total + Number(question.maximumPoints),
-      0,
-    );
+    const questionsAnswers = submission.questionsAnswers.filter((submittedQuestion) => {
+      const quizQuestion = questionById.get(submittedQuestion.questionId);
+      const isValid =
+        quizQuestion !== undefined &&
+        !keptQuestionIds.has(submittedQuestion.questionId) &&
+        this.canMapAnswers(
+          quizDefinition,
+          submission,
+          learnerId,
+          quizQuestion,
+          submittedQuestion.answers,
+        );
 
-    const attemptData: PreparedQuizAttempt = {
+      if (isValid) keptQuestionIds.add(submittedQuestion.questionId);
+      else droppedQuestionIds.push(submittedQuestion.questionId);
+
+      return isValid;
+    });
+
+    if (droppedQuestionIds.length)
+      this.logger.warn(
+        `Dropped stale quiz draft answers (lessonId=${submission.lessonId}, learnerId=${learnerId}, attemptId=${attemptId}, questionIds=${droppedQuestionIds.join(",")})`,
+      );
+
+    return { ...submission, questionsAnswers };
+  }
+
+  private canMapAnswers(
+    quizDefinition: QuizAuthoringLocalizedReadModel,
+    submission: QuizSubmission,
+    learnerId: UUIDType,
+    quizQuestion: QuizAuthoringLocalizedQuestion,
+    answers: QuizSubmission["questionsAnswers"][number]["answers"],
+  ) {
+    if (!answers.length) return true;
+
+    try {
+      this.mapSubmittedAnswers(
+        this.createAttemptData(quizDefinition, submission, learnerId, new Date().toISOString()),
+        quizQuestion,
+        quizQuestion.id,
+        answers,
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private createAttemptData(
+    quizDefinition: QuizAuthoringLocalizedReadModel,
+    submission: QuizSubmission,
+    learnerId: UUIDType,
+    submittedAt: string,
+  ): PreparedQuizAttempt {
+    return {
       assessmentId: quizDefinition.assessment.id,
       learnerId,
       language: submission.language,
-      availablePoints: availablePoints.toString(),
-      awardedPoints: "0",
-      scorePercentage: "0",
-      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+      availablePoints: this.sumAvailablePoints(quizDefinition).toString(),
+      awardedPoints: null,
+      scorePercentage: null,
+      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.PENDING,
       result: ASSESSMENT_ATTEMPT_RESULTS.PENDING,
       submittedAt,
-      gradedAt: submittedAt,
+      gradedAt: null,
       questionAnswers: [],
       choiceSelections: [],
       statementAnswers: [],
@@ -357,6 +535,23 @@ export class QuizRuntimeService {
       openTextAnswers: [],
       scaleSelections: [],
     };
+  }
+
+  private prepareAttempt(
+    quizDefinition: QuizAuthoringLocalizedReadModel,
+    submission: QuizSubmission,
+    learnerId: UUIDType,
+    allowUnanswered = false,
+  ): PreparedQuizAttempt {
+    const questionById = new Map(
+      quizDefinition.questions.map((question) => [question.id, question]),
+    );
+    const submittedQuestionIds = new Set<string>();
+
+    const submittedAt = new Date().toISOString();
+    const availablePoints = this.sumAvailablePoints(quizDefinition);
+
+    const attemptData = this.createAttemptData(quizDefinition, submission, learnerId, submittedAt);
 
     for (const submittedQuestion of submission.questionsAnswers) {
       const quizQuestion = questionById.get(submittedQuestion.questionId);
@@ -366,14 +561,20 @@ export class QuizRuntimeService {
 
       submittedQuestionIds.add(submittedQuestion.questionId);
 
+      if (allowUnanswered && !submittedQuestion.answers.length) continue;
+
       const questionAnswerId = randomUUID();
-      const questionIsCorrect = this.gradeQuestionAnswer(quizQuestion, submittedQuestion.answers);
+      const awaitsReview = quizQuestion.gradingMode === ASSESSMENT_GRADING_MODES.MANUAL;
+      const questionIsCorrect =
+        !awaitsReview && this.gradeQuestionAnswer(quizQuestion, submittedQuestion.answers);
       const awardedPoints = questionIsCorrect ? Number(quizQuestion.maximumPoints) : 0;
 
       attemptData.questionAnswers.push({
         id: questionAnswerId,
         questionId: quizQuestion.id,
-        gradingStatus: ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED,
+        gradingStatus: awaitsReview
+          ? ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING
+          : ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED,
         awardedPoints: awardedPoints.toString(),
         submittedAt,
       });
@@ -386,8 +587,34 @@ export class QuizRuntimeService {
       );
     }
 
-    if (submittedQuestionIds.size !== quizDefinition.questions.length)
+    if (!allowUnanswered && submittedQuestionIds.size !== quizDefinition.questions.length)
       throw new BadRequestException("studentLessonView.validation.quizEvaluationFailed");
+
+    if (allowUnanswered) {
+      const answeredQuestionIds = new Set(
+        attemptData.questionAnswers.map(({ questionId }) => questionId),
+      );
+
+      for (const question of quizDefinition.questions) {
+        if (answeredQuestionIds.has(question.id)) continue;
+
+        attemptData.questionAnswers.push({
+          id: randomUUID(),
+          questionId: question.id,
+          gradingStatus: ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED,
+          awardedPoints: "0",
+          submittedAt,
+        });
+      }
+    }
+
+    // The score is final only once every answer is graded; reviewers finish pending attempts.
+    if (
+      attemptData.questionAnswers.some(
+        ({ gradingStatus }) => gradingStatus === ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING,
+      )
+    )
+      return attemptData;
 
     const awardedPoints = attemptData.questionAnswers.reduce(
       (total, questionAnswer) => total + Number(questionAnswer.awardedPoints),
@@ -396,6 +623,8 @@ export class QuizRuntimeService {
 
     const scorePercentage = availablePoints ? (awardedPoints / availablePoints) * 100 : 0;
 
+    attemptData.gradingStatus = ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED;
+    attemptData.gradedAt = submittedAt;
     attemptData.awardedPoints = awardedPoints.toString();
     attemptData.scorePercentage = scorePercentage.toFixed(2);
     attemptData.result =

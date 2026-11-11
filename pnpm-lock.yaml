@@ -388,6 +388,9 @@ importers:
       rxjs:
         specifier: 7.8.1
         version: 7.8.1
+      scorm-again:
+        specifier: 3.0.4
+        version: 3.0.4
       sharp:
         specifier: 0.34.5
         version: 0.34.5
@@ -545,6 +548,9 @@ importers:
       prettier:
         specifier: 3.0.0
         version: 3.0.0
+      socket.io-client:
+        specifier: 4.8.0
+        version: 4.8.0
       source-map-support:
         specifier: 0.5.21
         version: 0.5.21
@@ -865,6 +871,9 @@ importers:
       motion:
         specifier: 12.23.22
         version: 12.23.22(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      pdfjs-dist:
+        specifier: 5.4.296
+        version: 5.4.296
       posthog-js:
         specifier: 1.273.0
         version: 1.273.0

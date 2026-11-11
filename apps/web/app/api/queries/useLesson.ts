@@ -12,7 +12,7 @@ export const lessonQueryOptions = (id: string, language?: SupportedLanguages, st
     queryFn: async () => {
       const response = await ApiClient.api.lessonControllerGetLessonById(id, {
         language,
-        studentId: studentId || "",
+        studentId: studentId || undefined,
       });
       return response.data;
     },

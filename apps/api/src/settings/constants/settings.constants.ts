@@ -1,4 +1,4 @@
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { LEADERBOARD_VISIBILITY, SUPPORTED_LANGUAGES } from "@repo/shared";
 
 const DEFAULT_COMPANY_INFORMATION = {
   companyName: "",
@@ -21,8 +21,12 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   learningPathsEnabled: false,
   unregisteredUserCoursesAccessibility: false,
   modernCourseListEnabled: true,
+  publicCoursePreviewEnabled: false,
   featuredCourseId: null,
   courseDiscussionsEnabled: false,
+  gamificationEnabled: false,
+  leaderboardsEnabled: false,
+  leaderboardVisibility: LEADERBOARD_VISIBILITY.CLOSED,
   calendarEnabled: true,
   liveTrainingEnabled: false,
   liveTrainingMaxParallelSessions: DEFAULT_LIVE_TRAINING_MAX_PARALLEL_SESSIONS,
@@ -37,6 +41,8 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   inviteOnlyRegistration: true,
   primaryColor: null,
   contrastColor: null,
+  backgroundColor: null,
+  accentColor: null,
   loginPageFiles: [],
 };
 

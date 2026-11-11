@@ -9403,6 +9403,97 @@
           ]
         }
       ]
+    },
+    {
+      "key": "gamification.guide",
+      "domain": "gamification",
+      "title": "Gamification",
+      "description": "Learn to configure gamification.",
+      "specPaths": [
+        "docs/specs/gamification-business-spec.md"
+      ],
+      "watchPaths": [
+        "apps/web/app/modules/Admin/Gamification/**",
+        "apps/web/app/modules/Gamification/**",
+        "apps/api/src/gamification/**"
+      ],
+      "flows": [
+        {
+          "id": "review-achievements",
+          "title": "Switch gamification on and review achievements",
+          "description": "Switch gamification on and review achievements in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "gamification"
+          ],
+          "specPaths": [
+            "docs/specs/gamification-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/Gamification/**",
+            "apps/web/app/modules/Gamification/**",
+            "apps/api/src/gamification/**"
+          ],
+          "goal": "Switch gamification on and review the organization's achievements.",
+          "preconditions": [
+            "Use localized synthetic data in the isolated demo tenant; required features and account permissions are enabled off camera."
+          ],
+          "actions": [
+            "Open Gamification under Manage and switch gamification on.",
+            "Review default and custom achievements with their levels and visibility.",
+            "Disable an achievement that does not fit the organization."
+          ],
+          "outcomes": [
+            "Learners see gamification, and the disabled achievement stops granting new levels."
+          ]
+        },
+        {
+          "id": "create-achievement",
+          "title": "Create a custom achievement",
+          "description": "Create a custom achievement in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "gamification"
+          ],
+          "specPaths": [
+            "docs/specs/gamification-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/Gamification/**",
+            "apps/web/app/modules/Gamification/**",
+            "apps/api/src/gamification/**"
+          ],
+          "goal": "Create a custom achievement with levels and badges.",
+          "preconditions": [
+            "Use localized synthetic data in the isolated demo tenant; required features and account permissions are enabled off camera."
+          ],
+          "actions": [
+            "Start a new achievement, name it and pick the activity and way of counting.",
+            "Add up to three levels with thresholds and XP rewards.",
+            "Pick an icon, check the badge preview and save."
+          ],
+          "outcomes": [
+            "The achievement appears in the list and learners are credited for past activity."
+          ]
+        }
+      ],
+      "videos": [
+        {
+          "key": "gamification.configure-achievements",
+          "title": "Configure gamification and achievements",
+          "description": "Configure gamification and achievements in Mentingo.",
+          "flowIds": [
+            "review-achievements",
+            "create-achievement"
+          ]
+        }
+      ]
     }
   ]
 }

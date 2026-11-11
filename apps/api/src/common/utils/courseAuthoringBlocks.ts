@@ -283,6 +283,37 @@ export const replaceCourseAuthoringBlock = (params: {
   return serializeContent($);
 };
 
+/** Inserts one server-built block beside an existing anchor without rewriting sibling blocks. */
+export const insertCourseAuthoringBlock = (params: {
+  content: string;
+  anchorBlockId: string;
+  blockId: string;
+  position: "before" | "after";
+  html: string;
+}) => {
+  const { $, blocks } = readAndValidateBlockIds(params.content, { requireIds: true });
+  const target = blocks.find((block) => block.id === params.anchorBlockId);
+  if (!target)
+    throw new CourseAuthoringBlockError(
+      COURSE_AUTHORING_BLOCK_ERROR.MISSING_TARGET,
+      "Image insertion anchor does not exist",
+    );
+  if (blocks.some((block) => block.id?.toLowerCase() === params.blockId.toLowerCase()))
+    throw new CourseAuthoringBlockError(
+      COURSE_AUTHORING_BLOCK_ERROR.DUPLICATE_ID,
+      "Inserted image block already exists",
+    );
+  const inserted = readAndValidateBlockIds(params.html, { requireIds: true });
+  if (inserted.blocks.length !== 1 || inserted.blocks[0].id !== params.blockId)
+    throw new CourseAuthoringBlockError(
+      COURSE_AUTHORING_BLOCK_ERROR.INVALID_REPLACEMENT,
+      "Image insertion must contain exactly its own identified block",
+    );
+  if (params.position === "before") $(target.element).before(params.html);
+  else $(target.element).after(params.html);
+  return serializeContent($);
+};
+
 export const getCourseAuthoringContentFingerprint = (content: string) => {
   const { $, blocks } = readAndValidateBlockIds(content, { requireIds: true });
 

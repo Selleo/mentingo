@@ -1,3 +1,115 @@
+<a name="v4.31.0"></a>
+
+## [v4.31.0] - 10.11.2026
+
+### Features:
+
+- sort report columns and show latest activity first ([#2118](https://github.com/Selleo/mentingo/issues/2118))
+
+- enforce quiz time limits on the server ([#2177](https://github.com/Selleo/mentingo/issues/2177))
+
+- rank learners on gamification leaderboards ([#2167](https://github.com/Selleo/mentingo/issues/2167))
+
+### Bug Fixes:
+
+- prevent login issues when MFA role settings are missing ([#2186](https://github.com/Selleo/mentingo/issues/2186))
+
+- guide learners to sign in when accessing content without being logged in ([#2184](https://github.com/Selleo/mentingo/issues/2184))
+
+- show lesson preview prompts only on quizzes ([#2170](https://github.com/Selleo/mentingo/issues/2170))
+
+### Chores:
+
+- improve the course list banner for a better browsing experience ([#2183](https://github.com/Selleo/mentingo/issues/2183))
+
+<a name="v4.30.0"></a>
+
+## [v4.30.0] - 09.11.2026
+
+### Features:
+
+- add reviewer role for grading open quiz answers ([#2166](https://github.com/Selleo/mentingo/issues/2166))
+
+- let admins configure gamification and custom achievements ([#2160](https://github.com/Selleo/mentingo/issues/2160))
+
+- support interactive AI Mentor course previews ([#2161](https://github.com/Selleo/mentingo/issues/2161))
+
+- place source images without rewriting lessons ([#2154](https://github.com/Selleo/mentingo/issues/2154))
+
+- build gamification core with achievements, XP and levels ([#2151](https://github.com/Selleo/mentingo/issues/2151))
+
+### Bug Fixes:
+
+- ensure the embedded lesson editor updates correctly when switching lessons ([#2164](https://github.com/Selleo/mentingo/issues/2164))
+
+- allow updating global course preview settings in support mode ([#2165](https://github.com/Selleo/mentingo/issues/2165))
+
+- find product tutorials in the assistant ([#2162](https://github.com/Selleo/mentingo/issues/2162))
+
+- make learning path statuses consistent with courses ([#2158](https://github.com/Selleo/mentingo/issues/2158))
+
+### Chores:
+
+- enhance color personalization and branding settings ([#2163](https://github.com/Selleo/mentingo/issues/2163))
+
+- allow creating new competencies directly within job profiles ([#2159](https://github.com/Selleo/mentingo/issues/2159))
+
+- secure certificate rendering and sharing ([#2155](https://github.com/Selleo/mentingo/issues/2155))
+
+- enforce MFA and session boundaries ([#2153](https://github.com/Selleo/mentingo/issues/2153))
+
+- isolate SCORM content on a dedicated origin with short-lived grants ([#2148](https://github.com/Selleo/mentingo/issues/2148))
+
+- enhance platform security for a safer user experience ([#2146](https://github.com/Selleo/mentingo/issues/2146))
+
+### Documentation:
+
+- update changelog for version v4.30.0
+
+<a name="v4.29.0"></a>
+
+## [v4.29.0] - 05.11.2026
+
+### Features:
+
+- preview free public courses before enrollment ([#2156](https://github.com/Selleo/mentingo/issues/2156))
+
+- add searchable self-onboarding videos and automated publishing ([#2115](https://github.com/Selleo/mentingo/issues/2115))
+
+- enable single sign-on (SSO) with Microsoft Entra for easier login ([#2117](https://github.com/Selleo/mentingo/issues/2117))
+
+### Bug Fixes:
+
+- show enrolled course authors in the course's enrolled students list ([#2157](https://github.com/Selleo/mentingo/issues/2157))
+
+- preserve final tutorial captions when publishing videos ([#2147](https://github.com/Selleo/mentingo/issues/2147))
+
+- preserve learning outcomes in native course imports ([#2145](https://github.com/Selleo/mentingo/issues/2145))
+
+- reuse existing categories when importing course packages ([#2114](https://github.com/Selleo/mentingo/issues/2114))
+
+- move source icons right of AI conversation titles and hide row status ([#2112](https://github.com/Selleo/mentingo/issues/2112))
+
+- name native course exports after course titles ([#2109](https://github.com/Selleo/mentingo/issues/2109))
+
+- simplify course catalog entry and update Polish naming ([#2108](https://github.com/Selleo/mentingo/issues/2108))
+
+- keep drawers and page edges visible in films ([#2107](https://github.com/Selleo/mentingo/issues/2107))
+
+- reuse the shared Slack icon in AI Conversations ([#2106](https://github.com/Selleo/mentingo/issues/2106))
+
+- watch release films directly in release notes ([#2104](https://github.com/Selleo/mentingo/issues/2104))
+
+### Chores:
+
+- add a user switcher to simplify testing during development ([#2152](https://github.com/Selleo/mentingo/issues/2152))
+
+- improve course package handling to increase app performance ([#2113](https://github.com/Selleo/mentingo/issues/2113))
+
+### Documentation:
+
+- update changelog for version v4.29.0
+
 <a name="v4.28.0"></a>
 
 ## [v4.28.0] - 02.11.2026
@@ -15,6 +127,10 @@
 - keep existing content when opening the article editor ([#2102](https://github.com/Selleo/mentingo/issues/2102))
 
 - ensure all document attachments are preserved in articles and news ([#2101](https://github.com/Selleo/mentingo/issues/2101))
+
+### Documentation:
+
+- update changelog for version v4.28.0
 
 <a name="v4.27.0"></a>
 
@@ -3632,7 +3748,10 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.28.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.31.0...HEAD
+[v4.31.0]: https://github.com/Selleo/mentingo/compare/v4.30.0...v4.31.0
+[v4.30.0]: https://github.com/Selleo/mentingo/compare/v4.29.0...v4.30.0
+[v4.29.0]: https://github.com/Selleo/mentingo/compare/v4.28.0...v4.29.0
 [v4.28.0]: https://github.com/Selleo/mentingo/compare/v4.27.0...v4.28.0
 [v4.27.0]: https://github.com/Selleo/mentingo/compare/v4.26.0...v4.27.0
 [v4.26.0]: https://github.com/Selleo/mentingo/compare/v4.25.0...v4.26.0

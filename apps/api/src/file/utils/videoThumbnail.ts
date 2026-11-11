@@ -9,3 +9,16 @@ export const getVideoThumbnailFilename = (resourceId: UUIDType) =>
   `${resourceId}${BASE_THUMBNAIL_EXTENSION}`;
 export const getVideoThumbnailKey = (resourceId: UUIDType, tenantId?: UUIDType) =>
   prefixTenantStorageKey(`thumbnail/${getVideoThumbnailFilename(resourceId)}`, tenantId);
+
+const REMOTE_INPUT_PROTOCOL_WHITELISTS: Record<string, string> = {
+  "https:": "https,tls,tcp,crypto",
+  "http:": "http,tcp,crypto",
+};
+
+export const getRemoteInputProtocolWhitelist = (inputUrl: string) => {
+  const whitelist = REMOTE_INPUT_PROTOCOL_WHITELISTS[new URL(inputUrl).protocol];
+
+  if (!whitelist) throw new Error("Unsupported thumbnail input protocol");
+
+  return whitelist;
+};

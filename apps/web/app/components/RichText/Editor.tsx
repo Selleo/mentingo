@@ -2,6 +2,7 @@ import {
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   RESOURCE_VISIBILITY,
   detectVideoProviderFromUrl,
+  sanitizeRichText,
   type EditableResourceVisibility,
 } from "@repo/shared";
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
@@ -104,7 +105,8 @@ const Editor = ({
 }: EditorProps) => {
   const { t } = useTranslation();
   const mediaPolicy = useRichTextContentPolicy();
-  const safeContent = mediaPolicy ? mediaPolicy(content ?? "") : content;
+  const sanitizedContent = sanitizeRichText(content ?? "");
+  const safeContent = mediaPolicy ? mediaPolicy(sanitizedContent) : sanitizedContent;
   const editorRef = useRef<TiptapEditor | null>(null);
   const lastEmittedContentRef = useRef(content ?? "");
   const [pendingDrop, setPendingDrop] = useState<{ files: File[]; position: number } | null>(null);
@@ -219,6 +221,7 @@ const Editor = ({
     onBlur: ({ editor }) => onBlur?.(editor),
     onDrop: handleDrop,
     editorProps: {
+      transformPastedHTML: sanitizeRichText,
       handleKeyDown,
       handlePaste: (_view, event) => handlePaste(event),
       attributes: {

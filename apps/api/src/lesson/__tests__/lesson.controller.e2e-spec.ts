@@ -11,8 +11,11 @@ import {
   ASSESSMENT_ATTEMPT_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_RESULTS,
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
+  ASSESSMENT_ANSWER_GRADING_STATUSES,
   COURSE_ENROLLMENT,
+  COURSE_STATUSES,
   ENTITY_TYPES,
+  LEARNER_PROGRESS_STATUSES,
   SCORM_PACKAGE_ENTITY_TYPE,
   SCORM_PACKAGE_STATUS,
   SCORM_STANDARD,
@@ -24,15 +27,19 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
+import { AiService } from "src/ai/services/ai.service";
 import { MESSAGE_ROLE, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
+import { QuizCompletedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QuizAuthoringService } from "src/quiz/services/quiz-authoring.service";
 import { QuizRuntimeService } from "src/quiz/services/quiz-runtime.service";
+import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiJudgeConfigurations,
@@ -46,6 +53,7 @@ import {
   assessments,
   assessmentAttempts,
   assessmentAttemptBlankAnswers,
+  assessmentAttemptOpenTextAnswers,
   assessmentAttemptQuestionAnswers,
   assessmentQuestions,
   assessmentQuestionChoiceOptions,
@@ -68,6 +76,7 @@ import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
+import type { AdminQuestionBody } from "src/lesson/lesson.schema";
 
 describe("LessonController (e2e) - quiz feedback redaction", () => {
   let app: INestApplication;
@@ -202,6 +211,204 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
     return lesson;
   };
+
+  describe("public course preview", () => {
+    const createPreview = async (
+      enabled = true,
+      lessonType: LessonTypes = LESSON_TYPES.CONTENT,
+    ) => {
+      await db
+        .update(settings)
+        .set({
+          settings: setJsonbField(settings.settings, "publicCoursePreviewEnabled", enabled),
+        })
+        .where(isNull(settings.userId));
+      const lesson = await createLessonForPublicAccess({ isFreemium: false, lessonType });
+      const [chapter] = await db.select().from(chapters).where(eq(chapters.id, lesson.chapterId));
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const cookies = await cookieFor(student, app);
+      return { lesson, courseId: chapter.courseId, student, cookies };
+    };
+
+    it("allows a student to read a free public lesson without creating progress or enrollment", async () => {
+      const { lesson, student, cookies } = await createPreview();
+      await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const progress = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(eq(studentLessonProgress.studentId, student.id));
+      const enrollment = await db
+        .select()
+        .from(studentCourses)
+        .where(eq(studentCourses.studentId, student.id));
+      expect(progress).toHaveLength(0);
+      expect(enrollment).toHaveLength(0);
+    });
+
+    it("opens and retakes an owned AI Mentor preview without enrollment, Learn mode, or progress", async () => {
+      const { lesson, student, cookies } = await createPreview(true, LESSON_TYPES.AI_MENTOR);
+      await db.insert(aiMentorLessons).values({
+        lessonId: lesson.id,
+        name: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Preview mentor"),
+      });
+      const welcome = jest
+        .spyOn(app.get(AiService), "initializeLessonWelcome")
+        .mockResolvedValue(undefined);
+      try {
+        const first = await request(app.getHttpServer())
+          .get(`/api/lesson/${lesson.id}?language=en`)
+          .set("Cookie", cookies)
+          .expect(200);
+        expect(first.body.data.status).toBe(THREAD_STATUS.ACTIVE);
+        expect(welcome).toHaveBeenCalledWith(first.body.data.threadId, student.id);
+        const [thread] = await db
+          .select()
+          .from(aiMentorThreads)
+          .where(eq(aiMentorThreads.id, first.body.data.threadId));
+        expect(thread).toMatchObject({ userId: student.id, status: THREAD_STATUS.ACTIVE });
+        await request(app.getHttpServer())
+          .post(`/api/ai/retake/${lesson.id}`)
+          .set("Cookie", cookies)
+          .expect(201);
+        const second = await request(app.getHttpServer())
+          .get(`/api/lesson/${lesson.id}?language=en`)
+          .set("Cookie", cookies)
+          .expect(200);
+        expect(second.body.data.threadId).not.toBe(first.body.data.threadId);
+        const [previous] = await db
+          .select()
+          .from(aiMentorThreads)
+          .where(eq(aiMentorThreads.id, first.body.data.threadId));
+        expect(previous.status).toBe(THREAD_STATUS.ARCHIVED);
+        expect(
+          await db
+            .select()
+            .from(studentLessonProgress)
+            .where(eq(studentLessonProgress.studentId, student.id)),
+        ).toHaveLength(0);
+        expect(
+          await db.select().from(studentCourses).where(eq(studentCourses.studentId, student.id)),
+        ).toHaveLength(0);
+        expect(
+          await db.select().from(courseStudentMode).where(eq(courseStudentMode.userId, student.id)),
+        ).toHaveLength(0);
+      } finally {
+        welcome.mockRestore();
+      }
+    });
+
+    it.each([
+      {
+        name: "disabled flag",
+        enabled: false,
+        status: COURSE_STATUSES.PUBLISHED,
+        isArchived: false,
+        priceInCents: 0,
+      },
+      {
+        name: "private course",
+        enabled: true,
+        status: COURSE_STATUSES.PRIVATE,
+        isArchived: false,
+        priceInCents: 0,
+      },
+      {
+        name: "draft course",
+        enabled: true,
+        status: COURSE_STATUSES.DRAFT,
+        isArchived: false,
+        priceInCents: 0,
+      },
+      {
+        name: "archived course",
+        enabled: true,
+        status: COURSE_STATUSES.PUBLISHED,
+        isArchived: true,
+        priceInCents: 0,
+      },
+      {
+        name: "paid course",
+        enabled: true,
+        status: COURSE_STATUSES.PUBLISHED,
+        isArchived: false,
+        priceInCents: 1000,
+      },
+    ])("does not preview a $name", async ({ enabled, status, isArchived, priceInCents }) => {
+      const { lesson, courseId, cookies } = await createPreview(enabled);
+      await db
+        .update(courses)
+        .set({ status, isArchived, priceInCents })
+        .where(eq(courses.id, courseId));
+      await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(401);
+    });
+
+    it("keeps enrolled users in the normal learning experience", async () => {
+      const { lesson, courseId, student, cookies } = await createPreview();
+      await db.insert(studentCourses).values({
+        courseId,
+        studentId: student.id,
+        status: COURSE_ENROLLMENT.ENROLLED,
+      });
+      await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const progress = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(eq(studentLessonProgress.studentId, student.id));
+      expect(progress).toHaveLength(1);
+      expect(progress[0].isStarted).toBe(true);
+    });
+
+    it("does not grant anonymous access", async () => {
+      const { lesson } = await createPreview();
+      await request(app.getHttpServer()).get(`/api/lesson/${lesson.id}?language=en`).expect(401);
+    });
+
+    it("rejects unenrolled quiz submission even for an otherwise free preview chapter", async () => {
+      const { lesson, cookies } = await createPreview(true, LESSON_TYPES.QUIZ);
+      await db.update(chapters).set({ isFreemium: true }).where(eq(chapters.id, lesson.chapterId));
+      await request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({ lessonId: lesson.id, language: SUPPORTED_LANGUAGES.EN, questionsAnswers: [] })
+        .expect(403);
+    });
+
+    it("restricts the organization preview toggle to settings managers", async () => {
+      const { cookies } = await createPreview();
+      await request(app.getHttpServer())
+        .patch("/api/settings/admin/public-course-preview")
+        .set("Cookie", cookies)
+        .expect(403);
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const adminCookies = await cookieFor(admin, app);
+      const disabled = await request(app.getHttpServer())
+        .patch("/api/settings/admin/public-course-preview")
+        .set("Cookie", adminCookies)
+        .expect(200);
+      expect(disabled.body.data.publicCoursePreviewEnabled).toBe(false);
+      const enabled = await request(app.getHttpServer())
+        .patch("/api/settings/admin/public-course-preview")
+        .set("Cookie", adminCookies)
+        .expect(200);
+      expect(enabled.body.data.publicCoursePreviewEnabled).toBe(true);
+    });
+  });
 
   describe("public lesson access", () => {
     it("allows guests to view a content lesson in a public chapter", async () => {
@@ -1415,6 +1622,57 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     },
   );
 
+  it("keeps the reviewer grading choice of open questions across an editor save round trip", async () => {
+    const authoring = app.get(QuizAuthoringService);
+    const course = await courseFactory.create();
+    const chapter = await chapterFactory.create({ courseId: course.id });
+    const lesson = await authoring.createQuizLesson({
+      chapterId: chapter.id,
+      title: "Open questions grading",
+      type: LESSON_TYPES.QUIZ,
+      thresholdScore: 0,
+      attemptsLimit: null,
+      quizCooldownInHours: null,
+      questions: [
+        { type: ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE, title: "Reviewed", requiresReview: true },
+        { type: ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE, title: "Participation" },
+      ],
+    });
+    const readBack = async () => {
+      const legacy = await authoring.getLegacyQuizLessonForAuthoring(lesson.id);
+      const questions = legacy?.questions ?? [];
+      const gradingModes = await db
+        .select({ gradingMode: assessmentQuestions.gradingMode })
+        .from(assessmentQuestions)
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .where(eq(assessments.lessonId, lesson.id))
+        .orderBy(assessmentQuestions.displayOrder);
+
+      return { questions, gradingModes: gradingModes.map(({ gradingMode }) => gradingMode) };
+    };
+    const saveQuestions = (questions: AdminQuestionBody[]) =>
+      authoring.updateQuizLesson(lesson.id, { language: SUPPORTED_LANGUAGES.EN, questions });
+
+    const created = await readBack();
+
+    expect(created.questions.map(({ requiresReview }) => requiresReview)).toEqual([true, false]);
+    expect(created.gradingModes).toEqual([
+      ASSESSMENT_GRADING_MODES.MANUAL,
+      ASSESSMENT_GRADING_MODES.PARTICIPATION,
+    ]);
+
+    await saveQuestions(created.questions);
+    expect((await readBack()).gradingModes).toEqual(created.gradingModes);
+
+    await saveQuestions(
+      created.questions.map((question) => ({ ...question, requiresReview: false })),
+    );
+    expect((await readBack()).gradingModes).toEqual([
+      ASSESSMENT_GRADING_MODES.PARTICIPATION,
+      ASSESSMENT_GRADING_MODES.PARTICIPATION,
+    ]);
+  });
+
   it.each(Object.values(ASSESSMENT_QUESTION_TYPES))(
     "preserves %s configuration and identity when editing and deleting questions",
     async (type) => {
@@ -2530,6 +2788,251 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(evaluationResponse.body.data.data.correctAnswerCount).toBe(1);
       expect(evaluationResponse.body.data.data.score).toBe(100);
+    });
+  });
+
+  describe("POST /api/lesson/evaluation-quiz - open answers awaiting review", () => {
+    const setupQuizWithOpenQuestion = async ({ quizFeedbackEnabled = true } = {}) => {
+      const category = await categoryFactory.create();
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const cookies = await cookieFor(student, app);
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        settings: { lessonSequenceEnabled: false, quizFeedbackEnabled },
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id });
+
+      await enrollStudentToCourse(student.id, course.id);
+      const { lesson } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
+      const choiceAnswers = await buildQuizAnswers(lesson.id);
+      const [{ assessmentId }] = await db
+        .select({ assessmentId: assessments.id })
+        .from(assessments)
+        .where(eq(assessments.lessonId, lesson.id));
+      const [openQuestion] = await db
+        .insert(assessmentQuestions)
+        .values({
+          assessmentId,
+          questionType: ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE,
+          displayOrder: 99,
+          maximumPoints: "1",
+          gradingMode: ASSESSMENT_GRADING_MODES.MANUAL,
+          prompt: buildJsonbField("en", "Explain"),
+          title: buildJsonbField("en", "Explain"),
+        })
+        .returning();
+      const questionsAnswers = [
+        ...choiceAnswers,
+        { questionId: openQuestion.id, answers: [{ value: "My open answer" }] },
+      ];
+
+      return { student, cookies, course, lesson, questionsAnswers, openQuestion, choiceAnswers };
+    };
+
+    const submit = (cookies: string, lessonId: UUIDType, questionsAnswers: unknown[]) =>
+      request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({ lessonId, language: "en", questionsAnswers });
+
+    it("keeps the attempt pending, the lesson incomplete and emits no quiz completed event", async () => {
+      const { student, cookies, lesson, questionsAnswers, openQuestion } =
+        await setupQuizWithOpenQuestion();
+      const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish");
+
+      const response = await submit(cookies, lesson.id, questionsAnswers).expect(201);
+
+      expect(response.body.data.data).toMatchObject({ awaitingReview: true, score: 0 });
+      expect(publishSpy.mock.calls.some(([event]) => event instanceof QuizCompletedEvent)).toBe(
+        false,
+      );
+      publishSpy.mockRestore();
+
+      const [attempt] = await db
+        .select()
+        .from(assessmentAttempts)
+        .where(eq(assessmentAttempts.learnerId, student.id));
+
+      expect(attempt).toMatchObject({
+        gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.PENDING,
+        result: ASSESSMENT_ATTEMPT_RESULTS.PENDING,
+        gradedAt: null,
+        awardedPoints: null,
+        scorePercentage: null,
+      });
+
+      const answers = await db
+        .select({
+          questionId: assessmentAttemptQuestionAnswers.questionId,
+          gradingStatus: assessmentAttemptQuestionAnswers.gradingStatus,
+          awardedPoints: assessmentAttemptQuestionAnswers.awardedPoints,
+          submittedText: assessmentAttemptOpenTextAnswers.submittedText,
+        })
+        .from(assessmentAttemptQuestionAnswers)
+        .leftJoin(
+          assessmentAttemptOpenTextAnswers,
+          eq(
+            assessmentAttemptOpenTextAnswers.questionAnswerId,
+            assessmentAttemptQuestionAnswers.id,
+          ),
+        )
+        .where(eq(assessmentAttemptQuestionAnswers.attemptId, attempt.id));
+
+      expect(answers.find(({ questionId }) => questionId === openQuestion.id)).toMatchObject({
+        gradingStatus: ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING,
+        awardedPoints: "0.00",
+        submittedText: "My open answer",
+      });
+      expect(
+        answers
+          .filter(({ questionId }) => questionId !== openQuestion.id)
+          .every(
+            ({ gradingStatus }) => gradingStatus === ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED,
+          ),
+      ).toBe(true);
+
+      const [progress] = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(
+          and(
+            eq(studentLessonProgress.studentId, student.id),
+            eq(studentLessonProgress.lessonId, lesson.id),
+          ),
+        );
+
+      expect(progress).toMatchObject({ completedAt: null, isQuizPassed: false, attempts: 1 });
+      expect(await app.get(StatisticsRepository).getQuizStats(student.id)).toMatchObject({
+        totalAttempts: 0,
+        averageScore: 0,
+      });
+    });
+
+    it("shows a partial result: graded questions with correctness, open answers waiting for review", async () => {
+      const { cookies, course, lesson, questionsAnswers, openQuestion, choiceAnswers } =
+        await setupQuizWithOpenQuestion();
+
+      await submit(cookies, lesson.id, questionsAnswers).expect(201);
+
+      const lessonResponse = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const lessonData = lessonResponse.body.data;
+
+      expect(lessonData).toMatchObject({
+        lessonCompleted: false,
+        isQuizAwaitingReview: true,
+        isQuizFeedbackRedacted: false,
+      });
+      expect(lessonData.quizDetails).toMatchObject({
+        score: null,
+        correctAnswerCount: choiceAnswers.length,
+        wrongAnswerCount: 0,
+      });
+
+      for (const question of lessonData.quizDetails.questions) {
+        if (question.id === openQuestion.id) {
+          expect(question.passQuestion).toBeNull();
+          expect(question.solutionExplanation).toBeNull();
+          expect(question.options[0]).toMatchObject({
+            isCorrect: null,
+            studentAnswer: "My open answer",
+          });
+        } else {
+          expect(question.passQuestion).toBe(true);
+        }
+      }
+
+      const courseResponse = await request(app.getHttpServer())
+        .get(`/api/course?id=${course.id}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const courseLesson = courseResponse.body.data.chapters
+        .flatMap((chapter: { lessons: { id: string; status: string }[] }) => chapter.lessons)
+        .find(({ id }: { id: string }) => id === lesson.id);
+
+      expect(courseLesson.status).toBe(LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW);
+    });
+
+    it("hides the partial result when quiz feedback is disabled", async () => {
+      const { cookies, lesson, questionsAnswers } = await setupQuizWithOpenQuestion({
+        quizFeedbackEnabled: false,
+      });
+
+      await submit(cookies, lesson.id, questionsAnswers).expect(201);
+
+      const lessonResponse = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const lessonData = lessonResponse.body.data;
+
+      expect(lessonData).toMatchObject({
+        lessonCompleted: false,
+        isQuizAwaitingReview: true,
+        isQuizFeedbackRedacted: true,
+      });
+      expect(lessonData.quizDetails).toMatchObject({
+        score: null,
+        correctAnswerCount: null,
+        wrongAnswerCount: null,
+      });
+
+      for (const question of lessonData.quizDetails.questions) {
+        expect(question.passQuestion).not.toBe(true);
+        for (const option of question.options) expect(option.isCorrect).not.toBe(true);
+      }
+
+      expect(
+        lessonData.quizDetails.questions.some(
+          (question: { options: { isStudentAnswer: boolean }[] }) =>
+            question.options.some((option) => option.isStudentAnswer),
+        ),
+      ).toBe(true);
+    });
+
+    it("blocks resubmitting and retaking while the quiz awaits review", async () => {
+      const { cookies, lesson, questionsAnswers } = await setupQuizWithOpenQuestion();
+
+      await submit(cookies, lesson.id, questionsAnswers).expect(201);
+
+      const resubmit = await submit(cookies, lesson.id, questionsAnswers).expect(409);
+
+      expect(resubmit.body.message).toBe("studentLessonView.validation.quizAwaitingReview");
+
+      const retake = await request(app.getHttpServer())
+        .delete(`/api/lesson/delete-student-quiz-answers?lessonId=${lesson.id}`)
+        .set("Cookie", cookies)
+        .expect(409);
+
+      expect(retake.body.message).toBe("studentLessonView.validation.quizAwaitingReview");
+    });
+
+    it("grades quizzes without manual questions immediately", async () => {
+      const { student, cookies, lesson } = await setupQuizWithOpenQuestion();
+
+      await db
+        .delete(assessmentQuestions)
+        .where(eq(assessmentQuestions.gradingMode, ASSESSMENT_GRADING_MODES.MANUAL));
+      const questionsAnswers = await buildQuizAnswers(lesson.id);
+
+      const response = await submit(cookies, lesson.id, questionsAnswers).expect(201);
+
+      expect(response.body.data.data).toMatchObject({ awaitingReview: false, score: 100 });
+      const [attempt] = await db
+        .select()
+        .from(assessmentAttempts)
+        .where(eq(assessmentAttempts.learnerId, student.id));
+
+      expect(attempt.gradingStatus).toBe(ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED);
+      expect(attempt.gradedAt).not.toBeNull();
     });
   });
 });

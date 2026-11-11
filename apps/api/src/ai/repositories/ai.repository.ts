@@ -22,6 +22,7 @@ import {
 import { DatabasePg } from "src/common";
 import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { activeLearningStateId } from "src/course-repetition/course-repetition.service";
+import { hasPublicCoursePreviewAccess } from "src/lesson/repositories/public-course-preview-access";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
@@ -841,6 +842,10 @@ export class AiRepository {
           activeLearningState(studentLessonProgress.learningStateId),
         ),
       );
+  }
+
+  async getHasPublicCoursePreviewAccess(lessonId: UUIDType, userId: UUIDType) {
+    return hasPublicCoursePreviewAccess(this.db, lessonId, userId);
   }
 
   async checkLessonAssignment(id: UUIDType, userId: UUIDType) {

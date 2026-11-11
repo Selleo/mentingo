@@ -34,6 +34,7 @@ export * from "./course/course-due-date-reminder-email.event";
 export * from "./user/user-login.event";
 export * from "./user/support-mode-enter.event";
 export * from "./user/user-logout.event";
+export * from "./user/user-session-revoked.event";
 export * from "./user/user-first-login.event";
 export * from "./user/user-invite.event";
 export * from "./user/users-import-invite-emails.event";

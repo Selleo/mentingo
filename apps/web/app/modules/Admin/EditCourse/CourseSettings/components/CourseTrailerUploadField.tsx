@@ -1,4 +1,8 @@
-import { ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+import {
+  ALLOWED_VIDEO_FILE_TYPES,
+  MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES,
+  formatFileSize,
+} from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
@@ -43,6 +47,7 @@ export const CourseTrailerUploadField = ({
           <div className="absolute inset-0 bg-neutral-950">
             {trailerEmbedUrl ? (
               <iframe
+                sandbox="allow-scripts allow-presentation"
                 src={trailerEmbedUrl}
                 title={t("adminCourseView.settings.trailerPreview", {
                   defaultValue: "Trailer preview",
@@ -73,7 +78,11 @@ export const CourseTrailerUploadField = ({
             {!isUploading && <span className="ml-1">{statusText}</span>}
           </div>
           <div className="w-fit rounded-md border bg-white px-2 py-1 text-[13px] font-medium leading-5 text-neutral-900">
-            {isUploading ? statusText : t("adminCourseView.settings.other.trailerUploadDetails")}
+            {isUploading
+              ? statusText
+              : t("adminCourseView.settings.other.trailerUploadDetails", {
+                  maxSize: formatFileSize(MAX_COURSE_TRAILER_VIDEO_SIZE_BYTES),
+                })}
           </div>
         </div>
         <input

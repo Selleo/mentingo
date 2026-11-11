@@ -1,18 +1,18 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import {
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_SCORM_PACKAGE_MIME_TYPES,
+  MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES,
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
+} from "@repo/shared";
 
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
-
-import { MAX_SCORM_PACKAGE_SIZE_BYTES, SCORM_PACKAGE_MIME_TYPES } from "../scorm-package-limits";
 
 import type { PipeTransform } from "@nestjs/common";
 
 export const SCORM_PACKAGE_FIELD = "scormPackage";
 export const SCORM_THUMBNAIL_FIELD = "thumbnail";
-
-export const MAX_SCORM_THUMBNAIL_SIZE = 20 * 1024 * 1024;
-const ALLOWED_SCORM_PACKAGE_MIME_TYPES = Object.values(SCORM_PACKAGE_MIME_TYPES);
 
 export type CreateScormCourseFiles = {
   [SCORM_PACKAGE_FIELD]?: Express.Multer.File[];
@@ -24,7 +24,6 @@ export class ValidateScormCourseFilesPipe implements PipeTransform {
   private readonly scormPackagePipe = getBaseFileTypePipe(
     buildFileTypeRegex(ALLOWED_SCORM_PACKAGE_MIME_TYPES),
     MAX_SCORM_PACKAGE_SIZE_BYTES,
-    true,
   ).build({
     fileIsRequired: true,
     errorHttpStatusCode: HttpStatus.BAD_REQUEST,
@@ -32,7 +31,7 @@ export class ValidateScormCourseFilesPipe implements PipeTransform {
 
   private readonly thumbnailPipe = getBaseFileTypePipe(
     buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
-    MAX_SCORM_THUMBNAIL_SIZE,
+    MAX_SCORM_THUMBNAIL_FILE_SIZE_BYTES,
   ).build({
     fileIsRequired: false,
     errorHttpStatusCode: HttpStatus.BAD_REQUEST,

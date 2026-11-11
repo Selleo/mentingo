@@ -1,30 +1,14 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
-import { VIDEO_PROVIDERS, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+import { VIDEO_PROVIDERS, ALLOWED_VIDEO_FILE_TYPES, MAX_VIDEO_FILE_SIZE_BYTES } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
 
 import { S3Service } from "src/s3/s3.service";
 
-import { MAX_VIDEO_SIZE } from "../file.constants";
 import { FileGuard } from "../guards/file.guard";
 import { VideoMetadataQueueService } from "../video-metadata.queue.service";
 import { VideoProcessingStateService } from "../video-processing-state.service";
 
-import type { UUIDType } from "src/common";
-
-type TusUploadState = {
-  uploadId: string;
-  fileKey: string;
-  multipartUploadId: string;
-  uploadLength: number;
-  offset: number;
-  parts: Array<{ ETag: string; PartNumber: number }>;
-  placeholderKey: string;
-  fileType?: string;
-  userId?: string;
-  tenantId?: UUIDType;
-  resourceId?: UUIDType;
-  sniffedMimeType?: string;
-};
+import type { TusUploadOwner, TusUploadState } from "./tus-upload.types";
 
 const TUS_STATE_TTL = 4 * 60 * 60 * 1000;
 const MIN_S3_PART_SIZE = 5 * 1024 * 1024;
@@ -38,7 +22,7 @@ export class TusUploadService {
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
-  async createSession(uploadId: string, uploadLength: number, currentUserId?: string) {
+  async createSession(uploadId: string, uploadLength: number, currentUser: TusUploadOwner) {
     if (!uploadLength || uploadLength <= 0) {
       throw new BadRequestException("Missing upload length");
     }
@@ -49,19 +33,17 @@ export class TusUploadService {
       throw new BadRequestException("S3 video upload not initialized");
     }
 
-    if (uploadLength > (state.maxUploadSize ?? MAX_VIDEO_SIZE)) {
+    if (uploadLength > (state.maxUploadSize ?? MAX_VIDEO_FILE_SIZE_BYTES)) {
       throw new BadRequestException("uploadFile.toast.videoTooLarge");
     }
 
-    if (state.userId && currentUserId && state.userId !== currentUserId) {
-      throw new ForbiddenException("Upload does not belong to the current user");
-    }
+    this.assertUploadOwner(state, currentUser);
 
     if (!state.multipartUploadId) {
       throw new BadRequestException("Missing multipart upload ID");
     }
 
-    const existing = await this.getSession(uploadId);
+    const existing = await this.getSession(uploadId, currentUser);
     if (existing) return existing;
 
     const session: TusUploadState = {
@@ -73,8 +55,8 @@ export class TusUploadService {
       parts: [],
       placeholderKey: state.placeholderKey,
       fileType: state.fileType,
-      userId: state.userId,
-      tenantId: state.tenantId,
+      userId: currentUser.userId,
+      tenantId: currentUser.tenantId,
       resourceId: state.resourceId,
     };
 
@@ -83,20 +65,22 @@ export class TusUploadService {
     return session;
   }
 
-  async getSession(uploadId: string): Promise<TusUploadState | null> {
+  async getSession(uploadId: string, currentUser: TusUploadOwner): Promise<TusUploadState | null> {
     const cached = (await this.cache.get(this.getCacheKey(uploadId))) as TusUploadState | undefined;
+    if (cached) this.assertUploadOwner(cached, currentUser);
     return cached ?? null;
   }
 
-  async handlePatch(uploadId: string, uploadOffset: number, chunk: Buffer, currentUserId?: string) {
-    const session = await this.getSession(uploadId);
+  async handlePatch(
+    uploadId: string,
+    uploadOffset: number,
+    chunk: Buffer,
+    currentUser: TusUploadOwner,
+  ) {
+    const session = await this.getSession(uploadId, currentUser);
 
     if (!session) {
       throw new BadRequestException("Upload session not found");
-    }
-
-    if (session.userId && currentUserId && session.userId !== currentUserId) {
-      throw new ForbiddenException("Upload does not belong to the current user");
     }
 
     if (uploadOffset !== session.offset) {
@@ -177,6 +161,16 @@ export class TusUploadService {
     await this.cache.set(this.getCacheKey(uploadId), session, TUS_STATE_TTL);
 
     return { offset: session.offset, completed: false };
+  }
+
+  private assertUploadOwner(owner: Partial<TusUploadOwner>, currentUser: TusUploadOwner) {
+    if (
+      !currentUser?.userId ||
+      !currentUser.tenantId ||
+      owner.userId !== currentUser.userId ||
+      owner.tenantId !== currentUser.tenantId
+    )
+      throw new ForbiddenException("Upload does not belong to the current user");
   }
 
   private getCacheKey(uploadId: string) {

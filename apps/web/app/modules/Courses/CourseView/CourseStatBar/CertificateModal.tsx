@@ -1,4 +1,8 @@
-import { ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES } from "@repo/shared";
+import {
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  MAX_IMAGE_FILE_SIZE_BYTES,
+  formatFileSize,
+} from "@repo/shared";
 import { X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -48,7 +52,7 @@ export default function CertificateModal({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const lastSavedColorRef = useRef<string | null>(null);
   const pendingColorRef = useRef<string | null>(null);
-  const acceptedSignatureTypes = [...ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES];
+  const acceptedSignatureTypes = [...ALLOWED_LESSON_IMAGE_FILE_TYPES];
   const { data: settings, isLoading: isLoadingSettings } = useCourseSettings({
     courseId: course.id,
   });
@@ -300,6 +304,7 @@ export default function CertificateModal({
                     imageFit="contain"
                     detailsText={t(
                       "adminCourseView.settings.other.certificateSignatureRequirements",
+                      { maxSize: formatFileSize(MAX_IMAGE_FILE_SIZE_BYTES) },
                     )}
                   />
                   {isSignatureUploading && (

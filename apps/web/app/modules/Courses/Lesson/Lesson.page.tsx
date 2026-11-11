@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "@remix-run/react";
+import { useLocation, useNavigate, useParams } from "@remix-run/react";
 import { first, get, last, orderBy } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,7 +12,10 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import Loader from "~/modules/common/Loader/Loader";
-import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import {
+  CourseAccessProvider,
+  useCourseAccessProvider,
+} from "~/modules/Courses/context/CourseAccessProvider";
 import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
@@ -41,6 +44,7 @@ const checkOverallLessonPosition = (chapters: Chapters, currentLessonId: string)
 
 export default function LessonPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { courseId = "", lessonId = "" } = useParams();
 
@@ -89,13 +93,6 @@ export default function LessonPage() {
     queryClient.invalidateQueries(courseQueryOptions(courseId, language));
   }, [courseId, language, lesson?.id]);
 
-  useLearningTimeTracker({
-    lessonId,
-    learningStateId: lesson?.learningStateId,
-    courseId,
-    enabled: !!user && !!lesson && !!course && !course.isManagerPreview,
-  });
-
   useEffect(() => {
     if (lessonError) {
       setError(true);
@@ -103,6 +100,19 @@ export default function LessonPage() {
   }, [lessonError]);
 
   if (error) {
+    if (!user) {
+      return (
+        <ErrorPage
+          iconName="LogIn"
+          title={t("studentLessonView.error.loginTitle")}
+          description={t("studentLessonView.error.loginDescription")}
+          actionLabel={t("studentCoursesView.courseUnavailable.goToLogin")}
+          actionIcon="ArrowRight"
+          to={`/auth/login?returnTo=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`}
+        />
+      );
+    }
+
     return (
       <ErrorPage
         title={t("studentLessonView.error.notAuthorizedTitle")}
@@ -219,6 +229,7 @@ export default function LessonPage() {
 
   return (
     <CourseAccessProvider course={course}>
+      <LessonLearningTimeTracker lessonId={lesson.id} learningStateId={lesson.learningStateId} />
       <PageWrapper
         className="h-auto"
         breadcrumbs={breadcrumbs}
@@ -236,6 +247,7 @@ export default function LessonPage() {
                 </p>
               </div>
               <LessonContent
+                showPreviewNotice
                 key={`${lesson.id}:${lesson.learningStateId ?? "current"}`}
                 lesson={lesson}
                 course={course}
@@ -252,4 +264,21 @@ export default function LessonPage() {
       </PageWrapper>
     </CourseAccessProvider>
   );
+}
+
+function LessonLearningTimeTracker({
+  lessonId,
+  learningStateId,
+}: {
+  lessonId: string;
+  learningStateId?: string | null;
+}) {
+  const { course, isEffectiveStudentExperience } = useCourseAccessProvider();
+  useLearningTimeTracker({
+    lessonId,
+    learningStateId,
+    courseId: course.id,
+    enabled: isEffectiveStudentExperience && !course.isManagerPreview,
+  });
+  return null;
 }

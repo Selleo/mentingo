@@ -511,6 +511,11 @@
             "ready": "Šiandienos praktika paruošta.",
             "failed": "Scenarijaus sukurti nepavyko. Atidarykite ir bandykite dar kartą."
           }
+        },
+        "gamification": {
+          "description": "Jūsų lygis, XP ir naujausi pasiekimai",
+          "empty": "Baikite pamokas ir kursus, kad gautumėte pirmąjį pasiekimą.",
+          "recentRewards": "Naujausi pasiekimai"
         }
       },
       "commonDescription": "Svarbiausia informacija vienu žvilgsniu",
@@ -615,6 +620,9 @@
           "reorderSuccess": "Užduočių tvarka išsaugota.",
           "reorderError": "Nepavyko išsaugoti užduočių tvarkos."
         }
+      },
+      "gamification": {
+        "title": "Lygis ir pasiekimai"
       }
     }
   },
@@ -738,7 +746,8 @@
       "contentCreator": "Turinio kūrėjas",
       "trainer": "Trainer",
       "student": "Studentas",
-      "groupManager": "Grupių vadovas"
+      "groupManager": "Grupių vadovas",
+      "reviewer": "Vertintojas"
     },
     "languages": {
       "en": "Anglų",
@@ -801,7 +810,8 @@
     "exitFullscreen": "Išeikite per visą ekraną",
     "refreshPage": "Atnaujinti puslapį",
     "validation": {
-      "messageRequired": "Žinutė yra privaloma."
+      "messageRequired": "Žinutė yra privaloma.",
+      "nameMaxLength": "Gali būti ne daugiau kaip {{max}} simbolių."
     }
   },
   "lessons": {
@@ -820,6 +830,7 @@
     "replace": "Spustelėkite, kad pakeistumėte",
     "toast": {
       "fileUploadedSuccessfully": "Failas sėkmingai įkeltas",
+      "uploadFailed": "Nepavyko įkelti failo. Patikrinkite failo tipą ir dydį, tada bandykite dar kartą.",
       "videoFailed": "Vaizdo įrašo įkėlimas nepavyko",
       "videoTooLarge": "Vaizdo failas viršija didžiausią leistiną dydį",
       "videoReady": "Vaizdo įrašas paruoštas naudoti",
@@ -830,9 +841,9 @@
       "uploadForbidden": "Šis įkėlimas nepriklauso dabartiniam vartotojui."
     },
     "details": {
-      "imageCrop": "PNG, JPG, JPEG arba SVG",
-      "video": "MP4, MOV, MPEG-2 arba Hevc (maks. iki 5 GB)",
-      "presentation": "PPT / PPTX (maks. iki 100 MB)"
+      "imageCrop": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})",
+      "video": "MP4, MOV/QT, WEBM arba OGG (maks. {{maxSize}})",
+      "presentation": "PPTX arba ODP (maks. {{maxSize}})"
     },
     "processing": {
       "title": "Vaizdo įrašas apdorojamas",
@@ -889,7 +900,7 @@
       "setUpCourse": "Nustatykite kursą",
       "provideDetails": "Pateikite išsamią informaciją, kad nustatytumėte naują kursą",
       "uploadFileHeader": "Spustelėkite, kad įkeltumėte arba nuvilkite ir numeskite",
-      "uploadFileBody": "SCORM .zip failas (maks. iki 500 MB)",
+      "uploadFileBody": "SCORM .zip failas (maks. {{maxSize}})",
       "pricing": "Kainodara",
       "status": "Būsena",
       "setUpPricing": "Nustatykite kurso kainą",
@@ -958,7 +969,8 @@
         "invalidAttempt": "SCORM bandymas neteisingas.",
         "invalidCmiValue": "SCORM vykdymo duomenys neteisingi.",
         "contentNotFound": "SCORM turinys nerastas.",
-        "contentForbidden": "Neturite prieigos prie šio SCORM turinio."
+        "contentForbidden": "Neturite prieigos prie šio SCORM turinio.",
+        "contentUnavailable": "SCORM turinys laikinai nepasiekiamas. Kreipkitės į administratorių."
       }
     },
     "coursePlaceholder": {
@@ -976,7 +988,7 @@
       "requirements": {
         "title": "Paketo reikalavimai",
         "version": "SCORM 1.2 paketas",
-        "archive": ".zip archyvas iki 500MB",
+        "archive": ".zip archyvas iki {{maxSize}}",
         "metadata": "Kurso metaduomenis galima redaguoti prieš importą"
       },
       "packageSection": "SCORM paketas",
@@ -991,11 +1003,22 @@
       "replacePackage": "Pakeisti paketą",
       "removePackage": "Pašalinti paketą",
       "uploadThumbnail": "Įkelti miniatiūrą",
-      "uploadThumbnailDescription": "PNG, JPG arba JPEG iki 20MB",
+      "uploadThumbnailDescription": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})",
       "thumbnailPreviewAlt": "Kurso miniatiūros peržiūra",
       "submit": "Sukurti SCORM kursą",
       "creating": "Kuriamas SCORM kursas...",
-      "toastDraftReady": "SCORM kurso forma paruošta API integracijai"
+      "toastDraftReady": "SCORM kurso forma paruošta API integracijai",
+      "categoryRequired": "Kategorija yra privaloma.",
+      "descriptionMaxLength": "Apraše gali būti ne daugiau kaip {{maxLength}} simbolių.",
+      "descriptionMinLength": "Aprašą turi sudaryti bent 2 simboliai.",
+      "languageInvalid": "Pasirinkite palaikomą kalbą.",
+      "packageInvalidType": "SCORM paketas turi būti .zip failas",
+      "packageRequired": "SCORM paketas yra privalomas.",
+      "packageTooLarge": "SCORM paketas turi būti mažesnis nei {{maxSize}}",
+      "thumbnailInvalid": "Miniatiūra turi būti tinkamas vaizdo failas",
+      "thumbnailInvalidType": "Miniatiūra turi būti PNG, JPG/JPEG, WEBP arba SVG",
+      "thumbnailTooLarge": "Miniatiūra turi būti mažesnė nei {{maxSize}}",
+      "titleMinLength": "Pavadinimą turi sudaryti bent 2 simboliai."
     },
     "lesson": {
       "packageSection": "SCORM paketas",
@@ -1007,7 +1030,7 @@
       "validation": {
         "titleRequired": "Pavadinimas būtinas",
         "packageRequired": "SCORM paketas yra privalomas",
-        "packageTooLarge": "SCORM paketas turi būti mažesnis nei 500MB",
+        "packageTooLarge": "SCORM paketas turi būti mažesnis nei {{maxSize}}",
         "packageInvalidType": "SCORM paketas turi būti .zip failas"
       }
     }
@@ -1067,7 +1090,9 @@
     },
     "qa": "Klausimai ir atsakymai",
     "tenants": "Organizacijos",
-    "reports": "Ataskaitos"
+    "reports": "Ataskaitos",
+    "leaderboards": "Lyderių lentelės",
+    "gamification": "Žaidybinimas"
   },
   "microsoftCalendar": {
     "title": "Microsoft kalendorius",
@@ -2298,7 +2323,9 @@
         "live_training": "gyvus mokymus",
         "activity_log": "veiklos žurnalą",
         "competencies": "kompetencijos",
-        "other": "platformos funkcijas"
+        "other": "platformos funkcijas",
+        "gamification": "žaidybinimą",
+        "quiz_grading": "testų vertinimas"
       },
       "descriptions": {
         "phishing_manage": "Gali kurti ir valdyti sukčiavimo el. paštu simuliacijas.",
@@ -2392,7 +2419,14 @@
         "live_training_end": "Gali užbaigti gyvų mokymų sesijas.",
         "live_training_statistics": "Gali peržiūrėti gyvų mokymų lankomumą ir statistiką.",
         "ai_thread_read": "Gali peržiūrėti visus pokalbius su DI ir jų išsaugotus vertinimus.",
-        "activity_log_read": "Gali peržiūrėti veiklos žurnalus."
+        "activity_log_read": "Gali peržiūrėti veiklos žurnalus.",
+        "gamification_read": "Peržiūrėti lygius, XP ir pasiekimus.",
+        "gamification_earn_hidden": "Gauti paslėptus pasiekimus.",
+        "gamification_leaderboard_read": "Peržiūrėti savo grupių lyderių lenteles ir organizacijos lentelę, kai ji vieša.",
+        "gamification_leaderboard_read_all": "Peržiūrėti organizacijos ir visų grupių lyderių lenteles.",
+        "gamification_manage": "Konfigūruoti pasiekimus ir žaidimo elementų nustatymus.",
+        "quiz_grading_read": "Peržiūrėti atvirų atsakymų, laukiančių įvertinimo, eilę.",
+        "quiz_grading_grade": "Vertinti atvirus atsakymus ir rašyti komentarus besimokantiesiems."
       }
     },
     "dropdown": {
@@ -2974,7 +3008,7 @@
         "charactersLeft": "Liko simbolių",
         "reachedCharactersLimit": "Pasiekėte simbolių limitą.",
         "reachedCharactersLimitHtml": "Per daug formatavimo. Sumažinkite formatavimo kiekį, kad tilptų į limitą.",
-        "trailerUploadDetails": "MP4, MOV (maks. 50 MB)",
+        "trailerUploadDetails": "MP4, MOV/QT, WEBM arba OGG (maks. {{maxSize}})",
         "enableCertificate": "Įgalinti sertifikatą",
         "enableCertificateDescription": "Įjunkite tai, kad išduotumėte šio kurso sertifikatus ir toliau sukonfigūruotumėte jų parašą bei peržiūrą.",
         "certificateValidity": "Sertifikato galiojimas",
@@ -3009,7 +3043,7 @@
           "groups": "Grupės",
           "users": "Naudotojai"
         },
-        "certificateSignatureRequirements": "PNG arba SVG (rekomenduojamas skaidrus fonas)",
+        "certificateSignatureRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})",
         "certificatePreviewTitle": "Sertifikato peržiūra",
         "certificatePreviewDescription": "Atidarykite peržiūrą, kad sureguliuotumėte kalbą ir spalvą.",
         "certificatePreviewButton": "Peržiūra",
@@ -3031,7 +3065,7 @@
       },
       "validation": {
         "titleMinLength": "Pavadinimą turi sudaryti bent 2 simboliai.",
-        "titleMaxLength": "Pavadinimas turi būti ne ilgesnis kaip 250 simbolių.",
+        "titleMaxLength": "Pavadinimas turi būti ne ilgesnis kaip {{max}} simbolių.",
         "descriptionMinLength": "Aprašą turi sudaryti bent 2 simboliai.",
         "categoryRequired": "Kategorija būtina",
         "certificateManageDenied": "Negalite tvarkyti šio kurso pažymėjimų.",
@@ -3158,11 +3192,12 @@
           "passThresholdMax": "Išlaikymo slenkstis negali viršyti 10",
           "titleMinLength": "Pavadinimas per trumpas (mažiausiai 2 simboliai)",
           "titleMaxLength": "Pavadinimas per ilgas (maks. 250 simbolių)",
-          "maxFileSize": "Failo dydis turi būti mažesnis nei {{ MAX_MB_PER_FILE }} MB",
+          "maxFileSize": "Failo dydis turi būti mažesnis nei {{maxSize}}",
           "maxFileNumber_one": "Negalite įkelti daugiau nei 1 failo",
           "maxFileNumber_other": "Negalite įkelti daugiau nei {{ count }} failų",
           "maxResources_five": "Negalite pridėti daugiau nei 5 išteklių",
-          "sourceUrlRequired": "Būtinas šaltinio URL"
+          "sourceUrlRequired": "Būtinas šaltinio URL",
+          "sourceUrlInvalid": "Įveskite galiojantį HTTPS URL"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pamokos rodymo tvarka sėkmingai atnaujinta",
@@ -3236,8 +3271,8 @@
           "voiceMode": "Balso režimas",
           "ttsPreset": "Iš anksto nustatytas TTS",
           "customTTSReference": "Pasirinktinė TTS nuoroda",
-          "includeFiles_one": "Pridėkite iki 1 failo žemiau {{ MAX_FILE_SIZE }} MB, kad būtų naudojamas kaip kontekstas pamokose",
-          "includeFiles_other": "Pridėkite iki {{ count }} failų, mažesnių nei {{ MAX_FILE_SIZE }} MB, kad galėtumėte naudoti kaip kontekstą pamokose"
+          "includeFiles_one": "Pridėkite iki 1 failo žemiau {{maxSize}}, kad būtų naudojamas kaip kontekstas pamokose",
+          "includeFiles_other": "Pridėkite iki {{ count }} failų, mažesnių nei {{maxSize}}, kad galėtumėte naudoti kaip kontekstą pamokose"
         },
         "placeholder": {
           "title": "Pateikite pamokos pavadinimą...",
@@ -3779,7 +3814,7 @@
           "leaveContentCancel": "Tęsti redagavimą",
           "leaveContentDiscard": "Išeiti neišsaugojus",
           "dropOrClick": "Nuvilkite vaizdą čia arba spustelėkite, kad įkeltumėte",
-          "allowedFormats": "PNG, JPG arba SVG",
+          "allowedFormats": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})",
           "aiMentorInstructionsTooltip": "Apibūdinkite, kaip AI mentorius turėtų elgtis pamokos metu. Įtraukite kontekstą, vaidmenį ar scenarijų, kurio AI turėtų laikytis. Tai apibrėžia, kaip AI vadovaus pokalbiui.",
           "updateAiMentorAvatarDescription": "Įkelkite naują AI mentoriaus vaizdą arba pašalinkite esamą.",
           "updateAiMentorAvatar": "Atnaujinkite AI mentoriaus avatarą",
@@ -3863,7 +3898,8 @@
           },
           "betaTooltip": "Ši funkcija pateikiama bandomojoje versijoje. Jame gali būti klaidų arba jis gali neveikti visiškai taip, kaip numatyta, ir naudojamas jūsų pačių rizika.",
           "dragWord": "Vilkite žodį į sakinį",
-          "taskDescriptionTooltip": "Trumpai apibūdinkite, ką dalyvis turėtų daryti pokalbio su AI mentoriumi metu."
+          "taskDescriptionTooltip": "Trumpai apibūdinkite, ką dalyvis turėtų daryti pokalbio su AI mentoriumi metu.",
+          "requiresReview": "Vertina vertintojas"
         }
       }
     },
@@ -4192,7 +4228,7 @@
   },
   "studentCoursesView": {
     "courseUnavailable": {
-      "accessTitle": "Kursas nepasiekiamas",
+      "accessTitle": "Prisijunkite, kad galėtumėte pereiti į kursą",
       "accessDescription": "Prisijunkite arba sukurkite paskyrą, kad galėtumėte tęsti kursą.",
       "goToLogin": "Eiti į prisijungimą",
       "goToCourseList": "Eiti į kursų sąrašą",
@@ -4281,6 +4317,8 @@
   },
   "studentLessonView": {
     "error": {
+      "loginTitle": "Prisijunkite, kad galėtumėte pereiti į pamoką",
+      "loginDescription": "Prisijunkite arba sukurkite paskyrą, kad galėtumėte tęsti pamoką.",
       "lessonIdNotFound": "Pamokos ID nerastas",
       "notAuthorizedTitle": "Neįgaliotas",
       "notAuthorizedDescription": "Jūs neturite teisės pasiekti šios pamokos.",
@@ -4308,6 +4346,7 @@
       "multipleChoice": "Klausimas su keliais pasirinkimais.",
       "singleChoice": "Vieno pasirinkimo klausimas",
       "passingThreshold": "Išlaikymo slenkstis: {{threshold}} % ({{correct}} iš {{questionsNumber}} klausimų)",
+      "partialScore": "Dalinis rezultatas: {{correct}} iš {{graded}} įvertintų klausimų teisingai",
       "score": "Rezultatas: {{score}}% ({{correct}} iš {{questionsNumber}} klausimų)",
       "contentCantBeEmbedded": "Šio turinio negalima įterpti.",
       "openInNewTab": "Atidaryti naujame skirtuke",
@@ -4321,6 +4360,7 @@
       "loading": "Įkeliamas SCORM turinys...",
       "launchFailed": "Nepavyko paleisti SCORM turinio.",
       "launchFailedBody": "Bandykite dar kartą. Jei problema išlieka, SCORM paketą gali reikėti įkelti iš naujo.",
+      "contentAccessExpired": "Nepavyko atnaujinti prieigos prie SCORM turinio. Norėdami tęsti, iš naujo atidarykite pamoką.",
       "saveFailed": "Nepavyko išsaugoti SCORM pažangos.",
       "saving": "Išsaugoma pažanga",
       "previousSco": "Ankstesnė dalis",
@@ -4384,7 +4424,8 @@
       "retakeAvailableIn": "Užrakinta {{time}} valandoms po paskutinio pakartojimo.",
       "cooldown": "Viktorina bus užrakinta {{time}} valandoms po paskutinio bandymo.",
       "noCooldown": "Nėra aušinimo laikotarpio.",
-      "beta": "Ši funkcija pateikiama bandomojoje versijoje. Jame gali būti klaidų arba jis gali neveikti visiškai taip, kaip numatyta, ir naudojamas jūsų pačių rizika."
+      "beta": "Ši funkcija pateikiama bandomojoje versijoje. Jame gali būti klaidų arba jis gali neveikti visiškai taip, kaip numatyta, ir naudojamas jūsų pačių rizika.",
+      "awaitingReview": "Testą galėsite kartoti po jo įvertinimo."
     },
     "breadcrumbs": {
       "availableCourses": "Galimi kursai",
@@ -4422,7 +4463,13 @@
       "quizNotAnsweredYet": "Jūs dar neatsakėte į šią viktoriną.",
       "courseEnrollmentRequired": "Jūs nesate užregistruoti į šį kursą.",
       "quizRetakeUnavailable": "Viktorinos atsakymų negalima atstatyti dėl bandymų limito arba laukimo laikotarpio.",
-      "quizResetFailed": "Nepavyko atstatyti viktorinos atsakymų. Bandykite dar kartą."
+      "quizResetFailed": "Nepavyko atstatyti viktorinos atsakymų. Bandykite dar kartą.",
+      "quizAwaitingReview": "Šis testas laukia įvertinimo."
+    },
+    "preview": {
+      "title": "Peržiūrite kurso turinį",
+      "enrollmentDescription": "Užsiregistruokite į kursą, kad galėtumėte atlikti testus ir išsaugoti pažangą.",
+      "learningModeDescription": "Įjunkite mokymosi režimą, kad galėtumėte atlikti testus ir stebėti pažangą."
     }
   },
   "studentCourseView": {
@@ -4461,6 +4508,7 @@
         "stopVoiceRecording": "Sustabdyti balso įrašymą",
         "taskDescription": "Užduoties aprašymas",
         "taskButton": "Užduoties aprašymas",
+        "taskDescriptionEmpty": "Šiai pamokai nepridėtas užduoties aprašymas.",
         "resultButton": "Rezultatas",
         "resultButtonDisabledTooltip": "Pirmiausia patikrinkite pamoką, kad pamatytumėte rezultatą.",
         "taskDescriptionExpand": "Spustelėkite norėdami išplėsti",
@@ -4662,13 +4710,13 @@
   },
   "certificateBackgroundUpload": {
     "title": "Foninis sertifikato įkėlimas",
-    "description": "Įkelkite sertifikato fono paveikslėlį.",
+    "description": "Fonas už sertifikato turinio.",
     "button": {
       "removeCertificateBackgroundImage": "Ištrinkite sertifikato foną",
       "preview": "Peržiūra"
     },
     "field": {
-      "imageRequirements": "PNG, JPG arba JPEG (maks. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})"
     },
     "other": {
       "uploading": "Įkeliama...",
@@ -4717,7 +4765,9 @@
       "finishedCourseNotification": "Pranešimai apie baigtą kursą",
       "finishedCourseNotificationDescription": "Gaukite pranešimus, kai vartotojas baigia kursą",
       "studentsWithOverdueCourseNotification": "Studentai su pranešimais apie vėluojančius kursus",
-      "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis"
+      "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis",
+      "publicCoursePreview": "Pamokų peržiūra prieš registraciją į kursą",
+      "publicCoursePreviewDescription": "Leiskite naudotojams peržiūrėti nemokamų viešų kursų pamokas neužsiregistravus į kursą."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Naujos vartotojo pranešimų nuostatos sėkmingai atnaujintos",
@@ -4730,7 +4780,8 @@
       "finishedCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie baigtą kursą nuostatos sėkmingai atnaujintos",
       "finishedCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimo apie baigtą kursą nuostatų",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie pradelstą kursą nuostatos sėkmingai atnaujintos",
-      "overdueCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimų apie pradelstą kursą nuostatų"
+      "overdueCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimų apie pradelstą kursą nuostatų",
+      "publicCoursePreviewPreferenceChangeSuccess": "Kursų peržiūros nustatymas atnaujintas"
     }
   },
   "registrationFormBuilder": {
@@ -4804,7 +4855,8 @@
       "student": "Studentas",
       "content_creator": "Turinio kūrėjas",
       "trainer": "Treneris",
-      "group_manager": "Grupių vadovas"
+      "group_manager": "Grupių vadovas",
+      "reviewer": "Vertintojas"
     },
     "switch": {
       "enabled": "Įjungta",
@@ -4812,6 +4864,7 @@
     },
     "toast": {
       "mfaEnforcementUpdatedSuccessfully": "MFA vykdymo nustatymai sėkmingai atnaujinti.",
+      "mfaVerificationRequired": "Jūsų vaidmeniui dabar reikalingas MFA. Norėdami tęsti, nustatykite arba patvirtinkite jį.",
       "mfaEnforcementUpdateFailed": "Nepavyko atnaujinti MFA vykdymo nustatymų."
     }
   },
@@ -4819,7 +4872,8 @@
     "completed": "Baigta",
     "inProgress": "Vykdoma",
     "notStarted": "Nepradėtas",
-    "blocked": "Užblokuota"
+    "blocked": "Užblokuota",
+    "awaitingReview": "Laukia įvertinimo"
   },
   "studentCertificateView": {
     "header": "Sertifikatai",
@@ -4945,10 +4999,10 @@
   },
   "platformLogo": {
     "header": "Platformos logotipas",
-    "subHeader": "Įkelkite tinkintą logotipą savo platformai. Palaikomi formatai: PNG, SVG",
+    "subHeader": "Pagrindinis platformos logotipas.",
     "field": {
       "uploadLabel": "Logotipo vaizdas",
-      "imageRequirements": "PNG arba SVG (maks. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Ištrinti platformos logotipą"
@@ -4961,10 +5015,10 @@
   },
   "platformSimpleLogo": {
     "header": "Platformos paprastas logotipas (piktograma)",
-    "subHeader": "Įkelkite tinkintą logotipą, kuris bus naudojamas kaip ženklas ir favicon. Palaikomi formatai: PNG, SVG",
+    "subHeader": "Kompaktiškas logotipas ir naršyklės favicon.",
     "field": {
       "uploadLabel": "Logotipo vaizdas",
-      "imageRequirements": "PNG arba SVG (maks. 10 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})"
     },
     "button": {
       "removeLogo": "Ištrinti platformos piktogramos logotipą"
@@ -4975,15 +5029,56 @@
       "logoFetchError": "Gaunant paprastą platformos logotipą įvyko klaida"
     }
   },
+  "brandingImages": {
+    "title": "Prekės ženklo vaizdai",
+    "description": "Logotipai ir fono vaizdai, naudojami platformoje, prisijungimo puslapyje ir sertifikatuose."
+  },
   "organizationTheme": {
     "title": "Organizacijos tema",
-    "description": "Tinkinkite savo platformos išvaizdą pasirinkdami temos spalvą, kuri atspindi jūsų organizacijos prekės ženklą."
+    "description": "Tinkinkite savo platformos išvaizdą pasirinkdami temos spalvą, kuri atspindi jūsų organizacijos prekės ženklą.",
+    "primaryColor": {
+      "label": "Pagrindinė spalva",
+      "description": "Mygtukai ir svarbiausi akcentai"
+    },
+    "contrastColor": {
+      "label": "Tekstas ant pagrindinės spalvos",
+      "description": "Tekstas ir piktogramos ant pagrindinių mygtukų"
+    },
+    "backgroundColor": {
+      "label": "Fonas",
+      "description": "Puslapio fonas už turinio"
+    },
+    "accentColor": {
+      "label": "Akcentas",
+      "description": "Nuorodos, skirtukai, kontūriniai mygtukai ir ženkleliai",
+      "adjustedDescription": "Patamsinta pagrindinė spalva, kad liktų įskaitoma"
+    },
+    "automatic": "Auto",
+    "resetToAutomatic": "Atkurti auto",
+    "pickColor": "Pasirinkti: {{label}}",
+    "contrastTooltip": {
+      "passes": "Kontrasto santykis atitinka WCAG 2 AA (bent {{minimum}}:1 įprastam tekstui).",
+      "fails": "Kontrasto santykis neatitinka WCAG 2 AA, kuris reikalauja bent {{minimum}}:1 įprastam tekstui."
+    },
+    "lowContrast": "Sunku perskaityti. Rekomenduojamas kontrastas – bent {{minimum}}:1",
+    "preview": {
+      "title": "Peržiūra",
+      "courseTitle": "Įvadas į dizainą",
+      "courseDetails": "12 pamokų · 3 valandos",
+      "badge": "Vykdoma",
+      "overviewTab": "Apžvalga",
+      "lessonsTab": "Pamokos",
+      "progress": "Pažanga",
+      "primaryButton": "Tęsti mokymąsi",
+      "outlineButton": "Išsaugoti vėlesniam laikui",
+      "link": "Peržiūrėti programą"
+    }
   },
   "organizationLoginBackgroundImageUpload": {
     "title": "Prisijungimo fono paveikslėlio įkėlimas",
-    "description": "Įkelkite tinkintą organizacijos prisijungimo puslapio fono paveikslėlį.",
+    "description": "Prisijungimo puslapio fonas.",
     "field": {
-      "imageRequirements": "PNG, JPG arba JPEG (maks. 20 MB)"
+      "imageRequirements": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}})"
     },
     "button": {
       "removeBackgroundImage": "Ištrinkite prisijungimo fono paveikslėlį"
@@ -5006,11 +5101,16 @@
       "invalidData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
       "fileEmpty": "Failo įkėlimas nepavyko – failas tuščias",
       "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
-      "invalidFileType": "Neteisingas failo tipas.",
+      "invalidFileType": "Failas netinkamas arba jo formatas nepalaikomas.",
       "missingTenantContext": "Trūksta organizacijos konteksto failo įkėlimui",
       "presentationFileTooLarge": "Pateiktis yra per didelė. Įkelkite pateiktį iki {{size}} {{unit}}.",
-      "audioFileTooLarge": "Garso failas per didelis. Įkelkite garso įrašą iki 200 MB.",
-      "rangeNotSatisfiable": "Prašomas baitų intervalas nepasiekiamas."
+      "audioFileTooLarge": "Garso failas per didelis. Įkelkite garso įrašą iki {{size}} {{unit}}.",
+      "rangeNotSatisfiable": "Prašomas baitų intervalas nepasiekiamas.",
+      "fileTooLarge": "Failas per didelis. Didžiausias dydis – {{maxSize}}.",
+      "uploadTooLarge": "Failas per didelis, kad būtų įkeltas.",
+      "imageResolutionTooLarge": "Vaizdas per didelis. Didžiausia raiška – {{width}}×{{height}} px.",
+      "imageAspectRatioMismatch": "Vaizdo kraštinių santykis turi būti {{aspectRatio}}.",
+      "invalidImageReference": "Pasirinktas vaizdas nepasiekiamas. Įkelkite vaizdą dar kartą."
     },
     "import": {
       "noFileUploaded": "Failas neįkeltas",
@@ -5284,8 +5384,7 @@
       "insert": "Įterpti",
       "delete": "Ištrinti",
       "columns": {
-        "asset": "Failas",
-        "actions": "Veiksmai"
+        "asset": "Failas"
       },
       "visibility": {
         "public": "Viešas",
@@ -5376,7 +5475,8 @@
     "activityLogs": "Veiklos žurnalas",
     "learningPaths": "Tobulėjimo keliai",
     "adminLearningPaths": "Tobulėjimo keliai",
-    "adminLearningPathEditor": "Tobulėjimo kelio redaktorius"
+    "adminLearningPathEditor": "Tobulėjimo kelio redaktorius",
+    "gamification": "Žaidybinimas"
   },
   "courseDuplication": {
     "error": {
@@ -5598,7 +5698,7 @@
     "status": {
       "draft": "Juodraštis",
       "published": "Paskelbta",
-      "private": "Privatu",
+      "private": "Privatus",
       "not_started": "Nepradėta",
       "in_progress": "Vykdoma",
       "completed": "Baigta",
@@ -5753,7 +5853,7 @@
       "titlePlaceholder": "Pavadinkite tobulėjimo kelią",
       "description": "Aprašymas",
       "descriptionPlaceholder": "Aprašykite, ką dalyviai atliks šiame tobulėjimo kelyje",
-      "imageHint": "PNG, JPG arba JPEG (maks. 20 MB, rekomenduojama 1200x1200 ar didesnė)",
+      "imageHint": "PNG, JPG/JPEG, WEBP arba SVG (maks. {{maxSize}}, rekomenduojama 1200x1200 ar didesnė)",
       "sequenceEnabled": "Nuoseklus mokymasis",
       "sequenceEnabledDescription": "Dalyviai turi baigti kursus rodoma tvarka.",
       "includesCertificate": "Sertifikatas",
@@ -6085,7 +6185,8 @@
       "generic": "Nepavyko paleisti palaikymo režimo",
       "targetUserRequired": "Pasirinkite aktyvų naudotoją iš pasirinktos organizacijos",
       "invalidSession": "Palaikymo sesija netinkama",
-      "sessionExpired": "Jūsų pagalbos sesija baigėsi. Pradėkite naują pagalbos sesiją."
+      "sessionExpired": "Jūsų pagalbos sesija baigėsi. Pradėkite naują pagalbos sesiją.",
+      "personalSettingsBlocked": "Palaikymo režimu asmeninių nustatymų keisti negalima."
     }
   },
   "superAdminTenantsView": {
@@ -6184,6 +6285,7 @@
       "hostAlreadyExists": "Organizacijos priegloba jau egzistuoja",
       "notFound": "Organizacija nerasta",
       "invalidHost": "Netinkamas organizacijos prieglobos URL",
+      "reservedHost": "Ši organizacijos priegloba yra rezervuota ir negali būti naudojama",
       "managingTenantRequired": "Reikalingas valdančios organizacijos administratorius",
       "currentTenantSupportNotAllowed": "Palaikymo režimas dabartinei organizacijai nepasiekiamas",
       "currentTenantDeleteNotAllowed": "Dabartinės valdančiosios organizacijos ištrinti negalima"
@@ -6196,7 +6298,13 @@
       "invalidRefreshToken": "Netinkamas atnaujinimo prieigos raktas",
       "adminRoleRequired": "Reikalingas administratoriaus vaidmuo",
       "missingPermission": "Neturite leidimo pasiekti šio šaltinio",
-      "sessionRevoked": "Jūsų sesija buvo atšaukta. Atnaujinkite sesiją."
+      "sessionRevoked": "Jūsų sesija buvo atšaukta. Atnaujinkite sesiją.",
+      "mfaRequired": "Norėdami tęsti, užbaikite dviejų veiksnių autentifikavimą.",
+      "sessionExpired": "Prisijungimo sesija baigėsi. Prisijunkite iš naujo.",
+      "mfaAlreadyEnabled": "Dviejų veiksnių autentifikavimas jau įjungtas.",
+      "mfaCodeAlreadyUsed": "Šis kodas jau panaudotas. Palaukite naujo kodo autentifikavimo programėlėje ir bandykite dar kartą.",
+      "invalidMfaCode": "Įveskite galiojantį šešių skaitmenų autentifikavimo kodą.",
+      "invalidSettingsUpdate": "Šių saugumo nustatymų čia keisti negalima."
     }
   },
   "sessionRevocation": {
@@ -6367,11 +6475,11 @@
       "uploadImage": "Įkelti naują pagrindinį vaizdą",
       "dropImage": "Nuvilkite pagrindinį vaizdą čia",
       "browse": "arba spustelėkite ir pasirinkite",
-      "imageLimit": "PNG, JPG iki 10 MB",
+      "imageLimit": "PNG, JPG iki {{maxSize}}",
       "imageRecommendation": "Rekomenduojama: 1920x820 px (21:9)",
       "trailer": "Kurso anonsas (nebūtina)",
       "dropVideo": "Nuvilkite anonsą čia",
-      "videoLimit": "MP4, MOV iki 50 MB",
+      "videoLimit": "MP4, MOV iki {{maxSize}}",
       "videoRecommendation": "Rekomenduojama: 30–90 sekundžių",
       "save": "Įkelti mediją"
     },
@@ -6453,7 +6561,8 @@
         "started": "Pradėta",
         "completed": "Baigta",
         "inProgress": "Vykdoma",
-        "notStarted": "Nepradėta"
+        "notStarted": "Nepradėta",
+        "awaitingReview": "Laukia įvertinimo"
       },
       "lessonTypes": {
         "content": "Turinys",
@@ -6823,13 +6932,13 @@
       "uploading": "Įkeliamas {{name}}...",
       "description": "Pasirinkite patvirtintą medžiagą arba aiškiai leiskite viešuosius šaltinius.",
       "library": "Kurso šaltiniai",
-      "fileHint": "PDF, DOCX, paprastas tekstas arba Markdown · iki 25 MiB",
+      "fileHint": "PDF, DOCX, tekstas, Markdown, PNG, JPEG arba WebP · iki 25 MiB",
       "use": "Naudoti šaltinį {{name}}",
       "required": "Privaloma",
       "exclude": "Neįtraukti",
       "emptyLibrary": "Pridėkite patvirtintą medžiagą arba įjunkite šaltinio leidimą.",
       "tooLarge": "Šaltinis viršija 25 MiB įkėlimo limitą.",
-      "unsupportedFile": "Pasirinkite PDF, DOCX, paprasto teksto arba Markdown failą.",
+      "unsupportedFile": "Pasirinkite PDF, DOCX, teksto, Markdown, PNG, JPEG arba WebP failą.",
       "status": {
         "queued": "Eilėje",
         "processing": "Apdorojama",
@@ -6965,6 +7074,7 @@
       "assetDecisionFallback": "Šiam turtui reikia aiškaus sprendimo.",
       "generatedVisualTitle": "Generuojama iliustracija",
       "restoreAsset": "Atšaukti praleidimą",
+      "sourceImageTitle": "Šaltinio paveikslėlis",
       "assetDetails": "Išsami informacija",
       "retryApprovalExplanation": "Ankstesnė užklausa galėjo būti priimta. Pakartojus gali būti taikomas papildomas mokestis.",
       "assetStatus": {
@@ -8324,7 +8434,9 @@
       "averageQuizScore": "Vidutinis testų rezultatas",
       "attempts": "Visi bandymai",
       "lastActivity": "Paskutinė veikla",
-      "pathCourseStatus": "Kurso būsena mokymosi kelyje"
+      "pathCourseStatus": "Kurso būsena mokymosi kelyje",
+      "sortAscending": "Rikiuoti didėjimo tvarka",
+      "sortDescending": "Rikiuoti mažėjimo tvarka"
     },
     "help": {
       "title": "Apie ataskaitą",
@@ -9171,6 +9283,303 @@
       "disabled": "Šioje sistemoje pagalbos pamokos neįjungtos.",
       "notFound": "Ši pamoka nepasiekiama jūsų Mentingo versijai.",
       "invalidRequest": "Pasirinkite pasiekiamą pamoką arba pakeiskite paieškos frazę ir bandykite dar kartą."
+    }
+  },
+  "learningPathView": {
+    "toast": {
+      "notFoundError": "Tobulėjimo kelias nerastas.",
+      "createError": "Nepavyko sukurti tobulėjimo kelio.",
+      "updateError": "Nepavyko atnaujinti tobulėjimo kelio.",
+      "updateMissingLanguage": "Šis tobulėjimo kelias nepasiekiamas pasirinkta kalba.",
+      "languageNotSupported": "Ši kalba nepalaikoma.",
+      "courseNotFound": "Kursas nerastas.",
+      "courseAlreadyExists": "Šis kursas jau yra tobulėjimo kelyje.",
+      "courseIdsMustBeUnique": "Kiekvieną kursą galima pridėti tik vieną kartą.",
+      "courseIdsEmpty": "Pasirinkite bent vieną kursą.",
+      "courseIdsMismatch": "Kursų tvarka neatitinka šio tobulėjimo kelio kursų.",
+      "courseLinkNotFound": "Šis kursas nepriklauso tobulėjimo keliui.",
+      "studentIdsEmpty": "Pasirinkite bent vieną besimokantįjį.",
+      "groupIdsEmpty": "Pasirinkite bent vieną grupę.",
+      "featureDisabled": "Tobulėjimo keliai šioje platformoje išjungti."
+    }
+  },
+  "gamification": {
+    "level": "Lygis {{level}}",
+    "xp": "{{xp}} XP",
+    "xpGain": "+{{xp}} XP",
+    "xpToNextLevel": "{{xp}} XP iki {{level}} lygio",
+    "levelOf": "Lygis {{level}} iš {{total}}",
+    "progress": "{{value}} / {{threshold}}",
+    "earnedOn": "Gauta {{date}}",
+    "achievements": "Pasiekimai",
+    "achievementsEmpty": "Pasiekimų dar nėra.",
+    "toast": {
+      "title": "Pasiekimas atrakintas!",
+      "description": "{{title}} · +{{xp}} XP"
+    },
+    "loadError": "Nepavyko įkelti pasiekimų.",
+    "retry": "Bandyti dar kartą",
+    "leaderboard": {
+      "title": "Lyderių lentelės",
+      "description": "Palyginkite XP ir pasiekimus su kitais besimokančiaisiais.",
+      "scope": "Lyderių lentelė",
+      "organization": "Visa organizacija",
+      "metricLabel": "Reitingavimas",
+      "periodLabel": "Laikotarpis",
+      "metric": {
+        "xp": "XP",
+        "achievements": "Pasiekimai"
+      },
+      "period": {
+        "week": "Ši savaitė",
+        "month": "Šis mėnuo",
+        "allTime": "Visas laikas",
+        "custom": "Pasirinktas laikotarpis"
+      },
+      "from": "Nuo",
+      "to": "Iki",
+      "rank": "Vieta",
+      "user": "Besimokantysis",
+      "yourPosition": "Jūsų vieta",
+      "empty": "Kol kas nėra ką reitinguoti.",
+      "noGroups": "Dar nepriklausote jokiai grupei, todėl lyderių lentelės nėra.",
+      "unavailable": "Lyderių lentelės jūsų organizacijoje neįjungtos.",
+      "loadError": "Nepavyko įkelti lyderių lentelės.",
+      "invalidRange": "Pasirinkite pradžios datą, kuri nėra vėlesnė už pabaigos datą.",
+      "chooseRange": "Pasirinkite pradžios ir pabaigos datas.",
+      "settings": {
+        "header": "Lyderių lentelės",
+        "subHeader": "Leiskite besimokantiesiems palyginti XP ir pasiekimus.",
+        "updated": "Lyderių lentelių nustatymai atnaujinti.",
+        "enabled": {
+          "label": "Įjungti lyderių lenteles",
+          "description": "Rodo lyderių lentelių puslapį. Išjungus niekas negali jų atidaryti."
+        },
+        "visibility": {
+          "label": "Matomumas besimokantiesiems",
+          "description": "Administratoriai visada mato visas lyderių lenteles.",
+          "closed": {
+            "label": "Uždaros",
+            "description": "Besimokantieji mato tik savo grupių lyderių lenteles."
+          },
+          "public": {
+            "label": "Viešos",
+            "description": "Besimokantieji mato ir visos organizacijos lyderių lentelę."
+          }
+        }
+      }
+    },
+    "admin": {
+      "title": "Žaidybinimas",
+      "description": "Įjunkite žaidybinimą savo organizacijoje ir sukonfigūruokite pasiekimus, kuriuos gali gauti besimokantieji.",
+      "enabled": {
+        "label": "Įjungti žaidybinimą",
+        "description": "Rodyti naudotojams lygius, XP, pasiekimus ir pranešimus apie apdovanojimus. Apdovanojimai skaičiuojami net kai ši parinktis išjungta."
+      },
+      "achievements": {
+        "title": "Pasiekimai",
+        "description": "Iš anksto nustatyti ir pasirinktiniai pasiekimai. Išjungus pasiekimą sustabdoma nauja pažanga, bet jau gauti apdovanojimai išlieka.",
+        "create": "Naujas pasiekimas"
+      },
+      "columns": {
+        "achievement": "Pasiekimas",
+        "event": "Įvykis",
+        "levels": "Lygiai",
+        "visibility": "Matomumas",
+        "enabled": "Aktyvus"
+      },
+      "predefined": "Iš anksto nustatytas",
+      "events": {
+        "login": "Prisijungimas",
+        "lesson_completed": "Užbaigta pamoka",
+        "course_completed": "Užbaigtas kursas",
+        "quiz_completed": "Užbaigtas testas"
+      },
+      "visibilityHints": {
+        "visible": "Besimokantieji jį mato dar prieš pasiekdami.",
+        "hidden": "Besimokantieji jį mato tik jį pasiekę."
+      },
+      "icons": {
+        "trophy": "Taurė",
+        "star": "Žvaigždė",
+        "flame": "Liepsna",
+        "zap": "Žaibas",
+        "target": "Taikinys",
+        "award": "Apdovanojimas",
+        "medal": "Medalis",
+        "crown": "Karūna",
+        "rocket": "Raketa",
+        "book_open": "Knyga",
+        "graduation_cap": "Absolvento kepurė",
+        "log_in": "Prisijungimas",
+        "door_open": "Atviros durys",
+        "calendar_check": "Kalendorius",
+        "clock": "Laikrodis",
+        "brain": "Smegenys",
+        "lightbulb": "Lemputė",
+        "puzzle": "Dėlionė",
+        "message_circle": "Pokalbio burbulas",
+        "heart": "Širdis",
+        "thumbs_up": "Nykštys aukštyn",
+        "sparkles": "Kibirkštys",
+        "circle_check": "Varnelė",
+        "gem": "Brangakmenis",
+        "diamond": "Deimantas",
+        "shield_check": "Skydas",
+        "badge_check": "Patvirtinimo ženklelis",
+        "flag": "Vėliava",
+        "mountain": "Kalnas",
+        "footprints": "Pėdsakai",
+        "gauge": "Matuoklis",
+        "timer": "Laikmatis",
+        "hourglass": "Smėlio laikrodis",
+        "alarm_clock": "Žadintuvas",
+        "calendar_days": "Kalendorius",
+        "sunrise": "Saulėtekis",
+        "sun": "Saulė",
+        "moon": "Mėnulis",
+        "coffee": "Kava",
+        "book": "Knyga",
+        "library": "Biblioteka",
+        "notebook_pen": "Užrašų knygelė",
+        "pencil": "Pieštukas",
+        "clipboard_check": "Kontrolinis sąrašas",
+        "list_checks": "Užduočių sąrašas",
+        "check_check": "Dviguba varnelė",
+        "glasses": "Akiniai",
+        "microscope": "Mikroskopas",
+        "flask_conical": "Kolba",
+        "atom": "Atomas",
+        "calculator": "Skaičiuotuvas",
+        "languages": "Kalbos",
+        "globe": "Gaublys",
+        "compass": "Kompasas",
+        "map": "Žemėlapis",
+        "route": "Maršrutas",
+        "telescope": "Teleskopas",
+        "headphones": "Ausinės",
+        "mic": "Mikrofonas",
+        "palette": "Paletė",
+        "users": "Žmonės",
+        "handshake": "Rankos paspaudimas",
+        "smile": "Šypsena",
+        "party_popper": "Šventė",
+        "gift": "Dovana",
+        "sprout": "Daigas",
+        "leaf": "Lapas",
+        "infinity": "Begalybė",
+        "repeat": "Kartojimas",
+        "trending_up": "Augimas",
+        "activity": "Aktyvumas",
+        "dumbbell": "Hantelis",
+        "gamepad_2": "Žaidimų pultelis",
+        "key": "Raktas",
+        "anchor": "Inkaras",
+        "plane": "Lėktuvas"
+      },
+      "requirementHints": {
+        "first_time": "Suteikiama pirmą kartą atlikus veiklą. Turi vieną lygį.",
+        "count": "Skaičiuoja kiekvieną veiklos kartą iš viso.",
+        "streak": "Skaičiuoja ilgiausią iš eilės einančių dienų su veikla seriją.",
+        "time_window": "Skaičiuoja daugiausia veiklų bet kuriuo pasirinktos trukmės laikotarpiu."
+      },
+      "requirements": {
+        "first_time": "Pirmą kartą",
+        "count": "Kiekis",
+        "streak": "Dienų serija",
+        "time_window": "Per laikotarpį"
+      },
+      "levelsSummary": "Lygiai: {{levels}} · {{xp}} XP",
+      "visibility": {
+        "visible": "Matomas",
+        "hidden": "Paslėptas, kol bus gautas"
+      },
+      "language": {
+        "label": "Kalba",
+        "baseLanguage": "Numatytoji",
+        "notAddedLanguages": "Kalbos, kurias galima pridėti",
+        "setBaseLanguage": "Nustatyti kaip numatytąją",
+        "setBaseTitle": "Pakeisti numatytąją kalbą",
+        "setBaseDescription": "Naudoti {{language}} kaip numatytąją šio pasiekimo kalbą?",
+        "createTitle": "Sukurti vertimą",
+        "createDescription": "Sukurti šio pasiekimo vertimą {{language}} kalba?",
+        "deleteTitle": "Ištrinti vertimą",
+        "deleteDescription": "Ištrinti {{language}} vertimą? Jo turinys bus pašalintas."
+      },
+      "form": {
+        "createTitle": "Naujas pasiekimas",
+        "editTitle": "Redaguoti pasiekimą",
+        "viewTitle": "Numatytasis pasiekimas",
+        "predefinedReadOnly": "Numatytieji pasiekimai pateikiami su platforma, todėl jų redaguoti negalima. Tačiau šį pasiekimą galite įjungti arba išjungti.",
+        "translationMode": "Redaguojate vertimą: {{language}}. Čia galima keisti tik pavadinimą ir aprašymą; visa kita redaguojama numatytąja kalba.",
+        "name": "Pavadinimas",
+        "description": "Aprašymas",
+        "requirement": "Reikalavimas",
+        "event": "Įvykis",
+        "requirementType": "Reikalavimo tipas",
+        "windowDays": "Laikotarpio trukmė (dienomis)",
+        "course": "Kursas",
+        "anyCourse": "Bet kuris kursas",
+        "minScore": "Mažiausias testo rezultatas (%)",
+        "levels": "Lygiai ir XP apdovanojimai",
+        "thresholdLabels": {
+          "count": {
+            "login": "Prisijungimų skaičius",
+            "lesson_completed": "Užbaigtų pamokų skaičius",
+            "course_completed": "Užbaigtų kursų skaičius",
+            "quiz_completed": "Užbaigtų testų skaičius"
+          },
+          "streak": {
+            "login": "Dienos iš eilės su prisijungimu",
+            "lesson_completed": "Dienos iš eilės su užbaigta pamoka",
+            "course_completed": "Dienos iš eilės su užbaigtu kursu",
+            "quiz_completed": "Dienos iš eilės su užbaigtu testu"
+          },
+          "time_window": {
+            "login": "Prisijungimai per laikotarpį",
+            "lesson_completed": "Pamokos, užbaigtos per laikotarpį",
+            "course_completed": "Kursai, užbaigti per laikotarpį",
+            "quiz_completed": "Testai, užbaigti per laikotarpį"
+          }
+        },
+        "xpReward": "XP apdovanojimas",
+        "addLevel": "Pridėti lygį",
+        "inactive": "Neaktyvus",
+        "statusHint": "Neaktyvūs pasiekimai nebesuteikia naujų lygių. Jau pasiekti lygiai išlieka.",
+        "badge": "Ženklelis",
+        "icon": "Piktograma",
+        "badgePreview": "Ženklelio peržiūra",
+        "iconHint": "Piktograma rodoma tik numatytuosiuose ženkleliuose. Lygiai su įkeltu ženkleliu rodo paveikslėlį be pakeitimų.",
+        "searchIcon": "Ieškoti piktogramų",
+        "noIconFound": "Piktograma nerasta.",
+        "resetBadge": "Naudoti numatytąjį ženklelį"
+      },
+      "validation": {
+        "threshold": "Įveskite bent 1.",
+        "xpReward": "Įveskite sveikąjį XP skaičių nuo 0 iki {{max}}.",
+        "titleRequired": "Įveskite pavadinimą pagrindine kalba.",
+        "windowDays": "Įveskite sveikąjį dienų skaičių nuo 1 iki {{max}}.",
+        "thresholdsAscending": "Kiekvienas lygis turi reikalauti daugiau nei ankstesnis.",
+        "minScore": "Įveskite rezultatą nuo 0 iki 100.",
+        "textTooLong": "Naudokite ne daugiau kaip {{max}} simbolių."
+      },
+      "loadFailed": "Nepavyko įkelti pasiekimo.",
+      "loadListFailed": "Nepavyko įkelti pasiekimų.",
+      "toast": {
+        "achievementSaved": "Pasiekimas išsaugotas.",
+        "achievementNotSaved": "Nepavyko išsaugoti pasiekimo.",
+        "settingsSaved": "Žaidybinimo nustatymai išsaugoti.",
+        "achievementNotFound": "Pasiekimas nerastas.",
+        "predefinedNotEditable": "Iš anksto nustatytus pasiekimus galima tik įjungti arba išjungti.",
+        "earnedLevelRemoved": "Negalima pašalinti lygių, kuriuos naudotojai jau gavo.",
+        "baseLanguageTitleRequired": "Įveskite pavadinimą pagrindine kalba.",
+        "unsupportedFilter": "Pasirinktas įvykis nepalaiko šio filtro.",
+        "courseNotFound": "Pasirinktas kursas neegzistuoja.",
+        "invalidTimeWindow": "Laikotarpio trukmė nustatoma tik laikotarpio pasiekimams.",
+        "invalidFirstTimeLevels": "„Pirmą kartą“ pasiekimai turi lygiai vieną lygį, kurio reikšmė 1.",
+        "thresholdsNotAscending": "Kiekvienas lygis turi reikalauti daugiau nei ankstesnis.",
+        "invalidBadgeImage": "Ženklelio paveikslėlis netinkamas. Įkelkite jį iš naujo."
+      }
     }
   }
 }

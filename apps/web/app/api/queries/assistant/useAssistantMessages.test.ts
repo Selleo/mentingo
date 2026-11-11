@@ -10,7 +10,10 @@ vi.mock("~/api/assistantIdentity", () => ({
   inAssistantSession: (_scope: unknown, operation: () => unknown) => operation(),
 }));
 
-vi.mock("@tanstack/react-query", () => ({ useInfiniteQuery: vi.fn() }));
+vi.mock("@tanstack/react-query", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@tanstack/react-query")>()),
+  useInfiniteQuery: vi.fn(),
+}));
 
 const interval = (runStatus: string, messageStatus: string) => {
   renderHook(() => useAssistantMessages("thread"));

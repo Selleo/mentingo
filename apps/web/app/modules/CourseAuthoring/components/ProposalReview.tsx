@@ -52,6 +52,7 @@ const operationTranslationKeys: Record<string, string> = {
   "lesson.create": "courseAuthoring.review.operationTypes.lessonCreate",
   "lesson.update": "courseAuthoring.review.operationTypes.lessonUpdate",
   "lesson.metadata.update": "courseAuthoring.review.operationTypes.lessonUpdate",
+  "lesson.image.insert": "courseAuthoring.review.operationTypes.lessonUpdate",
   "lesson.delete": "courseAuthoring.review.operationTypes.lessonDelete",
   "lesson.reorder": "courseAuthoring.review.operationTypes.lessonReorder",
   "chapter.create": "courseAuthoring.review.operationTypes.chapterCreate",

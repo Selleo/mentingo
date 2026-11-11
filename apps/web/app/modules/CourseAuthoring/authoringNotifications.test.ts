@@ -338,32 +338,35 @@ describe("global authoring work observer", () => {
     client.setQueryData(key(), session("failed", 4));
     expect(notify.mock.calls.map(([outcome]) => outcome)).toEqual(["failed", "failed"]);
   });
-  it("does not announce source ingestion as a completed AI request", async () => {
-    start();
-    const snapshot = {
-      ...session("running"),
-      turns: [],
-      tasks: [
-        {
-          taskId: "source",
-          requestId: "source-upload",
-          kind: "source",
-          status: "running" as const,
-          errorCode: null,
-          outputId: null,
-        },
-      ],
-    };
-    client.setQueryData(key(), snapshot);
-    client.setQueryData(key(), {
-      ...snapshot,
-      snapshotSequence: 2,
-      tasks: [{ ...snapshot.tasks[0], status: "succeeded" }],
-    });
-    await vi.advanceTimersByTimeAsync(500);
-    expect(refresh).not.toHaveBeenCalled();
-    expect(notify).not.toHaveBeenCalled();
-  });
+  it.each(["source", "source_vision"])(
+    "does not announce attachment job %s as a completed AI request",
+    async (kind) => {
+      start();
+      const snapshot = {
+        ...session("running"),
+        turns: [],
+        tasks: [
+          {
+            taskId: "source",
+            requestId: "source-upload",
+            kind,
+            status: "running" as const,
+            errorCode: null,
+            outputId: null,
+          },
+        ],
+      };
+      client.setQueryData(key(), snapshot);
+      client.setQueryData(key(), {
+        ...snapshot,
+        snapshotSequence: 2,
+        tasks: [{ ...snapshot.tasks[0], status: "succeeded" }],
+      });
+      await vi.advanceTimersByTimeAsync(500);
+      expect(refresh).not.toHaveBeenCalled();
+      expect(notify).not.toHaveBeenCalled();
+    },
+  );
   it("stops polling denied sessions without reporting a task failure", async () => {
     start();
     client.setQueryData(key(), session("running"));

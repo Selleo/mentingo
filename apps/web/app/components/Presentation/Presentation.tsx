@@ -1,3 +1,4 @@
+import { isAllowedIframeUrl } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { PdfPreviewViewer } from "~/components/RichText/extensions/pdfPreview/PdfPreviewViewer";
@@ -48,9 +49,13 @@ export default function Presentation({
 
   if (isExternalUrl) {
     const iframeSrc = provider === "canva" ? buildCanvaEmbedUrl(url) : `${url}/embed`;
+
+    if (!isAllowedIframeUrl(iframeSrc)) return null;
+
     return (
       <iframe
         title={t("richText.presentation.title")}
+        sandbox="allow-scripts allow-presentation"
         src={iframeSrc}
         className="aspect-video w-full rounded-lg border border-neutral-200 bg-white"
         allowFullScreen

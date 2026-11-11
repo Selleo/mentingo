@@ -63,6 +63,8 @@ Implementation changes identify candidates for comparison. Only an evidence-back
 
 A separate publishing job streams the assembled video directly to Bunny and uses the Guide SDK to request verification, search indexing and explicit publication. Existing published guidance stays available while a replacement is processing. Interrupted uploads/indexing can resume from private checkpoints without rerecording. The same public catalog continues serving hosted and self-hosted installations.
 
+Maintainers can manually generate and publish guides from the default branch or `staging`, using the existing recording and publishing environments. Other production branches require explicit approval of their exact commit. Selecting `staging` chooses the workflow implementation; the requested version tag still determines the app version recorded. Isolated branch tests remain non-publishing.
+
 Source evidence: `self-onboarding-on-version.yml`, `self-onboarding.yml`, the reviewed `mentingo-self-onboarding.json` flow registry, `self_onboarding_catalog.py`, `self_onboarding_recording.py`, and `scripts/self-onboarding-publish/publisher.mjs`. Deterministic tests cover semantic decisions, coverage blocking, private state, SDK publication and FFmpeg chapter assembly. This change has not run the provider-backed recording/publishing workflow. Chapter prerequisites are descriptive metadata until a separate typed Helpdesk search contract supports them.
 
 Maintainers can test a complete feature guide before merging by manually choosing one business specification and a branch or commit. This test creates downloadable video/chapter artifacts using fresh state and a separate testing environment; it does not publish tutorial revisions or advance production build state. Tests cover exact-spec selection, untagged source commits, the standalone Helpdesk manual entry point and rejection of test bundles by the publisher.
@@ -112,7 +114,6 @@ monoliths or retired keys require a migration rather than leaving both old and n
 
 These changes are locally verified with provider mocks, temporary Git histories and bundle validation.
 They have not triggered a new hosted recording or production publication. Successful generation artifacts alone do not establish provider processing, search indexing, publication or playback.
-
 
 ## App-wide contextual guidance
 

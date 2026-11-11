@@ -359,7 +359,7 @@ const ModernCoursesView = () => {
       return (
         <>
           <HeroBannerSkeleton />
-          <div className="relative z-30 space-y-3 py-6 pb-12 md:-mt-12 md:py-8 md:pb-8">
+          <div className="relative z-30 space-y-3 py-6 pb-12 md:py-8 md:pb-8">
             <ModernCourseRowSkeleton />
             {Array.from({ length: CATEGORY_PAGE_SIZE }).map((_, index) => (
               <ModernCourseRowSkeleton key={index} />
@@ -406,7 +406,7 @@ const ModernCoursesView = () => {
           />
         )}
 
-        <div className="relative z-30 space-y-3 py-6 pb-12 md:-mt-12 md:py-8 md:pb-8">
+        <div className="relative z-30 space-y-3 py-6 pb-12 md:py-8 md:pb-8">
           {match({ hasCourses: studentCourses.length > 0, isLoading: isStudentCoursesLoading })
             .with({ isLoading: true }, () => (
               <ModernCourseRowSkeleton

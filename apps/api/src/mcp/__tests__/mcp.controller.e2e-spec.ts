@@ -21,6 +21,7 @@ import {
 } from "src/global-search/semantic-search-index.chunking";
 import { SemanticSearchEmbeddingService } from "src/global-search/semantic-search-index.embedding.service";
 import { SemanticSearchIndexRepository } from "src/global-search/semantic-search-index.repository";
+import { SessionRevocationService } from "src/redis";
 import { DB } from "src/storage/db/db.providers";
 import {
   users,
@@ -143,9 +144,13 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
     host: string,
     scopes: string[] = [MCP_SCOPES.ACCOUNT_ACCESS],
   ): Promise<Client> {
+    const sessionVersion = await app
+      .get(SessionRevocationService)
+      .getOrCreateUserSessionVersion(user.id);
     const token = await app.get(McpTokenService).issue({
       userId: user.id,
       tenantId: user.tenantId,
+      sessionVersion,
       clientId: "mcp-http-e2e",
       resource: `http://${host}/api/mcp`,
       scopes,
@@ -605,7 +610,10 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       await indexLesson(foreignLesson, foreign);
       const embed = jest
         .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
-        .mockResolvedValue([1, ...Array<number>(1535).fill(0)]);
+        .mockResolvedValue({
+          embedding: [1, ...Array<number>(1535).fill(0)],
+          identity: { model: "text-embedding-3-small" },
+        });
       try {
         for (const reader of await readers()) {
           for (const mode of ["keyword", "hybrid"]) {
@@ -851,7 +859,10 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       for (const fixture of [free, paid, privateCourse]) await indexLesson(fixture);
       const embed = jest
         .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
-        .mockResolvedValue([1, ...Array<number>(1535).fill(0)]);
+        .mockResolvedValue({
+          embedding: [1, ...Array<number>(1535).fill(0)],
+          identity: { model: "text-embedding-3-small" },
+        });
       try {
         const tools = (await rpc(reader, "tools/list")).result.tools.map(
           (tool: ToolResult) => tool.name,
@@ -936,7 +947,10 @@ describe("MCP HTTP administrative and upload workflows (e2e)", () => {
       await indexLesson(fixture);
       const embed = jest
         .spyOn(app.get(SemanticSearchEmbeddingService), "embedQuery")
-        .mockResolvedValue([1, ...Array<number>(1535).fill(0)]);
+        .mockResolvedValue({
+          embedding: [1, ...Array<number>(1535).fill(0)],
+          identity: { model: "text-embedding-3-small" },
+        });
       try {
         for (const reader of await readers()) {
           await assertUnavailable(fixture, reader);

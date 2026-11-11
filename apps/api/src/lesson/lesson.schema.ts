@@ -1,4 +1,11 @@
-import { AI_MENTOR_TTS_PRESET, AI_MENTOR_VOICE_MODE, SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  AI_MENTOR_TTS_PRESET,
+  AI_MENTOR_VOICE_MODE,
+  ASSESSMENT_TIME_LIMIT_MINUTES,
+  LEARNER_PROGRESS_STATUSES,
+  QUIZ_ATTEMPT_START_STATUSES,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { AI_JUDGE_CRITERION_STATUS } from "src/ai/judge-configuration/judge-configuration.types";
@@ -37,6 +44,8 @@ export const adminQuestionSchema = Type.Object({
   displayOrder: Type.Optional(Type.Number()),
   solutionExplanation: Type.Optional(Type.String()),
   photoS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  // Open questions only: true = reviewer grading, false/omitted = participation (always correct); recomputed on every save.
+  requiresReview: Type.Optional(Type.Boolean()),
   options: Type.Optional(Type.Array(adminOptionSchema)),
   language: Type.Optional(supportedLanguagesSchema),
 });
@@ -83,6 +92,15 @@ const lessonQuizSchema = Type.Object({
   thresholdScore: Type.Number(),
   attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
   quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
+  timeLimitMinutes: Type.Optional(
+    Type.Union([
+      Type.Integer({
+        minimum: ASSESSMENT_TIME_LIMIT_MINUTES.MIN,
+        maximum: ASSESSMENT_TIME_LIMIT_MINUTES.MAX,
+      }),
+      Type.Null(),
+    ]),
+  ),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
 });
 
@@ -116,6 +134,7 @@ export const adminLessonSchema = Type.Object({
   thresholdScore: Type.Number(),
   attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
   quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
+  timeLimitMinutes: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
   fileS3Key: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.String()),
   questions: Type.Optional(Type.Array(adminQuestionResponseSchema)),
@@ -225,6 +244,36 @@ export const questionDetails = Type.Object({
   score: Type.Union([Type.Number(), Type.Null()]),
 });
 
+export const onlyAnswerIdSAnswerSchema = Type.Object({
+  answerId: UUIDSchema,
+});
+
+export const onlyValueAnswerSchema = Type.Object({
+  value: Type.String(),
+});
+
+export const fullAnswerSchema = Type.Object({
+  answerId: UUIDSchema,
+  value: Type.String(),
+});
+
+export const studentQuestionAnswersSchema = Type.Object({
+  questionId: UUIDSchema,
+  answers: Type.Array(
+    Type.Union([onlyAnswerIdSAnswerSchema, onlyValueAnswerSchema, fullAnswerSchema]),
+  ),
+});
+
+export const quizAttemptStateSchema = Type.Object({
+  attemptId: UUIDSchema,
+  startedAt: Type.String(),
+  expiresAt: Type.String(),
+  serverNow: Type.String(),
+  submitGraceSeconds: Type.Number(),
+  draftAnswers: Type.Array(studentQuestionAnswersSchema),
+  draftSavedAt: Type.Union([Type.String(), Type.Null()]),
+});
+
 export const lessonShowSchema = Type.Object({
   learningStateId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
   id: UUIDSchema,
@@ -238,7 +287,10 @@ export const lessonShowSchema = Type.Object({
   thresholdScore: Type.Union([Type.Number(), Type.Null()]),
   attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
   quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
+  timeLimitMinutes: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  quizAttempt: Type.Optional(Type.Union([quizAttemptStateSchema, Type.Null()])),
   isQuizPassed: Type.Union([Type.Boolean(), Type.Null()]),
+  isQuizAwaitingReview: Type.Optional(Type.Boolean()),
   attempts: Type.Union([Type.Number(), Type.Null()]),
   updatedAt: Type.Union([Type.String(), Type.Null()]),
   displayOrder: Type.Number(),
@@ -317,7 +369,10 @@ export const lessonForChapterSchema = Type.Array(
     title: Type.String(),
     type: Type.Enum(LESSON_TYPES),
     displayOrder: Type.Number(),
-    status: Type.Enum(PROGRESS_STATUSES),
+    status: Type.Union([
+      Type.Enum(PROGRESS_STATUSES),
+      Type.Literal(LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW),
+    ]),
     quizQuestionCount: Type.Union([Type.Number(), Type.Null()]),
     isExternal: Type.Optional(Type.Boolean()),
     lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),
@@ -331,30 +386,30 @@ export const lessonForChapterSchema = Type.Array(
 
 export const createLessonResourcesBody = Type.Object({});
 
-export const onlyAnswerIdSAnswerSchema = Type.Object({
-  answerId: UUIDSchema,
-});
-
-export const onlyValueAnswerSchema = Type.Object({
-  value: Type.String(),
-});
-
-export const fullAnswerSchema = Type.Object({
-  answerId: UUIDSchema,
-  value: Type.String(),
-});
-
-export const studentQuestionAnswersSchema = Type.Object({
-  questionId: UUIDSchema,
-  answers: Type.Array(
-    Type.Union([onlyAnswerIdSAnswerSchema, onlyValueAnswerSchema, fullAnswerSchema]),
-  ),
-});
-
 export const answerQuestionsForLessonBody = Type.Object({
   lessonId: UUIDSchema,
   questionsAnswers: Type.Array(studentQuestionAnswersSchema),
   language: Type.Enum(SUPPORTED_LANGUAGES),
+});
+
+export const startQuizAttemptBodySchema = Type.Object({
+  lessonId: UUIDSchema,
+  language: Type.Enum(SUPPORTED_LANGUAGES),
+});
+
+export const startQuizAttemptResponseSchema = Type.Object({
+  status: Type.Enum(QUIZ_ATTEMPT_START_STATUSES),
+  attempt: Type.Union([quizAttemptStateSchema, Type.Null()]),
+});
+
+export const saveQuizAttemptDraftBodySchema = Type.Object({
+  lessonId: UUIDSchema,
+  attemptId: UUIDSchema,
+  questionsAnswers: Type.Array(studentQuestionAnswersSchema),
+});
+
+export const saveQuizAttemptDraftResponseSchema = Type.Object({
+  draftSavedAt: Type.String(),
 });
 
 export const nextLessonSchema = Type.Union([
@@ -446,6 +501,11 @@ export type LessonSchema = Static<typeof lessonSchema>;
 export type AiMentorBody = Static<typeof aiMentorLessonSchema>;
 export type UpdateAiMentorLessonBody = Static<typeof updateAiMentorLessonSchema>;
 export type AnswerQuestionBody = Static<typeof answerQuestionsForLessonBody>;
+export type QuizAttemptState = Static<typeof quizAttemptStateSchema>;
+export type StartQuizAttemptBody = Static<typeof startQuizAttemptBodySchema>;
+export type StartQuizAttemptResponse = Static<typeof startQuizAttemptResponseSchema>;
+export type SaveQuizAttemptDraftBody = Static<typeof saveQuizAttemptDraftBodySchema>;
+export type SaveQuizAttemptDraftResponse = Static<typeof saveQuizAttemptDraftResponseSchema>;
 export type QuestionDetails = Static<typeof questionDetails>;
 export type NextLesson = Static<typeof nextLessonSchema>;
 export type StudentQuestionAnswer = Static<typeof studentQuestionAnswersSchema>;

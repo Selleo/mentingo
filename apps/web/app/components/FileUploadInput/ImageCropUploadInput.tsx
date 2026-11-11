@@ -1,3 +1,8 @@
+import {
+  ALLOWED_IMAGE_FILE_EXTENSIONS,
+  MAX_IMAGE_FILE_SIZE_BYTES,
+  formatFileSize,
+} from "@repo/shared";
 import { t } from "i18next";
 import { useRef, useState } from "react";
 import Cropper from "react-easy-crop";
@@ -18,6 +23,7 @@ type ImageCropUploadProps = {
   isCroppable: boolean;
   imageUrl?: string | null;
   fileInputRef?: React.RefObject<HTMLInputElement>;
+  maxSizeBytes?: number;
   aspect?: number;
   cropShape?: "rect" | "round";
   maxResolution?: { width?: number; height?: number };
@@ -33,6 +39,7 @@ export const ImageCropUploadInput = ({
   aspect,
   cropShape,
   maxResolution,
+  maxSizeBytes = MAX_IMAGE_FILE_SIZE_BYTES,
 }: ImageCropUploadProps) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -109,14 +116,16 @@ export const ImageCropUploadInput = ({
                   "text-gray-600": !imageUrl,
                 })}
               >
-                {t("uploadFile.details.imageCrop")}
+                {t("uploadFile.details.imageCrop", {
+                  maxSize: formatFileSize(maxSizeBytes),
+                })}
               </div>
             </div>
             <input
               ref={fileInputRef}
               data-testid="imageUpload"
               type="file"
-              accept=".png, .jpg, .jpeg, .svg"
+              accept={ALLOWED_IMAGE_FILE_EXTENSIONS.join(",")}
               onChange={(e) => {
                 const file = e.target.files?.[0];
 

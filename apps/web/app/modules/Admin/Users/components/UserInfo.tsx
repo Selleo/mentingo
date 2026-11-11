@@ -10,6 +10,7 @@ import MultipleSelector from "~/components/ui/multiselect";
 import { useGroupsOptions } from "~/hooks/useGroupsOptions";
 import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { getUserFieldMaxLength } from "~/utils/getUserFieldMaxLength";
 
 import { USER_PAGE_HANDLES } from "../../../../../e2e/data/users/handles";
 
@@ -189,6 +190,7 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
         return (
           <Input
             {...field}
+            maxLength={getUserFieldMaxLength(name)}
             data-testid={getInputTestId()}
             value={field.value as string}
             type={name === "email" ? "email" : "text"}

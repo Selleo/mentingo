@@ -36,6 +36,7 @@ import {
   AUTHORING_TOOL_STATUS,
   AUTHORING_WORK_PROGRESS_STAGE,
 } from "../courseAuthoring.constants";
+import { compactSourceReadActivity } from "../sourceReadActivity";
 
 import { AuthoringAssetDecision } from "./AuthoringAssetDecision";
 import { AuthoringCollapsibleSection } from "./AuthoringCollapsibleSection";
@@ -680,7 +681,7 @@ const connectionVariant = (connection: AuthoringConnectionState) =>
 export const AuthoringActivityRail = ({
   compact = false,
   tasks,
-  tools = [],
+  tools: rawTools = [],
   taskSequences = {},
   taskLabels = {},
   planSteps = [],
@@ -699,6 +700,7 @@ export const AuthoringActivityRail = ({
   omittedOptionalAssetIds = [],
 }: Props) => {
   const { t } = useTranslation();
+  const tools = compactSourceReadActivity(rawTools, (item) => item);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const succeeded = tasks.filter((task) => task.status === AUTHORING_TASK_STATUS.SUCCEEDED).length;
   const lessonTasks = tasks.filter((task) => task.kind === AUTHORING_TASK_KIND.LESSON);

@@ -1,69 +1,27 @@
+import { authSessionQueryOptions } from "~/api/queries/useAuthSession";
 import { currentUserQueryOptions } from "~/api/queries/useCurrentUser";
-import { getDashboardSettingsQueryKey } from "~/api/queries/useDashboardSettings";
-
-import { userSettingsQueryOptions } from "../../queries/useUserSettings";
-import { queryClient } from "../../queryClient";
-import { mfaSetupQueryOptions } from "../useSetupMFA";
-
-import type { CurrentUserResponse } from "../../generated-api";
-
-type AuthSuccessUser = Omit<
-  CurrentUserResponse["data"],
-  "isSupportMode" | "studentModeCourseIds" | "permissions" | "roleSlugs"
-> &
-  Partial<
-    Pick<
-      CurrentUserResponse["data"],
-      "isSupportMode" | "studentModeCourseIds" | "permissions" | "roleSlugs"
-    >
-  >;
-
-type HandleAuthSuccessOptions = {
-  user: AuthSuccessUser;
-  setLoggedIn: (value: boolean) => void;
-  setCurrentUser: (value: CurrentUserResponse["data"]) => void;
-  setHasVerifiedMFA: (value: boolean) => void;
-};
-
-const normalizeAuthSuccessUser = (user: AuthSuccessUser): CurrentUserResponse["data"] => ({
-  ...user,
-  isSupportMode: user.isSupportMode ?? false,
-  studentModeCourseIds: user.studentModeCourseIds ?? [],
-  permissions: user.permissions ?? [],
-  roleSlugs: user.roleSlugs ?? [],
-});
+import { queryClient } from "~/api/queryClient";
+import { useAuthStore } from "~/modules/Auth/authStore";
+import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 /**
- * Auth responses carry no permissions, so route guards would treat the user as having none
- * and redirect them to the fallback page. Fetch the full current user before marking the
- * session as logged in, and fall back to the auth payload only when that request fails.
+ * Starts the client session from the server's view of it. Auth responses can describe a session
+ * still awaiting MFA, so the user is only marked as logged in once the API returns them.
  */
-const fetchCurrentUserAfterAuth = async (fallbackUser: CurrentUserResponse["data"]) => {
-  try {
-    const response = await queryClient.fetchQuery({ ...currentUserQueryOptions, staleTime: 0 });
+export async function handleAuthSuccess() {
+  await queryClient.cancelQueries();
+  queryClient.removeQueries({
+    predicate: ({ queryKey }) =>
+      queryKey[0] !== authSessionQueryOptions.queryKey[0] &&
+      queryKey[0] !== currentUserQueryOptions.queryKey[0],
+  });
+  queryClient.setQueryData(currentUserQueryOptions.queryKey, null);
+  useAuthStore.getState().setLoggedIn(false);
+  useCurrentUserStore.getState().setCurrentUser(undefined);
 
-    return response?.data ?? fallbackUser;
-  } catch {
-    return fallbackUser;
-  }
-};
+  const response = await queryClient.fetchQuery({ ...currentUserQueryOptions, staleTime: 0 });
+  const user = response?.data;
 
-export async function handleAuthSuccess({
-  user,
-  setLoggedIn,
-  setCurrentUser,
-  setHasVerifiedMFA,
-}: HandleAuthSuccessOptions) {
-  const currentUser = await fetchCurrentUserAfterAuth(normalizeAuthSuccessUser(user));
-
-  queryClient.setQueryData(currentUserQueryOptions.queryKey, { data: currentUser });
-  setLoggedIn(true);
-  setCurrentUser(currentUser);
-  setHasVerifiedMFA(!currentUser.shouldVerifyMFA);
-
-  await Promise.all([
-    queryClient.invalidateQueries({ queryKey: getDashboardSettingsQueryKey(currentUser.id) }),
-    queryClient.invalidateQueries({ queryKey: userSettingsQueryOptions.queryKey }),
-    queryClient.invalidateQueries({ queryKey: mfaSetupQueryOptions.queryKey }),
-  ]);
+  useCurrentUserStore.getState().setCurrentUser(user);
+  useAuthStore.getState().setLoggedIn(Boolean(user));
 }

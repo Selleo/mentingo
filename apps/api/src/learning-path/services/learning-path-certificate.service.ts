@@ -10,12 +10,19 @@ import {
   SUPPORTED_LANGUAGES,
   buildCertificateHtmlDocument as buildSharedCertificateHtmlDocument,
   buildCertificateMarkup,
+  CERTIFICATE_STYLES,
+  CERTIFICATE_CONTENT_SECURITY_POLICY,
   isSupportedLanguage,
 } from "@repo/shared";
 import { format } from "date-fns";
-import { escape } from "lodash";
 import puppeteer, { type Browser, type Page } from "puppeteer";
 
+import { buildCertificateSharePageHtml } from "src/certificates/certificate-share-page";
+import {
+  prepareCertificatePage,
+  waitForCertificateAssets,
+  getCertificateImageDataUri,
+} from "src/common/utils/certificate-renderer";
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { S3Service } from "src/s3/s3.service";
@@ -29,6 +36,7 @@ import type {
   LearningPathCertificateShareRecord,
 } from "./learning-path-certificate.types";
 import type { SupportedLanguages } from "@repo/shared";
+import type { CertificateSharePageContent } from "src/certificates/certificates.share.types";
 import type { UUIDType, DatabasePg } from "src/common";
 
 const SHARE_IMAGE_WIDTH = 1600;
@@ -152,13 +160,17 @@ export class LearningPathCertificateService {
 
     const shareLanguage = this.normalizeLanguage(language);
     const publicCertificate = await this.getPublicShareCertificate(certificateId, shareLanguage);
+    const token =
+      await this.learningPathRepository.issueLearningPathCertificateShareToken(certificateId);
+    if (!token)
+      throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
     await this.getPublicShareImage(certificateId, shareLanguage);
 
     const shareUrl = this.buildTenantUrl(
       publicCertificate.tenantHost,
       "/api/learning-path/certificates/share",
       {
-        certificateId,
+        token,
         lang: shareLanguage,
       },
     );
@@ -176,6 +188,27 @@ export class LearningPathCertificateService {
     return this.buildSharePageHtml(context, this.toDataUri(imageBuffer, "image/png"));
   }
 
+  async getPublicSharePageByToken(token: UUIDType, language?: SupportedLanguages) {
+    const certificateId = await this.resolveShareToken(token);
+    return this.getPublicSharePage(certificateId, language);
+  }
+
+  async getPublicShareImageByToken(token: UUIDType, language?: SupportedLanguages) {
+    const certificateId = await this.resolveShareToken(token);
+    return this.getPublicShareImage(certificateId, language);
+  }
+
+  private async resolveShareToken(token: UUIDType): Promise<string> {
+    const certificateId =
+      await this.learningPathRepository.findLearningPathCertificateIdByShareToken(token);
+
+    if (!certificateId) {
+      throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
+    }
+
+    return certificateId;
+  }
+
   async getPublicShareImage(certificateId: UUIDType, language?: SupportedLanguages) {
     const shareLanguage = this.normalizeLanguage(language);
     const certificate = await this.getPublicShareCertificate(certificateId, shareLanguage);
@@ -191,7 +224,8 @@ export class LearningPathCertificateService {
     }
 
     const context = await this.buildShareRenderContext(certificateId, shareLanguage);
-    const imageBuffer = await this.renderPngFromHtml(this.buildShareImageDocument(context));
+    const html = await this.buildShareImageDocument(context);
+    const imageBuffer = await this.renderPngFromHtml(html);
 
     await this.s3Service.uploadFile(imageBuffer, imageKey, "image/png").catch((error) => {
       this.logger.warn(`Learning path certificate share image upload failed: ${error}`);
@@ -204,7 +238,6 @@ export class LearningPathCertificateService {
     userId: UUIDType,
     certificateId: UUIDType,
     language?: SupportedLanguages,
-    baseUrl?: string | null,
   ) {
     const shareLanguage = this.normalizeLanguage(language);
     const certificate = await this.learningPathRepository.findLearningPathCertificateByIdForRender(
@@ -217,7 +250,7 @@ export class LearningPathCertificateService {
       throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
     }
 
-    const imageSettings = await this.settingsService.getImageS3Keys();
+    const imageSettings = await this.settingsService.getImageS3KeysByTenantId(certificate.tenantId);
     const [platformLogoImageUrl, backgroundImageUrl, certificateSignatureImageUrl] =
       await Promise.all([
         this.getImageDataUriFromS3Key(imageSettings.platformLogoS3Key),
@@ -249,7 +282,7 @@ export class LearningPathCertificateService {
       },
     });
 
-    const completeHtml = buildSharedCertificateHtmlDocument(html, { baseUrl });
+    const completeHtml = buildSharedCertificateHtmlDocument(html);
     const pdfBuffer = await this.renderPdfFromHtml(completeHtml);
 
     return {
@@ -285,7 +318,7 @@ export class LearningPathCertificateService {
       certificate.tenantHost,
       "/api/learning-path/certificates/share",
       {
-        certificateId,
+        token: certificate.shareToken ?? undefined,
         lang: shareLanguage,
       },
     );
@@ -294,23 +327,16 @@ export class LearningPathCertificateService {
       certificate.tenantHost,
       "/api/learning-path/certificates/share-image",
       {
-        certificateId,
+        token: certificate.shareToken ?? undefined,
         lang: shareLanguage,
       },
     );
-
-    const certificateSignatureUrl = certificate.certificateSignature
-      ? await this.fileService.getFileUrl(certificate.certificateSignature, {
-          quality: IMAGE_QUALITY.SM,
-        })
-      : null;
 
     return {
       certificate,
       shareUrl,
       shareImageUrl,
       settings,
-      certificateSignatureUrl,
       formattedDate: this.formatDate(certificate.issuedAt || null),
       language: shareLanguage,
     };
@@ -333,116 +359,83 @@ export class LearningPathCertificateService {
   }
 
   private buildSharePageHtml(context: any, embeddedImageSrc: string): string {
-    const content = this.getSharePageContent(context, embeddedImageSrc);
-
-    return `<!DOCTYPE html>
-    <html lang="${context.language}">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>${content.pageTitle}</title>
-        <meta name="description" content="${content.pageDescription}" />
-        <meta name="robots" content="noindex,noarchive" />
-        <link rel="canonical" href="${content.shareUrl}" />
-        <meta property="og:title" content="${content.pageTitle}" />
-        <meta property="og:description" content="${content.pageDescription}" />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content="${content.shareUrl}" />
-        <meta property="og:image" content="${content.shareImageUrl}" />
-        <meta property="og:image:type" content="image/png" />
-        <meta property="og:image:width" content="${SHARE_IMAGE_WIDTH}" />
-        <meta property="og:image:height" content="${SHARE_IMAGE_HEIGHT}" />
-        <meta property="og:site_name" content="${content.siteName}" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <style>
-          :root { color-scheme: light; font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-          * { box-sizing: border-box; }
-          body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            background:
-              radial-gradient(circle at top right, rgba(63, 88, 182, 0.14), transparent 35%),
-              linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
-            color: #0f172a;
-          }
-          .card {
-            width: min(100%, 860px);
-            background: rgba(255,255,255,0.92);
-            border: 1px solid rgba(148, 163, 184, 0.28);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
-          }
-          img {
-            width: 100%;
-            display: block;
-            border-radius: 18px;
-            border: 1px solid rgba(148, 163, 184, 0.28);
-            background: #fff;
-          }
-        </style>
-      </head>
-      <body>
-        <main class="card">
-          <img src="${content.embeddedImage}" alt="${content.courseTitle}" />
-        </main>
-      </body>
-    </html>`;
+    return buildCertificateSharePageHtml(this.getSharePageContent(context, embeddedImageSrc));
   }
 
-  private getSharePageContent(context: any, embeddedImageSrc: string) {
+  private getSharePageContent(context: any, embeddedImageSrc: string): CertificateSharePageContent {
     const title = context.certificate.pathTitle ?? "";
     const translations = {
       pl: {
+        openLabel: "Otwórz platformę",
         pageTitle: `Certyfikat ukończenia ścieżki rozwoju "${title}"`,
         pageDescription: `${context.certificate.fullName} ukończył/a ścieżkę rozwoju "${title}" i otrzymał/a certyfikat.`,
       },
       en: {
+        openLabel: "Open platform",
         pageTitle: `Learning path completion certificate for "${title}"`,
         pageDescription: `${context.certificate.fullName} completed "${title}" and earned a certificate.`,
       },
       de: {
+        openLabel: "Plattform öffnen",
         pageTitle: `Zertifikat über den Abschluss des Entwicklungspfads "${title}"`,
         pageDescription: `${context.certificate.fullName} hat "${title}" abgeschlossen und ein Zertifikat erhalten.`,
       },
       lt: {
+        openLabel: "Atidaryti platformą",
         pageTitle: `Tobulėjimo kelio baigimo sertifikatas už "${title}"`,
         pageDescription: `${context.certificate.fullName} baigė "${title}" ir gavo sertifikatą.`,
       },
       cs: {
+        openLabel: "Otevřít platformu",
         pageTitle: `Certifikát o dokončení rozvojové cesty "${title}"`,
         pageDescription: `${context.certificate.fullName} dokončil/a "${title}" a získal/a certifikát.`,
       },
       es: {
+        openLabel: "Abrir plataforma",
         pageTitle: `Certificado de finalización de la ruta de desarrollo "${title}"`,
         pageDescription: `${context.certificate.fullName} completó "${title}" y obtuvo un certificado.`,
       },
       fr: {
+        openLabel: "Ouvrir la plateforme",
         pageTitle: `Certificat de réussite du parcours de développement « ${title} »`,
         pageDescription: `${context.certificate.fullName} a terminé le parcours de développement « ${title} » et obtenu un certificat.`,
       },
-    } as const satisfies Record<SupportedLanguages, { pageTitle: string; pageDescription: string }>;
+    } as const satisfies Record<
+      SupportedLanguages,
+      { openLabel: string; pageTitle: string; pageDescription: string }
+    >;
 
     const localizedContent = translations[context.language as SupportedLanguages];
+    const { certificate, settings } = context;
 
     return {
-      pageTitle: escape(localizedContent.pageTitle),
-      pageDescription: escape(localizedContent.pageDescription),
-      siteName: escape(context.certificate.tenantName),
-      courseTitle: escape(title),
-      shareUrl: escape(context.shareUrl),
-      shareImageUrl: escape(context.shareImageUrl),
-      embeddedImage: escape(embeddedImageSrc),
-      primaryColor: escape(context.settings.primaryColor || "#3f58b6"),
+      language: context.language,
+      pageTitle: localizedContent.pageTitle,
+      pageDescription: localizedContent.pageDescription,
+      shareUrl: context.shareUrl,
+      shareImageUrl: context.shareImageUrl,
+      imageWidth: SHARE_IMAGE_WIDTH,
+      imageHeight: SHARE_IMAGE_HEIGHT,
+      homeUrl: this.buildTenantUrl(certificate.tenantHost, "/", {}),
+      openLabel: localizedContent.openLabel,
+      logoUrl: settings.platformLogoS3Key ?? null,
+      faviconUrl:
+        settings.platformSimpleLogoS3Key ||
+        this.buildTenantUrl(certificate.tenantHost, "/app/assets/svgs/app-signet.svg", {}),
+      primaryColor: settings.primaryColor,
+      contrastColor: settings.contrastColor,
+      embeddedImage: embeddedImageSrc,
     };
   }
 
-  private buildShareImageDocument(context: any) {
-    return this.buildShareImageHtmlDocument(this.buildShareImageMarkup(context));
+  private async buildShareImageDocument(context: any): Promise<string> {
+    const certificateSignatureUrl = await this.getImageDataUriFromS3Key(
+      context.certificate.certificateSignature,
+    );
+
+    return this.buildShareImageHtmlDocument(
+      this.buildShareImageMarkup({ ...context, certificateSignatureUrl }),
+    );
   }
 
   private buildShareImageMarkup(context: any) {
@@ -491,7 +484,8 @@ export class LearningPathCertificateService {
           }
         </style>
         <title>Certificate</title>
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <style>${CERTIFICATE_STYLES}</style>
+        ${CERTIFICATE_CONTENT_SECURITY_POLICY}
       </head>
       <body>
         ${html}
@@ -506,13 +500,10 @@ export class LearningPathCertificateService {
       const browser = await this.getBrowser();
       page = await browser.newPage();
 
+      await prepareCertificatePage(page);
       await page.setContent(completeHtml, { waitUntil: "domcontentloaded", timeout: 30_000 });
       await page.waitForSelector("body > *", { timeout: 5_000 });
-      await page
-        .waitForFunction(() => {
-          return !("fonts" in document) || document.fonts.status === "loaded";
-        })
-        .catch(() => {});
+      await waitForCertificateAssets(page);
 
       const pdfBuffer = await page.pdf({
         format: "A4",
@@ -549,8 +540,10 @@ export class LearningPathCertificateService {
         height: SHARE_IMAGE_HEIGHT,
         deviceScaleFactor: 1,
       });
+      await prepareCertificatePage(page);
       await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 30_000 });
       await page.waitForSelector("body > *", { timeout: 5_000 });
+      await waitForCertificateAssets(page);
 
       const screenshot = await page.screenshot({
         type: "png",
@@ -648,20 +641,7 @@ export class LearningPathCertificateService {
   }
 
   private async getImageDataUriFromS3Key(s3Key?: string | null): Promise<string | null> {
-    if (!s3Key) return null;
-
-    try {
-      const [fileBuffer, contentType] = await Promise.all([
-        this.fileService.getRawFileBuffer(s3Key),
-        this.fileService.getFileContentType(s3Key).catch(() => null),
-      ]);
-
-      if (!fileBuffer?.length || !contentType) return null;
-
-      return this.toDataUri(fileBuffer, contentType);
-    } catch {
-      return null;
-    }
+    return getCertificateImageDataUri(this.fileService, s3Key);
   }
 
   private getShareImageKey(
@@ -669,6 +649,6 @@ export class LearningPathCertificateService {
     certificateId: UUIDType,
     language: SupportedLanguages,
   ) {
-    return `${tenantId}/learning-path-certificate-share/${certificateId}/${language}.png`;
+    return `${tenantId}/learning-path-certificate-share/v2/${certificateId}/${language}.png`;
   }
 }

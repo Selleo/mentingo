@@ -1,4 +1,5 @@
 import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
+import { MAX_PRESENTATION_FILE_SIZE_BYTES, formatFileSize } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "../Icon";
@@ -54,7 +55,11 @@ export const PresentationPreview = ({
             <span className="text-primary-400">{t("uploadFile.header")}</span>{" "}
             <span className="text-white">{t("uploadFile.subHeader")}</span>
           </div>
-          <div className="details text-neutral-200">{t("uploadFile.details.presentation")}</div>
+          <div className="details text-neutral-200">
+            {t("uploadFile.details.presentation", {
+              maxSize: formatFileSize(MAX_PRESENTATION_FILE_SIZE_BYTES),
+            })}
+          </div>
         </div>
         <Button
           variant="destructive"

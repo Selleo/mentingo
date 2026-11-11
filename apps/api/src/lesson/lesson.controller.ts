@@ -10,6 +10,7 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Put,
   Post,
   Query,
   Req,
@@ -17,6 +18,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  UsePipes,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
@@ -24,7 +26,6 @@ import {
   COURSE_LEARNING_STATE_KINDS,
   AI_THREAD_STATUSES,
   ALLOWED_AUDIO_FILE_TYPES,
-  ALLOWED_AVATAR_IMAGE_TYPES,
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ALLOWED_PDF_FILE_TYPES,
@@ -37,6 +38,8 @@ import {
   SUPPORTED_LANGUAGES,
   SupportedLanguages,
   type EditableResourceVisibility,
+  MAX_FILE_SIZE_BYTES,
+  MAX_AVATAR_FILE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { and, eq } from "drizzle-orm";
@@ -53,6 +56,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { FeaturesGuard } from "src/common/guards/features.guard";
 import { getGroupManagerLearnerScopeCondition } from "src/common/permissions/group-manager-scope.utils";
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
+import { SanitizeRichTextPipe } from "src/common/pipes/sanitize-rich-text.pipe";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { courseLearningContext } from "src/course-repetition/course-learning-context";
 import {
@@ -66,7 +70,6 @@ import {
 } from "src/course-repetition/course-repetition.service";
 import { CourseService } from "src/courses/course.service";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
@@ -105,6 +108,12 @@ import {
   UpdateEmbedLessonBody,
   enrolledLessonSchema,
   initializeLessonContextSchema,
+  SaveQuizAttemptDraftBody,
+  saveQuizAttemptDraftBodySchema,
+  saveQuizAttemptDraftResponseSchema,
+  StartQuizAttemptBody,
+  startQuizAttemptBodySchema,
+  startQuizAttemptResponseSchema,
 } from "./lesson.schema";
 import { AdminLessonService } from "./services/adminLesson.service";
 import { LessonService } from "./services/lesson.service";
@@ -114,7 +123,10 @@ import type {
   EnrolledLesson,
   LessonsFilters,
   LessonShow,
+  SaveQuizAttemptDraftResponse,
+  StartQuizAttemptResponse,
 } from "./lesson.schema";
+@UsePipes(SanitizeRichTextPipe)
 @Controller("lesson")
 export class LessonController {
   constructor(
@@ -228,8 +240,15 @@ export class LessonController {
       });
     });
     const { response, readOnly } = result;
-    if (!readOnly && response.data.threadId && response.data.status === AI_THREAD_STATUSES.ACTIVE) {
-      await this.aiService.initializeLessonWelcome(response.data.threadId, learnerId);
+    if (response.data.threadId && response.data.status === AI_THREAD_STATUSES.ACTIVE) {
+      const canInitializeWelcome =
+        !readOnly ||
+        (learnerId === currentUser.userId &&
+          hasAnyPermission(currentUser.permissions, [PERMISSIONS.AI_USE]) &&
+          (await this.aiService.hasPublicLessonPreviewAccess(id, learnerId)));
+      if (canInitializeWelcome) {
+        await this.aiService.initializeLessonWelcome(response.data.threadId, learnerId);
+      }
     }
     return response;
   }
@@ -484,6 +503,7 @@ export class LessonController {
           wrongAnswerCount: Type.Number(),
           questionCount: Type.Number(),
           score: Type.Number(),
+          awaitingReview: Type.Boolean(),
         }),
       }),
     ),
@@ -499,6 +519,7 @@ export class LessonController {
         wrongAnswerCount: number;
         questionCount: number;
         score: number;
+        awaitingReview: boolean;
       };
     }>
   > {
@@ -507,6 +528,40 @@ export class LessonController {
       message: "Evaluation quiz successfully",
       data: evaluationResult,
     });
+  }
+
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.BODY,
+    field: COURSE_LEARNING_TARGET_FIELDS.LESSON_ID,
+  })
+  @Post("quiz-attempt/start")
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
+  @Validate({
+    request: [{ type: "body", schema: startQuizAttemptBodySchema, required: true }],
+    response: baseResponse(startQuizAttemptResponseSchema),
+  })
+  async startQuizAttempt(
+    @Body() body: StartQuizAttemptBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<StartQuizAttemptResponse>> {
+    return new BaseResponse(await this.lessonService.startQuizAttempt(body, currentUser));
+  }
+
+  @CourseLearningWrite({
+    source: COURSE_LEARNING_TARGET_SOURCES.BODY,
+    field: COURSE_LEARNING_TARGET_FIELDS.LESSON_ID,
+  })
+  @Put("quiz-attempt/draft")
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
+  @Validate({
+    request: [{ type: "body", schema: saveQuizAttemptDraftBodySchema, required: true }],
+    response: baseResponse(saveQuizAttemptDraftResponseSchema),
+  })
+  async saveQuizAttemptDraft(
+    @Body() body: SaveQuizAttemptDraftBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<SaveQuizAttemptDraftResponse>> {
+    return new BaseResponse(await this.lessonService.saveQuizAttemptDraft(body, currentUser));
   }
 
   @Post("upload-files-to-lesson")
@@ -576,7 +631,7 @@ export class LessonController {
           ...ALLOWED_PRESENTATION_FILE_TYPES,
           ...ALLOWED_AUDIO_FILE_TYPES,
         ]),
-        MAX_VIDEO_SIZE,
+        MAX_FILE_SIZE_BYTES,
       ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
     )
     file: Express.Multer.File,
@@ -727,7 +782,10 @@ export class LessonController {
     @CurrentUser() currentUser: CurrentUserType,
     @Body("lessonId") lessonId: UUIDType,
     @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES)).build({
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        MAX_AVATAR_FILE_SIZE_BYTES,
+      ).build({
         fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),

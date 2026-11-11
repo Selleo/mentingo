@@ -1,3 +1,4 @@
+import { NotFoundException } from "@nestjs/common";
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import request from "supertest";
 
@@ -7,6 +8,7 @@ import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 import { truncateTables } from "../../../test/helpers/test-helpers";
+import { SettingsService } from "../settings.service";
 
 import type { DatabasePg } from "../../common";
 import type { CompanyInformaitonJSONSchema } from "../schemas/company-information.schema";
@@ -24,6 +26,8 @@ describe("SettingsController - Company Information (e2e)", () => {
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let globalSettingsFactory: ReturnType<typeof createSettingsFactory>;
+  let settingsService: SettingsService;
+  let inTenant: <T>(fn: () => Promise<T>) => Promise<T>;
 
   const validCompanyData: CompanyInformaitonJSONSchema = {
     companyName: "Test Company Ltd",
@@ -35,8 +39,10 @@ describe("SettingsController - Company Information (e2e)", () => {
   };
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, runAsTenant, defaultTenantId } = await createE2ETest();
     app = testApp;
+    settingsService = app.get(SettingsService);
+    inTenant = (fn) => runAsTenant(defaultTenantId, fn);
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -194,17 +200,14 @@ describe("SettingsController - Company Information (e2e)", () => {
       expect(response.body.data).toEqual(expectedData);
     });
 
-    it("should return 404 when no company information exists to update", async () => {
+    // Without global settings no session can pass the MFA policy check, so the missing-record
+    // branch is only reachable through the service.
+    it("should reject updates when no company information exists", async () => {
       await truncateTables(db, ["settings"]);
 
-      const response = await request(app.getHttpServer())
-        .patch("/api/settings/company-information")
-        .set("Cookie", adminCookies)
-        .send({ companyName: "Test" })
-        .expect(404);
-
-      expect(response.body.message).toBe("Company information not found");
-      expect(response.body.statusCode).toBe(404);
+      await expect(
+        inTenant(() => settingsService.updateCompanyInformation({ companyName: "Test" })),
+      ).rejects.toThrow(new NotFoundException("Company information not found"));
     });
 
     it("should return 403 for student users", async () => {
