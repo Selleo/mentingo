@@ -195,7 +195,7 @@ export default function TenantsPage() {
             />
           </DataTableToolbar>
 
-          <div data-testid={TENANTS_PAGE_HANDLES.TABLE_CONTAINER}>
+          <div data-testid={TENANTS_PAGE_HANDLES.TABLE_CONTAINER} aria-busy={isRefreshingTenants}>
             <DataTable
               table={table}
               isRefreshing={isRefreshingTenants}
