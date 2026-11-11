@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   test:
-    # The release film skill's own tests: synthetic data, FFmpeg and no model (release-film.yml records the films).
+    # Fast contracts and planning checks; real rendering is in the manual media workflow.
     name: Release film skill tests
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -34,29 +34,10 @@ jobs:
         with:
           node-version: 22.15.0
 
-      - name: Install FFmpeg, fonts, PDF tools and PyYAML
-        timeout-minutes: 7
-        run: |
-          # Hosted images usually already contain these tools; avoid unnecessary mirror access.
-          if command -v ffmpeg >/dev/null && command -v ffprobe >/dev/null && command -v pdftoppm >/dev/null && test -r /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf && python3 -c "import yaml"; then
-            exit 0
-          fi
-          # A proxy-backed runner may have no direct DNS/egress for apt's root process.
-          export http_proxy="${http_proxy:-${HTTP_PROXY:-}}"
-          export https_proxy="${https_proxy:-${HTTPS_PROXY:-}}"
-          export no_proxy="${no_proxy:-${NO_PROXY:-}}"
-          if [ -n "$https_proxy" ]; then echo 'HTTPS proxy configured'; else echo 'No HTTPS proxy configured'; fi
-          if getent hosts archive.ubuntu.com >/dev/null; then echo 'Ubuntu archive DNS available'; else echo 'Ubuntu archive direct DNS unavailable'; fi
-          # Use the primary HTTPS Ubuntu archive, not the runner's Azure mirror list.
-          . /etc/os-release
-          source_list="$RUNNER_TEMP/media-ci-ubuntu.list"
-          for suite in "$VERSION_CODENAME" "$VERSION_CODENAME-updates" "$VERSION_CODENAME-security"; do
-            echo "deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu $suite main restricted universe multiverse"
-          done > "$source_list"
-          apt_options=(-o "Dir::Etc::sourcelist=$source_list" -o "Dir::Etc::sourceparts=-" -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15)
-          timeout 180s sudo --preserve-env=http_proxy,https_proxy,no_proxy apt-get "${apt_options[@]}" -o APT::Update::Error-Mode=any update -qq
-          timeout 180s sudo --preserve-env=http_proxy,https_proxy,no_proxy apt-get "${apt_options[@]}" install -y -qq --no-install-recommends ffmpeg fonts-dejavu-core poppler-utils python3-yaml
-
-      - name: Run the release film skill tests
-        working-directory: .agents/skills/release-film
-        run: python3 -B -m unittest discover -s tests
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12'
+      - name: Install Python test dependencies
+        run: python -m pip install --disable-pip-version-check 'PyYAML==6.0.2' 'websockets==15.0.1'
+      - name: Run the release film unit tests
+        run: python -B .agents/skills/release-film/tests/run_checks.py release

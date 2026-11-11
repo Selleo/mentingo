@@ -19,6 +19,9 @@ on:
       - packages/shared/src/constants/self-onboarding-demo.ts
       - .agents/skills/release-film/tests/test_tutorial_focus.py
       - .agents/skills/release-film/tests/test_tutorial_media.py
+      - .agents/skills/release-film/tests/run_checks.py
+      - .agents/skills/release-film/tests/test_check_selection.py
+      - .github/workflows/media-integration-tests.yml
       - apps/web/playwright.self-onboarding-checks.config.ts
 permissions:
   contents: read
@@ -37,36 +40,13 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22.15.0
-      - name: Install deterministic media-test tools
-        timeout-minutes: 7
-        run: |
-          # Reuse runner tools rather than contacting package mirrors on every check.
-          if command -v ffmpeg >/dev/null && command -v ffprobe >/dev/null && test -r /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf && python3 -c "import yaml, venv, ensurepip"; then
-            exit 0
-          fi
-          # A proxy-backed runner may have no direct DNS/egress for apt's root process.
-          export http_proxy="${http_proxy:-${HTTP_PROXY:-}}"
-          export https_proxy="${https_proxy:-${HTTPS_PROXY:-}}"
-          export no_proxy="${no_proxy:-${NO_PROXY:-}}"
-          if [ -n "$https_proxy" ]; then echo 'HTTPS proxy configured'; else echo 'No HTTPS proxy configured'; fi
-          if getent hosts archive.ubuntu.com >/dev/null; then echo 'Ubuntu archive DNS available'; else echo 'Ubuntu archive direct DNS unavailable'; fi
-          # Use the primary HTTPS Ubuntu archive, not the runner's Azure mirror list.
-          . /etc/os-release
-          source_list="$RUNNER_TEMP/media-ci-ubuntu.list"
-          for suite in "$VERSION_CODENAME" "$VERSION_CODENAME-updates" "$VERSION_CODENAME-security"; do
-            echo "deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu $suite main restricted universe multiverse"
-          done > "$source_list"
-          apt_options=(-o "Dir::Etc::sourcelist=$source_list" -o "Dir::Etc::sourceparts=-" -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15)
-          timeout 180s sudo --preserve-env=http_proxy,https_proxy,no_proxy apt-get "${apt_options[@]}" -o APT::Update::Error-Mode=any update -qq
-          timeout 180s sudo --preserve-env=http_proxy,https_proxy,no_proxy apt-get "${apt_options[@]}" install -y -qq --no-install-recommends ffmpeg fonts-dejavu-core python3-yaml python3-venv
-      - name: Install the pinned realtime test dependency
-        run: |
-          python3 -m venv --system-site-packages "$RUNNER_TEMP/elevenlabs-tests"
-          "$RUNNER_TEMP/elevenlabs-tests/bin/python" -m pip install --disable-pip-version-check 'websockets==15.0.1'
-      - name: Test Self-onboarding flow planning and assembly
-        working-directory: .agents/skills/release-film/tests
-        run: |
-          "$RUNNER_TEMP/elevenlabs-tests/bin/python" -B -m unittest test_self_onboarding_catalog test_self_onboarding_pipeline test_self_onboarding_localization test_self_onboarding_progress test_elevenlabs test_elevenlabs_v4 test_tutorial_media test_tutorial_focus test_viewport_edges
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12'
+      - name: Install Python test dependencies
+        run: python -m pip install --disable-pip-version-check 'PyYAML==6.0.2' 'websockets==15.0.1'
+      - name: Test Self-onboarding flow planning
+        run: python -B .agents/skills/release-film/tests/run_checks.py onboarding
       - name: Install the existing pinned publishing dependencies
         run: corepack pnpm install --frozen-lockfile
       - name: Build the shared recording contracts
@@ -75,10 +55,3 @@ jobs:
         run: corepack pnpm --filter api test -- --runInBand src/seed/users-seed.spec.ts src/seed/self-onboarding-data-seed.spec.ts
       - name: Test the Self-onboarding publisher
         run: node --test scripts/self-onboarding-publish/publisher.test.mjs
-      - name: Install browser for recorder helper checks
-        timeout-minutes: 5
-        run: corepack pnpm --filter web exec playwright install --with-deps chromium
-      - name: Check recorder assertions against seeded progress states
-        run: |
-          SELF_ONBOARDING_DEMO=1 SELF_ONBOARDING_LANGUAGE=en corepack pnpm --filter web exec playwright test -c playwright.self-onboarding-checks.config.ts
-          SELF_ONBOARDING_DEMO=1 SELF_ONBOARDING_LANGUAGE=pl corepack pnpm --filter web exec playwright test -c playwright.self-onboarding-checks.config.ts
