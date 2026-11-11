@@ -15,7 +15,11 @@ import {
 } from "./semantic-search-index.constants";
 import { semanticSearchResourceSources } from "./semantic-search-resource.utils";
 
-import type { SemanticSearchSource, SemanticSearchSourceKey } from "./semantic-search-index.types";
+import type {
+  SemanticSearchEmbeddingIdentity,
+  SemanticSearchSource,
+  SemanticSearchSourceKey,
+} from "./semantic-search-index.types";
 
 export function semanticSearchResourceRevision() {
   return sql<string>`md5(coalesce(${resources.reference}, '') || ':' || ${resources.updatedAt}::text || ':' || ${resources.contentType})`;
@@ -131,7 +135,6 @@ export class SemanticSearchIndexRepository {
         AND ${searchChunks.sourceRevision} = CASE WHEN ${
           resources.id
         } IS NULL THEN '' ELSE ${semanticSearchResourceRevision()} END
-        AND ${searchChunks.embeddingModel} = ${SEMANTIC_SEARCH_MODEL}
         AND ${searchChunks.indexVersion} = ${SEMANTIC_SEARCH_INDEX_VERSION}
     )`,
       ),
@@ -164,7 +167,6 @@ export class SemanticSearchIndexRepository {
           AND c.entity_id = r.entity_id AND c.document_type = r.document_type
           AND c.language = r.language AND c.source_hash = md5(r.content)
           AND c.source_revision = md5(coalesce(file.reference, '') || ':' || file.updated_at::text || ':' || file.content_type)
-          AND c.embedding_model = ${SEMANTIC_SEARCH_MODEL}
           AND c.index_version = ${SEMANTIC_SEARCH_INDEX_VERSION})
     )
     SELECT count(*)::integer AS pending FROM (
@@ -214,6 +216,7 @@ export class SemanticSearchIndexRepository {
     source: SemanticSearchSource,
     chunks: string[],
     embeddings: number[][],
+    identity: SemanticSearchEmbeddingIdentity = { model: SEMANTIC_SEARCH_MODEL },
   ): Promise<boolean> {
     const tenantId = this.tenantId();
     // Lock the committed source row while validating and replacing its entire revision.
@@ -277,7 +280,7 @@ export class SemanticSearchIndexRepository {
           embedding: embeddings[chunkIndex],
           sourceHash: source.sourceHash,
           sourceRevision: source.sourceRevision,
-          embeddingModel: SEMANTIC_SEARCH_MODEL,
+          embeddingModel: identity.model,
           indexVersion: SEMANTIC_SEARCH_INDEX_VERSION,
           metadata: sql`${JSON.stringify(source.metadata)}::text::jsonb`,
         })),

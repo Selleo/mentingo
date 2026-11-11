@@ -72,7 +72,7 @@ describe("embedding tracing by application path", () => {
       const search = new SemanticSearchEmbeddingService(runtime);
       const embed = () => {
         if (path === "mentor") return runtime.createEmbeddings(["policy"]);
-        return search.embedTexts(["policy"]);
+        return search.embedTexts(["policy"]).then(({ embeddings }) => embeddings);
       };
 
       expect(await embed()).toEqual([Array(1536).fill(0.1)]);

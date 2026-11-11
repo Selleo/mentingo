@@ -9,7 +9,10 @@ import { chunkSearchText, normalizeSearchText } from "./semantic-search-index.ch
 import { SemanticSearchEmbeddingService } from "./semantic-search-index.embedding.service";
 import { SemanticSearchIndexRepository } from "./semantic-search-index.repository";
 
-import type { SemanticSearchIndexJob } from "./semantic-search-index.types";
+import type {
+  SemanticSearchEmbeddingIdentity,
+  SemanticSearchIndexJob,
+} from "./semantic-search-index.types";
 
 @Injectable()
 export class SemanticSearchIndexService {
@@ -47,9 +50,17 @@ export class SemanticSearchIndexService {
     const chunks = chunkSearchText(text);
     if (!chunks.length) return;
     const vectors: number[][] = [];
+    let identity: SemanticSearchEmbeddingIdentity | undefined;
     for (let offset = 0; offset < chunks.length; offset += 32) {
-      vectors.push(...(await this.embeddings.embedTexts(chunks.slice(offset, offset + 32))));
+      const batch = await this.embeddings.embedTexts(chunks.slice(offset, offset + 32));
+      // A mid-source fallback would store one source in two spaces; the job retries instead.
+      if (identity && identity.model !== batch.identity.model) {
+        throw new Error("Semantic search embedding model changed while indexing a source");
+      }
+      identity = batch.identity;
+      vectors.push(...batch.embeddings);
     }
-    await this.repository.replace(source, chunks, vectors);
+    if (!identity) return;
+    await this.repository.replace(source, chunks, vectors, identity);
   }
 }
