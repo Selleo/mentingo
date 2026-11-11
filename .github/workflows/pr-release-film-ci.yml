@@ -22,7 +22,7 @@ jobs:
   test:
     # The release film skill's own tests: synthetic data, FFmpeg and no model (release-film.yml records the films).
     name: Release film skill tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -35,10 +35,14 @@ jobs:
           node-version: 22.15.0
 
       - name: Install FFmpeg, fonts, PDF tools and PyYAML
+        timeout-minutes: 7
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends ffmpeg fonts-dejavu-core poppler-utils python3-yaml \
-            >/dev/null
+          # Hosted images usually already contain these tools; avoid unnecessary mirror access.
+          if command -v ffmpeg >/dev/null && command -v ffprobe >/dev/null && command -v pdftoppm >/dev/null && test -r /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf && python3 -c "import yaml"; then
+            exit 0
+          fi
+          timeout 180s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 -o APT::Update::Error-Mode=any update -qq
+          timeout 180s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 install -y -qq --no-install-recommends ffmpeg fonts-dejavu-core poppler-utils python3-yaml
 
       - name: Run the release film skill tests
         working-directory: .agents/skills/release-film
