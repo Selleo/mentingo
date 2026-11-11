@@ -41,6 +41,12 @@ jobs:
           if command -v ffmpeg >/dev/null && command -v ffprobe >/dev/null && command -v pdftoppm >/dev/null && test -r /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf && python3 -c "import yaml"; then
             exit 0
           fi
+          # A proxy-backed runner may have no direct DNS/egress for apt's root process.
+          export http_proxy="${http_proxy:-${HTTP_PROXY:-}}"
+          export https_proxy="${https_proxy:-${HTTPS_PROXY:-}}"
+          export no_proxy="${no_proxy:-${NO_PROXY:-}}"
+          if [ -n "$https_proxy" ]; then echo 'HTTPS proxy configured'; else echo 'No HTTPS proxy configured'; fi
+          if getent hosts archive.ubuntu.com >/dev/null; then echo 'Ubuntu archive DNS available'; else echo 'Ubuntu archive direct DNS unavailable'; fi
           # Use the primary HTTPS Ubuntu archive, not the runner's Azure mirror list.
           . /etc/os-release
           source_list="$RUNNER_TEMP/media-ci-ubuntu.list"
@@ -48,8 +54,8 @@ jobs:
             echo "deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu $suite main restricted universe multiverse"
           done > "$source_list"
           apt_options=(-o "Dir::Etc::sourcelist=$source_list" -o "Dir::Etc::sourceparts=-" -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15)
-          timeout 180s sudo apt-get "${apt_options[@]}" -o APT::Update::Error-Mode=any update -qq
-          timeout 180s sudo apt-get "${apt_options[@]}" install -y -qq --no-install-recommends ffmpeg fonts-dejavu-core poppler-utils python3-yaml
+          timeout 180s sudo --preserve-env=http_proxy,https_proxy,no_proxy apt-get "${apt_options[@]}" -o APT::Update::Error-Mode=any update -qq
+          timeout 180s sudo --preserve-env=http_proxy,https_proxy,no_proxy apt-get "${apt_options[@]}" install -y -qq --no-install-recommends ffmpeg fonts-dejavu-core poppler-utils python3-yaml
 
       - name: Run the release film skill tests
         working-directory: .agents/skills/release-film
