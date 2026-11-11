@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
-from typing import Literal, TypedDict, cast
+from typing import Literal, NotRequired, TypedDict, cast
 
 import llm
 import self_onboarding_model
@@ -66,6 +66,7 @@ class Domain(TypedDict):
     watchPaths: list[str]
     flows: list[Flow]
     videos: list[VideoGroup]
+    evidencePaths: NotRequired[list[str]]
 
 
 class Catalog(TypedDict):
@@ -192,7 +193,7 @@ def validate_catalog(value: object) -> Catalog:
     video_keys: set[str] = set()
     for item in domains:
         domain = _object(item, "domain")
-        if set(domain) != DOMAIN_FIELDS:
+        if set(domain) - {"evidencePaths"} != DOMAIN_FIELDS:
             raise ValueError("Domain fields differ from the catalog schema")
         for name in ("key", "domain"):
             key = domain[name]
@@ -206,6 +207,13 @@ def validate_catalog(value: object) -> Catalog:
             _text(domain[name], name)
         _paths(domain["specPaths"], "specPaths", specs=True)
         _paths(domain["watchPaths"], "watchPaths")
+        if "evidencePaths" in domain:
+            _paths(domain["evidencePaths"], "evidencePaths")
+            if len(domain["evidencePaths"]) > 8 or any(
+                    any(mark in path for mark in "*?[") or not path.endswith((".ts", ".tsx", ".rs"))
+                    or not any(_within_watch(path, root) for root in domain["watchPaths"])
+                    for path in domain["evidencePaths"]):
+                raise ValueError("Evidence paths must be exact source files within the domain dependencies")
         flows = domain["flows"]
         if not isinstance(flows, list) or not flows or len(flows) > 100:
             raise ValueError("A feature needs 1-100 explicitly registered flows")
@@ -328,6 +336,8 @@ def validate_planned_domain(domain: object, seed: Domain, repo: Path | None = No
     for key in DOMAIN_FIELDS - {"flows"}:
         if row.get(key) != seed[key]:
             raise ValueError("Plan changes trusted domain metadata")
+    if row.get("evidencePaths") != seed.get("evidencePaths"):
+        raise ValueError("Plan changes trusted source evidence paths")
     raw = row.get("flows")
     if not isinstance(raw, list) or not 1 <= len(raw) <= 100:
         raise ValueError("Planned feature needs 1-100 complete flows")
@@ -405,6 +415,11 @@ def _context(repo: Path, baseline: str | None, commit: str, paths: list[str], sp
              **details: object) -> dict[str, object]:
     payload: dict[str, object] = dict(details, changedPaths=paths, specPaths=specs,
                                      currentSpecs=_specs(repo, commit, specs))
+    evidence_paths = cast(dict, details.get("domain", {})).get("evidencePaths", [])
+    if evidence_paths:
+        if not set(evidence_paths) <= set(details.get("sourcePaths", [])):
+            raise ValueError("Reviewed source evidence is missing from the target version")
+        payload["currentSource"] = _specs(repo, commit, evidence_paths)
     if baseline:
         # Deleted specs are represented by the diff instead of a failing git show.
         payload["diff"] = _git(repo, "diff", "--no-ext-diff", "--no-renames", "--unified=5", baseline, commit,
@@ -426,11 +441,14 @@ def _classify(context: dict[str, object]) -> object:
             'supplied spec paths and existing source paths within the supplied domain dependencies. sourcePaths '
             'lists actual target-version files: choose proposed watchPaths from that inventory or the supplied '
             'watch patterns that match it; never invent file names. The inventory proves file existence only, '
-            'not behavior: cite supplied specs or diffs for behavioral evidence. Retire an '
+            'not behavior. When currentSource is supplied, those file contents are authoritative target-version '
+            'implementation evidence and may be cited. Use them to resolve stale generic lifecycle wording in specs; '
+            'do not propose a separate publish control if the supplied creation code already publishes automatically. '
+            'Without resolving implementation evidence, contradictory specs remain uncertain. Retire an '
             'existing flow only when the supplied specs/diff establish that it was removed from the product, '
             'never because a fixture, provider or optional feature is disabled in the recording environment. '
             'A previously retired flow may be restored through proposedFlows. Do not invent unsupported UI. Business specs guide the '
-            'inventory, current implementation determines delivered behavior. A contradiction means uncertain.'
+            'inventory, current implementation determines delivered behavior. An unresolved contradiction means uncertain.'
         )
     else:
         instruction = (

@@ -2,11 +2,11 @@
 
 ## Business Overview
 
-Knowledge Base lets organizations publish structured reference content inside Mentingo. Articles can be organized into sections, maintained in multiple languages, enriched with media and attachments, edited as drafts, and optionally exposed to public visitors when tenant settings allow it.
+Knowledge Base lets organizations publish structured reference content inside Mentingo. Articles can be organized into sections, maintained in multiple languages, enriched with media and attachments, edited through protected management views, and optionally exposed to public visitors when tenant settings allow it.
 
 For HR and L&D teams, this creates a maintained reference space for policies, onboarding guidance, learning support, and company knowledge that does not need to be packaged as a course.
 
-The main workflow starts from the Articles area. Readers browse the table of contents and open published articles, while permitted editors create sections, draft articles, edit rich content, preview changes, publish updates, and delete outdated content.
+The main workflow starts from the Articles area. Readers browse the table of contents and open published articles, while permitted editors create sections and published articles, edit rich content, preview changes, save updates, and delete outdated content.
 
 ## Who Uses It
 
@@ -18,7 +18,7 @@ The main workflow starts from the Articles area. Readers browse the table of con
 ## Feature Functions
 
 - Organize articles into knowledge-base sections.
-- Create draft articles from the table of contents.
+- Create articles from the table of contents; the UI immediately creates published entries.
 - Edit article title, summary, cover image, and rich-text content.
 - Upload article resources such as documents, images, videos, spreadsheets, and presentations.
 - Preview rich content before saving changes.
@@ -36,9 +36,11 @@ Public access controls let organizations decide when selected knowledge should s
 
 Readers open the Articles area and are directed to available published content from the table of contents. Article detail pages show the article content, author, publish date, cover image, in-page navigation, and previous/next article links.
 
-Editors with article permissions can create sections and draft articles, edit localized article content, upload resources into rich text, preview rendered content, and delete articles or sections. Language selectors keep base-language and available-language behavior explicit so translations do not silently replace the canonical version.
+Editors with article permissions can create sections and published articles, edit localized article content, upload resources into rich text, preview rendered content, and delete articles or sections. Language selectors keep base-language and available-language behavior explicit so translations do not silently replace the canonical version.
 
 Public visitors can reach articles only when tenant settings allow unregistered article access and the article is visible in the requested language. Authenticated admins can access private or draft content according to their permissions.
+
+The current editor has no separate publish/unpublish control. New article creates a published entry immediately; Save updates its content. Draft API access remains permission-gated and must not be presented as a separate editor publishing flow.
 
 ## Key Technical Context
 

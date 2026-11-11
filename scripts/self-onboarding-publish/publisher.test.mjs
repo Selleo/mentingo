@@ -762,3 +762,115 @@ test("accepts app-wide and future domain keys without an SDK or publisher enum",
     await assert.rejects(readBundle(f.root), /Invalid tutorial domain/);
   }
 });
+
+function parallelFixture(t, count = 5) {
+  const f = fixture(t);
+  f.manifest.domains = Array.from({ length: count }, (_, index) => ({
+    ...structuredClone(f.entry),
+    key: `development-paths.part-${index}`,
+  }));
+  f.write();
+  const id = (kind, index) =>
+    `${kind}0000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
+  const revisions = new Map();
+  const uploaded = new Set();
+  const published = [];
+  let active = 0;
+  let maximum = 0;
+  const client = {
+    publishing: {
+      createRevision: async (key) => {
+        const index = Number(key.split("-").at(-1));
+        const revision = id(1, index);
+        revisions.set(revision, index);
+        return { id: revision, version: 1 };
+      },
+      getRevision: async (revision) => ({ id: revision, version: 2 }),
+      prepareMedia: async (revision) => ({ id: id(2, revisions.get(revision)) }),
+      getOperation: async (operation) => {
+        const index = Number(operation.slice(-12)) - 1;
+        return { id: operation, revisionId: id(1, index), revisionVersion: 2, status: "succeeded" };
+      },
+      createUploadAuthorization: async () => ({}),
+      finalizeRevision: async (revision) => ({ id: id(3, revisions.get(revision)) }),
+      getFinalizationOperation: async (operation) => {
+        const index = Number(operation.slice(-12)) - 1;
+        return { id: operation, revisionId: id(1, index), revisionVersion: 3, status: "succeeded" };
+      },
+      publishRevision: async (revision) => {
+        published.push(revision);
+        return { id: revision, state: "published" };
+      },
+    },
+  };
+  const upload = async ({ entry, progress, save }) => {
+    active++;
+    maximum = Math.max(maximum, active);
+    await new Promise((resolve) => setImmediate(resolve));
+    active--;
+    uploaded.add(entry.key);
+    progress.uploadComplete = true;
+    save();
+  };
+  return { f, client, upload, uploaded, published, maximum: () => maximum };
+}
+
+test("uploads the whole batch with bounded workers before waiting for finalization", async (t) => {
+  const p = parallelFixture(t);
+  const read = p.client.publishing.getFinalizationOperation;
+  let releaseFirst;
+  const first = new Promise((resolve) => {
+    releaseFirst = resolve;
+  });
+  p.client.publishing.getFinalizationOperation = async (id) => {
+    assert.equal(p.uploaded.size, 5, "encoding must not block subsequent uploads");
+    if (id.endsWith("000000000001")) await first;
+    return read(id);
+  };
+  const publish = p.client.publishing.publishRevision;
+  p.client.publishing.publishRevision = async (id) => {
+    const result = await publish(id);
+    if (!id.endsWith("000000000001")) releaseFirst();
+    return result;
+  };
+  const result = await publishBundle({
+    ...p.f.options,
+    client: p.client,
+    upload: p.upload,
+    concurrency: 2,
+  });
+  assert.equal(p.maximum(), 2);
+  assert.equal(result.tutorials.length, 5);
+  assert.equal(p.published.length, 5);
+  assert.ok(!p.published[0].endsWith("000000000001"));
+  assert.deepEqual(
+    result.tutorials.map((v) => v.key),
+    p.f.manifest.domains.map((v) => v.key),
+  );
+});
+
+test("preserves completed parallel uploads and publishes others when one upload fails", async (t) => {
+  const p = parallelFixture(t, 3);
+  await assert.rejects(
+    publishBundle({
+      ...p.f.options,
+      client: p.client,
+      concurrency: 2,
+      upload: async (args) => {
+        if (args.entry.key.endsWith("-0")) throw new Error("one upload interrupted");
+        await p.upload(args);
+      },
+    }),
+    /one upload interrupted/,
+  );
+  const checkpoint = JSON.parse(readFileSync(p.f.statePath, "utf8"));
+  const summary = JSON.parse(readFileSync(p.f.outputPath, "utf8"));
+  assert.equal(p.published.length, 2);
+  assert.equal(summary.tutorials.length, 2);
+  assert.equal(
+    Object.values(checkpoint.publications).filter((v) => v.publishedRevisionId).length,
+    2,
+  );
+  await publishBundle({ ...p.f.options, client: p.client, upload: p.upload, concurrency: 2 });
+  assert.equal(p.published.length, 3, "resume publishes only the previously interrupted video");
+});

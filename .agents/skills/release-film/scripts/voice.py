@@ -108,6 +108,25 @@ class NoVoiceRedirects(urllib.request.HTTPRedirectHandler):
         return None
 
 
+
+def elevenlabs_error_code(error):
+    """Only known provider status codes may leave an HTTP error; never its message or body."""
+    allowed = {'invalid_api_key', 'missing_api_key', 'quota_exceeded', 'missing_permissions',
+               'insufficient_credits', 'payment_required', 'voice_not_found',
+               'authentication_error', 'authorization_error'}
+    try:
+        data = json.loads(error.read(8192))
+        if not isinstance(data, dict):
+            return ''
+        detail = data.get('detail')
+        detail = detail if isinstance(detail, dict) else {}
+        for code in (detail.get('status'), detail.get('code'), data.get('code'), data.get('type')):
+            if isinstance(code, str) and code in allowed:
+                return f'; provider code: {code}'
+    except (OSError, ValueError, TypeError, RecursionError):
+        pass
+    return ''
+
 def elevenlabs_request(voice, payload, api_key):
     """A bounded, single paid request to the fixed provider origin; failures never echo bodies or credentials."""
     if dialogue_model(payload.get('model_id', '')):
@@ -128,7 +147,7 @@ def elevenlabs_request(voice, payload, api_key):
         with opener.open(request, timeout=ELEVENLABS_TIMEOUT) as response:
             raw = response.read(ELEVENLABS_RESPONSE_LIMIT + 1)
     except urllib.error.HTTPError as error:
-        raise ValueError(f'ElevenLabs speech request failed (HTTP {error.code}); no automatic paid retry') from None
+        raise ValueError(f'ElevenLabs speech request failed (HTTP {error.code}){elevenlabs_error_code(error)}; no automatic paid retry') from None
     except (urllib.error.URLError, TimeoutError, OSError, ValueError):
         raise ValueError('ElevenLabs speech request failed or timed out; no automatic paid retry') from None
     if len(raw) > ELEVENLABS_RESPONSE_LIMIT:

@@ -97,6 +97,60 @@ class RenderTest(unittest.TestCase):
         for name in expected_artifacts:
             self.assertEqual(result['artifact_sha256'][name], hashlib.sha256((out/name).read_bytes()).hexdigest())
 
+    def test_tutorial_caption_uses_the_configured_display_face(self):
+        data=copy.deepcopy(self.data)
+        data.update(mode='tutorial',frameTheme='mentingo',
+                    captionFont=self.data['font'])
+        data['chapters'][0]['id']='fixture'
+        data['chapters'][0]['prs']=['https://github.com/Selleo/mentingo/blob/'+'a'*40+'/docs/specs/category-management-business-spec.md']
+        data['chapters'][0].pop('captions')
+        data['chapters'][0]['srt']='caption-words.srt'
+        (self.root/'caption-words.srt').write_text('1\n00:00:00,100 --> 00:00:00,800\nCaption.\n')
+        authored=self.plan(data,'caption-font.json')
+        prepared=self.root/'caption-prepared'
+        render_demo.prepare(authored,prepared,enforce_duration=False)
+        plan=load_plan(prepared/'editing-plan.json',enforce_duration=False)
+        self.assertEqual(plan['caption_font'],plan['font'])
+        output=self.root/'caption-font-render'
+        render(plan,output)
+        self.assertTrue((output/'demo.mp4').is_file())
+        self.assertIn('fontfile=caption.ttf',render_demo.step_filter(
+            self.root/'body.txt','A clear caption.',0,2,branded=True,font='caption.ttf'))
+
+    def test_mentingo_captions_have_no_accent_bar(self):
+        branded = render_demo.step_filter(self.root/'branded-label.txt','One visible step.',0,2,branded=True)
+        self.assertNotIn('drawbox',branded)
+        self.assertIn('fontcolor=0x222949',branded)
+        self.assertIn('drawbox',render_demo.step_filter(self.root/'release-label.txt','Release step.',0,2))
+
+    def test_mentingo_frame_preserves_full_viewport_and_rounded_corners(self):
+        data = copy.deepcopy(self.data)
+        data.update(mode='tutorial', frameTheme='mentingo', colors={'frame':'#222949','accent':'#4796fd'})
+        data['chapters'][0].update(id='sample-flow', prs=['https://github.com/example/project/blob/abc/docs/spec.md'])
+        plan = load_plan(self.plan(data, 'branded-input.json'), enforce_duration=False)
+        self.assertEqual(plan['frame_theme'], 'mentingo')
+        out = self.root/'branded-render'
+        render(plan, out, jobs=1)
+        pixels = self.frame(out/'demo.mp4', 0, 'null', 'rgb24')
+        def pixel(x, y):
+            at = (y * 1920 + x) * 3
+            return tuple(pixels[at:at + 3])
+        # Outside is the website's pale banner; the rounded corner reveals it.
+        for x,y in [(30,30),(193,77)]:
+            self.assertGreater(min(pixel(x,y)), 170)
+        source = self.frame(self.root/'capture.mp4', 0, 'scale=1536:864', 'rgb24')
+        for x,y in [(100,50),(1450,50),(100,800),(1450,800)]:
+            at = (y * 1536 + x) * 3
+            expected = source[at:at+3]
+            self.assertLess(sum(abs(a-b) for a,b in zip(pixel(192+x,76+y),expected))/3, 30)
+        # The logo is present from frame zero, and the last frame retains the app.
+        self.assertGreater(self.difference(self.frame(out/'demo.mp4',0,'crop=165:36:192:18'), bytes([240])*(165*36)), 10)
+        self.assertGreater(self.difference(self.frame(out/'demo.mp4',3.9,'crop=300:200:700:300'),bytes([240])*(300*200)), 25)
+        self.assertEqual(probe(out/'demo.mp4')['streams'][0]['width'],1920)
+        data['mode']='release'
+        with self.assertRaisesRegex(ValueError,'only for tutorial'):
+            load_plan(self.plan(data,'invalid-brand.json'),enforce_duration=False)
+
     def test_tutorial_mode_preserves_stable_ids_and_spec_provenance(self):
         data = copy.deepcopy(self.data)
         data['mode'] = 'tutorial'

@@ -1,5 +1,7 @@
 """Recording scaffolding preserves the tag's test fixture and stays inside the owned checkout."""
 import json
+import shutil
+import subprocess
 from pathlib import Path
 import sys
 import tempfile
@@ -12,6 +14,34 @@ import harness
 
 
 class RecordingFiles(unittest.TestCase):
+    @unittest.skipUnless(shutil.which('node'), 'Node is required to evaluate the recording config')
+    def test_recording_api_reuses_playwright_browser_and_preserves_explicit_overrides(self):
+        source = (core.SKILL / 'projects/mentingo-recording/playwright.config.ts').read_text()
+        source = source.replace('import { chromium, defineConfig } from "@playwright/test";', '')
+        source = source.replace('import base from "./playwright.config";', '')
+        source = source.replace('export default defineConfig(', 'globalThis.result = defineConfig(')
+        script = '''const vm = require('node:vm');
+const source = JSON.parse(process.argv[1]);
+const results = [undefined, '/custom/chrome'].map(inherited => {
+  const context = {
+    base: {webServer: [
+      {command: 'pnpm db:seed-e2e && pnpm dev', env: {KEEP: 'yes'}},
+      {command: 'pnpm dev', env: {PUPPETEER_EXECUTABLE_PATH: '/server/chrome'}}
+    ]},
+    process: {env: {PUPPETEER_EXECUTABLE_PATH: inherited}},
+    chromium: {executablePath: () => '/playwright/chromium'}, defineConfig: value => value
+  };
+  vm.runInNewContext(source, context);
+  return context.result;
+});
+console.log(JSON.stringify(results));'''
+        result = subprocess.run(['node', '-e', script, json.dumps(source)], check=True, capture_output=True, text=True)
+        default, inherited = json.loads(result.stdout)
+        self.assertEqual(default['webServer'][0]['env'], {'KEEP': 'yes', 'PUPPETEER_EXECUTABLE_PATH': '/playwright/chromium'})
+        self.assertEqual(inherited['webServer'][0]['env']['PUPPETEER_EXECUTABLE_PATH'], '/custom/chrome')
+        self.assertEqual(inherited['webServer'][1]['env']['PUPPETEER_EXECUTABLE_PATH'], '/server/chrome')
+        self.assertIn('pnpm db:seed &&', default['webServer'][0]['command'])
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

@@ -1,4 +1,4 @@
-import { defineConfig } from "@playwright/test";
+import { chromium, defineConfig } from "@playwright/test";
 
 import base from "./playwright.config";
 
@@ -17,6 +17,16 @@ export default defineConfig({
     if (command.includes("db:seed-e2e")) {
       throw new Error("Release-film must use the populated demo seed");
     }
-    return { ...server, command };
+    return {
+      ...server,
+      command,
+      env: {
+        ...server.env,
+        // Reports and certificates use Puppeteer in the API. Reuse the browser
+        // installed for this recording instead of its absent Puppeteer download.
+        PUPPETEER_EXECUTABLE_PATH:
+          server.env?.PUPPETEER_EXECUTABLE_PATH || process.env.PUPPETEER_EXECUTABLE_PATH || chromium.executablePath(),
+      },
+    };
   }),
 });

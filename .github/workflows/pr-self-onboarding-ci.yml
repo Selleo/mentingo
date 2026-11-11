@@ -5,6 +5,7 @@ on:
       - .github/workflows/self-onboarding.yml
       - .github/workflows/self-onboarding-on-version.yml
       - .github/workflows/pr-self-onboarding-ci.yml
+      - .agents/skills/release-film/assets/**
       - .agents/skills/release-film/scripts/**
       - .agents/skills/release-film/projects/mentingo-self-onboarding.json
       - .agents/skills/release-film/tests/test_self_onboarding*.py
@@ -16,7 +17,11 @@ on:
       - apps/web/e2e/fixtures/self-onboarding.fixture.ts
       - apps/api/src/seed/self-onboarding-data-seed*
       - packages/shared/src/constants/self-onboarding-demo.ts
+      - .agents/skills/release-film/tests/test_tutorial_focus.py
       - .agents/skills/release-film/tests/test_tutorial_media.py
+      - .agents/skills/release-film/tests/run_checks.py
+      - .agents/skills/release-film/tests/test_check_selection.py
+      - .github/workflows/media-integration-tests.yml
       - apps/web/playwright.self-onboarding-checks.config.ts
 permissions:
   contents: read
@@ -35,18 +40,13 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22.15.0
-      - name: Install deterministic media-test tools
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends ffmpeg fonts-dejavu-core python3-yaml python3-venv >/dev/null
-      - name: Install the pinned realtime test dependency
-        run: |
-          python3 -m venv --system-site-packages "$RUNNER_TEMP/elevenlabs-tests"
-          "$RUNNER_TEMP/elevenlabs-tests/bin/python" -m pip install --disable-pip-version-check 'websockets==15.0.1'
-      - name: Test Self-onboarding flow planning and assembly
-        working-directory: .agents/skills/release-film/tests
-        run: |
-          "$RUNNER_TEMP/elevenlabs-tests/bin/python" -B -m unittest test_self_onboarding_catalog test_self_onboarding_pipeline test_self_onboarding_localization test_self_onboarding_progress test_elevenlabs test_elevenlabs_v4 test_tutorial_media test_viewport_edges
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12'
+      - name: Install Python test dependencies
+        run: python -m pip install --disable-pip-version-check 'PyYAML==6.0.2' 'websockets==15.0.1'
+      - name: Test Self-onboarding flow planning
+        run: python -B .agents/skills/release-film/tests/run_checks.py onboarding
       - name: Install the existing pinned publishing dependencies
         run: corepack pnpm install --frozen-lockfile
       - name: Build the shared recording contracts
@@ -55,9 +55,3 @@ jobs:
         run: corepack pnpm --filter api test -- --runInBand src/seed/users-seed.spec.ts src/seed/self-onboarding-data-seed.spec.ts
       - name: Test the Self-onboarding publisher
         run: node --test scripts/self-onboarding-publish/publisher.test.mjs
-      - name: Install browser for recorder helper checks
-        run: corepack pnpm --filter web exec playwright install --with-deps chromium
-      - name: Check recorder assertions against seeded progress states
-        run: |
-          SELF_ONBOARDING_DEMO=1 SELF_ONBOARDING_LANGUAGE=en corepack pnpm --filter web exec playwright test -c playwright.self-onboarding-checks.config.ts
-          SELF_ONBOARDING_DEMO=1 SELF_ONBOARDING_LANGUAGE=pl corepack pnpm --filter web exec playwright test -c playwright.self-onboarding-checks.config.ts
