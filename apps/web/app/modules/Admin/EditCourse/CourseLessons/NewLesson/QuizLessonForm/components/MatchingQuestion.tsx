@@ -172,6 +172,8 @@ const MatchingQuestion = ({
                     item,
                     index,
                   );
+                  const optionError =
+                    errors?.questions?.[questionIndex]?.options?.[index]?.optionText?.message;
 
                   return (
                     <SortableList.Item id={item.sortableId}>
@@ -196,14 +198,13 @@ const MatchingQuestion = ({
                                 index,
                               )}
                               value={item.optionText}
-                              onChange={(e) =>
-                                handleOptionChange(index, "optionText", e.target.value)
+                              onChange={(event) =>
+                                handleOptionChange(index, "optionText", event.target.value)
                               }
                               placeholder={
                                 baseLanguageOption?.optionText ||
                                 t("adminCourseView.curriculum.lesson.placeholder.option")
                               }
-                              required
                               className="min-h-10 w-full text-base sm:w-1/2"
                             />
                             <AutosizeTextarea
@@ -216,14 +217,13 @@ const MatchingQuestion = ({
                                 index,
                               )}
                               value={item.matchedWord}
-                              onChange={(e) =>
-                                handleOptionChange(index, "matchedWord", e.target.value)
+                              onChange={(event) =>
+                                handleOptionChange(index, "matchedWord", event.target.value)
                               }
                               placeholder={
                                 baseLanguageOption?.matchedWord ||
                                 t("adminCourseView.curriculum.lesson.placeholder.matchedWords")
                               }
-                              required
                               className="min-h-10 w-full text-base sm:w-1/2"
                             />
                           </div>
@@ -253,6 +253,9 @@ const MatchingQuestion = ({
                           </div>
                         </div>
                       </div>
+                      {optionError && (
+                        <p className="ml-16 mt-1 text-sm text-red-500">{optionError}</p>
+                      )}
                     </SortableList.Item>
                   );
                 }}
