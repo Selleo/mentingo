@@ -3192,6 +3192,7 @@
           "sourceUrlRequired": "La URL de origen es obligatoria",
           "sourceUrlInvalid": "Introduce una URL HTTPS válida",
           "matchingPairsRequired": "Añade al menos 2 pares y completa ambos lados de cada par",
+          "matchingMatchRequired": "Completa la pareja de este elemento",
           "matchingPairsUnique": "Cada par necesita una pareja única"
         },
         "toast": {

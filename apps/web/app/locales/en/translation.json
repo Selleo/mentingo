@@ -3200,6 +3200,7 @@
           "sourceUrlRequired": "Source URL is required",
           "sourceUrlInvalid": "Enter a valid HTTPS URL",
           "matchingPairsRequired": "Add at least 2 pairs and fill in both sides of each pair",
+          "matchingMatchRequired": "Fill in the match for this pair",
           "matchingPairsUnique": "Each pair needs a unique match"
         },
         "toast": {

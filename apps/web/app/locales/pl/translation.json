@@ -3454,6 +3454,7 @@
           "sourceUrlRequired": "Adres URL źródła jest wymagany",
           "sourceUrlInvalid": "Wpisz poprawny adres URL HTTPS",
           "matchingPairsRequired": "Dodaj co najmniej 2 pary i uzupełnij obie strony każdej pary",
+          "matchingMatchRequired": "Uzupełnij dopasowanie w tej parze",
           "matchingPairsUnique": "Każda para musi mieć unikalne dopasowanie"
         },
         "toast": {

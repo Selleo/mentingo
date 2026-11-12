@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
@@ -172,8 +173,9 @@ const MatchingQuestion = ({
                     item,
                     index,
                   );
-                  const optionError =
-                    errors?.questions?.[questionIndex]?.options?.[index]?.optionText?.message;
+                  const optionErrors = errors?.questions?.[questionIndex]?.options?.[index];
+                  const promptError = optionErrors?.optionText?.message;
+                  const matchError = optionErrors?.matchedWord?.message;
 
                   return (
                     <SortableList.Item id={item.sortableId}>
@@ -205,7 +207,11 @@ const MatchingQuestion = ({
                                 baseLanguageOption?.optionText ||
                                 t("adminCourseView.curriculum.lesson.placeholder.option")
                               }
-                              className="min-h-10 w-full text-base sm:w-1/2"
+                              aria-invalid={Boolean(promptError)}
+                              className={cn(
+                                "min-h-10 w-full text-base sm:w-1/2",
+                                promptError && "border-red-500",
+                              )}
                             />
                             <AutosizeTextarea
                               minRows={1}
@@ -224,7 +230,11 @@ const MatchingQuestion = ({
                                 baseLanguageOption?.matchedWord ||
                                 t("adminCourseView.curriculum.lesson.placeholder.matchedWords")
                               }
-                              className="min-h-10 w-full text-base sm:w-1/2"
+                              aria-invalid={Boolean(matchError)}
+                              className={cn(
+                                "min-h-10 w-full text-base sm:w-1/2",
+                                matchError && "border-red-500",
+                              )}
                             />
                           </div>
                           <div className="flex items-center">
@@ -253,8 +263,10 @@ const MatchingQuestion = ({
                           </div>
                         </div>
                       </div>
-                      {optionError && (
-                        <p className="ml-16 mt-1 text-sm text-red-500">{optionError}</p>
+                      {(promptError || matchError) && (
+                        <p className="ml-16 mt-1 text-sm text-red-500">
+                          {[promptError, matchError].filter(Boolean).join(" ")}
+                        </p>
                       )}
                     </SortableList.Item>
                   );

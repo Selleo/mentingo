@@ -29,7 +29,13 @@ const pair = (id: string, optionText: string, matchedWord: string, displayOrder:
 
 let formApi: UseFormReturn<QuizLessonFormValues> | undefined;
 
-const QuestionWithEmptyFields = () => {
+const QuestionWithEmptyFields = ({
+  title = "",
+  options = [pair("pair-1", "", "Meow", 1), pair("pair-2", "Dog", "Woof", 2)],
+}: {
+  title?: string;
+  options?: ReturnType<typeof pair>[];
+}) => {
   const form = useForm<QuizLessonFormValues>({
     resolver: zodResolver(quizLessonFormSchema(i18next.t)),
     defaultValues: {
@@ -39,9 +45,9 @@ const QuestionWithEmptyFields = () => {
           id: "question-1",
           sortableId: "question-1",
           type: QuestionType.MATCHING,
-          title: "",
+          title,
           displayOrder: 1,
-          options: [pair("pair-1", "", "Meow", 1), pair("pair-2", "Dog", "Woof", 2)],
+          options,
         },
       ],
     },
@@ -92,5 +98,42 @@ describe("matching question editor validation", () => {
     expect(
       screen.getByText(i18next.t("adminCourseView.curriculum.lesson.validation.titleMinLength")),
     ).toBeInTheDocument();
+  });
+
+  it("points at each untranslated pair instead of asking for more pairs", async () => {
+    renderWith().render(
+      <QuestionWithEmptyFields
+        title="Dopasuj zwierzę do dźwięku"
+        options={[
+          pair("pair-1", "Kot", "Miau", 1),
+          pair("pair-2", "Pies", "Hau", 2),
+          pair("pair-3", "", "", 3),
+          pair("pair-4", "", "", 4),
+        ]}
+      />,
+    );
+
+    await act(async () => {
+      await formApi?.trigger();
+    });
+
+    const validationMessage = (key: string) =>
+      i18next.t(`adminCourseView.curriculum.lesson.validation.${key}`);
+
+    expect(
+      await screen.findAllByText(
+        `${validationMessage("optionTextRequired")} ${validationMessage("matchingMatchRequired")}`,
+      ),
+    ).toHaveLength(2);
+    expect(screen.getByTestId(QUIZ_LESSON_FORM_HANDLES.matchingMatchInput(0, 2))).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    expect(screen.getByTestId(QUIZ_LESSON_FORM_HANDLES.matchingMatchInput(0, 0))).toHaveAttribute(
+      "aria-invalid",
+      "false",
+    );
+    expect(screen.queryByText(validationMessage("matchingPairsRequired"))).not.toBeInTheDocument();
+    expect(screen.queryByText(validationMessage("matchingPairsUnique"))).not.toBeInTheDocument();
   });
 });

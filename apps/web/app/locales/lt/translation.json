@@ -3199,6 +3199,7 @@
           "sourceUrlRequired": "Būtinas šaltinio URL",
           "sourceUrlInvalid": "Įveskite galiojantį HTTPS URL",
           "matchingPairsRequired": "Pridėkite bent 2 poras ir užpildykite abi kiekvienos poros puses",
+          "matchingMatchRequired": "Įrašykite šios poros atitikmenį",
           "matchingPairsUnique": "Kiekviena pora turi turėti unikalų atitikmenį"
         },
         "toast": {

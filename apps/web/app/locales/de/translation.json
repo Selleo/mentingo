@@ -3199,6 +3199,7 @@
           "sourceUrlRequired": "Quell-URL ist erforderlich",
           "sourceUrlInvalid": "Geben Sie eine gültige HTTPS-URL ein",
           "matchingPairsRequired": "Füge mindestens 2 Paare hinzu und fülle beide Seiten jedes Paares aus",
+          "matchingMatchRequired": "Gib die Zuordnung für dieses Paar ein",
           "matchingPairsUnique": "Jedes Paar braucht eine eindeutige Zuordnung"
         },
         "toast": {

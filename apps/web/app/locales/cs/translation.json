@@ -3205,6 +3205,7 @@
           "sourceUrlRequired": "Adresa URL zdroje je povinná",
           "sourceUrlInvalid": "Zadejte platnou adresu URL HTTPS",
           "matchingPairsRequired": "Přidejte alespoň 2 dvojice a vyplňte obě strany každé dvojice",
+          "matchingMatchRequired": "Vyplňte přiřazení v této dvojici",
           "matchingPairsUnique": "Každá dvojice musí mít jedinečné přiřazení"
         },
         "toast": {

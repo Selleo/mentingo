@@ -65,11 +65,7 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
             });
           }
 
-          if (
-            question.type === QuestionType.MATCHING &&
-            ((question.options?.length ?? 0) < 2 ||
-              question.options?.some((option) => !option.matchedWord?.trim()))
-          ) {
+          if (question.type === QuestionType.MATCHING && (question.options?.length ?? 0) < 2) {
             ctx.addIssue({
               path: [index, "options"],
               message: t("adminCourseView.curriculum.lesson.validation.matchingPairsRequired"),
@@ -77,7 +73,20 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
             });
           }
 
-          const matches = question.options?.map((option) => option.matchedWord?.trim()) ?? [];
+          if (question.type === QuestionType.MATCHING) {
+            question.options?.forEach((option, optionIndex) => {
+              if (option.matchedWord?.trim()) return;
+
+              ctx.addIssue({
+                path: [index, "options", optionIndex, "matchedWord"],
+                message: t("adminCourseView.curriculum.lesson.validation.matchingMatchRequired"),
+                code: z.ZodIssueCode.custom,
+              });
+            });
+          }
+
+          const matches =
+            question.options?.map((option) => option.matchedWord?.trim()).filter(Boolean) ?? [];
 
           if (question.type === QuestionType.MATCHING && new Set(matches).size !== matches.length) {
             ctx.addIssue({

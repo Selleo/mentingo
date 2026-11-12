@@ -3193,6 +3193,7 @@
           "sourceUrlRequired": "L'URL source est obligatoire",
           "sourceUrlInvalid": "Saisissez une URL HTTPS valide",
           "matchingPairsRequired": "Ajoutez au moins 2 paires et remplissez les deux côtés de chaque paire",
+          "matchingMatchRequired": "Renseignez la correspondance de cette paire",
           "matchingPairsUnique": "Chaque paire doit avoir une correspondance unique"
         },
         "toast": {
