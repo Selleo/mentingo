@@ -40,6 +40,7 @@ export class OutboxPublisher {
   private replaceUndefinedWithNull(value: unknown): unknown {
     return match(value)
       .with(P.nullish, () => null)
+      .with(P.instanceOf(Date), (date) => date.toISOString())
       .with(P.array(), (items) => items.map((item) => this.replaceUndefinedWithNull(item)))
       .when(isRecord, (record) =>
         mapValues(record, (property) => this.replaceUndefinedWithNull(property)),

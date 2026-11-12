@@ -281,6 +281,7 @@ export class SessionService {
 
   async revokeSession(user: CurrentUserType) {
     await this.sessionRevocationService.revokeSession(user);
+    if (user.supportSessionId) await this.revokeSupportSessionMfaAssurance(user.supportSessionId);
     if (user.sessionId) {
       const revokedSession = { userId: user.userId, sessionId: user.sessionId };
 
@@ -288,7 +289,6 @@ export class SessionService {
         this.outboxPublisher.publish(new UserSessionRevokedEvent(revokedSession)),
       );
     }
-    if (user.supportSessionId) await this.revokeSupportSessionMfaAssurance(user.supportSessionId);
   }
 
   async revokeMfaChallenge(user: CurrentUserType) {

@@ -1,5 +1,7 @@
 import { Readable } from "node:stream";
 
+import { Logger } from "@nestjs/common";
+
 import {
   NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS,
   NATIVE_ARCHIVE_IMPORT_OUTCOMES,
@@ -17,7 +19,13 @@ const ACTOR = {
 const PATH_ID = "b7e3f32d-c1ab-4cb9-95e1-79212698bf54";
 const COURSE_ID = "f594d687-096b-4599-84bf-1f296afdb1e1";
 
-function arrangeExport({ hasRememberedExport }: { hasRememberedExport: boolean }) {
+function arrangeExport({
+  hasRememberedExport,
+  publish = jest.fn().mockResolvedValue(undefined),
+}: {
+  hasRememberedExport: boolean;
+  publish?: jest.Mock;
+}) {
   let tenantContextActive = false;
   const openVideo = jest.fn(async () => {
     expect(tenantContextActive).toBe(true);
@@ -64,7 +72,7 @@ function arrangeExport({ hasRememberedExport }: { hasRememberedExport: boolean }
     nativeArchiveSnapshotService as never,
     {} as never,
     nativeArchiveExportReuseService as never,
-    { publish: jest.fn().mockResolvedValue(undefined) } as never,
+    { publish } as never,
   );
 
   const progress = { enterStage: jest.fn(), reportStageWork: jest.fn() };
@@ -123,6 +131,19 @@ describe("NativeArchiveJobFulfillmentService", () => {
       expect.stringMatching(/^[a-f0-9]{64}$/),
       key,
     );
+  });
+
+  it("finishes an export whose activity could not be published", async () => {
+    jest.spyOn(Logger.prototype, "error").mockImplementation(() => undefined);
+    const { exportLearningPath } = arrangeExport({
+      hasRememberedExport: false,
+      publish: jest.fn().mockRejectedValue(new Error("connection reset")),
+    });
+
+    await expect(exportLearningPath()).resolves.toMatchObject({
+      key: expect.stringMatching(EXPORT_KEY_PATTERN),
+      filename: "sales-path.zip",
+    });
   });
 
   it("copies a remembered export of the same content instead of building it", async () => {
