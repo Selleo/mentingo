@@ -532,6 +532,7 @@ describe("getDraftQuizAnswers", () => {
     { id: "tf", type: "true_or_false", options: [{ id: "t1" }, { id: "t2" }] },
     { id: "brief", type: "brief_response", options: [] },
     { id: "detailed", type: "detailed_response", options: [] },
+    { id: "match", type: "matching", options: [{ id: "p1" }, { id: "p2" }] },
   ] as unknown as NonNullable<
     import("~/api/generated-api").GetLessonByIdResponse["data"]["quizDetails"]
   >["questions"];
@@ -542,6 +543,7 @@ describe("getDraftQuizAnswers", () => {
       { questionId: "multi", answers: [{ answerId: "m1" }, { answerId: "m3" }] },
       { questionId: "tf", answers: [{ answerId: "t1", value: "false" }] },
       { questionId: "brief", answers: [{ answerId: "brief", value: "short answer" }] },
+      { questionId: "match", answers: [{ answerId: "p2", value: "Paris" }] },
     ];
 
     const form = getDraftQuizAnswers(questions, draftAnswers);
@@ -549,6 +551,7 @@ describe("getDraftQuizAnswers", () => {
     expect(form.singleAnswerQuestions.single).toEqual({ s1: null, s2: "s2" });
     expect(form.trueOrFalseQuestions.tf).toEqual({ t1: "false", t2: null });
     expect(form.detailedResponses.detailed).toBe("");
+    expect(form.matchingQuestions.match).toEqual({ p1: null, p2: "Paris" });
     expect(parseQuizFormData(form)).toEqual(
       expect.arrayContaining(draftAnswers.map((answer) => expect.objectContaining(answer))),
     );
