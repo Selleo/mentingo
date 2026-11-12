@@ -212,6 +212,7 @@ describe("timed quiz", () => {
 
   it("restores a newer draft of a cached attempt unless the learner already edited", () => {
     const { rerenderQuiz } = renderQuiz(buildLesson({ quizAttempt: buildAttempt() }));
+
     expect(screen.getByTestId("answer")).toHaveValue("");
 
     rerenderQuiz(

@@ -37,6 +37,7 @@ export function useSaveQuizAttemptDraft() {
         .getQueriesData<GetLessonByIdResponse>({ queryKey: ["lesson", lessonId] })
         .forEach(([queryKey, cached]) => {
           const quizAttempt = cached?.data.quizAttempt;
+
           if (!cached || quizAttempt?.attemptId !== attemptId) return;
 
           queryClient.setQueryData<GetLessonByIdResponse>(
@@ -57,6 +58,7 @@ export function useSaveQuizAttemptDraft() {
       // A closed attempt means it was submitted or finalized; the refetched lesson shows the result.
       if (isClosedQuizAttemptError(error)) {
         await refetchLessonOnClosedQuizAttempt(error, lessonId);
+
         return;
       }
 

@@ -51,6 +51,7 @@ describe("useSaveQuizAttemptDraft", () => {
     });
 
     const cached = queryClient.getQueryData<GetLessonByIdResponse>(LESSON_KEY);
+
     expect(cached?.data.quizAttempt).toMatchObject({
       draftAnswers: ANSWERS,
       draftSavedAt: "2026-01-01T10:00:05Z",

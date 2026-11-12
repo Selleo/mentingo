@@ -48,6 +48,7 @@ export const useQuizCountdown = ({
 
     if (expiresAtMs === null) {
       setSecondsLeft(null);
+
       return;
     }
 
@@ -56,6 +57,7 @@ export const useQuizCountdown = ({
     const update = () => {
       const serverNowMs = Date.now() + clockOffsetMs;
       const left = Math.max(0, Math.ceil((expiresAtMs - serverNowMs) / 1000));
+
       setSecondsLeft(left);
 
       // fire once per deadline, even if a refetch re-runs this effect with a new clock offset
@@ -65,6 +67,7 @@ export const useQuizCountdown = ({
       }
 
       const graceOver = serverNowMs >= graceEndsAtMs;
+
       setIsGraceOver(graceOver);
 
       return graceOver;
