@@ -4,12 +4,18 @@ import { match } from "ts-pattern";
 import { extractLessonResourceIds } from "src/lesson/lesson-resource-references";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 
-import { DURATION_DEFAULTS, DURATION_DISPLAY_BUCKET_SECONDS } from "./duration-defaults";
+import {
+  DURATION_DEFAULTS,
+  DURATION_DISPLAY_BUCKET_SECONDS,
+  DURATION_MEDIA_KINDS,
+  DURATION_MEDIA_RULES,
+} from "./duration-defaults";
 
 import type {
   DurationEstimate,
   DurationCourseRow,
   DurationEstimatesByLanguage,
+  DurationMediaKind,
   DurationResource,
   LessonDurationCalculationParams,
 } from "./course-duration.types";
@@ -30,9 +36,9 @@ export const calculateLessonDurationSeconds = (params: LessonDurationCalculation
       );
     if (nodeType === "audio")
       counts.audio += getMediaDurationSeconds(
-        $(element).attr("data-src"),
+        $(element).attr("src"),
         params.resourcesByReference,
-        "audio/",
+        DURATION_MEDIA_KINDS.AUDIO,
       );
     if (nodeType === "image") counts.image += 1;
     if (nodeType === "downloadable-file") counts.download += 1;
@@ -69,13 +75,14 @@ export const calculateLessonDurationSeconds = (params: LessonDurationCalculation
 export const getVideoDurationSeconds = (
   source: string | undefined,
   resourcesByReference: Map<string, DurationResource> | undefined,
-): number => getMediaDurationSeconds(source, resourcesByReference, "video/");
+): number => getMediaDurationSeconds(source, resourcesByReference, DURATION_MEDIA_KINDS.VIDEO);
 
 const getMediaDurationSeconds = (
   source: string | undefined,
   resourcesByReference: Map<string, DurationResource> | undefined,
-  contentTypePrefix: "audio/" | "video/",
+  mediaKind: DurationMediaKind,
 ): number => {
+  const { contentTypePrefix, fallbackMinutes } = DURATION_MEDIA_RULES[mediaKind];
   const reference = source ? extractLessonResourceIds(source)[0] : undefined;
   const resource = reference ? resourcesByReference?.get(reference) : undefined;
   const duration = resource?.metadata?.durationSeconds;
@@ -84,13 +91,11 @@ const getMediaDurationSeconds = (
     typeof duration === "number" &&
     Number.isFinite(duration) &&
     duration > 0
-  )
+  ) {
     return Math.ceil(duration);
-  return (
-    (contentTypePrefix === "audio/"
-      ? DURATION_DEFAULTS.audioMinutes
-      : DURATION_DEFAULTS.videoMinutes) * 60
-  );
+  }
+
+  return fallbackMinutes * 60;
 };
 
 export const extractEmbeddedResourceIds = (content: string | null | undefined): string[] =>

@@ -79,7 +79,7 @@ import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { isStorageRangeNotSatisfiableError } from "./utils/storageErrors";
 import { findStorageKeyTenantId, prefixTenantStorageKey } from "./utils/tenantStorageKey";
 import { UPLOAD_ERROR_KEYS } from "./utils/uploadErrors";
-import { validateAudioUploadWithMetadata } from "./utils/validate-audio";
+import { validateAudioUpload } from "./utils/validate-audio";
 import { VideoMetadataQueueService } from "./video-metadata.queue.service";
 import { isBunnyWebhookReadyStatus } from "./video-metadata.utils";
 import { VideoProcessingStateService } from "./video-processing-state.service";
@@ -592,8 +592,7 @@ export class FileService {
     resource: string,
     tenantId: UUIDType,
   ): Promise<UploadFileResult> {
-    const { contentType: audioMimeType, durationSeconds } =
-      await validateAudioUploadWithMetadata(file);
+    const { contentType: audioMimeType, durationSeconds } = await validateAudioUpload(file);
 
     const fileKey = prefixTenantStorageKey(
       `${resource}/${randomUUID()}${VALIDATED_AUDIO_FILE_EXTENSIONS[audioMimeType]}`,

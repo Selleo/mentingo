@@ -2,9 +2,9 @@ import { drizzle } from "drizzle-orm/pg-proxy";
 
 import { VideoMetadataRepository } from "./video-metadata.repository";
 
-import type { DatabasePg } from "src/common";
+import type { DatabasePg, UUIDType } from "src/common";
 
-const tenantId = "11111111-1111-4111-8111-111111111111";
+const tenantId = "11111111-1111-4111-8111-111111111111" as UUIDType;
 const afterId = "22222222-2222-4222-8222-222222222222";
 
 describe("audio duration backfill query", () => {
@@ -15,7 +15,6 @@ describe("audio duration backfill query", () => {
       return { rows: [] };
     });
     const repository = new VideoMetadataRepository(db as unknown as DatabasePg);
-    expect(typeof repository.findAudioMissingDuration).toBe("function");
     await repository.findAudioMissingDuration(tenantId, afterId, 100);
     expect(queries).toHaveLength(1);
     const { statement, params } = queries[0];

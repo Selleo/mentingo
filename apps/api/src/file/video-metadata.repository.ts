@@ -7,13 +7,13 @@ import { DB } from "src/storage/db/db.providers";
 import { resources } from "src/storage/schema";
 
 import type { VideoMetadataResource } from "./video-metadata.types";
+import type { UUIDType } from "src/common";
 
 @Injectable()
 export class VideoMetadataRepository {
   constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
-  /** One tenant-scoped keyset page; never loads the audio bytes in the cron process. */
-  async findAudioMissingDuration(tenantId: string, afterId?: string, limit = 100) {
+  async findAudioMissingDuration(tenantId: UUIDType, afterId: string | undefined, limit: number) {
     return this.db
       .select({ id: resources.id, reference: resources.reference })
       .from(resources)

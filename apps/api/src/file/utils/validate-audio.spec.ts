@@ -178,7 +178,7 @@ describe("actual-content audio validation", () => {
         mimetype: browserMime,
         size: (await stat(filePath)).size,
       }),
-    ).resolves.toBe(canonicalMime);
+    ).resolves.toMatchObject({ contentType: canonicalMime });
   });
 
   it.each([
@@ -221,7 +221,7 @@ describe("actual-content audio validation", () => {
         mimetype: "",
         size: buffer.length,
       } as Express.Multer.File),
-    ).resolves.toBe("audio/wav");
+    ).resolves.toMatchObject({ contentType: "audio/wav" });
     const tempEntriesAfter = (await readdir(tmpdir())).filter((entry) =>
       entry.startsWith("mentingo-audio-"),
     );

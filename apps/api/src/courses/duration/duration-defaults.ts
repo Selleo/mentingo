@@ -13,3 +13,19 @@ export const DURATION_DEFAULTS: DurationHeuristics = {
   embedMinutes: 3,
   otherSeconds: 60,
 };
+
+export const DURATION_MEDIA_KINDS = {
+  AUDIO: "audio",
+  VIDEO: "video",
+} as const;
+
+export const DURATION_MEDIA_RULES = {
+  [DURATION_MEDIA_KINDS.AUDIO]: {
+    contentTypePrefix: "audio/",
+    fallbackMinutes: DURATION_DEFAULTS.audioMinutes,
+  },
+  [DURATION_MEDIA_KINDS.VIDEO]: {
+    contentTypePrefix: "video/",
+    fallbackMinutes: DURATION_DEFAULTS.videoMinutes,
+  },
+} as const;

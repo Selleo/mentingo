@@ -25,7 +25,7 @@ const calculateAudioLesson = (
     ]),
   });
 
-const audioNode = `<div data-node-type="audio" data-src="/api/lesson/lesson-resource/${audioId}"></div>`;
+const audioNode = `<audio data-node-type="audio" src="/api/lesson/lesson-resource/${audioId}"></audio>`;
 
 describe("content lesson audio duration", () => {
   it.each([0, -1, NaN, Infinity])("uses the media fallback for invalid duration %s", (duration) => {
@@ -35,7 +35,7 @@ describe("content lesson audio duration", () => {
   it("does not trust an HTML duration or an unresolved audio source", () => {
     expect(
       calculateAudioLesson(
-        '<div data-node-type="audio" data-src="https://example.com/audio.mp3" data-duration-seconds="9999"></div>',
+        '<audio data-node-type="audio" src="https://example.com/audio.mp3" data-duration-seconds="9999"></audio>',
       ),
     ).toBe(180);
   });

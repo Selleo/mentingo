@@ -50,7 +50,7 @@ describe("CourseDurationService", () => {
   });
 
   it("includes localized audio duration in lesson, chapter and course projections", async () => {
-    const audioNode = `<div data-node-type="audio" data-src="/api/lesson/lesson-resource/${resourceId}"></div>`;
+    const audioNode = `<audio data-node-type="audio" src="/api/lesson/lesson-resource/${resourceId}"></audio>`;
     const repository = {
       withCourseDurationTransaction: jest.fn(async (_courseId, _db, callback) =>
         callback({} as never),

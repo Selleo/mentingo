@@ -113,7 +113,7 @@ const detectAudioMimeType = async (
   { format, streams }: AudioProbeResult,
 ): Promise<ValidatedAudioMimeType | undefined> => {
   const isAudioOnly = streams.every((stream) => stream.codec_type === "audio");
-  if (!isAudioOnly || !(Number(format.duration) > 0)) return undefined;
+  if (!isAudioOnly) return undefined;
 
   const hasOnlyCodecs = (...codecs: string[]) =>
     streams.every((stream) => codecs.includes(stream.codec_name));
@@ -190,7 +190,7 @@ const assertAudioSize = (size: number) => {
  * Validates audio stored at `filePath` by probing and decoding its actual content, and returns
  * canonical MIME and duration metadata. Never trusts the extension or declared MIME.
  */
-export async function validateAudioFileAtPathWithMetadata(
+export async function validateAudioFileAtPath(
   filePath: string,
   declared: { mimetype: string; originalname: string; size: number },
 ): Promise<ValidatedAudioMetadata> {
@@ -221,7 +221,7 @@ export async function validateAudioFileAtPathWithMetadata(
  * Validates an in-memory audio upload. ffprobe and ffmpeg need a file, so the bytes are written
  * to a private temporary directory for the duration of the check.
  */
-export async function validateAudioUploadWithMetadata(
+export async function validateAudioUpload(
   file: Express.Multer.File,
 ): Promise<ValidatedAudioMetadata> {
   if (!file.buffer) throw new BadRequestException("files.toast.invalidData");
@@ -233,7 +233,7 @@ export async function validateAudioUploadWithMetadata(
   try {
     const filePath = path.join(directory, "upload");
     await writeFile(filePath, file.buffer, { mode: 0o600 });
-    return await validateAudioFileAtPathWithMetadata(filePath, {
+    return await validateAudioFileAtPath(filePath, {
       mimetype: file.mimetype,
       originalname: file.originalname,
       size: file.buffer.length,
@@ -241,19 +241,4 @@ export async function validateAudioUploadWithMetadata(
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
-}
-
-/** Backwards-compatible MIME-only validation. */
-export async function validateAudioFileAtPath(
-  filePath: string,
-  declared: { mimetype: string; originalname: string; size: number },
-): Promise<ValidatedAudioMimeType> {
-  return (await validateAudioFileAtPathWithMetadata(filePath, declared)).contentType;
-}
-
-/** Backwards-compatible MIME-only validation. */
-export async function validateAudioUpload(
-  file: Express.Multer.File,
-): Promise<ValidatedAudioMimeType> {
-  return (await validateAudioUploadWithMetadata(file)).contentType;
 }
