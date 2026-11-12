@@ -70,7 +70,7 @@ describe("public course AI Mentor previews", () => {
     ).resolves.toBe(stream);
     expect(aiRepository.resetStudentProgressForLesson).not.toHaveBeenCalled();
     expect(judgeService.evaluate).not.toHaveBeenCalled();
-    expect(outboxPublisher.publishDurable).not.toHaveBeenCalled();
+    expect(outboxPublisher.publish).not.toHaveBeenCalled();
   });
 
   it("does not grant another author access to an unassigned voice conversation", async () => {
