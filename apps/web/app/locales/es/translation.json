@@ -1111,7 +1111,8 @@
     "activityLogs": "Registros de actividad",
     "reports": "Informes",
     "leaderboards": "Clasificaciones",
-    "gamification": "Gamificación"
+    "gamification": "Gamificación",
+    "forum": "Foro"
   },
   "microsoftCalendar": {
     "title": "Calendario de Microsoft",
@@ -4767,7 +4768,9 @@
       "studentsWithOverdueCourseNotification": "Estudiantes con notificaciones de cursos vencidos",
       "studentsWithOverdueCourseNotificationDescription": "Recibir notificaciones cuando los estudiantes tengan cursos atrasados",
       "publicCoursePreview": "Ver lecciones antes de inscribirse en un curso",
-      "publicCoursePreviewDescription": "Permite a los usuarios con sesión iniciada abrir lecciones de cursos gratuitos antes de inscribirse. Los cuestionarios y el seguimiento del progreso siguen requiriendo inscripción."
+      "publicCoursePreviewDescription": "Permite a los usuarios con sesión iniciada abrir lecciones de cursos gratuitos antes de inscribirse. Los cuestionarios y el seguimiento del progreso siguen requiriendo inscripción.",
+      "forum": "Habilitar foro",
+      "forumDescription": "Permitir que todos en la organización creen temas y respondan. Los usuarios inscritos también ven allí los debates de sus cursos."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de nuevos usuarios se han actualizado correctamente.",
@@ -4781,7 +4784,8 @@
       "finishedCourseNotificationsPreferenceChangeError": "No se pudieron actualizar las preferencias de notificación del curso terminado",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de cursos vencidos se han actualizado correctamente",
       "overdueCourseNotificationsPreferenceChangeError": "No se pudieron actualizar las preferencias de notificación de cursos vencidos",
-      "publicCoursePreviewPreferenceChangeSuccess": "Preferencia de vista previa actualizada"
+      "publicCoursePreviewPreferenceChangeSuccess": "Preferencia de vista previa actualizada",
+      "forumPreferenceChangeSuccess": "La preferencia del foro se ha actualizado correctamente."
     }
   },
   "registrationFormBuilder": {
@@ -9651,5 +9655,64 @@
       }
     },
     "requiresGamification": "Activa primero la gamificación."
+  },
+  "forum": {
+    "title": "Foro",
+    "description": "Haz preguntas y comparte conocimientos con toda tu organización.",
+    "unavailable": "El foro no está disponible.",
+    "loadError": "No se pudo cargar el foro.",
+    "newTopic": "Nuevo tema",
+    "searchPlaceholder": "Buscar temas",
+    "filter": {
+      "label": "Mostrar temas",
+      "all": "Todos los temas",
+      "general": "General"
+    },
+    "sort": {
+      "label": "Ordenar temas",
+      "lastActivity": "Actividad reciente",
+      "newest": "Más recientes",
+      "mostReplies": "Más respuestas"
+    },
+    "empty": "Aún no hay temas. Crea el primero.",
+    "noResults": "Ningún tema coincide con tus filtros.",
+    "replies_one": "{{count}} respuesta",
+    "replies_other": "{{count}} respuestas",
+    "lastActivity": "Última actividad {{time}}",
+    "deletedPost": "Esta publicación fue eliminada.",
+    "deletePost": "Eliminar publicación",
+    "createDialog": {
+      "title": "Nuevo tema",
+      "titleLabel": "Título",
+      "titlePlaceholder": "¿De qué trata tu tema?",
+      "contentLabel": "Mensaje",
+      "contentPlaceholder": "Escribe la primera publicación",
+      "submit": "Crear tema"
+    },
+    "topic": {
+      "backToForum": "Volver al foro",
+      "courseThreadTitle": "Debate del curso {{course}}",
+      "noReplies": "Aún no hay respuestas.",
+      "replyPlaceholder": "Escribe una respuesta",
+      "replySubmit": "Responder",
+      "closed": "Las respuestas están cerradas porque se eliminó la primera publicación."
+    },
+    "deleteDialog": {
+      "title": "¿Eliminar esta publicación?",
+      "description": "La publicación se eliminará para todos. Esta acción no se puede deshacer."
+    },
+    "toast": {
+      "createTopicError": "No se pudo crear el tema.",
+      "createPostError": "No se pudo enviar la respuesta.",
+      "deletePostError": "No se pudo eliminar la publicación."
+    },
+    "errors": {
+      "topicNotFound": "Este tema no existe o no tienes acceso a él.",
+      "postNotFound": "Esta publicación ya no existe.",
+      "cannotDeletePost": "Solo puedes eliminar tus propias publicaciones.",
+      "topicDeleted": "Las respuestas están cerradas porque se eliminó la primera publicación.",
+      "emptyTitle": "Escribe un título.",
+      "emptyContent": "Escribe un mensaje."
+    }
   }
 }

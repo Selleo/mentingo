@@ -1,3 +1,4 @@
+import { FORUM_QUERY_KEY } from "~/api/queries/forum/forumQueryKeys";
 import { queryClient } from "~/api/queryClient";
 
 import { COURSE_CHAT_MESSAGES_QUERY_KEY } from "./useCourseChatMessages";
@@ -36,6 +37,12 @@ export function invalidateCourseChatMessageCreated(params: {
   if (params.parentMessageId) {
     invalidateCourseChatReplies(params.parentMessageId);
   }
+
+  invalidateForumCourseThreads();
+}
+
+function invalidateForumCourseThreads() {
+  queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEY });
 }
 
 export function updateCourseChatUserPresence(params: {
@@ -85,4 +92,6 @@ export function updateDeletedMessageInCache(payload: DeleteMessageResponse["data
       queryKey: [...COURSE_CHAT_REPLIES_QUERY_KEY, payload.parentMessageId],
     });
   }
+
+  invalidateForumCourseThreads();
 }

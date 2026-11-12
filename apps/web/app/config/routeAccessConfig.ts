@@ -118,6 +118,8 @@ export const routeAccessConfig = createRouteConfig({
   "oauth/connect": PUBLIC,
 
   "helpdesk/tutorials/:key": AUTHENTICATED_USER_ACCESS,
+  forum: AUTHENTICATED_USER_ACCESS,
+  "forum/topics/:topicId": AUTHENTICATED_USER_ACCESS,
   assistant: AUTHENTICATED_USER_ACCESS,
   "assistant/:threadId": AUTHENTICATED_USER_ACCESS,
 

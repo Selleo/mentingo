@@ -433,6 +433,17 @@
           "pageKey": "leaderboards"
         }
       ]
+    },
+    {
+      "key": "forum",
+      "title": "Forum",
+      "specPaths": ["docs/specs/forum-business-spec.md"],
+      "routes": [
+        {
+          "prefix": "/forum",
+          "pageKey": "forum"
+        }
+      ]
     }
   ],
   "excludedRoutes": [
