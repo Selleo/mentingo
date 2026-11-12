@@ -22,7 +22,6 @@ import {
   chapters,
   courses,
   lessons,
-  studentCourses,
   studentLessonProgress,
   users,
 } from "src/storage/schema";
@@ -35,9 +34,6 @@ import type {
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
 const fullName = sql<string>`concat_ws(' ', ${users.firstName}, ${users.lastName})`;
-
-// Completing a lesson on the learner's behalf needs them to still be enrolled.
-const isLearnerEnrolled = sql<boolean>`EXISTS (SELECT 1 FROM ${studentCourses} WHERE ${studentCourses.courseId} = ${courses.id} AND ${studentCourses.studentId} = ${assessmentAttempts.learnerId})`;
 
 // Questions are localized by their assessment; reviewers read them in the student's language.
 const localizedQuestionField = (column: AnyPgColumn) =>
@@ -174,7 +170,6 @@ export class QuizGradingRepository {
         chapterId: chapters.id,
         courseId: courses.id,
         courseStatus: courses.status,
-        isLearnerEnrolled,
       })
       .from(assessmentAttemptQuestionAnswers)
       .innerJoin(
@@ -328,7 +323,6 @@ export class QuizGradingRepository {
           activeLearningState(assessmentAttempts.learningStateId),
           ne(users.id, reviewerId),
           ne(courses.status, COURSE_STATUSES.DRAFT),
-          isLearnerEnrolled,
           filters.status
             ? eq(assessmentAttemptQuestionAnswers.gradingStatus, filters.status)
             : undefined,

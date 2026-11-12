@@ -425,6 +425,7 @@ export class LessonService {
       ? questionListWithUrls.map((question) => ({
           ...question,
           passQuestion: typeof question.passQuestion === "boolean" ? false : question.passQuestion,
+          reviewerFeedback: undefined,
           options: question.options?.map((option) => ({
             ...option,
             isCorrect: typeof option.isCorrect === "boolean" ? false : option.isCorrect,

@@ -14,7 +14,7 @@ import {
 import { and, eq } from "drizzle-orm";
 import request from "supertest";
 
-import { QuizAttemptGradedEvent, QuizCompletedEvent } from "src/events";
+import { LessonCompletedEvent, QuizAttemptGradedEvent, QuizCompletedEvent } from "src/events";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QuizAuthoringService } from "src/quiz/services/quiz-authoring.service";
@@ -94,7 +94,12 @@ describe("QuizGradingController (e2e)", () => {
   };
 
   // A quiz with two open questions, reviewer-graded by default; passing needs half of the points.
-  const setup = ({ briefRequiresReview = true } = {}) =>
+  const setup = ({
+    briefRequiresReview = true,
+    isEnrolled = true,
+    isFreemium = false,
+    quizFeedbackEnabled = true,
+  } = {}) =>
     runAsTenant(defaultTenantId, async () => {
       await createSettingsFactory(db).create({ userId: null });
       const author = await createUser(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
@@ -105,20 +110,22 @@ describe("QuizGradingController (e2e)", () => {
         authorId: author.id,
         categoryId: category.id,
         status: "published",
-        settings: { lessonSequenceEnabled: false, quizFeedbackEnabled: true },
+        settings: { lessonSequenceEnabled: false, quizFeedbackEnabled },
       });
       const chapter = await createChapterFactory(db).create({
         courseId: course.id,
         lessonCount: 1,
+        isFreemium,
       });
 
-      await db.insert(studentCourses).values({
-        id: randomUUID(),
-        studentId: student.id,
-        courseId: course.id,
-        status: COURSE_ENROLLMENT.ENROLLED,
-        enrolledAt: new Date().toISOString(),
-      });
+      if (isEnrolled)
+        await db.insert(studentCourses).values({
+          id: randomUUID(),
+          studentId: student.id,
+          courseId: course.id,
+          status: COURSE_ENROLLMENT.ENROLLED,
+          enrolledAt: new Date().toISOString(),
+        });
 
       const authoring = app.get(QuizAuthoringService);
       const lesson = await authoring.createQuizLesson({
@@ -293,6 +300,9 @@ describe("QuizGradingController (e2e)", () => {
 
     publishSpy.mockRestore();
     expect(events.some((event) => event instanceof QuizCompletedEvent)).toBe(true);
+    expect(events.find((event) => event instanceof LessonCompletedEvent)).toMatchObject({
+      lessonCompletionData: { userId: t.student.id, actor: { userId: t.student.id } },
+    });
     expect(events.find((event) => event instanceof QuizAttemptGradedEvent)).toMatchObject({
       userId: t.student.id,
       reviewerId: t.reviewer.id,
@@ -645,7 +655,7 @@ describe("QuizGradingController (e2e)", () => {
     ]);
   });
 
-  it("refuses to grade answers from a draft course or an unenrolled learner", async () => {
+  it("refuses to grade answers from a draft course", async () => {
     const context = await setup();
 
     await submitQuiz(context.studentCookie, context.lesson.id, context.briefId, context.detailedId);
@@ -661,23 +671,51 @@ describe("QuizGradingController (e2e)", () => {
     expect((await grade(context.reviewerCookie, first.id, true).expect(409)).body.message).toBe(
       "quizGrading.errors.courseNotPublished",
     );
-
-    await runAsTenant(defaultTenantId, async () => {
-      await db
-        .update(courses)
-        .set({ status: "published" })
-        .where(eq(courses.id, context.course.id));
-      await db.delete(studentCourses).where(eq(studentCourses.studentId, context.student.id));
-    });
-
-    expect((await listAnswers(context.reviewerCookie).expect(200)).body.pagination.totalItems).toBe(
-      0,
-    );
-    expect((await grade(context.reviewerCookie, first.id, true).expect(409)).body.message).toBe(
-      "quizGrading.errors.learnerNotEnrolled",
-    );
     expect(await findAttempt(context.student.id)).toMatchObject({
       gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.PENDING,
     });
+  });
+
+  it("grades answers from an unenrolled freemium learner", async () => {
+    const context = await setup({ isEnrolled: false, isFreemium: true });
+
+    await submitQuiz(context.studentCookie, context.lesson.id, context.briefId, context.detailedId);
+    const answers = (await listAnswers(context.reviewerCookie).expect(200)).body.data;
+
+    expect(answers).toHaveLength(2);
+
+    await grade(context.reviewerCookie, answers[0].id, true).expect(201);
+    const lastGrade = await grade(context.reviewerCookie, answers[1].id, true).expect(201);
+
+    expect(lastGrade.body.data.attemptGraded).toBe(true);
+    expect(await findAttempt(context.student.id)).toMatchObject({
+      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+      result: ASSESSMENT_ATTEMPT_RESULTS.PASSED,
+    });
+  });
+
+  it("hides reviewer feedback from the learner when quiz feedback is disabled", async () => {
+    const context = await setup({ quizFeedbackEnabled: false });
+
+    await submitQuiz(context.studentCookie, context.lesson.id, context.briefId, context.detailedId);
+    const answers = (await listAnswers(context.reviewerCookie).expect(200)).body.data;
+
+    await grade(context.reviewerCookie, answers[0].id, true, "Good").expect(201);
+    await grade(context.reviewerCookie, answers[1].id, true, "Fine").expect(201);
+
+    const lessonView = await request(app.getHttpServer())
+      .get(`/api/lesson/${context.lesson.id}?language=en`)
+      .set("Cookie", context.studentCookie)
+      .expect(200);
+
+    expect(lessonView.body.data).toMatchObject({
+      lessonCompleted: true,
+      isQuizFeedbackRedacted: true,
+    });
+    expect(
+      lessonView.body.data.quizDetails.questions.map(
+        ({ reviewerFeedback }: { reviewerFeedback?: unknown }) => reviewerFeedback,
+      ),
+    ).toEqual([undefined, undefined]);
   });
 });

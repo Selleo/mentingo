@@ -9115,8 +9115,7 @@
       "answerNotFound": "Cette réponse n'existe pas ou ne peut pas être notée.",
       "ownAnswer": "Vous ne pouvez pas noter votre propre réponse.",
       "attemptSuperseded": "L'apprenant a recommencé ce cours, cette tentative ne peut donc plus être notée.",
-      "courseNotPublished": "Ce cours est repassé en brouillon. Publiez-le avant de noter ses réponses.",
-      "learnerNotEnrolled": "L'apprenant n'est plus inscrit à ce cours, cette réponse ne peut donc pas être notée."
+      "courseNotPublished": "Ce cours est repassé en brouillon. Publiez-le avant de noter ses réponses."
     },
     "loadError": "Impossible de charger la file de notation. Actualisez la page pour réessayer."
   }

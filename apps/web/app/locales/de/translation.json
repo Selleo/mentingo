@@ -9580,8 +9580,7 @@
       "answerNotFound": "Diese Antwort existiert nicht oder kann nicht bewertet werden.",
       "ownAnswer": "Du kannst deine eigene Antwort nicht bewerten.",
       "attemptSuperseded": "Die lernende Person hat diesen Kurs neu begonnen, daher kann dieser Versuch nicht mehr bewertet werden.",
-      "courseNotPublished": "Dieser Kurs ist wieder ein Entwurf. Veröffentliche ihn, bevor du Antworten bewertest.",
-      "learnerNotEnrolled": "Die lernende Person ist nicht mehr in diesem Kurs eingeschrieben, daher kann diese Antwort nicht bewertet werden."
+      "courseNotPublished": "Dieser Kurs ist wieder ein Entwurf. Veröffentliche ihn, bevor du Antworten bewertest."
     },
     "loadError": "Die Bewertungswarteschlange konnte nicht geladen werden. Lade die Seite neu, um es erneut zu versuchen."
   }

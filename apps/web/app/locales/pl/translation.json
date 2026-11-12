@@ -9729,8 +9729,7 @@
       "answerNotFound": "Ta odpowiedź nie istnieje lub nie można jej ocenić.",
       "ownAnswer": "Nie możesz oceniać własnej odpowiedzi.",
       "attemptSuperseded": "Kursant rozpoczął ten kurs od nowa, więc tej próby nie można już ocenić.",
-      "courseNotPublished": "Ten kurs wrócił do wersji roboczej. Opublikuj go, zanim ocenisz odpowiedzi.",
-      "learnerNotEnrolled": "Kursant nie jest już zapisany na ten kurs, więc tej odpowiedzi nie można ocenić."
+      "courseNotPublished": "Ten kurs wrócił do wersji roboczej. Opublikuj go, zanim ocenisz odpowiedzi."
     },
     "loadError": "Nie udało się wczytać kolejki do oceny. Odśwież stronę, aby spróbować ponownie."
   }

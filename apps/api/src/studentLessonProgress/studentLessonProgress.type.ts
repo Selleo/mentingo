@@ -58,7 +58,8 @@ export type FinishQuizProgressParams = {
   isQuizPassed: boolean;
   language: SupportedLanguages;
   userPermissions: PermissionKey[];
-  actor: CurrentUserType;
+  // Omitted when acting for the learner (e.g. reviewer grading); the learner is then resolved.
+  actor?: CurrentUserType;
   isSupportMode: boolean;
   dbInstance: DatabasePg;
 };

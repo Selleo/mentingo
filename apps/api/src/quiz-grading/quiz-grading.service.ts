@@ -39,7 +39,7 @@ import type {
 import type { QuizAnswerForGrading, QuizGradingAnswerFilters } from "./quiz-grading.types";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
-// Reviewers complete lessons on the learner's behalf, like trainers do for live trainings.
+// Grading completes the lesson as the learner, so completion events and logs credit them.
 const LEARNER_PROGRESS_PERMISSIONS = [PERMISSIONS.LEARNING_PROGRESS_UPDATE];
 
 @Injectable()
@@ -112,12 +112,10 @@ export class QuizGradingService {
       if (answer.studentId === currentUser.userId)
         throw new ForbiddenException("quizGrading.errors.ownAnswer");
 
-      // Grading may complete the lesson, which needs a published course and an enrolled learner.
+      // Grading may complete the lesson, which needs a published course. Unenrolled (e.g. freemium)
+      // learners still get their grade; progress tracking skips them like automatic grading does.
       if (answer.courseStatus === COURSE_STATUSES.DRAFT)
         throw new ConflictException("quizGrading.errors.courseNotPublished");
-
-      if (!answer.isLearnerEnrolled)
-        throw new ConflictException("quizGrading.errors.learnerNotEnrolled");
 
       const awardedPoints = match(grade)
         .with({ method: QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL }, ({ passed }) =>
@@ -206,7 +204,7 @@ export class QuizGradingService {
     );
 
     if (isRegrade) {
-      await this.updateRegradedProgress(answer, score, isQuizPassed, currentUser);
+      await this.updateRegradedProgress(answer, score, isQuizPassed);
     } else {
       await this.studentLessonProgressService.finishQuizProgress({
         chapterId: answer.chapterId,
@@ -220,7 +218,6 @@ export class QuizGradingService {
         isQuizPassed,
         language: answer.language,
         userPermissions: LEARNER_PROGRESS_PERMISSIONS,
-        actor: currentUser,
         isSupportMode: false,
         dbInstance: this.db,
       });
@@ -248,7 +245,6 @@ export class QuizGradingService {
     answer: QuizAnswerForGrading,
     score: number,
     isQuizPassed: boolean,
-    currentUser: CurrentUserType,
   ) {
     const latestAttempt = await this.quizRuntimeRepository.findLatestAttempt(
       answer.assessmentId,
@@ -278,7 +274,6 @@ export class QuizGradingService {
       id: answer.lessonId,
       studentId: answer.studentId,
       userPermissions: LEARNER_PROGRESS_PERMISSIONS,
-      actor: currentUser,
       quizCompleted: true,
       completedQuestionCount: progress.completedQuestionCount ?? 0,
       dbInstance: this.db,
