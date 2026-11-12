@@ -52,12 +52,20 @@ function PageContent() {
   state.renderedPaths.push(pathname);
   return <div>Page content: {pathname}</div>;
 }
+
+const pendingPage = new Promise<never>(() => {});
+
+function SuspendingPage(): ReactElement {
+  throw pendingPage;
+}
+
 function renderLayout(path = "/courses") {
   return renderWith().render(
     <MemoryRouter initialEntries={[path]}>
       <NavigationLinks />
       <Routes>
         <Route element={<NavigationWrapper />}>
+          <Route path="/course/:courseId" element={<SuspendingPage />} />
           <Route path="*" element={<PageContent />} />
         </Route>
       </Routes>
@@ -91,6 +99,12 @@ describe("Assistant shared application host", () => {
     expect(state.renderedPaths).not.toContain("/admin/users");
     expect(screen.queryByText("Page content: /admin/users")).not.toBeInTheDocument();
     expect(screen.getByText("Page content: /")).toBeVisible();
+  });
+  it("keeps the sidebar mounted while a page suspends", () => {
+    renderLayout("/course/course-id");
+    expect(screen.getByRole("navigation")).toBeVisible();
+    expect(screen.getByRole("status")).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByTestId("persistent-dock")).toBeVisible();
   });
   it("does not mount a dock for anonymous visitors", () => {
     state.user = null;
