@@ -4493,6 +4493,13 @@
       "success": "Link zweryfikowany. Przekierowujemy...",
       "error": "Link do logowania jest nieprawidłowy lub wygasł.",
       "backToLogin": "Wróć do logowania"
+    },
+    "oauthError": {
+      "cancelled": "Logowanie zostało anulowane. Spróbuj zalogować się ponownie.",
+      "providerDisabled": "Ta metoda logowania jest wyłączona. Użyj innej metody.",
+      "providerNotConfigured": "Ta metoda logowania nie została jeszcze skonfigurowana. Skontaktuj się z administratorem.",
+      "providerError": "Nie udało się pobrać danych Twojego konta od dostawcy logowania. Spróbuj ponownie.",
+      "unknown": "Logowanie nie powiodło się. Spróbuj ponownie."
     }
   },
   "magicLinkView": {

@@ -1,9 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import axios from "axios";
 import { Strategy } from "passport-oauth2";
 
+import { OAUTH_LOGIN_ERROR_KEYS } from "src/auth/oauth/oauth-login.constants";
+import { OAuthLoginException } from "src/auth/oauth/oauth-login.exception";
 import { getCallbackPath } from "src/common/configuration/callbackUrl";
 import { EnvService } from "src/env/services/env.service";
 
@@ -11,8 +13,19 @@ import type { Request } from "express";
 import type { VerifyCallback } from "passport-oauth2";
 import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
+type SlackUserInfoResponse = {
+  ok: boolean;
+  error?: string;
+  email?: string;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+};
+
 @Injectable()
 export class SlackStrategy extends PassportStrategy(Strategy, "slack") {
+  private readonly logger = new Logger(SlackStrategy.name);
+
   constructor(
     private readonly configService: ConfigService,
     private readonly envService: EnvService,
@@ -43,7 +56,7 @@ export class SlackStrategy extends PassportStrategy(Strategy, "slack") {
         ]);
 
         if (!id || !secret) {
-          this.fail("Slack OAuth not configured", 401);
+          this.error(new OAuthLoginException(OAUTH_LOGIN_ERROR_KEYS.PROVIDER_NOT_CONFIGURED));
           return;
         }
 
@@ -68,7 +81,7 @@ export class SlackStrategy extends PassportStrategy(Strategy, "slack") {
 
         inner.success = this.success.bind(this);
         inner.fail = this.fail.bind(this);
-        inner.error = this.error.bind(this);
+        inner.error = (error: Error) => this.error(this.toOAuthLoginException(error));
         inner.redirect = this.redirect.bind(this);
         inner.pass = this.pass.bind(this);
 
@@ -79,17 +92,30 @@ export class SlackStrategy extends PassportStrategy(Strategy, "slack") {
     })();
   }
 
-  async validate(accessToken: string): Promise<ProviderLoginUserType> {
-    const response = await axios.get("https://slack.com/api/users.identity", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+  private toOAuthLoginException(error: Error) {
+    if (error instanceof OAuthLoginException) return error;
 
-    const user = response.data.user;
+    this.logger.warn(`Slack OAuth failed: ${error.message}`);
+    return new OAuthLoginException(OAUTH_LOGIN_ERROR_KEYS.PROVIDER_ERROR);
+  }
+
+  async validate(accessToken: string): Promise<ProviderLoginUserType> {
+    const { data: userInfo } = await axios.get<SlackUserInfoResponse>(
+      "https://slack.com/api/openid.connect.userInfo",
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+
+    if (!userInfo.ok || !userInfo.email) {
+      this.logger.warn(
+        `Slack user info request failed: ${userInfo.error ?? "response has no email"}`,
+      );
+      throw new OAuthLoginException(OAUTH_LOGIN_ERROR_KEYS.PROVIDER_ERROR);
+    }
 
     return {
-      firstName: user.name,
-      lastName: "",
-      email: user.email,
+      firstName: userInfo.given_name ?? userInfo.name ?? "",
+      lastName: userInfo.family_name ?? "",
+      email: userInfo.email,
     };
   }
 }

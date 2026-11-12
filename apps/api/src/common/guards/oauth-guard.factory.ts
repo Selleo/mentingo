@@ -1,6 +1,6 @@
-import { ForbiddenException, type Type } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
+import { OAuthProviderDisabledException } from "src/auth/oauth/oauth-login.exception";
 import { EnvService } from "src/env/services/env.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
@@ -8,6 +8,7 @@ import { TenantStateService } from "src/storage/db/tenant-state.service";
 
 import { TenantOAuthGuard } from "./tenant-oauth.guard";
 
+import type { Type } from "@nestjs/common";
 import type { IAuthGuard } from "@nestjs/passport";
 
 export type OAuthStateRequest = { oauthState?: string };
@@ -44,7 +45,7 @@ export const createTenantOAuthGuard = (
     }
 
     protected handleDisabled(): boolean {
-      throw new ForbiddenException(disabledMessage);
+      throw new OAuthProviderDisabledException(disabledMessage);
     }
   }
 
