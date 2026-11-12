@@ -14,6 +14,7 @@ export type NativeArchiveAssetStagingContext = {
   scormDirectories: NativeArchiveScormAssetDirectory[];
   referenceMap: Map<string, string>;
   uploadedResourceIdsByFileKey: Map<string, UUIDType>;
+  audioDurationSecondsByReference: Map<string, number>;
   assetReferences: Set<string>;
   uploadedFileReferences: string[];
   uploadedS3Keys: string[];
