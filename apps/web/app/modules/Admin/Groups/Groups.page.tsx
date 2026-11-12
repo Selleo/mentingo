@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@remix-run/react";
-import { getCoreRowModel, type RowSelectionState, useReactTable } from "@tanstack/react-table";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Plus, Trash } from "lucide-react";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useBulkDeleteGroups } from "~/api/mutations/admin/useBulkDeleteGroups";
@@ -15,6 +15,7 @@ import {
   DataTableSelectionBar,
   DataTableToolbar,
   useClampedPage,
+  useListedRowSelection,
   useRowRangeSelection,
 } from "~/components/DataTable";
 import { PageHeader } from "~/components/PageHeader/PageHeader";
@@ -72,13 +73,9 @@ const Groups = (): ReactElement => {
     data: { data: groups, pagination },
   } = useGroupsTableSuspense(deferredGroupsParams);
 
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [rowSelection, setRowSelection] = useListedRowSelection(groups.map(({ id }) => id));
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const rowRangeSelection = useRowRangeSelection();
-
-  useEffect(() => {
-    setRowSelection({});
-  }, [groupsParams]);
 
   useClampedPage({
     page,

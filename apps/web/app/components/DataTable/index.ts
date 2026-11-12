@@ -12,4 +12,5 @@ export {
 export { DataTableSelectionBar } from "./DataTableSelectionBar";
 export { DataTableToolbar } from "./DataTableToolbar";
 export { useClampedPage } from "./useClampedPage";
+export { useListedRowSelection } from "./useListedRowSelection";
 export type { ActiveTableFilter } from "./dataTable.types";

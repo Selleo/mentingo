@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@remix-run/react";
-import { getCoreRowModel, type RowSelectionState, useReactTable } from "@tanstack/react-table";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Plus, Trash } from "lucide-react";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteCategory } from "~/api/mutations/admin/useDeleteCategory";
@@ -16,6 +16,7 @@ import {
   DataTableSelectionBar,
   DataTableToolbar,
   useClampedPage,
+  useListedRowSelection,
   useRowRangeSelection,
 } from "~/components/DataTable";
 import { PageHeader } from "~/components/PageHeader/PageHeader";
@@ -75,13 +76,9 @@ const Categories = () => {
     data: { data: categories, pagination },
   } = useCategoriesTableSuspense(deferredCategoriesParams);
 
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [rowSelection, setRowSelection] = useListedRowSelection(categories.map(({ id }) => id));
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const rowRangeSelection = useRowRangeSelection();
-
-  useEffect(() => {
-    setRowSelection({});
-  }, [categoriesParams]);
 
   useClampedPage({
     page,

@@ -1,6 +1,6 @@
 import { Link, useNavigate, type MetaFunction } from "@remix-run/react";
 import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS } from "@repo/shared";
-import { getCoreRowModel, type RowSelectionState, useReactTable } from "@tanstack/react-table";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import {
   Archive,
   Import,
@@ -12,7 +12,7 @@ import {
   Trash2,
   Users as UsersIcon,
 } from "lucide-react";
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useBulkArchiveUsers } from "~/api/mutations/admin/useBulkArchiveUsers";
@@ -31,6 +31,7 @@ import {
   DataTablePagination,
   DataTableSelectionBar,
   useClampedPage,
+  useListedRowSelection,
   useRowRangeSelection,
 } from "~/components/DataTable";
 import { PageHeader } from "~/components/PageHeader/PageHeader";
@@ -81,7 +82,7 @@ const Users = () => {
   const { data: groupData } = useGroupsQuerySuspense({ language });
   const { data: roles = [] } = useRoles();
 
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [rowSelection, setRowSelection] = useListedRowSelection(userData.data.map(({ id }) => id));
   const rowRangeSelection = useRowRangeSelection();
   const [selectedValue, setSelectedValue] = useState<string[]>([]);
 
@@ -94,10 +95,6 @@ const Users = () => {
   const [showEditModal, setShowEditModal] = useState<ModalTypes>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isPermissionsMatrixOpen, setIsPermissionsMatrixOpen] = useState(false);
-
-  useEffect(() => {
-    setRowSelection({});
-  }, [filters.usersParams]);
 
   useClampedPage({
     page: filters.page,
@@ -184,7 +181,7 @@ const Users = () => {
   const closeModalAndClearSelection = useCallback(() => {
     setRowSelection({});
     setShowEditModal(null);
-  }, []);
+  }, [setRowSelection]);
 
   const handleDeleteUsers = () => {
     deleteUsers({ data: { userIds: selectedUserIds } }).then(() => {

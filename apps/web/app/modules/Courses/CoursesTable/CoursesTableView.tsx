@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
-import { getCoreRowModel, type RowSelectionState, useReactTable } from "@tanstack/react-table";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
-import { useDeferredValue, useEffect, useState } from "react";
+import { useDeferredValue } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDuplicateCourse } from "~/api/mutations/admin/useDuplicateCourse";
@@ -16,6 +16,7 @@ import {
   DataTablePagination,
   DataTableSelectionBar,
   useClampedPage,
+  useListedRowSelection,
   useRowRangeSelection,
 } from "~/components/DataTable";
 import { PageHeader } from "~/components/PageHeader/PageHeader";
@@ -55,12 +56,8 @@ const CoursesTableView = () => {
     data: { data: courses, pagination },
   } = useCoursesTableSuspense({ ...deferredCourseParams, language });
 
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [rowSelection, setRowSelection] = useListedRowSelection(courses.map(({ id }) => id));
   const rowRangeSelection = useRowRangeSelection();
-
-  useEffect(() => {
-    setRowSelection({});
-  }, [filters.courseParams]);
 
   useClampedPage({
     page: filters.page,
