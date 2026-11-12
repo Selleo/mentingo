@@ -12,6 +12,7 @@ sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 
 import cut  # noqa: E402
+import montage
 import takes  # noqa: E402
 
 
@@ -68,6 +69,20 @@ class Documents(unittest.TestCase):
 
 
 class Beats(unittest.TestCase):
+    def test_tutorial_keeps_actions_before_first_and_after_last_narrated_pin(self):
+        steps = [{'step': index, 'cmd': ['click', f'#step-{index}'], 'acting': True,
+                  'm': index + .1, 'a': index + .2, 'b': index + .6} for index in range(4)]
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder)/'capture.json').write_text(json.dumps({'steps':steps,'end':4,'active':[],'stills':[]}))
+            chapter = {'sentences':[{'action':1,'text':'Fill the form.'},{'action':2,'text':'Save it.'}]}
+            release, _ = cut.chapter_setup(chapter, folder)
+            tutorial, _ = cut.chapter_setup(chapter, folder, tutorial=True)
+            self.assertEqual(len(release['steps']),3)
+            self.assertEqual(len(tutorial['steps']),4)
+            self.assertEqual(montage.off_film(release['steps']),{0})
+            self.assertEqual(montage.off_film(tutorial['steps']),set())
+            self.assertTrue(tutorial['preserve_actions'])
+
     def test_checked_results_keep_their_pins_and_click_narration_stays_explicit(self):
         steps = [{'step': 0, 'cmd': ['goto', '/'], 'navigate': True, 'a': 0.2, 'b': 1.0},
                  {'step': 1, 'cmd': ['hover', '#bar'], 'acting': True, 'a': 1.2, 'b': 2.0},

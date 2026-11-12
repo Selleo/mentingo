@@ -49,6 +49,12 @@ export type QuizTranslationTarget =
   | {
       type: typeof QUIZ_TRANSLATION_TARGET_TYPES.BLANK_ANSWER_SET;
       blankId: UUIDType;
+    }
+  | {
+      type: typeof QUIZ_TRANSLATION_TARGET_TYPES.MATCHING_PAIR;
+      questionId: UUIDType;
+      displayOrder: number;
+      side: "prompt" | "match";
     };
 
 export type CourseTranslationContext = {

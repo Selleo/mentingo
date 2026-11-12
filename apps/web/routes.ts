@@ -74,7 +74,7 @@ export const routes: (
           route(":lessonId", "modules/Courses/Lesson/Lesson.page.tsx");
         });
         route("admin", "modules/Admin/Admin.layout.tsx", () => {
-          route("courses", "modules/Admin/Courses/Courses.page.tsx", {
+          route("courses", "modules/Admin/Courses/CoursesTableRedirect.page.tsx", {
             index: true,
           });
           route("envs", "modules/Admin/Envs/Envs.page.tsx");

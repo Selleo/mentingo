@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
+import { BadRequestException } from "@nestjs/common";
 import {
   AI_MENTOR_TEACHING_STYLE,
   AI_MENTOR_TTS_PRESET,
@@ -11,14 +12,18 @@ import {
   ASSESSMENT_ATTEMPT_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_RESULTS,
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
+  ASSESSMENT_ANSWER_GRADING_STATUSES,
+  ASSESSMENT_SCORING_MODES,
   COURSE_ENROLLMENT,
   COURSE_STATUSES,
   ENTITY_TYPES,
+  LEARNER_PROGRESS_STATUSES,
   SCORM_PACKAGE_ENTITY_TYPE,
   SCORM_PACKAGE_STATUS,
   SCORM_STANDARD,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
+  type AssessmentScoringMode,
   type SupportedLanguages,
 } from "@repo/shared";
 import { and, eq, isNull, sql } from "drizzle-orm";
@@ -29,12 +34,15 @@ import { AiService } from "src/ai/services/ai.service";
 import { MESSAGE_ROLE, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
+import { QuizCompletedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QuizAuthoringService } from "src/quiz/services/quiz-authoring.service";
 import { QuizRuntimeService } from "src/quiz/services/quiz-runtime.service";
+import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiJudgeConfigurations,
@@ -48,9 +56,11 @@ import {
   assessments,
   assessmentAttempts,
   assessmentAttemptBlankAnswers,
+  assessmentAttemptOpenTextAnswers,
   assessmentAttemptQuestionAnswers,
   assessmentQuestions,
   assessmentQuestionChoiceOptions,
+  assessmentQuestionMatchingPairs,
   courseStudentMode,
   resources,
   scormPackages,
@@ -70,6 +80,7 @@ import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
+import type { AdminQuestionBody } from "src/lesson/lesson.schema";
 
 describe("LessonController (e2e) - quiz feedback redaction", () => {
   let app: INestApplication;
@@ -1615,6 +1626,57 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     },
   );
 
+  it("keeps the reviewer grading choice of open questions across an editor save round trip", async () => {
+    const authoring = app.get(QuizAuthoringService);
+    const course = await courseFactory.create();
+    const chapter = await chapterFactory.create({ courseId: course.id });
+    const lesson = await authoring.createQuizLesson({
+      chapterId: chapter.id,
+      title: "Open questions grading",
+      type: LESSON_TYPES.QUIZ,
+      thresholdScore: 0,
+      attemptsLimit: null,
+      quizCooldownInHours: null,
+      questions: [
+        { type: ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE, title: "Reviewed", requiresReview: true },
+        { type: ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE, title: "Participation" },
+      ],
+    });
+    const readBack = async () => {
+      const legacy = await authoring.getLegacyQuizLessonForAuthoring(lesson.id);
+      const questions = legacy?.questions ?? [];
+      const gradingModes = await db
+        .select({ gradingMode: assessmentQuestions.gradingMode })
+        .from(assessmentQuestions)
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .where(eq(assessments.lessonId, lesson.id))
+        .orderBy(assessmentQuestions.displayOrder);
+
+      return { questions, gradingModes: gradingModes.map(({ gradingMode }) => gradingMode) };
+    };
+    const saveQuestions = (questions: AdminQuestionBody[]) =>
+      authoring.updateQuizLesson(lesson.id, { language: SUPPORTED_LANGUAGES.EN, questions });
+
+    const created = await readBack();
+
+    expect(created.questions.map(({ requiresReview }) => requiresReview)).toEqual([true, false]);
+    expect(created.gradingModes).toEqual([
+      ASSESSMENT_GRADING_MODES.MANUAL,
+      ASSESSMENT_GRADING_MODES.PARTICIPATION,
+    ]);
+
+    await saveQuestions(created.questions);
+    expect((await readBack()).gradingModes).toEqual(created.gradingModes);
+
+    await saveQuestions(
+      created.questions.map((question) => ({ ...question, requiresReview: false })),
+    );
+    expect((await readBack()).gradingModes).toEqual([
+      ASSESSMENT_GRADING_MODES.PARTICIPATION,
+      ASSESSMENT_GRADING_MODES.PARTICIPATION,
+    ]);
+  });
+
   it.each(Object.values(ASSESSMENT_QUESTION_TYPES))(
     "preserves %s configuration and identity when editing and deleting questions",
     async (type) => {
@@ -1628,6 +1690,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const isOpenText =
         type === ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE ||
         type === ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE;
+      const isMatching = type === ASSESSMENT_QUESTION_TYPES.MATCHING;
       const lesson = await authoring.createQuizLesson({
         chapterId: chapter.id,
         title: "Question configuration regression",
@@ -1649,7 +1712,18 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
                     isCorrect: true,
                     displayOrder: 1,
                     ...(type === ASSESSMENT_QUESTION_TYPES.SCALE_1_5 ? { scaleAnswer: 3 } : {}),
+                    ...(isMatching ? { matchedWord: "Match" } : {}),
                   },
+                  ...(isMatching
+                    ? [
+                        {
+                          optionText: "Second answer",
+                          matchedWord: "Second match",
+                          isCorrect: true,
+                          displayOrder: 2,
+                        },
+                      ]
+                    : []),
                 ],
           },
         ],
@@ -1848,6 +1922,353 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     expect((await authoring.getQuizLessonForAuthoring(lesson.id))?.questions).toEqual([]);
   });
 
+  describe("matching questions", () => {
+    const createMatchingQuiz = async (
+      scoringMode: AssessmentScoringMode,
+      courseOverrides: Parameters<typeof courseFactory.create>[0] = {},
+    ) => {
+      const authoring = app.get(QuizAuthoringService);
+      const course = await courseFactory.create(courseOverrides);
+      const chapter = await chapterFactory.create({ courseId: course.id });
+      const lesson = await authoring.createQuizLesson({
+        chapterId: chapter.id,
+        title: "Animals",
+        type: LESSON_TYPES.QUIZ,
+        thresholdScore: 50,
+        attemptsLimit: null,
+        quizCooldownInHours: null,
+        questions: [
+          {
+            type: ASSESSMENT_QUESTION_TYPES.MATCHING,
+            title: "Match the animal with its sound",
+            scoringMode,
+            options: [
+              { optionText: "Cat", matchedWord: "Meow", isCorrect: true, displayOrder: 1 },
+              { optionText: "Dog", matchedWord: "Woof", isCorrect: true, displayOrder: 2 },
+            ],
+          },
+        ],
+      });
+      const quiz = await authoring.getLegacyQuizLessonForAuthoring(lesson.id);
+      const question = quiz?.questions?.[0];
+      const [cat, dog] = question?.options ?? [];
+
+      if (!question?.id || !cat?.id || !dog?.id) throw new Error("Matching quiz was not created");
+
+      return {
+        courseId: course.id,
+        lesson,
+        question,
+        questionId: question.id,
+        cat,
+        catId: cat.id,
+        dog,
+        dogId: dog.id,
+      };
+    };
+
+    const submitMatching = (
+      lessonId: UUIDType,
+      questionId: UUIDType,
+      learnerId: UUIDType,
+      answers: Array<{ answerId: UUIDType; value: string }>,
+    ) =>
+      app.get(QuizRuntimeService).submitQuiz(
+        {
+          lessonId,
+          language: SUPPORTED_LANGUAGES.EN,
+          questionsAnswers: [{ questionId, answers }],
+        },
+        learnerId,
+      );
+
+    it("stores pairs, delivers shuffled matches and awards partial points", async () => {
+      const runtime = app.get(QuizRuntimeService);
+      const learner = await userFactory.create();
+      const { lesson, question, questionId, catId, dogId } = await createMatchingQuiz(
+        ASSESSMENT_SCORING_MODES.PARTIAL,
+      );
+
+      expect(question).toMatchObject({
+        type: ASSESSMENT_QUESTION_TYPES.MATCHING,
+        scoringMode: ASSESSMENT_SCORING_MODES.PARTIAL,
+      });
+      expect(
+        question.options?.map(({ optionText, matchedWord }) => [optionText, matchedWord]),
+      ).toEqual([
+        ["Cat", "Meow"],
+        ["Dog", "Woof"],
+      ]);
+
+      const delivery = await runtime.getQuizForDelivery(
+        lesson.id,
+        SUPPORTED_LANGUAGES.EN,
+        learner.id,
+      );
+
+      expect(new Set(delivery.questions[0].matchingTargets)).toEqual(new Set(["Meow", "Woof"]));
+      expect(delivery.questions[0].options?.map(({ matchedWord }) => matchedWord)).toEqual([
+        null,
+        null,
+      ]);
+
+      const attempt = await submitMatching(lesson.id, questionId, learner.id, [
+        { answerId: catId, value: "Meow" },
+        { answerId: dogId, value: "Meow" },
+      ]);
+
+      expect(attempt).toMatchObject({ score: 50, passed: true, correctAnswerCount: 0 });
+
+      const feedback = await runtime.getQuizForDelivery(
+        lesson.id,
+        SUPPORTED_LANGUAGES.EN,
+        learner.id,
+        true,
+      );
+
+      expect(feedback.questions[0].passQuestion).toBe(false);
+      expect(feedback.questions[0].options).toMatchObject([
+        { optionText: "Cat", studentAnswer: "Meow", isCorrect: true, matchedWord: "Meow" },
+        { optionText: "Dog", studentAnswer: "Meow", isCorrect: false, matchedWord: "Woof" },
+      ]);
+    });
+
+    it("awards no points in all-or-nothing mode unless every pair matches", async () => {
+      const learner = await userFactory.create();
+      const { lesson, questionId, catId, dogId } = await createMatchingQuiz(
+        ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING,
+      );
+      const submit = (dogMatch: string) =>
+        submitMatching(lesson.id, questionId, learner.id, [
+          { answerId: catId, value: "Meow" },
+          { answerId: dogId, value: dogMatch },
+        ]);
+
+      expect(await submit("Meow")).toMatchObject({
+        score: 0,
+        passed: false,
+        correctAnswerCount: 0,
+      });
+      expect(await submit("Woof")).toMatchObject({
+        score: 100,
+        passed: true,
+        correctAnswerCount: 1,
+      });
+    });
+
+    it("rejects answers outside the question and duplicate pair answers", async () => {
+      const learner = await userFactory.create();
+      const { lesson, questionId, catId } = await createMatchingQuiz(
+        ASSESSMENT_SCORING_MODES.PARTIAL,
+      );
+      const submit = (answers: Array<{ answerId: UUIDType; value: string }>) =>
+        submitMatching(lesson.id, questionId, learner.id, answers);
+
+      await expect(submit([{ answerId: catId, value: "Moo" }])).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      await expect(
+        submit([
+          { answerId: catId, value: "Meow" },
+          { answerId: catId, value: "Woof" },
+        ]),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it("never awards points for a matching question without pairs", async () => {
+      const learner = await userFactory.create();
+      const { lesson, questionId } = await createMatchingQuiz(
+        ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING,
+      );
+
+      await db
+        .delete(assessmentQuestionMatchingPairs)
+        .where(eq(assessmentQuestionMatchingPairs.questionId, questionId));
+
+      expect(await submitMatching(lesson.id, questionId, learner.id, [])).toMatchObject({
+        score: 0,
+        passed: false,
+      });
+    });
+
+    it("accepts an untranslated matching question submitted without answers", async () => {
+      const learner = await userFactory.create();
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const { courseId, lesson, questionId } = await createMatchingQuiz(
+        ASSESSMENT_SCORING_MODES.PARTIAL,
+        { baseLanguage: SUPPORTED_LANGUAGES.EN },
+      );
+
+      await request(app.getHttpServer())
+        .post(`/api/course/beta-create-language/${courseId}`)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(201);
+
+      const runtime = app.get(QuizRuntimeService);
+      const polish = await runtime.getQuizForDelivery(
+        lesson.id,
+        SUPPORTED_LANGUAGES.PL,
+        learner.id,
+      );
+
+      expect(polish.questions[0].matchingTargets?.some(Boolean)).toBe(false);
+      await expect(
+        runtime.submitQuiz(
+          {
+            lessonId: lesson.id,
+            language: SUPPORTED_LANGUAGES.PL,
+            questionsAnswers: [{ questionId, answers: [] }],
+          },
+          learner.id,
+        ),
+      ).resolves.toMatchObject({ score: 0, passed: false, correctAnswerCount: 0 });
+    });
+
+    it("keeps pair identities when the author reorders pairs", async () => {
+      const authoring = app.get(QuizAuthoringService);
+      const { lesson, question, cat, dog, catId, dogId } = await createMatchingQuiz(
+        ASSESSMENT_SCORING_MODES.PARTIAL,
+      );
+
+      await authoring.updateQuizLesson(lesson.id, {
+        language: SUPPORTED_LANGUAGES.EN,
+        questions: [{ ...question, options: [dog, cat] }],
+      });
+
+      const updated = await authoring.getLegacyQuizLessonForAuthoring(lesson.id);
+
+      expect(
+        updated?.questions?.[0].options?.map(({ id, optionText }) => [id, optionText]),
+      ).toEqual([
+        [dogId, "Dog"],
+        [catId, "Cat"],
+      ]);
+    });
+
+    it("translates pairs per language without changing the base pairs or the scoring mode", async () => {
+      const authoring = app.get(QuizAuthoringService);
+      const runtime = app.get(QuizRuntimeService);
+      const learner = await userFactory.create();
+      const { lesson, question, cat, dog } = await createMatchingQuiz(
+        ASSESSMENT_SCORING_MODES.PARTIAL,
+        {
+          baseLanguage: SUPPORTED_LANGUAGES.EN,
+          availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+        },
+      );
+
+      await db
+        .update(assessments)
+        .set({ availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL] })
+        .where(eq(assessments.lessonId, lesson.id));
+      const polishQuestion = {
+        ...question,
+        title: "Dopasuj zwierzę do dźwięku",
+        // Each language keeps its own pair rows, so a new translation sends pairs without ids.
+        options: [
+          { ...cat, id: undefined, optionText: "Kot", matchedWord: "Miau" },
+          { ...dog, id: undefined, optionText: "Pies", matchedWord: "Hau" },
+        ],
+      };
+
+      await expect(
+        authoring.updateQuizLesson(lesson.id, {
+          language: SUPPORTED_LANGUAGES.PL,
+          questions: [{ ...polishQuestion, scoringMode: ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING }],
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      await authoring.updateQuizLesson(lesson.id, {
+        language: SUPPORTED_LANGUAGES.PL,
+        questions: [polishQuestion],
+      });
+
+      const english = await authoring.getLegacyQuizLessonForAuthoring(
+        lesson.id,
+        SUPPORTED_LANGUAGES.EN,
+      );
+
+      expect(english?.questions?.[0].options?.map(({ matchedWord }) => matchedWord)).toEqual([
+        "Meow",
+        "Woof",
+      ]);
+      const polish = await runtime.getQuizForDelivery(
+        lesson.id,
+        SUPPORTED_LANGUAGES.PL,
+        learner.id,
+      );
+
+      expect(new Set(polish.questions[0].matchingTargets)).toEqual(new Set(["Hau", "Miau"]));
+      expect(polish.questions[0].options?.map(({ optionText }) => optionText)).toEqual([
+        "Kot",
+        "Pies",
+      ]);
+    });
+
+    it("rejects matching questions with too few pairs or repeated matches", async () => {
+      const authoring = app.get(QuizAuthoringService);
+      const course = await courseFactory.create();
+      const chapter = await chapterFactory.create({ courseId: course.id });
+      const create = (options: Array<{ optionText: string; matchedWord: string }>) =>
+        authoring.createQuizLesson({
+          chapterId: chapter.id,
+          title: "Animals",
+          type: LESSON_TYPES.QUIZ,
+          thresholdScore: 50,
+          attemptsLimit: null,
+          quizCooldownInHours: null,
+          questions: [
+            {
+              type: ASSESSMENT_QUESTION_TYPES.MATCHING,
+              title: "Match",
+              options: options.map((option, index) => ({
+                ...option,
+                isCorrect: true,
+                displayOrder: index + 1,
+              })),
+            },
+          ],
+        });
+
+      await expect(create([{ optionText: "Cat", matchedWord: "Meow" }])).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      await expect(
+        create([
+          { optionText: "Cat", matchedWord: "Mammal" },
+          { optionText: "Dog", matchedWord: " Mammal " },
+        ]),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it("refuses canonical (Luma) updates of quizzes that contain matching questions", async () => {
+      const authoring = app.get(QuizAuthoringService);
+      const { lesson } = await createMatchingQuiz(ASSESSMENT_SCORING_MODES.PARTIAL);
+      const definition = await authoring.getQuizLessonForAuthoring(lesson.id);
+
+      if (!definition) throw new Error("Quiz definition missing");
+
+      await expect(
+        authoring.saveCanonicalLesson(
+          {
+            title: "Animals",
+            thresholdScore: 50,
+            attemptsLimit: null,
+            quizCooldownInHours: null,
+            language: SUPPORTED_LANGUAGES.EN,
+            questions: definition.questions,
+          },
+          lesson.id,
+        ),
+      ).rejects.toThrow("courseAuthoring.errors.matchingQuestionUnsupported");
+      expect((await authoring.getQuizLessonForAuthoring(lesson.id))?.questions).toHaveLength(1);
+    });
+  });
+
   describe("GET /api/lesson/:id - quiz feedback redaction", () => {
     it("should redact quiz feedback for student when quizFeedbackEnabled is false", async () => {
       const category = await categoryFactory.create();
@@ -1884,6 +2305,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       if (response.body.data.quizDetails.questions) {
         for (const question of response.body.data.quizDetails.questions) {
           expect(question.passQuestion === false || question.passQuestion === null).toBe(true);
+          expect(question.solutionExplanation).toBeNull();
           if (question.options && question.options.length > 0) {
             for (const option of question.options as Array<{ isCorrect: boolean | null }>) {
               expect(option.isCorrect === false || option.isCorrect === null).toBe(true);
@@ -2730,6 +3152,251 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(evaluationResponse.body.data.data.correctAnswerCount).toBe(1);
       expect(evaluationResponse.body.data.data.score).toBe(100);
+    });
+  });
+
+  describe("POST /api/lesson/evaluation-quiz - open answers awaiting review", () => {
+    const setupQuizWithOpenQuestion = async ({ quizFeedbackEnabled = true } = {}) => {
+      const category = await categoryFactory.create();
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const cookies = await cookieFor(student, app);
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        settings: { lessonSequenceEnabled: false, quizFeedbackEnabled },
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id });
+
+      await enrollStudentToCourse(student.id, course.id);
+      const { lesson } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
+      const choiceAnswers = await buildQuizAnswers(lesson.id);
+      const [{ assessmentId }] = await db
+        .select({ assessmentId: assessments.id })
+        .from(assessments)
+        .where(eq(assessments.lessonId, lesson.id));
+      const [openQuestion] = await db
+        .insert(assessmentQuestions)
+        .values({
+          assessmentId,
+          questionType: ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE,
+          displayOrder: 99,
+          maximumPoints: "1",
+          gradingMode: ASSESSMENT_GRADING_MODES.MANUAL,
+          prompt: buildJsonbField("en", "Explain"),
+          title: buildJsonbField("en", "Explain"),
+        })
+        .returning();
+      const questionsAnswers = [
+        ...choiceAnswers,
+        { questionId: openQuestion.id, answers: [{ value: "My open answer" }] },
+      ];
+
+      return { student, cookies, course, lesson, questionsAnswers, openQuestion, choiceAnswers };
+    };
+
+    const submit = (cookies: string, lessonId: UUIDType, questionsAnswers: unknown[]) =>
+      request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({ lessonId, language: "en", questionsAnswers });
+
+    it("keeps the attempt pending, the lesson incomplete and emits no quiz completed event", async () => {
+      const { student, cookies, lesson, questionsAnswers, openQuestion } =
+        await setupQuizWithOpenQuestion();
+      const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish");
+
+      const response = await submit(cookies, lesson.id, questionsAnswers).expect(201);
+
+      expect(response.body.data.data).toMatchObject({ awaitingReview: true, score: 0 });
+      expect(publishSpy.mock.calls.some(([event]) => event instanceof QuizCompletedEvent)).toBe(
+        false,
+      );
+      publishSpy.mockRestore();
+
+      const [attempt] = await db
+        .select()
+        .from(assessmentAttempts)
+        .where(eq(assessmentAttempts.learnerId, student.id));
+
+      expect(attempt).toMatchObject({
+        gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.PENDING,
+        result: ASSESSMENT_ATTEMPT_RESULTS.PENDING,
+        gradedAt: null,
+        awardedPoints: null,
+        scorePercentage: null,
+      });
+
+      const answers = await db
+        .select({
+          questionId: assessmentAttemptQuestionAnswers.questionId,
+          gradingStatus: assessmentAttemptQuestionAnswers.gradingStatus,
+          awardedPoints: assessmentAttemptQuestionAnswers.awardedPoints,
+          submittedText: assessmentAttemptOpenTextAnswers.submittedText,
+        })
+        .from(assessmentAttemptQuestionAnswers)
+        .leftJoin(
+          assessmentAttemptOpenTextAnswers,
+          eq(
+            assessmentAttemptOpenTextAnswers.questionAnswerId,
+            assessmentAttemptQuestionAnswers.id,
+          ),
+        )
+        .where(eq(assessmentAttemptQuestionAnswers.attemptId, attempt.id));
+
+      expect(answers.find(({ questionId }) => questionId === openQuestion.id)).toMatchObject({
+        gradingStatus: ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING,
+        awardedPoints: "0.00",
+        submittedText: "My open answer",
+      });
+      expect(
+        answers
+          .filter(({ questionId }) => questionId !== openQuestion.id)
+          .every(
+            ({ gradingStatus }) => gradingStatus === ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED,
+          ),
+      ).toBe(true);
+
+      const [progress] = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(
+          and(
+            eq(studentLessonProgress.studentId, student.id),
+            eq(studentLessonProgress.lessonId, lesson.id),
+          ),
+        );
+
+      expect(progress).toMatchObject({ completedAt: null, isQuizPassed: false, attempts: 1 });
+      expect(await app.get(StatisticsRepository).getQuizStats(student.id)).toMatchObject({
+        totalAttempts: 0,
+        averageScore: 0,
+      });
+    });
+
+    it("shows a partial result: graded questions with correctness, open answers waiting for review", async () => {
+      const { cookies, course, lesson, questionsAnswers, openQuestion, choiceAnswers } =
+        await setupQuizWithOpenQuestion();
+
+      await submit(cookies, lesson.id, questionsAnswers).expect(201);
+
+      const lessonResponse = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const lessonData = lessonResponse.body.data;
+
+      expect(lessonData).toMatchObject({
+        lessonCompleted: false,
+        isQuizAwaitingReview: true,
+        isQuizFeedbackRedacted: false,
+      });
+      expect(lessonData.quizDetails).toMatchObject({
+        score: null,
+        correctAnswerCount: choiceAnswers.length,
+        wrongAnswerCount: 0,
+      });
+
+      for (const question of lessonData.quizDetails.questions) {
+        if (question.id === openQuestion.id) {
+          expect(question.passQuestion).toBeNull();
+          expect(question.solutionExplanation).toBeNull();
+          expect(question.options[0]).toMatchObject({
+            isCorrect: null,
+            studentAnswer: "My open answer",
+          });
+        } else {
+          expect(question.passQuestion).toBe(true);
+        }
+      }
+
+      const courseResponse = await request(app.getHttpServer())
+        .get(`/api/course?id=${course.id}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const courseLesson = courseResponse.body.data.chapters
+        .flatMap((chapter: { lessons: { id: string; status: string }[] }) => chapter.lessons)
+        .find(({ id }: { id: string }) => id === lesson.id);
+
+      expect(courseLesson.status).toBe(LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW);
+    });
+
+    it("hides the partial result when quiz feedback is disabled", async () => {
+      const { cookies, lesson, questionsAnswers } = await setupQuizWithOpenQuestion({
+        quizFeedbackEnabled: false,
+      });
+
+      await submit(cookies, lesson.id, questionsAnswers).expect(201);
+
+      const lessonResponse = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const lessonData = lessonResponse.body.data;
+
+      expect(lessonData).toMatchObject({
+        lessonCompleted: false,
+        isQuizAwaitingReview: true,
+        isQuizFeedbackRedacted: true,
+      });
+      expect(lessonData.quizDetails).toMatchObject({
+        score: null,
+        correctAnswerCount: null,
+        wrongAnswerCount: null,
+      });
+
+      for (const question of lessonData.quizDetails.questions) {
+        expect(question.passQuestion).not.toBe(true);
+        for (const option of question.options) expect(option.isCorrect).not.toBe(true);
+      }
+
+      expect(
+        lessonData.quizDetails.questions.some(
+          (question: { options: { isStudentAnswer: boolean }[] }) =>
+            question.options.some((option) => option.isStudentAnswer),
+        ),
+      ).toBe(true);
+    });
+
+    it("blocks resubmitting and retaking while the quiz awaits review", async () => {
+      const { cookies, lesson, questionsAnswers } = await setupQuizWithOpenQuestion();
+
+      await submit(cookies, lesson.id, questionsAnswers).expect(201);
+
+      const resubmit = await submit(cookies, lesson.id, questionsAnswers).expect(409);
+
+      expect(resubmit.body.message).toBe("studentLessonView.validation.quizAwaitingReview");
+
+      const retake = await request(app.getHttpServer())
+        .delete(`/api/lesson/delete-student-quiz-answers?lessonId=${lesson.id}`)
+        .set("Cookie", cookies)
+        .expect(409);
+
+      expect(retake.body.message).toBe("studentLessonView.validation.quizAwaitingReview");
+    });
+
+    it("grades quizzes without manual questions immediately", async () => {
+      const { student, cookies, lesson } = await setupQuizWithOpenQuestion();
+
+      await db
+        .delete(assessmentQuestions)
+        .where(eq(assessmentQuestions.gradingMode, ASSESSMENT_GRADING_MODES.MANUAL));
+      const questionsAnswers = await buildQuizAnswers(lesson.id);
+
+      const response = await submit(cookies, lesson.id, questionsAnswers).expect(201);
+
+      expect(response.body.data.data).toMatchObject({ awaitingReview: false, score: 100 });
+      const [attempt] = await db
+        .select()
+        .from(assessmentAttempts)
+        .where(eq(assessmentAttempts.learnerId, student.id));
+
+      expect(attempt.gradingStatus).toBe(ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED);
+      expect(attempt.gradedAt).not.toBeNull();
     });
   });
 });

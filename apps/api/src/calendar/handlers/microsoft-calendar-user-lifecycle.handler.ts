@@ -1,16 +1,17 @@
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-
 import { ArchiveUsersEvent, DeleteUserEvent } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { MicrosoftCalendarService } from "../services/microsoft-calendar.service";
 
-@EventsHandler(DeleteUserEvent, ArchiveUsersEvent)
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
+
+@OutboxEventsHandler(DeleteUserEvent, ArchiveUsersEvent)
 export class MicrosoftCalendarUserLifecycleHandler
-  implements IEventHandler<DeleteUserEvent | ArchiveUsersEvent>
+  implements OutboxEventsHandlerOf<DeleteUserEvent | ArchiveUsersEvent>
 {
   constructor(private readonly microsoftCalendarService: MicrosoftCalendarService) {}
 
-  async handle(event: DeleteUserEvent | ArchiveUsersEvent) {
+  async handleOutboxEvent(event: DeleteUserEvent | ArchiveUsersEvent) {
     if (event instanceof DeleteUserEvent) {
       await this.handleDeleteUserEvent(event);
     }

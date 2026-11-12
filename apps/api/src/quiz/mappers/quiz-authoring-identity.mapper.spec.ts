@@ -1,6 +1,7 @@
 import {
   ASSESSMENT_GRADING_MODES,
   ASSESSMENT_QUESTION_TYPES,
+  ASSESSMENT_SCORING_MODES,
   ASSESSMENT_TEXT_COMPARISON_MODES,
 } from "@repo/shared";
 
@@ -17,6 +18,7 @@ const createQuestion = (overrides: Partial<QuizAuthoringQuestion> = {}): QuizAut
   displayOrder: 1,
   maximumPoints: "1",
   gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+  scoringMode: ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING,
   prompt: "Question",
   title: "Question",
   description: null,
@@ -27,6 +29,7 @@ const createQuestion = (overrides: Partial<QuizAuthoringQuestion> = {}): QuizAut
   openTextSettings: null,
   blanks: [],
   dragAndDropOptions: [],
+  matchingPairs: [],
   ...overrides,
 });
 
@@ -193,5 +196,45 @@ describe("preserveExistingQuizAuthoringIds", () => {
     expect(result.options[0].id).toBe(existingQuestion.options[0].id);
     expect(result.trueFalseStatements[0].id).toBe(existingQuestion.trueFalseStatements[0].id);
     expect(result.scaleOptions[0].id).toBe(existingQuestion.scaleOptions[0].id);
+  });
+  it("keeps a new matching pair moved in front of existing pairs", () => {
+    const firstPair = {
+      id: "00000000-0000-4000-8000-000000000060",
+      displayOrder: 1,
+      prompt: "First",
+      match: "1",
+    };
+    const secondPair = {
+      id: "00000000-0000-4000-8000-000000000061",
+      displayOrder: 2,
+      prompt: "Second",
+      match: "2",
+    };
+    const newPair = {
+      id: "00000000-0000-4000-8000-000000000062",
+      displayOrder: 1,
+      prompt: "New",
+      match: "0",
+    };
+    const existingQuestion = createQuestion({
+      questionType: ASSESSMENT_QUESTION_TYPES.MATCHING,
+      matchingPairs: [firstPair, secondPair],
+    }) as QuizAuthoringLocalizedQuestion;
+    const incomingQuestion = createQuestion({
+      questionType: ASSESSMENT_QUESTION_TYPES.MATCHING,
+      matchingPairs: [
+        newPair,
+        { ...firstPair, displayOrder: 2 },
+        { ...secondPair, displayOrder: 3 },
+      ],
+    });
+
+    const [result] = preserveExistingQuizAuthoringIds([incomingQuestion], [existingQuestion]);
+
+    expect(result.matchingPairs.map(({ id }) => id)).toEqual([
+      newPair.id,
+      firstPair.id,
+      secondPair.id,
+    ]);
   });
 });

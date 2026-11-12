@@ -9,6 +9,7 @@ import {
   ServiceUnavailableException,
 } from "@nestjs/common";
 import {
+  ASSESSMENT_SCORING_MODES,
   CourseAuthoringOrderError,
   ENTITY_TYPES,
   normalizeAuthoringQuizQuestionOrder,
@@ -694,6 +695,8 @@ export class CourseAuthoringApplyService {
           const questions = normalizeAuthoringQuizQuestionOrder(payload.questions).map(
             (question) => ({
               ...question,
+              scoringMode: ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING,
+              matchingPairs: [],
               prompt: stripAuthoringHtmlStyles(question.prompt),
               description:
                 question.description === null

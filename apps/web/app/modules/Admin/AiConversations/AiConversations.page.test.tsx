@@ -1,5 +1,5 @@
 import { createRemixStub } from "@remix-run/testing";
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
@@ -104,7 +104,9 @@ describe("AI conversations inbox", () => {
       renderWith().render(<Page initialEntries={[`/admin/ai-conversations${search}`]} />);
       await screen.findByRole("heading", { name: "AI conversations" });
       expect(screen.queryByText("Select a conversation")).not.toBeInTheDocument();
-      expect(screen.queryByRole("link")).not.toBeInTheDocument();
+      expect(
+        within(screen.getByTestId("admin-ai-conversations")).queryByRole("link"),
+      ).not.toBeInTheDocument();
     },
   );
   it("preserves list URL state and resets details when selecting another conversation", async () => {
@@ -131,10 +133,12 @@ describe("AI conversations inbox", () => {
   });
   it("shows selectable conversations and a choose-conversation state without avatars or refresh", async () => {
     renderWith().render(<Page initialEntries={["/admin/ai-conversations"]} />);
-    const heading = await screen.findByRole("heading", { level: 1, name: "AI conversations" });
+    const heading = await screen.findByRole("heading", { level: 4, name: "AI conversations" });
     expect(screen.getByTestId("admin-ai-conversations")).not.toContainElement(heading);
     expect(await screen.findByText("Select a conversation")).toBeInTheDocument();
-    expect(screen.getAllByRole("link")).toHaveLength(3);
+    expect(within(screen.getByTestId("admin-ai-conversations")).getAllByRole("link")).toHaveLength(
+      3,
+    );
     expect(screen.getAllByRole("combobox")).toHaveLength(1); // Page size; filters open separately.
     expect(screen.getByRole("button", { name: "Filters" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Refresh" })).not.toBeInTheDocument();

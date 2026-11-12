@@ -1,7 +1,8 @@
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-
 import { CourseDueDateCalendarService } from "src/calendar/services/course-due-date-calendar.service";
 import { GroupCourseDueDatesRemovedEvent, GroupCourseDueDatesSyncedEvent } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type EventType = GroupCourseDueDatesSyncedEvent | GroupCourseDueDatesRemovedEvent;
 
@@ -10,11 +11,11 @@ const CourseDueDateCalendarEvents = [
   GroupCourseDueDatesRemovedEvent,
 ];
 
-@EventsHandler(...CourseDueDateCalendarEvents)
-export class CourseDueDateCalendarHandler implements IEventHandler<EventType> {
+@OutboxEventsHandler(...CourseDueDateCalendarEvents)
+export class CourseDueDateCalendarHandler implements OutboxEventsHandlerOf<EventType> {
   constructor(private readonly courseDueDateCalendarService: CourseDueDateCalendarService) {}
 
-  async handle(event: EventType) {
+  async handleOutboxEvent(event: EventType) {
     if (event instanceof GroupCourseDueDatesSyncedEvent) {
       const { courseId, groupIds } = event.groupCourseDueDatesSyncedData;
 

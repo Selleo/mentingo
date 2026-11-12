@@ -4,12 +4,18 @@ import { match } from "ts-pattern";
 import { extractLessonResourceIds } from "src/lesson/lesson-resource-references";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 
-import { DURATION_DEFAULTS, DURATION_DISPLAY_BUCKET_SECONDS } from "./duration-defaults";
+import {
+  DURATION_DEFAULTS,
+  DURATION_DISPLAY_BUCKET_SECONDS,
+  DURATION_MEDIA_KINDS,
+  DURATION_MEDIA_RULES,
+} from "./duration-defaults";
 
 import type {
   DurationEstimate,
   DurationCourseRow,
   DurationEstimatesByLanguage,
+  DurationMediaKind,
   DurationResource,
   LessonDurationCalculationParams,
 } from "./course-duration.types";
@@ -20,13 +26,19 @@ export const calculateLessonDurationSeconds = (params: LessonDurationCalculation
   const readingSeconds = Math.ceil(
     ($.text().trim().split(/\s+/).filter(Boolean).length / DURATION_DEFAULTS.wordsPerMinute) * 60,
   );
-  const counts = { video: 0, image: 0, download: 0, presentation: 0 };
+  const counts = { video: 0, audio: 0, image: 0, download: 0, presentation: 0 };
   $("[data-node-type]").each((_, element) => {
     const nodeType = $(element).attr("data-node-type");
     if (nodeType === "video")
       counts.video += getVideoDurationSeconds(
         $(element).attr("data-src"),
         params.resourcesByReference,
+      );
+    if (nodeType === "audio")
+      counts.audio += getMediaDurationSeconds(
+        $(element).attr("src"),
+        params.resourcesByReference,
+        DURATION_MEDIA_KINDS.AUDIO,
       );
     if (nodeType === "image") counts.image += 1;
     if (nodeType === "downloadable-file") counts.download += 1;
@@ -45,6 +57,7 @@ export const calculateLessonDurationSeconds = (params: LessonDurationCalculation
       () =>
         readingSeconds +
         counts.video +
+        counts.audio +
         counts.image * DURATION_DEFAULTS.imageSeconds +
         counts.download * DURATION_DEFAULTS.downloadSeconds +
         counts.presentation * DURATION_DEFAULTS.embedMinutes * 60 +
@@ -62,18 +75,27 @@ export const calculateLessonDurationSeconds = (params: LessonDurationCalculation
 export const getVideoDurationSeconds = (
   source: string | undefined,
   resourcesByReference: Map<string, DurationResource> | undefined,
+): number => getMediaDurationSeconds(source, resourcesByReference, DURATION_MEDIA_KINDS.VIDEO);
+
+const getMediaDurationSeconds = (
+  source: string | undefined,
+  resourcesByReference: Map<string, DurationResource> | undefined,
+  mediaKind: DurationMediaKind,
 ): number => {
+  const { contentTypePrefix, fallbackMinutes } = DURATION_MEDIA_RULES[mediaKind];
   const reference = source ? extractLessonResourceIds(source)[0] : undefined;
   const resource = reference ? resourcesByReference?.get(reference) : undefined;
   const duration = resource?.metadata?.durationSeconds;
   if (
-    resource?.contentType.startsWith("video/") &&
+    resource?.contentType.startsWith(contentTypePrefix) &&
     typeof duration === "number" &&
     Number.isFinite(duration) &&
     duration > 0
-  )
+  ) {
     return Math.ceil(duration);
-  return DURATION_DEFAULTS.videoMinutes * 60;
+  }
+
+  return fallbackMinutes * 60;
 };
 
 export const extractEmbeddedResourceIds = (content: string | null | undefined): string[] =>

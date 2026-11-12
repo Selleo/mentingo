@@ -1,6 +1,6 @@
 id: aiJudgeConfigurationGeneratorCreate
 description: Create-mode add-on for the AI Judge configuration Generator
-version: 1
+version: 4
 
 template: |
   <generation_mode>
@@ -10,6 +10,9 @@ template: |
   <mode_rules>
   - There is no previous configuration to preserve.
   - Treat the creator's desired outcome as the primary product intent while using lesson context to resolve terminology, role, and realistic measurable behavior.
+  - Ground the task and scoring guidance in applicable source facts. A next-step criterion must define the actual policy boundaries; the phrase "policy-aligned" alone is insufficient. Use the branch established by the configured scenario. When an item is already known to be unavailable, assess its resolution rather than requiring the learner to recite mutually exclusive successful-availability steps. Cover multiple possible branches only when the learner must first discover which state applies; never assume the normal action can proceed.
+  - Retain relevant source conditions about cost, prohibited requirements, reporting or escalation, and authority or completion limits in the next-step guidance. Do not give strong credit for an action that omits a required source step or invents a completed action. Keep these boundaries concise within the existing criterion rather than adding redundant criteria or making ordinary mistakes unconditional blockers.
+  - Preserve each applicable completion permission and its prerequisite explicitly in the relevant criterion or task goal. Retain source wording for safety conditions when already in the output language; generic action success, readiness, or confirmation must not replace a separate condition on lesson completion.
   - Begin criterion refs at C1 and blocking-error refs at B1, incrementing without gaps within each collection.
   - Fill every required configuration field. Do not return questions, placeholders, TODOs, or commentary when the brief provides enough information for a reasonable draft.
   - When the brief is underspecified, make conservative assumptions aligned with the lesson context and keep the result easy for the creator to review.

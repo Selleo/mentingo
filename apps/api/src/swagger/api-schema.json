@@ -12242,7 +12242,35 @@
     "/api/stripe/promotion-codes": {
       "get": {
         "operationId": "StripeController_getPromotionCodes",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -21357,6 +21385,10 @@
                   "type": "string"
                 },
                 {
+                  "const": "characteristic",
+                  "type": "string"
+                },
+                {
                   "const": "createdAt",
                   "type": "string"
                 }
@@ -23510,6 +23542,14 @@
                     {
                       "const": "complete_scorm",
                       "type": "string"
+                    },
+                    {
+                      "const": "export",
+                      "type": "string"
+                    },
+                    {
+                      "const": "import",
+                      "type": "string"
                     }
                   ]
                 },
@@ -23667,6 +23707,14 @@
                       },
                       {
                         "const": "complete_scorm",
+                        "type": "string"
+                      },
+                      {
+                        "const": "export",
+                        "type": "string"
+                      },
+                      {
+                        "const": "import",
                         "type": "string"
                       }
                     ]
@@ -39993,19 +40041,27 @@
                           "status": {
                             "anyOf": [
                               {
-                                "const": "not_started",
-                                "type": "string"
+                                "anyOf": [
+                                  {
+                                    "const": "not_started",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "in_progress",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "completed",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "blocked",
+                                    "type": "string"
+                                  }
+                                ]
                               },
                               {
-                                "const": "in_progress",
-                                "type": "string"
-                              },
-                              {
-                                "const": "completed",
-                                "type": "string"
-                              },
-                              {
-                                "const": "blocked",
+                                "const": "awaiting_review",
                                 "type": "string"
                               }
                             ]
@@ -40531,10 +40587,6 @@
                                       "type": "string"
                                     },
                                     {
-                                      "const": "match_words",
-                                      "type": "string"
-                                    },
-                                    {
                                       "const": "scale_1_5",
                                       "type": "string"
                                     },
@@ -40564,6 +40616,10 @@
                                     },
                                     {
                                       "const": "fill_in_the_blanks_dnd",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "matching",
                                       "type": "string"
                                     }
                                   ]
@@ -40596,6 +40652,9 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "requiresReview": {
+                                  "type": "boolean"
                                 },
                                 "options": {
                                   "type": "array",
@@ -40726,6 +40785,18 @@
                                     },
                                     {
                                       "const": "fr",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "scoringMode": {
+                                  "anyOf": [
+                                    {
+                                      "const": "all_or_nothing",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "partial",
                                       "type": "string"
                                     }
                                   ]
@@ -43229,19 +43300,27 @@
                     "status": {
                       "anyOf": [
                         {
-                          "const": "not_started",
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "const": "not_started",
+                              "type": "string"
+                            },
+                            {
+                              "const": "in_progress",
+                              "type": "string"
+                            },
+                            {
+                              "const": "completed",
+                              "type": "string"
+                            },
+                            {
+                              "const": "blocked",
+                              "type": "string"
+                            }
+                          ]
                         },
                         {
-                          "const": "in_progress",
-                          "type": "string"
-                        },
-                        {
-                          "const": "completed",
-                          "type": "string"
-                        },
-                        {
-                          "const": "blocked",
+                          "const": "awaiting_review",
                           "type": "string"
                         }
                       ]
@@ -43476,10 +43555,6 @@
                                 "type": "string"
                               },
                               {
-                                "const": "match_words",
-                                "type": "string"
-                              },
-                              {
                                 "const": "scale_1_5",
                                 "type": "string"
                               },
@@ -43509,6 +43584,10 @@
                               },
                               {
                                 "const": "fill_in_the_blanks_dnd",
+                                "type": "string"
+                              },
+                              {
+                                "const": "matching",
                                 "type": "string"
                               }
                             ]
@@ -43541,6 +43620,9 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "requiresReview": {
+                            "type": "boolean"
                           },
                           "options": {
                             "type": "array",
@@ -43672,6 +43754,18 @@
                               },
                               {
                                 "const": "fr",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "scoringMode": {
+                            "anyOf": [
+                              {
+                                "const": "all_or_nothing",
+                                "type": "string"
+                              },
+                              {
+                                "const": "partial",
                                 "type": "string"
                               }
                             ]
@@ -43970,10 +44064,6 @@
                                     "type": "string"
                                   },
                                   {
-                                    "const": "match_words",
-                                    "type": "string"
-                                  },
-                                  {
                                     "const": "scale_1_5",
                                     "type": "string"
                                   },
@@ -44003,6 +44093,10 @@
                                   },
                                   {
                                     "const": "fill_in_the_blanks_dnd",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "matching",
                                     "type": "string"
                                   }
                                 ]
@@ -44035,6 +44129,9 @@
                                     "type": "null"
                                   }
                                 ]
+                              },
+                              "requiresReview": {
+                                "type": "boolean"
                               },
                               "options": {
                                 "type": "array",
@@ -44166,6 +44263,18 @@
                                   },
                                   {
                                     "const": "fr",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "scoringMode": {
+                                "anyOf": [
+                                  {
+                                    "const": "all_or_nothing",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "partial",
                                     "type": "string"
                                   }
                                 ]
@@ -44687,10 +44796,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -44720,6 +44825,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -44759,6 +44868,9 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "requiresReview": {
+                          "type": "boolean"
                         },
                         "options": {
                           "type": "array",
@@ -44822,6 +44934,16 @@
                               "questionId": {
                                 "format": "uuid",
                                 "type": "string"
+                              },
+                              "matchedWord": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -44867,6 +44989,18 @@
                             }
                           ]
                         },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
+                              "type": "string"
+                            }
+                          ]
+                        },
                         "passQuestion": {
                           "anyOf": [
                             {
@@ -44876,6 +45010,12 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "matchingTargets": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         }
                       },
                       "required": [
@@ -45090,6 +45230,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "isQuizAwaitingReview": {
+                "type": "boolean"
               },
               "attempts": {
                 "anyOf": [
@@ -46142,10 +46285,6 @@
                           "type": "string"
                         },
                         {
-                          "const": "match_words",
-                          "type": "string"
-                        },
-                        {
                           "const": "scale_1_5",
                           "type": "string"
                         },
@@ -46175,6 +46314,10 @@
                         },
                         {
                           "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        },
+                        {
+                          "const": "matching",
                           "type": "string"
                         }
                       ]
@@ -46207,6 +46350,9 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "requiresReview": {
+                      "type": "boolean"
                     },
                     "options": {
                       "type": "array",
@@ -46338,6 +46484,18 @@
                         },
                         {
                           "const": "fr",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "scoringMode": {
+                      "anyOf": [
+                        {
+                          "const": "all_or_nothing",
+                          "type": "string"
+                        },
+                        {
+                          "const": "partial",
                           "type": "string"
                         }
                       ]
@@ -46968,10 +47126,6 @@
                           "type": "string"
                         },
                         {
-                          "const": "match_words",
-                          "type": "string"
-                        },
-                        {
                           "const": "scale_1_5",
                           "type": "string"
                         },
@@ -47001,6 +47155,10 @@
                         },
                         {
                           "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        },
+                        {
+                          "const": "matching",
                           "type": "string"
                         }
                       ]
@@ -47033,6 +47191,9 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "requiresReview": {
+                      "type": "boolean"
                     },
                     "options": {
                       "type": "array",
@@ -47164,6 +47325,18 @@
                         },
                         {
                           "const": "fr",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "scoringMode": {
+                      "anyOf": [
+                        {
+                          "const": "all_or_nothing",
+                          "type": "string"
+                        },
+                        {
+                          "const": "partial",
                           "type": "string"
                         }
                       ]
@@ -47613,10 +47786,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -47646,6 +47815,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -47678,6 +47851,9 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "requiresReview": {
+                          "type": "boolean"
                         },
                         "options": {
                           "type": "array",
@@ -47809,6 +47985,18 @@
                             },
                             {
                               "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
                               "type": "string"
                             }
                           ]
@@ -48024,10 +48212,6 @@
                           "type": "string"
                         },
                         {
-                          "const": "match_words",
-                          "type": "string"
-                        },
-                        {
                           "const": "scale_1_5",
                           "type": "string"
                         },
@@ -48057,6 +48241,10 @@
                         },
                         {
                           "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        },
+                        {
+                          "const": "matching",
                           "type": "string"
                         }
                       ]
@@ -48089,6 +48277,9 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "requiresReview": {
+                      "type": "boolean"
                     },
                     "options": {
                       "type": "array",
@@ -48220,6 +48411,18 @@
                         },
                         {
                           "const": "fr",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "scoringMode": {
+                      "anyOf": [
+                        {
+                          "const": "all_or_nothing",
+                          "type": "string"
+                        },
+                        {
+                          "const": "partial",
                           "type": "string"
                         }
                       ]
@@ -48362,10 +48565,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -48395,6 +48594,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -48427,6 +48630,9 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "requiresReview": {
+                          "type": "boolean"
                         },
                         "options": {
                           "type": "array",
@@ -48558,6 +48764,18 @@
                             },
                             {
                               "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
                               "type": "string"
                             }
                           ]
@@ -48739,10 +48957,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -48772,6 +48986,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -48804,6 +49022,9 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "requiresReview": {
+                          "type": "boolean"
                         },
                         "options": {
                           "type": "array",
@@ -48935,6 +49156,18 @@
                             },
                             {
                               "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
                               "type": "string"
                             }
                           ]
@@ -49267,13 +49500,17 @@
                   },
                   "score": {
                     "type": "number"
+                  },
+                  "awaitingReview": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
                   "correctAnswerCount",
                   "wrongAnswerCount",
                   "questionCount",
-                  "score"
+                  "score",
+                  "awaitingReview"
                 ]
               }
             },
@@ -72083,10 +72320,36 @@
                 "timesRedeemed"
               ]
             }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
           }
         },
         "required": [
-          "data"
+          "data",
+          "pagination"
         ]
       },
       "GetPromotionCodeResponse": {
@@ -176280,6 +176543,14 @@
                               {
                                 "const": "complete_scorm",
                                 "type": "string"
+                              },
+                              {
+                                "const": "export",
+                                "type": "string"
+                              },
+                              {
+                                "const": "import",
+                                "type": "string"
                               }
                             ]
                           }
@@ -180143,6 +180414,14 @@
                     },
                     {
                       "const": "complete_scorm",
+                      "type": "string"
+                    },
+                    {
+                      "const": "export",
+                      "type": "string"
+                    },
+                    {
+                      "const": "import",
                       "type": "string"
                     }
                   ]

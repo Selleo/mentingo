@@ -10,7 +10,7 @@ import {
 
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { PromptService } from "src/ai/services/prompt.service";
-import { OPENAI_MODELS } from "src/ai/utils/ai.type";
+import { TenantBoundLanguageModel } from "src/ai/utils/tenant-bound-language-model";
 import { McpHttpService } from "src/mcp/mcp-http.service";
 import { isMcpNativeFeatureCapabilities } from "src/mcp/mcp-native-read.types";
 import { MCP_HELPDESK_TOOL_NAMES } from "src/mcp/mcp-self-onboarding.constants";
@@ -139,8 +139,8 @@ export class AssistantExecutionService {
       await this.assistantRepository.updateRun(input, {
         activity: ASSISTANT_RUN_ACTIVITIES.THINKING,
       });
-      const openai = await this.aiRuntimeService.getAISdkOpenAI();
-      return openai(OPENAI_MODELS.BASIC);
+      const model = await this.aiRuntimeService.getAssistantLanguageModel();
+      return new TenantBoundLanguageModel(model, input.tenantId, this.tenantDbRunnerService);
     });
   }
 

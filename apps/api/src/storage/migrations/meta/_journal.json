@@ -1671,15 +1671,50 @@
     {
       "idx": 238,
       "version": "7",
-      "when": 1794320458911,
-      "tag": "0238_add_forum_scope_to_course_chat",
+      "when": 1794324839166,
+      "tag": "0238_keep_open_questions_participation_graded",
       "breakpoints": true
     },
     {
       "idx": 239,
       "version": "7",
-      "when": 1794320477485,
-      "tag": "0239_add_course_chat_scope_check_constraints",
+      "when": 1794472734000,
+      "tag": "0239_track_outbox_handler_delivery",
+      "breakpoints": true
+    },
+    {
+      "idx": 240,
+      "version": "7",
+      "when": 1794472740580,
+      "tag": "0240_migrate_outbox_payloads_to_unified_delivery",
+      "breakpoints": true
+    },
+    {
+      "idx": 241,
+      "version": "7",
+      "when": 1794486353347,
+      "tag": "0241_add_matching_questions",
+      "breakpoints": true
+    },
+    {
+      "idx": 242,
+      "version": "7",
+      "when": 1794486371659,
+      "tag": "0242_enable_matching_questions_tenant_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 243,
+      "version": "7",
+      "when": 1794501233269,
+      "tag": "0243_add_forum_scope_to_course_chat",
+      "breakpoints": true
+    },
+    {
+      "idx": 244,
+      "version": "7",
+      "when": 1794501243959,
+      "tag": "0244_add_course_chat_scope_check_constraints",
       "breakpoints": true
     }
   ]

@@ -1,35 +1,43 @@
-import { loadAiSdk } from "src/ai/utils/ai-esm";
-
 import { SEMANTIC_SEARCH_MODEL } from "./semantic-search-index.constants";
 import { SemanticSearchEmbeddingService } from "./semantic-search-index.embedding.service";
 
 jest.mock("src/ai/services/ai-runtime.service", () => ({ AiRuntimeService: class {} }));
-jest.mock("src/ai/utils/ai-esm", () => ({ loadAiSdk: jest.fn() }));
 
-describe("pinned semantic search embeddings", () => {
-  const embedMany = jest.fn();
-  const model = {};
-  const embedding = jest.fn().mockReturnValue(model);
-  const runtime = { getAISdkOpenAI: jest.fn().mockResolvedValue({ embedding }) };
-  const service = new SemanticSearchEmbeddingService(runtime as never);
+describe("semantic search embeddings", () => {
+  const createSemanticSearchEmbeddings = jest.fn();
+  const service = new SemanticSearchEmbeddingService({
+    createSemanticSearchEmbeddings,
+  } as never);
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(loadAiSdk).mockResolvedValue({ embedMany } as never);
+  beforeEach(() => jest.clearAllMocks());
+
+  it("requests 1536 dimensions with the OpenAI fallback model", async () => {
+    createSemanticSearchEmbeddings.mockResolvedValue({
+      embeddings: [Array(1536).fill(0.1)],
+      model: SEMANTIC_SEARCH_MODEL,
+    });
+
+    const result = await service.embedQuery("expenses policy");
+
+    expect(result.embedding).toHaveLength(1536);
+    expect(createSemanticSearchEmbeddings).toHaveBeenCalledWith({
+      values: ["expenses policy"],
+      dimensions: 1536,
+      coreModel: SEMANTIC_SEARCH_MODEL,
+      timeoutMs: 3000,
+    });
   });
 
-  it("always uses the pinned model and returns complete vectors", async () => {
-    embedMany.mockResolvedValue({ embeddings: [Array(1536).fill(0.1)] });
-    expect(await service.embedQuery("expenses policy")).toHaveLength(1536);
-    expect(embedding).toHaveBeenCalledWith(SEMANTIC_SEARCH_MODEL);
-    expect(embedMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        values: ["expenses policy"],
-        telemetry: { isEnabled: false },
-        maxRetries: 0,
-        abortSignal: expect.any(AbortSignal),
-      }),
-    );
+  it("labels vectors with the model that actually produced them", async () => {
+    createSemanticSearchEmbeddings.mockResolvedValue({
+      embeddings: [Array(1536).fill(0.1)],
+      model: "Qwen/Qwen3-Embedding-4B",
+    });
+
+    await expect(service.embedTexts(["policy"])).resolves.toEqual({
+      embeddings: [Array(1536).fill(0.1)],
+      identity: { model: "Qwen/Qwen3-Embedding-4B" },
+    });
   });
 
   it.each([
@@ -37,15 +45,14 @@ describe("pinned semantic search embeddings", () => {
     { embeddings: [[0.1]] },
     { embeddings: [Array(1536).fill(Number.NaN)] },
   ])("rejects incomplete or nonfinite responses", async ({ embeddings }) => {
-    embedMany.mockResolvedValue({ embeddings });
+    createSemanticSearchEmbeddings.mockResolvedValue({ embeddings, model: SEMANTIC_SEARCH_MODEL });
     await expect(service.embedQuery("policy")).rejects.toThrow(
       "Invalid semantic search embedding response",
     );
   });
 
-  it("propagates provider failure without switching embedding spaces", async () => {
-    embedMany.mockRejectedValue(new Error("unavailable"));
+  it("propagates a failure after Luma and the fallback both fail", async () => {
+    createSemanticSearchEmbeddings.mockRejectedValue(new Error("unavailable"));
     await expect(service.embedQuery("policy")).rejects.toThrow("unavailable");
-    expect(embedMany).toHaveBeenCalledTimes(1);
   });
 });

@@ -1240,7 +1240,7 @@ export class AdminLessonService {
     );
 
     const file = await this.buildMulterFileFromSignedUrl(signedUrl, options?.originalFilename);
-    const { fileKey, fileUrl, contentType } = await this.fileService.uploadFile(
+    const { fileKey, fileUrl, contentType, durationSeconds } = await this.fileService.uploadFile(
       file,
       `${RESOURCE_CATEGORIES.LESSON}/lesson-content`,
       currentUser.tenantId,
@@ -1254,6 +1254,7 @@ export class AdminLessonService {
           originalFilename: file.originalname,
           size: file.size,
           sourceUrl: signedUrl,
+          ...(durationSeconds !== undefined ? { durationSeconds } : {}),
         },
         uploadedById: currentUser.userId,
       },

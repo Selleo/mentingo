@@ -197,13 +197,13 @@ export class ContentMarketplaceService implements OnModuleInit {
   private async reportFailedCopy(actor: CurrentUserType, acquisitionId: string) {
     try {
       await this.outboxPublisher.publish(
-        new ContentMarketplaceCourseCopiedEvent(
-          actor.tenantId,
+        new ContentMarketplaceCourseCopiedEvent({
+          tenantId: actor.tenantId,
           acquisitionId,
-          CONTENT_MARKETPLACE_COPY_STATUSES.FAILED,
-          null,
-          new Date().toISOString(),
-        ),
+          status: CONTENT_MARKETPLACE_COPY_STATUSES.FAILED,
+          courseId: null,
+          occurredAt: new Date().toISOString(),
+        }),
       );
     } catch {
       this.logger.warn(`Could not report the failed marketplace copy ${acquisitionId}`);

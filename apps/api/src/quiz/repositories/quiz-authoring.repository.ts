@@ -12,6 +12,7 @@ import {
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionChoiceOptions,
   assessmentQuestionDragAndDropOptions,
+  assessmentQuestionMatchingPairs,
   assessmentQuestionOpenTextSettings,
   assessmentQuestions,
   assessmentQuestionScaleOptions,
@@ -35,6 +36,8 @@ import type {
   QuizTrueFalseStatementUpdate,
   QuizDragAndDropOptionUpdate,
   QuizBlankUpdate,
+  QuizMatchingPairInsert,
+  QuizMatchingPairUpdate,
 } from "./quiz-authoring.repository.types";
 import type {
   LocalizedChoiceOptionRow,
@@ -43,6 +46,7 @@ import type {
   LocalizedDragAndDropOptionRow,
   BlankAnswerSetRow,
   BlankRow,
+  MatchingPairRow,
   OpenTextSettingsRow,
   PromptImageRow,
   QuizAuthoringQuestion,
@@ -212,6 +216,25 @@ export class QuizAuthoringRepository {
       );
   }
 
+  async findMatchingPairs(
+    questionIds: UUIDType[],
+    language: SupportedLanguages,
+    db: DatabasePg = this.db,
+  ): Promise<MatchingPairRow[]> {
+    if (!questionIds.length) return [];
+
+    return db
+      .select()
+      .from(assessmentQuestionMatchingPairs)
+      .where(
+        and(
+          inArray(assessmentQuestionMatchingPairs.questionId, questionIds),
+          eq(assessmentQuestionMatchingPairs.language, language),
+        ),
+      )
+      .orderBy(asc(assessmentQuestionMatchingPairs.displayOrder));
+  }
+
   async findBlankAnswerSets(
     blankIds: UUIDType[],
     language: SupportedLanguages,
@@ -338,6 +361,11 @@ export class QuizAuthoringRepository {
     await trx.insert(assessmentQuestionDragAndDropOptions).values(values);
   }
 
+  async insertMatchingPairs(values: QuizMatchingPairInsert[], trx: DatabasePg) {
+    if (!values.length) return;
+    await trx.insert(assessmentQuestionMatchingPairs).values(values);
+  }
+
   async insertQuestions(
     values: QuizQuestionInsert[],
     language: SupportedLanguages,
@@ -405,6 +433,7 @@ export class QuizAuthoringRepository {
         displayOrder: question.displayOrder,
         maximumPoints: question.maximumPoints,
         gradingMode: question.gradingMode,
+        scoringMode: question.scoringMode,
         prompt: setJsonbField(assessmentQuestions.prompt, language, question.prompt, true, true),
         title: setJsonbField(
           assessmentQuestions.title,
@@ -461,6 +490,25 @@ export class QuizAuthoringRepository {
           inArray(assessmentQuestionDragAndDropOptions.id, ids),
         ),
       );
+  }
+
+  async deleteMatchingPairs(questionIds: UUIDType[], ids: UUIDType[], trx: DatabasePg) {
+    if (!ids.length) return;
+    await trx
+      .delete(assessmentQuestionMatchingPairs)
+      .where(
+        and(
+          inArray(assessmentQuestionMatchingPairs.questionId, questionIds),
+          inArray(assessmentQuestionMatchingPairs.id, ids),
+        ),
+      );
+  }
+
+  async updateMatchingPair(id: UUIDType, values: QuizMatchingPairUpdate, trx: DatabasePg) {
+    await trx
+      .update(assessmentQuestionMatchingPairs)
+      .set(values)
+      .where(eq(assessmentQuestionMatchingPairs.id, id));
   }
 
   async deleteOpenTextSettings(questionIds: UUIDType[], trx: DatabasePg) {

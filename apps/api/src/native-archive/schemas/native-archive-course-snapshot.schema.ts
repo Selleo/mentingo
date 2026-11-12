@@ -144,6 +144,8 @@ export const nativeArchiveCourseSnapshotSchema = Type.Object(
     assessmentQuestionBlanks: Type.Array(rowSchema),
     assessmentQuestionBlankAnswerSets: Type.Array(blankAnswerSetSchema),
     assessmentQuestionDragAndDropOptions: Type.Array(rowSchema),
+    // Archives exported before matching questions existed have no pairs.
+    assessmentQuestionMatchingPairs: Type.Optional(Type.Array(rowSchema)),
     assessmentQuestionScaleOptions: Type.Array(rowSchema),
     assessmentQuestionTrueFalseStatements: Type.Array(rowSchema),
     questionResources: Type.Array(resourcePairSchema),

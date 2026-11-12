@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common";
-import { CqrsModule } from "@nestjs/cqrs";
 
 import { FileModule } from "src/file/files.module";
 import { LocalizationModule } from "src/localization/localization.module";
@@ -13,7 +12,7 @@ import { StatisticsCron } from "./statistics.cron";
 import { StatisticsService } from "./statistics.service";
 
 @Module({
-  imports: [CqrsModule, FileModule, LocalizationModule],
+  imports: [FileModule, LocalizationModule],
   controllers: [StatisticsController],
   providers: [
     StatisticsHandler,

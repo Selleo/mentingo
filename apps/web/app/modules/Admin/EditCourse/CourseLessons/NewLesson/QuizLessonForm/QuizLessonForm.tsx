@@ -20,7 +20,7 @@ import Breadcrumb from "../components/Breadcrumb";
 
 import AnswerSelectQuestion from "./components/AnswerSelectQuestion";
 import FillInTheBlanksQuestion from "./components/FillInTheBlanksQuestion";
-import MatchWordsQuestion from "./components/MatchWordsQuestion";
+import MatchingQuestion from "./components/MatchingQuestion";
 import PhotoQuestion from "./components/PhotoQuestion";
 import QuestionSelector from "./components/QuestionSelector";
 import QuestionWrapper from "./components/QuestionWrapper";
@@ -110,7 +110,6 @@ const QuizLessonForm = ({
         const singleChoiceTypes = [
           QuestionType.SINGLE_CHOICE,
           QuestionType.MULTIPLE_CHOICE,
-          QuestionType.MATCH_WORDS,
           QuestionType.PHOTO_QUESTION_SINGLE_CHOICE,
           QuestionType.PHOTO_QUESTION_MULTIPLE_CHOICE,
         ];
@@ -122,11 +121,14 @@ const QuizLessonForm = ({
           QuestionType.DETAILED_RESPONSE,
         ];
 
-        if (type === QuestionType.MATCH_WORDS) {
-          return [
-            { sortableId: crypto.randomUUID(), optionText: "", isCorrect: true, displayOrder: 1 },
-            { sortableId: crypto.randomUUID(), optionText: "", isCorrect: true, displayOrder: 2 },
-          ];
+        if (type === QuestionType.MATCHING) {
+          return [1, 2].map((displayOrder) => ({
+            sortableId: crypto.randomUUID(),
+            optionText: "",
+            matchedWord: "",
+            isCorrect: true,
+            displayOrder,
+          }));
         }
 
         if (type === QuestionType.SCALE_1_5) {
@@ -239,8 +241,8 @@ const QuizLessonForm = ({
                 />
               ),
             )
-            .with(QuestionType.MATCH_WORDS, () => (
-              <MatchWordsQuestion
+            .with(QuestionType.MATCHING, () => (
+              <MatchingQuestion
                 questionIndex={questionIndex}
                 form={form}
                 isStructureLocked={isStructureLocked}
@@ -295,7 +297,7 @@ const QuizLessonForm = ({
           question.options?.some((option) => !option.optionText?.trim()) ?? false;
 
         const matchedWordsMissing =
-          question.type === QuestionType.MATCH_WORDS &&
+          question.type === QuestionType.MATCHING &&
           (question.options?.some((option) => !option.matchedWord?.trim()) ?? false);
 
         return questionTitleMissing || descriptionMissing || optionsMissing || matchedWordsMissing;

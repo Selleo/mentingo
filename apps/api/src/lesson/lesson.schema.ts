@@ -2,7 +2,9 @@ import {
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_VOICE_MODE,
   ASSESSMENT_TIME_LIMIT_MINUTES,
+  LEARNER_PROGRESS_STATUSES,
   QUIZ_ATTEMPT_START_STATUSES,
+  ASSESSMENT_SCORING_MODES,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -43,8 +45,11 @@ export const adminQuestionSchema = Type.Object({
   displayOrder: Type.Optional(Type.Number()),
   solutionExplanation: Type.Optional(Type.String()),
   photoS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  // Open questions only: true = reviewer grading, false/omitted = participation (always correct); recomputed on every save.
+  requiresReview: Type.Optional(Type.Boolean()),
   options: Type.Optional(Type.Array(adminOptionSchema)),
   language: Type.Optional(supportedLanguagesSchema),
+  scoringMode: Type.Optional(Type.Enum(ASSESSMENT_SCORING_MODES)),
 });
 
 // Canonical quizzes store unrestricted answer text. The legacy editor's input
@@ -67,6 +72,8 @@ export const optionSchema = Type.Object({
   studentAnswer: Type.Union([Type.String(), Type.Null()]),
   isCorrect: Type.Union([Type.Boolean(), Type.Null()]),
   questionId: Type.Optional(UUIDSchema),
+  // Matching only: the correct match, sent once feedback is available.
+  matchedWord: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
 export const questionSchema = Type.Object({
@@ -75,6 +82,7 @@ export const questionSchema = Type.Object({
   solutionExplanation: Type.Union([Type.String(), Type.Null()]),
   options: Type.Optional(Type.Array(optionSchema)),
   passQuestion: Type.Union([Type.Boolean(), Type.Null()]),
+  matchingTargets: Type.Optional(Type.Array(Type.String())),
 });
 
 const lessonQuizSchema = Type.Object({
@@ -287,6 +295,7 @@ export const lessonShowSchema = Type.Object({
   timeLimitMinutes: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
   quizAttempt: Type.Optional(Type.Union([quizAttemptStateSchema, Type.Null()])),
   isQuizPassed: Type.Union([Type.Boolean(), Type.Null()]),
+  isQuizAwaitingReview: Type.Optional(Type.Boolean()),
   attempts: Type.Union([Type.Number(), Type.Null()]),
   updatedAt: Type.Union([Type.String(), Type.Null()]),
   displayOrder: Type.Number(),
@@ -365,7 +374,10 @@ export const lessonForChapterSchema = Type.Array(
     title: Type.String(),
     type: Type.Enum(LESSON_TYPES),
     displayOrder: Type.Number(),
-    status: Type.Enum(PROGRESS_STATUSES),
+    status: Type.Union([
+      Type.Enum(PROGRESS_STATUSES),
+      Type.Literal(LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW),
+    ]),
     quizQuestionCount: Type.Union([Type.Number(), Type.Null()]),
     isExternal: Type.Optional(Type.Boolean()),
     lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),

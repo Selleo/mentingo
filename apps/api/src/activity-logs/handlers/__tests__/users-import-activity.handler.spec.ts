@@ -34,7 +34,7 @@ describe("UsersImportActivityHandler", () => {
     ];
     const skippedRows = [{ email: "skipped@example.com", reason: "already_exists" }];
 
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new UsersImportEvent({
         actor,
         tenantId: actor.tenantId,

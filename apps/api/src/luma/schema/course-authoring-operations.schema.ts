@@ -4,6 +4,7 @@ import {
   ASSESSMENT_QUESTION_TYPES,
   ASSESSMENT_TEXT_COMPARISON_MODES,
   SUPPORTED_LANGUAGES,
+  type AssessmentQuestionType,
 } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
@@ -19,11 +20,18 @@ const text = Type.String();
 const nullableText = Type.Union([text, Type.Null()]);
 const order = Type.Integer({ minimum: 0 });
 const nullableLimit = Type.Union([Type.Integer({ minimum: 1 }), Type.Null()]);
+// shortcut: Luma cannot author matching questions yet; add them to this schema in #2172.
+const authoringQuestionTypes = Object.values(ASSESSMENT_QUESTION_TYPES)
+  .filter(
+    (type): type is Exclude<AssessmentQuestionType, typeof ASSESSMENT_QUESTION_TYPES.MATCHING> =>
+      type !== ASSESSMENT_QUESTION_TYPES.MATCHING,
+  )
+  .map((type) => Type.Literal(type));
 
 export const authoringQuestionSchema = Type.Object(
   {
     id: UUIDSchema,
-    questionType: Type.Enum(ASSESSMENT_QUESTION_TYPES),
+    questionType: Type.Union(authoringQuestionTypes),
     displayOrder: order,
     maximumPoints: Type.String({ pattern: "^\\d+(\\.\\d+)?$" }),
     gradingMode: Type.Enum(ASSESSMENT_GRADING_MODES),

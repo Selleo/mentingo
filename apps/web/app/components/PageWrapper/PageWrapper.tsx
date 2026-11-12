@@ -19,6 +19,8 @@ type PageWrapperProps = HTMLAttributes<HTMLDivElement> & {
   rightSideContent?: ReactNode;
   leftSideContent?: ReactNode;
   aboveBreadcrumbs?: ReactNode;
+  /** Rendered at the far right of the breadcrumb bar, e.g. a view switcher. */
+  breadcrumbsAction?: ReactNode;
 };
 
 type Breadcrumb = { title: string; href: string };
@@ -34,7 +36,7 @@ export const Breadcrumbs = ({ breadcrumbs = [] }: BreadcrumbsProps) => {
   const lastBreadcrumb = breadcrumbs[lastIndex];
 
   return (
-    <BreadcrumbList className="mb-4">
+    <BreadcrumbList>
       {breadcrumbs.slice(0, lastIndex).map(({ href, title }, index) => (
         <BreadcrumbItem key={index}>
           <BreadcrumbLink asChild className="details-md text-neutral-800 hover:text-neutral-800">
@@ -61,6 +63,7 @@ export const PageWrapper = ({
   leftSideContent,
   wrapperClassName,
   aboveBreadcrumbs,
+  breadcrumbsAction,
   ...props
 }: PageWrapperProps) => {
   const hasBreadcrumbs = Boolean(breadcrumbs?.length);
@@ -69,7 +72,7 @@ export const PageWrapper = ({
     "w-full",
     !isBarebones && "pt-6 px-4 pb-4 md:px-6 md:pb-6 3xl:pt-12 3xl:px-8 3xl:pb-8",
     {
-      "pt-8 md:pt-6 3xl:pt-6 3xl:pb-2 [&_.breadcrumbs]:mb-2": hasBreadcrumbs,
+      "pt-0 3xl:pt-0 3xl:pb-2": hasBreadcrumbs,
     },
     className,
   );
@@ -82,8 +85,14 @@ export const PageWrapper = ({
         {aboveBreadcrumbs}
         <div className={contentClasses} {...props}>
           {hasBreadcrumbs && (
-            <div className="breadcrumbs">
+            <div
+              className={cn(
+                "breadcrumbs mb-6 flex min-h-12 items-center justify-between gap-4 border-b border-primary-100 bg-white py-2",
+                !isBarebones && "-mx-4 px-4 md:-mx-6 md:px-6 3xl:-mx-8 3xl:px-8",
+              )}
+            >
               <Breadcrumbs breadcrumbs={breadcrumbs ?? []} />
+              {breadcrumbsAction}
             </div>
           )}
           {children}

@@ -29,6 +29,7 @@ import {
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionBlanks,
   assessmentQuestionDragAndDropOptions,
+  assessmentQuestionMatchingPairs,
   assessmentQuestionOpenTextSettings,
   assessmentQuestionScaleOptions,
   assessmentQuestionTrueFalseStatements,
@@ -209,6 +210,15 @@ export class CourseTransferSnapshotRepository {
       .select(getTableColumns(assessmentQuestionDragAndDropOptions))
       .from(assessmentQuestionDragAndDropOptions)
       .where(inArray(assessmentQuestionDragAndDropOptions.questionId, questionIds));
+  }
+
+  async getSourceMatchingPairs(questionIds: UUIDType[]) {
+    if (!questionIds.length) return [];
+
+    return this.db
+      .select(getTableColumns(assessmentQuestionMatchingPairs))
+      .from(assessmentQuestionMatchingPairs)
+      .where(inArray(assessmentQuestionMatchingPairs.questionId, questionIds));
   }
 
   async getSourceScaleOptions(questionIds: UUIDType[]) {

@@ -45,7 +45,7 @@ function setup(inserted = [{ groupId }]) {
     })),
     transaction: jest.fn(async (work) => work(trx)),
   };
-  const outboxPublisher = { publish: jest.fn(), publishDurable: jest.fn() };
+  const outboxPublisher = { publish: jest.fn() };
   const localizationService = {
     getLocalizedSqlField: jest.fn(() => "Nowi pracownicy"),
   } as unknown as LocalizationService;
@@ -66,26 +66,28 @@ describe("Durable group assignment notifications", () => {
   it("snapshots the newly assigned user and localized group in the membership transaction without an actor", async () => {
     const { service, outboxPublisher, trx } = setup();
     await service.setUserGroups([groupId, groupId], userId);
-    expect(outboxPublisher.publishDurable).toHaveBeenCalledWith(
+    expect(outboxPublisher.publish).toHaveBeenCalledWith(
       expect.objectContaining({
-        kind: "user_assigned_to_group",
-        recipients: [
-          expect.objectContaining({
-            itemId: userId,
-            email: "alex@example.com",
-            language: "pl",
-            eventFields: expect.objectContaining({
-              group_id: groupId,
-              group_name: "Nowi pracownicy",
-              userFirstName: "Alex",
-              userLastName: "Morgan",
-              userEmail: "alex@example.com",
+        notificationData: expect.objectContaining({
+          kind: "user_assigned_to_group",
+          recipients: [
+            expect.objectContaining({
+              itemId: userId,
+              email: "alex@example.com",
+              language: "pl",
+              eventFields: expect.objectContaining({
+                group_id: groupId,
+                group_name: "Nowi pracownicy",
+                userFirstName: "Alex",
+                userLastName: "Morgan",
+                userEmail: "alex@example.com",
+              }),
             }),
-          }),
-        ],
+          ],
+        }),
       }),
       trx,
     );
-    expect(outboxPublisher.publishDurable).toHaveBeenCalledTimes(1);
+    expect(outboxPublisher.publish).toHaveBeenCalledTimes(1);
   });
 });

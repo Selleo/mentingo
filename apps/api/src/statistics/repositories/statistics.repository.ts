@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  ASSESSMENT_ATTEMPT_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   COURSE_ENROLLMENT,
   DASHBOARD_DEADLINE_RISK_TYPES,
@@ -30,6 +31,7 @@ import {
   assessments,
   assessmentAttempts,
   assessmentAttemptQuestionAnswers,
+  assessmentQuestions,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
@@ -91,12 +93,12 @@ export class StatisticsRepository {
         totalAttempts: sql<number>`COUNT(DISTINCT ${assessmentAttempts.id}) :: INTEGER`,
         totalCorrectAnswers: sql<number>`COALESCE(SUM(CASE
           WHEN ${assessmentAttempts.hasQuestionLevelAnswers}
-            THEN CASE WHEN ${assessmentAttemptQuestionAnswers.awardedPoints} > 0 THEN 1 ELSE 0 END
+            THEN CASE WHEN ${assessmentAttemptQuestionAnswers.awardedPoints} >= ${assessmentQuestions.maximumPoints} THEN 1 ELSE 0 END
           ELSE ${assessmentAttempts.awardedPoints}
         END), 0)::INTEGER`,
         totalWrongAnswers: sql<number>`COALESCE(SUM(CASE
           WHEN ${assessmentAttempts.hasQuestionLevelAnswers}
-            THEN CASE WHEN COALESCE(${assessmentAttemptQuestionAnswers.awardedPoints}, 0) <= 0 THEN 1 ELSE 0 END
+            THEN CASE WHEN COALESCE(${assessmentAttemptQuestionAnswers.awardedPoints}, 0) < COALESCE(${assessmentQuestions.maximumPoints}, 1) THEN 1 ELSE 0 END
           ELSE ${assessmentAttempts.availablePoints} - COALESCE(${assessmentAttempts.awardedPoints}, 0)
         END), 0)::INTEGER`,
         totalQuestions: sql<number>`COALESCE(SUM(CASE
@@ -113,10 +115,15 @@ export class StatisticsRepository {
         assessmentAttemptQuestionAnswers,
         eq(assessmentAttemptQuestionAnswers.attemptId, assessmentAttempts.id),
       )
+      .leftJoin(
+        assessmentQuestions,
+        eq(assessmentQuestions.id, assessmentAttemptQuestionAnswers.questionId),
+      )
       .where(
         and(
           eq(assessmentAttempts.learnerId, userId),
           eq(assessmentAttempts.submissionStatus, ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED),
+          eq(assessmentAttempts.gradingStatus, ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED),
           currentLearningState(assessmentAttempts.learningStateId),
         ),
       );
@@ -646,12 +653,12 @@ export class StatisticsRepository {
       .select({
         correctAnswersCount: sql<number>`COALESCE(SUM(CASE
           WHEN ${assessmentAttempts.hasQuestionLevelAnswers}
-            THEN CASE WHEN ${assessmentAttemptQuestionAnswers.awardedPoints} > 0 THEN 1 ELSE 0 END
+            THEN CASE WHEN ${assessmentAttemptQuestionAnswers.awardedPoints} >= ${assessmentQuestions.maximumPoints} THEN 1 ELSE 0 END
           ELSE ${assessmentAttempts.awardedPoints}
         END), 0)::INTEGER`,
         wrongAnswersCount: sql<number>`COALESCE(SUM(CASE
           WHEN ${assessmentAttempts.hasQuestionLevelAnswers}
-            THEN CASE WHEN COALESCE(${assessmentAttemptQuestionAnswers.awardedPoints}, 0) <= 0 THEN 1 ELSE 0 END
+            THEN CASE WHEN COALESCE(${assessmentAttemptQuestionAnswers.awardedPoints}, 0) < COALESCE(${assessmentQuestions.maximumPoints}, 1) THEN 1 ELSE 0 END
           ELSE ${assessmentAttempts.availablePoints} - COALESCE(${assessmentAttempts.awardedPoints}, 0)
         END), 0)::INTEGER`,
       })
@@ -664,9 +671,14 @@ export class StatisticsRepository {
         assessmentAttemptQuestionAnswers,
         eq(assessmentAttemptQuestionAnswers.attemptId, assessmentAttempts.id),
       )
+      .leftJoin(
+        assessmentQuestions,
+        eq(assessmentQuestions.id, assessmentAttemptQuestionAnswers.questionId),
+      )
       .where(
         and(
           eq(assessmentAttempts.submissionStatus, ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED),
+          eq(assessmentAttempts.gradingStatus, ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED),
           userId ? eq(courses.authorId, userId) : undefined,
         ),
       );

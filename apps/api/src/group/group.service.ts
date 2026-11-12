@@ -557,7 +557,7 @@ export class GroupService {
     );
 
     for (const group of newlyAssignedGroups) {
-      await this.outboxPublisher.publishDurable(
+      await this.outboxPublisher.publish(
         createUserNotificationEvent({
           kind: AUTOMATION_EVENT_KINDS.USER_ASSIGNED_TO_GROUP,
           user,
@@ -646,6 +646,8 @@ export class GroupService {
     switch (sort) {
       case GroupSortFields.name:
         return this.getLocalizedGroupName(language);
+      case GroupSortFields.characteristic:
+        return this.getLocalizedGroupCharacteristic(language);
       default:
         return groups.createdAt;
     }

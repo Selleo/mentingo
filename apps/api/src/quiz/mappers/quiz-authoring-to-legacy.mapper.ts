@@ -1,4 +1,4 @@
-import { ASSESSMENT_QUESTION_TYPES, LESSON_TYPES } from "@repo/shared";
+import { ASSESSMENT_GRADING_MODES, ASSESSMENT_QUESTION_TYPES, LESSON_TYPES } from "@repo/shared";
 import { match } from "ts-pattern";
 
 import { normalizeBlankPromptMarkers } from "./quiz-authoring-mapper.utils";
@@ -18,6 +18,7 @@ const buildSolutionExplanation = (question: QuizAuthoringLocalizedQuestion) => {
     ...question.blanks
       .map((blank) => blank.answerSets[0]?.preferredAnswer)
       .filter((answer): answer is string => Boolean(answer)),
+    ...question.matchingPairs.map((pair) => `${pair.prompt} – ${pair.match}`),
   ].filter(Boolean);
 
   if (!correctAnswers.length) return undefined;
@@ -110,14 +111,27 @@ const mapTargetQuestionToLegacy = (question: QuizAuthoringLocalizedQuestion): Ad
     );
   }
 
+  options.push(
+    ...question.matchingPairs.map((pair) => ({
+      id: pair.id,
+      optionText: pair.prompt,
+      displayOrder: pair.displayOrder,
+      isCorrect: true,
+      matchedWord: pair.match,
+      scaleAnswer: null,
+    })),
+  );
+
   return {
     id: question.id,
     type: question.questionType as AdminQuestionBody["type"],
+    scoringMode: question.scoringMode,
     title: question.title,
     description,
     displayOrder: question.displayOrder,
     ...(solutionExplanation ? { solutionExplanation } : {}),
     photoS3Key: question.photoS3Key,
+    requiresReview: question.gradingMode === ASSESSMENT_GRADING_MODES.MANUAL,
     options,
   };
 };

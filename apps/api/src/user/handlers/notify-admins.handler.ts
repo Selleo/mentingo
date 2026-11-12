@@ -9,43 +9,33 @@ import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { CourseCompletedEvent, UserPasswordCreatedEvent, UserRegisteredEvent } from "src/events";
 import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
-import { OutboxNotificationPreparationService } from "src/outbox/outbox-notification-preparation.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { dbAls } from "src/storage/db/db-als.store";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 
 import { UserService } from "../user.service";
 
-import type { IEventHandler } from "@nestjs/cqrs";
+import type { OutboxDeliveryContext, OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type EventType = UserRegisteredEvent | UserPasswordCreatedEvent | CourseCompletedEvent;
 
 @Injectable()
-export class NotifyAdminsHandler implements IEventHandler<EventType> {
+@OutboxEventsHandler(UserRegisteredEvent, UserPasswordCreatedEvent, CourseCompletedEvent)
+export class NotifyAdminsHandler implements OutboxEventsHandlerOf<EventType> {
   constructor(
     private userService: UserService,
     private emailService: EmailService,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly notificationCollectorService: NotificationCollectorService,
-    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
   ) {}
 
-  onModuleInit() {
-    this.outboxNotificationPreparationService.register(async (event) => {
-      if (
-        !(
-          event instanceof UserRegisteredEvent ||
-          event instanceof UserPasswordCreatedEvent ||
-          event instanceof CourseCompletedEvent
-        )
-      ) {
-        return [];
-      }
-
-      return this.notificationCollectorService.collectNotificationEvents(() => this.handle(event));
-    });
+  async handleOutboxEvent(event: EventType, { eventId }: OutboxDeliveryContext) {
+    await this.notificationCollectorService.publishCollectedNotifications(eventId, () =>
+      this.prepareNotifications(event),
+    );
   }
 
-  async handle(event: EventType) {
+  private async prepareNotifications(event: EventType) {
     if (event instanceof UserRegisteredEvent || event instanceof UserPasswordCreatedEvent) {
       await this.handleNotifyAdminAboutNewUser(event);
     }

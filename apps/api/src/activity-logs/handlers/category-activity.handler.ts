@@ -1,11 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import { CreateCategoryEvent, DeleteCategoryEvent, UpdateCategoryEvent } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type CategoryEventType = CreateCategoryEvent | UpdateCategoryEvent | DeleteCategoryEvent;
 
@@ -16,11 +18,11 @@ const CategoryActivityEvents = [
 ] as const;
 
 @Injectable()
-@EventsHandler(...CategoryActivityEvents)
-export class CategoryActivityHandler implements IEventHandler<CategoryEventType> {
+@OutboxEventsHandler(...CategoryActivityEvents)
+export class CategoryActivityHandler implements OutboxEventsHandlerOf<CategoryEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: CategoryEventType) {
+  async handleOutboxEvent(event: CategoryEventType) {
     if (event instanceof CreateCategoryEvent) return await this.handleCreate(event);
     if (event instanceof UpdateCategoryEvent) return await this.handleUpdate(event);
     if (event instanceof DeleteCategoryEvent) return await this.handleDelete(event);

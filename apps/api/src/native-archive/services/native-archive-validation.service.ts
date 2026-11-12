@@ -1,10 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
+import { ASSESSMENT_QUESTION_TYPES } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
 import {
   getAllImageVariantKeys,
   isImageVariantReference,
 } from "src/file/image-variants/image-variant.utils";
+import { MINIMUM_MATCHING_PAIRS } from "src/quiz/validators/canonical-quiz-authoring.validator";
 
 import { NATIVE_ARCHIVE_KIND } from "../native-archive.constants";
 import {
@@ -116,7 +118,21 @@ export class NativeArchiveValidationService {
       throw new BadRequestException("nativeArchive.error.invalidCourseSnapshot");
     }
 
-    const snapshot = value as unknown as NativeArchiveValidatedCourseSnapshot;
+    const snapshot = {
+      ...value,
+      assessmentQuestionMatchingPairs: value.assessmentQuestionMatchingPairs ?? [],
+    } as unknown as NativeArchiveValidatedCourseSnapshot;
+    const hasIncompleteMatchingQuestion = snapshot.questions.some(
+      (question) =>
+        question.type === ASSESSMENT_QUESTION_TYPES.MATCHING &&
+        snapshot.assessmentQuestionMatchingPairs.filter((pair) => pair.questionId === question.id)
+          .length < MINIMUM_MATCHING_PAIRS,
+    );
+
+    if (hasIncompleteMatchingQuestion) {
+      throw new BadRequestException("nativeArchive.error.invalidCourseSnapshot");
+    }
+
     const chapterIds = new Set(snapshot.chapters.map((chapter) => chapter.id));
     if (snapshot.lessons.some((lesson) => !chapterIds.has(lesson.chapterId))) {
       throw new BadRequestException("nativeArchive.error.invalidCourseSnapshot");

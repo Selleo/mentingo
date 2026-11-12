@@ -12,23 +12,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   deleteTemplate: vi.fn().mockResolvedValue(true),
   copyDefault: vi.fn().mockResolvedValue({ id: "copied-template" }),
-}));
-
-vi.mock("@remix-run/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@remix-run/react")>()),
-  useNavigate: () => mocks.navigate,
-  useSearchParams: () => [new URLSearchParams(), vi.fn()],
-  Link: ({ to, children, ...props }: { to: string; children: ReactNode }) => (
-    <a href={to} {...props}>
-      {children}
-    </a>
-  ),
-}));
-vi.mock("~/components/PageWrapper", () => ({
-  PageWrapper: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-}));
-vi.mock("~/api/queries/useEmailTemplates", () => ({
-  useEmailTemplates: () => ({
+  emailTemplatesQuery: {
     data: {
       data: [
         {
@@ -58,7 +42,24 @@ vi.mock("~/api/queries/useEmailTemplates", () => ({
     },
     isPending: false,
     isError: false,
-  }),
+  },
+}));
+
+vi.mock("@remix-run/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@remix-run/react")>()),
+  useNavigate: () => mocks.navigate,
+  useSearchParams: () => [new URLSearchParams(), vi.fn()],
+  Link: ({ to, children, ...props }: { to: string; children: ReactNode }) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
+  ),
+}));
+vi.mock("~/components/PageWrapper", () => ({
+  PageWrapper: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}));
+vi.mock("~/api/queries/useEmailTemplates", () => ({
+  useEmailTemplates: () => mocks.emailTemplatesQuery,
 }));
 vi.mock("~/api/mutations/emailTemplates/useCopyDefaultEmailTemplate", () => ({
   useCopyDefaultEmailTemplate: () => ({ mutateAsync: mocks.copyDefault, isPending: false }),

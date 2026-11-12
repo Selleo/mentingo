@@ -1,39 +1,38 @@
-import { Injectable, type OnModuleInit } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Value } from "@sinclair/typebox/value";
 
-import { OutboxDirectHandlerService } from "src/outbox/outbox-direct-handler.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { QueueService } from "src/queue";
 
 import { COURSE_TRANSFER_JOB_TARGETS } from "./course-transfer.constants";
 import { CourseTransferCoordinator } from "./course-transfer.coordinator";
 import { CourseTransferRequestedEvent } from "./events/course-transfer-requested.event";
 import { CourseTransferStreamRepository } from "./repositories/course-transfer-stream.repository";
-import {
-  courseTransferRequestedEventSchema,
-  courseTransferSourceSchema,
-} from "./schemas/course-transfer.schema";
+import { courseTransferSourceSchema } from "./schemas/course-transfer.schema";
+
+import type { CourseTransferRequestedData } from "./events/course-transfer-requested.event";
+import type { OutboxDeliveryContext, OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 @Injectable()
-export class CourseTransferDispatcher implements OnModuleInit {
+@OutboxEventsHandler(CourseTransferRequestedEvent)
+export class CourseTransferDispatcher
+  implements OutboxEventsHandlerOf<CourseTransferRequestedEvent>
+{
   constructor(
     private readonly courseTransferStreamRepository: CourseTransferStreamRepository,
     private readonly courseTransferCoordinator: CourseTransferCoordinator,
-    private readonly outboxDirectHandlerService: OutboxDirectHandlerService,
     private readonly queueService: QueueService,
   ) {}
 
-  onModuleInit(): void {
-    this.outboxDirectHandlerService.register(
-      CourseTransferRequestedEvent.name,
-      (payload, eventId) => this.enqueueRequestedTransfer(payload, eventId),
-    );
+  async handleOutboxEvent(event: CourseTransferRequestedEvent, { eventId }: OutboxDeliveryContext) {
+    await this.enqueueRequestedTransfer(event.transferRequestData, eventId);
   }
 
   /** Hands a committed transfer request to the worker queue of its transfer kind. */
-  async enqueueRequestedTransfer(payload: Record<string, unknown>, eventId: string): Promise<void> {
-    if (!Value.Check(courseTransferRequestedEventSchema, payload)) {
-      throw new Error("Invalid transfer dispatch event");
-    }
+  async enqueueRequestedTransfer(
+    payload: CourseTransferRequestedData,
+    eventId: string,
+  ): Promise<void> {
     const { operationId, sourceTenantId } = payload;
 
     const record = await this.courseTransferStreamRepository.findOperationWithStream(operationId);

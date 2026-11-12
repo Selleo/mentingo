@@ -58,7 +58,7 @@ describe("LearningPathActivityHandler", () => {
       },
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
@@ -88,7 +88,7 @@ describe("LearningPathActivityHandler", () => {
       },
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
@@ -113,7 +113,7 @@ describe("LearningPathActivityHandler", () => {
       actor,
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
@@ -135,7 +135,7 @@ describe("LearningPathActivityHandler", () => {
       userIds,
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
@@ -157,7 +157,7 @@ describe("LearningPathActivityHandler", () => {
       userId: actor.userId,
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
@@ -176,7 +176,7 @@ describe("LearningPathActivityHandler", () => {
       userId: actor.userId,
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,

@@ -154,7 +154,7 @@ class PipelineTest(unittest.TestCase):
         domain['videos'] = [{'key':domain['key'], 'title':domain['title'], 'description':domain['description'],
                              'flowIds':[f['id'] for f in domain['flows']]}]
         registry = {'domains': [copy.deepcopy(domain)]}
-        profile = hashlib.sha256(json.dumps({'provider': {}, 'pronunciation': {}, 'brand': {}, 'renderer': 'tutorial-v5-full-viewport'}, sort_keys=True).encode()).hexdigest()
+        profile = hashlib.sha256(json.dumps({'provider': {}, 'pronunciation': {}, 'brand': {}, 'renderer': 'tutorial-v11-continuous-sentence-audio', 'frame': recording.render_demo.mentingo_frame.fingerprint()}, sort_keys=True).encode()).hexdigest()
         states = {}
         for flow in domain['flows']:
             video = self.cache/'segments'/flow['id']/'demo.mp4'
@@ -503,6 +503,9 @@ class WorkflowsTest(unittest.TestCase):
                         self.assertIn('inputs.test_mode', step['if'])
                     self.assertNotIn('state.json', step['with']['path'])
         self.assertIn('default_branch', generation['if'])
+        for job in (generation, publication):
+            self.assertIn("github.ref == 'refs/heads/staging'", job['if'])
+            self.assertIn("github.event_name == 'workflow_dispatch'", job['if'])
         self.assertIn('github.sha == vars.SELF_ONBOARDING_PUBLISH_SHA', generation['if'])
         self.assertIn('github.sha == vars.SELF_ONBOARDING_PUBLISH_SHA', workflow['jobs']['publish']['if'])
 

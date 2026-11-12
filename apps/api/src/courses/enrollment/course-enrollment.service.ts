@@ -121,7 +121,9 @@ export class CourseEnrollmentService {
       );
     });
 
-    await this.outboxPublisher.publish(new UsersAssignedToCourseEvent({ studentIds, courseId }));
+    await this.outboxPublisher.publish(
+      new UsersAssignedToCourseEvent({ studentIds, courseId, tenantId: currentUser.tenantId }),
+    );
     await Promise.all(
       studentIds.map((studentId) =>
         this.outboxPublisher.publish(
@@ -219,7 +221,11 @@ export class CourseEnrollmentService {
     });
 
     await this.outboxPublisher.publish(
-      new UsersAssignedToCourseEvent({ studentIds: newStudentIds, courseId }),
+      new UsersAssignedToCourseEvent({
+        studentIds: newStudentIds,
+        courseId,
+        tenantId: course.tenantId,
+      }),
     );
   }
 

@@ -1,6 +1,7 @@
 import type { SupportedLanguages } from "@repo/shared";
 
 export const USERS_PAGE_HANDLES = {
+  PAGE: "users-page",
   HEADING: "users-page-heading",
   CREATE_BUTTON: "users-page-create-button",
   IMPORT_BUTTON: "users-page-import-button",
@@ -20,6 +21,10 @@ export const USERS_PAGE_HANDLES = {
   GROUPS_FILTER: "users-page-groups-filter",
   groupFilterOption: (groupId: string) => `users-page-groups-filter-option-${groupId}`,
   CLEAR_FILTERS_BUTTON: "users-page-clear-filters-button",
+  activeFilterPill: (filter: string) => `users-page-active-filter-${filter}`,
+  removeFilterButton: (filter: string) => `users-page-remove-filter-${filter}`,
+  SELECTED_COUNT: "users-page-selected-count",
+  EMPTY_STATE: "users-page-empty-state",
   SELECT_ALL_CHECKBOX: "users-page-select-all-checkbox",
   TABLE: "users-page-table",
   TABLE_BODY: "users-page-table-body",

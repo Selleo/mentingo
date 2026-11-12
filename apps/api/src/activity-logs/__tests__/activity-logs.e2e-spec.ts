@@ -1,5 +1,5 @@
 import { PERMISSIONS, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, sql } from "drizzle-orm";
 
 import { AnnouncementsService } from "src/announcements/announcements.service";
 import { AuthController } from "src/auth/auth.controller";
@@ -12,15 +12,17 @@ import { GroupService } from "src/group/group.service";
 import { LearningPathService } from "src/learning-path/services/learning-path.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
+import { OUTBOX_STATUSES } from "src/outbox/outbox.types";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { activityLogs } from "src/storage/schema";
+import { activityLogs, outboxEvents } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateAllTables } from "../../../test/helpers/test-helpers";
+import { waitForOutbox } from "../../../test/helpers/wait-for-outbox";
 import {
   ACTIVITY_LOG_ACTION_TYPES,
   ACTIVITY_LOG_RESOURCE_TYPES,
@@ -155,13 +157,13 @@ describe("Activity Logs E2E", () => {
     expectedCount = 1,
     timeoutMs = 5000,
   ) => {
-    const start = Date.now();
-    while (Date.now() - start < timeoutMs) {
-      const logs = await getLogs(filters);
-      if (logs.length >= expectedCount) return logs;
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-    throw new Error(`Timed out waiting for activity logs`);
+    return waitForOutbox(
+      app,
+      () => getLogs(filters),
+      (logs) => logs.length >= expectedCount,
+      timeoutMs,
+      50,
+    );
   };
 
   const parseMetadata = (metadata: any) =>
@@ -636,6 +638,19 @@ describe("Activity Logs E2E", () => {
       expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
       expect(createLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.CATEGORY);
       expect(createMetadata.after?.title).toBe("Initial Category");
+    });
+
+    it("should record an activity log at the time its event happened, not when it was delivered", async () => {
+      const category = await createCategory();
+      const [{ occurredAt }] = await baseDb
+        .update(outboxEvents)
+        .set({ createdAt: sql`NOW() - INTERVAL '1 hour'` })
+        .where(eq(outboxEvents.status, OUTBOX_STATUSES.PENDING))
+        .returning({ occurredAt: outboxEvents.createdAt });
+
+      const [createLog] = await waitForLogs({ resourceId: category.id });
+
+      expect(new Date(createLog.createdAt)).toEqual(new Date(occurredAt));
     });
 
     it("should record UPDATE activity log when category is updated", async () => {

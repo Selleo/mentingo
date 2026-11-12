@@ -37,7 +37,9 @@ test("admin can bulk delete selected student users", async ({
     await openBulkEditActionFlow(page, "delete");
     await confirmBulkEditFlow(page);
 
-    await expect(page.getByTestId(USERS_PAGE_HANDLES.TABLE_BODY).getByRole("row")).toHaveCount(0);
+    for (const user of users) {
+      await expect(page.getByTestId(USERS_PAGE_HANDLES.row(user.id))).toHaveCount(0);
+    }
 
     await expect
       .poll(async () => Promise.all(users.map((user) => userFactory.getByEmail(user.email))))

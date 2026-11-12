@@ -98,6 +98,7 @@ export class CourseEnrollmentRepository {
     const [course] = await this.db
       .select({
         authorId: courses.authorId,
+        tenantId: courses.tenantId,
         title: courses.title,
         baseLanguage: courses.baseLanguage,
         availableLocales: courses.availableLocales,

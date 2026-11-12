@@ -2,9 +2,13 @@ import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 
-export const courseTransferRequestedEventSchema = Type.Object({
+export const courseTransferRequestedDataSchema = Type.Object({
   operationId: UUIDSchema,
   sourceTenantId: UUIDSchema,
+});
+
+export const courseTransferRequestedEventSchema = Type.Object({
+  transferRequestData: courseTransferRequestedDataSchema,
 });
 
 export const courseTransferSourceSchema = Type.Object({
@@ -32,8 +36,12 @@ export const courseTransferJobSchema = Type.Object({
   targetTenantId: UUIDSchema,
 });
 
-export const courseTransferVideoMetadataRequestedEventSchema = Type.Object({
+export const courseTransferVideoMetadataRequestedDataSchema = Type.Object({
   tenantId: UUIDSchema,
   resourceId: UUIDSchema,
   fileKey: Type.String({ minLength: 1 }),
+});
+
+export const courseTransferVideoMetadataRequestedEventSchema = Type.Object({
+  videoMetadataRequestData: courseTransferVideoMetadataRequestedDataSchema,
 });

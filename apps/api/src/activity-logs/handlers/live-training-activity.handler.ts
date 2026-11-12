@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import {
   CreateLiveTrainingEvent,
@@ -11,12 +10,14 @@ import {
   UpdateLiveTrainingMaterialsEvent,
 } from "src/events";
 import { LiveTrainingService } from "src/live-training/live-training.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
 
 import type { ActorUserType } from "src/common/types/actor-user.type";
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type LiveTrainingEventType =
   | CreateLiveTrainingEvent
@@ -38,28 +39,22 @@ const LiveTrainingActivityEvents = [
 ] as const;
 
 @Injectable()
-@EventsHandler(...LiveTrainingActivityEvents)
-export class LiveTrainingActivityHandler implements IEventHandler<LiveTrainingEventType> {
+@OutboxEventsHandler(...LiveTrainingActivityEvents)
+export class LiveTrainingActivityHandler implements OutboxEventsHandlerOf<LiveTrainingEventType> {
   constructor(
     private readonly activityLogsService: ActivityLogsService,
     private readonly liveTrainingService: LiveTrainingService,
   ) {}
 
-  async handle(event: LiveTrainingEventType) {
+  async handleOutboxEvent(event: LiveTrainingEventType) {
     if (event instanceof CreateLiveTrainingEvent) return await this.handleCreate(event);
-
     if (event instanceof UpdateLiveTrainingEvent) return await this.handleUpdate(event);
-
     if (event instanceof DeleteLiveTrainingEvent) return await this.handleDelete(event);
-
     if (event instanceof UpdateLiveTrainingMaterialsEvent) {
       return await this.handleMaterialsUpdate(event);
     }
-
     if (event instanceof StartLiveTrainingSessionEvent) return await this.handleSessionStart(event);
-
     if (event instanceof EndLiveTrainingSessionEvent) return await this.handleSessionEnd(event);
-
     if (event instanceof FailLiveTrainingSessionEvent) return await this.handleSessionFail(event);
   }
 

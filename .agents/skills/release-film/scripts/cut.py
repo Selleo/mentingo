@@ -7,6 +7,7 @@ moves an eased camera and leaves out loading, blank pages and redirect hops.
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -20,6 +21,7 @@ import editor
 import language
 import metrics
 import montage
+import tutorial_focus
 import pronunciation
 import takes
 import voice as voice_provider
@@ -114,6 +116,15 @@ def film_font(addon, text=''):
     if not checked:
         return fallback, plain, f'{family} lacks the glyphs {missing!r}: {plain} used'
     return str(target), family, None
+
+
+def tutorial_font(addon, text, repo_slug):
+    """Use the clips reference's display face for Mentingo captions; never silently fall back."""
+    font, family, warning = film_font(addon, text)
+    if repo_slug == 'Selleo/mentingo' and (family != 'all-round-gothic' or warning):
+        raise ValueError('Mentingo tutorials require All Round Gothic 600 from the configured Adobe kit; ' +
+                         (warning or 'incorrect configured font family'))
+    return font
 
 
 def film_colors(addon):
@@ -244,7 +255,7 @@ def narrate(run, story, addon, root=None):
         results = json.loads(out.strip().splitlines()[-1])
         failed = [r for r in results if r.get('error')]
         if failed:
-            raise SystemExit(f'narration failed: {failed}')
+            raise SystemExit('narration failed: ' + '; '.join(str(item['error']) for item in failed))
         for job in todo:
             paced(core.tool('ffmpeg') or 'ffmpeg', job['out'], job['sentences'],
                   lossless=job.get('audio_profile') == 'pcm-48000-v1', clip_tail=voice == 'elevenlabs')
@@ -358,8 +369,10 @@ def bound_voice_captions(folder):
 
 
 def paced(ffmpeg, folder, sentences, lossless=False, clip_tail=False):
-    """The narration in ``folder`` (audio.mp3 and its word SRT) with at least PAUSE between two sentences: the silence
-    goes in halfway between one sentence's last word and the next one's first, and the words after it move."""
+    """Tutorial PCM preserves provider delivery. Other modes retain their existing sentence pacing.
+
+    UI-driven tutorial waits are applied later, only in acoustically verified gaps.
+    """
     folder = Path(folder)
     if clip_tail:
         bound_voice_captions(folder)
@@ -369,11 +382,9 @@ def paced(ffmpeg, folder, sentences, lossless=False, clip_tail=False):
                 for i in range(1, len(starts)) if starts[i] - ends[i - 1] < PAUSE - 0.05]
     if lossless:
         target = folder / 'paced.wav'
-        if silences:
-            splice(ffmpeg, folder / 'audio.mp3', silences, target, ['-c:a', 'pcm_s16le'])
-        else:
-            core.sh([ffmpeg, '-v', 'error', '-y', '-i', str(folder / 'audio.mp3'), '-ar', '48000',
-                     '-ac', '1', '-c:a', 'pcm_s16le', str(target)], timeout=300)
+        silences = []  # Preserve the provider's natural delivery within the entire chapter.
+        core.sh([ffmpeg, '-v', 'error', '-y', '-i', str(folder / 'audio.mp3'), '-ar', '48000',
+                 '-ac', '1', '-c:a', 'pcm_s16le', str(target)], timeout=300)
         duration = audio_seconds(target)
         shifted = montage.words_from_srt(montage.shifted_srt(words, silences))
         if any(start >= duration for start, _, _ in shifted):
@@ -389,6 +400,36 @@ def paced(ffmpeg, folder, sentences, lossless=False, clip_tail=False):
     (folder / 'paced.srt').replace(folder / 'subtitles.srt')
     if clip_tail:
         bound_voice_captions(folder)
+
+
+def sentence_pause_points(ffmpeg, audio, words, sentences):
+    """Audio waits may extend acoustic silence between sentences, never a word cue.
+
+    If the waveform has no suitable quiet gap, leave that sentence continuous;
+    its existing late-action diagnostics remain available for review.
+    """
+    starts = montage.sentence_starts(words, sentences)
+    ends = montage.sentence_ends(words, sentences)
+    result = {1: 0.0}
+    detected = subprocess.run([str(ffmpeg), '-hide_banner', '-nostdin', '-i', str(audio),
+        '-af', 'silencedetect=noise=-48dB:d=0.025', '-f', 'null', '-'],
+        capture_output=True, text=True, timeout=120, check=True).stderr
+    quiet, opened = [], None
+    for kind, value in re.findall(r'silence_(start|end): ([0-9.]+)', detected):
+        if kind == 'start':
+            opened = float(value)
+        elif opened is not None:
+            quiet.append((opened, float(value)))
+            opened = None
+    for i in range(1, len(starts)):
+        # Require the cut to be between the provider's words as well as inside
+        # measured silence. A timestamp alone is not acoustic evidence.
+        low, high = ends[i - 1], starts[i]
+        candidates = [(max(low, a) + min(high, b)) / 2 for a,b in quiet
+                      if min(high, b) - max(low, a) >= .02]
+        midpoint = (low + high) / 2
+        result[i + 1] = min(candidates, key=lambda t: abs(t - midpoint)) if candidates else None
+    return result
 
 
 def retime(ffmpeg, audio, srt, words, silences, folder):
@@ -449,7 +490,7 @@ def document_still(doc, crop=(0, 0.02, 1, 0.45), cached_only=False):
     return target if target.is_file() else None
 
 
-def chapter_setup(chapter, folder, cached_only=False, language=None):
+def chapter_setup(chapter, folder, cached_only=False, language=None, tutorial=False):
     """(spec, capture) of a chapter for the montage: the test up to shortly after its last narrated action (earlier
     steps run off film), each sentence a beat on the action it is pinned to (``language``: the film's, for the labels
     the montage adds)."""
@@ -457,6 +498,8 @@ def chapter_setup(chapter, folder, cached_only=False, language=None):
     beats = [s.get('action') for s in chapter['sentences']]
     pinned = [b for b in beats if b is not None]
     first, last = (min(pinned), max(pinned)) if pinned else (0, len(capture['steps']) - 1)
+    if tutorial:
+        first, last = 0, len(capture['steps']) - 1
     steps = capture['steps'][:last + 1]
     end = min(capture['end'], steps[-1]['b'] + CHAPTER_TAIL)
     following = next((s for s in capture['steps'][last + 1:] if s.get('acting') or s.get('navigate')), None)
@@ -479,7 +522,8 @@ def chapter_setup(chapter, folder, cached_only=False, language=None):
             # capital, np. Excel, ends no sentence)
             'sentences': [s['text'] for s in chapter['sentences']],
             # a scene's test.step titles name its windows (a project's own tests may title them in English)
-            'sections': ((chapter.get('source') or {}).get('file') or '').startswith('gaps/'), 'language': language}
+            'sections': ((chapter.get('source') or {}).get('file') or '').startswith('gaps/'), 'language': language,
+            **({'preserve_actions': True} if tutorial else {})}
     doc, beat = document(chapter, capture)
     if doc and document_still(doc, cached_only=cached_only):  # the downloaded PDF's first page covers the chapter's end
         spec['insert'] = {'from_beat': beat}
@@ -502,12 +546,15 @@ def steps_of(chapter, film, offset, said=None):
     return steps
 
 
-def chapter_film(chapter, folder, voice_dir, last=False, cached_only=False, language=None):
+def chapter_film(chapter, folder, voice_dir, last=False, cached_only=False, language=None, tutorial=False):
     """(spec, capture, words, speech seconds, film, camera spans) of a chapter: its montage on its spoken voice
     (``last``: the film's last chapter, whose last picture stays a little longer before the film fades out)."""
-    spec, capture = chapter_setup(chapter, folder, cached_only=cached_only, language=language)
+    spec, capture = chapter_setup(chapter, folder, cached_only=cached_only, language=language, tutorial=tutorial)
     words = montage.words_from_srt((Path(voice_dir) / 'subtitles.srt').read_text(encoding='utf-8'))
     speech = audio_seconds(narration_audio(voice_dir))
+    if tutorial:
+        tutorial_focus.align_actions(spec, chapter, capture, words)
+        spec['pause_points'] = sentence_pause_points(core.tool('ffmpeg'), narration_audio(voice_dir), words, spec['sentences'])
     film = montage.cut(spec, capture, words, audio_duration=speech, tail=montage.FINAL_TAIL if last else None)
     _, spans = montage.camera(spec, capture, film, capture['scale'])
     return spec, capture, words, speech, film, spans
@@ -524,7 +571,7 @@ def chapter_cut(ffmpeg, chapter, folder, voice_dir, sources, retimed=None, last=
     """``retimed``: the folder for the voice retimed around its waits (default the voice's own)."""
     said = language.texts(sources)
     spec, capture, words, speech, film, spans = chapter_film(chapter, folder, voice_dir, last, cached_only=cached_only,
-                                                             language=said['code'])
+                                                             language=said['code'], tutorial=sources.get('mode') == 'tutorial')
     camera = []
     for span in spans:
         entry = {'start': span['start'], 'end': span['end']}
@@ -543,7 +590,8 @@ def chapter_cut(ffmpeg, chapter, folder, voice_dir, sources, retimed=None, last=
                                          'duration': film['footage'], 'pieces': pieces, 'camera': camera,
                                          'pointer': film['pointer']},
                                         **({'labels': film['labels']} if film.get('labels') else {}),
-                                        **({'keys': film['keys']} if film.get('keys') else {}))}],
+                                        **({'keys': film['keys']} if film.get('keys') else {}),
+                                        **({'focus': tutorial_focus.from_film(film, capture)} if sources.get('mode') == 'tutorial' else {}))}],
              'review_points': {}}
     if film['insert_from'] is not None:
         doc, _ = document(chapter, capture)

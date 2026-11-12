@@ -26,7 +26,7 @@ describe("FileService audio storage", () => {
     const directory = await mkdtemp(path.join(tmpdir(), "audio-storage-test-"));
     try {
       const filePath = path.join(directory, "audio.wav");
-      execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "sine=duration=0.1", filePath]);
+      execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "sine=duration=1.25", filePath]);
       const buffer = await readFile(filePath);
       const uploadFile = jest.fn();
       const createVariants = jest.fn();
@@ -46,7 +46,11 @@ describe("FileService audio storage", () => {
         "lessons/lesson-content",
         "11111111-1111-4111-8111-111111111111" as UUIDType,
       );
-      expect(result).toMatchObject({ contentType: "audio/wav", fileUrl: "signed" });
+      expect(result).toMatchObject({
+        contentType: "audio/wav",
+        fileUrl: "signed",
+        durationSeconds: 2,
+      });
       expect(result.fileKey).toMatch(
         /^11111111-1111-4111-8111-111111111111\/lessons\/lesson-content\/.+\.wav$/,
       );

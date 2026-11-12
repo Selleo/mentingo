@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common";
-import { CqrsModule } from "@nestjs/cqrs";
 
 import { LearningFactsRepository } from "src/integration/repositories/learning-facts.repository";
 import { LocalizationService } from "src/localization/localization.service";
@@ -16,7 +15,7 @@ import { CompetenciesLearningHandler } from "./handlers/competencies-learning.ha
 import { CompetenciesContextRepository } from "./repositories/competencies-context.repository";
 
 @Module({
-  imports: [CqrsModule, UserModule],
+  imports: [UserModule],
   controllers: [CompetenciesController],
   providers: [
     CompetenciesClientService,

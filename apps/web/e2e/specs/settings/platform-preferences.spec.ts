@@ -4,21 +4,13 @@ import { COURSE_LIST_LAYOUT_VARIANT } from "~/modules/Dashboard/Settings/compone
 import { QA_SETTINGS_HANDLES } from "../../data/qa/handles";
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
+import { openFeaturesSettingsFlow } from "../../flows/settings/open-features-settings.flow";
+import { togglePlatformFeatureFlow } from "../../flows/settings/toggle-platform-feature.flow";
 
 import type { FixtureApiClient } from "../../utils/api-client";
-import type { Page } from "@playwright/test";
 import type { GetPublicGlobalSettingsResponse } from "~/api/generated-api";
 
 type GlobalSettings = GetPublicGlobalSettingsResponse["data"];
-
-const openPlatformCustomizationSettings = async (page: Page) => {
-  await openSettingsPageFlow(page);
-  await page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB).click();
-  await expect(
-    page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_CONTENT),
-  ).toBeVisible();
-};
 
 const getGlobalSettings = async (apiClient: FixtureApiClient) => {
   const response = await apiClient.api.settingsControllerGetPublicGlobalSettings();
@@ -53,9 +45,14 @@ test("admin can toggle course platform settings", async ({
       }
     });
 
-    await openPlatformCustomizationSettings(page);
+    await openFeaturesSettingsFlow(page);
+    await togglePlatformFeatureFlow(page, SETTINGS_PAGE_HANDLES.COURSES_VISIBILITY_SWITCH);
+    await togglePlatformFeatureFlow(page, SETTINGS_PAGE_HANDLES.COURSE_DISCUSSIONS_SWITCH);
 
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.COURSES_VISIBILITY_SWITCH).click();
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB).click();
+    await expect(
+      page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_CONTENT),
+    ).toBeVisible();
 
     const nextCourseListLayout = originalSettings.modernCourseListEnabled
       ? COURSE_LIST_LAYOUT_VARIANT.CLASSIC
@@ -64,7 +61,6 @@ test("admin can toggle course platform settings", async ({
     await page
       .getByTestId(SETTINGS_PAGE_HANDLES.courseListLayoutOption(nextCourseListLayout))
       .click();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.COURSE_DISCUSSIONS_SWITCH).click();
 
     await expect
       .poll(async () => {
@@ -102,14 +98,14 @@ test("admin can enable Q&A and the public Q&A switch becomes available", async (
       unregisteredUserQAAccessibility: false,
     });
 
-    await openPlatformCustomizationSettings(page);
+    await openFeaturesSettingsFlow(page);
     await expect(page.getByTestId(QA_SETTINGS_HANDLES.PUBLIC_SWITCH)).toBeDisabled();
     await page.getByTestId(QA_SETTINGS_HANDLES.ENABLED_SWITCH).click();
 
     await expect.poll(async () => (await getGlobalSettings(apiClient)).QAEnabled).toBe(true);
 
     await page.reload();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB).click();
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.FEATURES_TAB).click();
     await expect(page.getByTestId(QA_SETTINGS_HANDLES.PUBLIC_SWITCH)).toBeEnabled();
   });
 });
@@ -131,14 +127,14 @@ test("admin can enable News and the public News switch becomes available", async
       unregisteredUserNewsAccessibility: false,
     });
 
-    await openPlatformCustomizationSettings(page);
+    await openFeaturesSettingsFlow(page);
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.NEWS_PUBLIC_SWITCH)).toBeDisabled();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.NEWS_ENABLED_SWITCH).click();
 
     await expect.poll(async () => (await getGlobalSettings(apiClient)).newsEnabled).toBe(true);
 
     await page.reload();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB).click();
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.FEATURES_TAB).click();
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.NEWS_PUBLIC_SWITCH)).toBeEnabled();
   });
 });
@@ -160,14 +156,14 @@ test("admin can enable Articles and the public Articles switch becomes available
       unregisteredUserArticlesAccessibility: false,
     });
 
-    await openPlatformCustomizationSettings(page);
+    await openFeaturesSettingsFlow(page);
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.ARTICLES_PUBLIC_SWITCH)).toBeDisabled();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.ARTICLES_ENABLED_SWITCH).click();
 
     await expect.poll(async () => (await getGlobalSettings(apiClient)).articlesEnabled).toBe(true);
 
     await page.reload();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB).click();
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.FEATURES_TAB).click();
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.ARTICLES_PUBLIC_SWITCH)).toBeEnabled();
   });
 });

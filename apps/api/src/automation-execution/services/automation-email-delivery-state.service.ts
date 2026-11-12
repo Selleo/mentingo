@@ -401,7 +401,7 @@ export class AutomationEmailDeliveryStateService {
 
     if (nextDelivery?.status === AUTOMATION_EMAIL_DELIVERY_STATUSES.PENDING) {
       await this.outboxPublisher.publish(
-        new AutomationEmailDeliveryRequestedEvent(nextDelivery.id),
+        new AutomationEmailDeliveryRequestedEvent({ emailDeliveryId: nextDelivery.id }),
         transaction,
       );
     }

@@ -7,6 +7,7 @@ import { useDashboardTrainingCompletion } from "~/api/queries/useDashboardTraini
 import { Button } from "~/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "~/components/ui/chart";
 import { cn } from "~/lib/utils";
+import { COURSES_TABLE_PATH } from "~/modules/Courses/utils/coursesView";
 
 import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
@@ -82,7 +83,7 @@ export function WidgetAdminTrainingCompletion({
               {t("dashboardHome.widgets.training_completion.empty")}
             </p>
             <Button asChild size="sm">
-              <Link to="/admin/courses">
+              <Link to={COURSES_TABLE_PATH}>
                 {t("dashboardHome.widgets.training_completion.assignCourses")}
               </Link>
             </Button>

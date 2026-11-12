@@ -321,17 +321,19 @@ export const createAiMentorLessonCourse = async (
     },
   });
 
-export const createAllRenderedQuestionTypesQuizCourse = async (
-  input: Omit<
-    CreatePublishedLearningCourseInput<{
-      dndBlankAnswer: string;
-      dndBlankAnswerId: string;
-      quizLesson: CurriculumCourseLessonRecord;
-      textBlankAnswer: string;
-    }>,
-    "buildLessons"
-  >,
-) =>
+export const createAllRenderedQuestionTypesQuizCourse = async ({
+  openQuestionsRequireReview = false,
+  ...input
+}: Omit<
+  CreatePublishedLearningCourseInput<{
+    dndBlankAnswer: string;
+    dndBlankAnswerId: string;
+    matchingPairs: { prompt: string; match: string }[];
+    quizLesson: CurriculumCourseLessonRecord;
+    textBlankAnswer: string;
+  }>,
+  "buildLessons"
+> & { openQuestionsRequireReview?: boolean }) =>
   createPublishedLearningCourse({
     ...input,
     categoryTitle: (prefix) => `Learning All Quiz Types Category ${prefix}`,
@@ -340,6 +342,10 @@ export const createAllRenderedQuestionTypesQuizCourse = async (
       const textBlankAnswerId = randomUUID();
       const dndBlankAnswer = `${prefix}-dnd-answer`;
       const dndBlankAnswerId = randomUUID();
+      const matchingPairs = [
+        { prompt: `${prefix}-matching-prompt-1`, match: `${prefix}-matching-match-1` },
+        { prompt: `${prefix}-matching-prompt-2`, match: `${prefix}-matching-match-2` },
+      ];
       const quizLesson = await curriculumFactory.createQuizLesson(courseId, {
         chapterId,
         title: `${prefix}-quiz-lesson`,
@@ -423,12 +429,33 @@ export const createAllRenderedQuestionTypesQuizCourse = async (
               },
             ],
           },
-          { type: "brief_response", title: `${prefix}-brief-response`, displayOrder: 8 },
-          { type: "detailed_response", title: `${prefix}-detailed-response`, displayOrder: 9 },
+          {
+            type: "brief_response",
+            title: `${prefix}-brief-response`,
+            displayOrder: 8,
+            requiresReview: openQuestionsRequireReview,
+          },
+          {
+            type: "detailed_response",
+            title: `${prefix}-detailed-response`,
+            displayOrder: 9,
+            requiresReview: openQuestionsRequireReview,
+          },
+          {
+            type: "matching",
+            title: `${prefix}-matching`,
+            displayOrder: 10,
+            options: matchingPairs.map(({ prompt, match }, index) => ({
+              optionText: prompt,
+              matchedWord: match,
+              displayOrder: index + 1,
+              isCorrect: true,
+            })),
+          },
         ],
       });
 
-      return { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId };
+      return { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId, matchingPairs };
     },
   });
 

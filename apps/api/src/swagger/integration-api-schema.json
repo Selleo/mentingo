@@ -1162,6 +1162,10 @@
                   "type": "string"
                 },
                 {
+                  "const": "characteristic",
+                  "type": "string"
+                },
+                {
                   "const": "createdAt",
                   "type": "string"
                 }

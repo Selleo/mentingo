@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import {
   CreateChapterEvent,
@@ -7,10 +6,13 @@ import {
   UpdateChapterEvent,
   UserChapterFinishedEvent,
 } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type ChapterEventType =
   | UserChapterFinishedEvent
@@ -26,18 +28,16 @@ const ChapterActivityEvents = [
 ] as const;
 
 @Injectable()
-@EventsHandler(...ChapterActivityEvents)
-export class ChapterActivityHandler implements IEventHandler<ChapterEventType> {
+@OutboxEventsHandler(...ChapterActivityEvents)
+export class ChapterActivityHandler implements OutboxEventsHandlerOf<ChapterEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: ChapterEventType) {
-    if (event instanceof UserChapterFinishedEvent)
+  async handleOutboxEvent(event: ChapterEventType) {
+    if (event instanceof UserChapterFinishedEvent) {
       return await this.handleUserChapterFinished(event);
-
+    }
     if (event instanceof CreateChapterEvent) return await this.handleCreateChapter(event);
-
     if (event instanceof UpdateChapterEvent) return await this.handleUpdateChapter(event);
-
     if (event instanceof DeleteChapterEvent) return await this.handleDeleteChapter(event);
   }
 

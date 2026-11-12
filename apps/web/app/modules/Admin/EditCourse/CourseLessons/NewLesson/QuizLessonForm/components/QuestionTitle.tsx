@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { Input } from "~/components/ui/input";
+import { Switch } from "~/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 
 import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
@@ -49,7 +50,7 @@ const QuestionTitle = ({
     [QuestionType.PHOTO_QUESTION_MULTIPLE_CHOICE]: QuestionIcons.PhotoQuestion,
     [QuestionType.FILL_IN_THE_BLANKS_TEXT]: QuestionIcons.GapFill,
     [QuestionType.FILL_IN_THE_BLANKS_DND]: QuestionIcons.FillInTheBlanks,
-    [QuestionType.MATCH_WORDS]: QuestionIcons.MatchWords,
+    [QuestionType.MATCHING]: QuestionIcons.Matching,
     [QuestionType.SCALE_1_5]: QuestionIcons.Scale_1_5,
   };
 
@@ -102,10 +103,26 @@ const QuestionTitle = ({
         name={`questions.${questionIndex}.title`}
         value={item.title}
         placeholder={baseLanguageQuestion?.title}
-        onChange={(e) => handleOptionChange(e.target.value)}
-        required
+        onChange={(event) => handleOptionChange(event.target.value)}
+        // Matching questions rely on the form schema alone, without the browser's own tooltip.
+        required={questionType !== QuestionType.MATCHING}
         className="flex-1"
       />
+      {isOpenQuestion && (
+        <label className="flex shrink-0 items-center gap-2 text-sm text-neutral-800">
+          <Switch
+            data-testid={QUIZ_LESSON_FORM_HANDLES.questionRequiresReviewSwitch(questionIndex)}
+            checked={Boolean(item.requiresReview)}
+            disabled={isStructureLocked}
+            onCheckedChange={(checked) =>
+              form.setValue(`questions.${questionIndex}.requiresReview`, checked, {
+                shouldDirty: true,
+              })
+            }
+          />
+          {t("adminCourseView.curriculum.lesson.other.requiresReview")}
+        </label>
+      )}
       {isOpenQuestion && !isStructureLocked && (
         <TooltipProvider delayDuration={0}>
           <Tooltip>

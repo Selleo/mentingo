@@ -4,6 +4,10 @@ export const getRequestBaseUrl = (req: Request): string | null => {
   const headerOrigin = extractOriginFromHeaders(req);
   if (headerOrigin) return headerOrigin;
 
+  return getRequestHostUrl(req);
+};
+
+export const getRequestHostUrl = (req: Request): string | null => {
   const host = req.get("host");
   if (!host) return null;
 

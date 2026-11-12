@@ -1,4 +1,4 @@
-import { Inject, Injectable, type OnModuleInit } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -13,9 +13,11 @@ import {
   UpdateCourseEvent,
   UpdateLessonEvent,
 } from "src/events";
-import { OutboxDirectHandlerService } from "src/outbox/outbox-direct-handler.service";
-import { materializeLegacyEvent } from "src/outbox/outbox.event-registry";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
+import { DB } from "src/storage/db/db.providers";
 import { chapters, lessons } from "src/storage/schema";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type SyncEvents =
   | BulkUpdateCourseCategoryEvent
@@ -27,33 +29,26 @@ type SyncEvents =
   | UpdateLessonEvent
   | DeleteLessonEvent;
 
+const SyncEvents = [
+  BulkUpdateCourseCategoryEvent,
+  UpdateCourseEvent,
+  CreateChapterEvent,
+  UpdateChapterEvent,
+  DeleteChapterEvent,
+  CreateLessonEvent,
+  UpdateLessonEvent,
+  DeleteLessonEvent,
+];
+
 @Injectable()
-export class MasterCourseSyncHandler implements OnModuleInit {
+@OutboxEventsHandler(...SyncEvents)
+export class MasterCourseSyncHandler implements OutboxEventsHandlerOf<SyncEvents> {
   constructor(
     private readonly masterCourseService: MasterCourseService,
-    @Inject("DB") private readonly db: DatabasePg,
-    private readonly outboxDirectHandlerService: OutboxDirectHandlerService,
+    @Inject(DB) private readonly db: DatabasePg,
   ) {}
 
-  onModuleInit(): void {
-    const events = [
-      BulkUpdateCourseCategoryEvent,
-      UpdateCourseEvent,
-      CreateChapterEvent,
-      UpdateChapterEvent,
-      DeleteChapterEvent,
-      CreateLessonEvent,
-      UpdateLessonEvent,
-      DeleteLessonEvent,
-    ];
-    for (const event of events) {
-      this.outboxDirectHandlerService.registerReaction(event.name, async (payload) => {
-        await this.handle(materializeLegacyEvent(event.name, payload) as SyncEvents);
-      });
-    }
-  }
-
-  async handle(event: SyncEvents) {
+  async handleOutboxEvent(event: SyncEvents) {
     if (event instanceof BulkUpdateCourseCategoryEvent) {
       await this.queueBulkCourseCategorySync(event);
       return;

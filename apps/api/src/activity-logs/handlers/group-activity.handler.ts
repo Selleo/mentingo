@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import {
   CreateGroupEvent,
@@ -10,10 +9,13 @@ import {
   BulkAssignUsersToGroupsEvent,
 } from "src/events";
 import { BULK_ASSIGN_USERS_TO_GROUPS_SOURCES } from "src/group/types/group-membership-assignment.types";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type GroupEventType =
   | CreateGroupEvent
@@ -33,11 +35,11 @@ const GroupActivityEvents = [
 ] as const;
 
 @Injectable()
-@EventsHandler(...GroupActivityEvents)
-export class GroupActivityHandler implements IEventHandler<GroupEventType> {
+@OutboxEventsHandler(...GroupActivityEvents)
+export class GroupActivityHandler implements OutboxEventsHandlerOf<GroupEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: GroupEventType) {
+  async handleOutboxEvent(event: GroupEventType) {
     if (event instanceof CreateGroupEvent) return await this.handleCreate(event);
     if (event instanceof UpdateGroupEvent) return await this.handleUpdate(event);
     if (event instanceof DeleteGroupEvent) return await this.handleDelete(event);

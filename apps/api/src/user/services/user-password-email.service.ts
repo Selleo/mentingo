@@ -185,13 +185,14 @@ export class UserPasswordEmailService {
       });
     }
     await this.outboxPublisher.publish(
-      new NotificationEvent(
-        randomUUID(),
-        type === USER_PASSWORD_EMAIL_TYPES.RESET
-          ? AUTOMATION_EVENT_KINDS.PASSWORD_RECOVERY
-          : AUTOMATION_EVENT_KINDS.PASSWORD_REMINDER,
-        notificationRecipients,
-      ),
+      new NotificationEvent({
+        occurrenceId: randomUUID(),
+        kind:
+          type === USER_PASSWORD_EMAIL_TYPES.RESET
+            ? AUTOMATION_EVENT_KINDS.PASSWORD_RECOVERY
+            : AUTOMATION_EVENT_KINDS.PASSWORD_REMINDER,
+        recipients: notificationRecipients,
+      }),
       transaction,
     );
   }

@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "src/activity-logs/types";
@@ -7,25 +6,26 @@ import { buildActivityLogMetadata } from "src/activity-logs/utils/build-activity
 import { CreateQAEvent } from "src/events/qa/create-qa.event";
 import { DeleteQAEvent } from "src/events/qa/delete-qa.event";
 import { UpdateQAEvent } from "src/events/qa/update-qa.event";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type QAEventType = CreateQAEvent | UpdateQAEvent | DeleteQAEvent;
 
 const QAActivityEvents = [CreateQAEvent, UpdateQAEvent, DeleteQAEvent] as const;
 
 @Injectable()
-@EventsHandler(...QAActivityEvents)
-export class QAActivityHandler implements IEventHandler<QAEventType> {
+@OutboxEventsHandler(...QAActivityEvents)
+export class QAActivityHandler implements OutboxEventsHandlerOf<QAEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: QAEventType) {
+  async handleOutboxEvent(event: QAEventType) {
     if (event instanceof CreateQAEvent) {
       await this.handleCreateEvent(event);
     }
-
     if (event instanceof UpdateQAEvent) {
       await this.handleUpdateEvent(event);
     }
-
     if (event instanceof DeleteQAEvent) {
       await this.handleDeleteEvent(event);
     }
