@@ -1169,6 +1169,57 @@ describe("CourseController (e2e)", () => {
         });
       });
 
+      describe("when user is both student and group manager", () => {
+        it("returns the catalogue courses together with the managed groups' courses", async () => {
+          const category = await categoryFactory.create();
+          const author = await userFactory.withAdminRole().create();
+          const studentManager = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+          await addSystemRoleToUserInTests(
+            db,
+            studentManager.id,
+            studentManager.tenantId,
+            SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
+          );
+          const createCourse = (status: CourseStatus) =>
+            courseFactory.create({
+              authorId: author.id,
+              categoryId: category.id,
+              thumbnailS3Key: null,
+              status,
+            });
+
+          const publishedCourse = await createCourse(COURSE_STATUSES.PUBLISHED);
+          const managedDraftCourse = await createCourse(COURSE_STATUSES.DRAFT);
+          await createCourse(COURSE_STATUSES.DRAFT);
+
+          const managedGroup = await groupFactory
+            .withMembers([])
+            .create({ tenantId: studentManager.tenantId });
+          await db.insert(groupManagerGroups).values({
+            managerUserId: studentManager.id,
+            groupId: managedGroup.id,
+            tenantId: studentManager.tenantId,
+          });
+          await db.insert(groupCourses).values({
+            groupId: managedGroup.id,
+            courseId: managedDraftCourse.id,
+          });
+
+          const response = await request(app.getHttpServer())
+            .get("/api/course/all")
+            .query({ isArchived: "all" })
+            .set("Cookie", await cookieFor(studentManager, app))
+            .expect(200);
+
+          expect(response.body.data.map((course: CourseTest) => course.id).sort()).toEqual(
+            [publishedCourse.id, managedDraftCourse.id].sort(),
+          );
+        });
+      });
+
       describe("when user is contentCreator", () => {
         it("returns only courses created by the contentCreator", async () => {
           const category = await categoryFactory.create();

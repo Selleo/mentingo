@@ -23,6 +23,8 @@ export type TableSort<TSortField extends string> = TSortField | `-${TSortField}`
 type UseUrlTableStateOptions<TFilterKey extends string, TSortField extends string> = {
   /** URL params holding the table's filters, e.g. `["category", "state"]`. */
   filterKeys: readonly TFilterKey[];
+  /** Filter values the page can use; a URL value that fails its check is ignored and not counted. */
+  filterValidators?: Partial<Record<TFilterKey, (value: string) => boolean>>;
   /** Sortable column ids mapped to the API sort field they order by. */
   sortFields?: Partial<Record<string, TSortField>>;
   /** URL param holding the free-text search; `search` by default. */
@@ -47,6 +49,7 @@ const parsePage = (value: string | null) => {
  */
 export function useUrlTableState<TFilterKey extends string, TSortField extends string = string>({
   filterKeys,
+  filterValidators = {},
   sortFields = {},
   searchParam = DEFAULT_SEARCH_PARAM,
   defaultPerPage = DEFAULT_PER_PAGE,
@@ -59,7 +62,12 @@ export function useUrlTableState<TFilterKey extends string, TSortField extends s
   const page = parsePage(searchParams.get(TABLE_URL_PARAMS.PAGE));
   const perPage = isItemsPerPageOption(perPageParam) ? perPageParam : defaultPerPage;
 
-  const filterValues = filterKeys.map((filterKey) => searchParams.get(filterKey) ?? undefined);
+  const filterValues = filterKeys.map((filterKey) => {
+    const value = searchParams.get(filterKey);
+    const isValid = value && (filterValidators[filterKey]?.(value) ?? true);
+
+    return isValid ? value : undefined;
+  });
   const filtersKey = filterValues.join("\u0000");
   const filters = useMemo(
     () =>

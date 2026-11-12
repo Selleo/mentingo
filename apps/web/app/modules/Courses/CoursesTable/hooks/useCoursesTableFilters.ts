@@ -45,6 +45,12 @@ export function useCoursesTableFilters({
   const tableState = useUrlTableState({
     searchParam: COURSES_TABLE_FILTER_PARAMS.TITLE,
     filterKeys: COURSES_TABLE_FILTER_KEYS,
+    filterValidators: {
+      [COURSES_TABLE_FILTER_PARAMS.STATE]: (value) =>
+        canFilterByManagementState && isCourseStatus(value),
+      [COURSES_TABLE_FILTER_PARAMS.ARCHIVE]: (value) =>
+        canFilterByManagementState && isCourseArchiveFilter(value),
+    },
     sortFields: COURSES_TABLE_SORT_FIELDS,
     defaultPerPage: COURSES_TABLE_DEFAULT_PAGE_SIZE,
   });

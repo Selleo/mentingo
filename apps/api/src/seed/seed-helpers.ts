@@ -17,6 +17,7 @@ import {
   type SystemRoleSlug,
   type SupportedLanguages,
 } from "@repo/shared";
+import { createCache } from "cache-manager";
 import { and, eq, sql } from "drizzle-orm/sql";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
@@ -286,7 +287,7 @@ export async function createNiceCourses(
     const { enabled: isStripeConfigured } = await envService.getStripeConfigured();
 
     if (isStripeConfigured) {
-      const stripeService = new StripeService(envService, db);
+      const stripeService = new StripeService(envService, db, createCache());
 
       const existingStripeProduct = await stripeService.searchProducts({
         query: `name:\'${courseData.title}\'`,

@@ -38,6 +38,7 @@ export default function AutomationsContent() {
 
   const tableState = useUrlTableState({
     filterKeys: AUTOMATIONS_TABLE_FILTER_KEYS,
+    filterValidators: { [AUTOMATIONS_TABLE_FILTER_PARAMS.STATUS]: isAutomationStatus },
     defaultPerPage: AUTOMATIONS_TABLE_DEFAULT_PAGE_SIZE,
   });
   const statusParam = tableState.filters.status;
@@ -53,7 +54,7 @@ export default function AutomationsContent() {
   useClampedPage({
     page: tableState.page,
     perPage: tableState.perPage,
-    totalItems: data?.pagination.totalItems ?? 0,
+    totalItems: data?.pagination.totalItems,
     setPage: tableState.setPage,
   });
 

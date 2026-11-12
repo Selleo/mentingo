@@ -50,8 +50,6 @@ export type PlatformFeatureDefinition = {
   iconName: IconName;
   /** Integration that must be configured on the integrations page before the feature works. */
   requiredIntegration?: { envGroupId: string; service: string };
-  /** Feature that must be on before this one can be switched on. */
-  requiredFeature?: PlatformFeatureId;
   option?: PlatformFeatureOption;
   switchTestId?: string;
   optionTestId?: string;
@@ -93,7 +91,6 @@ export const PLATFORM_FEATURES: PlatformFeatureDefinition[] = [
     labelKey: "gamification.leaderboard.settings.enabled.label",
     descriptionKey: "gamification.leaderboard.settings.enabled.description",
     iconName: "Medal",
-    requiredFeature: PLATFORM_FEATURE_IDS.GAMIFICATION,
     option: PLATFORM_FEATURE_OPTIONS.LEADERBOARD_VISIBILITY,
     switchTestId: LEADERBOARD_HANDLES.SETTINGS_ENABLED_SWITCH,
     optionTestId: LEADERBOARD_HANDLES.SETTINGS_VISIBILITY,

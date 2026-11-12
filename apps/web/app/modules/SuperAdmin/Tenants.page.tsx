@@ -61,6 +61,7 @@ export default function TenantsPage() {
   const tableState = useUrlTableState({
     searchParam: TENANTS_TABLE_FILTER_PARAMS.SEARCH,
     filterKeys: TENANTS_TABLE_FILTER_KEYS,
+    filterValidators: { [TENANTS_TABLE_FILTER_PARAMS.STATUS]: isTenantStatusFilter },
     sortFields: TENANTS_TABLE_SORT_FIELDS,
     defaultPerPage: TENANTS_TABLE_DEFAULT_PAGE_SIZE,
   });

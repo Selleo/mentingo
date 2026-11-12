@@ -81,7 +81,7 @@ export function EmailTemplatesContent() {
   useClampedPage({
     page,
     perPage,
-    totalItems: data?.pagination.totalItems ?? 0,
+    totalItems: data?.pagination.totalItems,
     setPage: tableState.setPage,
   });
 

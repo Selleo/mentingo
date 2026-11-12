@@ -7,12 +7,20 @@ import {
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 
+import { CACHE_MANAGER_TOKEN, type Cache } from "src/cache/cache.types";
 import { DatabasePg } from "src/common";
 import { EnvService } from "src/env/services/env.service";
+import { dbAls } from "src/storage/db/db-als.store";
+import { MissingTenantContextError } from "src/storage/db/db-errors";
 import { DB } from "src/storage/db/db.providers";
 import { courses } from "src/storage/schema";
 
-import { MAX_LISTED_PROMOTION_CODES, STRIPE_LIST_PAGE_SIZE } from "./stripe.constants";
+import {
+  MAX_LISTED_PROMOTION_CODES,
+  PROMOTION_CODES_CACHE_PREFIX,
+  PROMOTION_CODES_CACHE_TTL_MS,
+  STRIPE_LIST_PAGE_SIZE,
+} from "./stripe.constants";
 
 import type { CreateCheckoutSessionBody } from "./schemas/checkoutSession.schema";
 import type { CreatePromotionCode } from "./schemas/createPromotionCode";
@@ -26,6 +34,7 @@ export class StripeService {
   constructor(
     private readonly envService: EnvService,
     @Inject(DB) private readonly db: DatabasePg,
+    @Inject(CACHE_MANAGER_TOKEN) private readonly cache: Cache,
   ) {}
 
   private async assertCourseAcceptsCheckout(courseId: UUIDType) {
@@ -176,23 +185,52 @@ export class StripeService {
 
   /**
    * Stripe lists promotion codes by cursor without a total, so all codes are read and paged here.
-   * Code counts stay small, and the cap guards against runaway listing.
+   * The list is cached briefly so paging and searching do not re-read it from Stripe each time.
    */
   async getPromotionCodes({ search, page, perPage }: PromotionCodesQuery) {
-    const client = await this.getClient();
-    const promotionCodes = await client.promotionCodes
-      .list({ limit: STRIPE_LIST_PAGE_SIZE })
-      .autoPagingToArray({ limit: MAX_LISTED_PROMOTION_CODES });
+    const promotionCodes = await this.getAllPromotionCodes();
 
     const searchTerm = search?.trim().toLowerCase();
-    const matchingCodes = promotionCodes
-      .map(this.promotionCodeToCamelCase)
-      .filter(({ code }) => !searchTerm || code.toLowerCase().includes(searchTerm));
+    const matchingCodes = promotionCodes.filter(
+      ({ code }) => !searchTerm || code.toLowerCase().includes(searchTerm),
+    );
 
     return {
       data: matchingCodes.slice((page - 1) * perPage, page * perPage),
       pagination: { totalItems: matchingCodes.length, page, perPage },
     };
+  }
+
+  private async getAllPromotionCodes() {
+    const cacheKey = this.getPromotionCodesCacheKey();
+    const cachedCodes = await this.cache.get<PromotionCode[]>(cacheKey).catch(() => undefined);
+
+    if (cachedCodes) return cachedCodes;
+
+    const client = await this.getClient();
+
+    const promotionCodes = await client.promotionCodes
+      .list({ limit: STRIPE_LIST_PAGE_SIZE })
+      .autoPagingToArray({ limit: MAX_LISTED_PROMOTION_CODES });
+
+    const mappedCodes = promotionCodes.map(this.promotionCodeToCamelCase);
+
+    await this.cache
+      .set(cacheKey, mappedCodes, PROMOTION_CODES_CACHE_TTL_MS)
+      .catch(() => undefined);
+
+    return mappedCodes;
+  }
+
+  private async clearPromotionCodesCache() {
+    await this.cache.del(this.getPromotionCodesCacheKey()).catch(() => undefined);
+  }
+
+  private getPromotionCodesCacheKey() {
+    const tenantId = dbAls.getStore()?.tenantId;
+    if (!tenantId) throw new MissingTenantContextError();
+
+    return `${PROMOTION_CODES_CACHE_PREFIX}${tenantId}`;
   }
 
   async getPromotionCode(id: string) {
@@ -235,6 +273,7 @@ export class StripeService {
         expires_at: expiresAt ? stripeExpiresAt : undefined,
         max_redemptions: maxRedemptions,
       });
+      await this.clearPromotionCodesCache();
 
       return "Promotion code created successfully";
     } catch (error) {
@@ -264,6 +303,7 @@ export class StripeService {
         promotionCode.id,
         updatePromotionCodeData,
       );
+      await this.clearPromotionCodesCache();
       return this.promotionCodeToCamelCase(promoCode);
     } catch (error) {
       if (error.raw.message) {

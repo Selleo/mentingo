@@ -55,7 +55,7 @@ const PromotionCodes = () => {
     isStripeConfigured?.enabled,
   );
 
-  const totalItems = promotionCodesResponse?.pagination.totalItems ?? 0;
+  const totalItems = promotionCodesResponse?.pagination.totalItems;
 
   useClampedPage({
     page: tableState.page,

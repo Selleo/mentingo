@@ -2,6 +2,7 @@ import { BadRequestException } from "@nestjs/common";
 
 import { StripeService } from "./stripe.service";
 
+import type { Cache } from "src/cache/cache.types";
 import type { DatabasePg } from "src/common";
 import type { EnvService } from "src/env/services/env.service";
 import type Stripe from "stripe";
@@ -14,7 +15,11 @@ describe("StripeService archived course checkout", () => {
     const where = jest.fn().mockResolvedValue(course ? [course] : []);
     const from = jest.fn().mockReturnValue({ where });
     const select = jest.fn().mockReturnValue({ from });
-    const service = new StripeService({} as EnvService, { select } as unknown as DatabasePg);
+    const service = new StripeService(
+      {} as EnvService,
+      { select } as unknown as DatabasePg,
+      {} as Cache,
+    );
     const paymentIntentCreate = jest.fn().mockResolvedValue({ client_secret: "payment-secret" });
     const checkoutCreate = jest.fn().mockResolvedValue({ client_secret: "checkout-secret" });
     const getClient = jest.spyOn(service, "getClient").mockResolvedValue({

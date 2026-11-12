@@ -33,6 +33,7 @@ export function useUsersTableFilters() {
   const tableState = useUrlTableState({
     searchParam: USERS_TABLE_FILTER_PARAMS.KEYWORD,
     filterKeys: USERS_TABLE_FILTER_KEYS,
+    filterValidators: { [USERS_TABLE_FILTER_PARAMS.STATUS]: isUserStatusFilter },
     sortFields: USERS_TABLE_SORT_FIELDS,
     defaultPerPage: USERS_TABLE_DEFAULT_PAGE_SIZE,
   });

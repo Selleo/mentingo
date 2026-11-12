@@ -29,6 +29,7 @@ import {
   UpdatePromotionCode,
   updatePromotionCodeSchema,
 } from "./schemas/updatePromotionCode.schema";
+import { PROMOTION_CODES_MAX_PAGE_SIZE } from "./stripe.constants";
 import { StripeService } from "./stripe.service";
 import { StripeWebhookHandler } from "./stripeWebhook.handler";
 
@@ -147,7 +148,11 @@ export class StripeController {
     request: [
       { type: "query", name: "search", schema: Type.Optional(Type.String()) },
       { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
-      { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      {
+        type: "query",
+        name: "perPage",
+        schema: Type.Optional(Type.Number({ minimum: 1, maximum: PROMOTION_CODES_MAX_PAGE_SIZE })),
+      },
     ],
     response: paginatedResponse(Type.Array(promotionCodeSchema)),
   })

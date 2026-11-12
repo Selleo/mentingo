@@ -97,6 +97,12 @@ export default function ActivityLogsPage() {
 
   const tableState = useUrlTableState({
     filterKeys: ACTIVITY_LOGS_FILTER_KEYS,
+    filterValidators: {
+      [ACTIVITY_LOGS_FILTER_PARAMS.RESOURCE]: isActivityLogResourceType,
+      [ACTIVITY_LOGS_FILTER_PARAMS.ACTIONS]: (value) => parseActionTypes(value).length > 0,
+      [ACTIVITY_LOGS_FILTER_PARAMS.FROM]: (value) => Boolean(parseDate(value)),
+      [ACTIVITY_LOGS_FILTER_PARAMS.TO]: (value) => Boolean(parseDate(value)),
+    },
     defaultPerPage: ACTIVITY_LOGS_DEFAULT_PER_PAGE,
   });
   const { search, filters, page, perPage } = tableState;

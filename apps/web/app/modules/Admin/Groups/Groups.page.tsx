@@ -110,9 +110,14 @@ const Groups = (): ReactElement => {
 
   const deleteSelectedGroups = async (event: FormEvent) => {
     event.preventDefault();
-    await deleteGroups(selectedGroupIds);
-    setRowSelection({});
-    setIsDialogOpen(false);
+    try {
+      await deleteGroups(selectedGroupIds);
+      setRowSelection({});
+    } catch {
+      // The mutation shows the error; the selection stays so the user can retry.
+    } finally {
+      setIsDialogOpen(false);
+    }
   };
 
   return (

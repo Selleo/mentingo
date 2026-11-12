@@ -65,11 +65,10 @@ export class CourseCatalogService {
       sort,
     });
     const courseIds = data.map((item) => item.id);
-    const trailerUrls = await this.courseMediaUrlService.getCourseTrailerUrls(courseIds);
-    const durationEstimates = await this.courseDurationService.getCourseDurationDisplayMinutes(
-      courseIds,
-      language,
-    );
+    const [trailerUrls, durationEstimates] = await Promise.all([
+      this.courseMediaUrlService.getCourseTrailerUrls(courseIds),
+      this.courseDurationService.getCourseDurationDisplayMinutes(courseIds, language),
+    ]);
 
     const dataWithS3SignedUrls = await Promise.all(
       data.map(async (item) => {

@@ -32,7 +32,7 @@ import { DatabasePg, type UUIDType } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination } from "src/common/pagination";
 import { getGroupManagerCourseScopeCondition } from "src/common/permissions/group-manager-scope.utils";
-import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
@@ -592,9 +592,9 @@ export class CourseCatalogRepository {
   }
 
   /**
-   * Course editors with `COURSE_UPDATE` see every course; others see their own courses and, when
-   * they manage groups, the courses assigned to those groups. Learners who cannot manage courses
-   * see only the courses visible to them in the catalogue.
+   * Course editors with `COURSE_UPDATE` see every course. Everyone else sees the union of what
+   * each of their roles grants: their own courses, the courses assigned to groups they manage, and,
+   * unless they manage courses, the courses visible to them in the catalogue.
    */
   private buildCourseListAccessCondition({
     currentUser,
@@ -602,30 +602,24 @@ export class CourseCatalogRepository {
     currentUserPermissions = [],
   }: CourseListAccessScope): SQL | undefined {
     if (hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE)) return undefined;
+    if (!currentUserId) return sql`FALSE`;
 
-    const canReadManagedCourses = hasAnyPermission(currentUserPermissions, [
-      PERMISSIONS.COURSE_READ_MANAGEABLE,
-      PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
-    ]);
+    const learnerCourseCondition =
+      hasPermission(currentUserPermissions, PERMISSIONS.COURSE_READ_ASSIGNED) &&
+      !hasPermission(currentUserPermissions, PERMISSIONS.COURSE_READ_MANAGEABLE)
+        ? this.buildLearnerVisibleCourseCondition(currentUserId)
+        : undefined;
 
-    if (!canReadManagedCourses) {
-      return currentUserId ? this.buildLearnerVisibleCourseCondition(currentUserId) : sql`FALSE`;
-    }
+    const ownCourseCondition = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN)
+      ? eq(courses.authorId, currentUserId)
+      : undefined;
 
-    const canUpdateOwnCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN);
-    const ownCourseCondition =
-      currentUserId && canUpdateOwnCourse ? eq(courses.authorId, currentUserId) : undefined;
+    const managedCourseCondition =
+      currentUser && hasPermission(currentUser.permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
+        ? getGroupManagerCourseScopeCondition(currentUser, courses.id, [])
+        : undefined;
 
-    if (
-      !currentUser ||
-      !hasPermission(currentUser.permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
-    ) {
-      return ownCourseCondition;
-    }
-
-    const managedCourseCondition = getGroupManagerCourseScopeCondition(currentUser, courses.id, []);
-
-    return or(ownCourseCondition, managedCourseCondition) ?? sql`FALSE`;
+    return or(learnerCourseCondition, ownCourseCondition, managedCourseCondition) ?? sql`FALSE`;
   }
 
   /** Published courses open to everyone, plus published or private courses the learner is enrolled in. */
