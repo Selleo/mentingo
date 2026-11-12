@@ -47,6 +47,7 @@ export const CONTENT_LESSON_FORM_HANDLES = {
 export const QUIZ_LESSON_FORM_HANDLES = {
   ROOT: "curriculum-quiz-lesson-form",
   TITLE_INPUT: "curriculum-quiz-lesson-title-input",
+  TIME_LIMIT_INPUT: "curriculum-quiz-lesson-time-limit-input",
   SAVE_BUTTON: "curriculum-quiz-lesson-save-button",
   DELETE_BUTTON: "curriculum-quiz-lesson-delete-button",
   CANCEL_BUTTON: "curriculum-quiz-lesson-cancel-button",

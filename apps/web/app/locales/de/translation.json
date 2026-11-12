@@ -3192,13 +3192,15 @@
           "attemptsLimit": "Versuche beschränken sich",
           "quizCooldownInHours": "Zeitsperre nach Fehlversuchen (in Stunden)",
           "numberOfQuestions": "{{count1}} von {{count2}} Fragen",
-          "noQuestions": "Keine Fragen"
+          "noQuestions": "Keine Fragen",
+          "timeLimitMinutes": "Zeitlimit (hh:mm)"
         },
         "tooltip": {
           "switch": "Wenn diese Option aktiviert ist, hat der Schüler eine begrenzte Anzahl von Quizversuchen.",
           "passingThreshold": "Der prozentuale Schwellenwert für das Bestehen des Quiz. Erreicht ein Schüler diese Punktzahl, gilt das Quiz als bestanden.",
           "attemptsLimit": "Anzahl der erlaubten Quizversuche, bevor die Zeitsperre ausgelöst wird.",
-          "quizCooldownInHours": "Dauer der Quizsperre nach Ausschöpfung aller Versuche."
+          "quizCooldownInHours": "Dauer der Quizsperre nach Ausschöpfung aller Versuche.",
+          "timeLimitMinutes": "Optional. Wenn festgelegt, starten Lernende das Quiz ausdrücklich und ihre Antworten werden nach Ablauf der Zeit automatisch abgegeben. Leer lassen für kein Zeitlimit."
         },
         "validation": {
           "optionTextRequired": "Optionstext ist erforderlich",
@@ -3227,7 +3229,8 @@
           "sourceUrlInvalid": "Geben Sie eine gültige HTTPS-URL ein",
           "matchingPairsRequired": "Füge mindestens 2 Paare hinzu und fülle beide Seiten jedes Paares aus",
           "matchingMatchRequired": "Gib die Zuordnung für dieses Paar ein",
-          "matchingPairsUnique": "Jedes Paar braucht eine eindeutige Zuordnung"
+          "matchingPairsUnique": "Jedes Paar braucht eine eindeutige Zuordnung",
+          "timeLimitMinutes": "Gib ein Zeitlimit zwischen {{min}} und {{max}} ein."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Die Anzeigereihenfolge der Lektionen wurde erfolgreich aktualisiert",
@@ -4505,12 +4508,25 @@
       "courseEnrollmentRequired": "Sie sind nicht in diesen Kurs eingeschrieben.",
       "quizRetakeUnavailable": "Die Quizantworten können wegen des Versuchslimits oder der Wartezeit nicht zurückgesetzt werden.",
       "quizResetFailed": "Die Quizantworten konnten nicht zurückgesetzt werden. Bitte versuchen Sie es erneut.",
-      "quizAwaitingReview": "Dieses Quiz wartet auf eine Bewertung."
+      "quizAwaitingReview": "Dieses Quiz wartet auf eine Bewertung.",
+      "quizNotTimed": "Dieses Quiz hat kein Zeitlimit.",
+      "quizAttemptNotStarted": "Starte das Quiz, bevor du Antworten abgibst.",
+      "quizAttemptExpired": "Die Zeit für diesen Quizversuch ist abgelaufen.",
+      "quizDraftInvalid": "Deine Antworten konnten nicht automatisch gespeichert werden. Prüfe sie und versuche es erneut."
     },
     "preview": {
       "title": "Sie sehen eine Kursvorschau",
       "enrollmentDescription": "Schreiben Sie sich ein, um Quizze zu beantworten und Ihren Fortschritt zu speichern.",
       "learningModeDescription": "Aktivieren Sie den Lernmodus, um Quizze zu beantworten und Ihren Fortschritt zu verfolgen."
+    },
+    "timedQuiz": {
+      "info": "Der Timer startet, wenn du „Quiz starten“ wählst, und läuft weiter, auch wenn du die Seite verlässt. Deine Antworten werden automatisch gespeichert und nach Ablauf der Zeit abgegeben. Unbeantwortete Fragen werden mit 0 Punkten bewertet.",
+      "timeLimit": "Zeitlimit",
+      "questions": "Fragen",
+      "start": "Quiz starten",
+      "timeLeft": "Verbleibende Zeit: {{time}}",
+      "warning": "Weniger als eine Minute übrig. Deine Antworten werden nach Ablauf der Zeit automatisch abgegeben.",
+      "timeUp": "Die Zeit ist abgelaufen. Deine Antworten werden abgegeben."
     }
   },
   "studentCourseView": {

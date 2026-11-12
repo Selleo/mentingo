@@ -261,16 +261,26 @@ export const parseQuizFormData = (input: QuizForm) => {
     }
   };
 
-  const processFillInTheBlanks = (questionMap: Record<string, Record<string, string | null>>) => {
+  const processFillInTheBlanks = (
+    questionMap: Record<string, Record<string, string | null>>,
+    { keepBlankPositions }: { keepBlankPositions: boolean },
+  ) => {
     for (const questionId in questionMap) {
       const answers = questionMap[questionId];
-      const answerArray = Object.entries(answers)
-        .filter((entry): entry is [string, string] => {
-          const value = entry[1];
-
-          return typeof value === "string" && value.trim() !== "";
-        })
-        .map(([answerId, value]) => (/^\d+$/.test(answerId) ? { value } : { answerId, value }));
+      const isFilled = (value: string | null): value is string =>
+        typeof value === "string" && value.trim() !== "";
+      const entries = Object.entries(answers);
+      const lastFilledIndex = entries.reduce(
+        (last, [, value], index) => (isFilled(value) ? index : last),
+        -1,
+      );
+      const answerArray = entries.flatMap(([answerId, value], index) => {
+        const isPositional = /^\d+$/.test(answerId);
+        if (isFilled(value)) return [isPositional ? { value } : { answerId, value }];
+        // blanks without ids are graded by position, so an empty one before a filled one keeps its slot
+        if (keepBlankPositions && isPositional && index < lastFilledIndex) return [{ value: "" }];
+        return [];
+      });
 
       if (answerArray.length > 0) {
         result.push({
@@ -310,6 +320,9 @@ export const parseQuizFormData = (input: QuizForm) => {
 
   const processSimpleResponses = (questionMap: Record<string, string>) => {
     for (const questionId in questionMap) {
+      // timed quizzes can be submitted partially; an empty response is an unanswered question
+      if (!questionMap[questionId]) continue;
+
       result.push({
         questionId,
         answers: [
@@ -327,13 +340,70 @@ export const parseQuizFormData = (input: QuizForm) => {
   processSingleAnswerQuestions(input.singleAnswerQuestions);
   processSingleAnswerQuestions(input.photoQuestionSingleChoice);
   processSingleAnswerQuestions(input.multiAnswerQuestions);
-  processFillInTheBlanks(input.fillInTheBlanksText);
-  processFillInTheBlanks(input.fillInTheBlanksDnd);
+  processFillInTheBlanks(input.fillInTheBlanksText, { keepBlankPositions: true });
+  // shortcut: an empty drag-and-drop value is rejected by the API, so legacy id-less dnd blanks
+  // still shift when filled partially; upgrade if such quizzes get timed
+  processFillInTheBlanks(input.fillInTheBlanksDnd, { keepBlankPositions: false });
   processMatchingQuestions(input.matchingQuestions);
   processSingleAnswerQuestions(input.photoQuestionMultipleChoice);
   processBooleanQuestions(input.trueOrFalseQuestions);
 
   return result;
+};
+
+type OpenAnswerField = "briefResponses" | "detailedResponses";
+type OptionAnswerField = Exclude<keyof QuizForm, OpenAnswerField>;
+type QuizQuestionType = Questions[number]["type"];
+
+const OPEN_ANSWER_FIELDS: Partial<Record<QuizQuestionType, OpenAnswerField>> = {
+  brief_response: "briefResponses",
+  detailed_response: "detailedResponses",
+};
+
+const OPTION_ANSWER_FIELDS: Partial<Record<QuizQuestionType, OptionAnswerField>> = {
+  single_choice: "singleAnswerQuestions",
+  multiple_choice: "multiAnswerQuestions",
+  true_or_false: "trueOrFalseQuestions",
+  photo_question_single_choice: "photoQuestionSingleChoice",
+  photo_question_multiple_choice: "photoQuestionMultipleChoice",
+  fill_in_the_blanks_text: "fillInTheBlanksText",
+  fill_in_the_blanks_dnd: "fillInTheBlanksDnd",
+  matching: "matchingQuestions",
+  scale_1_5: "scaleQuestions",
+};
+
+/** Inverse of `parseQuizFormData`: restores autosaved timed-quiz answers into the quiz form. */
+export const getDraftQuizAnswers = (
+  questions: Questions,
+  draftAnswers: EvaluationQuizBody["questionsAnswers"],
+): QuizForm => {
+  const form = getEmptyQuizAnswers(questions);
+
+  draftAnswers.forEach(({ questionId, answers }) => {
+    const questionType = questions.find(({ id }) => id === questionId)?.type;
+    if (!questionType) return;
+
+    const openAnswerField = OPEN_ANSWER_FIELDS[questionType];
+    const optionAnswerField = OPTION_ANSWER_FIELDS[questionType];
+
+    if (openAnswerField) {
+      const [answer] = answers;
+      form[openAnswerField][questionId] = answer && "value" in answer ? answer.value : "";
+      return;
+    }
+
+    if (!optionAnswerField) return;
+
+    const questionMap = { ...form[optionAnswerField][questionId] };
+    answers.forEach((answer, index) => {
+      // blanks without ids are sent positionally (see parseQuizFormData), keyed "1", "2", ...
+      const key = "answerId" in answer ? answer.answerId : `${index + 1}`;
+      questionMap[key] = "value" in answer ? answer.value : answer.answerId;
+    });
+    form[optionAnswerField][questionId] = questionMap;
+  });
+
+  return form;
 };
 
 export function getCurrentChapterId(

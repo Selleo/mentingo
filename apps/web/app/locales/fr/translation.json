@@ -3186,13 +3186,15 @@
           "attemptsLimit": "Limite de tentatives",
           "quizCooldownInHours": "Verrouillage horaire après tentatives infructueuses (en heures)",
           "numberOfQuestions": "{{count1}} questions sur {{count2}}",
-          "noQuestions": "Aucune question"
+          "noQuestions": "Aucune question",
+          "timeLimitMinutes": "Limite de temps (hh:mm)"
         },
         "tooltip": {
           "switch": "Si cette option est activée, l'apprenant dispose d'un nombre limité de tentatives de quiz.",
           "passingThreshold": "Le seuil de pourcentage pour réussir le quiz. Si un apprenant atteint ce score, le quiz sera considéré comme réussi.",
           "attemptsLimit": "Nombre de tentatives de quiz autorisées avant le déclenchement du verrouillage horaire.",
-          "quizCooldownInHours": "Durée du verrouillage du quiz une fois que toutes les tentatives ont été utilisées."
+          "quizCooldownInHours": "Durée du verrouillage du quiz une fois que toutes les tentatives ont été utilisées.",
+          "timeLimitMinutes": "Facultatif. Si elle est définie, les apprenants démarrent le quiz explicitement et leurs réponses sont envoyées automatiquement à la fin du temps imparti. Laissez vide pour ne pas limiter le temps."
         },
         "validation": {
           "optionTextRequired": "Le texte de l'option est requis",
@@ -3221,7 +3223,8 @@
           "sourceUrlInvalid": "Saisissez une URL HTTPS valide",
           "matchingPairsRequired": "Ajoutez au moins 2 paires et remplissez les deux côtés de chaque paire",
           "matchingMatchRequired": "Renseignez la correspondance de cette paire",
-          "matchingPairsUnique": "Chaque paire doit avoir une correspondance unique"
+          "matchingPairsUnique": "Chaque paire doit avoir une correspondance unique",
+          "timeLimitMinutes": "Saisissez une limite de temps entre {{min}} et {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "L'ordre d'affichage des leçons a été mis à jour avec succès",
@@ -4253,12 +4256,25 @@
       "courseEnrollmentRequired": "Vous n'êtes pas inscrit à ce cours.",
       "quizRetakeUnavailable": "Les réponses au quiz ne peuvent pas être réinitialisées en raison de la limite de tentatives ou du temps de recharge.",
       "quizResetFailed": "Échec de la réinitialisation des réponses au quiz. Veuillez réessayer.",
-      "quizAwaitingReview": "Ce quiz est en attente d'évaluation."
+      "quizAwaitingReview": "Ce quiz est en attente d'évaluation.",
+      "quizNotTimed": "Ce quiz n’a pas de limite de temps.",
+      "quizAttemptNotStarted": "Démarrez le quiz avant d’envoyer vos réponses.",
+      "quizAttemptExpired": "Le temps imparti pour cette tentative de quiz est écoulé.",
+      "quizDraftInvalid": "Vos réponses n’ont pas pu être enregistrées automatiquement. Vérifiez-les et réessayez."
     },
     "preview": {
       "title": "Vous consultez un aperçu du cours",
       "enrollmentDescription": "Inscrivez-vous pour répondre aux quiz et enregistrer votre progression.",
       "learningModeDescription": "Activez le mode apprentissage pour répondre aux quiz et suivre votre progression."
+    },
+    "timedQuiz": {
+      "info": "Le chronomètre démarre lorsque vous sélectionnez « Démarrer le quiz » et continue même si vous quittez la page. Vos réponses sont enregistrées automatiquement et envoyées à la fin du temps imparti. Les questions sans réponse valent 0 point.",
+      "timeLimit": "Limite de temps",
+      "questions": "Questions",
+      "start": "Démarrer le quiz",
+      "timeLeft": "Temps restant : {{time}}",
+      "warning": "Il reste moins d’une minute. Vos réponses seront envoyées automatiquement à la fin du temps imparti.",
+      "timeUp": "Le temps est écoulé. Vos réponses sont en cours d’envoi."
     }
   },
   "studentCourseView": {

@@ -16,6 +16,8 @@ export { syncLessonVideoCompletionQueries, useLessonVideoProgress } from "./useL
 export { useRegisterUser } from "./useRegisterUser";
 export { useStripePaymentIntent } from "./useStripePaymentIntent";
 export { useSubmitQuiz } from "./useSubmitQuiz";
+export { useStartQuizAttempt } from "./useStartQuizAttempt";
+export { useSaveQuizAttemptDraft } from "./useSaveQuizAttemptDraft";
 export { useCommitScormRuntime, useFinishScormRuntime } from "./useScormRuntime";
 export { useUnenrollCourse } from "./useUnenrollCourse";
 export { useUpdateColorSchema } from "./useUpdateColorSchema";
