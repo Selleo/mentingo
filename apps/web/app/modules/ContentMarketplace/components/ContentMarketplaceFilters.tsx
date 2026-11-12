@@ -3,10 +3,10 @@ import { RotateCcw, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { OptionPicker } from "~/components/OptionPicker/OptionPicker";
 import { SearchInput } from "~/components/SearchInput/SearchInput";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import { ReportOptionPicker } from "~/modules/Reports/components/ReportOptionPicker";
 
 import { CONTENT_MARKETPLACE_FILTER_ALL } from "../contentMarketplace.constants";
 
@@ -37,7 +37,7 @@ export function ContentMarketplaceFilters({
 
   return (
     <section
-      aria-label={t("reports.filters.toggle")}
+      aria-label={t("common.dataTable.filters")}
       className="rounded-lg border border-neutral-200 bg-white"
     >
       <div className="flex flex-wrap items-center gap-2 p-4">
@@ -58,7 +58,7 @@ export function ContentMarketplaceFilters({
           onClick={() => setIsFiltersOpen((open) => !open)}
         >
           <SlidersHorizontal className="size-4" aria-hidden />
-          {t("reports.filters.toggle")}
+          {t("common.dataTable.filters")}
           {filterCount > 0 && (
             <span className="details-md rounded-full bg-brand px-1.5 text-contrast">
               {filterCount}
@@ -76,7 +76,7 @@ export function ContentMarketplaceFilters({
           }}
         >
           <RotateCcw className="size-4" aria-hidden />
-          {t("reports.filters.resetAll")}
+          {t("common.dataTable.resetFilters")}
         </Button>
       </div>
       {isFiltersOpen && (
@@ -88,7 +88,7 @@ export function ContentMarketplaceFilters({
             <span className="text-sm font-medium text-neutral-700">
               {t("contentMarketplace.category")}
             </span>
-            <ReportOptionPicker
+            <OptionPicker
               label={t("contentMarketplace.category")}
               placeholder={t("contentMarketplace.allCategories")}
               className="w-full"
@@ -107,7 +107,7 @@ export function ContentMarketplaceFilters({
             <span className="text-sm font-medium text-neutral-700">
               {t("contentMarketplace.duration")}
             </span>
-            <ReportOptionPicker
+            <OptionPicker
               label={t("contentMarketplace.duration")}
               placeholder={t("contentMarketplace.anyDuration")}
               className="w-full"

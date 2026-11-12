@@ -3,6 +3,7 @@ import { ArrowLeft, Package } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import { COURSES_TABLE_PATH } from "~/modules/Courses/utils/coursesView";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -42,7 +43,7 @@ const ScormCoursePlaceholderPage = () => {
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/admin/courses">{t("adminScorm.coursePlaceholder.viewCourses")}</Link>
+              <Link to={COURSES_TABLE_PATH}>{t("adminScorm.coursePlaceholder.viewCourses")}</Link>
             </Button>
           </div>
         </div>

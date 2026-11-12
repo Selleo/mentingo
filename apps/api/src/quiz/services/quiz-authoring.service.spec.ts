@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import {
   ASSESSMENT_ATTEMPT_LIMIT_MODES,
   ASSESSMENT_TIME_LIMIT_MINUTES,
+  ASSESSMENT_SCORING_MODES,
   LESSON_TYPES,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -24,7 +25,12 @@ const fixture = JSON.parse(
   ),
 ) as { payload: { questions: QuizAuthoringQuestion[] } };
 
-const questions = fixture.payload.questions.map((question) => ({ ...question, photoS3Key: null }));
+const questions = fixture.payload.questions.map((question) => ({
+  ...question,
+  photoS3Key: null,
+  scoringMode: ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING,
+  matchingPairs: [],
+}));
 
 describe("QuizAuthoringService.saveCanonicalLesson", () => {
   const language = "en" as SupportedLanguages;

@@ -2,7 +2,6 @@ import { CONTENT_MARKETPLACE_SORT, CONTENT_MARKETPLACE_DURATIONS } from "@repo/s
 import { type Static, Type } from "@sinclair/typebox";
 
 import { pagination, UUIDSchema } from "src/common";
-import { NATIVE_ARCHIVE_IMPORT_OUTCOMES } from "src/native-archive/native-archive.constants";
 
 import {
   CONTENT_MARKETPLACE_CATALOG_LIMITS,
@@ -97,18 +96,7 @@ export const contentMarketplaceImportSourceSchema = Type.Object({
   acquisitionId: UUIDSchema,
 });
 
-export const nativeArchiveImportFinishedEventSchema = Type.Object({
-  tenantId: UUIDSchema,
-  jobId: Type.String(),
-  actorId: UUIDSchema,
-  outcome: Type.Enum(NATIVE_ARCHIVE_IMPORT_OUTCOMES),
-  courseId: Type.Union([UUIDSchema, Type.Null()]),
-  failureCode: Type.Union([Type.String(), Type.Null()]),
-  importSource: Type.Record(Type.String(), Type.String()),
-  finishedAt: Type.String(),
-});
-
-export const contentMarketplaceCourseCopiedEventSchema = Type.Object({
+export const contentMarketplaceCourseCopiedDataSchema = Type.Object({
   tenantId: UUIDSchema,
   acquisitionId: UUIDSchema,
   status: Type.Enum(CONTENT_MARKETPLACE_COPY_STATUSES),
@@ -116,12 +104,8 @@ export const contentMarketplaceCourseCopiedEventSchema = Type.Object({
   occurredAt: Type.String(),
 });
 
-export const courseDuplicatedEventSchema = Type.Object({
-  tenantId: UUIDSchema,
-  sourceCourseId: UUIDSchema,
-  courseId: UUIDSchema,
-  actorId: UUIDSchema,
-  duplicatedAt: Type.String(),
+export const contentMarketplaceCourseCopiedEventSchema = Type.Object({
+  courseCopiedData: contentMarketplaceCourseCopiedDataSchema,
 });
 
 export const contentMarketplaceAnalyticsEventSchema = Type.Union([

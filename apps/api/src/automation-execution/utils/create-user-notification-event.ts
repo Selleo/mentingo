@@ -12,19 +12,23 @@ export function createUserNotificationEvent({
   accountActionIntentId,
   occurrenceId = randomUUID(),
 }: UserNotificationEventInput): NotificationEvent {
-  return new NotificationEvent(occurrenceId, kind, [
-    {
-      itemId: user.id,
-      email: user.email,
-      name: user.firstName,
-      language,
-      eventFields: {
-        ...eventFields,
-        userFirstName: user.firstName,
-        userLastName: user.lastName,
-        userEmail: user.email,
+  return new NotificationEvent({
+    occurrenceId,
+    kind,
+    recipients: [
+      {
+        itemId: user.id,
+        email: user.email,
+        name: user.firstName,
+        language,
+        eventFields: {
+          ...eventFields,
+          userFirstName: user.firstName,
+          userLastName: user.lastName,
+          userEmail: user.email,
+        },
+        ...(accountActionIntentId ? { accountActionIntentId } : {}),
       },
-      ...(accountActionIntentId ? { accountActionIntentId } : {}),
-    },
-  ]);
+    ],
+  });
 }

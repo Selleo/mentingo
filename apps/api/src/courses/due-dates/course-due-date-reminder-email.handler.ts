@@ -16,16 +16,17 @@ import { EmailService } from "src/common/emails/emails.service";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { AnnouncementPublishedEvent, CourseDueDateReminderEmailEvent } from "src/events";
 import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
-import { OutboxNotificationPreparationService } from "src/outbox/outbox-notification-preparation.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import type { CourseDueDateReminderRecipient } from "./course-due-date-reminder.types";
-import type { IEventHandler } from "@nestjs/cqrs";
+import type { OutboxDeliveryContext, OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 @Injectable()
+@OutboxEventsHandler(CourseDueDateReminderEmailEvent)
 export class CourseDueDateReminderEmailHandler
-  implements IEventHandler<CourseDueDateReminderEmailEvent>
+  implements OutboxEventsHandlerOf<CourseDueDateReminderEmailEvent>
 {
   private readonly logger = new Logger(CourseDueDateReminderEmailHandler.name);
 
@@ -35,20 +36,18 @@ export class CourseDueDateReminderEmailHandler
     private readonly outboxPublisher: OutboxPublisher,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly notificationCollectorService: NotificationCollectorService,
-    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
   ) {}
 
-  onModuleInit() {
-    this.outboxNotificationPreparationService.register(async (event) => {
-      if (!(event instanceof CourseDueDateReminderEmailEvent)) {
-        return [];
-      }
-
-      return this.notificationCollectorService.collectNotificationEvents(() => this.handle(event));
-    });
+  async handleOutboxEvent(
+    event: CourseDueDateReminderEmailEvent,
+    { eventId }: OutboxDeliveryContext,
+  ) {
+    await this.notificationCollectorService.publishCollectedNotifications(eventId, () =>
+      this.prepareNotifications(event),
+    );
   }
 
-  async handle(event: CourseDueDateReminderEmailEvent) {
+  private async prepareNotifications(event: CourseDueDateReminderEmailEvent) {
     const { recipients } = event.courseDueDateReminderEmailData;
 
     await processInBatches(recipients, (recipient) => this.sendCourseDueDateReminder(recipient), {

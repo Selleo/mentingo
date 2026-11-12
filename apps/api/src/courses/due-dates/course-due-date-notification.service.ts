@@ -89,11 +89,11 @@ export class CourseDueDateNotificationService {
     }
 
     await this.outboxPublisher.publish(
-      new NotificationEvent(
-        randomUUID(),
-        AUTOMATION_EVENT_KINDS.ADMIN_OVERDUE_COURSES,
+      new NotificationEvent({
+        occurrenceId: randomUUID(),
+        kind: AUTOMATION_EVENT_KINDS.ADMIN_OVERDUE_COURSES,
         recipients,
-        [
+        items: [
           {
             itemId: tenantId,
             eventFields: {
@@ -103,7 +103,7 @@ export class CourseDueDateNotificationService {
             },
           },
         ],
-      ),
+      }),
     );
   }
 

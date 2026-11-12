@@ -1,6 +1,6 @@
 import type { UUIDType } from "src/common";
 
-type QuizCompletedData = {
+export type QuizCompletedData = {
   userId: UUIDType;
   courseId: UUIDType;
   lessonId: UUIDType;
@@ -11,21 +11,5 @@ type QuizCompletedData = {
 };
 
 export class QuizCompletedEvent {
-  public readonly userId: UUIDType;
-  public readonly courseId: UUIDType;
-  public readonly lessonId: UUIDType;
-  public readonly correctAnswers: number;
-  public readonly wrongAnswers: number;
-  public readonly score: number;
-  public readonly isSupportMode: boolean;
-
-  constructor(data: QuizCompletedData) {
-    this.userId = data.userId;
-    this.courseId = data.courseId;
-    this.lessonId = data.lessonId;
-    this.correctAnswers = data.correctAnswers;
-    this.wrongAnswers = data.wrongAnswers;
-    this.score = data.score;
-    this.isSupportMode = data.isSupportMode;
-  }
+  constructor(public readonly quizCompletionData: QuizCompletedData) {}
 }

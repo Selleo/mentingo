@@ -634,8 +634,8 @@ export class CourseTransferCoordinator {
     sourceTenantId: string,
     transaction: DatabasePg,
   ): Promise<void> {
-    await this.outboxPublisher.publishDurable(
-      new CourseTransferRequestedEvent(operationId, sourceTenantId),
+    await this.outboxPublisher.publish(
+      new CourseTransferRequestedEvent({ operationId, sourceTenantId }),
       transaction,
     );
   }

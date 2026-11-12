@@ -73,6 +73,7 @@ type CourseBulkActionsProps = {
   onDuplicateCourse?: (courseId: string) => void;
   rowAction?: boolean;
   triggerTestId?: string;
+  className?: string;
 };
 
 export const CourseBulkActions = ({
@@ -83,6 +84,7 @@ export const CourseBulkActions = ({
   onDuplicateCourse,
   rowAction = false,
   triggerTestId,
+  className,
 }: CourseBulkActionsProps) => {
   const [selectedBulkAction, setSelectedBulkAction] = useState<BulkCourseAction | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
@@ -215,7 +217,7 @@ export const CourseBulkActions = ({
             icon: <Archive className="size-4 shrink-0" />,
             translationKey: "adminCoursesView.dropdown.archive",
             action: () => setSelectedBulkAction(BULK_COURSE_ACTION.ARCHIVE),
-            destructive: true,
+            destructive: false,
             testId: COURSES_PAGE_HANDLES.BULK_EDIT_ARCHIVE_ACTION,
           },
         ]
@@ -368,21 +370,14 @@ export const CourseBulkActions = ({
 
   return (
     <div
-      className={cn("ml-auto flex items-center gap-x-2 px-4 py-2", {
-        "flex items-center justify-end gap-2 p-0 text-right": rowAction,
-      })}
-    >
-      {!rowAction && (
-        <p
-          className={cn("text-sm", {
-            "text-neutral-900": !isEmpty(selectedCourseIds),
-            "text-neutral-500": isEmpty(selectedCourseIds),
-          })}
-        >
-          {t("common.other.selected")} ({selectedCourseIds.length})
-        </p>
+      className={cn(
+        "ml-auto flex items-center gap-x-2 px-4 py-2",
+        {
+          "flex items-center justify-end gap-2 p-0 text-right": rowAction,
+        },
+        className,
       )}
-
+    >
       <BulkEditDropdown
         dropdownItems={bulkDropdownItems}
         disabled={isEmpty(selectedCourseIds)}

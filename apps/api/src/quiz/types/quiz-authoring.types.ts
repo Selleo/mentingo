@@ -3,6 +3,7 @@ import type {
   AssessmentGradingMode,
   AssessmentAttemptLimitMode,
   AssessmentQuestionType,
+  AssessmentScoringMode,
   AssessmentTextComparisonMode,
   SupportedLanguages,
 } from "@repo/shared";
@@ -13,6 +14,7 @@ import type {
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionChoiceOptions,
   assessmentQuestionDragAndDropOptions,
+  assessmentQuestionMatchingPairs,
   assessmentQuestionOpenTextSettings,
   assessmentQuestionScaleOptions,
   assessmentQuestionTrueFalseStatements,
@@ -39,6 +41,7 @@ export type QuizAuthoringQuestion = {
   displayOrder: number;
   maximumPoints: string;
   gradingMode: AssessmentGradingMode;
+  scoringMode: AssessmentScoringMode;
   prompt: string;
   title: string;
   description: string | null;
@@ -49,6 +52,7 @@ export type QuizAuthoringQuestion = {
   openTextSettings: QuizAuthoringOpenTextSettings | null;
   blanks: QuizAuthoringBlank[];
   dragAndDropOptions: QuizAuthoringDragAndDropOption[];
+  matchingPairs: QuizAuthoringMatchingPair[];
 };
 
 export type QuizAuthoringOption = {
@@ -92,6 +96,13 @@ export type QuizAuthoringDragAndDropOption = {
   label: string;
   targetBlankId: UUIDType | null;
   displayOrder: number;
+};
+
+export type QuizAuthoringMatchingPair = {
+  id: UUIDType;
+  displayOrder: number;
+  prompt: string;
+  match: string;
 };
 
 export type QuizLessonCreateData = {
@@ -177,6 +188,7 @@ export type ScaleOptionRow = InferSelectModel<typeof assessmentQuestionScaleOpti
 export type OpenTextSettingsRow = InferSelectModel<typeof assessmentQuestionOpenTextSettings>;
 export type BlankRow = InferSelectModel<typeof assessmentQuestionBlanks>;
 export type DragAndDropOptionRow = InferSelectModel<typeof assessmentQuestionDragAndDropOptions>;
+export type MatchingPairRow = InferSelectModel<typeof assessmentQuestionMatchingPairs>;
 export type BlankAnswerSetRow = InferSelectModel<typeof assessmentQuestionBlankAnswerSets>;
 
 export type PromptImageRow = {
@@ -202,5 +214,6 @@ export type QuizAuthoringRows = {
   blanks: BlankRow[];
   answerSets: BlankAnswerSetRow[];
   dragOptions: LocalizedDragAndDropOptionRow[];
+  matchingPairs: MatchingPairRow[];
   promptImages: PromptImageRow[];
 };

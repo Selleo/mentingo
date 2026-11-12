@@ -1,21 +1,22 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import { ACTIVITY_LOG_RESOURCE_TYPES } from "@repo/shared";
 import { match, P } from "ts-pattern";
 
 import { AutomationActivityEvent } from "src/events/automation/automation-activity.event";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
 
 import type { ActivityLogMetadata } from "../types";
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 @Injectable()
-@EventsHandler(AutomationActivityEvent)
-export class AutomationActivityHandler implements IEventHandler<AutomationActivityEvent> {
+@OutboxEventsHandler(AutomationActivityEvent)
+export class AutomationActivityHandler implements OutboxEventsHandlerOf<AutomationActivityEvent> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle({ data }: AutomationActivityEvent) {
+  async handleOutboxEvent({ data }: AutomationActivityEvent) {
     const { actor, operation, resourceId, previous, resource } = data;
     const context = { name: resource?.name ?? previous?.name ?? "", ...data.context };
 

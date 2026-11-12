@@ -35,11 +35,13 @@ export type QuizAttemptFeedback = {
   attempt: {
     id: UUIDType;
     scorePercentage: string | null;
+    gradingStatus: AssessmentAttemptGradingStatus;
   };
   questionAnswers: Array<{
     id: UUIDType;
     questionId: UUIDType;
     awardedPoints: string | null;
+    gradingStatus: AssessmentAnswerGradingStatus;
   }>;
   choiceSelections: Array<{ questionAnswerId: UUIDType; selectedOptionId: UUIDType }>;
   statementAnswers: Array<{
@@ -55,19 +57,28 @@ export type QuizAttemptFeedback = {
   }>;
   scaleSelections: Array<{ questionAnswerId: UUIDType; selectedScaleOptionId: UUIDType }>;
   openTextAnswers: Array<{ questionAnswerId: UUIDType; submittedText: string }>;
+  matchingAnswers: QuizMatchingAnswer[];
+};
+
+export type QuizMatchingAnswer = {
+  questionAnswerId: UUIDType;
+  pairId: UUIDType;
+  submittedMatch: string;
 };
 
 export type PreparedQuizAttempt = {
   assessmentId: UUIDType;
+  // Questions that earned their full points.
+  correctAnswerCount: number;
   learnerId: UUIDType;
   language: SupportedLanguages;
   availablePoints: string;
-  awardedPoints: string;
-  scorePercentage: string;
+  awardedPoints: string | null;
+  scorePercentage: string | null;
   gradingStatus: AssessmentAttemptGradingStatus;
   result: AssessmentAttemptResult;
   submittedAt: string;
-  gradedAt: string;
+  gradedAt: string | null;
   questionAnswers: Array<{
     id: UUIDType;
     questionId: UUIDType;
@@ -89,6 +100,7 @@ export type PreparedQuizAttempt = {
   }>;
   openTextAnswers: Array<{ questionAnswerId: UUIDType; submittedText: string }>;
   scaleSelections: Array<{ questionAnswerId: UUIDType; selectedScaleOptionId: UUIDType }>;
+  matchingAnswers: QuizMatchingAnswer[];
 };
 
 export type QuizSubmission = AnswerQuestionBody;
@@ -99,6 +111,7 @@ export type QuizRuntimeSubmissionResult = {
   questionCount: number;
   score: number;
   passed: boolean;
+  awaitingReview: boolean;
   attemptId: UUIDType;
   attemptNumber: number;
 };

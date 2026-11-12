@@ -7,43 +7,34 @@ import { processInBatches } from "src/common/utils/processInBatches";
 import { CertificateArchivedEmailEvent } from "src/events/certificate/certificate-archived-email.event";
 import { CertificateExpirationWarningEmailEvent } from "src/events/certificate/certificate-expiration-warning-email.event";
 import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
-import { OutboxNotificationPreparationService } from "src/outbox/outbox-notification-preparation.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import type { CertificateActivityReason } from "../certificates.types";
-import type { IEventHandler } from "@nestjs/cqrs";
 import type { CertificateEmailRecipient } from "src/events/certificate/certificate-email-recipient";
 import type { CertificateExpirationWarningEmailRecipient } from "src/events/certificate/certificate-expiration-warning-email.event";
+import type { OutboxDeliveryContext, OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type CertificateEmailEventType =
   | CertificateExpirationWarningEmailEvent
   | CertificateArchivedEmailEvent;
 
 @Injectable()
-export class CertificateEmailHandler implements IEventHandler<CertificateEmailEventType> {
+@OutboxEventsHandler(CertificateExpirationWarningEmailEvent, CertificateArchivedEmailEvent)
+export class CertificateEmailHandler implements OutboxEventsHandlerOf<CertificateEmailEventType> {
   private readonly logger = new Logger(CertificateEmailHandler.name);
 
   constructor(
     private readonly emailService: EmailService,
     private readonly notificationCollectorService: NotificationCollectorService,
-    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
   ) {}
 
-  onModuleInit() {
-    this.outboxNotificationPreparationService.register(async (event) => {
-      if (
-        !(
-          event instanceof CertificateExpirationWarningEmailEvent ||
-          event instanceof CertificateArchivedEmailEvent
-        )
-      ) {
-        return [];
-      }
-
-      return this.notificationCollectorService.collectNotificationEvents(() => this.handle(event));
-    });
+  async handleOutboxEvent(event: CertificateEmailEventType, { eventId }: OutboxDeliveryContext) {
+    await this.notificationCollectorService.publishCollectedNotifications(eventId, () =>
+      this.prepareNotifications(event),
+    );
   }
 
-  async handle(event: CertificateEmailEventType) {
+  private async prepareNotifications(event: CertificateEmailEventType) {
     if (event instanceof CertificateExpirationWarningEmailEvent) {
       await this.sendExpirationWarningEmails(
         event.certificateExpirationWarningEmailData.certificates,

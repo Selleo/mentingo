@@ -10,6 +10,7 @@ import {
   assessmentAttempts,
   assessmentAttemptBlankAnswers,
   assessmentAttemptChoiceSelections,
+  assessmentAttemptMatchingAnswers,
   assessmentAttemptOpenTextAnswers,
   assessmentAttemptQuestionAnswers,
   assessmentAttemptScaleSelections,
@@ -27,6 +28,7 @@ import type {
   QuizAttemptBlankAnswerInsert,
   QuizAttemptOpenTextAnswerInsert,
   QuizAttemptScaleSelectionInsert,
+  QuizAttemptMatchingAnswerInsert,
 } from "./quiz-runtime.repository.types";
 
 @Injectable()
@@ -240,6 +242,11 @@ export class QuizRuntimeRepository {
     await db.insert(assessmentAttemptScaleSelections).values(values);
   }
 
+  async insertMatchingAnswers(values: QuizAttemptMatchingAnswerInsert[], db: DatabasePg) {
+    if (!values.length) return;
+    await db.insert(assessmentAttemptMatchingAnswers).values(values);
+  }
+
   async findLatestAttempt(
     assessmentId: UUIDType,
     learnerId: UUIDType,
@@ -250,6 +257,7 @@ export class QuizRuntimeRepository {
       .select({
         id: assessmentAttempts.id,
         scorePercentage: assessmentAttempts.scorePercentage,
+        gradingStatus: assessmentAttempts.gradingStatus,
         attemptNumber: assessmentAttempts.attemptNumber,
       })
       .from(assessmentAttempts)
@@ -280,6 +288,7 @@ export class QuizRuntimeRepository {
         id: assessmentAttemptQuestionAnswers.id,
         questionId: assessmentAttemptQuestionAnswers.questionId,
         awardedPoints: assessmentAttemptQuestionAnswers.awardedPoints,
+        gradingStatus: assessmentAttemptQuestionAnswers.gradingStatus,
       })
       .from(assessmentAttemptQuestionAnswers)
       .where(eq(assessmentAttemptQuestionAnswers.attemptId, attemptId));
@@ -325,5 +334,14 @@ export class QuizRuntimeRepository {
       .select()
       .from(assessmentAttemptOpenTextAnswers)
       .where(inArray(assessmentAttemptOpenTextAnswers.questionAnswerId, questionAnswerIds));
+  }
+
+  async findMatchingAnswers(questionAnswerIds: UUIDType[], db: DatabasePg = this.db) {
+    if (!questionAnswerIds.length) return [];
+
+    return db
+      .select()
+      .from(assessmentAttemptMatchingAnswers)
+      .where(inArray(assessmentAttemptMatchingAnswers.questionAnswerId, questionAnswerIds));
   }
 }

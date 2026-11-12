@@ -4,11 +4,10 @@ import { USER_ROLE } from "~/config/userRoles";
 
 import { LEADERBOARD_HANDLES } from "../../data/gamification/handles";
 import { NAVIGATION_HANDLES } from "../../data/navigation/handles";
-import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { createFixtureFactories } from "../../factories";
 import { expect, test } from "../../fixtures/test.fixture";
 import { prepareNavigationPageFlow } from "../../flows/navigation/prepare-navigation-page.flow";
-import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
+import { openFeaturesSettingsFlow } from "../../flows/settings/open-features-settings.flow";
 import {
   ensureLeaderboardFeatures,
   setLeaderboardFeatureState,
@@ -43,8 +42,7 @@ test("admin enables leaderboards in platform settings and the navigation entry a
     await prepareNavigationPageFlow(page);
     await expect(page.getByTestId(NAVIGATION_HANDLES.LEADERBOARDS_LINK)).toHaveCount(0);
 
-    await openSettingsPageFlow(page);
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB).click();
+    await openFeaturesSettingsFlow(page);
     await expect(page.getByTestId(LEADERBOARD_HANDLES.SETTINGS_CARD)).toBeVisible();
     await page.getByTestId(LEADERBOARD_HANDLES.SETTINGS_ENABLED_SWITCH).click();
 

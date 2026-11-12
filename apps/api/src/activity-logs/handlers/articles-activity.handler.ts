@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import { CreateArticleLanguageEvent } from "src/events/articles/create-article-language.event";
 import { CreateArticleEvent } from "src/events/articles/create-articles.event";
@@ -11,10 +10,13 @@ import { DeleteSectionLanguageEvent } from "src/events/articles/delete-section-l
 import { DeleteArticleSectionEvent } from "src/events/articles/delete-section.event";
 import { UpdateArticleEvent } from "src/events/articles/update-articles.event";
 import { UpdateArticleSectionEvent } from "src/events/articles/update-section.event";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type ArticleEventType =
   | CreateArticleEvent
@@ -42,28 +44,35 @@ const ArticleActivityEvents = [
 ] as const;
 
 @Injectable()
-@EventsHandler(...ArticleActivityEvents)
-export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> {
+@OutboxEventsHandler(...ArticleActivityEvents)
+export class ArticlesActivityHandler implements OutboxEventsHandlerOf<ArticleEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: ArticleEventType) {
+  async handleOutboxEvent(event: ArticleEventType) {
     if (event instanceof CreateArticleEvent) return await this.handleCreateArticle(event);
-    if (event instanceof DeleteArticleLanguageEvent)
+    if (event instanceof DeleteArticleLanguageEvent) {
       return await this.handleDeleteArticleLanguage(event);
-    if (event instanceof CreateArticleLanguageEvent)
+    }
+    if (event instanceof CreateArticleLanguageEvent) {
       return await this.handleCreateArticleLanguage(event);
+    }
     if (event instanceof UpdateArticleEvent) return await this.handleUpdateArticle(event);
     if (event instanceof DeleteArticleEvent) return await this.handleDeleteArticle(event);
-    if (event instanceof CreateSectionLanguageEvent)
+    if (event instanceof CreateSectionLanguageEvent) {
       return await this.handleCreateSectionLanguageEvent(event);
-    if (event instanceof DeleteSectionLanguageEvent)
+    }
+    if (event instanceof DeleteSectionLanguageEvent) {
       return await this.handleDeleteSectionLanguageEvent(event);
-    if (event instanceof CreateArticleSectionEvent)
+    }
+    if (event instanceof CreateArticleSectionEvent) {
       return await this.handleCreateArticleSection(event);
-    if (event instanceof UpdateArticleSectionEvent)
+    }
+    if (event instanceof UpdateArticleSectionEvent) {
       return await this.handleUpdateArticleSection(event);
-    if (event instanceof DeleteArticleSectionEvent)
+    }
+    if (event instanceof DeleteArticleSectionEvent) {
       return await this.handleDeleteArticleSection(event);
+    }
   }
 
   private async handleCreateArticle(event: CreateArticleEvent) {

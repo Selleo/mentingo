@@ -1,13 +1,15 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import {
   CreateLiveTrainingEvent,
   DeleteLiveTrainingEvent,
   UpdateLiveTrainingEvent,
 } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { LiveTrainingAnnouncementsService } from "../live-training-announcements.service";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type LiveTrainingAnnouncementEvent =
   | CreateLiveTrainingEvent
@@ -15,15 +17,15 @@ type LiveTrainingAnnouncementEvent =
   | DeleteLiveTrainingEvent;
 
 @Injectable()
-@EventsHandler(CreateLiveTrainingEvent, UpdateLiveTrainingEvent, DeleteLiveTrainingEvent)
+@OutboxEventsHandler(CreateLiveTrainingEvent, UpdateLiveTrainingEvent, DeleteLiveTrainingEvent)
 export class LiveTrainingAnnouncementsHandler
-  implements IEventHandler<LiveTrainingAnnouncementEvent>
+  implements OutboxEventsHandlerOf<LiveTrainingAnnouncementEvent>
 {
   constructor(
     private readonly liveTrainingAnnouncementsService: LiveTrainingAnnouncementsService,
   ) {}
 
-  async handle(event: LiveTrainingAnnouncementEvent) {
+  async handleOutboxEvent(event: LiveTrainingAnnouncementEvent) {
     if (event instanceof CreateLiveTrainingEvent) {
       return this.liveTrainingAnnouncementsService.syncStartsSoonReminder(
         event.liveTrainingCreationData.liveTrainingId,

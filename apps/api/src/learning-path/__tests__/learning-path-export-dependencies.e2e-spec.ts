@@ -1,5 +1,5 @@
 import { MASTER_COURSE_EXPORT_SYNC_STATUSES, SUPPORTED_LANGUAGES } from "@repo/shared";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, count, eq, sql } from "drizzle-orm";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import {
@@ -215,11 +215,16 @@ describe("Learning path sharing through course dependencies (e2e)", () => {
   };
 
   const countDispatchRequests = async (operationId: string) => {
-    const events = await dbAdmin
-      .select({ payload: outboxEvents.payload })
+    const [{ dispatchRequestCount }] = await dbAdmin
+      .select({ dispatchRequestCount: count() })
       .from(outboxEvents)
-      .where(eq(outboxEvents.eventType, CourseTransferRequestedEvent.name));
-    return events.filter(({ payload }) => payload.operationId === operationId).length;
+      .where(
+        and(
+          eq(outboxEvents.eventType, CourseTransferRequestedEvent.name),
+          sql`${outboxEvents.payload} #>> '{transferRequestData,operationId}' = ${operationId}`,
+        ),
+      );
+    return dispatchRequestCount;
   };
 
   const transferCourses = async (sourceCourseIds: UUIDType[]) => {

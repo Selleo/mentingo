@@ -35,6 +35,8 @@ def node_or_skip():
 def picture(path):
     """The MD5 of an image's decoded pixels (FFmpeg's framemd5): two JPEGs of one picture, encoded apart, match. None
     without FFmpeg or a picture."""
+    if os.environ.get('RELEASE_FILM_UNIT_ONLY') == '1':
+        return None  # Pixel comparisons are covered by the manual media suite.
     ffmpeg = shutil.which('ffmpeg')
     if not ffmpeg:
         return None

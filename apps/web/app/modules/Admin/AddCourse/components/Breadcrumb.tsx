@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 import { Button } from "~/components/ui/button";
+import { COURSES_TABLE_PATH } from "~/modules/Courses/utils/coursesView";
 
 type BreadcrumbProps = {
   backTo?: string;
@@ -17,7 +18,7 @@ type BreadcrumbProps = {
 };
 
 const Breadcrumb = ({
-  backTo = "/admin/courses",
+  backTo = COURSES_TABLE_PATH,
   currentLabel,
   backButtonTestId,
 }: BreadcrumbProps) => {

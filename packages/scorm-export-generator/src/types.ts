@@ -89,6 +89,7 @@ export type ScormExportQuizLessonSnapshot = ScormExportBaseLessonSnapshot & {
 export type ScormExportQuizQuestion = {
   id: string;
   type: string;
+  scoringMode?: string | null;
   title: string;
   description?: string | null;
   solutionExplanation?: string | null;

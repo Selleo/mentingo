@@ -8,9 +8,10 @@ import type { DndWord } from "./types";
 
 type WordBankProps = {
   words: DndWord[];
+  wrapText?: boolean;
 };
 
-export const WordBank = ({ words }: WordBankProps) => {
+export const WordBank = ({ words, wrapText }: WordBankProps) => {
   const { setNodeRef } = useDroppable({
     id: "blank_preset",
     data: {
@@ -23,7 +24,7 @@ export const WordBank = ({ words }: WordBankProps) => {
       const updatedWord =
         word.value !== word.studentAnswerText ? { ...word, studentAnswerText: word.value } : word;
 
-      return <DraggableWord key={word.id} word={updatedWord ?? word} />;
+      return <DraggableWord key={word.id} word={updatedWord ?? word} wrapText={wrapText} />;
     });
   };
   const { t } = useTranslation();
@@ -40,6 +41,7 @@ export const WordBank = ({ words }: WordBankProps) => {
         {t("studentLessonView.other.answers")}
         <div
           ref={setNodeRef}
+          data-testid="blank_preset"
           className="flex min-h-12 min-w-20 flex-wrap items-center gap-2 rounded-lg"
         >
           {draggableWords}

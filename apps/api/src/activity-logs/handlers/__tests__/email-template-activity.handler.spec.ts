@@ -11,7 +11,7 @@ import {
   RestoreEmailTemplateEvent,
   UpdateEmailTemplateEvent,
 } from "src/events";
-import { materializeLegacyEvent } from "src/outbox/outbox.event-registry";
+import { rehydrateOutboxEvent } from "src/outbox/utils/outbox-event-rehydration.utils";
 
 import { EmailTemplateActivityHandler } from "../email-template-activity.handler";
 
@@ -56,9 +56,9 @@ describe("EmailTemplateActivityHandler", () => {
     [DeleteEmailTemplateEvent, "delete"],
   ] as const)("records %s as %s", async (Event, expectedAction) => {
     const original = new Event({ actor, resource });
-    const materialized = materializeLegacyEvent(Event.name, JSON.parse(JSON.stringify(original)));
+    const materialized = rehydrateOutboxEvent(Event, JSON.parse(JSON.stringify(original)));
     expect(materialized).toBeInstanceOf(Event);
-    await handler.handle(materialized as typeof original);
+    await handler.handleOutboxEvent(materialized as typeof original);
 
     expect(recordActivity).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -74,7 +74,9 @@ describe("EmailTemplateActivityHandler", () => {
     const previous = { ...resource, name: "Reset password" };
     const updated = { ...resource, name: "Reset your password" };
 
-    await handler.handle(new UpdateEmailTemplateEvent({ actor, resource: updated, previous }));
+    await handler.handleOutboxEvent(
+      new UpdateEmailTemplateEvent({ actor, resource: updated, previous }),
+    );
 
     expect(recordActivity).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -86,7 +88,7 @@ describe("EmailTemplateActivityHandler", () => {
   });
 
   it("keeps declared changed fields when an event has no value snapshots", async () => {
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new UpdateEmailTemplateEvent({
         actor,
         resource,
@@ -103,7 +105,7 @@ describe("EmailTemplateActivityHandler", () => {
   });
 
   it("keeps safe content edit details in activity context", async () => {
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new UpdateEmailTemplateEvent({
         actor,
         resource,
@@ -128,7 +130,7 @@ describe("EmailTemplateActivityHandler", () => {
       pl: { name: "Zresetuj hasło", subject: "Nowy temat", content: { text: "Nowa treść" } },
     };
 
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new UpdateEmailTemplateEvent({
         actor,
         resource: updated,
@@ -159,7 +161,7 @@ describe("EmailTemplateActivityHandler", () => {
       baseLanguage: resource.baseLanguage,
       availableLocales: resource.availableLocales,
     };
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new UpdateEmailTemplateEvent({
         actor,
         previous: { ...snapshot, de: { name: "Kurszuweisung" } },
@@ -178,7 +180,7 @@ describe("EmailTemplateActivityHandler", () => {
   it.each([AddEmailTemplateLanguageEvent, RemoveEmailTemplateLanguageEvent])(
     "keeps the language code in %s context",
     async (Event) => {
-      await handler.handle(
+      await handler.handleOutboxEvent(
         new Event({
           actor,
           resource: { ...resource, availableLocales: ["en", "pl"] },

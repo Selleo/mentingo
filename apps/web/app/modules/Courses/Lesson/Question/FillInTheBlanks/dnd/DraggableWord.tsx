@@ -13,6 +13,7 @@ type DraggableWordProps = {
   isStudentAnswer?: boolean;
   disabled?: boolean;
   stretchToContainer?: boolean;
+  wrapText?: boolean;
 };
 
 export const DraggableWord = ({
@@ -22,6 +23,7 @@ export const DraggableWord = ({
   isStudentAnswer,
   disabled,
   stretchToContainer,
+  wrapText,
 }: DraggableWordProps) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({
     id: word.id,
@@ -62,8 +64,10 @@ export const DraggableWord = ({
       ref={setNodeRef}
       style={wordStyle}
       className={cn(
-        "inline-flex items-center whitespace-nowrap will-change-transform transition-[transform,box-shadow] duration-300 ease-out",
+        "inline-flex touch-none items-center whitespace-nowrap will-change-transform transition-[transform,box-shadow] duration-300 ease-out",
         stretchToContainer ? "h-full w-full justify-center rounded-none" : "w-max",
+        // w-max would let a long word widen the whole lesson column.
+        wrapText && "w-auto max-w-full whitespace-normal text-left [overflow-wrap:anywhere]",
         !isDragging
           ? quizWordStyle
           : "rounded-md bg-gray-100 px-2 py-1 text-neutral-700 blur-[0.3px]",

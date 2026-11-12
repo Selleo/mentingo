@@ -1,6 +1,6 @@
 id: aiJudgeConfigurationGeneratorImprove
 description: Improve-mode add-on for the AI Judge configuration Generator
-version: 1
+version: 2
 
 template: |
   <generation_mode>
@@ -9,6 +9,7 @@ template: |
 
   <mode_rules>
   - Return a complete replacement configuration, not a patch or explanation.
+  - Preserve the existing learner/counterpart roles and assessment perspective throughout taskGoal, criteria, and examples. Clarifying wording does not authorize a role swap.
   - Preserve sound content that the creator did not ask to change. Make the smallest coherent set of changes needed to satisfy the creator's instruction.
   - Copy every unaffected field exactly as provided, character for character. Do not paraphrase, shorten, polish, normalize, or restyle content outside the requested improvement.
   - When validation findings are supplied, every changed field must be traceable to a finding or be strictly required to keep an affected field coherent.

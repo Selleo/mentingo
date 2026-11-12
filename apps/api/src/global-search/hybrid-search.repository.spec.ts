@@ -16,6 +16,7 @@ describe("HybridSearchRepository HNSW retrieval coordination", () => {
     roleSlugs: [],
   };
   const embedding = [1, ...Array<number>(1535).fill(0)];
+  const openAiSpace = { model: "text-embedding-3-small" };
   const match = (id: string, candidateCount: number) => ({
     entityId: id,
     languages: ["en"],
@@ -58,6 +59,8 @@ describe("HybridSearchRepository HNSW retrieval coordination", () => {
       200,
       [],
       false,
+      false,
+      openAiSpace,
     );
     expect(candidates).toHaveBeenNthCalledWith(
       2,
@@ -67,6 +70,8 @@ describe("HybridSearchRepository HNSW retrieval coordination", () => {
       400,
       [first],
       false,
+      false,
+      openAiSpace,
     );
     expect(rows.map((row) => row.entityId)).toEqual([first, second]);
     expect(rows[0]).not.toHaveProperty("candidateCount");
@@ -94,6 +99,8 @@ describe("HybridSearchRepository HNSW retrieval coordination", () => {
       1600,
       ids.slice(0, 3),
       false,
+      false,
+      openAiSpace,
     );
     expect(execute).toHaveBeenCalledTimes(5);
   });
@@ -197,6 +204,34 @@ describe("HybridSearchRepository MCP learner lesson eligibility", () => {
     const gate = sourceBranch.match(/AND \$(\d+)\s+AND/);
     expect(gate).not.toBeNull();
     expect(keyword.params[Number(gate![1]) - 1]).toBe(false);
+  });
+
+  it("compares the query vector only with chunks from the model that produced it", () => {
+    const repository = new HybridSearchRepository({} as DatabasePg);
+    const query = dialect.sqlToQuery(
+      repository.buildSemanticCandidateQuery(
+        SEARCH_ENTITY_TYPES.COURSE,
+        [1, 0],
+        actor,
+        200,
+        [],
+        false,
+        false,
+        { model: "Qwen/Qwen3-Embedding-4B" },
+      ),
+    );
+    expect(query.sql).toContain("c.embedding_model =");
+    expect(query.sql).toContain("c.index_version =");
+    expect(query.params).toEqual(expect.arrayContaining(["Qwen/Qwen3-Embedding-4B"]));
+  });
+
+  it("refuses a query vector from another embedding size", async () => {
+    const transaction = jest.fn();
+    const repository = new HybridSearchRepository({ transaction } as unknown as DatabasePg);
+    await expect(
+      repository.findSemanticMatches(SEARCH_ENTITY_TYPES.COURSE, Array(2560).fill(0.1), actor),
+    ).rejects.toThrow("Query embedding does not match the configured semantic search space");
+    expect(transaction).not.toHaveBeenCalled();
   });
 
   it("does not substitute management permissions when learner permissions are absent", async () => {

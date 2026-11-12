@@ -365,6 +365,8 @@ export class CourseTransferMaterializerService {
       authorMetadata: toNullableJsonbBuildObject(duplicatedCourseValues.authorMetadata),
       title: toJsonbBuildObject(targetCourse.title),
       description: toJsonbBuildObject(sourceSnapshot.course.description),
+      learningOutcomes: toJsonbBuildObject(duplicatedCourseValues.learningOutcomes),
+      durationEstimates: toJsonbBuildObject(duplicatedCourseValues.durationEstimates),
       thumbnailS3Key: getCopiedInternalReference(
         resourceCollection,
         COURSE_TRANSFER_RESOURCE_GROUPS.COURSES,
@@ -537,7 +539,7 @@ export class CourseTransferMaterializerService {
       );
     }
 
-    await this.outboxPublisher.publishDurable(
+    await this.outboxPublisher.publish(
       new LearningPathExportAppliedEvent({
         tenantId: input.targetTenantId,
         learningPathId: targetLearningPathId,
@@ -635,7 +637,7 @@ export class CourseTransferMaterializerService {
         params.sourceSnapshot.course.thumbnailS3Key,
       ),
       thumbnailPositionY: params.sourceSnapshot.course.thumbnailPositionY,
-      learningOutcomes: params.sourceSnapshot.course.learningOutcomes,
+      learningOutcomes: toJsonbBuildObject(params.sourceSnapshot.course.learningOutcomes),
       showAuthorSection: params.sourceSnapshot.course.showAuthorSection,
       status: "draft",
       hasCertificate: params.sourceSnapshot.course.hasCertificate,
@@ -743,7 +745,7 @@ export class CourseTransferMaterializerService {
         course.thumbnailS3Key,
       ),
       thumbnailPositionY: course.thumbnailPositionY,
-      learningOutcomes: course.learningOutcomes,
+      learningOutcomes: toJsonbBuildObject(course.learningOutcomes),
       showAuthorSection: course.showAuthorSection,
       hasCertificate: course.hasCertificate,
       priceInCents: 0,
@@ -974,6 +976,7 @@ export class CourseTransferMaterializerService {
               title: toJsonbBuildObject(sourceQuestion.title),
               displayOrder: sourceQuestion.displayOrder,
               gradingMode: sourceQuestion.gradingMode,
+              scoringMode: sourceQuestion.scoringMode,
               solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
               photoS3Key: getCopiedInternalReference(
                 params.resourceCollection,
@@ -998,6 +1001,7 @@ export class CourseTransferMaterializerService {
         title: toJsonbBuildObject(sourceQuestion.title),
         displayOrder: sourceQuestion.displayOrder,
         gradingMode: sourceQuestion.gradingMode,
+        scoringMode: sourceQuestion.scoringMode,
         solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
         photoS3Key: getCopiedInternalReference(
           params.resourceCollection,
@@ -1222,13 +1226,34 @@ export class CourseTransferMaterializerService {
         ({ id }) => uuidv5(id, params.targetCourseId) as UUIDType,
       );
 
+    const targetMatchingPairIds = params.sourceSnapshot.assessmentQuestionMatchingPairs.map(
+      ({ id }) => uuidv5(id, params.targetCourseId) as UUIDType,
+    );
+
     await this.courseTransferGraphRepository.deleteStaleTargetQuestionDetails({
       questionIds: targetQuestionIds,
       scaleOptionIds: targetScaleOptionIds,
       trueFalseStatementIds: targetTrueFalseStatementIds,
       blankIds: targetBlankIds,
       dragAndDropOptionIds: targetDragAndDropOptionIds,
+      matchingPairIds: targetMatchingPairIds,
     });
+    await this.courseTransferGraphRepository.parkTargetMatchingPairs(targetQuestionIds);
+
+    for (const sourcePair of params.sourceSnapshot.assessmentQuestionMatchingPairs) {
+      const targetQuestionId = params.questionMap.get(sourcePair.questionId);
+
+      if (!targetQuestionId) continue;
+
+      await this.courseTransferGraphRepository.upsertTargetMatchingPair({
+        id: uuidv5(sourcePair.id, params.targetCourseId) as UUIDType,
+        questionId: targetQuestionId,
+        language: sourcePair.language,
+        displayOrder: sourcePair.displayOrder,
+        prompt: sourcePair.prompt,
+        match: sourcePair.match,
+      });
+    }
 
     for (const sourceOption of params.sourceSnapshot.assessmentQuestionScaleOptions) {
       const targetQuestionId = params.questionMap.get(sourceOption.questionId);
@@ -2155,8 +2180,8 @@ export class CourseTransferMaterializerService {
   ): Promise<void> {
     if (!getBunnyVideoId(reference)) return;
 
-    await this.outboxPublisher.publishDurable(
-      new CourseTransferVideoMetadataRequestedEvent(tenantId, resourceId, reference),
+    await this.outboxPublisher.publish(
+      new CourseTransferVideoMetadataRequestedEvent({ tenantId, resourceId, fileKey: reference }),
       transaction,
     );
   }

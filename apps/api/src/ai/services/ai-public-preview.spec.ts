@@ -41,7 +41,7 @@ function fixture(preview = true, enrolled = false) {
   const stream = { source: AI_RUNTIME_SOURCES.CORE };
   const aiRuntimeService = { streamMentorChat: jest.fn(async () => stream) };
   const judgeService = { evaluate: jest.fn() };
-  const outboxPublisher = { publishDurable: jest.fn() };
+  const outboxPublisher = { publish: jest.fn() };
   const service = Object.assign(Object.create(AiService.prototype), {
     aiRepository,
     aiRuntimeService,
@@ -96,7 +96,7 @@ describe("public course AI Mentor previews", () => {
       service.streamMessage({ threadId, content: "Hello" }, "model" as never, student),
     ).resolves.toBe(stream);
     expect(aiRuntimeService.streamMentorChat).toHaveBeenCalledTimes(1);
-    expect(outboxPublisher.publishDurable).not.toHaveBeenCalled();
+    expect(outboxPublisher.publish).not.toHaveBeenCalled();
   });
 
   it("checks eligibility again before streaming, including when the organization disables previews", async () => {
@@ -134,7 +134,7 @@ describe("public course AI Mentor previews", () => {
       expect.anything(),
     );
     expect(aiRepository.resetStudentProgressForLesson).not.toHaveBeenCalled();
-    expect(outboxPublisher.publishDurable).not.toHaveBeenCalled();
+    expect(outboxPublisher.publish).not.toHaveBeenCalled();
   });
 
   it("denies an unenrolled retake when preview eligibility is revoked", async () => {
@@ -149,7 +149,7 @@ describe("public course AI Mentor previews", () => {
     const { service, aiRepository, outboxPublisher } = fixture(false, true);
     await service.retakeLesson(lessonId, student);
     expect(aiRepository.resetStudentProgressForLesson).toHaveBeenCalled();
-    expect(outboxPublisher.publishDurable).toHaveBeenCalled();
+    expect(outboxPublisher.publish).toHaveBeenCalled();
   });
 
   it("denies public-preview grading before calling the judge", async () => {

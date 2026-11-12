@@ -1,6 +1,7 @@
 import type {
   AssessmentGradingMode,
   AssessmentQuestionType,
+  AssessmentScoringMode,
   AssessmentTextComparisonMode,
   EntityType,
   LocalizedText,
@@ -32,6 +33,7 @@ import type {
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionBlanks,
   assessmentQuestionDragAndDropOptions,
+  assessmentQuestionMatchingPairs,
   assessmentQuestionOpenTextSettings,
   assessmentQuestionScaleOptions,
   assessmentQuestionTrueFalseStatements,
@@ -132,23 +134,30 @@ export type CourseSelect = InferSelectModel<typeof courses>;
 
 export type CourseInsert = InferInsertModel<typeof courses>;
 
-export type CourseJsonbInsert = Omit<
-  CourseInsert,
-  "title" | "description" | "settings" | "authorMetadata"
-> & {
+type CourseJsonbColumn =
+  | "title"
+  | "description"
+  | "settings"
+  | "authorMetadata"
+  | "learningOutcomes"
+  | "durationEstimates";
+
+export type CourseJsonbInsert = Omit<CourseInsert, CourseJsonbColumn> & {
   title: SQL<unknown>;
   description: SQL<unknown>;
   settings: SQL<unknown>;
   authorMetadata?: SQL<unknown> | null;
+  learningOutcomes?: SQL<unknown>;
+  durationEstimates?: SQL<unknown>;
 };
 
-export type CourseJsonbUpdate = Partial<
-  Omit<CourseInsert, "title" | "description" | "settings" | "authorMetadata">
-> & {
+export type CourseJsonbUpdate = Partial<Omit<CourseInsert, CourseJsonbColumn>> & {
   title?: SQL<unknown>;
   description?: SQL<unknown>;
   settings?: SQL<unknown>;
   authorMetadata?: SQL<unknown> | null;
+  learningOutcomes?: SQL<unknown>;
+  durationEstimates?: SQL<unknown>;
 };
 
 export type CategorySelect = InferSelectModel<typeof categories>;
@@ -200,6 +209,7 @@ export type QuestionSelect = {
   displayOrder: number;
   photoS3Key: string | null;
   gradingMode: AssessmentGradingMode;
+  scoringMode: AssessmentScoringMode;
   authorId: UUIDType | null;
   createdAt: string;
   updatedAt: string;
@@ -253,6 +263,10 @@ export type AssessmentQuestionBlankAnswerSetSelect = InferSelectModel<
 
 export type AssessmentQuestionDragAndDropOptionSelect = InferSelectModel<
   typeof assessmentQuestionDragAndDropOptions
+>;
+
+export type AssessmentQuestionMatchingPairSelect = InferSelectModel<
+  typeof assessmentQuestionMatchingPairs
 >;
 
 export type AssessmentQuestionScaleOptionSelect = InferSelectModel<
@@ -311,6 +325,15 @@ export type UpsertTargetDragAndDropOptionValues = {
   displayOrder: number;
 };
 
+export type UpsertTargetMatchingPairValues = {
+  id: UUIDType;
+  questionId: UUIDType;
+  language: SupportedLanguages;
+  displayOrder: number;
+  prompt: string;
+  match: string;
+};
+
 export type UpsertTargetScaleOptionValues = {
   id: UUIDType;
   questionId: UUIDType;
@@ -334,6 +357,7 @@ export type DeleteStaleTargetQuestionDetailsValues = {
   trueFalseStatementIds: UUIDType[];
   blankIds: UUIDType[];
   dragAndDropOptionIds: UUIDType[];
+  matchingPairIds: UUIDType[];
 };
 
 export type DuplicateChaptersParams = {
@@ -544,6 +568,7 @@ export type SourceSnapshot = {
   assessmentQuestionBlanks: Array<AssessmentQuestionBlankSelect>;
   assessmentQuestionBlankAnswerSets: Array<AssessmentQuestionBlankAnswerSetSelect>;
   assessmentQuestionDragAndDropOptions: Array<AssessmentQuestionDragAndDropOptionSelect>;
+  assessmentQuestionMatchingPairs: Array<AssessmentQuestionMatchingPairSelect>;
   assessmentQuestionScaleOptions: Array<AssessmentQuestionScaleOptionSelect>;
   assessmentQuestionTrueFalseStatements: Array<AssessmentQuestionTrueFalseStatementSelect>;
   questionResources: Array<ResourceWithRelation>;

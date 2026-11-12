@@ -1,5 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, type SupportedLanguages } from "@repo/shared";
+import {
+  COURSE_ENROLLMENT,
+  LEARNER_PROGRESS_STATUSES,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
@@ -7,6 +11,7 @@ import { getGroupManagerCourseScopeCondition } from "src/common/permissions/grou
 import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
+import { quizAwaitingReview } from "src/quiz/quiz-awaiting-review.sql";
 import { DB } from "src/storage/db/db.providers";
 import {
   assessmentQuestions,
@@ -217,6 +222,9 @@ export class CourseDetailRepository {
                       studentLessonProgress.isQuizPassed
                     } IS TRUE OR ${studentLessonProgress.isQuizPassed} IS NULL) THEN ${
                       PROGRESS_STATUSES.COMPLETED
+                    }
+                    WHEN ${quizAwaitingReview(lessons.id, userId)} THEN ${
+                      LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW
                     }
                     WHEN ${studentLessonProgress.isStarted} THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}

@@ -49,6 +49,7 @@ import { SessionRevocationService } from "src/redis";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { SupportModeService } from "src/support-mode/support-mode.service";
+import { WsGateway } from "src/websocket/websocket.gateway";
 
 import {
   courseStudentMode,
@@ -105,6 +106,7 @@ export class AuthService {
     private readonly userPasswordEmailService: UserPasswordEmailService,
     private readonly notificationAccountActionService: NotificationAccountActionService,
     private readonly loginMethodsService: LoginMethodsService,
+    private readonly wsGateway: WsGateway,
   ) {}
 
   public async register({
@@ -616,6 +618,19 @@ export class AuthService {
     return { ...tokens, session };
   }
 
+  /**
+   * Revokes the session and closes its sockets at once, across API instances, so a logged-out
+   * socket stops receiving pushes. The sockets close even if recording the revocation fails; the
+   * outbox event closes any socket this call could not reach.
+   */
+  async revokeSessionAndCloseSockets(user: CurrentUserType) {
+    try {
+      await this.sessionService.revokeSession(user);
+    } finally {
+      if (user.sessionId) this.wsGateway.disconnectSession(user.sessionId);
+    }
+  }
+
   async revokeSupportSession(sessionId: string) {
     await this.supportModeService.revokeSession(sessionId);
     await this.sessionService.revokeSupportSessionMfaAssurance(sessionId);
@@ -823,7 +838,7 @@ export class AuthService {
       sessionVersion: user.sessionVersion,
     });
 
-    await this.sessionService.revokeSession(user);
+    await this.revokeSessionAndCloseSockets(user);
     this.tokenService.setTemporaryTokenCookies(response, tokens.accessToken);
 
     return this.sessionService.verifySessionToken(

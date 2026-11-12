@@ -661,7 +661,7 @@ export class AiService {
       await this.aiRepository.setThreadsToArchived(lessonId, userId, trx);
       if (isPublicPreview) return;
       await this.aiRepository.resetStudentProgressForLesson(lessonId, userId, trx);
-      await this.outboxPublisher.publishDurable(
+      await this.outboxPublisher.publish(
         new LessonProgressChangedEvent({
           userId,
           courseId: lesson.courseId,

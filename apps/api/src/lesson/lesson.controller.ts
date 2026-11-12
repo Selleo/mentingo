@@ -503,6 +503,7 @@ export class LessonController {
           wrongAnswerCount: Type.Number(),
           questionCount: Type.Number(),
           score: Type.Number(),
+          awaitingReview: Type.Boolean(),
         }),
       }),
     ),
@@ -518,6 +519,7 @@ export class LessonController {
         wrongAnswerCount: number;
         questionCount: number;
         score: number;
+        awaitingReview: boolean;
       };
     }>
   > {

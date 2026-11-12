@@ -369,7 +369,11 @@ export class UserImportService {
       });
     }
     await this.outboxPublisher.publish(
-      new NotificationEvent(randomUUID(), AUTOMATION_EVENT_KINDS.USER_INVITE, recipients),
+      new NotificationEvent({
+        occurrenceId: randomUUID(),
+        kind: AUTOMATION_EVENT_KINDS.USER_INVITE,
+        recipients,
+      }),
       trx,
     );
 

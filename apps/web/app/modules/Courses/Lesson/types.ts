@@ -37,6 +37,11 @@ export type QuizForm = {
       [key: string]: string | null;
     };
   };
+  matchingQuestions: {
+    [key: string]: {
+      [key: string]: string | null;
+    };
+  };
 };
 
 export type LessonPreviewUser = {
@@ -49,6 +54,7 @@ export const LESSON_PROGRESS_STATUSES = {
   IN_PROGRESS: "in_progress",
   COMPLETED: "completed",
   BLOCKED: "blocked",
+  AWAITING_REVIEW: "awaiting_review",
 } as const;
 
 export type ProgressStatus =

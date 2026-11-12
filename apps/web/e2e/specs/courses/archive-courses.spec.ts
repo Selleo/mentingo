@@ -56,7 +56,7 @@ test("admin can archive and restore courses from bulk actions", async ({
     );
     await page.getByTestId(COURSES_PAGE_HANDLES.BULK_EDIT_TRIGGER).click();
     const archiveAction = page.getByTestId(COURSES_PAGE_HANDLES.BULK_EDIT_ARCHIVE_ACTION);
-    await expect(archiveAction).toHaveClass(/text-error-700/);
+    await expect(archiveAction).not.toHaveClass(/text-error-700/);
     await archiveAction.click();
     await expect(page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG)).toBeVisible();
     await page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG_CANCEL_BUTTON).click();

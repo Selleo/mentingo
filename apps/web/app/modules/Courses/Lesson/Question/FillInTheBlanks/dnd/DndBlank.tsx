@@ -1,6 +1,8 @@
 import { useDroppable } from "@dnd-kit/core";
 import { rectSwappingStrategy, SortableContext } from "@dnd-kit/sortable";
 
+import { cn } from "~/lib/utils";
+
 import { DraggableWord } from "./DraggableWord";
 
 import type { DndWord } from "./types";
@@ -11,6 +13,8 @@ type DndBlankProps = {
   isCorrect?: boolean | null;
   isStudentAnswer?: boolean;
   minWidth?: string;
+  className?: string;
+  wrapText?: boolean;
 };
 
 export const DndBlank = ({
@@ -19,6 +23,8 @@ export const DndBlank = ({
   isCorrect,
   isStudentAnswer,
   minWidth,
+  className,
+  wrapText,
 }: DndBlankProps) => {
   const { setNodeRef } = useDroppable({
     id: blankId,
@@ -33,7 +39,10 @@ export const DndBlank = ({
         data-testid={blankId}
         ref={setNodeRef}
         style={minWidth ? { minWidth } : undefined}
-        className="mx-2 inline-flex h-9 align-middle items-stretch overflow-hidden rounded-md border bg-white"
+        className={cn(
+          "mx-2 inline-flex h-9 align-middle items-stretch overflow-hidden rounded-md border bg-white",
+          className,
+        )}
       >
         {words.map((word) => (
           <DraggableWord
@@ -42,6 +51,7 @@ export const DndBlank = ({
             isCorrect={isCorrect}
             isStudentAnswer={isStudentAnswer}
             stretchToContainer
+            wrapText={wrapText}
           />
         ))}
       </div>

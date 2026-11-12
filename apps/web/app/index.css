@@ -525,7 +525,7 @@ input::-webkit-datetime-edit-fields-wrapper {
   left: 16px;
 }
 
-/* Catalogue ↔ course management morph (CoursesViewToggle). */
+/* Catalogue ↔ courses table transition (CoursesViewToggle). */
 ::view-transition-group(*) {
   animation-duration: 450ms;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);

@@ -42,7 +42,7 @@ describe("UserPasswordEmailsActivityHandler", () => {
       },
     ];
 
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new UserPasswordEmailsEvent({
         actor,
         tenantId: actor.tenantId,
@@ -95,7 +95,7 @@ describe("UserPasswordEmailsActivityHandler", () => {
       tenantId: "00000000-0000-0000-0000-000000000010",
     };
 
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new UserPasswordEmailsEvent({
         actor,
         tenantId: actor.tenantId,
@@ -143,7 +143,7 @@ describe("UserPasswordEmailsActivityHandler", () => {
       tenantId: "00000000-0000-0000-0000-000000000010",
     };
 
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new UserPasswordEmailsEvent({
         actor,
         tenantId: actor.tenantId,

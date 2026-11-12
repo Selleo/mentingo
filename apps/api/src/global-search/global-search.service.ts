@@ -19,6 +19,7 @@ import type {
   GlobalSearchResponse,
   GlobalSearchResult,
 } from "./schemas/global-search.schema";
+import type { SemanticSearchQueryEmbedding } from "./semantic-search-index.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -74,16 +75,21 @@ export class GlobalSearchService {
       return this.emptyResponse();
     }
 
-    let embedding: number[] | undefined;
+    let queryEmbedding: SemanticSearchQueryEmbedding | undefined;
     let semanticStatus: GlobalSearchResult["semanticStatus"];
     if (mode === GLOBAL_SEARCH_MODES.HYBRID) {
       try {
-        embedding = await this.semanticSearchEmbeddingService.embedQuery(trimmedQuery);
+        queryEmbedding = await this.semanticSearchEmbeddingService.embedQuery(trimmedQuery);
       } catch {
         semanticStatus = GLOBAL_SEARCH_SEMANTIC_STATUSES.UNAVAILABLE;
       }
-      if (embedding) {
-        semanticStatus = (await this.hybridSearchRepository.hasCurrentChunks(currentUser))
+      if (queryEmbedding) {
+        // Readiness is judged in the query's own space; an OpenAI fallback query against a Luma
+        // index reports pending and returns keyword results instead of mixing vectors.
+        semanticStatus = (await this.hybridSearchRepository.hasCurrentChunks(
+          currentUser,
+          queryEmbedding.identity,
+        ))
           ? GLOBAL_SEARCH_SEMANTIC_STATUSES.READY
           : GLOBAL_SEARCH_SEMANTIC_STATUSES.PENDING;
       }
@@ -109,11 +115,15 @@ export class GlobalSearchService {
           ? await this.hybridSearchRepository.findKeywordMatches(...args, true)
           : await this.hybridSearchRepository.findKeywordMatches(...args);
         let semantic: MatchRow[] = [];
-        if (embedding) {
-          const semanticArgs = [entityType, embedding, currentUser, metadataOnly] as const;
-          semantic = learnerLessons
-            ? await this.hybridSearchRepository.findSemanticMatches(...semanticArgs, true)
-            : await this.hybridSearchRepository.findSemanticMatches(...semanticArgs);
+        if (queryEmbedding) {
+          semantic = await this.hybridSearchRepository.findSemanticMatches(
+            entityType,
+            queryEmbedding.embedding,
+            currentUser,
+            metadataOnly,
+            learnerLessons,
+            queryEmbedding.identity,
+          );
         }
         return {
           keyword: keyword.map((match) => ({ ...match, entityType })),

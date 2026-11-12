@@ -17,6 +17,7 @@ import {
   type SystemRoleSlug,
   type SupportedLanguages,
 } from "@repo/shared";
+import { createCache } from "cache-manager";
 import { and, eq, sql } from "drizzle-orm/sql";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
@@ -107,7 +108,7 @@ const createSeedAssessmentQuestion = async (
     : questionData.description;
   const questionType =
     questionData.type as (typeof ASSESSMENT_QUESTION_TYPES)[keyof typeof ASSESSMENT_QUESTION_TYPES];
-  const isManual =
+  const isOpenQuestion =
     questionData.type === QUESTION_TYPE.BRIEF_RESPONSE ||
     questionData.type === QUESTION_TYPE.DETAILED_RESPONSE;
 
@@ -117,7 +118,9 @@ const createSeedAssessmentQuestion = async (
     questionType,
     displayOrder,
     maximumPoints: "1",
-    gradingMode: isManual ? ASSESSMENT_GRADING_MODES.MANUAL : ASSESSMENT_GRADING_MODES.AUTOMATIC,
+    gradingMode: isOpenQuestion
+      ? ASSESSMENT_GRADING_MODES.PARTICIPATION
+      : ASSESSMENT_GRADING_MODES.AUTOMATIC,
     prompt: buildJsonbField(language, description ?? questionData.title),
     title: buildJsonbField(language, questionData.title),
     description: questionData.description
@@ -286,7 +289,7 @@ export async function createNiceCourses(
     const { enabled: isStripeConfigured } = await envService.getStripeConfigured();
 
     if (isStripeConfigured) {
-      const stripeService = new StripeService(envService, db);
+      const stripeService = new StripeService(envService, db, createCache());
 
       const existingStripeProduct = await stripeService.searchProducts({
         query: `name:\'${courseData.title}\'`,

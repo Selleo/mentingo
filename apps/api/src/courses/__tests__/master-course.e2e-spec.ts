@@ -8,6 +8,7 @@ import {
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_VOICE_MODE,
   ASSESSMENT_GRADING_MODES,
+  ASSESSMENT_SCORING_MODES,
   ASSESSMENT_QUESTION_TYPES,
   LESSON_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
@@ -56,10 +57,12 @@ import {
   assessments,
   assessmentQuestions,
   assessmentQuestionChoiceOptions,
+  assessmentQuestionMatchingPairs,
   resourceEntity,
   resources,
   tenants,
 } from "src/storage/schema";
+import { toJsonbBuildObject } from "src/utils/jsonb";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -70,6 +73,13 @@ import { createUserFactory } from "../../../test/factory/user.factory";
 import { DEFAULT_TEST_TENANT_HOST } from "../../../test/helpers/tenant-helpers";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 import { waitForOutbox } from "../../../test/helpers/wait-for-outbox";
+
+import {
+  JSONB_TYPES,
+  SHARED_LEARNING_OUTCOME_LANGUAGES,
+  SOURCE_LEARNING_OUTCOMES,
+  UPDATED_LEARNING_OUTCOMES,
+} from "./master-course.scenarios";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
@@ -105,6 +115,12 @@ describe("Master course export and sync (e2e)", () => {
   let sourceTenantId: string;
   let targetTenantId: string;
   let masterCourseService: MasterCourseService;
+
+  const createUpdateSync =
+    (job: Omit<Parameters<MasterCourseService["transferFromSyncJob"]>[0], "triggerEventType">) =>
+    () =>
+      masterCourseService.transferFromSyncJob({ ...job, triggerEventType: "UpdateCourseEvent" });
+
   let aiRepository: AiRepository;
   let mockS3Service: {
     copyFile: jest.Mock;
@@ -373,10 +389,7 @@ describe("Master course export and sync (e2e)", () => {
             en: "Master Source Description",
             pl: "Opis kursu zrodlowego master",
           }),
-          learningOutcomes: {
-            en: ["Understand the source course"],
-            pl: ["Zrozumiec kurs zrodlowy"],
-          },
+          learningOutcomes: toJsonbBuildObject(SOURCE_LEARNING_OUTCOMES),
           authorMetadata: {
             authorId: sourceAdmin.id,
             firstName: sourceAdmin.firstName,
@@ -524,6 +537,32 @@ describe("Master course export and sync (e2e)", () => {
     };
   };
 
+  const getCourseDetails = async (
+    courseId: string,
+    language: string,
+    cookie: string[],
+    host: string,
+  ) => {
+    const response = await withTenantHost(
+      request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: courseId, language })
+        .set("Cookie", cookie),
+      host,
+    ).expect(200);
+
+    return response.body.data;
+  };
+
+  const selectStoredLearningOutcomes = (courseIds: string[]) =>
+    baseDb
+      .select({
+        kind: sql<string>`jsonb_typeof(${courses.learningOutcomes})`,
+        outcomes: courses.learningOutcomes,
+      })
+      .from(courses)
+      .where(inArray(courses.id, courseIds));
+
   it("forbids export when caller is not a managing-tenant admin", async () => {
     const targetAdmin = await runAsTenant(targetTenantId, async () =>
       userFactory
@@ -617,6 +656,42 @@ describe("Master course export and sync (e2e)", () => {
         .set({ status: TENANT_STATUSES.ACTIVE })
         .where(eq(tenants.id, targetTenantId));
     }
+  });
+
+  it.each(SHARED_LEARNING_OUTCOME_LANGUAGES)(
+    "shows shared learning outcomes to recipient admins in $language",
+    async ({ language }) => {
+      const { sourceCourseId, sourceCookie, targetCourseId, targetCookie } = await setupAndExport();
+
+      const sourceCourse = await getCourseDetails(
+        sourceCourseId,
+        language,
+        sourceCookie,
+        SOURCE_HOST,
+      );
+      const targetCourse = await getCourseDetails(
+        targetCourseId,
+        language,
+        targetCookie,
+        TARGET_HOST,
+      );
+
+      expect(sourceCourse).toMatchObject({ learningOutcomes: SOURCE_LEARNING_OUTCOMES[language] });
+      expect(targetCourse).toMatchObject({
+        isContentReadonly: true,
+        learningOutcomes: SOURCE_LEARNING_OUTCOMES[language],
+      });
+    },
+  );
+
+  it("stores shared learning outcomes as a language map", async () => {
+    const { targetCourseId } = await setupAndExport();
+
+    const storedTargetCourses = await selectStoredLearningOutcomes([targetCourseId]);
+
+    expect(storedTargetCourses).toEqual([
+      { kind: JSONB_TYPES.OBJECT, outcomes: SOURCE_LEARNING_OUTCOMES },
+    ]);
   });
 
   it("exports source course to target tenant and keeps exported copy readonly", async () => {
@@ -813,10 +888,7 @@ describe("Master course export and sync (e2e)", () => {
             en: updatedTitle,
             pl: "Kurs zrodlowy master",
           }),
-          learningOutcomes: {
-            en: ["Apply the updated course"],
-            pl: ["Zastosowac zaktualizowany kurs"],
-          },
+          learningOutcomes: toJsonbBuildObject(UPDATED_LEARNING_OUTCOMES),
           showAuthorSection: true,
           thumbnailPositionY: 28,
           authorMetadata: {
@@ -851,6 +923,7 @@ describe("Master course export and sync (e2e)", () => {
         .select({
           title: courses.title,
           learningOutcomes: courses.learningOutcomes,
+          learningOutcomesType: sql<string>`jsonb_typeof(${courses.learningOutcomes})`,
           showAuthorSection: courses.showAuthorSection,
           thumbnailPositionY: courses.thumbnailPositionY,
           status: courses.status,
@@ -865,9 +938,9 @@ describe("Master course export and sync (e2e)", () => {
     });
 
     expect(syncedTargetCourse?.title.en).toBe(updatedTitle);
-    expect(syncedTargetCourse?.learningOutcomes).toEqual({
-      en: ["Apply the updated course"],
-      pl: ["Zastosowac zaktualizowany kurs"],
+    expect(syncedTargetCourse).toMatchObject({
+      learningOutcomesType: JSONB_TYPES.OBJECT,
+      learningOutcomes: UPDATED_LEARNING_OUTCOMES,
     });
     expect(syncedTargetCourse?.showAuthorSection).toBe(true);
     expect(syncedTargetCourse?.thumbnailPositionY).toBe(28);
@@ -1865,14 +1938,12 @@ describe("Master course export and sync (e2e)", () => {
       .select()
       .from(masterCourseExports)
       .where(eq(masterCourseExports.sourceCourseId, sourceCourseId));
-    const sync = () =>
-      masterCourseService.transferFromSyncJob({
-        exportId: exportLink.id,
-        sourceCourseId,
-        sourceTenantId,
-        targetTenantId,
-        triggerEventType: "UpdateCourseEvent",
-      });
+    const sync = createUpdateSync({
+      exportId: exportLink.id,
+      sourceCourseId,
+      sourceTenantId,
+      targetTenantId,
+    });
     await runAsTenant(sourceTenantId, async () => {
       await db
         .update(assessmentQuestionChoiceOptions)
@@ -1919,6 +1990,122 @@ describe("Master course export and sync (e2e)", () => {
     ]);
     await sync();
     expect(await readOptions()).toEqual(replaced);
+  });
+
+  it("syncs matching pairs and scoring mode, including reorders and deletions", async () => {
+    const questionId = faker.string.uuid();
+    const catId = faker.string.uuid();
+    const dogId = faker.string.uuid();
+    const { sourceCourseId, targetCourseId } = await setupAndExport({
+      beforeExport: async ({ sourceLessonId }) => {
+        await runAsTenant(sourceTenantId, async () => {
+          const [assessment] = await db
+            .insert(assessments)
+            .values({ lessonId: sourceLessonId, passingScorePercentage: "50" })
+            .returning();
+
+          await db.insert(assessmentQuestions).values({
+            id: questionId,
+            assessmentId: assessment.id,
+            questionType: ASSESSMENT_QUESTION_TYPES.MATCHING,
+            gradingMode: ASSESSMENT_GRADING_MODES.AUTOMATIC,
+            scoringMode: ASSESSMENT_SCORING_MODES.PARTIAL,
+            prompt: { en: "Match" },
+            title: { en: "Match" },
+            displayOrder: 1,
+          });
+          await db.insert(assessmentQuestionMatchingPairs).values([
+            {
+              id: catId,
+              questionId,
+              language: "en",
+              prompt: "Cat",
+              match: "Meow",
+              displayOrder: 1,
+            },
+            {
+              id: dogId,
+              questionId,
+              language: "en",
+              prompt: "Dog",
+              match: "Woof",
+              displayOrder: 2,
+            },
+          ]);
+        });
+      },
+    });
+    const readTarget = () =>
+      runAsTenant(targetTenantId, () =>
+        db
+          .select({
+            scoringMode: assessmentQuestions.scoringMode,
+            prompt: assessmentQuestionMatchingPairs.prompt,
+            match: assessmentQuestionMatchingPairs.match,
+            displayOrder: assessmentQuestionMatchingPairs.displayOrder,
+          })
+          .from(assessmentQuestionMatchingPairs)
+          .innerJoin(
+            assessmentQuestions,
+            eq(assessmentQuestions.id, assessmentQuestionMatchingPairs.questionId),
+          )
+          .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+          .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
+          .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+          .where(eq(chapters.courseId, targetCourseId))
+          .orderBy(asc(assessmentQuestionMatchingPairs.displayOrder)),
+      );
+
+    expect(await readTarget()).toEqual([
+      {
+        scoringMode: ASSESSMENT_SCORING_MODES.PARTIAL,
+        prompt: "Cat",
+        match: "Meow",
+        displayOrder: 1,
+      },
+      {
+        scoringMode: ASSESSMENT_SCORING_MODES.PARTIAL,
+        prompt: "Dog",
+        match: "Woof",
+        displayOrder: 2,
+      },
+    ]);
+
+    const [exportLink] = await baseDb
+      .select()
+      .from(masterCourseExports)
+      .where(eq(masterCourseExports.sourceCourseId, sourceCourseId));
+    const sync = createUpdateSync({
+      exportId: exportLink.id,
+      sourceCourseId,
+      sourceTenantId,
+      targetTenantId,
+    });
+
+    await runAsTenant(sourceTenantId, async () => {
+      await db
+        .update(assessmentQuestionMatchingPairs)
+        .set({ displayOrder: -1 })
+        .where(eq(assessmentQuestionMatchingPairs.id, catId));
+      await db
+        .update(assessmentQuestionMatchingPairs)
+        .set({ displayOrder: 1 })
+        .where(eq(assessmentQuestionMatchingPairs.id, dogId));
+      await db
+        .update(assessmentQuestionMatchingPairs)
+        .set({ displayOrder: 2 })
+        .where(eq(assessmentQuestionMatchingPairs.id, catId));
+    });
+    await sync();
+    expect((await readTarget()).map(({ prompt }) => prompt)).toEqual(["Dog", "Cat"]);
+
+    await runAsTenant(sourceTenantId, () =>
+      db
+        .delete(assessmentQuestionMatchingPairs)
+        .where(eq(assessmentQuestionMatchingPairs.id, dogId)),
+    );
+    await sync();
+    expect((await readTarget()).map(({ prompt }) => prompt)).toEqual(["Cat"]);
   });
 
   it("rewrites fill-in-the-blanks option markers for every localized question description", async () => {

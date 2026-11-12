@@ -50,13 +50,17 @@ describe("Automation account-action delivery (e2e)", () => {
       }),
     );
     const base = t.createWelcomeNotificationEvent();
-    const event = new NotificationEvent(base.occurrenceId, "password_recovery", [
-      {
-        ...base.recipients[0],
-        accountActionIntentId: intent,
-        eventFields: { name: "Recovery learner" },
-      },
-    ]);
+    const event = new NotificationEvent({
+      occurrenceId: base.notificationData.occurrenceId,
+      kind: "password_recovery",
+      recipients: [
+        {
+          ...base.notificationData.recipients[0],
+          accountActionIntentId: intent,
+          eventFields: { name: "Recovery learner" },
+        },
+      ],
+    });
     const [run] = await t.publishNotificationAndGetRuns(event);
     const delivery = (await t.getAutomationRun(run.id)).deliveries[0];
     return { run, delivery, intent };

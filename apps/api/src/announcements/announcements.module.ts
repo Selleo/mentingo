@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common";
-import { CqrsModule } from "@nestjs/cqrs";
 
 import { LocalizationModule } from "src/localization/localization.module";
 import { PermissionsModule } from "src/permissions/permissions.module";
@@ -12,7 +11,7 @@ import { AnnouncementsRepository } from "./announcements.repository";
 import { AnnouncementsService } from "./announcements.service";
 
 @Module({
-  imports: [CqrsModule, PermissionsModule, LocalizationModule],
+  imports: [PermissionsModule, LocalizationModule],
   controllers: [AnnouncementsController],
   providers: [
     AnnouncementsService,

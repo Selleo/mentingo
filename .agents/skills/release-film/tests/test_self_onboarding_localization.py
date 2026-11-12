@@ -56,12 +56,17 @@ class LocalizationTest(unittest.TestCase):
         reference = recording.cache_capture(self.cache, self.root/'run', source_root, {'chapters': [self.chapter]},
             self.flow, self.domain, self.commit, 'Selleo/mentingo', self.root/'checkout',
             scenario={'base': 'apps/web/e2e/specs/demo.spec.ts',
-                      'source': 'import { test } from "../fixtures/self-onboarding.fixture";\ntest("flow", async () => {});'})
+                      'source': 'import { test } from "../fixtures/self-onboarding.fixture";\n'
+                                'test("flow", async ({page}) => { await page.getByRole("button", '
+                                '{name: /Saved configurations/}).click(); });'})
         self.raw(code='pl')
         run = self.root/'run'
         shutil.copytree(self.root/'checkout', run/'checkout', dirs_exist_ok=True)
         base = run/'checkout/apps/web/e2e/specs/demo.spec.ts'
         base.parent.mkdir(parents=True, exist_ok=True); base.write_text('original test')
+        for code, label in [('en', 'Saved configurations'), ('pl', 'Zapisane konfiguracje')]:
+            core.save(run/f'checkout/apps/web/app/locales/{code}/translation.json',
+                      {'reports': {'saved': {'title': label}}})
         camera = self.patch(recording.harness, 'capture', return_value=[{'status': 'passed', 'error': '',
             'capture': str(self.root/'raw'/self.commit/self.flow['id']/'pl')}])
         self.patch(recording.harness, 'test_env', return_value={})
@@ -74,6 +79,11 @@ class LocalizationTest(unittest.TestCase):
         self.assertNotEqual(result['id'], reference['id'])
         self.assertEqual(result['parentCaptureId'], reference['id'])
         self.assertEqual(camera.call_args.args[2]['SELF_ONBOARDING_LANGUAGE'], 'pl')
+        localized = (self.root/'polish-restore/scene.spec.ts').read_text()
+        self.assertIn('new RegExp("Zapisane konfiguracje", "")', localized)
+        self.assertNotIn('/Saved configurations/', localized)
+        recording.restore_capture(self.cache, reference, self.root/'english-restore')
+        self.assertIn('/Saved configurations/', (self.root/'english-restore/scene.spec.ts').read_text())
         worker.assert_not_called()
         self.assertFalse(list(base.parent.glob('rf-localized-*.spec.ts')))
 
@@ -852,7 +862,7 @@ class LocalizationTest(unittest.TestCase):
             entries.append((sources['language'],copy.deepcopy(entry)))
             return entry,{}
         self.patch(recording.cut,'chapter_cut',side_effect=chapter_cut)
-        self.patch(recording.cut,'film_font',return_value=('unused-font','Test',None))
+        self.patch(recording.cut,'film_font',return_value=('unused-font','all-round-gothic',None))
         prepared = self.patch(recording.render_demo,'prepare')
         run=self.root/'render-run'
         self.patch(recording.render_demo,'load_plan',side_effect=lambda *args,**kwargs:{'language':core.load(run/'sources.json')['language']})
@@ -868,6 +878,7 @@ class LocalizationTest(unittest.TestCase):
         english=recording.render_flow(run,self.flow,self.domain,'en',self.commit,'Selleo/mentingo',brand,self.cache,reference)
         authored = core.load(prepared.call_args.args[0])
         self.assertEqual(authored['colors'], brand['brand']['colors'])
+        self.assertEqual(authored['frameTheme'], 'mentingo')
         polish=recording.render_flow(run,self.flow,self.domain,'pl',self.commit,'Selleo/mentingo',{},self.cache,self.raw(code='pl'))
         self.assertEqual((english['duration'],polish['duration']),(6,8))
         self.assertNotEqual(polish['captureId'],english['captureId'])

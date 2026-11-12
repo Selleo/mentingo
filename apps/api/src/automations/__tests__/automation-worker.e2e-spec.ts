@@ -75,13 +75,13 @@ describe("Automation BullMQ worker (e2e)", () => {
       .requestAutomationApi("post", `/${other.id}/enable`, t.otherCookie, t.otherTenant.host)
       .expect(201);
     const first = t.createWelcomeNotificationEvent();
-    const second = new NotificationEvent(
-      first.occurrenceId,
-      first.kind,
-      structuredClone(first.recipients),
-    );
-    second.recipients[0] = {
-      ...second.recipients[0],
+    const second = new NotificationEvent({
+      occurrenceId: first.notificationData.occurrenceId,
+      kind: first.notificationData.kind,
+      recipients: structuredClone(first.notificationData.recipients),
+    });
+    second.notificationData.recipients[0] = {
+      ...second.notificationData.recipients[0],
       itemId: t.otherAdmin.id,
       email: t.otherAdmin.email,
       language: SUPPORTED_LANGUAGES.PL,

@@ -229,8 +229,8 @@ function CalendarContent() {
 
   return (
     <PageWrapper
-      isBarebones
-      className="flex h-[calc(100dvh-4rem)] flex-col overflow-hidden bg-neutral-50/50 p-4 md:p-6 2xl:h-dvh 3xl:p-8"
+      breadcrumbs={[{ title: t("navigationSideBar.calendar"), href: "/calendar" }]}
+      className="flex h-[calc(100dvh-4rem)] flex-col overflow-hidden bg-neutral-50/50 2xl:h-dvh"
       data-testid={CALENDAR_HANDLES.PAGE}
     >
       <section className="flex min-h-0 flex-1 flex-col gap-3">

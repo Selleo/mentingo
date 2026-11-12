@@ -57,3 +57,10 @@ yarn-error.log*
 # Release film (.agents/skills/release-film): its local runs, tools and development files
 /.local/
 __pycache__/
+
+# Private local AI experiment captures
+experiment-runs/
+
+# Generated evaluation run reports (datasets/configuration remain versioned)
+/docs/langfuse/validation-*.json
+/docs/langfuse/baseline-*.json

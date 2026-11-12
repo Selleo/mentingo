@@ -26,6 +26,7 @@ For HR and L&D, this matters because learning programs often need to follow comp
 - Set, change, or clear the tenant age limit.
 - Define the maximum number of live trainings that may run in parallel.
 - Upload, preview, and remove login-page support documents with administrator-provided display names.
+- Switch platform features on or off from a Features catalogue that explains what each feature does, where it appears, who sees it, and which integration it needs.
 
 ## End-User Value
 
@@ -38,6 +39,8 @@ An administrator opens Settings and uses the Organization tab to review configur
 Changes are saved through dedicated settings controls and immediately affect the tenant's platform behavior. Login-page documents can be added with a display name, previewed, and removed; these files are available publicly on the login page so unauthenticated learners or visitors can access the organization's supporting materials.
 
 The public course preview switch starts disabled. When enabled, signed-in learners can browse published, unarchived free courses before enrolling. Students with AI access can chat with mentors and restart their preview conversations without enrolling or entering Learn mode. Lesson pages explain that quizzes and learning progress require enrollment and offer an enrollment action. Administrators previewing a course see a Learn-mode action instead. Paid lessons retain their existing access rules, and anonymous course access remains a separate setting.
+
+The Features tab gathers every platform feature switch in one place, as cards for course settings, Q&A, news, knowledge base, development paths, gamification, and leaderboards. Each switch shows the icon of the feature's page in the sidebar. Visitor access for news, knowledge base, and Q&A and the leaderboard visibility mode stay disabled until their feature is on, and leaderboards stay locked until gamification is on. Features that depend on an integration, such as live training, cannot be switched on until it is configured and link to the matching integration. Turning a feature off asks for confirmation and explains that nothing is deleted. Branding, theme, and the course-list layout remain under Platform customization.
 
 Users without settings-management access do not see administrator organization controls. The Settings navigation also adapts by showing only the tabs and cards the current user's permissions allow.
 

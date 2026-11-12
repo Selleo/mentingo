@@ -12,6 +12,7 @@ export type QuizEvaluationResult = {
   wrongAnswerCount: number;
   questionCount: number;
   score: number;
+  awaitingReview: boolean;
 };
 
 export type ExpiredQuizAttemptFinalization =

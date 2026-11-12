@@ -18,7 +18,6 @@ export const GAMIFICATION_EVENT_SOURCES: Record<GamificationEventType, Gamificat
     outboxEventType: UserLoginEvent.name,
     userIdPath: ["loginData", "userId"],
     supportModePath: ["loginData", "actor", "isSupportMode"],
-    // Logins are counted per distinct day.
     subjectPath: null,
     courseIdPath: null,
     scorePath: null,
@@ -41,11 +40,11 @@ export const GAMIFICATION_EVENT_SOURCES: Record<GamificationEventType, Gamificat
   },
   [GAMIFICATION_EVENT_TYPES.QUIZ_COMPLETED]: {
     outboxEventType: QuizCompletedEvent.name,
-    userIdPath: ["userId"],
-    supportModePath: ["isSupportMode"],
-    subjectPath: ["lessonId"],
-    courseIdPath: ["courseId"],
-    scorePath: ["score"],
+    userIdPath: ["quizCompletionData", "userId"],
+    supportModePath: ["quizCompletionData", "isSupportMode"],
+    subjectPath: ["quizCompletionData", "lessonId"],
+    courseIdPath: ["quizCompletionData", "courseId"],
+    scorePath: ["quizCompletionData", "score"],
   },
 };
 

@@ -1,6 +1,6 @@
 id: aiMentorConfigurationGeneratorImprove
 description: Improve-mode instructions for AI Mentor configuration generation
-version: 1
+version: 3
 
 template: |
   <generation_mode>
@@ -10,7 +10,11 @@ template: |
   <mode_rules>
   - The current configuration may be incomplete after a manual type change. Complete missing fields for its selected type.
   - Return a complete replacement, not a patch.
-  - Preserve valid unaffected content exactly when practical.
+  - Copy every valid unaffected field exactly, character for character. This preservation takes priority over general drafting preferences, concision, optional-field defaults, and stylistic polishing.
+  - An existing optional field remains authored content: do not replace feedbackGuidance, openingInstruction, factsAndConstraints, or other populated optional fields with null just because their instruction also appears elsewhere or seems redundant. Change or remove them only when the creator asks or a supplied finding requires it.
+  - Preserve existing participant role labels, scene wording, and character identity exactly unless the creator explicitly requests a change to that field or a supplied finding identifies a defect. Do not replace a valid authored role with an inferred occupation or rewrite the scene to follow general create-mode preferences.
+  - A request to change turn pacing or question count belongs in the relevant response-behavior field; it does not authorize changing unrelated goals, source constraints, expertise, or feedback guidance.
+  - Normalize a structurally invalid current field only as required by the output schema, preserving other fields.
   - Make the smallest coherent changes needed for the creator instruction and supplied findings.
   - Never restore fields belonging to another type or propose changing type.
   </mode_rules>

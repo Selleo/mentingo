@@ -15,6 +15,7 @@ import {
   assessmentQuestionTrueFalseStatements,
   assessmentQuestionScaleOptions,
   assessmentQuestionDragAndDropOptions,
+  assessmentQuestionMatchingPairs,
   assessmentQuestions,
   assessments,
   questionsAndAnswers,
@@ -443,7 +444,9 @@ export class SearchIndexRepository {
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .innerJoin(
-        sql`LATERAL JSONB_EACH_TEXT(${this.asLocalizedJsonbObject(assessmentQuestionScaleOptions.label)}) AS scale_locale(lang, value)`,
+        sql`LATERAL JSONB_EACH_TEXT(${this.asLocalizedJsonbObject(
+          assessmentQuestionScaleOptions.label,
+        )}) AS scale_locale(lang, value)`,
         sql`true`,
       )
       .where(
@@ -479,6 +482,14 @@ export class SearchIndexRepository {
         assessmentQuestionDragAndDropOptions.tenantId,
         assessmentQuestionDragAndDropOptions.language,
         assessmentQuestionDragAndDropOptions.label,
+      ),
+      buildOptionQuery(
+        assessmentQuestionMatchingPairs,
+        assessmentQuestionMatchingPairs.id,
+        assessmentQuestionMatchingPairs.questionId,
+        assessmentQuestionMatchingPairs.tenantId,
+        assessmentQuestionMatchingPairs.language,
+        sql`CONCAT_WS(' – ', ${assessmentQuestionMatchingPairs.prompt}, ${assessmentQuestionMatchingPairs.match})`,
       ),
     );
   }

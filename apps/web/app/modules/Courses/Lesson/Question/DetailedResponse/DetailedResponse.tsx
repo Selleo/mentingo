@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
+import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { QuestionCard } from "~/modules/Courses/Lesson/Question/QuestionCard";
 
@@ -17,12 +18,14 @@ export const DetailedResponse = ({ question, isCompleted = false }: DetailedResp
   const { isPreviewMode } = useCourseAccessProvider();
   const { register } = useFormContext<QuizForm>();
   const { t } = useTranslation();
+  const { isQuizAwaitingReview } = useQuizContext();
 
   return (
     <QuestionCard
       title={question.title}
       questionType="threeOrFiveWordSentence"
       questionNumber={question.displayOrder}
+      isAwaitingReview={isQuizAwaitingReview && Boolean(question.requiresReview)}
     >
       <Textarea
         data-testid="detailed-response"

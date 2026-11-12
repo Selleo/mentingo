@@ -13,6 +13,7 @@ import {
   SCORM_STANDARD,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
+  type CourseStatus,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
@@ -62,6 +63,7 @@ import {
   assignSystemRoleToUserInTests,
 } from "../../../test/helpers/permission-role-helpers";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
+import { dispatchOutbox, waitForOutbox } from "../../../test/helpers/wait-for-outbox";
 
 import type { CalendarEventTestResponse } from "./types/calendar-event-test.types";
 import type { CourseTest } from "../../../test/factory/course.factory";
@@ -120,6 +122,7 @@ describe("CourseController (e2e)", () => {
     let events: CalendarEventTestResponse[] = [];
 
     for (let attempt = 0; attempt < 10; attempt += 1) {
+      await dispatchOutbox(app);
       events = await getCalendarEventsForUser(user);
       if (events.length === expectedCount) return events;
       await sleep(50);
@@ -1129,19 +1132,93 @@ describe("CourseController (e2e)", () => {
       });
 
       describe("when user is student", () => {
-        it("returns 403 for unauthorized request", async () => {
+        it("returns only published courses and private courses the student is enrolled in", async () => {
           const category = await categoryFactory.create();
           const author = await userFactory.withAdminRole().create();
-          await courseFactory.create({ authorId: author.id, categoryId: category.id });
-          const user = await userFactory
+          const student = await userFactory
             .withCredentials({ password })
             .withUserSettings(db)
             .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+          const createCourse = (overrides: { status: CourseStatus; isArchived?: boolean }) =>
+            courseFactory.create({
+              authorId: author.id,
+              categoryId: category.id,
+              thumbnailS3Key: null,
+              ...overrides,
+            });
 
-          await request(app.getHttpServer())
+          const publishedCourse = await createCourse({ status: COURSE_STATUSES.PUBLISHED });
+          const enrolledPrivateCourse = await createCourse({ status: COURSE_STATUSES.PRIVATE });
+          await createCourse({ status: COURSE_STATUSES.PRIVATE });
+          await createCourse({ status: COURSE_STATUSES.DRAFT });
+          await createCourse({ status: COURSE_STATUSES.PUBLISHED, isArchived: true });
+
+          await db.insert(studentCourses).values({
+            studentId: student.id,
+            courseId: enrolledPrivateCourse.id,
+            finishedChapterCount: 0,
+          });
+
+          const response = await request(app.getHttpServer())
             .get("/api/course/all")
-            .set("Cookie", await cookieFor(user, app))
-            .expect(403);
+            .query({ isArchived: "all" })
+            .set("Cookie", await cookieFor(student, app))
+            .expect(200);
+
+          expect(response.body.data.map((course: CourseTest) => course.id).sort()).toEqual(
+            [publishedCourse.id, enrolledPrivateCourse.id].sort(),
+          );
+        });
+      });
+
+      describe("when user is both student and group manager", () => {
+        it("returns the catalogue courses together with the managed groups' courses", async () => {
+          const category = await categoryFactory.create();
+          const author = await userFactory.withAdminRole().create();
+          const studentManager = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+          await addSystemRoleToUserInTests(
+            db,
+            studentManager.id,
+            studentManager.tenantId,
+            SYSTEM_ROLE_SLUGS.GROUP_MANAGER,
+          );
+          const createCourse = (status: CourseStatus) =>
+            courseFactory.create({
+              authorId: author.id,
+              categoryId: category.id,
+              thumbnailS3Key: null,
+              status,
+            });
+
+          const publishedCourse = await createCourse(COURSE_STATUSES.PUBLISHED);
+          const managedDraftCourse = await createCourse(COURSE_STATUSES.DRAFT);
+          await createCourse(COURSE_STATUSES.DRAFT);
+
+          const managedGroup = await groupFactory
+            .withMembers([])
+            .create({ tenantId: studentManager.tenantId });
+          await db.insert(groupManagerGroups).values({
+            managerUserId: studentManager.id,
+            groupId: managedGroup.id,
+            tenantId: studentManager.tenantId,
+          });
+          await db.insert(groupCourses).values({
+            groupId: managedGroup.id,
+            courseId: managedDraftCourse.id,
+          });
+
+          const response = await request(app.getHttpServer())
+            .get("/api/course/all")
+            .query({ isArchived: "all" })
+            .set("Cookie", await cookieFor(studentManager, app))
+            .expect(200);
+
+          expect(response.body.data.map((course: CourseTest) => course.id).sort()).toEqual(
+            [publishedCourse.id, managedDraftCourse.id].sort(),
+          );
         });
       });
 
@@ -4424,21 +4501,17 @@ describe("CourseController (e2e)", () => {
         })
         .expect(200);
 
-      const refreshDeadline = Date.now() + 15000;
-
-      while (true) {
-        const [refreshedCourse] = await db
-          .select({ durationEstimates: courses.durationEstimates })
-          .from(courses)
-          .where(eq(courses.id, course.id));
-
-        if (refreshedCourse.durationEstimates.en?.totalSeconds === 150) break;
-        if (Date.now() >= refreshDeadline) {
-          throw new Error("Timed out waiting for the lesson update to refresh course duration");
-        }
-
-        await sleep(50);
-      }
+      await waitForOutbox(
+        app,
+        () =>
+          db
+            .select({ durationEstimates: courses.durationEstimates })
+            .from(courses)
+            .where(eq(courses.id, course.id)),
+        ([refreshedCourse]) => refreshedCourse.durationEstimates.en?.totalSeconds === 150,
+        15000,
+        50,
+      );
 
       const refreshedResponse = await request(app.getHttpServer())
         .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)
