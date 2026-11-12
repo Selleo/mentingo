@@ -86,7 +86,7 @@ const Groups = (): ReactElement => {
 
   const { mutateAsync: deleteGroups } = useBulkDeleteGroups();
 
-  const columns = getGroupsColumns({ rowRangeSelection, t });
+  const columns = useMemo(() => getGroupsColumns({ rowRangeSelection, t }), [rowRangeSelection, t]);
 
   const table = useReactTable({
     getRowId: (row) => row.id,

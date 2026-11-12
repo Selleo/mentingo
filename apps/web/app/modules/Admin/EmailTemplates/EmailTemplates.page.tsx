@@ -1,7 +1,7 @@
 import { useNavigate } from "@remix-run/react";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useArchiveEmailTemplate } from "~/api/mutations/emailTemplates/useArchiveEmailTemplate";
@@ -93,25 +93,35 @@ export function EmailTemplatesContent() {
     navigate(editorPath);
   };
 
-  const openCopiedTemplate = (copiedTemplateId: string | null) => {
-    if (copiedTemplateId) navigate(`${EMAIL_TEMPLATE_LIST_PATH}/${copiedTemplateId}`);
-  };
+  const columns = useMemo(() => {
+    const openCopiedTemplate = (copiedTemplateId: string | null) => {
+      if (copiedTemplateId) navigate(`${EMAIL_TEMPLATE_LIST_PATH}/${copiedTemplateId}`);
+    };
 
-  const columns = getEmailTemplateColumns({
+    return getEmailTemplateColumns({
+      t,
+      language,
+      isActionPending,
+      copyDefaultTemplate: (event) =>
+        void copyDefaultTemplate(event)
+          .then((copied) => openCopiedTemplate(copied.id))
+          .catch(() => undefined),
+      duplicateTemplate: (templateId) =>
+        void duplicateTemplate(templateId)
+          .then((copied) => openCopiedTemplate(copied.id))
+          .catch(() => undefined),
+      restoreTemplate: (templateId) => void restoreTemplate(templateId).catch(() => undefined),
+      requestConfirmation: setPendingConfirmation,
+    });
+  }, [
     t,
     language,
     isActionPending,
-    copyDefaultTemplate: (event) =>
-      void copyDefaultTemplate(event)
-        .then((copied) => openCopiedTemplate(copied.id))
-        .catch(() => undefined),
-    duplicateTemplate: (templateId) =>
-      void duplicateTemplate(templateId)
-        .then((copied) => openCopiedTemplate(copied.id))
-        .catch(() => undefined),
-    restoreTemplate: (templateId) => void restoreTemplate(templateId).catch(() => undefined),
-    requestConfirmation: setPendingConfirmation,
-  });
+    navigate,
+    copyDefaultTemplate,
+    duplicateTemplate,
+    restoreTemplate,
+  ]);
 
   const table = useReactTable({
     data: data?.data ?? [],

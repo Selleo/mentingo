@@ -2,6 +2,7 @@ import { useNavigate } from "@remix-run/react";
 import { AUTOMATION_STATUSES, type AutomationStatus } from "@repo/shared";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useAutomations } from "~/api/queries/useAutomations";
@@ -80,10 +81,15 @@ export default function AutomationsContent() {
       ]
     : [];
 
+  const columns = useMemo(
+    () => getAutomationsTableColumns({ t, language: i18n.language }),
+    [t, i18n.language],
+  );
+
   const table = useReactTable({
     getRowId: (automation) => automation.id,
     data: data?.data ?? [],
-    columns: getAutomationsTableColumns({ t, language: i18n.language }),
+    columns,
     getCoreRowModel: getCoreRowModel(),
   });
 

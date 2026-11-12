@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
-import { useDeferredValue } from "react";
+import { useCallback, useDeferredValue, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDuplicateCourse } from "~/api/mutations/admin/useDuplicateCourse";
@@ -68,20 +68,27 @@ const CoursesTableView = () => {
 
   const { mutateAsync: duplicateCourse } = useDuplicateCourse();
 
-  const duplicateCourseAndOpenCopy = async (courseId: string) => {
-    const {
-      data: { courseId: newCourseId, jobId },
-    } = await duplicateCourse(courseId);
-    navigate(`/admin/beta-courses/${newCourseId}?duplicationJobId=${jobId}`);
-  };
+  const duplicateCourseAndOpenCopy = useCallback(
+    async (courseId: string) => {
+      const {
+        data: { courseId: newCourseId, jobId },
+      } = await duplicateCourse(courseId);
+      navigate(`/admin/beta-courses/${newCourseId}?duplicationJobId=${jobId}`);
+    },
+    [duplicateCourse, navigate],
+  );
 
-  const columns = getCoursesTableColumns({
-    t,
-    canManageCourses,
-    categories: categories ?? [],
-    rowRangeSelection,
-    onDuplicateCourse: (courseId) => void duplicateCourseAndOpenCopy(courseId),
-  });
+  const columns = useMemo(
+    () =>
+      getCoursesTableColumns({
+        t,
+        canManageCourses,
+        categories: categories ?? [],
+        rowRangeSelection,
+        onDuplicateCourse: (courseId) => void duplicateCourseAndOpenCopy(courseId),
+      }),
+    [t, canManageCourses, categories, rowRangeSelection, duplicateCourseAndOpenCopy],
+  );
 
   const table = useReactTable({
     getRowId: (row) => row.id,

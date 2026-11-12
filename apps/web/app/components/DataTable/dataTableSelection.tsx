@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useRef } from "react";
 
 import { Checkbox } from "~/components/ui/checkbox";
 import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
@@ -8,25 +8,33 @@ import type { MouseEvent } from "react";
 
 export const SELECT_COLUMN_ID = "select";
 
-/** Remembers the last toggled row so shift-click can select a range. */
+/**
+ * Remembers the last toggled row so shift-click can select a range. The returned object stays the
+ * same between renders, so memoized table columns keep their cells mounted.
+ */
 export function useRowRangeSelection() {
-  const [lastSelectedRowIndex, setLastSelectedRowIndex] = useState(0);
+  const lastSelectedRowIndex = useRef(0);
 
-  const toggleRowSelection = <TData,>(
-    table: Table<TData>,
-    row: Row<TData>,
-    event: MouseEvent<HTMLElement>,
-  ) =>
-    handleRowSelectionRange({
-      table,
-      event,
-      id: row.id,
-      value: row.getIsSelected(),
-      lastSelectedRowIndex,
-      setLastSelectedRowIndex,
-    });
-
-  return { toggleRowSelection };
+  return useMemo(
+    () => ({
+      toggleRowSelection: <TData,>(
+        table: Table<TData>,
+        row: Row<TData>,
+        event: MouseEvent<HTMLElement>,
+      ) =>
+        handleRowSelectionRange({
+          table,
+          event,
+          id: row.id,
+          value: row.getIsSelected(),
+          lastSelectedRowIndex: lastSelectedRowIndex.current,
+          setLastSelectedRowIndex: (rowIndex) => {
+            lastSelectedRowIndex.current = rowIndex;
+          },
+        }),
+    }),
+    [],
+  );
 }
 
 export type RowRangeSelection = ReturnType<typeof useRowRangeSelection>;

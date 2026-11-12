@@ -1,6 +1,6 @@
 import { AUTOMATION_RUN_STATUSES, type AutomationRunStatus } from "@repo/shared";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useAutomationRuns } from "~/api/queries/useAutomationRuns";
@@ -86,14 +86,20 @@ export default function AutomationLogsContent() {
       ]
     : [];
 
+  const columns = useMemo(
+    () =>
+      getAutomationRunsTableColumns({
+        t,
+        language: i18n.language,
+        onOpenDetail: setSelectedAutomationRunId,
+      }),
+    [t, i18n.language],
+  );
+
   const table = useReactTable({
     getRowId: (automationRun) => automationRun.id,
     data: data?.data ?? [],
-    columns: getAutomationRunsTableColumns({
-      t,
-      language: i18n.language,
-      onOpenDetail: setSelectedAutomationRunId,
-    }),
+    columns,
     getCoreRowModel: getCoreRowModel(),
   });
 

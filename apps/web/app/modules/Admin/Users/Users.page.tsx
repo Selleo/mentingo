@@ -155,7 +155,10 @@ const Users = () => {
     },
   ];
 
-  const columns = getUsersTableColumns({ t, roles, rowRangeSelection });
+  const columns = useMemo(
+    () => getUsersTableColumns({ t, roles, rowRangeSelection }),
+    [t, roles, rowRangeSelection],
+  );
 
   const table = useReactTable({
     getRowId: (row) => row.id,

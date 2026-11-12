@@ -90,7 +90,10 @@ const Categories = () => {
   const { mutate: deleteCategory } = useDeleteCategory();
   const { mutate: deleteManyCategories } = useDeleteManyCategories();
 
-  const columns = getCategoriesColumns({ rowRangeSelection, t });
+  const columns = useMemo(
+    () => getCategoriesColumns({ rowRangeSelection, t }),
+    [rowRangeSelection, t],
+  );
 
   const table = useReactTable({
     getRowId: (row) => row.id,
