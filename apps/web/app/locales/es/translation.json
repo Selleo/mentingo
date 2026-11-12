@@ -3846,7 +3846,8 @@
           "dragWord": "Arrastra la palabra a la oración",
           "taskDescriptionTooltip": "Describa brevemente lo que debe hacer el participante durante la conversación con el mentor de IA.",
           "matchingScoringAllOrNothing": "Todos los pares deben ser correctos",
-          "matchingScoringPartial": "Puntos por cada par correcto"
+          "matchingScoringPartial": "Puntos por cada par correcto",
+          "requiresReview": "Calificada por el revisor"
         }
       }
     },
@@ -4293,6 +4294,7 @@
       "multipleChoice": "Pregunta de opción múltiple.",
       "singleChoice": "Pregunta de opción única",
       "passingThreshold": "Umbral de aprobación: {{threshold}}% ({{correct}} de preguntas {{questionsNumber}})",
+      "partialScore": "Puntuación parcial: {{correct}} de {{graded}} preguntas calificadas correctas",
       "score": "Puntuación: {{score}}% ({{correct}} de preguntas {{questionsNumber}})",
       "contentCantBeEmbedded": "Este contenido no se puede incrustar.",
       "openInNewTab": "Abrir en nueva pestaña",
@@ -4373,7 +4375,8 @@
       "retakeAvailableIn": "Bloqueado durante {{time}} horas después de la última repetición.",
       "cooldown": "El cuestionario se bloqueará durante {{time}} horas después del último intento.",
       "noCooldown": "Sin período de recuperación.",
-      "beta": "Esta funcionalidad se proporciona en una versión de prueba. Puede contener errores o no funcionar completamente según lo previsto y se utiliza bajo su propio riesgo."
+      "beta": "Esta funcionalidad se proporciona en una versión de prueba. Puede contener errores o no funcionar completamente según lo previsto y se utiliza bajo su propio riesgo.",
+      "awaitingReview": "Podrás repetir el cuestionario cuando se haya revisado."
     },
     "breadcrumbs": {
       "availableCourses": "Cursos disponibles",
@@ -4411,7 +4414,8 @@
       "quizNotAnsweredYet": "Aún no has respondido este cuestionario.",
       "courseEnrollmentRequired": "No estás inscrito en este curso.",
       "quizRetakeUnavailable": "Las respuestas del cuestionario no se pueden restablecer debido al límite de intentos o al tiempo de reutilización.",
-      "quizResetFailed": "No se pudieron restablecer las respuestas del cuestionario. Por favor inténtalo de nuevo."
+      "quizResetFailed": "No se pudieron restablecer las respuestas del cuestionario. Por favor inténtalo de nuevo.",
+      "quizAwaitingReview": "Este cuestionario está pendiente de revisión."
     },
     "preview": {
       "title": "Estás viendo una vista previa del curso",
@@ -4810,7 +4814,8 @@
     "completed": "Completado",
     "inProgress": "En progreso",
     "notStarted": "No iniciado",
-    "blocked": "Bloqueado"
+    "blocked": "Bloqueado",
+    "awaitingReview": "Pendiente de revisión"
   },
   "studentCertificateView": {
     "header": "Certificados",
@@ -6509,7 +6514,8 @@
       "status": {
         "completed": "Completado",
         "inProgress": "En curso",
-        "notStarted": "No iniciado"
+        "notStarted": "No iniciado",
+        "awaitingReview": "Pendiente de revisión"
       },
       "lessonTypes": {
         "content": "Contenido",

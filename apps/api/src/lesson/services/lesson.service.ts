@@ -392,7 +392,7 @@ export class LessonService {
             lesson.id,
             questionLanguage,
             isPublicCoursePreview ? undefined : effectiveUserId,
-            !isPublicCoursePreview && lesson.lessonCompleted,
+            !isPublicCoursePreview && (lesson.lessonCompleted || lesson.isQuizAwaitingReview),
           )
         : null;
     const questionList = quizDelivery?.questions ?? [];
@@ -449,6 +449,21 @@ export class LessonService {
       };
 
       return { ...lesson, ...timedQuizState, quizDetails, isQuizFeedbackRedacted };
+    }
+
+    // Partial result: counts only already graded questions, the rest waits for a reviewer.
+    if (lesson.isQuizAwaitingReview && !isQuizFeedbackRedacted) {
+      const quizDetails: QuestionDetails = {
+        questions: redactedQuestionList,
+        questionCount: redactedQuestionList.length,
+        score: null,
+        correctAnswerCount: questionListWithUrls.filter(({ passQuestion }) => passQuestion === true)
+          .length,
+        wrongAnswerCount: questionListWithUrls.filter(({ passQuestion }) => passQuestion === false)
+          .length,
+      };
+
+      return { ...lesson, quizDetails, isQuizFeedbackRedacted };
     }
 
     const quizDetails = {
@@ -755,6 +770,10 @@ export class LessonService {
       throw new ConflictException("studentLessonView.validation.quizAlreadyAnswered");
     }
 
+    if (accessCourseLessonWithDetails.quizAwaitingReview) {
+      throw new ConflictException("studentLessonView.validation.quizAwaitingReview");
+    }
+
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("studentLessonView.validation.lessonAssignmentRequired");
 
@@ -784,7 +803,9 @@ export class LessonService {
         if (!evaluationResult) return null;
 
         const isQuizPassed = evaluationResult.passed;
+        const { awaitingReview } = evaluationResult;
 
+        // A pending attempt keeps the lesson incomplete; grading completes it and emits the events.
         await this.studentLessonProgressService.updateQuizProgress(
           accessCourseLessonWithDetails.chapterId,
           studentQuizAnswers.lessonId,
@@ -793,10 +814,20 @@ export class LessonService {
           evaluationResult.score,
           evaluationResult.attemptNumber,
           isQuizPassed,
-          true,
+          !awaitingReview,
           trx,
           studentQuizAnswers.language,
         );
+
+        if (awaitingReview) {
+          return {
+            correctAnswerCount: 0,
+            wrongAnswerCount: 0,
+            questionCount: evaluationResult.questionCount,
+            score: 0,
+            awaitingReview,
+          };
+        }
 
         if (isQuizPassed) {
           await this.studentLessonProgressService.markLessonAsCompleted({
@@ -830,6 +861,7 @@ export class LessonService {
           wrongAnswerCount: evaluationResult.wrongAnswerCount,
           questionCount: evaluationResult.questionCount,
           score: evaluationResult.score,
+          awaitingReview,
         };
       } catch (error) {
         if (error instanceof HttpException) throw error;
@@ -872,6 +904,10 @@ export class LessonService {
 
     if (!accessCourseLessonWithDetails) {
       throw new NotFoundException("common.toast.notFound");
+    }
+
+    if (accessCourseLessonWithDetails.quizAwaitingReview) {
+      throw new ConflictException("studentLessonView.validation.quizAwaitingReview");
     }
 
     if (!accessCourseLessonWithDetails.lessonIsCompleted) {

@@ -2631,7 +2631,7 @@ export interface GetCourseResponse {
         title: string;
         type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
         displayOrder: number;
-        status: "not_started" | "in_progress" | "completed" | "blocked";
+        status: ("not_started" | "in_progress" | "completed" | "blocked") | "awaiting_review";
         quizQuestionCount: number | null;
         isExternal?: boolean;
         lessonResources?: {
@@ -2741,6 +2741,7 @@ export interface GetBetaCourseByIdResponse {
           displayOrder?: number;
           solutionExplanation?: string;
           photoS3Key?: string | null;
+          requiresReview?: boolean;
           options?: {
             /** @format uuid */
             id?: string;
@@ -3342,7 +3343,7 @@ export interface GetChapterWithLessonResponse {
       title: string;
       type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
       displayOrder: number;
-      status: "not_started" | "in_progress" | "completed" | "blocked";
+      status: ("not_started" | "in_progress" | "completed" | "blocked") | "awaiting_review";
       quizQuestionCount: number | null;
       isExternal?: boolean;
       lessonResources?: {
@@ -3404,6 +3405,7 @@ export type BetaCreateChapterBody = {
       displayOrder?: number;
       solutionExplanation?: string;
       photoS3Key?: string | null;
+      requiresReview?: boolean;
       options?: {
         /** @format uuid */
         id?: string;
@@ -3489,6 +3491,7 @@ export type UpdateChapterBody = ({
       displayOrder?: number;
       solutionExplanation?: string;
       photoS3Key?: string | null;
+      requiresReview?: boolean;
       options?: {
         /** @format uuid */
         id?: string;
@@ -3623,6 +3626,7 @@ export interface GetLessonByIdResponse {
         displayOrder?: number;
         solutionExplanation: string | null;
         photoS3Key?: string | null;
+        requiresReview?: boolean;
         options?: {
           /** @format uuid */
           id: string;
@@ -3679,6 +3683,7 @@ export interface GetLessonByIdResponse {
       draftSavedAt: string | null;
     } | null;
     isQuizPassed: boolean | null;
+    isQuizAwaitingReview?: boolean;
     attempts: number | null;
     updatedAt: string | null;
     displayOrder: number;
@@ -3854,6 +3859,7 @@ export type BetaCreateLessonBody = {
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;
@@ -4045,6 +4051,7 @@ export type BetaCreateAiMentorLessonBody = {
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;
@@ -4177,6 +4184,7 @@ export type BetaUpdateAiMentorLessonBody = ({
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;
@@ -4245,6 +4253,7 @@ export type BetaCreateQuizLessonBody = {
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;
@@ -4309,6 +4318,7 @@ export type BetaUpdateQuizLessonBody = ({
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;
@@ -4370,6 +4380,7 @@ export type BetaUpdateLessonBody = ({
     displayOrder?: number;
     solutionExplanation?: string;
     photoS3Key?: string | null;
+    requiresReview?: boolean;
     options?: {
       /** @format uuid */
       id?: string;
@@ -4456,6 +4467,7 @@ export interface EvaluationQuizResponse {
       wrongAnswerCount: number;
       questionCount: number;
       score: number;
+      awaitingReview: boolean;
     };
   };
 }

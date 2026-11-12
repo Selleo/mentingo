@@ -24,6 +24,12 @@ The publisher resolves the Guide SDK through `apps/api/package.json` and TUS
 through `apps/web/package.json`, so its versions follow the root lockfile and
 published SDK already used by Core. Tests use the same SDK through an Axios adapter.
 
+## Parallel uploads and processing
+
+The publisher streams up to three videos concurrently (`--concurrency 1-8` overrides this bound). It attempts all uploads and enqueues their finalization before polling for Bunny encoding and indexing. Bunny can therefore process the batch concurrently. A ready revision is published only after media verification and indexing succeed.
+
+One failed video does not discard successful work on other videos. All workers settle before the resumable checkpoint and summary are finalized. Interrupted uploads retain their TUS resource, and completed publications are skipped on resume. The Rust worker already reschedules videos still processing; no server redeployment is needed for this publisher change.
+
 ## Bundle contract
 
 `manifest.json` has this shape. Each entry describes one combined feature-area

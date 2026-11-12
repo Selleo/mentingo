@@ -3902,7 +3902,8 @@
           "dragWord": "Drag word into sentence",
           "taskDescriptionTooltip": "Briefly describe what the participant should do during the conversation with the AI mentor.",
           "matchingScoringAllOrNothing": "All pairs must be correct",
-          "matchingScoringPartial": "Points for each correct pair"
+          "matchingScoringPartial": "Points for each correct pair",
+          "requiresReview": "Graded by reviewer"
         }
       }
     },
@@ -4349,6 +4350,7 @@
       "multipleChoice": "Multiple choice question.",
       "singleChoice": "Single choice question",
       "passingThreshold": "Passing threshold: {{threshold}}% ({{correct}} of {{questionsNumber}} questions)",
+      "partialScore": "Partial score: {{correct}} of {{graded}} graded questions correct",
       "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)",
       "contentCantBeEmbedded": "This content can’t be embedded.",
       "openInNewTab": "Open in new tab",
@@ -4429,7 +4431,8 @@
       "retakeAvailableIn": "Locked for {{time}} hours after last retake.",
       "cooldown": "Quiz will be locked for {{time}} hours after the last attempt.",
       "noCooldown": "No cooldown period.",
-      "beta": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk."
+      "beta": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk.",
+      "awaitingReview": "You can retake the quiz after it has been reviewed."
     },
     "breadcrumbs": {
       "availableCourses": "Available Courses",
@@ -4467,7 +4470,8 @@
       "quizNotAnsweredYet": "You have not answered this quiz yet.",
       "courseEnrollmentRequired": "You are not enrolled in this course.",
       "quizRetakeUnavailable": "Quiz answers cannot be reset because of the attempts limit or cooldown.",
-      "quizResetFailed": "Failed to reset quiz answers. Please try again."
+      "quizResetFailed": "Failed to reset quiz answers. Please try again.",
+      "quizAwaitingReview": "This quiz is waiting for review."
     },
     "preview": {
       "title": "You are previewing this course",
@@ -4873,7 +4877,8 @@
     "completed": "Completed",
     "inProgress": "In Progress",
     "notStarted": "Not Started",
-    "blocked": "Blocked"
+    "blocked": "Blocked",
+    "awaitingReview": "Waiting for review"
   },
   "studentCertificateView": {
     "header": "Certificates",
@@ -6573,7 +6578,8 @@
         "started": "Started",
         "completed": "Completed",
         "inProgress": "In progress",
-        "notStarted": "Not started"
+        "notStarted": "Not started",
+        "awaitingReview": "Waiting for review"
       },
       "lessonTypes": {
         "content": "Content",

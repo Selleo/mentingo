@@ -257,6 +257,7 @@ export class QuizRuntimeRepository {
       .select({
         id: assessmentAttempts.id,
         scorePercentage: assessmentAttempts.scorePercentage,
+        gradingStatus: assessmentAttempts.gradingStatus,
         attemptNumber: assessmentAttempts.attemptNumber,
       })
       .from(assessmentAttempts)
@@ -287,6 +288,7 @@ export class QuizRuntimeRepository {
         id: assessmentAttemptQuestionAnswers.id,
         questionId: assessmentAttemptQuestionAnswers.questionId,
         awardedPoints: assessmentAttemptQuestionAnswers.awardedPoints,
+        gradingStatus: assessmentAttemptQuestionAnswers.gradingStatus,
       })
       .from(assessmentAttemptQuestionAnswers)
       .where(eq(assessmentAttemptQuestionAnswers.attemptId, attemptId));

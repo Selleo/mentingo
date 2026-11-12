@@ -8,6 +8,7 @@ import {
   SUPPORTED_LANGUAGES,
   type SupportedLanguages,
 } from "@repo/shared";
+import { match } from "ts-pattern";
 import { validate as uuidValidate, v5 as uuidV5 } from "uuid";
 
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
@@ -35,6 +36,12 @@ const toAssessmentQuestionType = (type: AdminQuestionBody["type"]) => {
 
 const isManualQuestion = (type: AdminQuestionBody["type"]) =>
   type === QUESTION_TYPE.BRIEF_RESPONSE || type === QUESTION_TYPE.DETAILED_RESPONSE;
+
+const getGradingMode = (question: AdminQuestionBody) =>
+  match({ isOpen: isManualQuestion(question.type), requiresReview: question.requiresReview })
+    .with({ isOpen: false }, () => ASSESSMENT_GRADING_MODES.AUTOMATIC)
+    .with({ requiresReview: true }, () => ASSESSMENT_GRADING_MODES.MANUAL)
+    .otherwise(() => ASSESSMENT_GRADING_MODES.PARTICIPATION);
 
 const isChoiceQuestion = (type: AdminQuestionBody["type"]) =>
   type === QUESTION_TYPE.SINGLE_CHOICE ||
@@ -216,9 +223,7 @@ const mapQuestion = (question: AdminQuestionBody, index: number): QuizAuthoringQ
     questionType,
     displayOrder: question.displayOrder ?? index + 1,
     maximumPoints: "1",
-    gradingMode: isManualQuestion(question.type)
-      ? ASSESSMENT_GRADING_MODES.MANUAL
-      : ASSESSMENT_GRADING_MODES.AUTOMATIC,
+    gradingMode: getGradingMode(question),
     scoringMode:
       isMatchingQuestion && question.scoringMode
         ? question.scoringMode

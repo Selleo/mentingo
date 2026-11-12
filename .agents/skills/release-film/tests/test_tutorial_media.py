@@ -98,6 +98,48 @@ class TutorialMedia(unittest.TestCase):
             self.assertGreater(self.rms(samples, boundary - .02, boundary + .02), middle * .85)
         self.assertAlmostEqual(len(samples) / 48000, 3, delta=.04)
 
+    def test_decoded_result_stays_visible_before_the_next_ui_change(self):
+        from test_montage import capture,step,words_at
+        take=capture([
+            step(0,.1,.3,.5,(600,350)),
+            step(1,.55,.6,.8,acting=False,look=True,box=[500,300,300,60]),
+            step(2,.9,1.2,1.4,(900,350)),
+        ],end=2)
+        take['scale']=.5
+        spec={'preserve_actions':True,'steps':[{'cmd':['click','Save'],'beat':1},
+              {'cmd':['look','Updated'],'beat':2},{'cmd':['click','Next'],'beat':3}]}
+        film=montage.cut(spec,take,words_at((.1,'Save.'),(.7,'Updated.'),(1,'Next.')),audio_duration=2)
+        source=self.root/'states.mp4'
+        self.command('-f','lavfi','-i',
+            'color=c=red:s=800x450:r=30:d=2,drawbox=color=lime:t=fill:enable=gte(t\\,.6),drawbox=color=blue:t=fill:enable=gte(t\\,1.2)',
+            '-c:v','libx264',source)
+        segment={'source':str(source),'scale':.5,'frame':[800,450],
+                 'pieces':[list(p) for p in montage.video_pieces(film['pieces'],take['timeline'])],
+                 'pointer':film['pointer'],'footage_duration':film['footage'],'crop':[0,0,800,450]}
+        inputs,graph=render_demo.footage_visual(segment,0,film['footage'],render_demo.pointer_images(self.root,.5))
+        output=self.root/'timed-states.mp4'
+        self.command('-filter_complex_threads','1',*inputs,'-filter_complex',graph,'-map','[v0]',
+                     '-t',film['footage'],'-c:v','libx264','-threads','2',output)
+        def pixel(at):
+            raw=subprocess.check_output([self.ffmpeg,'-v','error','-ss',str(at),'-i',str(output),
+                                         '-vf','crop=2:2:950:460','-frames:v','1','-pix_fmt','rgb24','-f','rawvideo','-'])
+            return raw[:3]
+        actions={a['step']:a for a in film['actions']}
+        for at in (actions[1]['t']+.3,actions[1]['t']+1.5):
+            red,green,blue=pixel(at)
+            self.assertGreater(green,180,'settled result must remain visible while the viewer reads')
+            self.assertLess(blue,80)
+        self.assertGreater(pixel(actions[2]['t']+.2)[2],180)
+
+    def test_final_syllable_keeps_its_level_even_when_there_is_no_quiet_tail(self):
+        listing = self.root / 'end.txt'
+        listing.write_text(f"file '{self.video}'\n" * 3)
+        output = self.root / 'complete-speech.mp4'
+        render_demo.mux_narration({'chapters': [{'audio':str(self.voice),'start':0,'audio_offset':0}]},
+                                  listing, output, 3)
+        samples = self.samples(output)
+        self.assertGreater(self.rms(samples,2.8,2.95), self.rms(samples,.4,.6)*.9)
+
     def test_chapter_audio_starts_at_its_own_offset_and_does_not_bleed_into_the_gap(self):
         short = self.root / 'short.wav'
         self.command('-i', self.voice, '-t', 1, short)
@@ -114,7 +156,7 @@ class TutorialMedia(unittest.TestCase):
         for start, end in [(.7, .9), (2.7, 2.9)]:
             self.assertGreater(self.rms(samples, start, end), .04)
 
-    def test_tutorial_pause_insertion_preserves_the_original_mp3_and_uses_pcm_for_rendering(self):
+    def test_tutorial_keeps_provider_delivery_and_uses_pcm_without_artificial_pauses(self):
         mp3 = self.root / 'audio.mp3'
         self.command('-i', self.voice, '-c:a', 'libmp3lame', mp3)
         original = mp3.read_bytes()
@@ -125,7 +167,28 @@ class TutorialMedia(unittest.TestCase):
         self.assertEqual(cut.narration_audio(self.root), self.root / 'paced.wav')
         self.assertEqual(render_demo.probe(self.root / 'paced.wav')['streams'][0]['codec_name'], 'pcm_s16le')
         paced = montage.words_from_srt((self.root / 'subtitles.srt').read_text())
-        self.assertAlmostEqual(paced[1][0] - paced[0][1], cut.PAUSE, places=2)
+        self.assertEqual(paced,words)
+        self.assertEqual(self.samples(mp3),self.samples(self.root/'paced.wav'))
+
+
+    def test_audio_waits_use_measured_silence_between_sentences(self):
+        voice=self.root/'sentence-audio.wav'
+        self.command('-f','lavfi','-i','sine=frequency=440:sample_rate=48000:duration=3',
+                     '-af',"volume=enable='between(t,1,1.5)':volume=0",voice)
+        words=[(.1,.9,'First.'),(1.6,2.7,'Second.')]
+        points=cut.sentence_pause_points(self.ffmpeg,voice,words,['First.','Second.'])
+        self.assertEqual(points[1],0)
+        self.assertGreater(points[2],1)
+        self.assertLess(points[2],1.5)
+        no_gap=cut.sentence_pause_points(self.ffmpeg,self.voice,words,['First.','Second.'])
+        self.assertIsNone(no_gap[2], 'never insert dead air into a spoken waveform')
+
+    def test_mentingo_captions_require_the_reference_face_without_a_fallback(self):
+        with mock.patch.object(cut,'film_font',return_value=('other.ttf','DejaVu Sans','fallback')):
+            with self.assertRaisesRegex(ValueError,'All Round Gothic 600'):
+                cut.tutorial_font({},'Caption','Selleo/mentingo')
+        with mock.patch.object(cut,'film_font',return_value=('brand.otf','all-round-gothic',None)):
+            self.assertEqual(cut.tutorial_font({},'Caption','Selleo/mentingo'),'brand.otf')
 
 
 if __name__ == '__main__':

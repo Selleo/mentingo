@@ -40,3 +40,26 @@ describe("QuestionCard title", () => {
     expect(container.querySelector("[onclick], [style]")).toBeNull();
   });
 });
+
+describe("QuestionCard review badge", () => {
+  it.each([
+    { isAwaitingReview: true, count: 1 },
+    { isAwaitingReview: false, count: 0 },
+  ])(
+    "renders $count awaiting review badges when isAwaitingReview is $isAwaitingReview",
+    ({ isAwaitingReview, count }) => {
+      render(
+        <QuestionCard
+          questionNumber={1}
+          questionType="oneOrTwoWordSentence"
+          title="Explain"
+          isAwaitingReview={isAwaitingReview}
+        >
+          Answer
+        </QuestionCard>,
+      );
+
+      expect(screen.queryAllByText("progressBadge.awaitingReview")).toHaveLength(count);
+    },
+  );
+});

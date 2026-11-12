@@ -1,3 +1,25 @@
+<a name="v4.31.1"></a>
+
+## [v4.31.1] - 11.11.2026
+
+### Features:
+
+- use native Luma chat and embeddings with Core fallback ([#2111](https://github.com/Selleo/mentingo/issues/2111))
+
+- make open quiz answers wait for review ([#2168](https://github.com/Selleo/mentingo/issues/2168))
+
+### Bug Fixes:
+
+- show tutorial steps clearly and publish videos in parallel ([#2150](https://github.com/Selleo/mentingo/issues/2150))
+
+- prevent voice mentor audio gaps during authentication ([#2192](https://github.com/Selleo/mentingo/issues/2192))
+
+- ensure learning outcomes are preserved when sharing courses ([#2169](https://github.com/Selleo/mentingo/issues/2169))
+
+### Tests:
+
+- add AI evaluators and history-based regression datasets ([#2105](https://github.com/Selleo/mentingo/issues/2105))
+
 <a name="v4.31.0"></a>
 
 ## [v4.31.0] - 10.11.2026
@@ -21,6 +43,10 @@
 ### Chores:
 
 - improve the course list banner for a better browsing experience ([#2183](https://github.com/Selleo/mentingo/issues/2183))
+
+### Documentation:
+
+- update changelog for version v4.31.0
 
 <a name="v4.30.0"></a>
 
@@ -3748,7 +3774,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.31.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.31.1...HEAD
+[v4.31.1]: https://github.com/Selleo/mentingo/compare/v4.31.0...v4.31.1
 [v4.31.0]: https://github.com/Selleo/mentingo/compare/v4.30.0...v4.31.0
 [v4.30.0]: https://github.com/Selleo/mentingo/compare/v4.29.0...v4.30.0
 [v4.29.0]: https://github.com/Selleo/mentingo/compare/v4.28.0...v4.29.0

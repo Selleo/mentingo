@@ -29,7 +29,11 @@
     "perf:load:dashboard": "pnpm --filter @mentingo/performance-tests test:load:dashboard",
     "start:debug": "pnpm run --filter=api start:debug",
     "prepare": "husky",
-    "gpush": "git push --no-verify"
+    "gpush": "git push --no-verify",
+    "test:ai:regression": "pnpm --filter=api test:ai:regression",
+    "eval:ai": "pnpm --filter=api eval:ai",
+    "eval:ai:record": "python3 scripts/langfuse/record.py --setup docs/langfuse/remote-setup.json --manifest apps/api/test/evaluations/feature-catalogue.v1.json",
+    "eval:ai:experiment": "python3 scripts/langfuse/experiment.py"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

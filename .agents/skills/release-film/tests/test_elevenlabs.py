@@ -134,6 +134,22 @@ class ElevenLabs(unittest.TestCase):
             voice.elevenlabs_request('test_voice', {'text': 'Hi'}, 'never-print-this-key')
         self.assertNotIn('never-print-this-key', str(caught.exception))
 
+    def test_http_errors_expose_only_allowlisted_provider_codes(self):
+        for code in ('quota_exceeded','invalid_api_key','never-print-this-key'):
+            body=json.dumps({'detail':{'status':code,'message':'never-print-this-key'}}).encode()
+            error=urllib.error.HTTPError('https://api.elevenlabs.io',401,'never-print-this-key',{},io.BytesIO(body))
+            opener=mock.Mock();opener.open.side_effect=error
+            with mock.patch.object(voice.urllib.request,'build_opener',return_value=opener):
+                with self.assertRaises(ValueError) as caught:
+                    voice.elevenlabs_request('test_voice',{'text':'Hi'},'never-print-this-key')
+            message=str(caught.exception)
+            self.assertNotIn('never-print-this-key',message)
+            if code!='never-print-this-key':
+                self.assertIn('provider code: '+code,message)
+            else:
+                self.assertNotIn('provider code:',message)
+            opener.open.assert_called_once()
+
     def test_response_size_limit(self):
         response = mock.MagicMock()
         response.__enter__.return_value.read.return_value = b'x' * 17

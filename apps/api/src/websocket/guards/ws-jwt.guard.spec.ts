@@ -6,6 +6,8 @@ import { WsJwtGuard } from "./ws-jwt.guard";
 import type { ExecutionContext } from "@nestjs/common";
 import type { SessionService } from "src/auth/session/session.service";
 
+jest.mock("src/auth/session/session.service", () => ({ SessionService: class {} }));
+
 describe("WebSocket credential expiry", () => {
   it.each([
     [Object.assign(new Error("expired"), { name: "TokenExpiredError" }), true],
@@ -35,5 +37,35 @@ describe("WebSocket credential expiry", () => {
     } else {
       expect(client.emit).not.toHaveBeenCalled();
     }
+  });
+});
+
+describe("Disconnected voice ingress", () => {
+  it("does not authorize a packet whose socket disconnected during verification", async () => {
+    const client = {
+      connected: true,
+      handshake: { auth: { token: "synthetic-token" } },
+      data: { user: { userId: "cached-user" } },
+      join: jest.fn(),
+      emit: jest.fn(),
+      disconnect: jest.fn(),
+    };
+    const guard = new WsJwtGuard({
+      verifySessionToken: async () => {
+        client.connected = false;
+        return {
+          userId: "synthetic-user",
+          sessionId: "synthetic-session",
+          tenantId: "synthetic-tenant",
+        };
+      },
+    } as unknown as SessionService);
+    await expect(
+      guard.canActivate({
+        switchToWs: () => ({ getClient: () => client }),
+      } as unknown as ExecutionContext),
+    ).rejects.toBeInstanceOf(WsException);
+    expect(client.join).not.toHaveBeenCalled();
+    expect(client.data.user.userId).toBe("cached-user");
   });
 });

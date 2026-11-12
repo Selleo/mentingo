@@ -3236,6 +3236,109 @@
           "outcomes": [
             "The deleted section is absent from the table of contents."
           ]
+        },
+        {
+          "id": "remove-section-language",
+          "title": "Remove an article section translation",
+          "description": "Remove a non-base article section language while retaining its base version.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Remove an unused translation of an article section.",
+          "preconditions": [
+            "The Articles module is enabled and the recording administrator can manage article sections.",
+            "A disposable section has a base language and one additional saved translation, prepared off camera with the existing fixtures."
+          ],
+          "actions": [
+            "Open the section editor from the table of contents.",
+            "Open the section language selector and remove the non-base language using its visible removal action.",
+            "Reopen the section and inspect its remaining language choices and base-language title."
+          ],
+          "outcomes": [
+            "The removed translation is no longer offered and the base-language section remains available."
+          ]
+        },
+        {
+          "id": "remove-article-language",
+          "title": "Remove an article translation",
+          "description": "Remove a non-base article language while retaining its base version.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Remove an unused translation of an article.",
+          "preconditions": [
+            "The Articles module is enabled and the recording author can manage the selected article.",
+            "A disposable article has populated base-language content and one additional saved translation, prepared off camera with the existing fixtures."
+          ],
+          "actions": [
+            "Open the article editor through its section.",
+            "Open the article language selector and remove the non-base language using its visible removal action.",
+            "Reopen the article and inspect its remaining language choices and base-language content."
+          ],
+          "outcomes": [
+            "The removed article translation is no longer offered and the base-language article remains readable."
+          ]
+        },
+        {
+          "id": "upload-article-resource",
+          "title": "Add a resource to article content",
+          "description": "Upload and insert a resource through the article rich-content editor.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "articles"
+          ],
+          "specPaths": [
+            "docs/specs/knowledge-base-articles-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Articles/**",
+            "apps/api/src/articles/**",
+            "apps/web/e2e/specs/articles/**",
+            "apps/web/e2e/flows/articles/**"
+          ],
+          "goal": "Add a visible resource to an article and verify it survives saving.",
+          "preconditions": [
+            "The Articles module is enabled and the recording author can edit the selected article.",
+            "A populated article and a neutral committed image fixture are available; use localized example labels and no written English in the image for Polish footage."
+          ],
+          "actions": [
+            "Open the article editor through its section.",
+            "Use the rich-content resource insertion control and select the committed image fixture through its visible upload control.",
+            "Complete any visible resource fields, insert the uploaded resource and save the article.",
+            "Open the saved article through navigation and inspect the inserted resource."
+          ],
+          "outcomes": [
+            "The uploaded resource renders within the saved article content in the selected language."
+          ]
         }
       ],
       "videos": [
@@ -3277,7 +3380,30 @@
             "configure-public-article",
             "delete-article"
           ]
+        },
+        {
+          "key": "knowledge-base-articles.language-removal",
+          "title": "Remove unused article and section translations",
+          "description": "Remove unused translations while preserving base-language articles and sections.",
+          "flowIds": [
+            "remove-article-language",
+            "remove-section-language"
+          ]
+        },
+        {
+          "key": "knowledge-base-articles.resources",
+          "title": "Add resources to article content",
+          "description": "Upload a resource, insert it into an article and verify the saved result.",
+          "flowIds": [
+            "upload-article-resource"
+          ]
         }
+      ],
+      "evidencePaths": [
+        "apps/web/app/modules/Articles/components/ArticlesTOC/ArticlesTOC.tsx",
+        "apps/web/app/modules/Articles/ArticleForm.page.tsx",
+        "apps/api/src/articles/repositories/articles.repository.ts",
+        "apps/web/app/modules/Articles/components/ArticlesTOC/EditArticleSectionSheet.tsx"
       ]
     },
     {
@@ -4746,6 +4872,38 @@
           "outcomes": [
             "Voice exchange and transcript are visible without losing the practice."
           ]
+        },
+        {
+          "id": "retry-practice-generation",
+          "title": "Retry failed practice generation",
+          "description": "Retry generation of the same daily AI Mentor practice after a recoverable failure.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "ai-mentor"
+          ],
+          "specPaths": [
+            "docs/specs/ai-mentor-lessons-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/AiMentorPractice/**",
+            "apps/api/src/ai/**"
+          ],
+          "goal": "Recover a failed daily practice without creating another session.",
+          "preconditions": [
+            "A synthetic daily practice has been staged in the failed generation state through the existing isolated test fixtures.",
+            "The isolated practice-generation provider can complete the retry; no real learner data or live failure injection."
+          ],
+          "actions": [
+            "Open the existing failed daily practice and inspect its failure message.",
+            "Select Retry and observe the generation state.",
+            "Wait for the prepared practice and open its task."
+          ],
+          "outcomes": [
+            "The same daily practice becomes ready without creating another daily session."
+          ]
         }
       ],
       "videos": [
@@ -4765,6 +4923,14 @@
           "description": "Practice with voice in Mentingo.",
           "flowIds": [
             "use-practice-voice"
+          ]
+        },
+        {
+          "key": "ai-mentor.recovery",
+          "title": "Recover a failed practice",
+          "description": "Retry a failed daily practice and continue once it is ready.",
+          "flowIds": [
+            "retry-practice-generation"
           ]
         }
       ]
@@ -6679,6 +6845,42 @@
           "outcomes": [
             "The deleted session is no longer scheduled."
           ]
+        },
+        {
+          "id": "run-offline-live-training",
+          "title": "Start and finish an offline training session",
+          "description": "Run an offline training session and inspect its completion in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "live-training"
+          ],
+          "specPaths": [
+            "docs/specs/live-training-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/LiveTraining/**",
+            "apps/api/src/live-training/**",
+            "apps/api/src/calendar/**"
+          ],
+          "goal": "Start and finish an offline session, including its linked lesson completion.",
+          "preconditions": [
+            "Use localized synthetic data in the isolated demo tenant; the recording account is an authorized host.",
+            "A scheduled offline training is linked to a live-training lesson in a synthetic course with an enrolled synthetic learner; no LiveKit service or real participant accounts are needed."
+          ],
+          "actions": [
+            "Open the prepared offline training and inspect its location and scheduled state.",
+            "Start the session as its authorized host and inspect the active status and locked configuration and material management.",
+            "Finish the session and inspect the ended status and session history.",
+            "Open the linked lesson as the enrolled synthetic learner and inspect its completion."
+          ],
+          "outcomes": [
+            "The offline session moves from scheduled to active to ended and appears in session history.",
+            "Configuration and material management are locked while the session is running.",
+            "Finishing the course-linked offline session completes the linked lesson for the enrolled learner."
+          ]
         }
       ],
       "videos": [
@@ -6697,7 +6899,8 @@
           "description": "Manage materials and run a session in Mentingo.",
           "flowIds": [
             "training-materials",
-            "join-live-training"
+            "join-live-training",
+            "run-offline-live-training"
           ]
         },
         {
@@ -7805,6 +8008,38 @@
           ]
         },
         {
+          "id": "set-category-base-language",
+          "title": "Change a category base language",
+          "description": "Choose which saved category translation is used as its base language.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "categories"
+          ],
+          "specPaths": [
+            "docs/specs/category-management-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/Categories/**",
+            "apps/api/src/category/**"
+          ],
+          "goal": "Change the base language of a category and verify that the choice remains saved.",
+          "preconditions": [
+            "Use localized synthetic data in the isolated demo tenant; required features and account permissions are enabled off camera.",
+            "Use a disposable category with saved English and Polish translations; keep both translations available."
+          ],
+          "actions": [
+            "Open the disposable category and select its existing non-base translation.",
+            "Choose Set as base language and confirm the change.",
+            "Reopen the category and inspect the base-language indicator."
+          ],
+          "outcomes": [
+            "The selected saved translation becomes the category base language and remains marked as the base after reopening."
+          ]
+        },
+        {
           "id": "delete-category",
           "title": "Remove an unused category",
           "description": "Remove an unused category in Mentingo.",
@@ -7921,6 +8156,14 @@
             "add-category-from-catalogue",
             "search-categories-globally",
             "delete-category"
+          ]
+        },
+        {
+          "key": "categories.language-defaults",
+          "title": "Choose the category base language",
+          "description": "Change the base language of an existing translated category.",
+          "flowIds": [
+            "set-category-base-language"
           ]
         }
       ]

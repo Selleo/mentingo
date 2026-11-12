@@ -1,4 +1,5 @@
 import {
+  ASSESSMENT_ATTEMPT_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_RESULTS,
   ASSESSMENT_QUESTION_TYPES,
   ASSESSMENT_TIMED_ATTEMPT_SUBMIT_GRACE_SECONDS,
@@ -41,6 +42,7 @@ export const mapQuizAttemptToRuntimeSubmissionResult = (
     questionCount,
     score: Math.floor(Number(attemptData.scorePercentage)),
     passed: attemptData.result === ASSESSMENT_ATTEMPT_RESULTS.PASSED,
+    awaitingReview: attemptData.gradingStatus === ASSESSMENT_ATTEMPT_GRADING_STATUSES.PENDING,
     ...persistedAttempt,
   };
 };
