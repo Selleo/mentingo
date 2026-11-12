@@ -4200,6 +4200,13 @@
       "success": "Odkaz na přihlášení ověřen. Přesměrování...",
       "error": "Odkaz na přihlášení je neplatný nebo jeho platnost vypršela.",
       "backToLogin": "Zpět k přihlášení"
+    },
+    "oauthError": {
+      "cancelled": "Přihlášení bylo zrušeno. Zkuste se přihlásit znovu.",
+      "providerDisabled": "Tento způsob přihlášení je vypnutý. Použijte prosím jiný.",
+      "providerNotConfigured": "Tento způsob přihlášení zatím není nastaven. Obraťte se prosím na správce.",
+      "providerError": "Nepodařilo se získat údaje o vašem účtu od poskytovatele přihlášení. Zkuste to prosím znovu.",
+      "unknown": "Přihlášení se nezdařilo. Zkuste to prosím znovu."
     }
   },
   "magicLinkView": {

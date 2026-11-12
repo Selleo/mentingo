@@ -3955,6 +3955,13 @@
       "success": "Lien de connexion vérifié. Redirection...",
       "error": "Le lien de connexion n'est pas valide ou a expiré.",
       "backToLogin": "Retour à la connexion"
+    },
+    "oauthError": {
+      "cancelled": "La connexion a été annulée. Veuillez réessayer.",
+      "providerDisabled": "Cette méthode de connexion est désactivée. Veuillez en utiliser une autre.",
+      "providerNotConfigured": "Cette méthode de connexion n'est pas encore configurée. Veuillez contacter votre administrateur.",
+      "providerError": "Impossible de récupérer les informations de votre compte auprès du fournisseur de connexion. Veuillez réessayer.",
+      "unknown": "La connexion a échoué. Veuillez réessayer."
     }
   },
   "magicLinkView": {

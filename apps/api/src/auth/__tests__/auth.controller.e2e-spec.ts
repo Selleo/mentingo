@@ -5,6 +5,7 @@ import { isArray, omit } from "lodash";
 import { nanoid } from "nanoid";
 import request from "supertest";
 
+import { OAUTH_LOGIN_ERROR_KEYS } from "src/auth/oauth/oauth-login.constants";
 import { hashToken } from "src/auth/utils/hash-auth-token";
 import { NOTIFICATION_ACCOUNT_ACTION_KINDS } from "src/automation-execution/automation-execution.constants";
 import { NotificationAccountActionService } from "src/automation-execution/services/notification-account-action.service";
@@ -13,6 +14,7 @@ import { EnvService } from "src/env/services/env.service";
 import { RATE_LIMITS } from "src/rate-limit/rate-limit.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { TenantStateService } from "src/storage/db/tenant-state.service";
 import {
   createTokens,
   formFieldAnswers,
@@ -25,6 +27,7 @@ import {
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { DEFAULT_TEST_TENANT_HOST } from "../../../test/helpers/tenant-helpers";
 import { truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../auth.service";
 
@@ -35,6 +38,7 @@ import type { DatabasePg } from "src/common";
 describe("AuthController (e2e)", () => {
   let app: INestApplication;
   let inTenant: <T>(fn: () => Promise<T>) => Promise<T>;
+  let defaultTenantId: string;
   let authService: AuthService;
   let db: DatabasePg;
   let baseDb: DatabasePg;
@@ -43,7 +47,8 @@ describe("AuthController (e2e)", () => {
   let settingsService: SettingsService;
 
   beforeAll(async () => {
-    const { app: testApp, runAsTenant, defaultTenantId } = await createE2ETest();
+    const { app: testApp, runAsTenant, defaultTenantId: testTenantId } = await createE2ETest();
+    defaultTenantId = testTenantId;
     inTenant = (fn) => runAsTenant(defaultTenantId, fn);
     app = testApp;
     authService = app.get(AuthService);
@@ -76,27 +81,77 @@ describe("AuthController (e2e)", () => {
     await app.close();
   });
 
-  it("starts Slack OAuth when enabled after app startup", async () => {
+  const enabledSlackEnv: Record<string, string> = {
+    SLACK_OAUTH_ENABLED: "true",
+    SLACK_CLIENT_ID: "test-slack-client-id",
+    SLACK_CLIENT_SECRET: "test-slack-client-secret",
+  };
+
+  const mockSlackEnv = (slackEnv: Record<string, string>) => {
     const envService = app.get(EnvService);
     const getEnv = envService.getEnv.bind(envService);
-    const slackEnv: Record<string, string> = {
-      SLACK_OAUTH_ENABLED: "true",
-      SLACK_CLIENT_ID: "test-slack-client-id",
-      SLACK_CLIENT_SECRET: "test-slack-client-secret",
-    };
 
     jest.spyOn(envService, "getEnv").mockImplementation(async (name) => {
       const value = slackEnv[name];
       return value ? { name, value } : getEnv(name);
     });
+  };
+
+  it("starts Slack OAuth when enabled after app startup", async () => {
+    mockSlackEnv(enabledSlackEnv);
 
     const response = await request(app.getHttpServer()).get("/api/auth/slack").expect(302);
     const redirect = new URL(response.headers.location);
 
     expect(redirect.origin).toBe("https://slack.com");
     expect(redirect.pathname).toBe("/openid/connect/authorize");
-    expect(redirect.searchParams.get("client_id")).toBe(slackEnv.SLACK_CLIENT_ID);
+    expect(redirect.searchParams.get("client_id")).toBe(enabledSlackEnv.SLACK_CLIENT_ID);
     expect(redirect.searchParams.get("state")).toBeTruthy();
+  });
+
+  describe("GET /api/auth/slack/callback failures", () => {
+    const getSlackCallbackRedirect = async (query: Record<string, string>) => {
+      const response = await request(app.getHttpServer())
+        .get("/api/auth/slack/callback")
+        .query(query)
+        .expect(302);
+
+      return new URL(response.headers.location);
+    };
+
+    it("redirects to the tenant login page when the user cancels Slack consent", async () => {
+      mockSlackEnv(enabledSlackEnv);
+      const state = await app.get(TenantStateService).sign(defaultTenantId);
+
+      const redirect = await getSlackCallbackRedirect({ error: "access_denied", state });
+
+      expect(redirect.origin).toBe(DEFAULT_TEST_TENANT_HOST);
+      expect(redirect.pathname).toBe("/auth/login");
+      expect(redirect.searchParams.get("error")).toBe(OAUTH_LOGIN_ERROR_KEYS.CANCELLED);
+    });
+
+    it("redirects to the tenant login page when Slack login is disabled", async () => {
+      mockSlackEnv({ SLACK_OAUTH_ENABLED: "false" });
+      const state = await app.get(TenantStateService).sign(defaultTenantId);
+
+      const redirect = await getSlackCallbackRedirect({ code: "slack-code", state });
+
+      expect(redirect.origin).toBe(DEFAULT_TEST_TENANT_HOST);
+      expect(redirect.pathname).toBe("/auth/login");
+      expect(redirect.searchParams.get("error")).toBe(OAUTH_LOGIN_ERROR_KEYS.PROVIDER_DISABLED);
+    });
+
+    it("redirects to the login page when the OAuth state is invalid", async () => {
+      mockSlackEnv(enabledSlackEnv);
+
+      const redirect = await getSlackCallbackRedirect({
+        code: "slack-code",
+        state: "tampered.state",
+      });
+
+      expect(redirect.pathname).toBe("/auth/login");
+      expect(redirect.searchParams.get("error")).toBe(OAUTH_LOGIN_ERROR_KEYS.UNKNOWN);
+    });
   });
 
   describe("POST /api/auth/register", () => {

@@ -4194,6 +4194,13 @@
       "success": "Login link verified. Redirecting...",
       "error": "Login link is invalid or has expired.",
       "backToLogin": "Back to login"
+    },
+    "oauthError": {
+      "cancelled": "Sign-in was cancelled. Please try again to log in.",
+      "providerDisabled": "This sign-in method is disabled. Please use a different one.",
+      "providerNotConfigured": "This sign-in method is not configured yet. Please contact your administrator.",
+      "providerError": "We couldn't get your account details from the sign-in provider. Please try again.",
+      "unknown": "Sign-in failed. Please try again."
     }
   },
   "magicLinkView": {

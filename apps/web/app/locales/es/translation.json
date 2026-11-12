@@ -4138,6 +4138,13 @@
       "success": "Enlace de inicio de sesión verificado. Redirigiendo...",
       "error": "El enlace de inicio de sesión no es válido o ha caducado.",
       "backToLogin": "Volver a iniciar sesión"
+    },
+    "oauthError": {
+      "cancelled": "Se canceló el inicio de sesión. Inténtalo de nuevo.",
+      "providerDisabled": "Este método de inicio de sesión está desactivado. Usa otro método.",
+      "providerNotConfigured": "Este método de inicio de sesión aún no está configurado. Ponte en contacto con tu administrador.",
+      "providerError": "No pudimos obtener los datos de tu cuenta del proveedor de inicio de sesión. Inténtalo de nuevo.",
+      "unknown": "No se pudo iniciar sesión. Inténtalo de nuevo."
     }
   },
   "magicLinkView": {

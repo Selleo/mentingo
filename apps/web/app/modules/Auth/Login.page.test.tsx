@@ -15,6 +15,12 @@ vi.mock("~/api/queries/useLoginPageFiles", () => ({
 }));
 vi.mock("~/components/PlatformLogo", () => ({ PlatformLogo: () => <div /> }));
 
+const { mockedToast } = vi.hoisted(() => ({ mockedToast: vi.fn() }));
+vi.mock("~/components/ui/use-toast", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("~/components/ui/use-toast")>()),
+  toast: mockedToast,
+}));
+
 mockRemixReact();
 const methods = vi.hoisted(() => ({
   password: false,
@@ -81,6 +87,20 @@ describe("Login page", () => {
       `https://github.com/Selleo/mentingo/blob/main/CHANGELOG.md#${version}`,
     );
     expect(screen.queryByText(/App Version|Wersja aplikacji/i)).not.toBeInTheDocument();
+  });
+
+  it("shows a translated toast for an OAuth login error returned by the API", async () => {
+    renderWith({ withQuery: true }).render(
+      <RemixStub initialEntries={["/?error=loginView.oauthError.providerError"]} />,
+    );
+
+    await waitFor(() => {
+      expect(mockedToast).toHaveBeenCalledWith({
+        variant: "destructive",
+        description:
+          "We couldn't get your account details from the sign-in provider. Please try again.",
+      });
+    });
   });
 
   it.skip("submits the form with valid data", async () => {

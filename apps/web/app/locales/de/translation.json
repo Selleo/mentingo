@@ -4193,6 +4193,13 @@
       "success": "Anmeldelink bestätigt. Weiterleitung...",
       "error": "Der Anmeldelink ist ungültig oder abgelaufen.",
       "backToLogin": "Zurück zum Login"
+    },
+    "oauthError": {
+      "cancelled": "Die Anmeldung wurde abgebrochen. Bitte versuchen Sie es erneut.",
+      "providerDisabled": "Diese Anmeldemethode ist deaktiviert. Bitte verwenden Sie eine andere Methode.",
+      "providerNotConfigured": "Diese Anmeldemethode ist noch nicht eingerichtet. Bitte wenden Sie sich an Ihren Administrator.",
+      "providerError": "Ihre Kontodaten konnten nicht vom Anmeldeanbieter abgerufen werden. Bitte versuchen Sie es erneut.",
+      "unknown": "Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut."
     }
   },
   "magicLinkView": {

@@ -4195,6 +4195,13 @@
       "success": "Prisijungimo nuoroda patvirtinta. Peradresuojama...",
       "error": "Prisijungimo nuoroda neteisinga arba pasibaigė.",
       "backToLogin": "Grįžti į prisijungimą"
+    },
+    "oauthError": {
+      "cancelled": "Prisijungimas atšauktas. Bandykite prisijungti dar kartą.",
+      "providerDisabled": "Šis prisijungimo būdas išjungtas. Naudokite kitą būdą.",
+      "providerNotConfigured": "Šis prisijungimo būdas dar nesukonfigūruotas. Susisiekite su administratoriumi.",
+      "providerError": "Nepavyko gauti jūsų paskyros duomenų iš prisijungimo paslaugos teikėjo. Bandykite dar kartą.",
+      "unknown": "Prisijungti nepavyko. Bandykite dar kartą."
     }
   },
   "magicLinkView": {
