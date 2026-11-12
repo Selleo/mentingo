@@ -1,3 +1,25 @@
+<a name="v4.32.0"></a>
+
+## [v4.32.0] - 12.11.2026
+
+### Features:
+
+- add matching questions to quizzes ([#2178](https://github.com/Selleo/mentingo/issues/2178))
+
+### Bug Fixes:
+
+- keep the sidebar visible during course page loading ([#2195](https://github.com/Selleo/mentingo/issues/2195))
+
+### Chores:
+
+- improve Slack login reliability and redirect authentication errors to the login page ([#2196](https://github.com/Selleo/mentingo/issues/2196))
+
+- improve table layouts and simplify the settings experience ([#2193](https://github.com/Selleo/mentingo/issues/2193))
+
+- make outbox event processing reliable and unified ([#2181](https://github.com/Selleo/mentingo/issues/2181))
+
+- add activity logs to native import and export ([#2175](https://github.com/Selleo/mentingo/issues/2175))
+
 <a name="v4.31.1"></a>
 
 ## [v4.31.1] - 11.11.2026
@@ -15,6 +37,10 @@
 - prevent voice mentor audio gaps during authentication ([#2192](https://github.com/Selleo/mentingo/issues/2192))
 
 - ensure learning outcomes are preserved when sharing courses ([#2169](https://github.com/Selleo/mentingo/issues/2169))
+
+### Documentation:
+
+- update changelog for version v4.31.1
 
 ### Tests:
 
@@ -3774,7 +3800,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.31.1...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.32.0...HEAD
+[v4.32.0]: https://github.com/Selleo/mentingo/compare/v4.31.1...v4.32.0
 [v4.31.1]: https://github.com/Selleo/mentingo/compare/v4.31.0...v4.31.1
 [v4.31.0]: https://github.com/Selleo/mentingo/compare/v4.30.0...v4.31.0
 [v4.30.0]: https://github.com/Selleo/mentingo/compare/v4.29.0...v4.30.0
