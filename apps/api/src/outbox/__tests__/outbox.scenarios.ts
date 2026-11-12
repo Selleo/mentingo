@@ -1,3 +1,5 @@
+import { OUTBOX_RETRY_DELAYS_SECONDS } from "src/outbox/outbox.constants";
+
 export const OUTBOX_TABLES = ["outbox_events"] as const;
 
 /** Whether an event's payload stays in the outbox once every handler has succeeded. */
@@ -18,8 +20,14 @@ export const TRANSACTION_OUTCOMES = {
 
 export type TransactionOutcome = (typeof TRANSACTION_OUTCOMES)[keyof typeof TRANSACTION_OUTCOMES];
 
-/** Just past the 5-second delay before a failed event is claimed again. */
+/** Just past the 5-second delay before a failed event is claimed again for the first time. */
 export const RETRY_DELAY_ELAPSED_SECONDS = 6;
+
+/** Just past the 30-second delay before a twice-failed event is claimed again. */
+export const SECOND_RETRY_DELAY_ELAPSED_SECONDS = 31;
+
+/** Just past the longest delay before a failed event is claimed again. */
+export const LONGEST_RETRY_DELAY_ELAPSED_SECONDS = Math.max(...OUTBOX_RETRY_DELAYS_SECONDS) + 1;
 
 /** Just past the 5 minutes after which a claimed event counts as stalled. */
 export const STALLED_CLAIM_ELAPSED_SECONDS = 6 * 60;

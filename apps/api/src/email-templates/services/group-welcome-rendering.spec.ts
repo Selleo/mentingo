@@ -68,16 +68,15 @@ it("renders a group-specific welcome using the new member's public email variabl
     } as unknown as EmailTemplateAssetService,
     { runWithTenant: async (_tenant, callback) => callback() } as TenantDbRunnerService,
   );
+  const [recipient] = notification.notificationData.recipients;
+
+  if (!recipient) throw new Error("Expected the group welcome notification to have a recipient");
+
   const rendered = await service.renderEmailTemplatePublication(
     "tenant",
     publication,
     "en",
-    resolveAutomationMappings(
-      mappings,
-      notification.notificationData.recipients[0]!.eventFields,
-      "en",
-      "en",
-    ),
+    resolveAutomationMappings(mappings, recipient.eventFields, "en", "en"),
     { companyName: "Tenant", primaryColor: "#123456" },
   );
   expect(rendered.subject).toBe("Welcome Alex to Sales <Europe>");

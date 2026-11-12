@@ -43,10 +43,11 @@ export const OUTBOX_STATUSES = {
 
 export type OutboxStatus = (typeof OUTBOX_STATUSES)[keyof typeof OUTBOX_STATUSES];
 
+/** A claimed event. Every claim stamps its id; only rows never claimed have none. */
 export type OutboxEnvelope = Pick<
   typeof outboxEvents.$inferSelect,
-  "id" | "eventType" | "payload" | "attemptCount" | "succeededHandlers" | "tenantId" | "claimId"
->;
+  "id" | "eventType" | "payload" | "attemptCount" | "succeededHandlers" | "tenantId" | "createdAt"
+> & { claimId: string };
 
 export type OutboxHandlerDeliveryOutcome =
   (typeof OUTBOX_HANDLER_DELIVERY_OUTCOMES)[keyof typeof OUTBOX_HANDLER_DELIVERY_OUTCOMES];

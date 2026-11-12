@@ -11,7 +11,7 @@ import {
   NATIVE_ARCHIVE_KIND,
 } from "src/native-archive/native-archive.constants";
 import { OutboxDispatcherService } from "src/outbox/outbox-dispatcher.service";
-import { OUTBOX_MAX_ATTEMPTS } from "src/outbox/outbox.constants";
+import { OUTBOX_ABANDONED_CLAIM_ERROR, OUTBOX_MAX_ATTEMPTS } from "src/outbox/outbox.constants";
 import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { OutboxRepository } from "src/outbox/outbox.repository";
@@ -28,11 +28,13 @@ import {
   CONCURRENT_CLAIM_CASES,
   RETRY_DELAY_ELAPSED_SECONDS,
   INVALID_IMPORT_OUTCOME,
+  LONGEST_RETRY_DELAY_ELAPSED_SECONDS,
   NON_MARKETPLACE_IMPORT_SOURCE,
   OUTBOX_PAYLOAD_RETENTIONS,
   OUTBOX_TABLES,
   PUBLICATION_CASES,
   PUBLISHED_PAYLOAD_CASES,
+  SECOND_RETRY_DELAY_ELAPSED_SECONDS,
   STALLED_CLAIM_ELAPSED_SECONDS,
   TRANSACTION_OUTCOMES,
 } from "./outbox.scenarios";
@@ -207,11 +209,15 @@ describe("Outbox (e2e)", () => {
   };
 
   /** Moves an event's last update into the past, as if that much time had passed since. */
-  const backdateOutboxEvent = (id: string, elapsedSeconds: number, status?: OutboxStatus) =>
+  const backdateOutboxEvent = (
+    id: string,
+    elapsedSeconds: number,
+    changes: { status?: OutboxStatus; attemptCount?: number } = {},
+  ) =>
     dbAdmin
       .update(outboxEvents)
       .set({
-        ...(status && { status }),
+        ...changes,
         updatedAt: sql`NOW() - make_interval(secs => ${elapsedSeconds})`,
       })
       .where(eq(outboxEvents.id, id));
@@ -224,10 +230,10 @@ describe("Outbox (e2e)", () => {
     return publishExportedEvent(defaultTenantId);
   };
 
-  /** Dispatches once, then lets the retry delay pass so the next dispatch may claim it again. */
+  /** Dispatches once, then lets any retry delay pass so the next dispatch may claim it again. */
   const dispatchAndWaitOutRetryDelay = async (id: string) => {
     await dispatchOutbox();
-    await backdateOutboxEvent(id, RETRY_DELAY_ELAPSED_SECONDS);
+    await backdateOutboxEvent(id, LONGEST_RETRY_DELAY_ELAPSED_SECONDS);
   };
 
   describe("publishing", () => {
@@ -360,6 +366,7 @@ describe("Outbox (e2e)", () => {
 
         await backdateOutboxEvent(staleClaim.id, STALLED_CLAIM_ELAPSED_SECONDS);
         await outboxRepository.releaseStalledClaims(defaultTenantId);
+        await backdateOutboxEvent(staleClaim.id, RETRY_DELAY_ELAPSED_SECONDS);
         const currentClaim = await outboxRepository.claimNextDueEvent(defaultTenantId);
 
         if (!currentClaim) throw new Error("Expected the released event to be claimed again");
@@ -371,6 +378,56 @@ describe("Outbox (e2e)", () => {
       });
 
       expect(locks).toEqual({ staleClaim: null, currentClaim: { succeededHandlers: [] } });
+    });
+
+    it("ignores writes made under a claim that was released as stalled", async () => {
+      await publishExportedEvent(defaultTenantId);
+
+      await runAsTenant(defaultTenantId, async () => {
+        const staleClaim = await outboxRepository.claimNextDueEvent(defaultTenantId);
+
+        if (!staleClaim) throw new Error("Expected a pending event to claim");
+
+        await backdateOutboxEvent(staleClaim.id, STALLED_CLAIM_ELAPSED_SECONDS);
+        await outboxRepository.releaseStalledClaims(defaultTenantId);
+        await outboxRepository.recordFailedAttempt(staleClaim, {
+          status: OUTBOX_STATUSES.FAILED,
+          attemptCount: staleClaim.attemptCount + 1,
+          lastError: "late write by test",
+        });
+      });
+
+      expect(await findOnlyOutboxEvent()).toMatchObject({
+        status: OUTBOX_STATUSES.FAILED,
+        attemptCount: 1,
+        lastError: OUTBOX_ABANDONED_CLAIM_ERROR,
+        claimId: null,
+      });
+    });
+
+    it("leaves a stalled claim alone while a running handler has it locked", async () => {
+      await publishExportedEvent(defaultTenantId);
+      const { id } = await findOnlyOutboxEvent();
+      await backdateOutboxEvent(id, STALLED_CLAIM_ELAPSED_SECONDS, {
+        status: OUTBOX_STATUSES.PROCESSING,
+      });
+
+      await dbAdmin.transaction(async (transaction) => {
+        await transaction
+          .select({ id: outboxEvents.id })
+          .from(outboxEvents)
+          .where(eq(outboxEvents.id, id))
+          .for("update");
+
+        await runAsTenant(defaultTenantId, () =>
+          outboxRepository.releaseStalledClaims(defaultTenantId),
+        );
+      });
+
+      expect(await findOnlyOutboxEvent()).toMatchObject({
+        status: OUTBOX_STATUSES.PROCESSING,
+        attemptCount: 0,
+      });
     });
   });
 
@@ -447,6 +504,26 @@ describe("Outbox (e2e)", () => {
       });
     });
 
+    it("waits longer before each further retry", async () => {
+      await publishEventWithFailingHandler();
+      await dispatchOutbox();
+      const { id } = await findOnlyOutboxEvent();
+      await backdateOutboxEvent(id, RETRY_DELAY_ELAPSED_SECONDS);
+      await dispatchOutbox();
+
+      await backdateOutboxEvent(id, RETRY_DELAY_ELAPSED_SECONDS);
+      await dispatchOutbox();
+      const beforeDelay = await findOnlyOutboxEvent();
+      await backdateOutboxEvent(id, SECOND_RETRY_DELAY_ELAPSED_SECONDS);
+      await dispatchOutbox();
+      const afterDelay = await findOnlyOutboxEvent();
+
+      expect({ beforeDelay, afterDelay }).toMatchObject({
+        beforeDelay: { attemptCount: 2 },
+        afterDelay: { attemptCount: 3 },
+      });
+    });
+
     it("retries only the handlers that failed", async () => {
       await publishEventWithFailingHandler();
       const { id } = await findOnlyOutboxEvent();
@@ -480,17 +557,44 @@ describe("Outbox (e2e)", () => {
       });
     });
 
-    it("returns a stalled claim to pending and delivers it", async () => {
+    it("counts a stalled claim as a failed attempt and delivers it after the retry delay", async () => {
       const rootId = faker.string.uuid();
       await publishExportedEvent(defaultTenantId, rootId);
       const { id } = await findOnlyOutboxEvent();
-      await backdateOutboxEvent(id, STALLED_CLAIM_ELAPSED_SECONDS, OUTBOX_STATUSES.PROCESSING);
+      await backdateOutboxEvent(id, STALLED_CLAIM_ELAPSED_SECONDS, {
+        status: OUTBOX_STATUSES.PROCESSING,
+      });
 
       await dispatchOutbox();
+      const released = await findOnlyOutboxEvent();
+      await backdateOutboxEvent(id, RETRY_DELAY_ELAPSED_SECONDS);
+      await dispatchOutbox();
 
+      expect(released).toMatchObject({
+        status: OUTBOX_STATUSES.FAILED,
+        attemptCount: 1,
+        lastError: OUTBOX_ABANDONED_CLAIM_ERROR,
+      });
       expect(exportedEventProbe.deliveries).toEqual([{ rootId, tenantId: defaultTenantId }]);
       expect(await findOnlyOutboxEvent()).toMatchObject({
         status: OUTBOX_STATUSES.PUBLISHED,
+      });
+    });
+
+    it("marks a claim that keeps stalling dead on its last allowed attempt", async () => {
+      await publishExportedEvent(defaultTenantId);
+      const { id } = await findOnlyOutboxEvent();
+      await backdateOutboxEvent(id, STALLED_CLAIM_ELAPSED_SECONDS, {
+        status: OUTBOX_STATUSES.PROCESSING,
+        attemptCount: OUTBOX_MAX_ATTEMPTS - 1,
+      });
+
+      await dispatchOutbox();
+
+      expect(exportedEventProbe.deliveries).toEqual([]);
+      expect(await findOnlyOutboxEvent()).toMatchObject({
+        status: OUTBOX_STATUSES.DEAD,
+        attemptCount: OUTBOX_MAX_ATTEMPTS,
       });
     });
 

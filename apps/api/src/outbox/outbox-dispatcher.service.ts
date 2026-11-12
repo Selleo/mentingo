@@ -8,6 +8,7 @@ import {
 } from "src/automation-execution/events/notification-event";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { outboxDeliveryAls } from "./outbox-delivery-als.store";
 import { OutboxEventHandlerRegistry } from "./outbox-event-handler-registry";
 import { OUTBOX_HANDLER_DELIVERY_OUTCOMES, OUTBOX_MAX_ATTEMPTS } from "./outbox.constants";
 import { OutboxRepository } from "./outbox.repository";
@@ -62,26 +63,34 @@ export class OutboxDispatcherService {
     return this.runningPass;
   }
 
+  /**
+   * A database error stops only the tenant it happened in; the other tenants are still delivered,
+   * and an event left in processing is released as a failed attempt once its claim goes stale.
+   */
   private async deliverDueEventsOfEveryTenant(): Promise<void> {
     await this.tenantDbRunnerService.runForEachTenant(async (tenantId) => {
-      await this.outboxRepository.releaseStalledClaims(tenantId);
-      let event = await this.outboxRepository.claimNextDueEvent(tenantId);
-
-      while (event) {
-        await this.deliverClaimedEvent(event, tenantId);
-        event = await this.outboxRepository.claimNextDueEvent(tenantId);
+      try {
+        await this.deliverDueEvents(tenantId);
+      } catch (error) {
+        this.logger.error(
+          `[tenant=${tenantId}] Outbox dispatch pass failed: ${error}`,
+          error instanceof Error ? error.stack : undefined,
+        );
       }
     });
   }
 
-  private async deliverClaimedEvent(claimedEvent: OutboxEnvelope, tenantId: string): Promise<void> {
-    if (claimedEvent.tenantId && tenantId && claimedEvent.tenantId !== tenantId) {
-      const message = `Tenant mismatch while processing outbox event ${claimedEvent.id}: claimed under tenant=${tenantId}, event.tenantId=${claimedEvent.tenantId}`;
-      this.logger.error(message);
-      await this.recordFailedAttempt(claimedEvent, message);
-      return;
-    }
+  private async deliverDueEvents(tenantId: string): Promise<void> {
+    await this.outboxRepository.releaseStalledClaims(tenantId);
+    let event = await this.outboxRepository.claimNextDueEvent(tenantId);
 
+    while (event) {
+      await this.deliverClaimedEvent(event, tenantId);
+      event = await this.outboxRepository.claimNextDueEvent(tenantId);
+    }
+  }
+
+  private async deliverClaimedEvent(claimedEvent: OutboxEnvelope, tenantId: string): Promise<void> {
     const event = await this.upgradeLegacyFlatPayload(claimedEvent);
     const subscription = this.outboxEventHandlerRegistry.findEventSubscription(event.eventType);
 
@@ -143,6 +152,7 @@ export class OutboxDispatcherService {
         if (outcome === OUTBOX_HANDLER_DELIVERY_OUTCOMES.CLAIM_LOST) return outcome;
       } catch (error) {
         handlerFailures.push(`${handler.name}: ${error instanceof Error ? error.message : error}`);
+        await this.outboxRepository.refreshClaim(event);
       }
     }
 
@@ -167,7 +177,9 @@ export class OutboxDispatcherService {
     if (lockedEvent.succeededHandlers.includes(handler.name))
       return OUTBOX_HANDLER_DELIVERY_OUTCOMES.DELIVERED;
 
-    await handler.handleOutboxEvent(outboxEvent, { eventId: event.id });
+    await outboxDeliveryAls.run({ occurredAt: event.createdAt }, () =>
+      handler.handleOutboxEvent(outboxEvent, { eventId: event.id }),
+    );
     await this.outboxRepository.recordSucceededHandler(event, handler.name);
 
     return OUTBOX_HANDLER_DELIVERY_OUTCOMES.DELIVERED;
@@ -177,10 +189,12 @@ export class OutboxDispatcherService {
     claim: OutboxClaim,
     clearPayloadAfterDelivery: boolean,
   ): Promise<void> {
-    await match(clearPayloadAfterDelivery)
-      .with(true, () => this.outboxRepository.markPublishedWithoutPayload(claim))
-      .with(false, () => this.outboxRepository.markPublished(claim))
-      .exhaustive();
+    if (clearPayloadAfterDelivery) {
+      await this.outboxRepository.markPublishedWithoutPayload(claim);
+      return;
+    }
+
+    await this.outboxRepository.markPublished(claim);
   }
 
   /** Notification intake failures are stored with a generic message instead of their error. */
@@ -215,11 +229,11 @@ export class OutboxDispatcherService {
   private async recordFailedAttempt(event: OutboxEnvelope, error: unknown): Promise<void> {
     const attemptCount = event.attemptCount + 1;
 
+    const status =
+      attemptCount >= OUTBOX_MAX_ATTEMPTS ? OUTBOX_STATUSES.DEAD : OUTBOX_STATUSES.FAILED;
+
     await this.outboxRepository.recordFailedAttempt(event, {
-      status: match(attemptCount >= OUTBOX_MAX_ATTEMPTS)
-        .with(true, () => OUTBOX_STATUSES.DEAD)
-        .with(false, () => OUTBOX_STATUSES.FAILED)
-        .exhaustive(),
+      status,
       attemptCount,
       lastError: toOutboxErrorMessage(error),
     });

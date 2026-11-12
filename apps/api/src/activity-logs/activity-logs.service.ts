@@ -16,6 +16,7 @@ import {
 
 import { DatabasePg, type Pagination } from "src/common";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { outboxDeliveryAls } from "src/outbox/outbox-delivery-als.store";
 import { dbAls } from "src/storage/db/db-als.store";
 import { activityLogs } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -45,12 +46,18 @@ export class ActivityLogsService {
     private readonly activityLogResourceNameService: ActivityLogResourceNameService,
   ) {}
 
+  /**
+   * Activities recorded by an outbox handler keep the time their event was published, so the log
+   * stays in the order things happened however late or out of order the events are delivered.
+   */
   async recordActivity(payload: RecordActivityLogParams): Promise<void> {
     const tenantId = dbAls.getStore()?.tenantId;
+    const occurredAt = outboxDeliveryAls.getStore()?.occurredAt;
 
     if (process.env.NODE_ENV === "test") {
       return this.persistActivityLog({
         ...(tenantId ? { tenantId } : {}),
+        ...(occurredAt && { occurredAt }),
         ...payload,
         actor: this.getActorFromPayload(payload.actor),
       });
@@ -58,6 +65,7 @@ export class ActivityLogsService {
 
     await this.activityLogsQueueService.enqueueActivityLog({
       ...(tenantId ? { tenantId } : {}),
+      ...(occurredAt && { occurredAt }),
       ...payload,
       actor: this.getActorFromPayload(payload.actor),
     });
@@ -79,6 +87,7 @@ export class ActivityLogsService {
         resourceType: payload.resourceType ?? null,
         resourceId: payload.resourceId ?? null,
         metadata: settingsToJSONBuildObject(metadata),
+        ...(payload.occurredAt && { createdAt: payload.occurredAt }),
       });
     } catch (error) {
       this.logger.error(

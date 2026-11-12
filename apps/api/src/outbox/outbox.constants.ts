@@ -1,10 +1,26 @@
 export const OUTBOX_NOTIFY_CHANNEL = "outbox_events";
 
-/** An event that fails this many times is marked dead instead of being retried. */
-export const OUTBOX_MAX_ATTEMPTS = 5;
+/**
+ * How long a failed event waits before it may be claimed again, by the number of attempts it has
+ * used. The waits add up to about ten and a half hours, so an event outlives an outage of Redis,
+ * the mail provider or another dependency instead of dying within seconds.
+ */
+export const OUTBOX_RETRY_DELAYS_SECONDS = [
+  5,
+  30,
+  5 * 60,
+  30 * 60,
+  2 * 60 * 60,
+  2 * 60 * 60,
+  2 * 60 * 60,
+  2 * 60 * 60,
+  2 * 60 * 60,
+] as const;
 
-/** How long a failed event waits before it may be claimed again. */
-export const OUTBOX_RETRY_DELAY_SECONDS = 5;
+/** An event that fails this many times is marked dead instead of being retried. */
+export const OUTBOX_MAX_ATTEMPTS = OUTBOX_RETRY_DELAYS_SECONDS.length + 1;
+
+export const OUTBOX_ABANDONED_CLAIM_ERROR = "Claim abandoned before delivery finished";
 
 /** How long a claim may stay in processing before it counts as abandoned. */
 export const OUTBOX_STALLED_CLAIM_SECONDS = 5 * 60;
