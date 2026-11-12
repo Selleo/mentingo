@@ -423,8 +423,15 @@ describe("ForumController (e2e)", () => {
         .post("/api/forum/topics")
         .set("Cookie", cookie)
         .send(body)
-        .expect(403);
-      expect(notEnrolled.body.message).toBe("courseChat.errors.notEnrolled");
+        .expect(404);
+      expect(notEnrolled.body.message).toBe("forum.errors.courseNotFound");
+
+      const missingCourse = await request(app.getHttpServer())
+        .post("/api/forum/topics")
+        .set("Cookie", cookie)
+        .send({ ...body, courseId: faker.string.uuid() })
+        .expect(404);
+      expect(missingCourse.body.message).toBe("forum.errors.courseNotFound");
 
       const withoutPermission = await request(app.getHttpServer())
         .post("/api/forum/topics")

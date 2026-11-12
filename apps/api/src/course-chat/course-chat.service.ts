@@ -218,7 +218,7 @@ export class CourseChatService {
     }
 
     const message = await this.courseChatRepository.getMessageContext(messageId);
-    if (!message || message.deletedAt || !message.userId || !message.courseId) {
+    if (!message || message.deletedAt || !message.userId) {
       throw new NotFoundException("courseChat.errors.messageNotFound");
     }
 
@@ -255,7 +255,7 @@ export class CourseChatService {
     permissions: PermissionKey[],
   ): Promise<BaseResponse<DeleteCourseChatMessageResponse>> {
     const message = await this.courseChatRepository.getMessageContext(messageId);
-    if (!message || message.deletedAt || !message.userId || !message.courseId) {
+    if (!message || message.deletedAt || !message.userId) {
       throw new NotFoundException("courseChat.errors.messageNotFound");
     }
 
@@ -294,7 +294,7 @@ export class CourseChatService {
   private async getAccessibleMessage(messageId: UUIDType, userId: UUIDType) {
     const message = await this.courseChatRepository.getMessageContext(messageId);
 
-    if (!message || !message.courseId) {
+    if (!message) {
       throw new NotFoundException("courseChat.errors.messageNotFound");
     }
 

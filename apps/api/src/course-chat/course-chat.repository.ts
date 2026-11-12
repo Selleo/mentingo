@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
-import { and, count, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
@@ -230,7 +230,13 @@ export class CourseChatRepository {
       .from(courseChatMessages)
       .innerJoin(courseChatThreads, eq(courseChatThreads.id, courseChatMessages.threadId))
       .innerJoin(users, eq(users.id, courseChatMessages.userId))
-      .where(and(eq(courseChatMessages.id, messageId), isNull(courseChatMessages.deletedAt)))
+      .where(
+        and(
+          eq(courseChatMessages.id, messageId),
+          isNull(courseChatMessages.deletedAt),
+          isNotNull(courseChatMessages.courseId),
+        ),
+      )
       .limit(1);
 
     return message ?? null;
@@ -282,14 +288,20 @@ export class CourseChatRepository {
       .select({
         id: courseChatMessages.id,
         threadId: courseChatMessages.threadId,
-        courseId: courseChatMessages.courseId,
+        courseId: sql<UUIDType>`${courseChatMessages.courseId}`,
         userId: courseChatMessages.userId,
         parentMessageId: courseChatMessages.parentMessageId,
         deletedAt: courseChatMessages.deletedAt,
       })
       .from(courseChatMessages)
       .innerJoin(courseChatThreads, eq(courseChatThreads.id, courseChatMessages.threadId))
-      .where(and(eq(courseChatMessages.id, messageId), eq(courseChatThreads.archived, false)))
+      .where(
+        and(
+          eq(courseChatMessages.id, messageId),
+          eq(courseChatThreads.archived, false),
+          isNotNull(courseChatMessages.courseId),
+        ),
+      )
       .limit(1);
 
     return message ?? null;

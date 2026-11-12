@@ -56,8 +56,7 @@ export type CourseChatEmailContext = {
 export type CourseChatMessageContext = {
   id: UUIDType;
   threadId: UUIDType;
-  /** Null for general forum posts, which course discussion endpoints must not touch. */
-  courseId: UUIDType | null;
+  courseId: UUIDType;
   userId?: UUIDType;
   parentMessageId: UUIDType | null;
   deletedAt?: string | null;

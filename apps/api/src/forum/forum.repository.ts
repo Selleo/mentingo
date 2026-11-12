@@ -64,18 +64,16 @@ export class ForumRepository {
       ])
       .exhaustive();
 
-    const data = await this.db
-      .with(visibleTopics)
-      .select()
-      .from(visibleTopics)
-      .orderBy(...orderBy)
-      .limit(query.perPage)
-      .offset((query.page - 1) * query.perPage);
-
-    const [{ totalItems }] = await this.db
-      .with(visibleTopics)
-      .select({ totalItems: count() })
-      .from(visibleTopics);
+    const [data, [{ totalItems }]] = await Promise.all([
+      this.db
+        .with(visibleTopics)
+        .select()
+        .from(visibleTopics)
+        .orderBy(...orderBy)
+        .limit(query.perPage)
+        .offset((query.page - 1) * query.perPage),
+      this.db.with(visibleTopics).select({ totalItems: count() }).from(visibleTopics),
+    ]);
 
     return { data, totalItems };
   }
@@ -139,19 +137,20 @@ export class ForumRepository {
       isNull(courseChatMessages.deletedAt),
     );
 
-    const data = await this.db
-      .select(this.postSelect())
-      .from(courseChatMessages)
-      .innerJoin(users, eq(users.id, courseChatMessages.userId))
-      .where(visibleRepliesCondition)
-      .orderBy(asc(courseChatMessages.createdAt), asc(courseChatMessages.id))
-      .limit(perPage)
-      .offset((page - 1) * perPage);
-
-    const [{ totalItems }] = await this.db
-      .select({ totalItems: count() })
-      .from(courseChatMessages)
-      .where(visibleRepliesCondition);
+    const [data, [{ totalItems }]] = await Promise.all([
+      this.db
+        .select(this.postSelect())
+        .from(courseChatMessages)
+        .innerJoin(users, eq(users.id, courseChatMessages.userId))
+        .where(visibleRepliesCondition)
+        .orderBy(asc(courseChatMessages.createdAt), asc(courseChatMessages.id))
+        .limit(perPage)
+        .offset((page - 1) * perPage),
+      this.db
+        .select({ totalItems: count() })
+        .from(courseChatMessages)
+        .where(visibleRepliesCondition),
+    ]);
 
     return { data, totalItems };
   }

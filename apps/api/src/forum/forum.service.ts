@@ -63,7 +63,13 @@ export class ForumService {
 
     return new PaginatedResponse({
       data: data.map((topic) => ({
-        ...this.mapTopicBase(topic, avatarUrlByReference),
+        ...this.mapTopicBase(
+          topic,
+          this.courseChatMessageMapper.getMappedAvatarReference(
+            topic.authorAvatarReference,
+            avatarUrlByReference,
+          ),
+        ),
         excerpt: topic.firstPostDeletedAt ? "" : this.toExcerpt(topic.firstPostContent),
         isDeleted: Boolean(topic.firstPostDeletedAt),
       })),
@@ -111,7 +117,7 @@ export class ForumService {
     const content = this.normalizeText(body.content, "forum.errors.emptyContent");
 
     if (body.courseId) {
-      await this.assertCanPostInCourseThreads(currentUser);
+      await this.assertCanCreateCourseThread(body.courseId, currentUser);
 
       const { data: message } = await this.courseChatService.createMessage(
         body.courseId,
@@ -265,14 +271,22 @@ export class ForumService {
     return globalSettings.courseDiscussionsEnabled === true;
   }
 
-  private async assertCanPostInCourseThreads(currentUser: CurrentUserType) {
+  private async assertCanCreateCourseThread(courseId: UUIDType, currentUser: CurrentUserType) {
     const globalSettings = await this.settingsService.getGlobalSettings();
 
     if (globalSettings.courseDiscussionsEnabled !== true) {
       throw new BadRequestException("forum.errors.courseDiscussionsDisabled");
     }
 
+    this.assertHasPermission(currentUser, PERMISSIONS.COURSE_DISCUSSION_READ);
     this.assertHasPermission(currentUser, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_CREATE);
+
+    const isEnrolled = await this.courseChatRepository.isUserEnrolledInCourse(
+      courseId,
+      currentUser.userId,
+    );
+
+    if (!isEnrolled) throw new NotFoundException("forum.errors.courseNotFound");
   }
 
   private assertHasPermission(currentUser: CurrentUserType, permission: PermissionKey) {
@@ -290,12 +304,9 @@ export class ForumService {
 
     if (!topic) throw new NotFoundException("forum.errors.topicNotFound");
 
-    const avatarUrlByReference = await this.courseChatMessageMapper.getAvatarUrlByReference([
-      topic.authorAvatarReference,
-    ]);
     const [firstPost] = await this.mapPosts([this.toFirstPostRow(topic)], viewerUserId);
 
-    return { ...this.mapTopicBase(topic, avatarUrlByReference), firstPost };
+    return { ...this.mapTopicBase(topic, firstPost.user.avatarReference), firstPost };
   }
 
   private async getPostResponse(postId: UUIDType, viewerUserId: UUIDType) {
@@ -343,7 +354,7 @@ export class ForumService {
     );
   }
 
-  private mapTopicBase(topic: ForumTopicRow, avatarUrlByReference: Map<string, string>) {
+  private mapTopicBase(topic: ForumTopicRow, authorAvatarUrl: string | null) {
     return {
       id: topic.id,
       scope: topic.scope,
@@ -353,10 +364,7 @@ export class ForumService {
         id: topic.firstPostUserId,
         firstName: topic.authorFirstName,
         lastName: topic.authorLastName,
-        avatarReference: this.courseChatMessageMapper.getMappedAvatarReference(
-          topic.authorAvatarReference,
-          avatarUrlByReference,
-        ),
+        avatarReference: authorAvatarUrl,
       },
       replyCount: topic.replyCount,
       lastActivityAt: topic.lastActivityAt,
@@ -380,7 +388,7 @@ export class ForumService {
     };
   }
 
-  /** Cuts by code points so emoji and other surrogate pairs are never split. */
+  /** Cuts by code points so surrogate pairs are never split; multi-code-point emoji still can be. */
   private toExcerpt(content: string) {
     return Array.from(content).slice(0, FORUM_TOPIC_EXCERPT_LENGTH).join("");
   }
