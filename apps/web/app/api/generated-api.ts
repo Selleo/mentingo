@@ -30642,7 +30642,6 @@ export interface GetMessagesResponse {
       count: number;
       reactedByCurrentUser: boolean;
     }[];
-    title: string | null;
     replyCount: number;
     latestReply: {
       /** @format uuid */
@@ -30732,7 +30731,6 @@ export interface CreateMessageResponse {
       count: number;
       reactedByCurrentUser: boolean;
     }[];
-    title: string | null;
     replyCount: number;
     latestReply: {
       /** @format uuid */
@@ -30794,7 +30792,6 @@ export interface GetRepliesResponse {
       count: number;
       reactedByCurrentUser: boolean;
     }[];
-    title: string | null;
     replyCount: number;
     latestReply: {
       /** @format uuid */
@@ -30914,8 +30911,6 @@ export interface CreateTopicBody {
    * @maxLength 5000
    */
   content: string;
-  /** @format uuid */
-  courseId?: string;
 }
 
 export interface CreateTopicResponse {

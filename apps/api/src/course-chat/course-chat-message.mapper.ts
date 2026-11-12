@@ -121,7 +121,6 @@ export class CourseChatMessageMapper {
 
     return {
       ...this.mapMessagePreview(message, reactionsByMessageId, avatarUrlByReference),
-      title: message.parentMessageId ? null : message.title,
       replyCount: replySummary?.replyCount ?? 0,
       replyParticipants: (replyParticipantsByMessageId.get(message.id) ?? []).map((user) => ({
         id: user.id,

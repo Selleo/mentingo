@@ -11,7 +11,6 @@ export type CourseChatMessageRow = {
   id: UUIDType;
   threadId: UUIDType;
   courseId: UUIDType;
-  title: string | null;
   userId: UUIDType;
   content: string;
   parentMessageId: UUIDType | null;

@@ -70,7 +70,6 @@ export const forumPostListSchema = Type.Array(forumPostSchema);
 export const createForumTopicSchema = Type.Object({
   title: Type.String({ minLength: 1, maxLength: FORUM_TOPIC_TITLE_MAX_LENGTH }),
   content: Type.String({ minLength: 1, maxLength: FORUM_POST_MAX_LENGTH }),
-  courseId: Type.Optional(UUIDSchema),
 });
 
 export const createForumPostSchema = Type.Object({

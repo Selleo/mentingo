@@ -246,7 +246,6 @@ export class CourseChatRepository {
     courseId: UUIDType;
     userId: UUIDType;
     content: string;
-    title?: string;
     parentMessageId?: UUIDType;
     parentMessage?: CourseChatMessageContext;
     dbInstance?: DatabasePg;
@@ -412,7 +411,6 @@ export class CourseChatRepository {
         id: rankedReplies.id,
         threadId: rankedReplies.threadId,
         courseId: rankedReplies.courseId,
-        title: rankedReplies.title,
         userId: rankedReplies.userId,
         content: rankedReplies.content,
         latestReplyParentMessageId: rankedReplies.parentMessageId,
@@ -440,7 +438,6 @@ export class CourseChatRepository {
         id: row.id,
         threadId: row.threadId,
         courseId: row.courseId,
-        title: row.title,
         userId: row.userId,
         content: row.content,
         parentMessageId: row.latestReplyParentMessageId,
@@ -533,7 +530,6 @@ export class CourseChatRepository {
       id: sql<UUIDType>`${courseChatMessages.id}`.as("id"),
       threadId: sql<UUIDType>`${courseChatMessages.threadId}`.as("threadId"),
       courseId: sql<UUIDType>`${courseChatMessages.courseId}`.as("courseId"),
-      title: sql<string | null>`${courseChatThreads.title}`.as("title"),
       userId: sql<UUIDType>`${courseChatMessages.userId}`.as("userId"),
       content: sql<string>`${courseChatMessages.content}`.as("content"),
       parentMessageId: sql<UUIDType | null>`${courseChatMessages.parentMessageId}`.as(
@@ -566,13 +562,12 @@ export class CourseChatRepository {
       courseId: UUIDType;
       userId: UUIDType;
       content: string;
-      title?: string;
     },
     db: DatabasePg,
   ) {
     const [thread] = await db
       .insert(courseChatThreads)
-      .values({ courseId: params.courseId, createdByUserId: params.userId, title: params.title })
+      .values({ courseId: params.courseId, createdByUserId: params.userId })
       .returning({ id: courseChatThreads.id });
 
     const [message] = await db

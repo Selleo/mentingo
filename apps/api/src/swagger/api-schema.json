@@ -160100,16 +160100,6 @@
                     ]
                   }
                 },
-                "title": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
                 "replyCount": {
                   "type": "number"
                 },
@@ -160278,7 +160268,6 @@
                 "updatedAt",
                 "user",
                 "reactions",
-                "title",
                 "replyCount",
                 "latestReply",
                 "replyParticipants"
@@ -160487,16 +160476,6 @@
                   ]
                 }
               },
-              "title": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "replyCount": {
                 "type": "number"
               },
@@ -160665,7 +160644,6 @@
               "updatedAt",
               "user",
               "reactions",
-              "title",
               "replyCount",
               "latestReply",
               "replyParticipants"
@@ -160778,16 +160756,6 @@
                       "reactedByCurrentUser"
                     ]
                   }
-                },
-                "title": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
                 },
                 "replyCount": {
                   "type": "number"
@@ -160957,7 +160925,6 @@
                 "updatedAt",
                 "user",
                 "reactions",
-                "title",
                 "replyCount",
                 "latestReply",
                 "replyParticipants"
@@ -161268,10 +161235,6 @@
           "content": {
             "minLength": 1,
             "maxLength": 5000,
-            "type": "string"
-          },
-          "courseId": {
-            "format": "uuid",
             "type": "string"
           }
         },

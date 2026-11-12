@@ -133,7 +133,6 @@ export class CourseChatService {
     currentUser: CurrentUserType,
     tenantId: UUIDType,
     body: CreateCourseChatMessageBody,
-    options: { title?: string } = {},
   ): Promise<BaseResponse<CourseChatMessageResponse>> {
     await this.assertUserEnrolledInCourse(courseId, currentUser.userId);
 
@@ -162,7 +161,6 @@ export class CourseChatService {
         courseId,
         userId: currentUser.userId,
         content: this.normalizeContent(body.content),
-        title: options.title,
         parentMessageId: body.parentMessageId,
         parentMessage: parentMessage ?? undefined,
         dbInstance: trx,

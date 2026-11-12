@@ -109,31 +109,11 @@ export class ForumService {
   async createTopic(params: {
     body: CreateForumTopicBody;
     currentUser: CurrentUserType;
-    tenantId: UUIDType;
     language: SupportedLanguages;
   }): Promise<BaseResponse<ForumTopicResponse>> {
-    const { body, currentUser, tenantId, language } = params;
+    const { body, currentUser, language } = params;
     const title = this.normalizeText(body.title, "forum.errors.emptyTitle");
     const content = this.normalizeText(body.content, "forum.errors.emptyContent");
-
-    if (body.courseId) {
-      await this.assertCanCreateCourseThread(body.courseId, currentUser);
-
-      const { data: message } = await this.courseChatService.createMessage(
-        body.courseId,
-        currentUser,
-        tenantId,
-        { content },
-        { title },
-      );
-      const messageContext = await this.courseChatRepository.getMessageContext(message.id);
-
-      if (!messageContext) throw new NotFoundException("forum.errors.topicNotFound");
-
-      return new BaseResponse(
-        await this.getTopicResponse(messageContext.threadId, currentUser.userId, language),
-      );
-    }
 
     const topicId = await this.db.transaction((trx) =>
       this.forumRepository.createGeneralTopic({ userId: currentUser.userId, title, content }, trx),
@@ -269,24 +249,6 @@ export class ForumService {
     const globalSettings = await this.settingsService.getGlobalSettings();
 
     return globalSettings.courseDiscussionsEnabled === true;
-  }
-
-  private async assertCanCreateCourseThread(courseId: UUIDType, currentUser: CurrentUserType) {
-    const globalSettings = await this.settingsService.getGlobalSettings();
-
-    if (globalSettings.courseDiscussionsEnabled !== true) {
-      throw new BadRequestException("forum.errors.courseDiscussionsDisabled");
-    }
-
-    this.assertHasPermission(currentUser, PERMISSIONS.COURSE_DISCUSSION_READ);
-    this.assertHasPermission(currentUser, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_CREATE);
-
-    const isEnrolled = await this.courseChatRepository.isUserEnrolledInCourse(
-      courseId,
-      currentUser.userId,
-    );
-
-    if (!isEnrolled) throw new NotFoundException("forum.errors.courseNotFound");
   }
 
   private assertHasPermission(currentUser: CurrentUserType, permission: PermissionKey) {

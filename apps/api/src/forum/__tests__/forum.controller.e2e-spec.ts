@@ -79,10 +79,7 @@ describe("ForumController (e2e)", () => {
     );
   };
 
-  const createTopic = async (
-    cookie: string,
-    body: { title: string; content: string; courseId?: string },
-  ) => {
+  const createTopic = async (cookie: string, body: { title: string; content: string }) => {
     const response = await request(app.getHttpServer())
       .post("/api/forum/topics")
       .set("Cookie", cookie)
@@ -369,7 +366,7 @@ describe("ForumController (e2e)", () => {
         .expect(404);
     });
 
-    it("creates course threads and replies from the forum that appear in the course discussion", async () => {
+    it("adds forum replies to course threads in the course discussion", async () => {
       const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
       const { user: classmate, cookie: classmateCookie } = await createUserWithCookie(
         SYSTEM_ROLE_SLUGS.STUDENT,
@@ -377,78 +374,30 @@ describe("ForumController (e2e)", () => {
       const course = await courseFactory.create({ authorId: student.id });
       await enroll(course.id, student, classmate);
 
-      const topic = await createTopic(cookie, {
-        title: "Exam preparation",
-        content: "Who wants to study together?",
-        courseId: course.id,
-      });
-      expect(topic).toMatchObject({
-        scope: DISCUSSION_SCOPES.COURSE,
-        title: "Exam preparation",
-        course: { id: course.id, title: course.title },
-      });
+      const courseThread = await createCourseThread(
+        cookie,
+        course.id,
+        "Who wants to study together?",
+      );
+      const [{ id: courseTopicId }] = (await listTopics(classmateCookie)).data;
 
-      const reply = await createReply(classmateCookie, topic.id, "Count me in");
+      const reply = await createReply(classmateCookie, courseTopicId, "Count me in");
 
       const courseMessages = await request(app.getHttpServer())
         .get(`/api/course-chat/${course.id}/messages`)
         .set("Cookie", cookie)
         .expect(200);
       expect(courseMessages.body.data).toEqual([
-        expect.objectContaining({
-          id: topic.firstPost.id,
-          title: "Exam preparation",
-          content: "Who wants to study together?",
-          replyCount: 1,
-        }),
+        expect.objectContaining({ id: courseThread.id, replyCount: 1 }),
       ]);
 
       const courseReplies = await request(app.getHttpServer())
-        .get(`/api/course-chat/messages/${topic.firstPost.id}/replies`)
+        .get(`/api/course-chat/messages/${courseThread.id}/replies`)
         .set("Cookie", cookie)
         .expect(200);
       expect(courseReplies.body.data.map((message: { id: string }) => message.id)).toEqual([
         reply.id,
       ]);
-      expect(courseReplies.body.data[0].title).toBeNull();
-    });
-
-    it("guards creating course threads from the forum", async () => {
-      const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
-      const { cookie: reviewerCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.REVIEWER);
-      const course = await courseFactory.create({ authorId: student.id });
-      const body = { title: "Course topic", content: "Hello", courseId: course.id };
-
-      const notEnrolled = await request(app.getHttpServer())
-        .post("/api/forum/topics")
-        .set("Cookie", cookie)
-        .send(body)
-        .expect(404);
-      expect(notEnrolled.body.message).toBe("forum.errors.courseNotFound");
-
-      const missingCourse = await request(app.getHttpServer())
-        .post("/api/forum/topics")
-        .set("Cookie", cookie)
-        .send({ ...body, courseId: faker.string.uuid() })
-        .expect(404);
-      expect(missingCourse.body.message).toBe("forum.errors.courseNotFound");
-
-      const withoutPermission = await request(app.getHttpServer())
-        .post("/api/forum/topics")
-        .set("Cookie", reviewerCookie)
-        .send(body)
-        .expect(403);
-      expect(withoutPermission.body.message).toBe("auth.error.missingPermission");
-
-      await enroll(course.id, student);
-      await setGlobalSettings({ courseDiscussionsEnabled: false });
-
-      const disabled = await request(app.getHttpServer())
-        .post("/api/forum/topics")
-        .set("Cookie", cookie)
-        .send(body)
-        .expect(400);
-      expect(disabled.body.message).toBe("forum.errors.courseDiscussionsDisabled");
     });
 
     it("keeps course discussion endpoints away from general forum posts", async () => {

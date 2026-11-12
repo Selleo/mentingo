@@ -99,9 +99,8 @@ export class ForumController {
     @Body() body: CreateForumTopicBody,
     @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser: CurrentUserType,
-    @CurrentUser("tenantId") tenantId: UUIDType,
   ): Promise<BaseResponse<ForumTopicResponse>> {
-    return this.forumService.createTopic({ body, currentUser, tenantId, language });
+    return this.forumService.createTopic({ body, currentUser, language });
   }
 
   @Get("topics/:topicId")
