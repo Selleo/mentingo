@@ -1,6 +1,7 @@
 import type {
   AutomationEventKind,
   AutomationPlaceholderValue,
+  AutomationRecipientAudience,
   SupportedLanguages,
 } from "@repo/shared";
 import type {
@@ -12,6 +13,7 @@ export type NotificationRecipientsByEvent = Map<AutomationEventKind, Notificatio
 export type NotificationItemsByEvent = Map<AutomationEventKind, NotificationEventItem[]>;
 
 export type NotificationCaptureOptions = {
+  audience?: AutomationRecipientAudience;
   tenantId: string;
   template?: {
     event: AutomationEventKind;

@@ -1,15 +1,24 @@
 import {
   AUTOMATION_MAPPING_TYPES,
+  AUTOMATION_EVENT_KINDS,
+  AUTOMATION_RECIPIENT_AUDIENCES,
   AUTOMATION_RECIPIENT_TYPES,
   AUTOMATION_STEP_TYPES,
   AUTOMATION_TEMPLATE_TYPES,
+  BUILT_IN_EMAIL_TEMPLATE_KEYS,
 } from "@repo/shared";
 
 import type { EmailTemplate } from "../emailTemplates.types";
-import type { AutomationEventDefinition, CreateAutomationInput } from "@repo/shared";
+import type {
+  AutomationEventDefinition,
+  AutomationRecipientSelection,
+  CreateAutomationInput,
+} from "@repo/shared";
+
+type AutomationDraftTemplate = Pick<EmailTemplate, "event" | "placeholders"> & { id: string };
 
 export function buildAutomationDraftForEmailTemplate(
-  template: EmailTemplate & { id: string },
+  template: AutomationDraftTemplate,
   event: AutomationEventDefinition,
   name: string,
 ): CreateAutomationInput {
@@ -45,7 +54,7 @@ export function buildAutomationDraftForEmailTemplate(
           type: AUTOMATION_STEP_TYPES.SEND_EMAIL,
           config: {
             template: { type: AUTOMATION_TEMPLATE_TYPES.CUSTOM, id: template.id },
-            recipients: { type: AUTOMATION_RECIPIENT_TYPES.EVENT },
+            recipients: buildEventRecipientsForTemplate(template, event),
             mappings,
           },
         },
@@ -82,4 +91,21 @@ export function buildAutomationDraftForEmailTemplate(
   action.parentId = parentId;
   action.position = position;
   return definition;
+}
+
+/** Course completion templates keep their original audience: admin templates email administrators. */
+function buildEventRecipientsForTemplate(
+  template: AutomationDraftTemplate,
+  event: AutomationEventDefinition,
+): AutomationRecipientSelection {
+  if (event.kind !== AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE) {
+    return { type: AUTOMATION_RECIPIENT_TYPES.EVENT };
+  }
+
+  const audience =
+    template.event === BUILT_IN_EMAIL_TEMPLATE_KEYS.ADMIN_FINISHED_COURSE
+      ? AUTOMATION_RECIPIENT_AUDIENCES.ADMINISTRATORS
+      : AUTOMATION_RECIPIENT_AUDIENCES.LEARNER;
+
+  return { type: AUTOMATION_RECIPIENT_TYPES.EVENT, audience };
 }

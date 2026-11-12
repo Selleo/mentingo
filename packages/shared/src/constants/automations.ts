@@ -145,6 +145,22 @@ export const AUTOMATION_FIELD_SENSITIVITIES = {
 export type AutomationRecipientType =
   (typeof AUTOMATION_RECIPIENT_TYPES)[keyof typeof AUTOMATION_RECIPIENT_TYPES];
 
+export const AUTOMATION_RECIPIENT_AUDIENCES = {
+  LEARNER: "learner",
+  ADMINISTRATORS: "administrators",
+} as const;
+
+export type AutomationRecipientAudience =
+  (typeof AUTOMATION_RECIPIENT_AUDIENCES)[keyof typeof AUTOMATION_RECIPIENT_AUDIENCES];
+
+/** Maps the retired administrator-only course completion trigger onto the shared one. */
+export const resolveCurrentAutomationEventKind = <Kind extends string | null | undefined>(
+  kind: Kind,
+) =>
+  kind === AUTOMATION_EVENT_KINDS.ADMIN_FINISHED_COURSE
+    ? AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE
+    : kind;
+
 export const AUTOMATION_VALIDATION_ISSUE_CODES = {
   CROSS_AUTOMATION_REFERENCE: "cross_automation_reference",
   CYCLE: "cycle",

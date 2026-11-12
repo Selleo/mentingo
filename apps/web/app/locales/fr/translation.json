@@ -7699,6 +7699,11 @@
     },
     "recipients": {
       "title": "Destinataires",
+      "courseCompletionAudience": "Destinataires de fin de cours",
+      "courseCompletionAudiences": {
+        "learner": "Apprenant ayant terminé le cours",
+        "administrators": "Administrateurs (selon les préférences de notification)"
+      },
       "event": "Utilisateurs liés à l’événement",
       "user": "Utilisateur sélectionné",
       "group": "Membres d’un groupe sélectionné",

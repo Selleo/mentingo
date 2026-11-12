@@ -1,4 +1,7 @@
-import { AUTOMATION_TRIGGER_DEFINITIONS } from "./automationTriggers";
+import {
+  AUTOMATION_TRIGGER_DEFINITIONS,
+  getAutomationTriggerDefinition,
+} from "./automationTriggers";
 import {
   AUTOMATION_EVENT_KINDS as EVENTS,
   AUTOMATION_PLACEHOLDER_TYPES as TYPES,
@@ -173,12 +176,15 @@ export const AUTOMATION_EVENT_VARIABLES: Record<AutomationEventKind, AutomationP
     }),
   ) as Record<AutomationEventKind, AutomationProvidedVariable[]>;
 
+// Historical run/delivery snapshots retain their original event kind.
+AUTOMATION_EVENT_VARIABLES[EVENTS.ADMIN_FINISHED_COURSE] =
+  AUTOMATION_EVENT_VARIABLES[EVENTS.USER_FINISHED_COURSE];
+
 export function resolveAutomationEventFieldSourceKey(kind: AutomationEventKind, key: string) {
   return (
     AUTOMATION_EVENT_VARIABLES[kind].find((variable) => variable.key === key)?.sourceKey ??
-    AUTOMATION_TRIGGER_DEFINITIONS.find((trigger) => trigger.type === kind)?.providedVariables.find(
-      (variable) => variable.key === key,
-    )?.sourceKey ??
+    getAutomationTriggerDefinition(kind)?.providedVariables.find((variable) => variable.key === key)
+      ?.sourceKey ??
     key
   );
 }

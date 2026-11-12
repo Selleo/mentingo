@@ -7755,6 +7755,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Empfänger",
+      "courseCompletionAudience": "Empfänger des Kursabschlusses",
+      "courseCompletionAudiences": {
+        "learner": "Lernender, der den Kurs abgeschlossen hat",
+        "administrators": "Administratoren (gemäß Benachrichtigungseinstellungen)"
+      },
       "event": "Mit dem Ereignis verknüpfte Benutzer",
       "user": "Ausgewählter Benutzer",
       "group": "Mitglieder einer ausgewählten Gruppe",

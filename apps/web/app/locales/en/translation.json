@@ -8014,6 +8014,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Recipients",
+      "courseCompletionAudience": "Course completion recipients",
+      "courseCompletionAudiences": {
+        "learner": "Learner who completed the course",
+        "administrators": "Administrators (respecting notification preferences)"
+      },
       "event": "Users linked to the event",
       "user": "Selected user",
       "group": "Members of a selected group",

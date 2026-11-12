@@ -8013,6 +8013,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Příjemci",
+      "courseCompletionAudience": "Příjemci dokončení kurzu",
+      "courseCompletionAudiences": {
+        "learner": "Účastník, který dokončil kurz",
+        "administrators": "Správci (podle předvoleb oznámení)"
+      },
       "event": "Uživatelé spojení s událostí",
       "user": "Vybraný uživatel",
       "group": "Členové vybrané skupiny",

@@ -858,7 +858,7 @@ export class EmailTemplateManagementService {
       })),
       ...publication,
       event: key,
-      triggerEventKind: getBuiltInTemplateEvent(key),
+      triggerEventKind: findAutomationEventDefinition(getBuiltInTemplateEvent(key))?.kind ?? null,
       status: null,
       completeLocales: this.emailTemplateValidationService.getCompleteEmailTemplateLocales(
         publication.subject,
@@ -899,7 +899,7 @@ export class EmailTemplateManagementService {
           placeholder.sampleValue as EmailTemplateResponse["variables"][number]["sampleValue"],
       })),
       placeholders,
-      triggerEventKind: template.triggerEventKind,
+      triggerEventKind: findAutomationEventDefinition(template.triggerEventKind)?.kind ?? null,
       event: null,
       name: template.name,
       subject: template.subject,

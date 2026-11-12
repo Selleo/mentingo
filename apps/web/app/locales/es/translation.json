@@ -7942,6 +7942,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Destinatarios",
+      "courseCompletionAudience": "Destinatarios de finalización del curso",
+      "courseCompletionAudiences": {
+        "learner": "Alumno que completó el curso",
+        "administrators": "Administradores (según las preferencias de notificación)"
+      },
       "event": "Usuarios vinculados al evento",
       "user": "Usuario seleccionado",
       "group": "Miembros de un grupo seleccionado",

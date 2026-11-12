@@ -140929,6 +140929,18 @@
                                           "type": {
                                             "const": "event",
                                             "type": "string"
+                                          },
+                                          "audience": {
+                                            "anyOf": [
+                                              {
+                                                "const": "learner",
+                                                "type": "string"
+                                              },
+                                              {
+                                                "const": "administrators",
+                                                "type": "string"
+                                              }
+                                            ]
                                           }
                                         },
                                         "required": [
@@ -141568,6 +141580,18 @@
                                                   "type": {
                                                     "const": "event",
                                                     "type": "string"
+                                                  },
+                                                  "audience": {
+                                                    "anyOf": [
+                                                      {
+                                                        "const": "learner",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "administrators",
+                                                        "type": "string"
+                                                      }
+                                                    ]
                                                   }
                                                 },
                                                 "required": [
@@ -143083,6 +143107,18 @@
                                               "type": {
                                                 "const": "event",
                                                 "type": "string"
+                                              },
+                                              "audience": {
+                                                "anyOf": [
+                                                  {
+                                                    "const": "learner",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "administrators",
+                                                    "type": "string"
+                                                  }
+                                                ]
                                               }
                                             },
                                             "required": [
@@ -143704,6 +143740,18 @@
                                     "type": {
                                       "const": "event",
                                       "type": "string"
+                                    },
+                                    "audience": {
+                                      "anyOf": [
+                                        {
+                                          "const": "learner",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "administrators",
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -144897,6 +144945,18 @@
                                     "type": {
                                       "const": "event",
                                       "type": "string"
+                                    },
+                                    "audience": {
+                                      "anyOf": [
+                                        {
+                                          "const": "learner",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "administrators",
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -145514,6 +145574,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -146153,6 +146225,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -146800,6 +146884,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -147439,6 +147535,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -148086,6 +148194,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -148725,6 +148845,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -149369,6 +149501,18 @@
                                     "type": {
                                       "const": "event",
                                       "type": "string"
+                                    },
+                                    "audience": {
+                                      "anyOf": [
+                                        {
+                                          "const": "learner",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "administrators",
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -149982,6 +150126,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -150621,6 +150777,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -151289,6 +151457,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -151928,6 +152108,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -152576,6 +152768,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -153195,6 +153399,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -153834,6 +154050,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -154481,6 +154709,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -155120,6 +155360,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -155767,6 +156019,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -156406,6 +156670,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -157053,6 +157329,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -157692,6 +157980,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [

@@ -7772,6 +7772,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Gavėjai",
+      "courseCompletionAudience": "Kurso užbaigimo gavėjai",
+      "courseCompletionAudiences": {
+        "learner": "Kursą baigęs dalyvis",
+        "administrators": "Administratoriai (pagal pranešimų nuostatas)"
+      },
       "event": "Su įvykiu susiję naudotojai",
       "user": "Pasirinktas naudotojas",
       "group": "Pasirinktos grupės nariai",
