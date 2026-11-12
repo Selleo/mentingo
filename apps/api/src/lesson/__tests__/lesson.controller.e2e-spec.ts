@@ -1955,7 +1955,16 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       if (!question?.id || !cat?.id || !dog?.id) throw new Error("Matching quiz was not created");
 
-      return { lesson, question, questionId: question.id, cat, catId: cat.id, dog, dogId: dog.id };
+      return {
+        courseId: course.id,
+        lesson,
+        question,
+        questionId: question.id,
+        cat,
+        catId: cat.id,
+        dog,
+        dogId: dog.id,
+      };
     };
 
     const submitMatching = (
@@ -2080,6 +2089,44 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         score: 0,
         passed: false,
       });
+    });
+
+    it("accepts an untranslated matching question submitted without answers", async () => {
+      const learner = await userFactory.create();
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const { courseId, lesson, questionId } = await createMatchingQuiz(
+        ASSESSMENT_SCORING_MODES.PARTIAL,
+        { baseLanguage: SUPPORTED_LANGUAGES.EN },
+      );
+
+      await request(app.getHttpServer())
+        .post(`/api/course/beta-create-language/${courseId}`)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(201);
+
+      const runtime = app.get(QuizRuntimeService);
+      const polish = await runtime.getQuizForDelivery(
+        lesson.id,
+        SUPPORTED_LANGUAGES.PL,
+        learner.id,
+      );
+
+      expect(polish.questions[0].matchingTargets?.some(Boolean)).toBe(false);
+      await expect(
+        runtime.submitQuiz(
+          {
+            lessonId: lesson.id,
+            language: SUPPORTED_LANGUAGES.PL,
+            questionsAnswers: [{ questionId, answers: [] }],
+          },
+          learner.id,
+        ),
+      ).resolves.toMatchObject({ score: 0, passed: false, correctAnswerCount: 0 });
     });
 
     it("keeps pair identities when the author reorders pairs", async () => {
