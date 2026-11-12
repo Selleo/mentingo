@@ -74,6 +74,7 @@ function setup(practice: unknown = readyPractice) {
   };
   jest.mocked(createLumaSocket).mockReturnValue(socket as unknown as LumaSocket);
   const repository = {
+    getCourseAuthorByLesson: jest.fn().mockResolvedValue(user.userId),
     findPracticeSessionById: jest.fn().mockResolvedValue(practice),
     checkLessonAssignment: jest.fn().mockResolvedValue([{ isAssigned: true }]),
     findAiMentorVoiceConfigByLessonId: jest.fn().mockResolvedValue({
@@ -182,6 +183,151 @@ describe("Practice voice sessions", () => {
     await expect(service.startAudio("socket-1", user, input)).resolves.toMatchObject({ ok: false });
     expect(repository.findPracticeSessionById).not.toHaveBeenCalled();
     expect(createLumaSocket).not.toHaveBeenCalled();
+  });
+
+  it("rejects preview voice for an enrolled non-author before creating a conversation", async () => {
+    const { service, repository, threadService } = setup();
+    const result = await service.startAudio("socket-1", user, {
+      voiceAction: payload.voiceAction,
+      meta: payload.meta,
+      lessonId: practiceId,
+      preview: true,
+    } as StartAudioBody);
+    expect(result).toEqual({ ok: false, translationKey: "common.toast.noAccess" });
+    expect(threadService.createThreadIfNoneExist).not.toHaveBeenCalled();
+    expect(repository.checkLessonAssignment).not.toHaveBeenCalled();
+    expect(createLumaSocket).not.toHaveBeenCalled();
+  });
+
+  it("rejects another author's lesson even with update-own permission", async () => {
+    const { service, repository, threadService } = setup();
+    repository.getCourseAuthorByLesson.mockResolvedValue("other-author");
+    await expect(
+      service.startAudio(
+        "socket-1",
+        {
+          ...user,
+          permissions: [PERMISSIONS.COURSE_UPDATE_OWN, PERMISSIONS.AI_USE],
+        },
+        {
+          voiceAction: payload.voiceAction,
+          meta: payload.meta,
+          lessonId: practiceId,
+          preview: true,
+        } as StartAudioBody,
+      ),
+    ).resolves.toMatchObject({ ok: false });
+    expect(threadService.createThreadIfNoneExist).not.toHaveBeenCalled();
+    expect(createLumaSocket).not.toHaveBeenCalled();
+  });
+
+  it.each([PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN])(
+    "starts an authorized %s preview on the caller's own thread and forwards a spoken turn",
+    async (permission) => {
+      const { service, socket, repository, threadService, aiService } = setup();
+      const actor = { ...user, permissions: [permission, PERMISSIONS.AI_USE] };
+      await expect(
+        service.startAudio("socket-1", actor, {
+          voiceAction: payload.voiceAction,
+          meta: payload.meta,
+          lessonId: practiceId,
+          preview: true,
+        }),
+      ).resolves.toEqual({ ok: true });
+      expect(repository.checkLessonAssignment).not.toHaveBeenCalled();
+      expect(threadService.createThreadIfNoneExist).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lessonId: practiceId,
+          userId: actor.userId,
+          status: THREAD_STATUS.ACTIVE,
+        }),
+      );
+      const onTranscription = socket.onLearnerTranscription.mock.calls[0][0];
+      await onTranscription({
+        jobId: "turn-1",
+        data: {
+          text: "A preview answer",
+          status: LEARNER_TRANSCRIPT_STATUSES.FINAL,
+        },
+      } as LearnerTranscriptionPayload);
+      expect(aiService.streamMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          threadId,
+          lessonId: practiceId,
+          content: "A preview answer",
+        }),
+        expect.anything(),
+        actor,
+        true,
+      );
+      expect(socket.sendMentorTextDelta).toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    { preview: "true" },
+    { preview: true, practiceSessionId: practiceId, threadId },
+    { preview: true, lessonId: "not-a-uuid" },
+  ])("rejects malformed preview targets", async (overrides) => {
+    const { service, threadService } = setup();
+    await expect(
+      service.startAudio(
+        "socket-1",
+        {
+          ...user,
+          permissions: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.AI_USE],
+        },
+        {
+          voiceAction: payload.voiceAction,
+          meta: payload.meta,
+          lessonId: practiceId,
+          ...overrides,
+        } as StartAudioBody,
+      ),
+    ).resolves.toMatchObject({ ok: false });
+    expect(threadService.createThreadIfNoneExist).not.toHaveBeenCalled();
+    expect(createLumaSocket).not.toHaveBeenCalled();
+  });
+
+  it("requires AI permission even for preview administrators", async () => {
+    const { service, threadService } = setup();
+    await expect(
+      service.startAudio(
+        "socket-1",
+        {
+          ...user,
+          permissions: [PERMISSIONS.COURSE_UPDATE],
+        },
+        {
+          voiceAction: payload.voiceAction,
+          meta: payload.meta,
+          lessonId: practiceId,
+          preview: true,
+        },
+      ),
+    ).resolves.toMatchObject({ ok: false });
+    expect(threadService.createThreadIfNoneExist).not.toHaveBeenCalled();
+  });
+
+  it("denies a missing or cross-tenant lesson even for preview administrators", async () => {
+    const { service, repository, threadService } = setup();
+    repository.getCourseAuthorByLesson.mockResolvedValue(undefined);
+    await expect(
+      service.startAudio(
+        "socket-1",
+        {
+          ...user,
+          permissions: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.AI_USE],
+        },
+        {
+          voiceAction: payload.voiceAction,
+          meta: payload.meta,
+          lessonId: practiceId,
+          preview: true,
+        },
+      ),
+    ).resolves.toMatchObject({ ok: false });
+    expect(threadService.createThreadIfNoneExist).not.toHaveBeenCalled();
   });
 
   it("preserves the lesson access, thread, language, and voice configuration path", async () => {

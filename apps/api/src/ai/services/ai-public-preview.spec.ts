@@ -23,6 +23,7 @@ const student = {
 
 function fixture(preview = true, enrolled = false) {
   const aiRepository = {
+    getCourseAuthorByLesson: jest.fn(async () => userId),
     findThread: jest.fn(async () => ({
       id: threadId,
       userId,
@@ -54,6 +55,41 @@ function fixture(preview = true, enrolled = false) {
 }
 
 describe("public course AI Mentor previews", () => {
+  it("streams an author's voice preview without enrollment or progress writes", async () => {
+    const { service, stream, aiRepository, judgeService, outboxPublisher } = fixture(false);
+    await expect(
+      service.streamMessage(
+        { threadId, content: "Voice preview" },
+        "model" as never,
+        {
+          ...student,
+          permissions: [PERMISSIONS.COURSE_UPDATE_OWN, PERMISSIONS.AI_USE],
+        },
+        true,
+      ),
+    ).resolves.toBe(stream);
+    expect(aiRepository.resetStudentProgressForLesson).not.toHaveBeenCalled();
+    expect(judgeService.evaluate).not.toHaveBeenCalled();
+    expect(outboxPublisher.publishDurable).not.toHaveBeenCalled();
+  });
+
+  it("does not grant another author access to an unassigned voice conversation", async () => {
+    const { service, aiRepository, aiRuntimeService } = fixture(false);
+    aiRepository.getCourseAuthorByLesson.mockResolvedValue(lessonId);
+    await expect(
+      service.streamMessage(
+        { threadId, content: "Voice preview" },
+        "model" as never,
+        {
+          ...student,
+          permissions: [PERMISSIONS.COURSE_UPDATE_OWN, PERMISSIONS.AI_USE],
+        },
+        true,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(aiRuntimeService.streamMentorChat).not.toHaveBeenCalled();
+  });
+
   it("allows an eligible unenrolled student's own chat without learning progress events", async () => {
     const { service, aiRuntimeService, outboxPublisher, stream } = fixture();
     await expect(

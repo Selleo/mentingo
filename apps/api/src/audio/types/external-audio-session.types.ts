@@ -37,6 +37,7 @@ export type ExternalAudioSession = {
   currentUser: CurrentUserType;
   threadId: UUIDType;
   lessonId?: UUIDType;
+  preview?: boolean;
   practiceSessionId?: UUIDType;
   userId: UUIDType;
   sessionRunId: string | null;

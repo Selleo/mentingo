@@ -4,6 +4,7 @@ import { USER_ROLE } from "~/config/userRoles";
 
 import { CURRICULUM_TEST_DATA } from "../../data/curriculum/curriculum.data";
 import { AI_MENTOR_LESSON_FORM_HANDLES } from "../../data/curriculum/handles";
+import { LEARNING_HANDLES } from "../../data/learning/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { createCourseLanguageFlow } from "../../flows/courses/create-course-language.flow";
 import { fillRichTextEditorFlow } from "../../flows/courses/editor.flow";
@@ -132,6 +133,12 @@ test("admin can create and preview an AI mentor lesson", async ({
       factories,
       `curriculum-ai-mentor-${Date.now()}`,
     );
+    await page.route("**/api/env/luma", (route) =>
+      route.fulfill({
+        contentType: "application/json",
+        json: { data: { enabled: true, courseGenerationEnabled: false, voiceMentorEnabled: true } },
+      }),
+    );
     const curriculumFactory = factories.createCurriculumFactory();
     const chapter = await curriculumFactory.createChapter({
       courseId: course.id,
@@ -191,6 +198,11 @@ test("admin can create and preview an AI mentor lesson", async ({
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.PREVIEW_BUTTON).click();
     await expect(page.getByText("Ada").first()).toBeVisible();
     await expect(page.getByText(formattedDescriptionText).first()).toBeVisible();
+    // Preview is interactive without switching to Learn mode, but cannot grade.
+    const voiceAction = page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_ACTION_BUTTON);
+    await expect(voiceAction).toHaveAttribute("data-mode", "voice");
+    await expect(voiceAction).toBeEnabled();
+    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeDisabled();
   });
 });
 

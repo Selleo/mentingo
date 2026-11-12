@@ -44,6 +44,7 @@ import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
+import { canPreviewAiMentorLesson } from "src/ai/utils/ai-mentor-preview-access";
 import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { stripVoiceControlTags, VoiceMarkupDisplayParser } from "src/ai/utils/voiceControlTags";
 import { ExternalAudioSessionStore } from "src/audio/external-audio-session.store";
@@ -345,6 +346,7 @@ export class ExternalAudioService {
       currentUser,
       threadId: context.threadId,
       lessonId: payload.lessonId,
+      preview: payload.preview,
       practiceSessionId: payload.practiceSessionId,
       userId: currentUser.userId,
       sessionRunId: null,
@@ -378,9 +380,11 @@ export class ExternalAudioService {
     payload: StartAudioBody,
     currentUser: WsUser,
   ): Promise<VoiceMentorSessionContext | null> {
+    if (payload.preview !== undefined && typeof payload.preview !== "boolean") return null;
     if (payload.practiceSessionId !== undefined || payload.threadId !== undefined) {
       if (
         payload.lessonId !== undefined ||
+        payload.preview !== undefined ||
         typeof payload.practiceSessionId !== "string" ||
         !isUuid(payload.practiceSessionId) ||
         typeof payload.threadId !== "string" ||
@@ -405,8 +409,11 @@ export class ExternalAudioService {
       };
     }
 
-    if (typeof payload.lessonId !== "string" || !payload.lessonId) return null;
-    if (!(await this.canAccessLesson(payload.lessonId, currentUser))) return null;
+    if (typeof payload.lessonId !== "string" || !isUuid(payload.lessonId)) return null;
+    if (payload.preview) {
+      if (!(await canPreviewAiMentorLesson(this.aiRepository, payload.lessonId, currentUser)))
+        return null;
+    } else if (!(await this.canAccessLesson(payload.lessonId, currentUser))) return null;
 
     const { thread } = await this.threadService.createThreadIfNoneExist({
       lessonId: payload.lessonId,
@@ -851,6 +858,17 @@ export class ExternalAudioService {
     let stoppedByAudioOutputError = false;
     try {
       await this.tenantDbRunner.runWithTenant(session.currentUser.tenantId, async () => {
+        if (
+          session.preview &&
+          (!session.lessonId ||
+            !(await canPreviewAiMentorLesson(
+              this.aiRepository,
+              session.lessonId,
+              session.currentUser,
+            )))
+        ) {
+          throw new Error("common.toast.noAccess");
+        }
         const stream = await this.aiService.streamMessage(
           {
             threadId: session.threadId,

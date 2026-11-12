@@ -42,6 +42,8 @@ interface LessonFormProps {
   onJudge: () => Promise<void>;
   isJudgePending: boolean;
   allowVoiceMentor?: boolean;
+  allowJudge?: boolean;
+  textReadOnly?: boolean;
   onVoiceActiveChange?: (active: boolean) => void;
   compact?: boolean;
 }
@@ -65,6 +67,8 @@ export const LessonForm = ({
   onJudge,
   isJudgePending,
   allowVoiceMentor = true,
+  allowJudge = true,
+  textReadOnly = false,
   onVoiceActiveChange,
   compact = false,
 }: LessonFormProps) => {
@@ -297,7 +301,8 @@ export const LessonForm = ({
   };
 
   const judgeVoiceMentorLesson = async () => {
-    if (isVoiceJudgePending || (voiceTarget.practiceSessionId && isVoiceTurnPending)) return;
+    if (!allowJudge || isVoiceJudgePending || (voiceTarget.practiceSessionId && isVoiceTurnPending))
+      return;
 
     setIsVoiceJudgePending(true);
 
@@ -323,7 +328,7 @@ export const LessonForm = ({
             void stopVoiceMode();
             return;
           }
-          handleSubmit();
+          if (!textReadOnly) handleSubmit();
         }}
       >
         <div
@@ -332,7 +337,7 @@ export const LessonForm = ({
             compact && "px-3 py-2",
           )}
         >
-          <div>
+          <fieldset disabled={textReadOnly}>
             <LessonComposerCenterContent
               isVoiceMode={isVoiceMode}
               compact={compact}
@@ -343,10 +348,10 @@ export const LessonForm = ({
               onSubmit={handleSubmit}
               textInputTestId={LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT}
             />
-          </div>
+          </fieldset>
 
           <div className={cn("mt-2 flex items-center justify-between gap-3", compact && "mt-1")}>
-            <div className="flex items-center gap-2">
+            <fieldset disabled={textReadOnly} className="flex items-center gap-2">
               <LessonComposerLeftControl
                 isVoiceMode={isVoiceMode}
                 onCloseVoiceMode={() => void cancelVoiceMode()}
@@ -354,18 +359,21 @@ export const LessonForm = ({
                 closeVoiceModeLabel={t("studentCourseView.lesson.aiMentorLesson.closeVoiceMode")}
                 addEmojiLabel={t("studentCourseView.lesson.aiMentorLesson.addEmoji")}
               />
-            </div>
+            </fieldset>
             <LessonComposerRightControls
               isVoiceMode={isVoiceMode}
               isVoiceMentorMode={isVoiceMentorMode}
               isVoiceMentorStarting={isVoiceMentorStarting}
-              canSubmit={Boolean(input.trim())}
+              canSubmit={!textReadOnly && Boolean(input.trim())}
               canUseVoiceMentor={canUseVoiceMentor}
+              dictationDisabled={textReadOnly}
               onStartVoiceMode={() => void startVoiceMode()}
               onStopVoiceMode={() => void stopVoiceMode()}
               onStartVoiceMentor={() => void startVoiceMentorMode()}
               onStopVoiceMentor={() => void stopVoiceMentorMode()}
-              onSubmit={handleSubmit}
+              onSubmit={() => {
+                if (!textReadOnly) handleSubmit();
+              }}
               sendLabel={t("studentCourseView.lesson.aiMentorLesson.send")}
               toggleVoiceInputLabel={t("studentCourseView.lesson.aiMentorLesson.toggleVoiceInput")}
               dictateVoiceInputLabel={t(
@@ -404,8 +412,9 @@ export const LessonForm = ({
         onJudge={() => void judgeVoiceMentorLesson()}
         isJudgePending={isJudgePending || isVoiceJudgePending}
         canJudge={
-          !voiceTarget.practiceSessionId ||
-          (!isVoiceTurnPending && messages.some((message) => message.role === MESSAGE_ROLE.USER))
+          allowJudge &&
+          (!voiceTarget.practiceSessionId ||
+            (!isVoiceTurnPending && messages.some((message) => message.role === MESSAGE_ROLE.USER)))
         }
         isMicMuted={isVoiceMentorMuted}
         connectionState={voiceMentorConnectionState}
