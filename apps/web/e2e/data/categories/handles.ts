@@ -12,6 +12,7 @@ export const CATEGORIES_PAGE_HANDLES = {
   rowCheckbox: (categoryId: string) => `categories-page-table-checkbox-${categoryId}`,
   SORT_TITLE: "categories-page-sort-title",
   SORT_CREATED_AT: "categories-page-sort-created-at",
+  BULK_EDIT_TRIGGER: "categories-page-bulk-edit-trigger",
   DELETE_SELECTED_BUTTON: "categories-page-delete-selected-button",
   DELETE_DIALOG: "categories-page-delete-dialog",
   DELETE_DIALOG_CANCEL_BUTTON: "categories-page-delete-dialog-cancel-button",

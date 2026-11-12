@@ -815,6 +815,21 @@
     "validation": {
       "messageRequired": "Wiadomość jest wymagana.",
       "nameMaxLength": "Może mieć maksymalnie {{max}} znaków."
+    },
+    "optionPicker": {
+      "search": "Szukaj",
+      "empty": "Brak wyników"
+    },
+    "dataTable": {
+      "filters": "Filtry",
+      "resetFilters": "Wyczyść wszystkie filtry",
+      "removeFilter": "Usuń filtr: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}",
+      "selectedCount": "Zaznaczono: {{count}}",
+      "emptyTitle": "Brak wyników",
+      "emptyDescription": "Spróbuj innego wyszukiwania lub wyczyść filtry.",
+      "selectAll": "Zaznacz wszystkie",
+      "selectRow": "Zaznacz wiersz"
     }
   },
   "lessons": {
@@ -2300,11 +2315,13 @@
         "draft": "Wersja robocza",
         "published": "Opublikowane",
         "private": "Niepubliczne"
-      }
+      },
+      "allCategories": "Wszystkie kategorie",
+      "archive": "Archiwum"
     },
     "courses": {
       "header": "Zarządzaj kursami",
-      "subHeader": "Wszystkie kursy, które możesz wyświetlić i edytować"
+      "learnerHeader": "Wszystkie kursy"
     },
     "field": {
       "title": "Tytuł",
@@ -2316,7 +2333,8 @@
       "state": "Stan",
       "status": "Status",
       "sharedCourse": "Udostępniony",
-      "createdAt": "Utworzono"
+      "createdAt": "Utworzono",
+      "duration": "Czas trwania"
     },
     "lessonCard": {
       "mappedTypes": {
@@ -2574,7 +2592,16 @@
         "competencies": "kompetencje",
         "other": "funkcje platformy",
         "gamification": "grywalizację",
-        "quiz_grading": "ocenianie quizów"
+        "quiz_grading": "ocenianie quizów",
+        "ai_thread": "rozmowy z AI",
+        "automation": "automatyzacje",
+        "automation_log": "logi automatyzacji",
+        "content_marketplace": "katalog kursów",
+        "dashboard": "pulpit",
+        "email_template": "szablony e-mail",
+        "managed_group_results": "wyniki zarządzanych grup",
+        "phishing": "symulacje phishingu",
+        "todo_task": "zadania"
       },
       "descriptions": {
         "phishing_manage": "Może tworzyć i zarządzać symulacjami phishingu.",
@@ -4968,7 +4995,8 @@
       "account": "Konto",
       "integrations": "Integracje",
       "organization": "Organizacja",
-      "platformCustomization": "Dostosowanie Platformy"
+      "platformCustomization": "Dostosowanie Platformy",
+      "features": "Funkcje"
     },
     "breadcrumbs": {
       "settings": "Ustawienia"
@@ -5053,7 +5081,7 @@
       "newUserNotifications": "Powiadomienia o nowych użytkownikach",
       "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik",
       "coursesVisibility": "Pokazuj kursy odwiedzającym",
-      "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania",
+      "coursesVisibilityDescription": "Pozwala osobom niezalogowanym przeglądać listę kursów i otwierać darmowe lekcje.",
       "modernCourseList": "Używaj nowoczesnej listy kursów",
       "modernCourseListDescription": "Włącz nowy wygląd listy kursów z sekcją hero i top kursami",
       "courseListLayout": "Układ listy kursów",
@@ -5069,11 +5097,11 @@
         "availableCourses": "Dostępne kursy"
       },
       "courseDiscussions": "Włącz dyskusje w kursach",
-      "courseDiscussionsDescription": "Pozwól zapisanym użytkownikom przeglądać i prowadzić dyskusje w kursach",
+      "courseDiscussionsDescription": "Dodaje do każdego kursu zakładkę dyskusji, w której zapisani użytkownicy mogą zadawać pytania, odpowiadać i reagować.",
       "calendar": "Włącz kalendarz",
       "calendarDescription": "Pozwól użytkownikom przeglądać zaplanowane wydarzenia w kalendarzu",
       "liveTraining": "Włącz szkolenia na żywo",
-      "liveTrainingDescription": "Pozwól trenerom tworzyć i prowadzić sesje szkoleniowe na żywo",
+      "liveTrainingDescription": "Pozwala trenerom planować i prowadzić sesje na żywo online. Uczestnicy widzą nadchodzące sesje w kalendarzu i dołączają do nich w przeglądarce.",
       "liveTrainingMaxParallelSessions": "Maksymalna liczba równoległych sesji szkoleń na żywo",
       "liveTrainingMaxParallelSessionsDescription": "Ogranicz liczbę sesji szkoleń na żywo aktywnych w tym samym czasie.",
       "liveTrainingTooltip": "Włącz tylko wtedy, gdy tenant ma korzystać z sesji prowadzonych przez trenerów.",
@@ -5086,7 +5114,7 @@
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
       "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy",
       "publicCoursePreview": "Podgląd lekcji przed zapisem do kursu",
-      "publicCoursePreviewDescription": "Pozwól niezapisanym użytkownikom przeglądać lekcje w bezpłatnych kursach publicznych."
+      "publicCoursePreviewDescription": "Pozwala zalogowanym użytkownikom otwierać lekcje darmowych kursów przed zapisaniem się. Quizy i śledzenie postępu nadal wymagają zapisu."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
@@ -5850,11 +5878,11 @@
     "settings": {
       "qaEnabled": {
         "label": "Włącz sekcję Q&A",
-        "description": "Włącz sekcję Q&A. Gdy jest wyłączona, sekcja Q&A jest ukryta dla wszystkich użytkowników."
+        "description": "Dodaje sekcję Q&A z częstymi pytaniami i odpowiedziami. Po wyłączeniu jest ukryta dla wszystkich."
       },
       "qaPublic": {
-        "label": "Pokaż sekcję Q&A niezarejestrowanym użytkownikom",
-        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję Q&A (można włączyć tylko, gdy sekcja Q&A jest aktywna)"
+        "label": "Widoczność dla odwiedzających",
+        "description": "Osoby niezalogowane też mogą czytać sekcję Q&A. Dostępne po włączeniu Q&A."
       }
     },
     "toast": {
@@ -5870,11 +5898,11 @@
     "settings": {
       "newsEnabled": {
         "label": "Włącz sekcję aktualności",
-        "description": "Włącz sekcję aktualności. Gdy jest wyłączona, sekcja aktualności jest ukryta dla wszystkich użytkowników."
+        "description": "Dodaje sekcję aktualności, w której publikujesz ogłoszenia i nowości dla użytkowników. Po wyłączeniu sekcja jest ukryta dla wszystkich."
       },
       "newsPublic": {
-        "label": "Pokaż sekcję aktualności niezarejestrowanym użytkownikom",
-        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję aktualności (można włączyć tylko, gdy sekcja aktualności jest aktywna)"
+        "label": "Widoczność dla odwiedzających",
+        "description": "Osoby niezalogowane też mogą czytać aktualności. Dostępne po włączeniu aktualności."
       }
     },
     "toast": {
@@ -5890,11 +5918,11 @@
     "settings": {
       "articlesEnabled": {
         "label": "Włącz sekcję bazy wiedzy",
-        "description": "Włącz sekcję bazy wiedzy. Gdy jest wyłączona, sekcja bazy wiedzy jest ukryta dla wszystkich użytkowników."
+        "description": "Dodaje bazę wiedzy, w której publikujesz artykuły, np. poradniki, procedury i FAQ. Po wyłączeniu jest ukryta dla wszystkich."
       },
       "articlesPublic": {
-        "label": "Pokaż sekcję bazy wiedzy niezarejestrowanym użytkownikom",
-        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję bazy wiedzy (można włączyć tylko, gdy sekcja bazy wiedzy jest aktywna)"
+        "label": "Widoczność dla odwiedzających",
+        "description": "Osoby niezalogowane też mogą czytać bazę wiedzy. Dostępne po włączeniu bazy wiedzy."
       }
     },
     "toast": {
@@ -5910,7 +5938,7 @@
     "settings": {
       "learningPathsEnabled": {
         "label": "Włącz ścieżki rozwoju",
-        "description": "Włącz ścieżki rozwoju. Po wyłączeniu są ukryte i zablokowane dla wszystkich użytkowników."
+        "description": "Łącz kursy w ścieżki rozwoju, które uczestnicy przechodzą krok po kroku. Po wyłączeniu ścieżki są ukryte, a ich strony zablokowane dla wszystkich."
       }
     }
   },
@@ -8543,11 +8571,7 @@
       "timezone": "Daty używają strefy {{timezone}}."
     },
     "title": "Raporty",
-    "description": "Poznaj postępy organizacji w nauce, ścieżkach rozwoju, kursach i wśród uczestników.",
-    "picker": {
-      "search": "Szukaj",
-      "empty": "Brak wyników"
-    }
+    "description": "Poznaj postępy organizacji w nauce, ścieżkach rozwoju, kursach i wśród uczestników."
   },
   "contentMarketplace": {
     "category": "Kategoria / temat",
@@ -9451,7 +9475,7 @@
         "updated": "Zaktualizowano ustawienia rankingów.",
         "enabled": {
           "label": "Włącz rankingi",
-          "description": "Pokazuje stronę rankingów. Gdy wyłączone, nikt nie może otworzyć rankingów."
+          "description": "Dodaje stronę rankingów, która szereguje uczestników według XP lub osiągnięć w grupach albo w całej organizacji. Po wyłączeniu nikt nie może jej otworzyć."
         },
         "visibility": {
           "label": "Widoczność dla uczestników",
@@ -9472,7 +9496,7 @@
       "description": "Włącz grywalizację w organizacji i skonfiguruj osiągnięcia, które mogą zdobywać uczestnicy.",
       "enabled": {
         "label": "Włącz grywalizację",
-        "description": "Pokazuj użytkownikom poziomy, XP, osiągnięcia i powiadomienia o nagrodach. Nagrody są naliczane także wtedy, gdy ta opcja jest wyłączona."
+        "description": "Pokazuje użytkownikom poziomy, XP i osiągnięcia w profilu i na pulpicie oraz powiadamia o każdej nagrodzie. Postęp jest liczony także wtedy, gdy ta opcja jest wyłączona."
       },
       "achievements": {
         "title": "Osiągnięcia",
@@ -9679,5 +9703,54 @@
         "invalidBadgeImage": "Obraz odznaki jest nieprawidłowy. Prześlij go ponownie."
       }
     }
+  },
+  "coursesViewToggle": {
+    "label": "Widok kursów",
+    "catalogue": "Katalog",
+    "table": "Tabela"
+  },
+  "platformFeatures": {
+    "needsSetup": {
+      "description": "Ta funkcja wymaga integracji, która nie jest jeszcze skonfigurowana.",
+      "configure": "Skonfiguruj integrację"
+    },
+    "disable": {
+      "title": "Wyłączyć funkcję „{{feature}}”?",
+      "description": "Użytkownicy przestaną ją widzieć. Dane zostaną zachowane i wrócą po ponownym włączeniu.",
+      "confirm": "Wyłącz"
+    },
+    "items": {
+      "learningPaths": {
+        "title": "Ścieżki rozwoju"
+      },
+      "gamification": {
+        "title": "Grywalizacja"
+      },
+      "liveTraining": {
+        "title": "Szkolenia na żywo"
+      },
+      "courseDiscussions": {
+        "title": "Dyskusje w kursach"
+      },
+      "leaderboards": {
+        "title": "Rankingi"
+      },
+      "news": {
+        "title": "Aktualności"
+      },
+      "articles": {
+        "title": "Baza wiedzy"
+      },
+      "qa": {
+        "title": "Q&A"
+      },
+      "coursesForVisitors": {
+        "title": "Kursy dla odwiedzających"
+      },
+      "publicCoursePreview": {
+        "title": "Publiczny podgląd kursu"
+      }
+    },
+    "requiresGamification": "Najpierw włącz grywalizację."
   }
 }

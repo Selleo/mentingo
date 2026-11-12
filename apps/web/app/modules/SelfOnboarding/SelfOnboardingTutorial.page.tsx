@@ -27,7 +27,14 @@ export default function HelpdeskTutorialPage() {
   const chapter = tutorial ? selectedHelpdeskChapter(tutorial, chapterId) : undefined;
 
   return (
-    <PageWrapper>
+    <PageWrapper
+      breadcrumbs={[
+        { title: t("navigationSideBar.dashboard"), href: "/dashboard" },
+        ...(tutorial
+          ? [{ title: helpdeskTutorialLabel(tutorial).title, href: helpdeskTutorialPath(key) }]
+          : []),
+      ]}
+    >
       <Button asChild variant="ghost" className="mb-4">
         <Link to="/dashboard">
           <ArrowLeft className="mr-2 size-4" aria-hidden />

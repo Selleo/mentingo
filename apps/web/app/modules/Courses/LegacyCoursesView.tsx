@@ -1,4 +1,3 @@
-import { useNavigate } from "@remix-run/react";
 import { OnboardingPages, PERMISSIONS } from "@repo/shared";
 import { isEmpty } from "lodash-es";
 import { useMemo, useReducer } from "react";
@@ -7,9 +6,9 @@ import { match } from "ts-pattern";
 
 import { useCategories, useCurrentUser } from "~/api/queries";
 import { useAvailableCourses } from "~/api/queries/useAvailableCourses";
-import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
+import { COURSES_TABLE_PERMISSIONS } from "~/config/routeAccessConfig";
 import { usePermissions } from "~/hooks/usePermissions";
 import Loader from "~/modules/common/Loader/Loader";
 import {
@@ -18,9 +17,10 @@ import {
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { CourseList } from "~/modules/Courses/components/CourseList";
+import { CoursesViewToggle } from "~/modules/Courses/components/CoursesViewToggle";
 import { StudentsCurses } from "~/modules/Courses/components/StudentsCurses";
+import { COURSES_VIEWS } from "~/modules/Courses/utils/coursesView";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
-import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
 import { createSortOptions, type SortOption } from "~/types/sorting";
 
 import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
@@ -32,11 +32,10 @@ const LegacyCoursesView = () => {
   const { hasAccess: canUpdateLearningProgress } = usePermissions({
     required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
   });
-  const { hasAccess: canManageCourses } = usePermissions({
-    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  const { hasAccess: canOpenCoursesTable } = usePermissions({
+    required: COURSES_TABLE_PERMISSIONS,
   });
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   const { data: currentUser } = useCurrentUser();
 
@@ -167,22 +166,7 @@ const LegacyCoursesView = () => {
                 isLoading={isCategoriesLoading}
               />
 
-              {canManageCourses && (
-                <ButtonGroup
-                  buttons={[
-                    {
-                      children: <DashboardIcon />,
-                      isActive: true,
-                      onClick: () => navigate("/courses"),
-                    },
-                    {
-                      children: <HamburgerIcon />,
-                      isActive: false,
-                      onClick: () => navigate("/admin/courses"),
-                    },
-                  ]}
-                />
-              )}
+              {canOpenCoursesTable && <CoursesViewToggle active={COURSES_VIEWS.CATALOGUE} />}
             </div>
           </div>
           <div

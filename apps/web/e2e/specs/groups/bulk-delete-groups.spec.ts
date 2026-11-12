@@ -4,6 +4,7 @@ import { GROUPS_PAGE_HANDLES } from "../../data/groups/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { cancelDeleteGroupsDialogFlow } from "../../flows/groups/cancel-delete-groups-dialog.flow";
 import { confirmDeleteGroupsFlow } from "../../flows/groups/confirm-delete-groups.flow";
+import { filterGroupsFlow } from "../../flows/groups/filter-groups.flow";
 import { openDeleteGroupsDialogFlow } from "../../flows/groups/open-delete-groups-dialog.flow";
 import { openGroupsPageFlow } from "../../flows/groups/open-groups-page.flow";
 import { selectGroupsFlow } from "../../flows/groups/select-groups.flow";
@@ -12,7 +13,7 @@ test("admin cannot delete groups when no rows are selected", async ({ withReadon
   await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
     await openGroupsPageFlow(page);
 
-    await expect(page.getByTestId(GROUPS_PAGE_HANDLES.DELETE_SELECTED_BUTTON)).toBeDisabled();
+    await expect(page.getByTestId(GROUPS_PAGE_HANDLES.BULK_EDIT_TRIGGER)).toBeDisabled();
   });
 });
 
@@ -33,6 +34,7 @@ test("admin can cancel group deletion from the delete dialog", async ({
     });
 
     await openGroupsPageFlow(page);
+    await filterGroupsFlow(page, prefix);
     await selectGroupsFlow(
       page,
       groups.map((group) => group.id),
@@ -67,6 +69,7 @@ test("admin can delete a single selected group", async ({ cleanup, factories, wi
     });
 
     await openGroupsPageFlow(page);
+    await filterGroupsFlow(page, group.name);
     await selectGroupsFlow(page, [group.id]);
     await openDeleteGroupsDialogFlow(page);
     await confirmDeleteGroupsFlow(page);
@@ -94,6 +97,7 @@ test("admin can bulk delete selected groups", async ({ cleanup, factories, withW
     });
 
     await openGroupsPageFlow(page);
+    await filterGroupsFlow(page, prefix);
     await selectGroupsFlow(
       page,
       groups.map((group) => group.id),

@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
+import { GamificationFeatureGuard } from "~/Guards/GamificationFeatureGuard";
+import { GAMIFICATION_FEATURES } from "~/Guards/GamificationFeatureGuard.constants";
 
 import { LEADERBOARD_HANDLES } from "../../../../e2e/data/gamification/handles";
 
@@ -46,6 +48,14 @@ const METRIC_LABEL_KEYS = {
 } as const satisfies Record<LeaderboardMetric, string>;
 
 export default function LeaderboardPage() {
+  return (
+    <GamificationFeatureGuard feature={GAMIFICATION_FEATURES.LEADERBOARDS}>
+      <Leaderboard />
+    </GamificationFeatureGuard>
+  );
+}
+
+function Leaderboard() {
   const { t } = useTranslation();
   const { data: globalSettings, error: settingsError } = useGlobalSettings();
   const isEnabled = areLeaderboardsEnabled(globalSettings);

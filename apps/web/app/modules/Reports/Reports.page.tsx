@@ -25,6 +25,7 @@ import { useReportExportStatus } from "~/api/queries/useReportExportStatus";
 import { useReportOptions } from "~/api/queries/useReportOptions";
 import { useReportResult } from "~/api/queries/useReportResult";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
+import { OptionPicker } from "~/components/OptionPicker/OptionPicker";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -40,7 +41,6 @@ import {
   ReportHeadlineMetrics,
   ReportOutcomeMetrics,
 } from "~/modules/Reports/components/ReportMetrics";
-import { ReportOptionPicker } from "~/modules/Reports/components/ReportOptionPicker";
 import { ReportResultsTable } from "~/modules/Reports/components/ReportResultsTable";
 import { ReportSavedConfigurations } from "~/modules/Reports/components/ReportSavedConfigurations";
 import { ReportSaveDialog } from "~/modules/Reports/components/ReportSaveDialog";
@@ -647,7 +647,7 @@ export default function ReportsPage() {
             <div className="flex flex-col gap-4 p-4">
               <div className="flex flex-wrap items-center gap-2">
                 {subjectType && (
-                  <ReportOptionPicker
+                  <OptionPicker
                     label={t(`reports.subject.${subjectType}`)}
                     placeholder={t(
                       `reports.subject.choose${subjectType[0].toUpperCase()}${subjectType.slice(1)}`,
@@ -660,7 +660,7 @@ export default function ReportsPage() {
                     onToggle={({ id, label }) => selectSubject(id, label, subjectType)}
                   />
                 )}
-                <ReportOptionPicker
+                <OptionPicker
                   label={t("reports.scope.groupLabel")}
                   placeholder={t("reports.scope.allGroups")}
                   options={options?.groups}

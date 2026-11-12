@@ -14,6 +14,7 @@ import {
   countDistinct,
   desc,
   eq,
+  exists,
   getTableColumns,
   gte,
   inArray,
@@ -591,8 +592,9 @@ export class CourseCatalogRepository {
   }
 
   /**
-   * Course editors with `COURSE_UPDATE` see every course; others see their own courses and, when
-   * they manage groups, the courses assigned to those groups.
+   * Course editors with `COURSE_UPDATE` see every course. Everyone else sees the union of what
+   * each of their roles grants: their own courses, the courses assigned to groups they manage, and,
+   * unless they manage courses, the courses visible to them in the catalogue.
    */
   private buildCourseListAccessCondition({
     currentUser,
@@ -600,21 +602,46 @@ export class CourseCatalogRepository {
     currentUserPermissions = [],
   }: CourseListAccessScope): SQL | undefined {
     if (hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE)) return undefined;
+    if (!currentUserId) return sql`FALSE`;
 
-    const canUpdateOwnCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN);
-    const ownCourseCondition =
-      currentUserId && canUpdateOwnCourse ? eq(courses.authorId, currentUserId) : undefined;
+    const learnerCourseCondition =
+      hasPermission(currentUserPermissions, PERMISSIONS.COURSE_READ_ASSIGNED) &&
+      !hasPermission(currentUserPermissions, PERMISSIONS.COURSE_READ_MANAGEABLE)
+        ? this.buildLearnerVisibleCourseCondition(currentUserId)
+        : undefined;
 
-    if (
-      !currentUser ||
-      !hasPermission(currentUser.permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
-    ) {
-      return ownCourseCondition;
-    }
+    const ownCourseCondition = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN)
+      ? eq(courses.authorId, currentUserId)
+      : undefined;
 
-    const managedCourseCondition = getGroupManagerCourseScopeCondition(currentUser, courses.id, []);
+    const managedCourseCondition =
+      currentUser && hasPermission(currentUser.permissions, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
+        ? getGroupManagerCourseScopeCondition(currentUser, courses.id, [])
+        : undefined;
 
-    return or(ownCourseCondition, managedCourseCondition) ?? sql`FALSE`;
+    return or(learnerCourseCondition, ownCourseCondition, managedCourseCondition) ?? sql`FALSE`;
+  }
+
+  /** Published courses open to everyone, plus published or private courses the learner is enrolled in. */
+  private buildLearnerVisibleCourseCondition(learnerId: UUIDType) {
+    const enrollmentSubquery = this.db
+      .select({ id: studentCourses.id })
+      .from(studentCourses)
+      .where(
+        and(
+          eq(studentCourses.courseId, courses.id),
+          eq(studentCourses.studentId, learnerId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      );
+
+    return or(
+      and(eq(courses.status, COURSE_STATUSES.PUBLISHED), eq(courses.isArchived, false)),
+      and(
+        inArray(courses.status, [COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE]),
+        exists(enrollmentSubquery),
+      ),
+    );
   }
 
   private buildStudentCoursesConditions({ studentId, filters, language }: StudentCoursesFilters) {

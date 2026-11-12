@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
@@ -9,6 +9,7 @@ import type { AutomationRunQuery } from "@repo/shared";
 export function useAutomationRuns(query: AutomationRunQuery = {}) {
   return useQuery({
     queryKey: AUTOMATIONS_QUERY_KEYS.runs(query),
+    placeholderData: keepPreviousData,
     queryFn: async () =>
       (await ApiClient.api.automationRunHistoryControllerListAutomationRuns(query)).data,
   });

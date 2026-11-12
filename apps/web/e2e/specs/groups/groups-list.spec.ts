@@ -2,6 +2,7 @@ import { USER_ROLE } from "~/config/userRoles";
 
 import { GROUPS_PAGE_HANDLES, GROUP_PAGE_HANDLES } from "../../data/groups/handles";
 import { expect, test } from "../../fixtures/test.fixture";
+import { filterGroupsFlow } from "../../flows/groups/filter-groups.flow";
 import { openGroupDetailsFromListFlow } from "../../flows/groups/open-group-details-from-list.flow";
 import { openGroupsPageFlow } from "../../flows/groups/open-groups-page.flow";
 import { shiftSelectGroupRangeFlow } from "../../flows/groups/shift-select-group-range.flow";
@@ -49,6 +50,7 @@ test("admin can browse, sort, and open group details from the groups list", asyn
     });
 
     await openGroupsPageFlow(page);
+    await filterGroupsFlow(page, prefix);
 
     await expect(page.getByTestId(GROUPS_PAGE_HANDLES.HEADING)).toBeVisible();
     await expect(page.getByTestId(GROUPS_PAGE_HANDLES.CREATE_BUTTON)).toBeVisible();

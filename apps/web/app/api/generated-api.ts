@@ -9241,6 +9241,12 @@ export interface GetPromotionCodesResponse {
     };
     timesRedeemed: number;
   }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface GetPromotionCodeResponse {
@@ -44119,10 +44125,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name StripeControllerGetPromotionCodes
      * @request GET:/api/stripe/promotion-codes
      */
-    stripeControllerGetPromotionCodes: (params: RequestParams = {}) =>
+    stripeControllerGetPromotionCodes: (
+      query?: {
+        search?: string;
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetPromotionCodesResponse, any>({
         path: `/api/stripe/promotion-codes`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -47940,7 +47956,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         page?: number;
         perPage?: number;
-        sort?: "name" | "createdAt";
+        sort?: "name" | "characteristic" | "createdAt";
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},

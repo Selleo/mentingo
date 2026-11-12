@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -17,5 +17,6 @@ export function useEmailTemplates(page: number, perPage: number, search = "") {
           { signal },
         )
       ).data,
+    placeholderData: keepPreviousData,
   });
 }

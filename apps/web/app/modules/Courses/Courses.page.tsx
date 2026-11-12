@@ -1,15 +1,25 @@
-import { Navigate } from "@remix-run/react";
+import { Navigate, useSearchParams } from "@remix-run/react";
 import { ACCESS_GUARD, PERMISSIONS } from "@repo/shared";
-import { useLayoutEffect } from "react";
+import { lazy, Suspense, useLayoutEffect } from "react";
+import { match } from "ts-pattern";
 
 import { useCurrentUserSessionSuspense } from "~/api/queries/useCurrentUserSessionSuspense";
 import { usePublicGlobalSettingsSuspense } from "~/api/queries/usePublicGlobalSettingsSuspense";
 import { useUserSettingsSuspense } from "~/api/queries/useUserSettings";
-import { hasPermission } from "~/common/permissions/permission.utils";
+import { hasPermission, matchesRequirement } from "~/common/permissions/permission.utils";
+import { COURSES_TABLE_ACCESS } from "~/config/routeAccessConfig";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
+import { RequireAuthenticatedUser } from "~/Guards/RequireAuthenticatedUser";
+import Loader from "~/modules/common/Loader/Loader";
 import GroupManagerModernCoursesView from "~/modules/Courses/components/modern/GroupManagerModernCoursesView";
 import ModernCoursesView from "~/modules/Courses/components/modern/ModernCoursesView";
+import { loadCoursesTableView } from "~/modules/Courses/CoursesTable/loadCoursesTableView";
 import LegacyCoursesView from "~/modules/Courses/LegacyCoursesView";
+import {
+  COURSES_CATALOGUE_PATH,
+  COURSES_VIEWS,
+  getRequestedCoursesView,
+} from "~/modules/Courses/utils/coursesView";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 import { getDefaultAuthenticatedRedirect } from "~/utils/getDefaultAuthenticatedRedirect";
@@ -67,7 +77,34 @@ function AuthenticatedCourses() {
   return <CoursesView />;
 }
 
+const CoursesTableView = lazy(loadCoursesTableView);
+
+/**
+ * Shows the view named in the `view` URL param. The table needs table access: anonymous visitors
+ * sign in first, and signed-in users without access fall back to the catalogue.
+ */
 function CoursesView() {
+  const { data: currentUser } = useCurrentUserSessionSuspense();
+  const [searchParams] = useSearchParams();
+
+  const requestedView = getRequestedCoursesView(searchParams);
+  const canOpenCoursesTable = matchesRequirement(
+    currentUser?.permissions ?? [],
+    COURSES_TABLE_ACCESS,
+  );
+
+  return match({ requestedView, canOpenCoursesTable, isAnonymous: !currentUser })
+    .with({ requestedView: COURSES_VIEWS.CATALOGUE }, () => <CoursesCatalogue />)
+    .with({ canOpenCoursesTable: true }, () => (
+      <Suspense fallback={<Loader />}>
+        <CoursesTableView />
+      </Suspense>
+    ))
+    .with({ isAnonymous: true }, () => <RequireAuthenticatedUser />)
+    .otherwise(() => <Navigate replace to={COURSES_CATALOGUE_PATH} />);
+}
+
+function CoursesCatalogue() {
   const { data: currentUser } = useCurrentUserSessionSuspense();
   const { data: globalSettings } = usePublicGlobalSettingsSuspense();
 

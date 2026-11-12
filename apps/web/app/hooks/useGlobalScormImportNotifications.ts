@@ -8,6 +8,7 @@ import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
 import { queryClient } from "~/api/queryClient";
 import { acquireSocket, releaseSocket } from "~/api/socket";
 import { useToast } from "~/components/ui/use-toast";
+import { COURSES_TABLE_PATH } from "~/modules/Courses/utils/coursesView";
 
 import type { ScormImportAction, ScormPackageStatus, SupportedLanguages } from "@repo/shared";
 
@@ -95,7 +96,7 @@ export function useGlobalScormImportNotifications() {
           : null;
 
       if (failedCourseEditPath && location.pathname === failedCourseEditPath) {
-        navigate("/admin/courses");
+        navigate(COURSES_TABLE_PATH);
       }
     };
 

@@ -45,6 +45,7 @@ import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
 import { CourseLanguageSelector } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { CourseEnrolled } from "~/modules/Admin/EditCourse/CourseEnrolled/CourseEnrolled";
 import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCourseTabs";
+import { COURSES_TABLE_PATH } from "~/modules/Courses/utils/coursesView";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
@@ -256,7 +257,7 @@ const EditCourse = () => {
   }
 
   const breadcrumbs = [
-    { title: t("adminCourseView.breadcrumbs.courses"), href: "/admin/courses" },
+    { title: t("adminCourseView.breadcrumbs.courses"), href: COURSES_TABLE_PATH },
     { title: course?.title || "", href: `/admin/beta-courses/${id}` },
   ];
   const duplicationNotice = isDuplicationFailed
