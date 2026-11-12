@@ -28,7 +28,10 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
               key: z.string(),
             }),
           ),
-          title: z.string().min(2).max(250),
+          title: z
+            .string()
+            .min(2, t("adminCourseView.curriculum.lesson.validation.titleMinLength"))
+            .max(250, t("adminCourseView.curriculum.lesson.validation.titleMaxLength")),
           scoringMode: z.optional(z.nativeEnum(ASSESSMENT_SCORING_MODES)),
           options: z
             .array(

@@ -103,8 +103,9 @@ const QuestionTitle = ({
         name={`questions.${questionIndex}.title`}
         value={item.title}
         placeholder={baseLanguageQuestion?.title}
-        onChange={(e) => handleOptionChange(e.target.value)}
-        required
+        onChange={(event) => handleOptionChange(event.target.value)}
+        // Matching questions rely on the form schema alone, without the browser's own tooltip.
+        required={questionType !== QuestionType.MATCHING}
         className="flex-1"
       />
       {isOpenQuestion && (
