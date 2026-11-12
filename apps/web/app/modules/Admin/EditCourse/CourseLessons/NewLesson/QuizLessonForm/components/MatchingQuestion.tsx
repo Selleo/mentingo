@@ -99,7 +99,10 @@ const MatchingQuestion = ({
       const updatedOptions = [...currentOptions];
 
       updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], [field]: value };
-      form.setValue(`questions.${questionIndex}.options`, updatedOptions, { shouldDirty: true });
+      form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     },
     [form, questionIndex],
   );

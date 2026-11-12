@@ -73,26 +73,33 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
             });
           }
 
+          // Matching errors stay on pair fields: an issue on the whole options list would hide them.
           if (question.type === QuestionType.MATCHING) {
+            const matches = question.options?.map((option) => option.matchedWord?.trim()) ?? [];
+
             question.options?.forEach((option, optionIndex) => {
-              if (option.matchedWord?.trim()) return;
+              const match = matches[optionIndex];
 
-              ctx.addIssue({
-                path: [index, "options", optionIndex, "matchedWord"],
-                message: t("adminCourseView.curriculum.lesson.validation.matchingMatchRequired"),
-                code: z.ZodIssueCode.custom,
-              });
-            });
-          }
+              // The API trims prompts, so a whitespace-only prompt is empty.
+              if (option.optionText && !option.optionText.trim())
+                ctx.addIssue({
+                  path: [index, "options", optionIndex, "optionText"],
+                  message: t("adminCourseView.curriculum.lesson.validation.optionTextRequired"),
+                  code: z.ZodIssueCode.custom,
+                });
 
-          const matches =
-            question.options?.map((option) => option.matchedWord?.trim()).filter(Boolean) ?? [];
-
-          if (question.type === QuestionType.MATCHING && new Set(matches).size !== matches.length) {
-            ctx.addIssue({
-              path: [index, "options"],
-              message: t("adminCourseView.curriculum.lesson.validation.matchingPairsUnique"),
-              code: z.ZodIssueCode.custom,
+              if (!match)
+                ctx.addIssue({
+                  path: [index, "options", optionIndex, "matchedWord"],
+                  message: t("adminCourseView.curriculum.lesson.validation.matchingMatchRequired"),
+                  code: z.ZodIssueCode.custom,
+                });
+              else if (matches.indexOf(match) !== matches.lastIndexOf(match))
+                ctx.addIssue({
+                  path: [index, "options", optionIndex, "matchedWord"],
+                  message: t("adminCourseView.curriculum.lesson.validation.matchingPairsUnique"),
+                  code: z.ZodIssueCode.custom,
+                });
             });
           }
 

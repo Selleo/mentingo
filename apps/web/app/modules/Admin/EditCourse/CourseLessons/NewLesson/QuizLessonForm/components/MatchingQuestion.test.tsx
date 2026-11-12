@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { act, screen } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import i18next from "i18next";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { Form } from "~/components/ui/form";
 import { renderWith } from "~/utils/testUtils";
@@ -135,5 +135,49 @@ describe("matching question editor validation", () => {
     );
     expect(screen.queryByText(validationMessage("matchingPairsRequired"))).not.toBeInTheDocument();
     expect(screen.queryByText(validationMessage("matchingPairsUnique"))).not.toBeInTheDocument();
+  });
+
+  it("keeps every pair error visible when matches repeat and clears one once it is fixed", async () => {
+    renderWith().render(
+      <QuestionWithEmptyFields
+        title="Animals"
+        options={[
+          pair("pair-1", "Cat", "Meow", 1),
+          pair("pair-2", "Kitten", "Meow", 2),
+          pair("pair-3", " ", "", 3),
+        ]}
+      />,
+    );
+
+    await act(async () => {
+      await formApi?.trigger();
+    });
+
+    const validationMessage = (key: string) =>
+      i18next.t(`adminCourseView.curriculum.lesson.validation.${key}`);
+
+    expect(await screen.findAllByText(validationMessage("matchingPairsUnique"))).toHaveLength(2);
+    expect(
+      screen.getByText(
+        `${validationMessage("optionTextRequired")} ${validationMessage("matchingMatchRequired")}`,
+      ),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId(QUIZ_LESSON_FORM_HANDLES.matchingMatchInput(0, 1)), {
+      target: { value: "Mew" },
+    });
+
+    await vi.waitFor(() =>
+      expect(screen.queryByText(validationMessage("matchingPairsUnique"))).not.toBeInTheDocument(),
+    );
+    expect(
+      screen.getByText(
+        `${validationMessage("optionTextRequired")} ${validationMessage("matchingMatchRequired")}`,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId(QUIZ_LESSON_FORM_HANDLES.matchingMatchInput(0, 1))).toHaveAttribute(
+      "aria-invalid",
+      "false",
+    );
   });
 });
