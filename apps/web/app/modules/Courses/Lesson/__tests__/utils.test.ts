@@ -667,9 +667,9 @@ describe("matching mapping", () => {
     expect(
       parseQuizFormData({
         ...getEmptyQuizAnswers([]),
-        matchingQuestions: { "question-matching": { "pair-1": null, "pair-2": null } },
+        matchingQuestions: { "question-matching": {} },
       }),
-    ).toEqual([]);
+    ).toEqual([{ questionId: "question-matching", answers: [] }]);
   });
 
   it("prepares one answer per pair", () => {

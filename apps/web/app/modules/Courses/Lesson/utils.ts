@@ -261,7 +261,11 @@ export const parseQuizFormData = (input: QuizForm) => {
     }
   };
 
-  const processFillInTheBlanks = (questionMap: Record<string, Record<string, string | null>>) => {
+  const processFillInTheBlanks = (
+    questionMap: Record<string, Record<string, string | null>>,
+    // The API requires every matching question, even an untranslated one with nothing to place.
+    keepUnanswered = false,
+  ) => {
     for (const questionId in questionMap) {
       const answers = questionMap[questionId];
       const answerArray = Object.entries(answers)
@@ -272,7 +276,7 @@ export const parseQuizFormData = (input: QuizForm) => {
         })
         .map(([answerId, value]) => (/^\d+$/.test(answerId) ? { value } : { answerId, value }));
 
-      if (answerArray.length > 0) {
+      if (keepUnanswered || answerArray.length > 0) {
         result.push({
           questionId,
           answers: answerArray,
@@ -318,7 +322,7 @@ export const parseQuizFormData = (input: QuizForm) => {
   processSingleAnswerQuestions(input.multiAnswerQuestions);
   processFillInTheBlanks(input.fillInTheBlanksText);
   processFillInTheBlanks(input.fillInTheBlanksDnd);
-  processFillInTheBlanks(input.matchingQuestions);
+  processFillInTheBlanks(input.matchingQuestions, true);
   processSingleAnswerQuestions(input.photoQuestionMultipleChoice);
   processBooleanQuestions(input.trueOrFalseQuestions);
 
