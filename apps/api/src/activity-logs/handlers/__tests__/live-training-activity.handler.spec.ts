@@ -81,7 +81,7 @@ describe("LiveTrainingActivityHandler", () => {
       },
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,

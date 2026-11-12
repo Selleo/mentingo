@@ -1,6 +1,4 @@
-import { Injectable, type OnModuleInit } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-import { Value } from "@sinclair/typebox/value";
+import { Injectable } from "@nestjs/common";
 
 import { processInBatches } from "src/common/utils/processInBatches";
 import {
@@ -13,12 +11,13 @@ import {
   BulkAssignUsersToGroupsEvent,
 } from "src/events";
 import { GROUP_ENROLLMENT_EVENT_BATCH_SIZE } from "src/group/group.constants";
-import { OutboxDirectHandlerService } from "src/outbox/outbox-direct-handler.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { LearningPathExportAppliedEvent } from "../events/learning-path-export-applied.event";
-import { learningPathExportAppliedEventSchema } from "../learning-path.schema";
 import { LearningPathCourseSyncService } from "../services/learning-path-course-sync.service";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type EventType =
   | EnrollUserToGroupEvent
@@ -26,6 +25,7 @@ type EventType =
   | LearningPathCourseAddedEvent
   | LearningPathCourseRemovedEvent
   | LearningPathCourseSyncEvent
+  | LearningPathExportAppliedEvent
   | LessonCompletedEvent
   | UserCourseFinishedEvent;
 
@@ -35,35 +35,20 @@ const LearningPathCourseEvents = [
   LearningPathCourseAddedEvent,
   LearningPathCourseRemovedEvent,
   LearningPathCourseSyncEvent,
+  LearningPathExportAppliedEvent,
   LessonCompletedEvent,
   UserCourseFinishedEvent,
 ] as const;
 
 @Injectable()
-@EventsHandler(...LearningPathCourseEvents)
-export class LearningPathCourseSyncHandler implements IEventHandler<EventType>, OnModuleInit {
+@OutboxEventsHandler(...LearningPathCourseEvents)
+export class LearningPathCourseSyncHandler implements OutboxEventsHandlerOf<EventType> {
   constructor(
     private readonly learningPathCourseSyncService: LearningPathCourseSyncService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
-    private readonly outboxDirectHandlerService: OutboxDirectHandlerService,
   ) {}
 
-  onModuleInit() {
-    this.outboxDirectHandlerService.register(
-      LearningPathExportAppliedEvent.name,
-      async (payload) => {
-        if (!Value.Check(learningPathExportAppliedEventSchema, payload)) {
-          throw new Error("Invalid learning path export reconciliation event");
-        }
-
-        await this.handleLearningPathCourseSync(
-          new LearningPathExportAppliedEvent(payload.learningPathCourseSyncData),
-        );
-      },
-    );
-  }
-
-  async handle(event: EventType) {
+  async handleOutboxEvent(event: EventType) {
     if (event instanceof EnrollUserToGroupEvent) {
       return this.handleEnrollUserToGroup(event);
     }

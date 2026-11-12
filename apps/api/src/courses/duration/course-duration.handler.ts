@@ -1,5 +1,3 @@
-import { EventsHandler } from "@nestjs/cqrs";
-
 import { CourseDurationRepository } from "src/courses/duration/course-duration.repository";
 import { CourseDurationService } from "src/courses/duration/course-duration.service";
 import {
@@ -14,9 +12,10 @@ import {
   UpdateLessonEvent,
   ResourceVideoDurationUpdatedEvent,
 } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
-import type { IEventHandler } from "@nestjs/cqrs";
 import type { UUIDType } from "src/common";
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type CourseDurationEvent =
   | CreateCourseEvent
@@ -30,7 +29,7 @@ type CourseDurationEvent =
   | ResourceVideoDurationUpdatedEvent
   | CourseDurationRefreshRequestedEvent;
 
-@EventsHandler(
+@OutboxEventsHandler(
   CreateCourseEvent,
   UpdateCourseEvent,
   CreateChapterEvent,
@@ -42,13 +41,13 @@ type CourseDurationEvent =
   ResourceVideoDurationUpdatedEvent,
   CourseDurationRefreshRequestedEvent,
 )
-export class CourseDurationHandler implements IEventHandler<CourseDurationEvent> {
+export class CourseDurationHandler implements OutboxEventsHandlerOf<CourseDurationEvent> {
   constructor(
     private readonly courseDurationService: CourseDurationService,
     private readonly courseDurationRepository: CourseDurationRepository,
   ) {}
 
-  async handle(event: CourseDurationEvent): Promise<void> {
+  async handleOutboxEvent(event: CourseDurationEvent): Promise<void> {
     if (event instanceof ResourceVideoDurationUpdatedEvent) {
       await this.courseDurationService.refreshCoursesForResource(
         event.resourceVideoDurationUpdatedData.resourceId,

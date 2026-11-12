@@ -6365,7 +6365,9 @@
       "start_learning_path": "Learning Path started",
       "complete_learning_path": "Learning Path completed",
       "play_scorm": "SCORM played",
-      "complete_scorm": "SCORM completed"
+      "complete_scorm": "SCORM completed",
+      "export": "Exported",
+      "import": "Imported"
     },
     "entity": {
       "automation": "Automation",

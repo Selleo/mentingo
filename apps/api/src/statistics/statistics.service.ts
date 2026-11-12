@@ -20,6 +20,8 @@ import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
+import { dbAls } from "src/storage/db/db-als.store";
+import { MissingTenantContextError } from "src/storage/db/db-errors";
 import { studentCourses } from "src/storage/schema";
 
 import type {
@@ -318,7 +320,12 @@ export class StatisticsService {
 
     const currentStats = await this.statisticsRepository.getActivityStats(userId);
 
-    if (!currentStats) await this.outboxPublisher.publish(new UserFirstLoginEvent({ userId }));
+    if (!currentStats) {
+      const tenantId = dbAls.getStore()?.tenantId;
+      if (!tenantId) throw new MissingTenantContextError();
+
+      await this.outboxPublisher.publish(new UserFirstLoginEvent({ userId, tenantId }));
+    }
 
     const lastActivityDate = currentStats?.lastActivityDate
       ? startOfDay(new Date(currentStats.lastActivityDate))

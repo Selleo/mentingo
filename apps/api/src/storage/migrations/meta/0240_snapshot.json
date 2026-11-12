@@ -1,6 +1,6 @@
 {
-  "id": "35a7777f-a2e7-4dbb-ac78-c365faa12df7",
-  "prevId": "a9846383-e46f-45ad-a8d0-ee1211bd61fe",
+  "id": "f22b1835-4729-44d3-bf35-6c7a0368c5bf",
+  "prevId": "20b2f97d-7aaa-426b-8e37-a6f4404a492c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -15634,6 +15634,19 @@
           "primaryKey": false,
           "notNull": false
         },
+        "succeeded_handlers": {
+          "name": "succeeded_handlers",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "claim_id": {
+          "name": "claim_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "tenant_id": {
           "name": "tenant_id",
           "type": "uuid",
@@ -15695,7 +15708,7 @@
               "nulls": "last"
             },
             {
-              "expression": "(COALESCE(payload #>> '{loginData,userId}', payload #>> '{lessonCompletionData,userId}', payload #>> '{courseFinishedData,userId}', payload ->> 'userId'))",
+              "expression": "(COALESCE(payload #>> '{loginData,userId}', payload #>> '{lessonCompletionData,userId}', payload #>> '{courseFinishedData,userId}', payload #>> '{quizCompletionData,userId}'))",
               "isExpression": true,
               "asc": true,
               "nulls": "last"
@@ -21222,127 +21235,6 @@
       },
       "uniqueConstraints": {}
     },
-    "public.assessment_attempt_matching_answers": {
-      "name": "assessment_attempt_matching_answers",
-      "schema": "",
-      "columns": {
-        "question_answer_id": {
-          "name": "question_answer_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "pair_id": {
-          "name": "pair_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "submitted_match": {
-          "name": "submitted_match",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "assessment_attempt_matching_answers_tenant_id_idx": {
-          "name": "assessment_attempt_matching_answers_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "assessment_attempt_matching_answers_tenant_pair_idx": {
-          "name": "assessment_attempt_matching_answers_tenant_pair_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "pair_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "assessment_attempt_matching_answers_question_answer_id_assessment_attempt_question_answers_id_fk": {
-          "name": "assessment_attempt_matching_answers_question_answer_id_assessment_attempt_question_answers_id_fk",
-          "tableFrom": "assessment_attempt_matching_answers",
-          "columnsFrom": [
-            "question_answer_id"
-          ],
-          "tableTo": "assessment_attempt_question_answers",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "assessment_attempt_matching_answers_pair_id_assessment_question_matching_pairs_id_fk": {
-          "name": "assessment_attempt_matching_answers_pair_id_assessment_question_matching_pairs_id_fk",
-          "tableFrom": "assessment_attempt_matching_answers",
-          "columnsFrom": [
-            "pair_id"
-          ],
-          "tableTo": "assessment_question_matching_pairs",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "assessment_attempt_matching_answers_tenant_id_tenants_id_fk": {
-          "name": "assessment_attempt_matching_answers_tenant_id_tenants_id_fk",
-          "tableFrom": "assessment_attempt_matching_answers",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {
-        "assessment_attempt_matching_answers_tenant_id_question_answer_id_pair_id_pk": {
-          "name": "assessment_attempt_matching_answers_tenant_id_question_answer_id_pair_id_pk",
-          "columns": [
-            "tenant_id",
-            "question_answer_id",
-            "pair_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {}
-    },
     "public.assessment_attempt_open_text_answers": {
       "name": "assessment_attempt_open_text_answers",
       "schema": "",
@@ -22987,150 +22879,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.assessment_question_matching_pairs": {
-      "name": "assessment_question_matching_pairs",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "question_id": {
-          "name": "question_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "language": {
-          "name": "language",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "display_order": {
-          "name": "display_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "prompt": {
-          "name": "prompt",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "match": {
-          "name": "match",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "assessment_question_matching_pairs_tenant_id_idx": {
-          "name": "assessment_question_matching_pairs_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "assessment_question_matching_pairs_tenant_question_language_display_order_idx": {
-          "name": "assessment_question_matching_pairs_tenant_question_language_display_order_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "question_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "language",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "display_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "assessment_question_matching_pairs_question_id_assessment_questions_id_fk": {
-          "name": "assessment_question_matching_pairs_question_id_assessment_questions_id_fk",
-          "tableFrom": "assessment_question_matching_pairs",
-          "columnsFrom": [
-            "question_id"
-          ],
-          "tableTo": "assessment_questions",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "assessment_question_matching_pairs_tenant_id_tenants_id_fk": {
-          "name": "assessment_question_matching_pairs_tenant_id_tenants_id_fk",
-          "tableFrom": "assessment_question_matching_pairs",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.assessment_question_open_text_settings": {
       "name": "assessment_question_open_text_settings",
       "schema": "",
@@ -23634,13 +23382,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "scoring_mode": {
-          "name": "scoring_mode",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'all_or_nothing'"
         },
         "prompt": {
           "name": "prompt",

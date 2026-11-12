@@ -437,7 +437,7 @@ export class CertificatesService implements OnModuleDestroy {
       );
       for (const target of resetTargets) {
         for (const userId of target.userIds) {
-          await this.outboxPublisher.publishDurable(
+          await this.outboxPublisher.publish(
             new LearningSourceWithdrawnEvent({
               userId,
               courseId: target.courseId,

@@ -1,21 +1,23 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import { BulkAssignUsersToGroupsEvent } from "src/events";
 import { GroupService } from "src/group/group.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
+
 @Injectable()
-@EventsHandler(BulkAssignUsersToGroupsEvent)
+@OutboxEventsHandler(BulkAssignUsersToGroupsEvent)
 export class GroupMembershipEnrollmentHandler
-  implements IEventHandler<BulkAssignUsersToGroupsEvent>
+  implements OutboxEventsHandlerOf<BulkAssignUsersToGroupsEvent>
 {
   constructor(
     private readonly groupService: GroupService,
     private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
-  async handle(event: BulkAssignUsersToGroupsEvent) {
+  async handleOutboxEvent(event: BulkAssignUsersToGroupsEvent) {
     if (event instanceof BulkAssignUsersToGroupsEvent) {
       return this.handleBulkAssignUsersToGroups(event);
     }

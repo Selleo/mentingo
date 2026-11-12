@@ -62,6 +62,7 @@ import {
   assignSystemRoleToUserInTests,
 } from "../../../test/helpers/permission-role-helpers";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
+import { dispatchOutbox, waitForOutbox } from "../../../test/helpers/wait-for-outbox";
 
 import type { CalendarEventTestResponse } from "./types/calendar-event-test.types";
 import type { CourseTest } from "../../../test/factory/course.factory";
@@ -120,6 +121,7 @@ describe("CourseController (e2e)", () => {
     let events: CalendarEventTestResponse[] = [];
 
     for (let attempt = 0; attempt < 10; attempt += 1) {
+      await dispatchOutbox(app);
       events = await getCalendarEventsForUser(user);
       if (events.length === expectedCount) return events;
       await sleep(50);
@@ -4424,21 +4426,17 @@ describe("CourseController (e2e)", () => {
         })
         .expect(200);
 
-      const refreshDeadline = Date.now() + 15000;
-
-      while (true) {
-        const [refreshedCourse] = await db
-          .select({ durationEstimates: courses.durationEstimates })
-          .from(courses)
-          .where(eq(courses.id, course.id));
-
-        if (refreshedCourse.durationEstimates.en?.totalSeconds === 150) break;
-        if (Date.now() >= refreshDeadline) {
-          throw new Error("Timed out waiting for the lesson update to refresh course duration");
-        }
-
-        await sleep(50);
-      }
+      await waitForOutbox(
+        app,
+        () =>
+          db
+            .select({ durationEstimates: courses.durationEstimates })
+            .from(courses)
+            .where(eq(courses.id, course.id)),
+        ([refreshedCourse]) => refreshedCourse.durationEstimates.en?.totalSeconds === 150,
+        15000,
+        50,
+      );
 
       const refreshedResponse = await request(app.getHttpServer())
         .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)

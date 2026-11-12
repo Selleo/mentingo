@@ -1,5 +1,3 @@
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-
 import { processInBatches } from "src/common/utils/processInBatches";
 import {
   CreateLiveTrainingEvent,
@@ -8,10 +6,13 @@ import {
   GroupCourseDueDatesSyncedEvent,
   UpdateLiveTrainingEvent,
 } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { MicrosoftCalendarRepository } from "../repositories/microsoft-calendar.repository";
 import { MicrosoftCalendarSyncQueueService } from "../services/microsoft-calendar-sync-queue.service";
 import { MICROSOFT_CALENDAR_SYNC_REASONS } from "../types/microsoft-calendar.types";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type CalendarOutboundEvent =
   | CreateLiveTrainingEvent
@@ -22,20 +23,22 @@ type CalendarOutboundEvent =
 
 const OUTBOUND_QUEUE_BATCH_SIZE = 25;
 
-@EventsHandler(
+@OutboxEventsHandler(
   CreateLiveTrainingEvent,
   UpdateLiveTrainingEvent,
   DeleteLiveTrainingEvent,
   GroupCourseDueDatesRemovedEvent,
   GroupCourseDueDatesSyncedEvent,
 )
-export class MicrosoftCalendarOutboundHandler implements IEventHandler<CalendarOutboundEvent> {
+export class MicrosoftCalendarOutboundHandler
+  implements OutboxEventsHandlerOf<CalendarOutboundEvent>
+{
   constructor(
     private readonly microsoftCalendarRepository: MicrosoftCalendarRepository,
     private readonly microsoftCalendarSyncQueueService: MicrosoftCalendarSyncQueueService,
   ) {}
 
-  async handle(_event: CalendarOutboundEvent) {
+  async handleOutboxEvent(_event: CalendarOutboundEvent) {
     const connections = await this.microsoftCalendarRepository.listOutboundConnections();
 
     await processInBatches(

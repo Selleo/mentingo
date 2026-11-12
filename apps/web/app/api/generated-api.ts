@@ -33850,7 +33850,9 @@ export interface FindAllTenantsResponse {
         | "start_learning_path"
         | "complete_learning_path"
         | "play_scorm"
-        | "complete_scorm";
+        | "complete_scorm"
+        | "export"
+        | "import";
     }[];
     /** @min 0 */
     activityCountLast14Days: number;
@@ -34814,7 +34816,9 @@ export interface GetActivityLogsResponse {
       | "start_learning_path"
       | "complete_learning_path"
       | "play_scorm"
-      | "complete_scorm";
+      | "complete_scorm"
+      | "export"
+      | "import";
     resourceType: (string | null) | null;
     resourceId: (string | null) | null;
     metadata: any;
@@ -48762,6 +48766,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "complete_learning_path"
               | "play_scorm"
               | "complete_scorm"
+              | "export"
+              | "import"
             )
           | (
               | "create"
@@ -48802,6 +48808,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "complete_learning_path"
               | "play_scorm"
               | "complete_scorm"
+              | "export"
+              | "import"
             )[];
       },
       params: RequestParams = {},

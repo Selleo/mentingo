@@ -17,6 +17,8 @@ export type RecordActivityLogInput = {
   after?: Record<string, string> | null;
   context?: Record<string, string> | null;
   tenantId?: UUIDType;
+  /** When the action happened, if the activity is recorded later; defaults to the insert time. */
+  occurredAt?: string;
 };
 
 export type ActorType = {

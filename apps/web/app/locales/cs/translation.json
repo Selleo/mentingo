@@ -5653,7 +5653,9 @@
       "start_learning_path": "Vzdělávací cesta zahájena",
       "complete_learning_path": "Vzdělávací cesta dokončena",
       "play_scorm": "SCORM spuštěn",
-      "complete_scorm": "SCORM dokončen"
+      "complete_scorm": "SCORM dokončen",
+      "export": "Exportováno",
+      "import": "Importováno"
     },
     "entity": {
       "automation": "Automatizace",

@@ -539,7 +539,7 @@ export class CourseTransferMaterializerService {
       );
     }
 
-    await this.outboxPublisher.publishDurable(
+    await this.outboxPublisher.publish(
       new LearningPathExportAppliedEvent({
         tenantId: input.targetTenantId,
         learningPathId: targetLearningPathId,
@@ -2180,8 +2180,8 @@ export class CourseTransferMaterializerService {
   ): Promise<void> {
     if (!getBunnyVideoId(reference)) return;
 
-    await this.outboxPublisher.publishDurable(
-      new CourseTransferVideoMetadataRequestedEvent(tenantId, resourceId, reference),
+    await this.outboxPublisher.publish(
+      new CourseTransferVideoMetadataRequestedEvent({ tenantId, resourceId, fileKey: reference }),
       transaction,
     );
   }

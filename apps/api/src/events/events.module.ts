@@ -1,5 +1,4 @@
 import { Global, Module } from "@nestjs/common";
-import { CqrsModule } from "@nestjs/cqrs";
 
 import { AnnouncementsModule } from "src/announcements/announcements.module";
 import { AnnouncementEmailHandler } from "src/announcements/handlers/announcement-email.handler";
@@ -24,7 +23,6 @@ import { UserModule } from "src/user/user.module";
 @Global()
 @Module({
   imports: [
-    CqrsModule,
     AnnouncementsModule,
     UserModule,
     EmailModule,
@@ -38,7 +36,7 @@ import { UserModule } from "src/user/user.module";
     CourseChatModule,
     GroupModule,
   ],
-  exports: [CqrsModule],
+  exports: [],
   providers: [
     NotifyAdminsHandler,
     NotifyUsersHandler,

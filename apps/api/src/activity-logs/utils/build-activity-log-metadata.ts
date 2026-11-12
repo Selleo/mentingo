@@ -112,7 +112,7 @@ const areValuesEqual = (previousValue: unknown, updatedValue: unknown): boolean 
  * @param value - The value to convert.
  * @returns A string representation of the value.
  */
-const stringifyMetadataValue = (value: unknown): string => {
+export const stringifyMetadataValue = (value: unknown): string => {
   if (value === null || value === undefined) return "";
   if (value instanceof Date) return value.toISOString();
   if (typeof value === "object") return JSON.stringify(value);

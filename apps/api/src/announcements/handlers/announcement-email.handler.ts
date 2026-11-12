@@ -8,37 +8,33 @@ import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { AnnouncementPublishedEvent } from "src/events";
 import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
-import { OutboxNotificationPreparationService } from "src/outbox/outbox-notification-preparation.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 
 import { AnnouncementsRepository } from "../announcements.repository";
 
-import type { IEventHandler } from "@nestjs/cqrs";
 import type { AnnouncementEmailTemplate, LocalizedText } from "@repo/shared";
 import type { UUIDType } from "src/common";
+import type { OutboxDeliveryContext, OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 @Injectable()
-export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPublishedEvent> {
+@OutboxEventsHandler(AnnouncementPublishedEvent)
+export class AnnouncementEmailHandler implements OutboxEventsHandlerOf<AnnouncementPublishedEvent> {
   private readonly logger = new Logger(AnnouncementEmailHandler.name);
 
   constructor(
     private readonly announcementsRepository: AnnouncementsRepository,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly notificationCollectorService: NotificationCollectorService,
-    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
   ) {}
 
-  onModuleInit() {
-    this.outboxNotificationPreparationService.register(async (event) => {
-      if (!(event instanceof AnnouncementPublishedEvent)) {
-        return [];
-      }
-
-      return this.notificationCollectorService.collectNotificationEvents(() => this.handle(event));
-    });
+  async handleOutboxEvent(event: AnnouncementPublishedEvent, { eventId }: OutboxDeliveryContext) {
+    await this.notificationCollectorService.publishCollectedNotifications(eventId, () =>
+      this.prepareNotifications(event),
+    );
   }
 
-  async handle(event: AnnouncementPublishedEvent) {
+  private async prepareNotifications(event: AnnouncementPublishedEvent) {
     const [announcement] = await this.announcementsRepository.getAnnouncementById(
       event.announcementPublishedData.announcementId,
     );

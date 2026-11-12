@@ -13,8 +13,8 @@ import { getActivityLogMetadataResourceName } from "src/activity-logs/utils/get-
 import { BUILT_IN_AUTOMATIONS } from "src/automation-execution/catalog";
 import { AutomationActivityEvent } from "src/events/automation/automation-activity.event";
 import { LocalizationService } from "src/localization/localization.service";
-import { materializeLegacyEvent } from "src/outbox/outbox.event-registry";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { rehydrateOutboxEvent } from "src/outbox/utils/outbox-event-rehydration.utils";
 
 import { AUTOMATION_RUNTIME, AUTOMATION_LIFECYCLE_ACTIVITY_TYPES } from "../automation.constants";
 import { assembleAutomationRecordFromRows } from "../mappers/automation-persistence.mapper";
@@ -116,11 +116,11 @@ describe("Automation activity lifecycle", () => {
     const [event, handle] = publish.mock.calls[0];
     expect(handle).toBe(transaction);
     expect(event).toBeInstanceOf(AutomationActivityEvent);
-    const restored = materializeLegacyEvent(
-      event.constructor.name,
+    const restored = rehydrateOutboxEvent<AutomationActivityEvent>(
+      AutomationActivityEvent,
       JSON.parse(JSON.stringify(event)),
     );
-    await handler.handle(restored as AutomationActivityEvent);
+    await handler.handleOutboxEvent(restored);
     const log = recordActivity.mock.calls[0][0];
     expect(log).toMatchObject({ actor, operation: action, resourceType: "automation" });
     expect(getActivityLogMetadataResourceName(log, "automation")).toBeTruthy();

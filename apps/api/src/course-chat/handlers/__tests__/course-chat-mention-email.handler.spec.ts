@@ -45,11 +45,13 @@ describe("CourseChatMentionEmailHandler", () => {
       } as never,
       tenantRunner as never,
       dbAdmin as never,
-      {} as never,
-      {} as never,
+      {
+        publishCollectedNotifications: (_eventId: string, prepare: () => Promise<void>) =>
+          prepare(),
+      } as never,
     );
 
-    await handler.handle(
+    await handler.handleOutboxEvent(
       new CourseChatUserMentionedEvent({
         tenantId,
         courseId,
@@ -63,6 +65,7 @@ describe("CourseChatMentionEmailHandler", () => {
           tenantId,
         },
       }),
+      { eventId: "event-1" },
     );
 
     expect(courseChatRepository.getLocalizedCourseTitles).toHaveBeenCalledWith(courseId);

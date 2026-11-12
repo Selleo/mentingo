@@ -949,7 +949,7 @@ export class LessonService {
           trx,
           null,
         );
-        await this.outboxPublisher.publishDurable(
+        await this.outboxPublisher.publish(
           new LessonProgressChangedEvent({
             userId,
             courseId: accessCourseLessonWithDetails.courseId,

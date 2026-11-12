@@ -18,7 +18,6 @@ import { CourseAuthoringSessionService } from "src/luma/course-authoring-session
 import { LumaService } from "src/luma/luma.service";
 import { authoringOperationSchema } from "src/luma/schema/course-authoring-operations.schema";
 import * as outboxConstants from "src/outbox/outbox.constants";
-import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_APP } from "src/storage/db/db.providers";
 import { createTenantAwareDb } from "src/storage/db/tenant-aware-session";
@@ -81,14 +80,6 @@ const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
     db = app.get(DB);
     runner = app.get(TenantDbRunnerService);
     apply = app.get(CourseAuthoringApplyService);
-    const publisher = app.get(OutboxPublisher);
-    // The Jest profile suppresses the dispatcher. Keep real durable persistence
-    // for native domain calls without delivering background effects during assertions.
-    jest
-      .spyOn(publisher, "publish")
-      .mockImplementation((event, transaction) =>
-        publisher.publishDurable(event, transaction ?? db),
-      );
     jest.spyOn(outboxConstants, "isOutboxProcessingEnabled").mockReturnValue(true);
     await runner.runWithTenant(test.defaultTenantId, async () => {
       await createSettingsFactory(db).create();

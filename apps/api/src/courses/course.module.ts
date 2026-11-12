@@ -1,5 +1,4 @@
 import { forwardRef, Module } from "@nestjs/common";
-import { CqrsModule } from "@nestjs/cqrs";
 
 import { AiModule } from "src/ai/ai.module";
 import { AnnouncementsModule } from "src/announcements/announcements.module";
@@ -90,7 +89,6 @@ import { CourseStatisticsService } from "./statistics/course-statistics.service"
     AnnouncementsModule,
     EmailModule,
     SearchIndexModule,
-    CqrsModule,
     AiModule,
     forwardRef(() => StripeModule),
     forwardRef(() => UserModule),

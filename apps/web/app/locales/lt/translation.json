@@ -5649,7 +5649,9 @@
       "start_learning_path": "Mokymosi kelias pradėtas",
       "complete_learning_path": "Mokymosi kelias užbaigtas",
       "play_scorm": "SCORM paleistas",
-      "complete_scorm": "SCORM užbaigtas"
+      "complete_scorm": "SCORM užbaigtas",
+      "export": "Eksportuota",
+      "import": "Importuota"
     },
     "entity": {
       "automation": "Automatizavimas",

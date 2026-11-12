@@ -1,23 +1,24 @@
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-
 import { CertificatesService } from "src/certificates/certificates.service";
 import { CourseService } from "src/courses/course.service";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type EventType = UpdateHasCertificateEvent;
 
 const CourseEvents = [UpdateHasCertificateEvent];
 
-@EventsHandler(...CourseEvents)
-export class CourseHandler implements IEventHandler {
+@OutboxEventsHandler(...CourseEvents)
+export class CourseHandler implements OutboxEventsHandlerOf<EventType> {
   constructor(
     private readonly courseService: CourseService,
     private readonly certificateService: CertificatesService,
     private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
-  async handle(event: EventType) {
+  async handleOutboxEvent(event: EventType) {
     await this.handleUpdateHasCertificate(event);
   }
 

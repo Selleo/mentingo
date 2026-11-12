@@ -1,11 +1,11 @@
-import { Injectable, type OnModuleInit } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Value } from "@sinclair/typebox/value";
-import { match } from "ts-pattern";
+import { match, P } from "ts-pattern";
 
 import { CourseDuplicatedEvent } from "src/events";
 import { NativeArchiveImportFinishedEvent } from "src/native-archive/events/native-archive-import-finished.event";
 import { NATIVE_ARCHIVE_IMPORT_OUTCOMES } from "src/native-archive/native-archive.constants";
-import { OutboxDirectHandlerService } from "src/outbox/outbox-direct-handler.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import {
@@ -14,13 +14,18 @@ import {
 } from "../content-marketplace.constants";
 import { ContentMarketplaceCourseCopiedEvent } from "../events/content-marketplace-course-copied.event";
 import { ContentMarketplaceLineageRepository } from "../repositories/content-marketplace-lineage.repository";
-import {
-  contentMarketplaceCourseCopiedEventSchema,
-  contentMarketplaceImportSourceSchema,
-  courseDuplicatedEventSchema,
-  nativeArchiveImportFinishedEventSchema,
-} from "../schemas/content-marketplace.schema";
+import { contentMarketplaceImportSourceSchema } from "../schemas/content-marketplace.schema";
 import { ContentMarketplaceEventDeliveryService } from "../services/content-marketplace-event-delivery.service";
+
+import type { ContentMarketplaceCourseCopiedData } from "../events/content-marketplace-course-copied.event";
+import type { CourseDuplicatedData } from "src/events";
+import type { NativeArchiveImportFinishedData } from "src/native-archive/events/native-archive-import-finished.event";
+import type { OutboxDeliveryContext, OutboxEventsHandlerOf } from "src/outbox/outbox.types";
+
+type ContentMarketplaceOutboxEvent =
+  | NativeArchiveImportFinishedEvent
+  | ContentMarketplaceCourseCopiedEvent
+  | CourseDuplicatedEvent;
 
 /**
  * Reacts to committed outbox events: a finished marketplace import records the course's lineage,
@@ -29,33 +34,39 @@ import { ContentMarketplaceEventDeliveryService } from "../services/content-mark
  * Each delivery reuses the outbox event ID, so a redelivered event is counted once.
  */
 @Injectable()
-export class ContentMarketplaceAnalyticsHandler implements OnModuleInit {
+@OutboxEventsHandler(
+  NativeArchiveImportFinishedEvent,
+  ContentMarketplaceCourseCopiedEvent,
+  CourseDuplicatedEvent,
+)
+export class ContentMarketplaceAnalyticsHandler
+  implements OutboxEventsHandlerOf<ContentMarketplaceOutboxEvent>
+{
   constructor(
-    private readonly outboxDirectHandlerService: OutboxDirectHandlerService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly contentMarketplaceLineageRepository: ContentMarketplaceLineageRepository,
     private readonly contentMarketplaceEventDeliveryService: ContentMarketplaceEventDeliveryService,
   ) {}
 
-  onModuleInit(): void {
-    this.outboxDirectHandlerService.register(
-      NativeArchiveImportFinishedEvent.name,
-      (payload, eventId) => this.recordMarketplaceImport(payload, eventId),
-    );
-    this.outboxDirectHandlerService.register(
-      ContentMarketplaceCourseCopiedEvent.name,
-      (payload, eventId) => this.queueFailedCopyReport(payload, eventId),
-    );
-    this.outboxDirectHandlerService.register(CourseDuplicatedEvent.name, (payload, eventId) =>
-      this.recordMarketplaceDuplication(payload, eventId),
-    );
+  async handleOutboxEvent(
+    event: ContentMarketplaceOutboxEvent,
+    { eventId }: OutboxDeliveryContext,
+  ) {
+    await match(event)
+      .with(P.instanceOf(NativeArchiveImportFinishedEvent), (importFinished) =>
+        this.recordMarketplaceImport(importFinished.importFinishedData, eventId),
+      )
+      .with(P.instanceOf(ContentMarketplaceCourseCopiedEvent), (courseCopied) =>
+        this.queueFailedCopyReport(courseCopied.courseCopiedData, eventId),
+      )
+      .with(P.instanceOf(CourseDuplicatedEvent), (courseDuplicated) =>
+        this.recordMarketplaceDuplication(courseDuplicated.courseDuplicatedData, eventId),
+      )
+      .exhaustive();
   }
 
   /** Imports queued by other features carry their own source and are left alone. */
-  private async recordMarketplaceImport(payload: Record<string, unknown>, eventId: string) {
-    if (!Value.Check(nativeArchiveImportFinishedEventSchema, payload))
-      throw new Error("Invalid native archive import finished event");
-
+  private async recordMarketplaceImport(payload: NativeArchiveImportFinishedData, eventId: string) {
     const { importSource } = payload;
 
     if (!Value.Check(contentMarketplaceImportSourceSchema, importSource)) return;
@@ -87,10 +98,10 @@ export class ContentMarketplaceAnalyticsHandler implements OnModuleInit {
     });
   }
 
-  private async queueFailedCopyReport(payload: Record<string, unknown>, eventId: string) {
-    if (!Value.Check(contentMarketplaceCourseCopiedEventSchema, payload))
-      throw new Error("Invalid content marketplace course copied event");
-
+  private async queueFailedCopyReport(
+    payload: ContentMarketplaceCourseCopiedData,
+    eventId: string,
+  ) {
     await this.contentMarketplaceEventDeliveryService.enqueueEventDelivery({
       tenantId: payload.tenantId,
       event: {
@@ -105,10 +116,7 @@ export class ContentMarketplaceAnalyticsHandler implements OnModuleInit {
   }
 
   /** A duplicate keeps its source's lineage, so duplicates of duplicates are still counted. */
-  private async recordMarketplaceDuplication(payload: Record<string, unknown>, eventId: string) {
-    if (!Value.Check(courseDuplicatedEventSchema, payload))
-      throw new Error("Invalid course duplicated event");
-
+  private async recordMarketplaceDuplication(payload: CourseDuplicatedData, eventId: string) {
     const { tenantId, sourceCourseId, courseId } = payload;
 
     const lineage = await this.tenantDbRunnerService.runWithTenant(tenantId, async () => {

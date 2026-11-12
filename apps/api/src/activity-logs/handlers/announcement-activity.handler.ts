@@ -1,22 +1,24 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import { CreateAnnouncementEvent, ViewAnnouncementEvent } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type AnnouncementEventType = CreateAnnouncementEvent | ViewAnnouncementEvent;
 
 const AnnouncementActivityEvents = [CreateAnnouncementEvent, ViewAnnouncementEvent] as const;
 
 @Injectable()
-@EventsHandler(...AnnouncementActivityEvents)
-export class AnnouncementActivityHandler implements IEventHandler<AnnouncementEventType> {
+@OutboxEventsHandler(...AnnouncementActivityEvents)
+export class AnnouncementActivityHandler implements OutboxEventsHandlerOf<AnnouncementEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: AnnouncementEventType) {
+  async handleOutboxEvent(event: AnnouncementEventType) {
     if (event instanceof CreateAnnouncementEvent) return await this.handleCreate(event);
 
     if (event instanceof ViewAnnouncementEvent) return await this.handleView(event);

@@ -50,7 +50,7 @@ describe("ScormActivityHandler", () => {
       },
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
@@ -80,7 +80,7 @@ describe("ScormActivityHandler", () => {
       },
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
@@ -105,7 +105,7 @@ describe("ScormActivityHandler", () => {
       actor,
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
@@ -127,7 +127,7 @@ describe("ScormActivityHandler", () => {
       userId: "00000000-0000-0000-0000-000000000002",
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
@@ -146,7 +146,7 @@ describe("ScormActivityHandler", () => {
       userId: "00000000-0000-0000-0000-000000000002",
     });
 
-    await handler.handle(event);
+    await handler.handleOutboxEvent(event);
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,

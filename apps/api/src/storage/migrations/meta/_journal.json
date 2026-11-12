@@ -1678,15 +1678,29 @@
     {
       "idx": 239,
       "version": "7",
-      "when": 1794467531738,
-      "tag": "0239_add_matching_questions",
+      "when": 1794472734000,
+      "tag": "0239_track_outbox_handler_delivery",
       "breakpoints": true
     },
     {
       "idx": 240,
       "version": "7",
-      "when": 1794467540635,
-      "tag": "0240_enable_matching_questions_tenant_rls",
+      "when": 1794472740580,
+      "tag": "0240_migrate_outbox_payloads_to_unified_delivery",
+      "breakpoints": true
+    },
+    {
+      "idx": 241,
+      "version": "7",
+      "when": 1794486353347,
+      "tag": "0241_add_matching_questions",
+      "breakpoints": true
+    },
+    {
+      "idx": 242,
+      "version": "7",
+      "when": 1794486371659,
+      "tag": "0242_enable_matching_questions_tenant_rls",
       "breakpoints": true
     }
   ]
