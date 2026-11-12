@@ -1,3 +1,8 @@
+import {
+  AUTOMATION_EVENT_KINDS,
+  AUTOMATION_RECIPIENT_AUDIENCES,
+  AUTOMATION_RECIPIENT_TYPES,
+} from "@repo/shared";
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { createInstance } from "i18next";
@@ -8,7 +13,18 @@ import translation from "~/locales/pl/translation.json";
 
 import { EmailRecipientsSettings } from "./EmailRecipientsSettings";
 
+import type { AutomationEventDefinition } from "@repo/shared";
+
 vi.mock("./AutomationRecipientPicker", () => ({ AutomationRecipientPicker: () => null }));
+
+const courseCompletionEvent: AutomationEventDefinition = {
+  kind: AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE,
+  label: "Course completion",
+  description: "",
+  recipientPolicy: "",
+  fields: [],
+  providedVariables: [],
+};
 
 describe("course completion email audience", () => {
   it("selects administrators on the email action, not on the condition", async () => {
@@ -19,7 +35,7 @@ describe("course completion email audience", () => {
     render(
       <I18nextProvider i18n={i18n}>
         <EmailRecipientsSettings
-          event={{ kind: "user_finished_course" } as never}
+          event={courseCompletionEvent}
           disabled={false}
           hasAccountActionLinks={false}
           onChange={onChange}
@@ -30,6 +46,9 @@ describe("course completion email audience", () => {
     await user.click(
       screen.getByRole("option", { name: "Administratorzy (zgodnie z preferencjami powiadomień)" }),
     );
-    expect(onChange).toHaveBeenCalledWith({ type: "event", audience: "administrators" });
+    expect(onChange).toHaveBeenCalledWith({
+      type: AUTOMATION_RECIPIENT_TYPES.EVENT,
+      audience: AUTOMATION_RECIPIENT_AUDIENCES.ADMINISTRATORS,
+    });
   });
 });
