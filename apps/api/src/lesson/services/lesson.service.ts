@@ -425,10 +425,12 @@ export class LessonService {
       ? questionListWithUrls.map((question) => ({
           ...question,
           passQuestion: typeof question.passQuestion === "boolean" ? false : question.passQuestion,
+          solutionExplanation: null,
           reviewerFeedback: undefined,
           options: question.options?.map((option) => ({
             ...option,
             isCorrect: typeof option.isCorrect === "boolean" ? false : option.isCorrect,
+            matchedWord: null,
           })),
         }))
       : questionListWithUrls;
@@ -937,7 +939,7 @@ export class LessonService {
           trx,
           null,
         );
-        await this.outboxPublisher.publishDurable(
+        await this.outboxPublisher.publish(
           new LessonProgressChangedEvent({
             userId,
             courseId: accessCourseLessonWithDetails.courseId,

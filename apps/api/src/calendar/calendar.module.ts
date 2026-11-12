@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common";
-import { CqrsModule } from "@nestjs/cqrs";
 
 import { LocalizationModule } from "src/localization/localization.module";
 import { SettingsModule } from "src/settings/settings.module";
@@ -23,7 +22,7 @@ import { MicrosoftCalendarSyncWorker } from "./workers/microsoft-calendar-sync.w
 import { MicrosoftCalendarCron } from "./workers/microsoft-calendar.cron";
 
 @Module({
-  imports: [CqrsModule, LocalizationModule, SettingsModule],
+  imports: [LocalizationModule, SettingsModule],
   controllers: [CalendarController, MicrosoftCalendarController, MicrosoftCalendarOAuthController],
   providers: [
     CalendarService,

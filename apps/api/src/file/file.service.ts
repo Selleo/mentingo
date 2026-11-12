@@ -592,7 +592,7 @@ export class FileService {
     resource: string,
     tenantId: UUIDType,
   ): Promise<UploadFileResult> {
-    const audioMimeType = await validateAudioUpload(file);
+    const { contentType: audioMimeType, durationSeconds } = await validateAudioUpload(file);
 
     const fileKey = prefixTenantStorageKey(
       `${resource}/${randomUUID()}${VALIDATED_AUDIO_FILE_EXTENSIONS[audioMimeType]}`,
@@ -610,6 +610,7 @@ export class FileService {
       fileKey,
       fileUrl: await this.s3Service.getSignedUrl(fileKey),
       contentType: audioMimeType,
+      durationSeconds,
     };
   }
 
@@ -891,6 +892,9 @@ export class FileService {
               size: file.size,
               checksum,
               ...(uploadResult.imageVariants ? { imageVariants: uploadResult.imageVariants } : {}),
+              ...(uploadResult.durationSeconds !== undefined
+                ? { durationSeconds: uploadResult.durationSeconds }
+                : {}),
             }),
             uploadedBy: currentUser?.userId || null,
             visibility: options?.visibility ?? RESOURCE_VISIBILITY.PUBLIC,

@@ -4,6 +4,7 @@ import {
   ASSESSMENT_ATTEMPT_RESULTS,
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   ASSESSMENT_FEEDBACK_MODES,
+  ASSESSMENT_SCORING_MODES,
   ASSESSMENT_TEXT_COMPARISON_MODES,
   QUIZ_REVIEW_GRADING_METHODS,
   type AssessmentAnswerGradingStatus,
@@ -15,6 +16,7 @@ import {
   type AssessmentTextComparisonMode,
   type AssessmentGradingMode,
   type AssessmentQuestionType,
+  type AssessmentScoringMode,
   type SupportedLanguages,
   type LocalizedText,
   type QuizReviewGradingMethod,
@@ -109,6 +111,10 @@ export const assessmentQuestions = pgTable(
     displayOrder: integer("display_order").notNull(),
     maximumPoints: numeric("maximum_points", { precision: 8, scale: 2 }).notNull().default("1"),
     gradingMode: text("grading_mode").$type<AssessmentGradingMode>().notNull(),
+    scoringMode: text("scoring_mode")
+      .$type<AssessmentScoringMode>()
+      .notNull()
+      .default(ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING),
     prompt: jsonb("prompt").$type<LocalizedText>().notNull().default({}),
     title: jsonb("title").$type<LocalizedText>(),
     description: jsonb("description").$type<LocalizedText>(),
@@ -169,6 +175,27 @@ export const assessmentQuestionTrueFalseStatements = pgTable(
     ).on(table.tenantId, table.questionId, table.language, table.displayOrder),
     questionLanguageDisplayOrderIdx: index(
       "assessment_question_true_false_statements_tenant_question_language_display_order_lookup_idx",
+    ).on(table.tenantId, table.questionId, table.language, table.displayOrder),
+  })),
+);
+
+export const assessmentQuestionMatchingPairs = pgTable(
+  "assessment_question_matching_pairs",
+  {
+    ...id,
+    questionId: uuid("question_id")
+      .references(() => assessmentQuestions.id, { onDelete: "cascade" })
+      .notNull(),
+    language: text("language").$type<SupportedLanguages>().notNull(),
+    displayOrder: integer("display_order").notNull(),
+    prompt: text("prompt").notNull(),
+    match: text("match").notNull(),
+    ...timestamps,
+    tenantId,
+  },
+  withTenantIdIndex("assessment_question_matching_pairs", (table) => ({
+    questionLanguageDisplayOrderUniqueIdx: uniqueIndex(
+      "assessment_question_matching_pairs_tenant_question_language_display_order_idx",
     ).on(table.tenantId, table.questionId, table.language, table.displayOrder),
   })),
 );
@@ -470,6 +497,28 @@ export const assessmentAttemptBlankAnswers = pgTable(
     selectedOptionIdx: index("assessment_attempt_blank_answers_tenant_selected_option_idx").on(
       table.tenantId,
       table.selectedDragOptionId,
+    ),
+  }),
+);
+
+export const assessmentAttemptMatchingAnswers = pgTable(
+  "assessment_attempt_matching_answers",
+  {
+    questionAnswerId: uuid("question_answer_id")
+      .references(() => assessmentAttemptQuestionAnswers.id, { onDelete: "cascade" })
+      .notNull(),
+    pairId: uuid("pair_id")
+      .references(() => assessmentQuestionMatchingPairs.id, { onDelete: "cascade" })
+      .notNull(),
+    submittedMatch: text("submitted_match").notNull(),
+    tenantId,
+  },
+  (table) => ({
+    ...withTenantIdIndex("assessment_attempt_matching_answers")(table),
+    primaryKey: primaryKey({ columns: [table.tenantId, table.questionAnswerId, table.pairId] }),
+    pairIdx: index("assessment_attempt_matching_answers_tenant_pair_idx").on(
+      table.tenantId,
+      table.pairId,
     ),
   }),
 );

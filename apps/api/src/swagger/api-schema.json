@@ -12225,7 +12225,35 @@
     "/api/stripe/promotion-codes": {
       "get": {
         "operationId": "StripeController_getPromotionCodes",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -21133,6 +21161,10 @@
                   "type": "string"
                 },
                 {
+                  "const": "characteristic",
+                  "type": "string"
+                },
+                {
                   "const": "createdAt",
                   "type": "string"
                 }
@@ -23286,6 +23318,14 @@
                     {
                       "const": "complete_scorm",
                       "type": "string"
+                    },
+                    {
+                      "const": "export",
+                      "type": "string"
+                    },
+                    {
+                      "const": "import",
+                      "type": "string"
                     }
                   ]
                 },
@@ -23443,6 +23483,14 @@
                       },
                       {
                         "const": "complete_scorm",
+                        "type": "string"
+                      },
+                      {
+                        "const": "export",
+                        "type": "string"
+                      },
+                      {
+                        "const": "import",
                         "type": "string"
                       }
                     ]
@@ -39976,10 +40024,6 @@
                                       "type": "string"
                                     },
                                     {
-                                      "const": "match_words",
-                                      "type": "string"
-                                    },
-                                    {
                                       "const": "scale_1_5",
                                       "type": "string"
                                     },
@@ -40009,6 +40053,10 @@
                                     },
                                     {
                                       "const": "fill_in_the_blanks_dnd",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "matching",
                                       "type": "string"
                                     }
                                   ]
@@ -40174,6 +40222,18 @@
                                     },
                                     {
                                       "const": "fr",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "scoringMode": {
+                                  "anyOf": [
+                                    {
+                                      "const": "all_or_nothing",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "partial",
                                       "type": "string"
                                     }
                                   ]
@@ -42932,10 +42992,6 @@
                                 "type": "string"
                               },
                               {
-                                "const": "match_words",
-                                "type": "string"
-                              },
-                              {
                                 "const": "scale_1_5",
                                 "type": "string"
                               },
@@ -42965,6 +43021,10 @@
                               },
                               {
                                 "const": "fill_in_the_blanks_dnd",
+                                "type": "string"
+                              },
+                              {
+                                "const": "matching",
                                 "type": "string"
                               }
                             ]
@@ -43131,6 +43191,18 @@
                               },
                               {
                                 "const": "fr",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "scoringMode": {
+                            "anyOf": [
+                              {
+                                "const": "all_or_nothing",
+                                "type": "string"
+                              },
+                              {
+                                "const": "partial",
                                 "type": "string"
                               }
                             ]
@@ -43429,10 +43501,6 @@
                                     "type": "string"
                                   },
                                   {
-                                    "const": "match_words",
-                                    "type": "string"
-                                  },
-                                  {
                                     "const": "scale_1_5",
                                     "type": "string"
                                   },
@@ -43462,6 +43530,10 @@
                                   },
                                   {
                                     "const": "fill_in_the_blanks_dnd",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "matching",
                                     "type": "string"
                                   }
                                 ]
@@ -43628,6 +43700,18 @@
                                   },
                                   {
                                     "const": "fr",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "scoringMode": {
+                                "anyOf": [
+                                  {
+                                    "const": "all_or_nothing",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "partial",
                                     "type": "string"
                                   }
                                 ]
@@ -44149,10 +44233,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -44182,6 +44262,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -44287,6 +44371,16 @@
                               "questionId": {
                                 "format": "uuid",
                                 "type": "string"
+                              },
+                              "matchedWord": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -44332,6 +44426,18 @@
                             }
                           ]
                         },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
+                              "type": "string"
+                            }
+                          ]
+                        },
                         "passQuestion": {
                           "anyOf": [
                             {
@@ -44360,6 +44466,12 @@
                             "maximumPoints",
                             "comment"
                           ]
+                        },
+                        "matchingTargets": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         }
                       },
                       "required": [
@@ -45629,10 +45741,6 @@
                           "type": "string"
                         },
                         {
-                          "const": "match_words",
-                          "type": "string"
-                        },
-                        {
                           "const": "scale_1_5",
                           "type": "string"
                         },
@@ -45662,6 +45770,10 @@
                         },
                         {
                           "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        },
+                        {
+                          "const": "matching",
                           "type": "string"
                         }
                       ]
@@ -45828,6 +45940,18 @@
                         },
                         {
                           "const": "fr",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "scoringMode": {
+                      "anyOf": [
+                        {
+                          "const": "all_or_nothing",
+                          "type": "string"
+                        },
+                        {
+                          "const": "partial",
                           "type": "string"
                         }
                       ]
@@ -46458,10 +46582,6 @@
                           "type": "string"
                         },
                         {
-                          "const": "match_words",
-                          "type": "string"
-                        },
-                        {
                           "const": "scale_1_5",
                           "type": "string"
                         },
@@ -46491,6 +46611,10 @@
                         },
                         {
                           "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        },
+                        {
+                          "const": "matching",
                           "type": "string"
                         }
                       ]
@@ -46657,6 +46781,18 @@
                         },
                         {
                           "const": "fr",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "scoringMode": {
+                      "anyOf": [
+                        {
+                          "const": "all_or_nothing",
+                          "type": "string"
+                        },
+                        {
+                          "const": "partial",
                           "type": "string"
                         }
                       ]
@@ -47106,10 +47242,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -47139,6 +47271,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -47305,6 +47441,18 @@
                             },
                             {
                               "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
                               "type": "string"
                             }
                           ]
@@ -47520,10 +47668,6 @@
                           "type": "string"
                         },
                         {
-                          "const": "match_words",
-                          "type": "string"
-                        },
-                        {
                           "const": "scale_1_5",
                           "type": "string"
                         },
@@ -47553,6 +47697,10 @@
                         },
                         {
                           "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        },
+                        {
+                          "const": "matching",
                           "type": "string"
                         }
                       ]
@@ -47722,6 +47870,18 @@
                           "type": "string"
                         }
                       ]
+                    },
+                    "scoringMode": {
+                      "anyOf": [
+                        {
+                          "const": "all_or_nothing",
+                          "type": "string"
+                        },
+                        {
+                          "const": "partial",
+                          "type": "string"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -47861,10 +48021,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -47894,6 +48050,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -48060,6 +48220,18 @@
                             },
                             {
                               "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
                               "type": "string"
                             }
                           ]
@@ -48241,10 +48413,6 @@
                               "type": "string"
                             },
                             {
-                              "const": "match_words",
-                              "type": "string"
-                            },
-                            {
                               "const": "scale_1_5",
                               "type": "string"
                             },
@@ -48274,6 +48442,10 @@
                             },
                             {
                               "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            },
+                            {
+                              "const": "matching",
                               "type": "string"
                             }
                           ]
@@ -48440,6 +48612,18 @@
                             },
                             {
                               "const": "fr",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "scoringMode": {
+                          "anyOf": [
+                            {
+                              "const": "all_or_nothing",
+                              "type": "string"
+                            },
+                            {
+                              "const": "partial",
                               "type": "string"
                             }
                           ]
@@ -71592,10 +71776,36 @@
                 "timesRedeemed"
               ]
             }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
           }
         },
         "required": [
-          "data"
+          "data",
+          "pagination"
         ]
       },
       "GetPromotionCodeResponse": {
@@ -140899,6 +141109,18 @@
                                           "type": {
                                             "const": "event",
                                             "type": "string"
+                                          },
+                                          "audience": {
+                                            "anyOf": [
+                                              {
+                                                "const": "learner",
+                                                "type": "string"
+                                              },
+                                              {
+                                                "const": "administrators",
+                                                "type": "string"
+                                              }
+                                            ]
                                           }
                                         },
                                         "required": [
@@ -141538,6 +141760,18 @@
                                                   "type": {
                                                     "const": "event",
                                                     "type": "string"
+                                                  },
+                                                  "audience": {
+                                                    "anyOf": [
+                                                      {
+                                                        "const": "learner",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "administrators",
+                                                        "type": "string"
+                                                      }
+                                                    ]
                                                   }
                                                 },
                                                 "required": [
@@ -143053,6 +143287,18 @@
                                               "type": {
                                                 "const": "event",
                                                 "type": "string"
+                                              },
+                                              "audience": {
+                                                "anyOf": [
+                                                  {
+                                                    "const": "learner",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "administrators",
+                                                    "type": "string"
+                                                  }
+                                                ]
                                               }
                                             },
                                             "required": [
@@ -143674,6 +143920,18 @@
                                     "type": {
                                       "const": "event",
                                       "type": "string"
+                                    },
+                                    "audience": {
+                                      "anyOf": [
+                                        {
+                                          "const": "learner",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "administrators",
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -144867,6 +145125,18 @@
                                     "type": {
                                       "const": "event",
                                       "type": "string"
+                                    },
+                                    "audience": {
+                                      "anyOf": [
+                                        {
+                                          "const": "learner",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "administrators",
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -145484,6 +145754,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -146123,6 +146405,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -146770,6 +147064,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -147409,6 +147715,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -148056,6 +148374,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -148695,6 +149025,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -149339,6 +149681,18 @@
                                     "type": {
                                       "const": "event",
                                       "type": "string"
+                                    },
+                                    "audience": {
+                                      "anyOf": [
+                                        {
+                                          "const": "learner",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "administrators",
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -149952,6 +150306,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -150591,6 +150957,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -151259,6 +151637,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -151898,6 +152288,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -152546,6 +152948,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -153165,6 +153579,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -153804,6 +154230,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -154451,6 +154889,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -155090,6 +155540,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -155737,6 +156199,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -156376,6 +156850,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -157023,6 +157509,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -157662,6 +158160,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -175346,6 +175856,14 @@
                               {
                                 "const": "complete_scorm",
                                 "type": "string"
+                              },
+                              {
+                                "const": "export",
+                                "type": "string"
+                              },
+                              {
+                                "const": "import",
+                                "type": "string"
                               }
                             ]
                           }
@@ -179209,6 +179727,14 @@
                     },
                     {
                       "const": "complete_scorm",
+                      "type": "string"
+                    },
+                    {
+                      "const": "export",
+                      "type": "string"
+                    },
+                    {
+                      "const": "import",
                       "type": "string"
                     }
                   ]

@@ -497,7 +497,7 @@ export class StudentLessonProgressService {
     );
 
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, resolvedActor, dbInstance);
-    await this.outboxPublisher.publishDurable(
+    await this.outboxPublisher.publish(
       new LessonProgressChangedEvent({
         userId: studentId,
         courseId: lesson.courseId,

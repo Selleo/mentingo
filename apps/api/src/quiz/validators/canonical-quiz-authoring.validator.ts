@@ -1,8 +1,11 @@
-import { ASSESSMENT_QUESTION_TYPES } from "@repo/shared";
+import { ASSESSMENT_QUESTION_TYPES, ASSESSMENT_SCORING_MODES } from "@repo/shared";
 
 import { getBlankMarkerIds } from "../mappers/quiz-authoring-mapper.utils";
 
-import type { QuizAuthoringQuestion } from "../types/quiz-authoring.types";
+import type {
+  QuizAuthoringMatchingPair,
+  QuizAuthoringQuestion,
+} from "../types/quiz-authoring.types";
 
 export const validateCanonicalQuizQuestions = (questions: QuizAuthoringQuestion[]): string[] => {
   const issues: string[] = [];
@@ -18,6 +21,7 @@ export const validateCanonicalQuizQuestions = (questions: QuizAuthoringQuestion[
       ...question.scaleOptions,
       ...question.blanks,
       ...question.dragAndDropOptions,
+      ...question.matchingPairs,
     ];
     const childIds = children.map((child) => child.id);
     if (new Set(childIds).size !== childIds.length) issues.push("duplicate_question_child_id");
@@ -78,6 +82,14 @@ export const validateCanonicalQuizQuestions = (questions: QuizAuthoringQuestion[
       )
         issues.push("invalid_drag_targets");
     } else if (question.dragAndDropOptions.length) issues.push("unexpected_drag_options");
+    if (question.questionType === ASSESSMENT_QUESTION_TYPES.MATCHING) {
+      if (!hasValidMatchingPairs(question.matchingPairs)) issues.push("invalid_matching_pairs");
+    } else if (question.matchingPairs.length) issues.push("unexpected_matching_pairs");
+    if (
+      question.scoringMode === ASSESSMENT_SCORING_MODES.PARTIAL &&
+      question.questionType !== ASSESSMENT_QUESTION_TYPES.MATCHING
+    )
+      issues.push("unexpected_partial_scoring");
     const open =
       question.questionType === ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE ||
       question.questionType === ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE;
@@ -95,3 +107,11 @@ export const validateCanonicalQuizQuestions = (questions: QuizAuthoringQuestion[
   }
   return [...new Set(issues)];
 };
+
+export const MINIMUM_MATCHING_PAIRS = 2;
+
+// Matches are the selectable targets, so they must be unique within a question.
+export const hasValidMatchingPairs = (pairs: QuizAuthoringMatchingPair[]) =>
+  pairs.length >= MINIMUM_MATCHING_PAIRS &&
+  pairs.every((pair) => pair.prompt.trim() && pair.match.trim()) &&
+  new Set(pairs.map((pair) => pair.match.trim())).size === pairs.length;

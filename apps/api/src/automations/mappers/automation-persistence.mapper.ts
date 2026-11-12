@@ -1,5 +1,8 @@
 import {
   AUTOMATION_DEFINITION_KINDS,
+  AUTOMATION_EVENT_KINDS,
+  AUTOMATION_RECIPIENT_AUDIENCES,
+  AUTOMATION_RECIPIENT_TYPES,
   AUTOMATION_NODE_KINDS,
   AUTOMATION_STEP_TYPES,
   type AutomationDefinitionKind,
@@ -7,6 +10,7 @@ import {
   type AutomationStepConfiguration,
   type AutomationWorkflow,
 } from "@repo/shared";
+import { match, P } from "ts-pattern";
 
 import type { AutomationRecord, LocalizedAutomationRow } from "../automation.types";
 import type { automationSteps } from "src/storage/schema";
@@ -37,8 +41,19 @@ export const assembleAutomationRecordFromRows = (
   const { name, description, localizedAppliedName, localizedAppliedDescription, ...metadata } =
     automation;
 
+  const hasLegacyAppliedAdminCourseCompletionTrigger = steps.some(
+    (step) =>
+      step.automationId === automation.id &&
+      step.definitionKind === AUTOMATION_DEFINITION_KINDS.APPLIED &&
+      step.id === automation.appliedRootStepId &&
+      isLegacyAdminCourseCompletionTriggerRow(step),
+  );
+
   return {
     ...metadata,
+    legacyAppliedEventKind: hasLegacyAppliedAdminCourseCompletionTrigger
+      ? AUTOMATION_EVENT_KINDS.ADMIN_FINISHED_COURSE
+      : undefined,
     name,
     description,
     draftDefinition: {
@@ -69,13 +84,66 @@ function buildWorkflowFromStepRows(
     .filter((step) => step.automationId === automation.id && step.definitionKind === definitionKind)
     .sort((left, right) => left.id.localeCompare(right.id));
 
+  const hasLegacyAdminCourseCompletionTrigger = definitionSteps.some(
+    isLegacyAdminCourseCompletionTriggerRow,
+  );
+
   return {
     rootStepId:
       definitionKind === AUTOMATION_DEFINITION_KINDS.DRAFT
         ? automation.draftRootStepId
         : automation.appliedRootStepId,
-    steps: definitionSteps.map(deserializeAutomationStep),
+    steps: definitionSteps.map((row) => {
+      const step = deserializeAutomationStep(row);
+
+      return hasLegacyAdminCourseCompletionTrigger
+        ? migrateLegacyAdminCourseCompletionStep(step)
+        : step;
+    }),
   };
+}
+
+function isLegacyAdminCourseCompletionTriggerRow(step: AutomationStepRow): boolean {
+  return (
+    step.nodeKind === AUTOMATION_NODE_KINDS.TRIGGER &&
+    step.configuration.name === AUTOMATION_EVENT_KINDS.ADMIN_FINISHED_COURSE
+  );
+}
+
+/**
+ * Moves a workflow saved on the retired administrator-only course completion trigger onto the
+ * shared trigger. Templates, mappings and explicitly selected recipients are kept; event
+ * recipients become administrators. Saving the workflow persists the migrated form.
+ */
+function migrateLegacyAdminCourseCompletionStep(step: AutomationStep): AutomationStep {
+  return match(step)
+    .with(
+      {
+        type: AUTOMATION_STEP_TYPES.TRIGGER,
+        config: { eventKind: AUTOMATION_EVENT_KINDS.ADMIN_FINISHED_COURSE },
+      },
+      (triggerStep) => ({
+        ...triggerStep,
+        config: { eventKind: AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE },
+      }),
+    )
+    .with(
+      {
+        type: AUTOMATION_STEP_TYPES.SEND_EMAIL,
+        config: { recipients: P.optional({ type: AUTOMATION_RECIPIENT_TYPES.EVENT }) },
+      },
+      (emailStep) => ({
+        ...emailStep,
+        config: {
+          ...emailStep.config,
+          recipients: {
+            type: AUTOMATION_RECIPIENT_TYPES.EVENT,
+            audience: AUTOMATION_RECIPIENT_AUDIENCES.ADMINISTRATORS,
+          },
+        },
+      }),
+    )
+    .otherwise(() => step);
 }
 
 function deserializeAutomationStep(step: AutomationStepRow): AutomationStep {

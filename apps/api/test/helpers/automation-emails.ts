@@ -5,16 +5,24 @@ import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { automationEmailDeliveries } from "src/storage/schema";
 
+import { dispatchOutbox } from "./wait-for-outbox";
+
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
-/** Run committed deliveries deterministically in specs that disable the email worker. */
+/**
+ * Run committed deliveries deterministically in specs that disable the email worker. Committed
+ * outbox events are dispatched first, so their notifications have created the deliveries, and
+ * again afterwards, so the next step of each recipient is requested.
+ */
 export async function deliverPendingAutomationEmails(
   app: INestApplication,
   tenantId: string,
   allowFailures = false,
 ) {
-  return app.get(TenantDbRunnerService).runWithTenant(tenantId, async () => {
+  await dispatchOutbox(app);
+
+  const results = await app.get(TenantDbRunnerService).runWithTenant(tenantId, async () => {
     const deliveries = await app
       .get<DatabasePg>(DB)
       .select({ id: automationEmailDeliveries.id })
@@ -40,4 +48,8 @@ export async function deliverPendingAutomationEmails(
     }
     return results;
   });
+
+  await dispatchOutbox(app);
+
+  return results;
 }

@@ -27,6 +27,8 @@ import {
 } from "src/file/file.constants";
 import { audioProbeResultSchema, type AudioProbeResult } from "src/file/types/audio-probe.type";
 
+import type { ValidatedAudioMetadata } from "src/file/types/validated-audio-metadata.type";
+
 const execFileAsync = promisify(execFile);
 
 const EBML_ROOT_ID = 0x1a45dfa3;
@@ -111,7 +113,7 @@ const detectAudioMimeType = async (
   { format, streams }: AudioProbeResult,
 ): Promise<ValidatedAudioMimeType | undefined> => {
   const isAudioOnly = streams.every((stream) => stream.codec_type === "audio");
-  if (!isAudioOnly || !(Number(format.duration) > 0)) return undefined;
+  if (!isAudioOnly) return undefined;
 
   const hasOnlyCodecs = (...codecs: string[]) =>
     streams.every((stream) => codecs.includes(stream.codec_name));
@@ -186,12 +188,12 @@ const assertAudioSize = (size: number) => {
 
 /**
  * Validates audio stored at `filePath` by probing and decoding its actual content, and returns
- * the canonical MIME type. Never trusts the extension or declared MIME.
+ * canonical MIME and duration metadata. Never trusts the extension or declared MIME.
  */
 export async function validateAudioFileAtPath(
   filePath: string,
   declared: { mimetype: string; originalname: string; size: number },
-): Promise<ValidatedAudioMimeType> {
+): Promise<ValidatedAudioMetadata> {
   if (!isAudioFile({ type: declared.mimetype, name: declared.originalname })) {
     throw new BadRequestException("files.toast.invalidData");
   }
@@ -203,11 +205,13 @@ export async function validateAudioFileAtPath(
 
   try {
     const probeResult = await probeAudioFile(filePath);
+    const duration = Number(probeResult.format.duration);
+    if (!Number.isFinite(duration) || duration <= 0) throw new Error("Invalid audio duration");
     const audioMimeType = await detectAudioMimeType(filePath, probeResult);
     if (!audioMimeType) throw new Error("Unsupported audio");
 
     await decodeAudioToNullSink(filePath);
-    return audioMimeType;
+    return { contentType: audioMimeType, durationSeconds: Math.ceil(duration) };
   } catch {
     throw new BadRequestException("files.toast.invalidFileType");
   }
@@ -219,7 +223,7 @@ export async function validateAudioFileAtPath(
  */
 export async function validateAudioUpload(
   file: Express.Multer.File,
-): Promise<ValidatedAudioMimeType> {
+): Promise<ValidatedAudioMetadata> {
   if (!file.buffer) throw new BadRequestException("files.toast.invalidData");
 
   assertAudioSize(file.buffer.length);

@@ -1,18 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
-import { useToggleCourseDiscussions } from "~/api/mutations/admin/useToggleCourseDiscussions";
-import { useToggleLiveTraining } from "~/api/mutations/admin/useToggleLiveTraining";
 import { useToggleModernCourseList } from "~/api/mutations/admin/useToggleModernCourseList";
-import { useTogglePublicCoursePreview } from "~/api/mutations/admin/useTogglePublicCoursePreview";
-import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
 import { Badge } from "~/components/ui/badge";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { cn } from "~/lib/utils";
 
 import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
-import { SettingItem } from "../SettingItem";
 
 import { COURSE_LIST_LAYOUT_VARIANT } from "./courseListLayout";
 import { CourseListLayoutPreview } from "./CourseListLayoutPreview";
@@ -28,68 +23,14 @@ export default function CoursesAccessibilityPreferences({
 }: CoursesAccessibilityPreferencesProps) {
   const { t } = useTranslation();
 
-  const { mutate: changeUnregisteredUserCoursesAccessibility } =
-    useUnregisteredUserCoursesAccessibility();
   const { mutate: toggleModernCourseList } = useToggleModernCourseList();
-  const { mutate: togglePublicCoursePreview, isPending: isTogglingPublicCoursePreview } =
-    useTogglePublicCoursePreview();
-  const { mutate: toggleCourseDiscussions } = useToggleCourseDiscussions();
-  const { mutate: toggleLiveTraining } = useToggleLiveTraining();
-  const trainerRoleUserCount = globalSettings.trainerRoleUserCount ?? 0;
-  const isLiveTrainingDisableBlocked =
-    globalSettings.liveTrainingEnabled && trainerRoleUserCount > 0;
 
   const currentLayout = globalSettings.modernCourseListEnabled
     ? COURSE_LIST_LAYOUT_VARIANT.MODERN
     : COURSE_LIST_LAYOUT_VARIANT.CLASSIC;
 
-  const handleCoursesAccessibilityChange = () => {
-    changeUnregisteredUserCoursesAccessibility();
-  };
-
   return (
     <div className="space-y-4">
-      <SettingItem
-        id="coursesVisibility"
-        label={t("adminPreferences.field.coursesVisibility")}
-        description={t("adminPreferences.field.coursesVisibilityDescription")}
-        checked={globalSettings.unregisteredUserCoursesAccessibility}
-        onCheckedChange={handleCoursesAccessibilityChange}
-        testId={SETTINGS_PAGE_HANDLES.COURSES_VISIBILITY_SWITCH}
-      />
-      <SettingItem
-        id="publicCoursePreview"
-        label={t("adminPreferences.field.publicCoursePreview")}
-        description={t("adminPreferences.field.publicCoursePreviewDescription")}
-        checked={globalSettings.publicCoursePreviewEnabled}
-        onCheckedChange={() => togglePublicCoursePreview()}
-        disabled={isTogglingPublicCoursePreview}
-        testId={SETTINGS_PAGE_HANDLES.PUBLIC_COURSE_PREVIEW_SWITCH}
-      />
-      <SettingItem
-        id="courseDiscussions"
-        label={t("adminPreferences.field.courseDiscussions")}
-        description={t("adminPreferences.field.courseDiscussionsDescription")}
-        checked={globalSettings.courseDiscussionsEnabled}
-        onCheckedChange={toggleCourseDiscussions}
-        testId={SETTINGS_PAGE_HANDLES.COURSE_DISCUSSIONS_SWITCH}
-      />
-      <SettingItem
-        id="liveTraining"
-        label={t("adminPreferences.field.liveTraining")}
-        description={t("adminPreferences.field.liveTrainingDescription")}
-        checked={globalSettings.liveTrainingEnabled}
-        onCheckedChange={toggleLiveTraining}
-        disabled={isLiveTrainingDisableBlocked}
-        tooltip={
-          isLiveTrainingDisableBlocked
-            ? t("adminPreferences.field.liveTrainingDisableBlockedTooltip", {
-                count: trainerRoleUserCount,
-              })
-            : t("adminPreferences.field.liveTrainingTooltip")
-        }
-        testId={SETTINGS_PAGE_HANDLES.LIVE_TRAINING_SWITCH}
-      />
       <div className="space-y-4 rounded-lg border p-3 shadow-sm">
         <div className="space-y-0.5">
           <p className="body-base-md">{t("adminPreferences.field.courseListLayout")}</p>

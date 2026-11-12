@@ -818,6 +818,21 @@
     "validation": {
       "messageRequired": "Zpráva je povinná.",
       "nameMaxLength": "Může mít nejvýše {{max}} znaků."
+    },
+    "optionPicker": {
+      "search": "Hledat",
+      "empty": "Žádné výsledky"
+    },
+    "dataTable": {
+      "filters": "Filtry",
+      "resetFilters": "Resetovat všechny filtry",
+      "removeFilter": "Odebrat filtr: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}",
+      "selectedCount": "Vybráno: {{count}}",
+      "emptyTitle": "Nebyly nalezeny žádné výsledky",
+      "emptyDescription": "Zkuste jiné vyhledávání nebo resetujte filtry.",
+      "selectAll": "Vybrat vše",
+      "selectRow": "Vybrat řádek"
     }
   },
   "lessons": {
@@ -2058,11 +2073,13 @@
         "draft": "Návrh",
         "published": "Publikováno",
         "private": "Soukromé"
-      }
+      },
+      "allCategories": "Všechny kategorie",
+      "archive": "Archiv"
     },
     "courses": {
       "header": "Spravovat kurzy",
-      "subHeader": "Všechny kurzy si můžete prohlížet a upravovat"
+      "learnerHeader": "Všechny kurzy"
     },
     "field": {
       "title": "Titul",
@@ -2074,7 +2091,8 @@
       "state": "Stát",
       "status": "Postavení",
       "sharedCourse": "Sdíleno",
-      "createdAt": "Vytvořeno v"
+      "createdAt": "Vytvořeno v",
+      "duration": "Délka"
     },
     "lessonCard": {
       "mappedTypes": {
@@ -2331,7 +2349,16 @@
         "competencies": "kompetence",
         "other": "funkce platformy",
         "gamification": "gamifikaci",
-        "quiz_grading": "hodnocení kvízů"
+        "quiz_grading": "hodnocení kvízů",
+        "ai_thread": "AI konverzace",
+        "automation": "automatizace",
+        "automation_log": "logy automatizací",
+        "content_marketplace": "tržiště obsahu",
+        "dashboard": "nástěnka",
+        "email_template": "e-mailové šablony",
+        "managed_group_results": "výsledky spravovaných skupin",
+        "phishing": "phishingové simulace",
+        "todo_task": "úkoly"
       },
       "descriptions": {
         "phishing_manage": "Může vytvářet a spravovat phishingové simulace.",
@@ -3171,13 +3198,15 @@
           "attemptsLimit": "Omezení pokusů",
           "quizCooldownInHours": "Časový zámek po neúspěšných pokusech (v hodinách)",
           "numberOfQuestions": "{{count1}} z {{count2}} otázek",
-          "noQuestions": "Žádné otázky"
+          "noQuestions": "Žádné otázky",
+          "timeLimitMinutes": "Časový limit (hh:mm)"
         },
         "tooltip": {
           "switch": "Pokud je povoleno, má student omezený počet pokusů o kvíz.",
           "passingThreshold": "Procentuální hranice pro absolvování kvízu. Pokud student dosáhne tohoto skóre, bude kvíz považován za úspěšný.",
           "attemptsLimit": "Počet povolených pokusů o kvíz před spuštěním časového zámku.",
-          "quizCooldownInHours": "Doba trvání zámku kvízu po použití všech pokusů."
+          "quizCooldownInHours": "Doba trvání zámku kvízu po použití všech pokusů.",
+          "timeLimitMinutes": "Volitelné. Pokud je nastaveno, studenti kvíz výslovně spustí a jejich odpovědi se po uplynutí času odešlou automaticky. Ponechte prázdné bez časového limitu."
         },
         "validation": {
           "optionTextRequired": "Text možnosti je povinný",
@@ -3203,7 +3232,11 @@
           "maxFileNumber_other": "Nemůžete nahrát více než {{ count }} souborů",
           "maxResources_five": "Nemůžete přidat více než 5 zdrojů",
           "sourceUrlRequired": "Adresa URL zdroje je povinná",
-          "sourceUrlInvalid": "Zadejte platnou adresu URL HTTPS"
+          "sourceUrlInvalid": "Zadejte platnou adresu URL HTTPS",
+          "matchingPairsRequired": "Přidejte alespoň 2 dvojice a vyplňte obě strany každé dvojice",
+          "matchingMatchRequired": "Vyplňte přiřazení v této dvojici",
+          "matchingPairsUnique": "Každá dvojice musí mít jedinečné přiřazení",
+          "timeLimitMinutes": "Zadejte časový limit od {{min}} do {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pořadí zobrazení lekce bylo úspěšně aktualizováno",
@@ -3278,7 +3311,8 @@
           "ttsPreset": "Předvolba TTS",
           "customTTSReference": "Vlastní reference TTS",
           "includeFiles_one": "Připojte až 1 soubor pod {{maxSize}}, který bude použit jako kontext v lekcích",
-          "includeFiles_other": "Připojte až {{ count }} soubory menší než {{maxSize}}, které budou použity jako kontext v lekcích"
+          "includeFiles_other": "Připojte až {{ count }} soubory menší než {{maxSize}}, které budou použity jako kontext v lekcích",
+          "matchingScoring": "Bodování"
         },
         "placeholder": {
           "title": "Uveďte název lekce...",
@@ -3795,7 +3829,7 @@
           "option": "Volba",
           "singleChoice": "Jediný výběr",
           "multipleChoice": "Vícenásobný výběr",
-          "matchWords": "Vhodný",
+          "matching": "Přiřazování",
           "trueOrFalse": "Pravda nebo nepravda",
           "fillInTheBlanks": "Doplňování mezer (drag & drop)",
           "photoQuestion": "Otázka na fotku",
@@ -3904,6 +3938,8 @@
           "betaTooltip": "Tato funkce je poskytována v testovací verzi. Může obsahovat chyby nebo nemusí plně fungovat tak, jak bylo zamýšleno, a je používán na vaše vlastní riziko.",
           "dragWord": "Přetáhněte slovo do věty",
           "taskDescriptionTooltip": "Stručně popište, co by měl účastník dělat během rozhovoru s mentorem AI.",
+          "matchingScoringAllOrNothing": "Všechny dvojice musí být správně",
+          "matchingScoringPartial": "Body za každou správnou dvojici",
           "requiresReview": "Hodnotí hodnotitel"
         }
       }
@@ -4200,6 +4236,13 @@
       "success": "Odkaz na přihlášení ověřen. Přesměrování...",
       "error": "Odkaz na přihlášení je neplatný nebo jeho platnost vypršela.",
       "backToLogin": "Zpět k přihlášení"
+    },
+    "oauthError": {
+      "cancelled": "Přihlášení bylo zrušeno. Zkuste se přihlásit znovu.",
+      "providerDisabled": "Tento způsob přihlášení je vypnutý. Použijte prosím jiný.",
+      "providerNotConfigured": "Tento způsob přihlášení zatím není nastaven. Obraťte se prosím na správce.",
+      "providerError": "Nepodařilo se získat údaje o vašem účtu od poskytovatele přihlášení. Zkuste to prosím znovu.",
+      "unknown": "Přihlášení se nezdařilo. Zkuste to prosím znovu."
     }
   },
   "magicLinkView": {
@@ -4355,7 +4398,10 @@
       "score": "Skóre: {{score}}% ({{correct}} z {{questionsNumber}} otázek)",
       "contentCantBeEmbedded": "Tento obsah nelze vložit.",
       "openInNewTab": "Otevřít na nové kartě",
-      "scale_1_5": "Otázka typu škála (1–5)"
+      "scale_1_5": "Otázka typu škála (1–5)",
+      "matching": "Přiřaďte každou položku k její dvojici.",
+      "noMatchesAvailable": "Pro tuto otázku zatím nejsou k dispozici žádná přiřazení.",
+      "correctMatch": "Správné přiřazení:"
     },
     "aiMentor": {
       "title": "Sezení AI Mentor",
@@ -4469,12 +4515,25 @@
       "courseEnrollmentRequired": "Nejste zapsáni do tohoto kurzu.",
       "quizRetakeUnavailable": "Odpovědi v kvízu nelze resetovat kvůli limitu pokusů nebo čekací době.",
       "quizResetFailed": "Odpovědi v kvízu se nepodařilo resetovat. Zkuste to prosím znovu.",
-      "quizAwaitingReview": "Tento kvíz čeká na hodnocení."
+      "quizAwaitingReview": "Tento kvíz čeká na hodnocení.",
+      "quizNotTimed": "Tento kvíz nemá časový limit.",
+      "quizAttemptNotStarted": "Před odesláním odpovědí spusťte kvíz.",
+      "quizAttemptExpired": "Čas na tento pokus o kvíz vypršel.",
+      "quizDraftInvalid": "Vaše odpovědi se nepodařilo automaticky uložit. Zkontrolujte je a zkuste to znovu."
     },
     "preview": {
       "title": "Prohlížíte si náhled kurzu",
       "enrollmentDescription": "Zapište se do kurzu, abyste mohli vyplňovat kvízy a ukládat svůj postup.",
       "learningModeDescription": "Zapněte režim učení, abyste mohli vyplňovat kvízy a sledovat svůj postup."
+    },
+    "timedQuiz": {
+      "info": "Čas začne běžet po výběru „Spustit kvíz“ a běží dál, i když stránku opustíte. Odpovědi se ukládají automaticky a po uplynutí času se odešlou. Nezodpovězené otázky získají 0 bodů.",
+      "timeLimit": "Časový limit",
+      "questions": "Otázky",
+      "start": "Spustit kvíz",
+      "timeLeft": "Zbývající čas: {{time}}",
+      "warning": "Zbývá méně než minuta. Odpovědi se po uplynutí času odešlou automaticky.",
+      "timeUp": "Čas vypršel. Vaše odpovědi se odesílají."
     }
   },
   "studentCourseView": {
@@ -4696,7 +4755,8 @@
       "account": "Účet",
       "integrations": "Integrace",
       "organization": "Organizace",
-      "platformCustomization": "Přizpůsobení platformy"
+      "platformCustomization": "Přizpůsobení platformy",
+      "features": "Funkce"
     },
     "breadcrumbs": {
       "settings": "Nastavení"
@@ -4741,7 +4801,7 @@
       "newUserNotifications": "Oznámení nového uživatele",
       "newUserNotificationsDescription": "Dostávat upozornění, když je vytvořen nový uživatel",
       "coursesVisibility": "Ukažte kurzy návštěvníkům",
-      "coursesVisibilityDescription": "Umožněte návštěvníkům zobrazit seznam kurzů a přistupovat k bezplatným lekcím bez přihlášení",
+      "coursesVisibilityDescription": "Umožňuje nepřihlášeným lidem procházet seznam kurzů a otevírat bezplatné lekce.",
       "modernCourseList": "Použijte moderní zobrazení seznamu kurzů",
       "modernCourseListDescription": "Povolte nový design seznamu kurzů se sekcemi hrdinů a nejlepších kurzů",
       "courseListLayout": "Rozvržení seznamu kurzů",
@@ -4757,11 +4817,11 @@
         "availableCourses": "Dostupné kurzy"
       },
       "courseDiscussions": "Povolit diskuse v kurzech",
-      "courseDiscussionsDescription": "Umožnit zapsaným uživatelům zobrazovat diskuse v kurzech a zapojovat se do nich",
+      "courseDiscussionsDescription": "Přidá ke každému kurzu záložku diskuze, kde se zapsaní uživatelé mohou ptát, odpovídat a reagovat.",
       "calendar": "Povolit kalendář",
       "calendarDescription": "Umožnit uživatelům zobrazit naplánované události v kalendáři",
       "liveTraining": "Povolit Živé školení",
-      "liveTrainingDescription": "Umožnit školitelům vytvářet a vést živá školení",
+      "liveTrainingDescription": "Umožňuje školitelům plánovat a vést živá online sezení. Studující vidí nadcházející sezení v kalendáři a připojují se v prohlížeči.",
       "liveTrainingMaxParallelSessions": "Maximální počet souběžných relací Živé školení",
       "liveTrainingMaxParallelSessionsDescription": "Omezte počet relací Živé školení, které mohou být aktivní současně.",
       "liveTrainingTooltip": "Zapněte pouze tehdy, když má tenant používat živé relace vedené trenéry.",
@@ -4772,7 +4832,7 @@
       "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",
       "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy",
       "publicCoursePreview": "Náhled lekcí před zápisem do kurzu",
-      "publicCoursePreviewDescription": "Umožněte uživatelům prohlížet lekce v bezplatných veřejných kurzech bez zápisu."
+      "publicCoursePreviewDescription": "Umožňuje přihlášeným uživatelům otevírat lekce bezplatných kurzů před zápisem. Kvízy a sledování postupu stále vyžadují zápis."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Předvolby upozornění pro nové uživatele byly úspěšně aktualizovány",
@@ -5644,7 +5704,9 @@
       "start_learning_path": "Vzdělávací cesta zahájena",
       "complete_learning_path": "Vzdělávací cesta dokončena",
       "play_scorm": "SCORM spuštěn",
-      "complete_scorm": "SCORM dokončen"
+      "complete_scorm": "SCORM dokončen",
+      "export": "Exportováno",
+      "import": "Importováno"
     },
     "entity": {
       "automation": "Automatizace",
@@ -5982,11 +6044,11 @@
     "settings": {
       "qaEnabled": {
         "label": "Povolit sekci Otázky a odpovědi",
-        "description": "Povolte sekci Otázky a odpovědi. Pokud je tato možnost zakázána, je sekce Otázky a odpovědi pro všechny uživatele skrytá."
+        "description": "Přidá sekci Q&A s častými otázkami a odpověďmi. Po vypnutí je skrytá pro všechny."
       },
       "qaPublic": {
-        "label": "Zobrazit sekci Otázky a odpovědi neregistrovaným uživatelům",
-        "description": "Povolit neregistrovaným uživatelům zobrazení sekce Otázky a odpovědi (lze přepnout pouze v případě, že je povolena sekce Otázky a odpovědi)"
+        "label": "Viditelnost pro návštěvníky",
+        "description": "Sekci Q&A mohou číst i nepřihlášení lidé. Dostupné po zapnutí Q&A."
       }
     },
     "toast": {
@@ -6002,11 +6064,11 @@
     "settings": {
       "newsEnabled": {
         "label": "Povolit sekci novinek",
-        "description": "Povolit sekci novinek. Je-li zakázáno, sekce zpráv je skryta pro všechny uživatele."
+        "description": "Přidá sekci novinek, kde zveřejňujete oznámení a novinky pro uživatele. Po vypnutí je sekce skrytá pro všechny."
       },
       "newsPublic": {
-        "label": "Zobrazit sekci novinek neregistrovaným uživatelům",
-        "description": "Povolit neregistrovaným uživatelům zobrazení sekce novinek (lze přepnout pouze v případě, že je povolena sekce novinek)"
+        "label": "Viditelnost pro návštěvníky",
+        "description": "Novinky mohou číst i nepřihlášení lidé. Dostupné po zapnutí novinek."
       }
     },
     "toast": {
@@ -6022,11 +6084,11 @@
     "settings": {
       "articlesEnabled": {
         "label": "Povolit sekci znalostní báze",
-        "description": "Povolte sekci znalostní báze. Je-li tato funkce zakázána, je sekce znalostní báze skryta pro všechny uživatele."
+        "description": "Přidá znalostní bázi, kde zveřejňujete články, například návody, postupy a FAQ. Po vypnutí je skrytá pro všechny."
       },
       "articlesPublic": {
-        "label": "Zobrazit sekci znalostní báze neregistrovaným uživatelům",
-        "description": "Povolit neregistrovaným uživatelům zobrazení sekce znalostní báze (lze přepnout pouze v případě, že je povolena sekce znalostní báze)"
+        "label": "Viditelnost pro návštěvníky",
+        "description": "Znalostní bázi mohou číst i nepřihlášení lidé. Dostupné po zapnutí znalostní báze."
       }
     },
     "toast": {
@@ -6042,7 +6104,7 @@
     "settings": {
       "learningPathsEnabled": {
         "label": "Povolit rozvojové cesty",
-        "description": "Povolte rozvojové cesty. Po vypnutí jsou skryté a zablokované pro všechny uživatele."
+        "description": "Spojte kurzy do rozvojových cest, které studující procházejí krok za krokem. Po vypnutí jsou rozvojové cesty skryté a jejich stránky zablokované pro všechny."
       }
     }
   },
@@ -7190,7 +7252,8 @@
       "receiptSynchronizationPending": "Předchozí změny se ukládají do pracovního prostoru AI. Zkuste stejný výběr za chvíli použít znovu.",
       "appliedRefreshPending": "Změny byly použity. Pokud je ještě nevidíte, obnovte kurz.",
       "deepResearchPreferenceNotSaved": "Hloubkový výzkum byl pro tento požadavek povolen, ale nastavení se nepodařilo uložit pro další zprávy.",
-      "webSearchPreferenceNotSaved": "Vyhledávání na webu bylo pro tento požadavek povoleno, ale nastavení se nepodařilo uložit pro další zprávy."
+      "webSearchPreferenceNotSaved": "Vyhledávání na webu bylo pro tento požadavek povoleno, ale nastavení se nepodařilo uložit pro další zprávy.",
+      "matchingQuestionUnsupported": "Luma zatím neumí upravovat kvízy s otázkami na přiřazování. Upravte tento kvíz v editoru kvízů."
     },
     "review": {
       "generatedImage": "Vygenerovaný obrázek",
@@ -7784,11 +7847,7 @@
       "timezone": "Data jsou v časovém pásmu {{timezone}}."
     },
     "title": "Přehledy",
-    "description": "Sledujte pokrok organizace v rozvojových cestách, kurzech a u jednotlivých uživatelů.",
-    "picker": {
-      "search": "Hledat",
-      "empty": "Žádné výsledky"
-    }
+    "description": "Sledujte pokrok organizace v rozvojových cestách, kurzech a u jednotlivých uživatelů."
   },
   "automations": {
     "success": {
@@ -7970,6 +8029,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Příjemci",
+      "courseCompletionAudience": "Příjemci dokončení kurzu",
+      "courseCompletionAudiences": {
+        "learner": "Účastník, který dokončil kurz",
+        "administrators": "Správci (podle předvoleb oznámení)"
+      },
       "event": "Uživatelé spojení s událostí",
       "user": "Vybraný uživatel",
       "group": "Členové vybrané skupiny",
@@ -9355,7 +9419,7 @@
         "updated": "Nastavení žebříčků bylo aktualizováno.",
         "enabled": {
           "label": "Zapnout žebříčky",
-          "description": "Zobrazí stránku žebříčků. Když je vypnuto, nikdo žebříčky neotevře."
+          "description": "Přidá stránku žebříčků, která řadí studující podle XP nebo úspěchů ve skupinách nebo v celé organizaci. Po vypnutí ji nikdo neotevře."
         },
         "visibility": {
           "label": "Viditelnost pro studenty",
@@ -9376,7 +9440,7 @@
       "description": "Zapněte gamifikaci pro svou organizaci a nastavte úspěchy, které mohou studenti získat.",
       "enabled": {
         "label": "Zapnout gamifikaci",
-        "description": "Zobrazovat uživatelům úrovně, XP, úspěchy a oznámení o odměnách. Odměny se počítají, i když je tato možnost vypnutá."
+        "description": "Zobrazuje uživatelům úrovně, XP a úspěchy v profilu a na nástěnce a upozorní na každou odměnu. Postup se počítá i ve vypnutém stavu."
       },
       "achievements": {
         "title": "Úspěchy",
@@ -9648,5 +9712,54 @@
       "courseNotPublished": "Tento kurz je opět koncept. Před hodnocením odpovědí jej zveřejněte."
     },
     "loadError": "Frontu k hodnocení se nepodařilo načíst. Obnovte stránku a zkuste to znovu."
+  },
+  "coursesViewToggle": {
+    "label": "Zobrazení kurzů",
+    "catalogue": "Katalog",
+    "table": "Tabulka"
+  },
+  "platformFeatures": {
+    "needsSetup": {
+      "description": "Tato funkce vyžaduje integraci, která zatím není nastavená.",
+      "configure": "Nastavit integraci"
+    },
+    "disable": {
+      "title": "Vypnout funkci „{{feature}}“?",
+      "description": "Uživatelé ji přestanou vidět. Data zůstanou uložená a po opětovném zapnutí se vrátí.",
+      "confirm": "Vypnout"
+    },
+    "items": {
+      "learningPaths": {
+        "title": "Rozvojové cesty"
+      },
+      "gamification": {
+        "title": "Gamifikace"
+      },
+      "liveTraining": {
+        "title": "Živá školení"
+      },
+      "courseDiscussions": {
+        "title": "Diskuze v kurzech"
+      },
+      "leaderboards": {
+        "title": "Žebříčky"
+      },
+      "news": {
+        "title": "Novinky"
+      },
+      "articles": {
+        "title": "Znalostní báze"
+      },
+      "qa": {
+        "title": "Q&A"
+      },
+      "coursesForVisitors": {
+        "title": "Kurzy pro návštěvníky"
+      },
+      "publicCoursePreview": {
+        "title": "Veřejný náhled kurzu"
+      }
+    },
+    "requiresGamification": "Nejprve zapněte gamifikaci."
   }
 }

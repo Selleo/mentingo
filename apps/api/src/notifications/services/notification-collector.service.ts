@@ -1,10 +1,10 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { randomUUID } from "node:crypto";
 
 import { Injectable } from "@nestjs/common";
 import { deriveAutomationBranchFieldValues } from "@repo/shared";
 
 import { NotificationEvent } from "src/automation-execution/events/notification-event";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { dbAls } from "src/storage/db/db-als.store";
 
 import type {
@@ -15,14 +15,23 @@ import type {
 import type { AutomationPlaceholderValue } from "@repo/shared";
 import type { NotificationRecipient } from "src/automation-execution/automation-execution.types";
 
-/** Request-local producer preparation, before durable publication; never sends mail. */
+/**
+ * Turns what an outbox handler captures into NotificationEvents and publishes them; never sends
+ * mail. Each notification's occurrence is derived from the source event, so a retried handler
+ * publishes the same occurrences and automation runs are not created twice.
+ */
 @Injectable()
 export class NotificationCollectorService {
   private readonly recipientContext = new AsyncLocalStorage<NotificationRecipientsByEvent>();
 
   private readonly itemContext = new AsyncLocalStorage<NotificationItemsByEvent>();
 
-  async collectNotificationEvents(prepare: () => Promise<void>): Promise<NotificationEvent[]> {
+  constructor(private readonly outboxPublisher: OutboxPublisher) {}
+
+  async publishCollectedNotifications(
+    sourceEventId: string,
+    prepare: () => Promise<void>,
+  ): Promise<void> {
     const recipientsByEvent: NotificationRecipientsByEvent = new Map();
     const itemsByEvent: NotificationItemsByEvent = new Map();
 
@@ -30,20 +39,16 @@ export class NotificationCollectorService {
       this.recipientContext.run(recipientsByEvent, prepare),
     );
 
-    const notifications: NotificationEvent[] = [];
-
     for (const eventKind of new Set([...recipientsByEvent.keys(), ...itemsByEvent.keys()])) {
-      notifications.push(
-        new NotificationEvent(
-          randomUUID(),
-          eventKind,
-          recipientsByEvent.get(eventKind) ?? [],
-          itemsByEvent.get(eventKind),
-        ),
+      await this.outboxPublisher.publish(
+        new NotificationEvent({
+          occurrenceId: `${sourceEventId}:${eventKind}`,
+          kind: eventKind,
+          recipients: recipientsByEvent.get(eventKind) ?? [],
+          items: itemsByEvent.get(eventKind),
+        }),
       );
     }
-
-    return notifications;
   }
 
   captureNotificationItem(itemId: string, options: NotificationCaptureOptions): void {
@@ -97,6 +102,10 @@ export class NotificationCollectorService {
 
     const recipients = recipientsByEvent.get(template.event) ?? [];
     const recipient = this.createNotificationRecipient(message.to, template, recipients.length);
+
+    if (options.audience) {
+      recipient.audience = options.audience;
+    }
 
     recipients.push(recipient);
     recipientsByEvent.set(template.event, recipients);

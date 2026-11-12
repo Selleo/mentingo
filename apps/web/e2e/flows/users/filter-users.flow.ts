@@ -1,4 +1,5 @@
 import { USERS_PAGE_HANDLES } from "../../data/users/handles";
+import { waitForSearchParam } from "../../utils/wait-for-search-param";
 
 import { closeMultiselectFlow } from "./close-multiselect.flow";
 
@@ -22,6 +23,7 @@ export const filterUsersFlow = async (
 
   if (keyword !== undefined) {
     await page.getByTestId(USERS_PAGE_HANDLES.SEARCH_INPUT).fill(keyword);
+    await waitForSearchParam(page, "keyword", keyword);
   }
 
   if (roleSlug) {

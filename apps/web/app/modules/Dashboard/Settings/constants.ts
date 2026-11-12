@@ -5,6 +5,7 @@ export const SETTINGS_TABS = {
   ACCOUNT: "account",
   INTEGRATIONS: "integrations",
   PLATFORM_CUSTOMIZATION: "platformCustomization",
+  FEATURES: "features",
 };
 
 export const SETTINGS_TAB_QUERY_PARAM = "tab";

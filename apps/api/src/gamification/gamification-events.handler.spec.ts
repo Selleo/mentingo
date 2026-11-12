@@ -5,21 +5,13 @@ import {
   UserCourseFinishedEvent,
   UserLoginEvent,
 } from "src/events";
-import { isOutboxProcessingEnabled } from "src/outbox/outbox.constants";
+import { rehydrateOutboxEvent } from "src/outbox/utils/outbox-event-rehydration.utils";
 import { dbAls } from "src/storage/db/db-als.store";
 
 import { GamificationEventsHandler } from "./gamification-events.handler";
 
 import type { GamificationQueueService } from "./gamification-queue.service";
 import type { ActorUserType } from "src/common/types/actor-user.type";
-import type { OutboxDirectHandlerService } from "src/outbox/outbox-direct-handler.service";
-
-jest.mock("src/outbox/outbox.constants", () => ({
-  ...jest.requireActual("src/outbox/outbox.constants"),
-  isOutboxProcessingEnabled: jest.fn(),
-}));
-
-type Reaction = (payload: Record<string, unknown>, eventId: string) => Promise<void>;
 
 const TENANT_ID = "tenant-1";
 const USER_ID = "user-1";
@@ -39,7 +31,13 @@ const quiz = (isSupportMode = false) =>
   });
 
 // Mirrors how the outbox stores events: class name as type, JSON payload.
-const EVENTS = [
+type GamificationSourceEvent =
+  | UserLoginEvent
+  | LessonCompletedEvent
+  | UserCourseFinishedEvent
+  | QuizCompletedEvent;
+
+const EVENTS: GamificationSourceEvent[] = [
   new UserLoginEvent({ userId: USER_ID, method: USER_LOGIN_METHOD.PASSWORD, actor: actor() }),
   new LessonCompletedEvent({
     userId: USER_ID,
@@ -52,34 +50,25 @@ const EVENTS = [
 ];
 
 describe("GamificationEventsHandler", () => {
-  const reactions = new Map<string, Reaction>();
-  const outboxDirectHandlerService = {
-    registerReaction: jest.fn((eventType: string, reaction: Reaction) => {
-      reactions.set(eventType, reaction);
-    }),
-  } as unknown as OutboxDirectHandlerService;
   const gamificationQueueService = {
     enqueueEvaluateUser: jest.fn(),
   } as unknown as jest.Mocked<GamificationQueueService>;
+  const handler = new GamificationEventsHandler(gamificationQueueService);
 
-  new GamificationEventsHandler(
-    outboxDirectHandlerService,
-    gamificationQueueService,
-  ).onModuleInit();
+  const react = (event: GamificationSourceEvent, tenantId: string | null = TENANT_ID) => {
+    const storedEvent = rehydrateOutboxEvent<GamificationSourceEvent>(
+      event.constructor as never,
+      JSON.parse(JSON.stringify(event)),
+    );
+    const deliver = () => handler.handleOutboxEvent(storedEvent, { eventId: "event-1" });
 
-  const react = (event: object, tenantId: string | null = TENANT_ID) => {
-    const reaction = reactions.get(event.constructor.name);
-    const payload = JSON.parse(JSON.stringify(event));
+    if (!tenantId) return deliver();
 
-    if (!reaction) throw new Error(`No reaction for ${event.constructor.name}`);
-    if (!tenantId) return reaction(payload, "event-1");
-
-    return dbAls.run({ tenantId }, () => reaction(payload, "event-1"));
+    return dbAls.run({ tenantId }, deliver);
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(isOutboxProcessingEnabled).mockReturnValue(true);
   });
 
   it.each(EVENTS.map((event) => [event.constructor.name, event]))(
@@ -114,14 +103,6 @@ describe("GamificationEventsHandler", () => {
 
   it("skips events without a tenant context", async () => {
     await react(quiz(), null);
-
-    expect(gamificationQueueService.enqueueEvaluateUser).not.toHaveBeenCalled();
-  });
-
-  it("skips events while outbox processing is disabled", async () => {
-    jest.mocked(isOutboxProcessingEnabled).mockReturnValue(false);
-
-    await react(quiz());
 
     expect(gamificationQueueService.enqueueEvaluateUser).not.toHaveBeenCalled();
   });

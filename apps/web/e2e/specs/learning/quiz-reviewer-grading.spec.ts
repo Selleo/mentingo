@@ -41,7 +41,7 @@ test("grading the last answer completes the lesson", async ({
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
-  const { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId } = lessons;
+  const { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId, matchingPairs } = lessons;
 
   let reviewerEmail = "";
   await withWorkerPage(
@@ -75,6 +75,7 @@ test("grading the last answer completes the lesson", async ({
           dndBlankAnswer,
           dndBlankAnswerId,
           textBlankAnswer,
+          matchingPairs,
         });
         await submitQuizFlow(page);
         quizWasSubmitted = true;

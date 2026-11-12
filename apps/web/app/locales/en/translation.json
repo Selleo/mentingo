@@ -812,6 +812,21 @@
     "validation": {
       "messageRequired": "Message is required.",
       "nameMaxLength": "Must be at most {{max}} characters."
+    },
+    "optionPicker": {
+      "search": "Search",
+      "empty": "No matches found"
+    },
+    "dataTable": {
+      "filters": "Filters",
+      "resetFilters": "Reset all filters",
+      "removeFilter": "Remove filter: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}",
+      "selectedCount": "Selected: {{count}}",
+      "emptyTitle": "No results found",
+      "emptyDescription": "Try a different search or reset the filters.",
+      "selectAll": "Select all",
+      "selectRow": "Select row"
     }
   },
   "lessons": {
@@ -2053,11 +2068,13 @@
         "draft": "Draft",
         "published": "Published",
         "private": "Private"
-      }
+      },
+      "allCategories": "All categories",
+      "archive": "Archive"
     },
     "courses": {
       "header": "Manage courses",
-      "subHeader": "All courses you can view and edit"
+      "learnerHeader": "All courses"
     },
     "field": {
       "title": "Title",
@@ -2069,7 +2086,8 @@
       "state": "State",
       "status": "Status",
       "sharedCourse": "Shared",
-      "createdAt": "Created At"
+      "createdAt": "Created At",
+      "duration": "Duration"
     },
     "lessonCard": {
       "mappedTypes": {
@@ -2326,7 +2344,16 @@
         "competencies": "competencies",
         "other": "platform capabilities",
         "gamification": "gamification",
-        "quiz_grading": "quiz grading"
+        "quiz_grading": "quiz grading",
+        "ai_thread": "AI conversations",
+        "automation": "automations",
+        "automation_log": "automation logs",
+        "content_marketplace": "content marketplace",
+        "dashboard": "dashboard",
+        "email_template": "email templates",
+        "managed_group_results": "managed group results",
+        "phishing": "phishing simulations",
+        "todo_task": "tasks"
       },
       "descriptions": {
         "phishing_manage": "Create and manage phishing simulations.",
@@ -3166,13 +3193,15 @@
           "attemptsLimit": "Attempts limit",
           "quizCooldownInHours": "Time lock after failed attempts (in hours)",
           "numberOfQuestions": "{{count1}} of {{count2}} questions",
-          "noQuestions": "No questions"
+          "noQuestions": "No questions",
+          "timeLimitMinutes": "Time limit (hh:mm)"
         },
         "tooltip": {
           "switch": "If enabled, the student has a limited number of quiz attempts.",
           "passingThreshold": "The percentage threshold for passing the quiz. If a student reaches this score, the quiz will be considered passed.",
           "attemptsLimit": "Number of quiz attempts allowed before time lock is triggered.",
-          "quizCooldownInHours": "Duration of the quiz lock after all attempts are used."
+          "quizCooldownInHours": "Duration of the quiz lock after all attempts are used.",
+          "timeLimitMinutes": "Optional. When set, learners start the quiz explicitly and their answers are submitted automatically when time runs out. Leave empty for no time limit."
         },
         "validation": {
           "optionTextRequired": "Option text is required",
@@ -3198,7 +3227,11 @@
           "maxFileNumber_other": "You cannot upload more than {{ count }} files",
           "maxResources_five": "You cannot add more than 5 resources",
           "sourceUrlRequired": "Source URL is required",
-          "sourceUrlInvalid": "Enter a valid HTTPS URL"
+          "sourceUrlInvalid": "Enter a valid HTTPS URL",
+          "matchingPairsRequired": "Add at least 2 pairs and fill in both sides of each pair",
+          "matchingMatchRequired": "Fill in the match for this pair",
+          "matchingPairsUnique": "Each pair needs a unique match",
+          "timeLimitMinutes": "Enter a time limit between {{min}} and {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",
@@ -3273,7 +3306,8 @@
           "ttsPreset": "TTS Preset",
           "customTTSReference": "Custom TTS Reference",
           "includeFiles_one": "Attach up to 1 file below {{maxSize}} to be used as context in lessons",
-          "includeFiles_other": "Attach up to {{ count }} files below {{maxSize}} to be used as context in lessons"
+          "includeFiles_other": "Attach up to {{ count }} files below {{maxSize}} to be used as context in lessons",
+          "matchingScoring": "Scoring"
         },
         "placeholder": {
           "title": "Provide lesson title...",
@@ -3789,7 +3823,7 @@
           "option": "Option",
           "singleChoice": "Single choice",
           "multipleChoice": "Multiple choice",
-          "matchWords": "Matching",
+          "matching": "Matching",
           "trueOrFalse": "True or false",
           "fillInTheBlanks": "Gap filling (drag&drop)",
           "photoQuestion": "Photo question",
@@ -3898,6 +3932,8 @@
           "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk.",
           "dragWord": "Drag word into sentence",
           "taskDescriptionTooltip": "Briefly describe what the participant should do during the conversation with the AI mentor.",
+          "matchingScoringAllOrNothing": "All pairs must be correct",
+          "matchingScoringPartial": "Points for each correct pair",
           "requiresReview": "Graded by reviewer"
         }
       }
@@ -4194,6 +4230,13 @@
       "success": "Login link verified. Redirecting...",
       "error": "Login link is invalid or has expired.",
       "backToLogin": "Back to login"
+    },
+    "oauthError": {
+      "cancelled": "Sign-in was cancelled. Please try again to log in.",
+      "providerDisabled": "This sign-in method is disabled. Please use a different one.",
+      "providerNotConfigured": "This sign-in method is not configured yet. Please contact your administrator.",
+      "providerError": "We couldn't get your account details from the sign-in provider. Please try again.",
+      "unknown": "Sign-in failed. Please try again."
     }
   },
   "magicLinkView": {
@@ -4349,7 +4392,10 @@
       "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)",
       "contentCantBeEmbedded": "This content can’t be embedded.",
       "openInNewTab": "Open in new tab",
-      "scale_1_5": "Scale question (1-5)"
+      "scale_1_5": "Scale question (1-5)",
+      "matching": "Match each item with its pair.",
+      "noMatchesAvailable": "No matches are available for this question yet.",
+      "correctMatch": "Correct match:"
     },
     "aiMentor": {
       "title": "AI Mentor Session",
@@ -4463,12 +4509,25 @@
       "courseEnrollmentRequired": "You are not enrolled in this course.",
       "quizRetakeUnavailable": "Quiz answers cannot be reset because of the attempts limit or cooldown.",
       "quizResetFailed": "Failed to reset quiz answers. Please try again.",
-      "quizAwaitingReview": "This quiz is waiting for review."
+      "quizAwaitingReview": "This quiz is waiting for review.",
+      "quizNotTimed": "This quiz has no time limit.",
+      "quizAttemptNotStarted": "Start the quiz before submitting answers.",
+      "quizAttemptExpired": "The time for this quiz attempt has run out.",
+      "quizDraftInvalid": "Your answers could not be saved automatically. Check them and try again."
     },
     "preview": {
       "title": "You are previewing this course",
       "enrollmentDescription": "Enroll to take quizzes and save your progress.",
       "learningModeDescription": "Enable Learn mode to take quizzes and track your progress."
+    },
+    "timedQuiz": {
+      "info": "The timer starts when you select “Start quiz” and keeps running if you leave the page. Your answers are saved automatically and submitted when time runs out. Unanswered questions score 0 points.",
+      "timeLimit": "Time limit",
+      "questions": "Questions",
+      "start": "Start quiz",
+      "timeLeft": "Time left: {{time}}",
+      "warning": "Less than a minute left. Your answers will be submitted automatically when time runs out.",
+      "timeUp": "Time is up. Your answers are being submitted."
     }
   },
   "studentCourseView": {
@@ -4688,7 +4747,8 @@
       "account": "Account",
       "integrations": "Integrations",
       "organization": "Organization",
-      "platformCustomization": "Platform Customization"
+      "platformCustomization": "Platform Customization",
+      "features": "Features"
     },
     "breadcrumbs": {
       "settings": "Settings"
@@ -4733,7 +4793,7 @@
       "newUserNotifications": "New User Notifications",
       "newUserNotificationsDescription": "Receive notifications when a new user is created",
       "coursesVisibility": "Show courses to visitors",
-      "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
+      "coursesVisibilityDescription": "Lets people who are not signed in browse the course list and open free lessons.",
       "modernCourseList": "Use modern course list view",
       "modernCourseListDescription": "Enable the new course list design with hero and top courses sections",
       "courseListLayout": "Course list layout",
@@ -4749,11 +4809,11 @@
         "availableCourses": "Available courses"
       },
       "courseDiscussions": "Enable course discussions",
-      "courseDiscussionsDescription": "Allow enrolled users to view and participate in course discussion threads",
+      "courseDiscussionsDescription": "Adds a discussion tab to every course where enrolled users can ask questions, reply and react.",
       "calendar": "Enable calendar",
       "calendarDescription": "Allow users to view scheduled events in the calendar",
       "liveTraining": "Enable Live Training",
-      "liveTrainingDescription": "Allow trainers to create and run live training sessions",
+      "liveTrainingDescription": "Lets trainers schedule and run live online sessions. Learners see upcoming sessions in their calendar and join them in the browser.",
       "liveTrainingMaxParallelSessions": "Max parallel Live Training sessions",
       "liveTrainingMaxParallelSessionsDescription": "Limit how many Live Training sessions can be active at the same time.",
       "liveTrainingTooltip": "Enable this only when the tenant should use trainer-led live sessions.",
@@ -4764,7 +4824,7 @@
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
       "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses",
       "publicCoursePreview": "View lessons before enrolling in a course",
-      "publicCoursePreviewDescription": "Let unenrolled users view lessons in free public courses."
+      "publicCoursePreviewDescription": "Lets signed-in users open lessons of free courses before they enroll. Quizzes and progress tracking still require enrolling."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
@@ -5792,11 +5852,11 @@
     "settings": {
       "qaEnabled": {
         "label": "Enable Q&A section",
-        "description": "Enable the Q&A section. When disabled, the Q&A section is hidden for all users."
+        "description": "Adds a Q&A section with common questions and their answers. When off, it is hidden for everyone."
       },
       "qaPublic": {
-        "label": "Show Q&A section to unregistered users",
-        "description": "Allow unregistered users to view the Q&A section (can only be toggled, when Q&A section is enabled)"
+        "label": "Visibility for visitors",
+        "description": "People who are not signed in can read the Q&A section too. Available once Q&A is on."
       }
     },
     "toast": {
@@ -5812,11 +5872,11 @@
     "settings": {
       "newsEnabled": {
         "label": "Enable news section",
-        "description": "Enable the news section. When disabled, the news section is hidden for all users."
+        "description": "Adds a News section where you publish announcements and updates for users. When off, the section is hidden for everyone."
       },
       "newsPublic": {
-        "label": "Show news section to unregistered users",
-        "description": "Allow unregistered users to view the news section (can only be toggled, when news section is enabled)"
+        "label": "Visibility for visitors",
+        "description": "People who are not signed in can read news too. Available once news is on."
       }
     },
     "toast": {
@@ -5832,11 +5892,11 @@
     "settings": {
       "articlesEnabled": {
         "label": "Enable knowledge base section",
-        "description": "Enable the knowledge base section. When disabled, the knowledge base section is hidden for all users."
+        "description": "Adds a knowledge base where you publish articles such as guides, procedures and FAQs. When off, it is hidden for everyone."
       },
       "articlesPublic": {
-        "label": "Show knowledge base section to unregistered users",
-        "description": "Allow unregistered users to view the knowledge base section (can only be toggled, when the knowledge base section is enabled)"
+        "label": "Visibility for visitors",
+        "description": "People who are not signed in can read the knowledge base too. Available once the knowledge base is on."
       }
     },
     "toast": {
@@ -5852,7 +5912,7 @@
     "settings": {
       "learningPathsEnabled": {
         "label": "Enable Development Paths",
-        "description": "Enable Development Paths. When disabled, Development Paths are hidden and blocked for all users."
+        "description": "Group courses into development paths that learners complete step by step. When off, development paths are hidden and their pages are blocked for everyone."
       }
     }
   },
@@ -6356,7 +6416,9 @@
       "start_learning_path": "Learning Path started",
       "complete_learning_path": "Learning Path completed",
       "play_scorm": "SCORM played",
-      "complete_scorm": "SCORM completed"
+      "complete_scorm": "SCORM completed",
+      "export": "Exported",
+      "import": "Imported"
     },
     "entity": {
       "automation": "Automation",
@@ -7193,7 +7255,8 @@
       "receiptSynchronizationPending": "Saving previous changes to the AI workspace. Try applying this same selection again shortly.",
       "appliedRefreshPending": "Changes were applied. Refresh the course if they are not visible yet.",
       "deepResearchPreferenceNotSaved": "Deep research was enabled for this request, but the preference could not be saved for future messages.",
-      "webSearchPreferenceNotSaved": "Web search was allowed for this request, but the preference could not be saved for future messages."
+      "webSearchPreferenceNotSaved": "Web search was allowed for this request, but the preference could not be saved for future messages.",
+      "matchingQuestionUnsupported": "Luma cannot edit quizzes with matching questions yet. Edit this quiz in the quiz editor."
     },
     "review": {
       "generatedImage": "Generated image",
@@ -7785,11 +7848,7 @@
       "timezone": "Dates use {{timezone}}."
     },
     "title": "Reports",
-    "description": "Understand organisation progress across learning, development paths, courses, and learners.",
-    "picker": {
-      "search": "Search",
-      "empty": "No matches found"
-    }
+    "description": "Understand organisation progress across learning, development paths, courses, and learners."
   },
   "automations": {
     "success": {
@@ -7971,6 +8030,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Recipients",
+      "courseCompletionAudience": "Course completion recipients",
+      "courseCompletionAudiences": {
+        "learner": "Learner who completed the course",
+        "administrators": "Administrators (respecting notification preferences)"
+      },
       "event": "Users linked to the event",
       "user": "Selected user",
       "group": "Members of a selected group",
@@ -9332,7 +9396,7 @@
         "updated": "Leaderboard settings updated.",
         "enabled": {
           "label": "Enable leaderboards",
-          "description": "Shows the leaderboards page. When off, nobody can open leaderboards."
+          "description": "Adds a leaderboards page that ranks learners by XP or achievements, per group or across the organization. When off, nobody can open it."
         },
         "visibility": {
           "label": "Learner visibility",
@@ -9353,7 +9417,7 @@
       "description": "Turn gamification on for your organization and configure the achievements learners can earn.",
       "enabled": {
         "label": "Enable gamification",
-        "description": "Show levels, XP, achievements and reward notifications to users. Rewards are calculated even while this is off."
+        "description": "Shows users their levels, XP and achievements on their profile and dashboard, with a notification for each reward. Progress is counted even while this is off."
       },
       "achievements": {
         "title": "Achievements",
@@ -9625,5 +9689,54 @@
       "courseNotPublished": "This course is back in draft. Publish it before grading its answers."
     },
     "loadError": "Could not load the grading queue. Refresh the page to try again."
+  },
+  "coursesViewToggle": {
+    "label": "Courses view",
+    "catalogue": "Catalogue",
+    "table": "Table"
+  },
+  "platformFeatures": {
+    "needsSetup": {
+      "description": "This feature needs an integration that is not configured yet.",
+      "configure": "Configure integration"
+    },
+    "disable": {
+      "title": "Turn off \"{{feature}}\"?",
+      "description": "Users will no longer see it. Your data stays saved and comes back when you turn it on again.",
+      "confirm": "Turn off"
+    },
+    "items": {
+      "learningPaths": {
+        "title": "Development paths"
+      },
+      "gamification": {
+        "title": "Gamification"
+      },
+      "liveTraining": {
+        "title": "Live training"
+      },
+      "courseDiscussions": {
+        "title": "Course discussions"
+      },
+      "leaderboards": {
+        "title": "Leaderboards"
+      },
+      "news": {
+        "title": "News"
+      },
+      "articles": {
+        "title": "Knowledge base"
+      },
+      "qa": {
+        "title": "Q&A"
+      },
+      "coursesForVisitors": {
+        "title": "Courses for visitors"
+      },
+      "publicCoursePreview": {
+        "title": "Public course preview"
+      }
+    },
+    "requiresGamification": "Turn on Gamification first."
   }
 }

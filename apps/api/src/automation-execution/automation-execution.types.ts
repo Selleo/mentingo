@@ -7,8 +7,11 @@ import type {
   AutomationRunStatus,
   AutomationEventKind,
   AutomationPlaceholderMappings,
+  AutomationRecipientSelection,
+  AutomationRecipientAudience,
   BuiltInEmailTemplateKey,
   SupportedLanguages,
+  AUTOMATION_RECIPIENT_TYPES,
 } from "@repo/shared";
 import type {
   AUTOMATION_EMAIL_DELIVERY_DIRECTIONS,
@@ -111,6 +114,11 @@ export interface AutomationRunOutcome {
 
 export interface BuiltInAutomationDefinition {
   eventKind: AutomationEventKind;
+  triggerEventKind?: AutomationEventKind;
+  recipients?: Extract<
+    AutomationRecipientSelection,
+    { type: typeof AUTOMATION_RECIPIENT_TYPES.EVENT }
+  >;
   name: Record<SupportedLanguages, string>;
   description: Record<SupportedLanguages, string>;
   templateKey: BuiltInEmailTemplateKey;
@@ -168,6 +176,7 @@ export type EncryptedAccountActionToken = {
 };
 
 export interface NotificationRecipient {
+  audience?: AutomationRecipientAudience;
   /** Stable occurrence key, not necessarily a UUID (e.g. email:index or selected:item:email:index). */
   itemId: string;
   email: string;

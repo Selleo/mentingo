@@ -34,27 +34,34 @@ type QueryOptions = {
 
 export const ALL_COURSES_QUERY_KEY = ["courses"];
 
+/** Maps course list filters to the `GET /course/all` query, shared by every course list. */
+export const toCoursesFilterQuery = (searchParams?: Omit<CourseParams, "sort">) => {
+  const isArchived = match(searchParams)
+    .with({ includeArchived: true }, () => COURSE_ARCHIVED_QUERY_VALUES.ALL)
+    .with({ isArchived: true }, () => COURSE_ARCHIVED_QUERY_VALUES.TRUE)
+    .with({ isArchived: false }, () => COURSE_ARCHIVED_QUERY_VALUES.FALSE)
+    .otherwise(() => undefined);
+
+  return {
+    ...(searchParams?.title && { title: searchParams.title }),
+    ...(searchParams?.description && { description: searchParams.description }),
+    ...(searchParams?.category && { category: searchParams.category }),
+    ...(searchParams?.authorId && { authorId: searchParams.authorId }),
+    ...(searchParams?.state && { status: searchParams.state }),
+    ...(isArchived && { isArchived }),
+    language: searchParams?.language ?? SUPPORTED_LANGUAGES.EN,
+  };
+};
+
 export const allCoursesQueryOptions = (
   searchParams?: CourseParams,
   options: QueryOptions = { enabled: true },
 ) => ({
   queryKey: [...ALL_COURSES_QUERY_KEY, searchParams],
   queryFn: async () => {
-    const isArchived = match(searchParams)
-      .with({ includeArchived: true }, () => COURSE_ARCHIVED_QUERY_VALUES.ALL)
-      .with({ isArchived: true }, () => COURSE_ARCHIVED_QUERY_VALUES.TRUE)
-      .with({ isArchived: false }, () => COURSE_ARCHIVED_QUERY_VALUES.FALSE)
-      .otherwise(() => undefined);
-
     const response = await ApiClient.api.courseControllerGetAllCourses({
-      ...(searchParams?.title && { title: searchParams.title }),
-      ...(searchParams?.description && { description: searchParams.description }),
-      ...(searchParams?.category && { category: searchParams.category }),
-      ...(searchParams?.authorId && { authorId: searchParams.authorId }),
-      ...(searchParams?.state && { status: searchParams.state }),
+      ...toCoursesFilterQuery(searchParams),
       ...(searchParams?.sort && { sort: searchParams.sort }),
-      ...(isArchived && { isArchived }),
-      language: searchParams?.language ?? SUPPORTED_LANGUAGES.EN,
       page: 1,
       perPage: 100,
     });

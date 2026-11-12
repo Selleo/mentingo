@@ -815,6 +815,21 @@
     "validation": {
       "messageRequired": "Wiadomość jest wymagana.",
       "nameMaxLength": "Może mieć maksymalnie {{max}} znaków."
+    },
+    "optionPicker": {
+      "search": "Szukaj",
+      "empty": "Brak wyników"
+    },
+    "dataTable": {
+      "filters": "Filtry",
+      "resetFilters": "Wyczyść wszystkie filtry",
+      "removeFilter": "Usuń filtr: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}",
+      "selectedCount": "Zaznaczono: {{count}}",
+      "emptyTitle": "Brak wyników",
+      "emptyDescription": "Spróbuj innego wyszukiwania lub wyczyść filtry.",
+      "selectAll": "Zaznacz wszystkie",
+      "selectRow": "Zaznacz wiersz"
     }
   },
   "lessons": {
@@ -2300,11 +2315,13 @@
         "draft": "Wersja robocza",
         "published": "Opublikowane",
         "private": "Niepubliczne"
-      }
+      },
+      "allCategories": "Wszystkie kategorie",
+      "archive": "Archiwum"
     },
     "courses": {
       "header": "Zarządzaj kursami",
-      "subHeader": "Wszystkie kursy, które możesz wyświetlić i edytować"
+      "learnerHeader": "Wszystkie kursy"
     },
     "field": {
       "title": "Tytuł",
@@ -2316,7 +2333,8 @@
       "state": "Stan",
       "status": "Status",
       "sharedCourse": "Udostępniony",
-      "createdAt": "Utworzono"
+      "createdAt": "Utworzono",
+      "duration": "Czas trwania"
     },
     "lessonCard": {
       "mappedTypes": {
@@ -2574,7 +2592,16 @@
         "competencies": "kompetencje",
         "other": "funkcje platformy",
         "gamification": "grywalizację",
-        "quiz_grading": "ocenianie quizów"
+        "quiz_grading": "ocenianie quizów",
+        "ai_thread": "rozmowy z AI",
+        "automation": "automatyzacje",
+        "automation_log": "logi automatyzacji",
+        "content_marketplace": "katalog kursów",
+        "dashboard": "pulpit",
+        "email_template": "szablony e-mail",
+        "managed_group_results": "wyniki zarządzanych grup",
+        "phishing": "symulacje phishingu",
+        "todo_task": "zadania"
       },
       "descriptions": {
         "phishing_manage": "Może tworzyć i zarządzać symulacjami phishingu.",
@@ -3418,13 +3445,15 @@
           "attemptsLimit": "Limit prób",
           "quizCooldownInHours": "Blokada czasowa po niezdaniu (w godzinach)",
           "numberOfQuestions": "{{count1}} z {{count2}} pytań",
-          "noQuestions": "Brak pytań"
+          "noQuestions": "Brak pytań",
+          "timeLimitMinutes": "Limit czasu (gg:mm)"
         },
         "tooltip": {
           "switch": "Jeśli włączone, student ma ograniczoną liczbę podejść do quizu.",
           "passingThreshold": "Procentowy próg zaliczenia quizu. Jeśli student osiągnie ten wynik, quiz zostanie uznany za zaliczony.",
           "attemptsLimit": "Liczba podejść do quizu przed uruchomieniem blokady czasowej.",
-          "quizCooldownInHours": "Czas trwania blokady quizu po wykorzystaniu wszystkich prób."
+          "quizCooldownInHours": "Czas trwania blokady quizu po wykorzystaniu wszystkich prób.",
+          "timeLimitMinutes": "Opcjonalne. Po ustawieniu kursant rozpoczyna quiz samodzielnie, a jego odpowiedzi są wysyłane automatycznie po upływie czasu. Pozostaw puste, aby nie ograniczać czasu."
         },
         "validation": {
           "optionTextRequired": "Tekst opcji jest wymagany",
@@ -3452,7 +3481,11 @@
           "maxFileNumber_other": "Nie możesz przesłać więcej niż {{ count }} plików",
           "maxResources": "Nie możesz dodać więcej niż {{ count }} zasobów do lekcji",
           "sourceUrlRequired": "Adres URL źródła jest wymagany",
-          "sourceUrlInvalid": "Wpisz poprawny adres URL HTTPS"
+          "sourceUrlInvalid": "Wpisz poprawny adres URL HTTPS",
+          "matchingPairsRequired": "Dodaj co najmniej 2 pary i uzupełnij obie strony każdej pary",
+          "matchingMatchRequired": "Uzupełnij dopasowanie w tej parze",
+          "matchingPairsUnique": "Każda para musi mieć unikalne dopasowanie",
+          "timeLimitMinutes": "Podaj limit czasu od {{min}} do {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
@@ -3529,7 +3562,8 @@
           "includeFiles_one": "Dołącz maksymalnie 1 plik, poniżej {{maxSize}}, który będzie używany jako kontekst w lekcjach",
           "includeFiles_few": "Dołącz maksymalnie {{ count }} pliki, poniżej {{maxSize}}, które będą używane jako kontekst w lekcjach",
           "includeFiles_many": "Dołącz maksymalnie {{ count }} plików, poniżej {{maxSize}}, które będą używane jako kontekst w lekcjach",
-          "includeFiles_other": "Dołącz maksymalnie {{ count }} plików, poniżej {{maxSize}}, które będą używane jako kontekst w lekcjach"
+          "includeFiles_other": "Dołącz maksymalnie {{ count }} plików, poniżej {{maxSize}}, które będą używane jako kontekst w lekcjach",
+          "matchingScoring": "Punktacja"
         },
         "placeholder": {
           "title": "Podaj tytuł lekcji...",
@@ -4049,7 +4083,7 @@
           "dropOrClick": "Upuść obraz tutaj lub kliknij, aby przesłać",
           "allowedFormats": "PNG, JPG/JPEG, WEBP lub SVG (maks. {{maxSize}})",
           "multipleChoice": "Wielokrotny wybór",
-          "matchWords": "Dopasowanie",
+          "matching": "Dopasowanie",
           "trueOrFalse": "Prawda/fałsz",
           "fillInTheBlanks": "Uzupełnij luki (drag&drop)",
           "photoQuestion": "Pytanie z obrazkiem",
@@ -4156,6 +4190,8 @@
           },
           "betaTooltip": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko.",
           "dragWord": "Przeciągnij słowo do zdania",
+          "matchingScoringAllOrNothing": "Wszystkie pary muszą być poprawne",
+          "matchingScoringPartial": "Punkty za każdą poprawną parę",
           "requiresReview": "Oceniane przez recenzenta"
         }
       },
@@ -4460,6 +4496,13 @@
       "success": "Link zweryfikowany. Przekierowujemy...",
       "error": "Link do logowania jest nieprawidłowy lub wygasł.",
       "backToLogin": "Wróć do logowania"
+    },
+    "oauthError": {
+      "cancelled": "Logowanie zostało anulowane. Spróbuj zalogować się ponownie.",
+      "providerDisabled": "Ta metoda logowania jest wyłączona. Użyj innej metody.",
+      "providerNotConfigured": "Ta metoda logowania nie została jeszcze skonfigurowana. Skontaktuj się z administratorem.",
+      "providerError": "Nie udało się pobrać danych Twojego konta od dostawcy logowania. Spróbuj ponownie.",
+      "unknown": "Logowanie nie powiodło się. Spróbuj ponownie."
     }
   },
   "magicLinkView": {
@@ -4618,7 +4661,10 @@
       "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)",
       "contentCantBeEmbedded": "Treść nie może być osadzona",
       "openInNewTab": "Otwórz w nowej karcie",
-      "scale_1_5": "Pytanie typu skala (1-5)"
+      "scale_1_5": "Pytanie typu skala (1-5)",
+      "matching": "Dopasuj każdy element do jego pary.",
+      "noMatchesAvailable": "To pytanie nie ma jeszcze dopasowań do ułożenia.",
+      "correctMatch": "Poprawne dopasowanie:"
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",
@@ -4732,12 +4778,25 @@
       "courseEnrollmentRequired": "Nie jesteś zapisany/a na ten kurs.",
       "quizRetakeUnavailable": "Nie można zresetować odpowiedzi z powodu limitu podejść lub okresu oczekiwania.",
       "quizResetFailed": "Nie udało się zresetować odpowiedzi quizu. Spróbuj ponownie.",
-      "quizAwaitingReview": "Ten quiz oczekuje na ocenę."
+      "quizAwaitingReview": "Ten quiz oczekuje na ocenę.",
+      "quizNotTimed": "Ten quiz nie ma limitu czasu.",
+      "quizAttemptNotStarted": "Rozpocznij quiz, zanim wyślesz odpowiedzi.",
+      "quizAttemptExpired": "Czas na to podejście do quizu minął.",
+      "quizDraftInvalid": "Nie udało się automatycznie zapisać odpowiedzi. Sprawdź je i spróbuj ponownie."
     },
     "preview": {
       "title": "Przeglądasz podgląd kursu",
       "enrollmentDescription": "Zapisz się na kurs, aby rozwiązywać quizy i zapisywać postępy.",
       "learningModeDescription": "Włącz tryb nauki, aby rozwiązywać quizy i śledzić postępy."
+    },
+    "timedQuiz": {
+      "info": "Czas zaczyna biec po wybraniu „Rozpocznij quiz” i biegnie dalej, nawet jeśli opuścisz stronę. Odpowiedzi zapisują się automatycznie i zostaną wysłane po upływie czasu. Pytania bez odpowiedzi otrzymują 0 punktów.",
+      "timeLimit": "Limit czasu",
+      "questions": "Pytania",
+      "start": "Rozpocznij quiz",
+      "timeLeft": "Pozostały czas: {{time}}",
+      "warning": "Została mniej niż minuta. Odpowiedzi zostaną wysłane automatycznie po upływie czasu.",
+      "timeUp": "Czas minął. Wysyłamy Twoje odpowiedzi."
     }
   },
   "studentCourseView": {
@@ -4959,7 +5018,8 @@
       "account": "Konto",
       "integrations": "Integracje",
       "organization": "Organizacja",
-      "platformCustomization": "Dostosowanie Platformy"
+      "platformCustomization": "Dostosowanie Platformy",
+      "features": "Funkcje"
     },
     "breadcrumbs": {
       "settings": "Ustawienia"
@@ -5044,7 +5104,7 @@
       "newUserNotifications": "Powiadomienia o nowych użytkownikach",
       "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik",
       "coursesVisibility": "Pokazuj kursy odwiedzającym",
-      "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania",
+      "coursesVisibilityDescription": "Pozwala osobom niezalogowanym przeglądać listę kursów i otwierać darmowe lekcje.",
       "modernCourseList": "Używaj nowoczesnej listy kursów",
       "modernCourseListDescription": "Włącz nowy wygląd listy kursów z sekcją hero i top kursami",
       "courseListLayout": "Układ listy kursów",
@@ -5060,11 +5120,11 @@
         "availableCourses": "Dostępne kursy"
       },
       "courseDiscussions": "Włącz dyskusje w kursach",
-      "courseDiscussionsDescription": "Pozwól zapisanym użytkownikom przeglądać i prowadzić dyskusje w kursach",
+      "courseDiscussionsDescription": "Dodaje do każdego kursu zakładkę dyskusji, w której zapisani użytkownicy mogą zadawać pytania, odpowiadać i reagować.",
       "calendar": "Włącz kalendarz",
       "calendarDescription": "Pozwól użytkownikom przeglądać zaplanowane wydarzenia w kalendarzu",
       "liveTraining": "Włącz szkolenia na żywo",
-      "liveTrainingDescription": "Pozwól trenerom tworzyć i prowadzić sesje szkoleniowe na żywo",
+      "liveTrainingDescription": "Pozwala trenerom planować i prowadzić sesje na żywo online. Uczestnicy widzą nadchodzące sesje w kalendarzu i dołączają do nich w przeglądarce.",
       "liveTrainingMaxParallelSessions": "Maksymalna liczba równoległych sesji szkoleń na żywo",
       "liveTrainingMaxParallelSessionsDescription": "Ogranicz liczbę sesji szkoleń na żywo aktywnych w tym samym czasie.",
       "liveTrainingTooltip": "Włącz tylko wtedy, gdy tenant ma korzystać z sesji prowadzonych przez trenerów.",
@@ -5077,7 +5137,7 @@
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
       "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy",
       "publicCoursePreview": "Podgląd lekcji przed zapisem do kursu",
-      "publicCoursePreviewDescription": "Pozwól niezapisanym użytkownikom przeglądać lekcje w bezpłatnych kursach publicznych."
+      "publicCoursePreviewDescription": "Pozwala zalogowanym użytkownikom otwierać lekcje darmowych kursów przed zapisaniem się. Quizy i śledzenie postępu nadal wymagają zapisu."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
@@ -5841,11 +5901,11 @@
     "settings": {
       "qaEnabled": {
         "label": "Włącz sekcję Q&A",
-        "description": "Włącz sekcję Q&A. Gdy jest wyłączona, sekcja Q&A jest ukryta dla wszystkich użytkowników."
+        "description": "Dodaje sekcję Q&A z częstymi pytaniami i odpowiedziami. Po wyłączeniu jest ukryta dla wszystkich."
       },
       "qaPublic": {
-        "label": "Pokaż sekcję Q&A niezarejestrowanym użytkownikom",
-        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję Q&A (można włączyć tylko, gdy sekcja Q&A jest aktywna)"
+        "label": "Widoczność dla odwiedzających",
+        "description": "Osoby niezalogowane też mogą czytać sekcję Q&A. Dostępne po włączeniu Q&A."
       }
     },
     "toast": {
@@ -5861,11 +5921,11 @@
     "settings": {
       "newsEnabled": {
         "label": "Włącz sekcję aktualności",
-        "description": "Włącz sekcję aktualności. Gdy jest wyłączona, sekcja aktualności jest ukryta dla wszystkich użytkowników."
+        "description": "Dodaje sekcję aktualności, w której publikujesz ogłoszenia i nowości dla użytkowników. Po wyłączeniu sekcja jest ukryta dla wszystkich."
       },
       "newsPublic": {
-        "label": "Pokaż sekcję aktualności niezarejestrowanym użytkownikom",
-        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję aktualności (można włączyć tylko, gdy sekcja aktualności jest aktywna)"
+        "label": "Widoczność dla odwiedzających",
+        "description": "Osoby niezalogowane też mogą czytać aktualności. Dostępne po włączeniu aktualności."
       }
     },
     "toast": {
@@ -5881,11 +5941,11 @@
     "settings": {
       "articlesEnabled": {
         "label": "Włącz sekcję bazy wiedzy",
-        "description": "Włącz sekcję bazy wiedzy. Gdy jest wyłączona, sekcja bazy wiedzy jest ukryta dla wszystkich użytkowników."
+        "description": "Dodaje bazę wiedzy, w której publikujesz artykuły, np. poradniki, procedury i FAQ. Po wyłączeniu jest ukryta dla wszystkich."
       },
       "articlesPublic": {
-        "label": "Pokaż sekcję bazy wiedzy niezarejestrowanym użytkownikom",
-        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję bazy wiedzy (można włączyć tylko, gdy sekcja bazy wiedzy jest aktywna)"
+        "label": "Widoczność dla odwiedzających",
+        "description": "Osoby niezalogowane też mogą czytać bazę wiedzy. Dostępne po włączeniu bazy wiedzy."
       }
     },
     "toast": {
@@ -5901,7 +5961,7 @@
     "settings": {
       "learningPathsEnabled": {
         "label": "Włącz ścieżki rozwoju",
-        "description": "Włącz ścieżki rozwoju. Po wyłączeniu są ukryte i zablokowane dla wszystkich użytkowników."
+        "description": "Łącz kursy w ścieżki rozwoju, które uczestnicy przechodzą krok po kroku. Po wyłączeniu ścieżki są ukryte, a ich strony zablokowane dla wszystkich."
       }
     }
   },
@@ -6405,7 +6465,9 @@
       "start_learning_path": "Rozpoczęto ścieżkę",
       "complete_learning_path": "Ukończono ścieżkę",
       "play_scorm": "Uruchomiono SCORM",
-      "complete_scorm": "Ukończono SCORM"
+      "complete_scorm": "Ukończono SCORM",
+      "export": "Wyeksportowano",
+      "import": "Zaimportowano"
     },
     "entity": {
       "automation": "Automatyzacja",
@@ -7250,7 +7312,8 @@
       "receiptSynchronizationPending": "Trwa zapisywanie poprzednich zmian w przestrzeni AI. Za chwilę spróbuj ponownie zastosować ten sam wybór.",
       "appliedRefreshPending": "Zmiany zostały zastosowane. Odśwież kurs, jeśli nie są jeszcze widoczne.",
       "deepResearchPreferenceNotSaved": "Włączono pogłębiony research dla tej prośby, ale nie udało się zapisać ustawienia dla kolejnych wiadomości.",
-      "webSearchPreferenceNotSaved": "Zezwolono na wyszukiwanie w tej prośbie, ale nie udało się zapisać tego ustawienia dla kolejnych wiadomości."
+      "webSearchPreferenceNotSaved": "Zezwolono na wyszukiwanie w tej prośbie, ale nie udało się zapisać tego ustawienia dla kolejnych wiadomości.",
+      "matchingQuestionUnsupported": "Luma nie może jeszcze edytować quizów z pytaniami typu dopasowanie. Edytuj ten quiz w edytorze quizów."
     },
     "review": {
       "generatedImage": "Wygenerowana grafika",
@@ -7791,6 +7854,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Odbiorcy",
+      "courseCompletionAudience": "Odbiorcy ukończenia kursu",
+      "courseCompletionAudiences": {
+        "learner": "Uczestnik, który ukończył kurs",
+        "administrators": "Administratorzy (zgodnie z preferencjami powiadomień)"
+      },
       "event": "Użytkownicy powiązani ze zdarzeniem",
       "user": "Wybrany użytkownik",
       "group": "Członkowie wybranej grupy",
@@ -8531,11 +8599,7 @@
       "timezone": "Daty używają strefy {{timezone}}."
     },
     "title": "Raporty",
-    "description": "Poznaj postępy organizacji w nauce, ścieżkach rozwoju, kursach i wśród uczestników.",
-    "picker": {
-      "search": "Szukaj",
-      "empty": "Brak wyników"
-    }
+    "description": "Poznaj postępy organizacji w nauce, ścieżkach rozwoju, kursach i wśród uczestników."
   },
   "contentMarketplace": {
     "category": "Kategoria / temat",
@@ -9439,7 +9503,7 @@
         "updated": "Zaktualizowano ustawienia rankingów.",
         "enabled": {
           "label": "Włącz rankingi",
-          "description": "Pokazuje stronę rankingów. Gdy wyłączone, nikt nie może otworzyć rankingów."
+          "description": "Dodaje stronę rankingów, która szereguje uczestników według XP lub osiągnięć w grupach albo w całej organizacji. Po wyłączeniu nikt nie może jej otworzyć."
         },
         "visibility": {
           "label": "Widoczność dla uczestników",
@@ -9460,7 +9524,7 @@
       "description": "Włącz grywalizację w organizacji i skonfiguruj osiągnięcia, które mogą zdobywać uczestnicy.",
       "enabled": {
         "label": "Włącz grywalizację",
-        "description": "Pokazuj użytkownikom poziomy, XP, osiągnięcia i powiadomienia o nagrodach. Nagrody są naliczane także wtedy, gdy ta opcja jest wyłączona."
+        "description": "Pokazuje użytkownikom poziomy, XP i osiągnięcia w profilu i na pulpicie oraz powiadamia o każdej nagrodzie. Postęp jest liczony także wtedy, gdy ta opcja jest wyłączona."
       },
       "achievements": {
         "title": "Osiągnięcia",
@@ -9732,5 +9796,54 @@
       "courseNotPublished": "Ten kurs wrócił do wersji roboczej. Opublikuj go, zanim ocenisz odpowiedzi."
     },
     "loadError": "Nie udało się wczytać kolejki do oceny. Odśwież stronę, aby spróbować ponownie."
+  },
+  "coursesViewToggle": {
+    "label": "Widok kursów",
+    "catalogue": "Katalog",
+    "table": "Tabela"
+  },
+  "platformFeatures": {
+    "needsSetup": {
+      "description": "Ta funkcja wymaga integracji, która nie jest jeszcze skonfigurowana.",
+      "configure": "Skonfiguruj integrację"
+    },
+    "disable": {
+      "title": "Wyłączyć funkcję „{{feature}}”?",
+      "description": "Użytkownicy przestaną ją widzieć. Dane zostaną zachowane i wrócą po ponownym włączeniu.",
+      "confirm": "Wyłącz"
+    },
+    "items": {
+      "learningPaths": {
+        "title": "Ścieżki rozwoju"
+      },
+      "gamification": {
+        "title": "Grywalizacja"
+      },
+      "liveTraining": {
+        "title": "Szkolenia na żywo"
+      },
+      "courseDiscussions": {
+        "title": "Dyskusje w kursach"
+      },
+      "leaderboards": {
+        "title": "Rankingi"
+      },
+      "news": {
+        "title": "Aktualności"
+      },
+      "articles": {
+        "title": "Baza wiedzy"
+      },
+      "qa": {
+        "title": "Q&A"
+      },
+      "coursesForVisitors": {
+        "title": "Kursy dla odwiedzających"
+      },
+      "publicCoursePreview": {
+        "title": "Publiczny podgląd kursu"
+      }
+    },
+    "requiresGamification": "Najpierw włącz grywalizację."
   }
 }

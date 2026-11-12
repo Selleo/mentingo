@@ -22,6 +22,7 @@ import {
   type CreateTenantFormValues,
   createTenantFormSchema,
 } from "~/modules/SuperAdmin/schemas/tenant.schema";
+import { TENANTS_PATH } from "~/modules/SuperAdmin/tenantsTable.constants";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CREATE_TENANT_PAGE_HANDLES, TENANT_FORM_HANDLES } from "../../../e2e/data/tenants/handles";
@@ -52,7 +53,12 @@ export default function CreateTenantPage() {
   };
 
   return (
-    <PageWrapper>
+    <PageWrapper
+      breadcrumbs={[
+        { title: t("superAdminTenantsView.title"), href: TENANTS_PATH },
+        { title: t("superAdminTenantsView.create.title"), href: `${TENANTS_PATH}/new` },
+      ]}
+    >
       <div data-testid={CREATE_TENANT_PAGE_HANDLES.PAGE} className="flex flex-col gap-y-6">
         <div>
           <h1 data-testid={CREATE_TENANT_PAGE_HANDLES.HEADING} className="text-xl font-semibold">

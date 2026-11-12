@@ -39,7 +39,11 @@ describe("Automation recipient scenarios (e2e)", () => {
   it("does not multiply an everyone audience by the source recipient count", async () => {
     await enableEveryoneAutomation();
     const event = t.createWelcomeNotificationEvent();
-    event.recipients.push({ ...event.recipients[0], itemId: t.admin.id, email: t.admin.email });
+    event.notificationData.recipients.push({
+      ...event.notificationData.recipients[0],
+      itemId: t.admin.id,
+      email: t.admin.email,
+    });
     const [run] = await t.publishNotificationAndGetRuns(event);
     const detail = await t.getAutomationRun(run.id);
     expect(detail.deliveries.map(({ recipientEmail }) => recipientEmail).sort()).toEqual(
@@ -53,7 +57,10 @@ describe("Automation recipient scenarios (e2e)", () => {
   it("preserves distinct repeated source items even when their content and recipient match", async () => {
     await enableEveryoneAutomation();
     const event = t.createWelcomeNotificationEvent();
-    event.recipients.push({ ...event.recipients[0], itemId: randomUUID() });
+    event.notificationData.recipients.push({
+      ...event.notificationData.recipients[0],
+      itemId: randomUUID(),
+    });
     const [run] = await t.publishNotificationAndGetRuns(event);
     const { deliveries } = await t.getAutomationRun(run.id);
     expect(deliveries).toHaveLength(4);
@@ -69,13 +76,16 @@ describe("Automation recipient scenarios (e2e)", () => {
   it("deduplicates explicit item IDs and expands items without event-linked recipients", async () => {
     await enableEveryoneAutomation();
     const base = t.createWelcomeNotificationEvent();
-    const item = { itemId: randomUUID(), eventFields: base.recipients[0].eventFields };
-    const event = new NotificationEvent(
-      base.occurrenceId,
-      base.kind,
-      [],
-      [item, structuredClone(item)],
-    );
+    const item = {
+      itemId: randomUUID(),
+      eventFields: base.notificationData.recipients[0].eventFields,
+    };
+    const event = new NotificationEvent({
+      occurrenceId: base.notificationData.occurrenceId,
+      kind: base.notificationData.kind,
+      recipients: [],
+      items: [item, structuredClone(item)],
+    });
     const [run] = await t.publishNotificationAndGetRuns(event);
     const { deliveries } = await t.getAutomationRun(run.id);
     expect(deliveries).toHaveLength(2);
@@ -230,12 +240,16 @@ describe("Automation recipient scenarios (e2e)", () => {
       };
       const automation = await t.createEnabledAutomation(definition);
       const base = t.createWelcomeNotificationEvent();
-      base.recipients[0].eventFields = {
+      base.notificationData.recipients[0].eventFields = {
         userFirstName: "Source learner",
         userEmail: t.student.email,
       };
       const [run] = await t.publishNotificationAndGetRuns(
-        new NotificationEvent(base.occurrenceId, kind, base.recipients),
+        new NotificationEvent({
+          occurrenceId: base.notificationData.occurrenceId,
+          kind,
+          recipients: base.notificationData.recipients,
+        }),
       );
       const [delivery] = await t.runAsTenant(t.defaultTenantId, () =>
         t.db

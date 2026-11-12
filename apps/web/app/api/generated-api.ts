@@ -2727,7 +2727,6 @@ export interface GetBetaCourseByIdResponse {
           type:
             | "brief_response"
             | "detailed_response"
-            | "match_words"
             | "scale_1_5"
             | "single_choice"
             | "multiple_choice"
@@ -2735,7 +2734,8 @@ export interface GetBetaCourseByIdResponse {
             | "photo_question_single_choice"
             | "photo_question_multiple_choice"
             | "fill_in_the_blanks_text"
-            | "fill_in_the_blanks_dnd";
+            | "fill_in_the_blanks_dnd"
+            | "matching";
           description?: string | null;
           title: string;
           displayOrder?: number;
@@ -2758,6 +2758,7 @@ export interface GetBetaCourseByIdResponse {
           }[];
           /** @default "en" */
           language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+          scoringMode?: "all_or_nothing" | "partial";
         }[];
         aiMentor?: {
           /** @format uuid */
@@ -3390,7 +3391,6 @@ export type BetaCreateChapterBody = {
       type:
         | "brief_response"
         | "detailed_response"
-        | "match_words"
         | "scale_1_5"
         | "single_choice"
         | "multiple_choice"
@@ -3398,7 +3398,8 @@ export type BetaCreateChapterBody = {
         | "photo_question_single_choice"
         | "photo_question_multiple_choice"
         | "fill_in_the_blanks_text"
-        | "fill_in_the_blanks_dnd";
+        | "fill_in_the_blanks_dnd"
+        | "matching";
       description?: string | null;
       title: string;
       displayOrder?: number;
@@ -3422,6 +3423,7 @@ export type BetaCreateChapterBody = {
       }[];
       /** @default "en" */
       language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      scoringMode?: "all_or_nothing" | "partial";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -3475,7 +3477,6 @@ export type UpdateChapterBody = ({
       type:
         | "brief_response"
         | "detailed_response"
-        | "match_words"
         | "scale_1_5"
         | "single_choice"
         | "multiple_choice"
@@ -3483,7 +3484,8 @@ export type UpdateChapterBody = ({
         | "photo_question_single_choice"
         | "photo_question_multiple_choice"
         | "fill_in_the_blanks_text"
-        | "fill_in_the_blanks_dnd";
+        | "fill_in_the_blanks_dnd"
+        | "matching";
       description?: string | null;
       title: string;
       displayOrder?: number;
@@ -3507,6 +3509,7 @@ export type UpdateChapterBody = ({
       }[];
       /** @default "en" */
       language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      scoringMode?: "all_or_nothing" | "partial";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -3609,7 +3612,6 @@ export interface GetLessonByIdResponse {
         type:
           | "brief_response"
           | "detailed_response"
-          | "match_words"
           | "scale_1_5"
           | "single_choice"
           | "multiple_choice"
@@ -3617,7 +3619,8 @@ export interface GetLessonByIdResponse {
           | "photo_question_single_choice"
           | "photo_question_multiple_choice"
           | "fill_in_the_blanks_text"
-          | "fill_in_the_blanks_dnd";
+          | "fill_in_the_blanks_dnd"
+          | "matching";
         description?: string | null;
         title: string;
         displayOrder?: number;
@@ -3634,15 +3637,18 @@ export interface GetLessonByIdResponse {
           isCorrect: boolean | null;
           /** @format uuid */
           questionId?: string;
+          matchedWord?: string | null;
         }[];
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        scoringMode?: "all_or_nothing" | "partial";
         passQuestion: boolean | null;
         reviewerFeedback?: {
           awardedPoints: number;
           maximumPoints: number;
           comment: string;
         };
+        matchingTargets?: string[];
       }[];
       questionCount: number;
       correctAnswerCount: number | null;
@@ -3844,7 +3850,6 @@ export type BetaCreateLessonBody = {
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -3852,7 +3857,8 @@ export type BetaCreateLessonBody = {
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -3876,6 +3882,7 @@ export type BetaCreateLessonBody = {
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -4035,7 +4042,6 @@ export type BetaCreateAiMentorLessonBody = {
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -4043,7 +4049,8 @@ export type BetaCreateAiMentorLessonBody = {
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -4067,6 +4074,7 @@ export type BetaCreateAiMentorLessonBody = {
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
   liveTrainingId?: string | null;
   updatedAt?: string;
@@ -4167,7 +4175,6 @@ export type BetaUpdateAiMentorLessonBody = ({
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -4175,7 +4182,8 @@ export type BetaUpdateAiMentorLessonBody = ({
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -4199,6 +4207,7 @@ export type BetaUpdateAiMentorLessonBody = ({
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
   liveTrainingId?: string | null;
   updatedAt?: string;
@@ -4235,7 +4244,6 @@ export type BetaCreateQuizLessonBody = {
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -4243,7 +4251,8 @@ export type BetaCreateQuizLessonBody = {
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -4267,6 +4276,7 @@ export type BetaCreateQuizLessonBody = {
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
 } & {
   /** @format uuid */
@@ -4299,7 +4309,6 @@ export type BetaUpdateQuizLessonBody = ({
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -4307,7 +4316,8 @@ export type BetaUpdateQuizLessonBody = ({
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -4331,6 +4341,7 @@ export type BetaUpdateQuizLessonBody = ({
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
 } & {
   /** @format uuid */
@@ -4360,7 +4371,6 @@ export type BetaUpdateLessonBody = ({
     type:
       | "brief_response"
       | "detailed_response"
-      | "match_words"
       | "scale_1_5"
       | "single_choice"
       | "multiple_choice"
@@ -4368,7 +4378,8 @@ export type BetaUpdateLessonBody = ({
       | "photo_question_single_choice"
       | "photo_question_multiple_choice"
       | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
+      | "fill_in_the_blanks_dnd"
+      | "matching";
     description?: string | null;
     title: string;
     displayOrder?: number;
@@ -4392,6 +4403,7 @@ export type BetaUpdateLessonBody = ({
     }[];
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    scoringMode?: "all_or_nothing" | "partial";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -9234,6 +9246,12 @@ export interface GetPromotionCodesResponse {
     };
     timesRedeemed: number;
   }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface GetPromotionCodeResponse {
@@ -26130,6 +26148,7 @@ export interface ListAutomationsResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -26287,6 +26306,7 @@ export interface ListAutomationsResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -26611,6 +26631,7 @@ export interface ListBuiltInAutomationTemplatesResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -26762,6 +26783,7 @@ export interface SimulateAutomationBody {
             recipients?:
               | {
                   type: "event";
+                  audience?: "learner" | "administrators";
                 }
               | {
                   type: "everyone";
@@ -27035,6 +27057,7 @@ export interface CreateAutomationBody {
             recipients?:
               | {
                   type: "event";
+                  audience?: "learner" | "administrators";
                 }
               | {
                   type: "everyone";
@@ -27190,6 +27213,7 @@ export interface CreateAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -27347,6 +27371,7 @@ export interface CreateAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -27506,6 +27531,7 @@ export interface CreateAutomationFromTemplateResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -27663,6 +27689,7 @@ export interface CreateAutomationFromTemplateResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -27822,6 +27849,7 @@ export interface GetAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -27979,6 +28007,7 @@ export interface GetAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -28137,6 +28166,7 @@ export interface UpdateAutomationBody {
             recipients?:
               | {
                   type: "event";
+                  audience?: "learner" | "administrators";
                 }
               | {
                   type: "everyone";
@@ -28292,6 +28322,7 @@ export interface UpdateAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -28449,6 +28480,7 @@ export interface UpdateAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -28615,6 +28647,7 @@ export interface DuplicateAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -28772,6 +28805,7 @@ export interface DuplicateAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -28931,6 +28965,7 @@ export interface ApplyAutomationBody {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -29087,6 +29122,7 @@ export interface ApplyAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -29244,6 +29280,7 @@ export interface ApplyAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -29403,6 +29440,7 @@ export interface EnableAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -29560,6 +29598,7 @@ export interface EnableAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -29719,6 +29758,7 @@ export interface DisableAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -29876,6 +29916,7 @@ export interface DisableAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -30035,6 +30076,7 @@ export interface ArchiveAutomationResponse {
               recipients?:
                 | {
                     type: "event";
+                    audience?: "learner" | "administrators";
                   }
                 | {
                     type: "everyone";
@@ -30192,6 +30234,7 @@ export interface ArchiveAutomationResponse {
                 recipients?:
                   | {
                       type: "event";
+                      audience?: "learner" | "administrators";
                     }
                   | {
                       type: "everyone";
@@ -33955,7 +33998,9 @@ export interface FindAllTenantsResponse {
         | "start_learning_path"
         | "complete_learning_path"
         | "play_scorm"
-        | "complete_scorm";
+        | "complete_scorm"
+        | "export"
+        | "import";
     }[];
     /** @min 0 */
     activityCountLast14Days: number;
@@ -34919,7 +34964,9 @@ export interface GetActivityLogsResponse {
       | "start_learning_path"
       | "complete_learning_path"
       | "play_scorm"
-      | "complete_scorm";
+      | "complete_scorm"
+      | "export"
+      | "import";
     resourceType: (string | null) | null;
     resourceId: (string | null) | null;
     metadata: any;
@@ -44220,10 +44267,23 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name StripeControllerGetPromotionCodes
      * @request GET:/api/stripe/promotion-codes
      */
-    stripeControllerGetPromotionCodes: (params: RequestParams = {}) =>
+    stripeControllerGetPromotionCodes: (
+      query?: {
+        search?: string;
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetPromotionCodesResponse, any>({
         path: `/api/stripe/promotion-codes`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -48119,7 +48179,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         page?: number;
         perPage?: number;
-        sort?: "name" | "createdAt";
+        sort?: "name" | "characteristic" | "createdAt";
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
@@ -48945,6 +49005,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "complete_learning_path"
               | "play_scorm"
               | "complete_scorm"
+              | "export"
+              | "import"
             )
           | (
               | "create"
@@ -48985,6 +49047,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "complete_learning_path"
               | "play_scorm"
               | "complete_scorm"
+              | "export"
+              | "import"
             )[];
       },
       params: RequestParams = {},

@@ -29,7 +29,9 @@ test("admin can bulk archive active users", async ({ cleanup, factories, withWor
     await openBulkEditActionFlow(page, "archive");
     await confirmBulkEditFlow(page);
 
-    await expect(page.getByTestId(USERS_PAGE_HANDLES.TABLE_BODY).getByRole("row")).toHaveCount(0);
+    for (const user of users) {
+      await expect(page.getByTestId(USERS_PAGE_HANDLES.row(user.id))).toHaveCount(0);
+    }
 
     await filterUsersFlow(page, { archivedStatus: "archived" });
 

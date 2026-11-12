@@ -2,6 +2,8 @@ export const GROUPS_PAGE_HANDLES = {
   PAGE: "groups-page",
   HEADING: "groups-page-heading",
   CREATE_BUTTON: "groups-page-create-button",
+  BULK_EDIT_TRIGGER: "groups-page-bulk-edit-trigger",
+  SEARCH_INPUT: "groups-page-search-input",
   DELETE_SELECTED_BUTTON: "groups-page-delete-selected-button",
   DELETE_DIALOG: "groups-page-delete-dialog",
   DELETE_DIALOG_CANCEL_BUTTON: "groups-page-delete-dialog-cancel-button",

@@ -155,6 +155,27 @@ describe("groupController (e2e)", () => {
         expect(response.body.data[1].id).toBe(group1.id);
       });
 
+      it("returns all groups with sorting by characteristic", async () => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+        const cookies = await cookieFor(admin, app);
+        const group1 = await groupFactory.create({ name: "A", characteristic: "Z" });
+        const group2 = await groupFactory.create({ name: "B", characteristic: "Y" });
+
+        const response = await request(app.getHttpServer())
+          .get("/api/group/all")
+          .set("Cookie", cookies)
+          .query({ sort: "characteristic" })
+          .expect(200);
+
+        expect(response.body.data.map((group: { id: string }) => group.id)).toEqual([
+          group2.id,
+          group1.id,
+        ]);
+      });
+
       it("returns all groups with sorting by created at", async () => {
         const admin = await userFactory
           .withCredentials({ password })

@@ -1,4 +1,4 @@
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, type PermissionKey } from "@repo/shared";
 
 import type { PermissionRequirement } from "~/common/permissions/permission.utils";
 
@@ -52,6 +52,14 @@ const USER_MANAGEMENT_ACCESS: PermissionRequirement = {
 };
 const COURSE_EDIT_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+};
+export const COURSES_TABLE_PERMISSIONS: PermissionKey[] = [
+  PERMISSIONS.COURSE_UPDATE,
+  PERMISSIONS.COURSE_UPDATE_OWN,
+  PERMISSIONS.COURSE_READ_ASSIGNED,
+];
+export const COURSES_TABLE_ACCESS: PermissionRequirement = {
+  anyOf: COURSES_TABLE_PERMISSIONS,
 };
 const ARTICLE_EDIT_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
@@ -144,9 +152,7 @@ export const routeAccessConfig = createRouteConfig({
   "news/:newsId": PUBLIC,
 
   // Admin part
-  "admin/courses": {
-    anyOf: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
-  },
+  "admin/courses": COURSE_EDIT_ACCESS,
   "admin/courses/new": COURSE_EDIT_ACCESS,
   "admin/course/:courseId/lesson/:lessonId/preview": COURSE_EDIT_ACCESS,
   "admin/beta-courses/new": {

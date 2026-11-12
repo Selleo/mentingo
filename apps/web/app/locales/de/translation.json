@@ -812,6 +812,21 @@
     "validation": {
       "messageRequired": "Eine Nachricht ist erforderlich.",
       "nameMaxLength": "Darf höchstens {{max}} Zeichen lang sein."
+    },
+    "optionPicker": {
+      "search": "Suchen",
+      "empty": "Keine Treffer"
+    },
+    "dataTable": {
+      "filters": "Filter",
+      "resetFilters": "Alle Filter zurücksetzen",
+      "removeFilter": "Filter entfernen: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}",
+      "selectedCount": "Ausgewählt: {{count}}",
+      "emptyTitle": "Keine Ergebnisse gefunden",
+      "emptyDescription": "Versuche eine andere Suche oder setze die Filter zurück.",
+      "selectAll": "Alle auswählen",
+      "selectRow": "Zeile auswählen"
     }
   },
   "lessons": {
@@ -2052,11 +2067,13 @@
         "draft": "Entwurf",
         "published": "Veröffentlicht",
         "private": "Privat"
-      }
+      },
+      "allCategories": "Alle Kategorien",
+      "archive": "Archiv"
     },
     "courses": {
       "header": "Kurse verwalten",
-      "subHeader": "Alle Kurse können Sie einsehen und bearbeiten"
+      "learnerHeader": "Alle Kurse"
     },
     "field": {
       "title": "Titel",
@@ -2068,7 +2085,8 @@
       "state": "Zustand",
       "status": "Status",
       "sharedCourse": "Geteilt",
-      "createdAt": "Erstellt am"
+      "createdAt": "Erstellt am",
+      "duration": "Dauer"
     },
     "lessonCard": {
       "mappedTypes": {
@@ -2325,7 +2343,16 @@
         "competencies": "Kompetenzen",
         "other": "Plattformfunktionen",
         "gamification": "Gamification",
-        "quiz_grading": "Quiz-Bewertung"
+        "quiz_grading": "Quiz-Bewertung",
+        "ai_thread": "KI-Unterhaltungen",
+        "automation": "Automatisierungen",
+        "automation_log": "Automatisierungsprotokolle",
+        "content_marketplace": "Content-Marktplatz",
+        "dashboard": "Dashboard",
+        "email_template": "E-Mail-Vorlagen",
+        "managed_group_results": "Ergebnisse verwalteter Gruppen",
+        "phishing": "Phishing-Simulationen",
+        "todo_task": "Aufgaben"
       },
       "descriptions": {
         "phishing_manage": "Phishing-Simulationen erstellen und verwalten.",
@@ -3165,13 +3192,15 @@
           "attemptsLimit": "Versuche beschränken sich",
           "quizCooldownInHours": "Zeitsperre nach Fehlversuchen (in Stunden)",
           "numberOfQuestions": "{{count1}} von {{count2}} Fragen",
-          "noQuestions": "Keine Fragen"
+          "noQuestions": "Keine Fragen",
+          "timeLimitMinutes": "Zeitlimit (hh:mm)"
         },
         "tooltip": {
           "switch": "Wenn diese Option aktiviert ist, hat der Schüler eine begrenzte Anzahl von Quizversuchen.",
           "passingThreshold": "Der prozentuale Schwellenwert für das Bestehen des Quiz. Erreicht ein Schüler diese Punktzahl, gilt das Quiz als bestanden.",
           "attemptsLimit": "Anzahl der erlaubten Quizversuche, bevor die Zeitsperre ausgelöst wird.",
-          "quizCooldownInHours": "Dauer der Quizsperre nach Ausschöpfung aller Versuche."
+          "quizCooldownInHours": "Dauer der Quizsperre nach Ausschöpfung aller Versuche.",
+          "timeLimitMinutes": "Optional. Wenn festgelegt, starten Lernende das Quiz ausdrücklich und ihre Antworten werden nach Ablauf der Zeit automatisch abgegeben. Leer lassen für kein Zeitlimit."
         },
         "validation": {
           "optionTextRequired": "Optionstext ist erforderlich",
@@ -3197,7 +3226,11 @@
           "maxFileNumber_other": "Sie können nicht mehr als {{ count }} Dateien hochladen",
           "maxResources_five": "Sie können nicht mehr als 5 Ressourcen hinzufügen",
           "sourceUrlRequired": "Quell-URL ist erforderlich",
-          "sourceUrlInvalid": "Geben Sie eine gültige HTTPS-URL ein"
+          "sourceUrlInvalid": "Geben Sie eine gültige HTTPS-URL ein",
+          "matchingPairsRequired": "Füge mindestens 2 Paare hinzu und fülle beide Seiten jedes Paares aus",
+          "matchingMatchRequired": "Gib die Zuordnung für dieses Paar ein",
+          "matchingPairsUnique": "Jedes Paar braucht eine eindeutige Zuordnung",
+          "timeLimitMinutes": "Gib ein Zeitlimit zwischen {{min}} und {{max}} ein."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Die Anzeigereihenfolge der Lektionen wurde erfolgreich aktualisiert",
@@ -3272,7 +3305,8 @@
           "ttsPreset": "TTS-Voreinstellung",
           "customTTSReference": "Benutzerdefinierte TTS-Referenz",
           "includeFiles_one": "Hängen Sie bis zu 1 Datei mit weniger als {{maxSize}} an, um sie als Kontext im Unterricht zu verwenden",
-          "includeFiles_other": "Hängen Sie bis zu {{ count }} Dateien mit weniger als {{maxSize}} an, um sie als Kontext in Lektionen zu verwenden"
+          "includeFiles_other": "Hängen Sie bis zu {{ count }} Dateien mit weniger als {{maxSize}} an, um sie als Kontext in Lektionen zu verwenden",
+          "matchingScoring": "Bewertung"
         },
         "placeholder": {
           "title": "Unterrichtstitel angeben...",
@@ -3788,7 +3822,7 @@
           "option": "Option",
           "singleChoice": "Einzelauswahl",
           "multipleChoice": "Multiple Choice",
-          "matchWords": "Passend",
+          "matching": "Zuordnung",
           "trueOrFalse": "Richtig oder falsch",
           "fillInTheBlanks": "Lückentext (Drag & Drop)",
           "photoQuestion": "Fotofrage",
@@ -3897,6 +3931,8 @@
           "betaTooltip": "Diese Funktionalität wird in einer Testversion bereitgestellt. Es kann Fehler enthalten oder nicht vollständig wie vorgesehen funktionieren. Die Nutzung erfolgt auf eigenes Risiko.",
           "dragWord": "Ziehen Sie ein Wort in einen Satz",
           "taskDescriptionTooltip": "Beschreiben Sie kurz, was der Teilnehmer während des Gesprächs mit dem KI-Mentor tun soll.",
+          "matchingScoringAllOrNothing": "Alle Paare müssen richtig sein",
+          "matchingScoringPartial": "Punkte für jedes richtige Paar",
           "requiresReview": "Vom Prüfer bewertet"
         }
       }
@@ -4193,6 +4229,13 @@
       "success": "Anmeldelink bestätigt. Weiterleitung...",
       "error": "Der Anmeldelink ist ungültig oder abgelaufen.",
       "backToLogin": "Zurück zum Login"
+    },
+    "oauthError": {
+      "cancelled": "Die Anmeldung wurde abgebrochen. Bitte versuchen Sie es erneut.",
+      "providerDisabled": "Diese Anmeldemethode ist deaktiviert. Bitte verwenden Sie eine andere Methode.",
+      "providerNotConfigured": "Diese Anmeldemethode ist noch nicht eingerichtet. Bitte wenden Sie sich an Ihren Administrator.",
+      "providerError": "Ihre Kontodaten konnten nicht vom Anmeldeanbieter abgerufen werden. Bitte versuchen Sie es erneut.",
+      "unknown": "Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut."
     }
   },
   "magicLinkView": {
@@ -4348,7 +4391,10 @@
       "score": "Punktzahl: {{score}} % ({{correct}} von {{questionsNumber}} Fragen)",
       "contentCantBeEmbedded": "Dieser Inhalt kann nicht eingebettet werden.",
       "openInNewTab": "In neuem Tab öffnen",
-      "scale_1_5": "Frage vom Typ Skala 1 bis 5."
+      "scale_1_5": "Frage vom Typ Skala 1 bis 5.",
+      "matching": "Ordne jedes Element seinem Paar zu.",
+      "noMatchesAvailable": "Für diese Frage sind noch keine Zuordnungen verfügbar.",
+      "correctMatch": "Richtige Zuordnung:"
     },
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",
@@ -4462,12 +4508,25 @@
       "courseEnrollmentRequired": "Sie sind nicht in diesen Kurs eingeschrieben.",
       "quizRetakeUnavailable": "Die Quizantworten können wegen des Versuchslimits oder der Wartezeit nicht zurückgesetzt werden.",
       "quizResetFailed": "Die Quizantworten konnten nicht zurückgesetzt werden. Bitte versuchen Sie es erneut.",
-      "quizAwaitingReview": "Dieses Quiz wartet auf eine Bewertung."
+      "quizAwaitingReview": "Dieses Quiz wartet auf eine Bewertung.",
+      "quizNotTimed": "Dieses Quiz hat kein Zeitlimit.",
+      "quizAttemptNotStarted": "Starte das Quiz, bevor du Antworten abgibst.",
+      "quizAttemptExpired": "Die Zeit für diesen Quizversuch ist abgelaufen.",
+      "quizDraftInvalid": "Deine Antworten konnten nicht automatisch gespeichert werden. Prüfe sie und versuche es erneut."
     },
     "preview": {
       "title": "Sie sehen eine Kursvorschau",
       "enrollmentDescription": "Schreiben Sie sich ein, um Quizze zu beantworten und Ihren Fortschritt zu speichern.",
       "learningModeDescription": "Aktivieren Sie den Lernmodus, um Quizze zu beantworten und Ihren Fortschritt zu verfolgen."
+    },
+    "timedQuiz": {
+      "info": "Der Timer startet, wenn du „Quiz starten“ wählst, und läuft weiter, auch wenn du die Seite verlässt. Deine Antworten werden automatisch gespeichert und nach Ablauf der Zeit abgegeben. Unbeantwortete Fragen werden mit 0 Punkten bewertet.",
+      "timeLimit": "Zeitlimit",
+      "questions": "Fragen",
+      "start": "Quiz starten",
+      "timeLeft": "Verbleibende Zeit: {{time}}",
+      "warning": "Weniger als eine Minute übrig. Deine Antworten werden nach Ablauf der Zeit automatisch abgegeben.",
+      "timeUp": "Die Zeit ist abgelaufen. Deine Antworten werden abgegeben."
     }
   },
   "studentCourseView": {
@@ -4687,7 +4746,8 @@
       "account": "Konto",
       "integrations": "Integrationen",
       "organization": "Organisation",
-      "platformCustomization": "Plattformanpassung"
+      "platformCustomization": "Plattformanpassung",
+      "features": "Funktionen"
     },
     "breadcrumbs": {
       "settings": "Einstellungen"
@@ -4732,7 +4792,7 @@
       "newUserNotifications": "Benachrichtigungen für neue Benutzer",
       "newUserNotificationsDescription": "Erhalten Sie Benachrichtigungen, wenn ein neuer Benutzer erstellt wird",
       "coursesVisibility": "Zeigen Sie Besuchern Kurse",
-      "coursesVisibilityDescription": "Ermöglichen Sie Besuchern, die Kursliste anzuzeigen und auf kostenlose Lektionen zuzugreifen, ohne sich anzumelden",
+      "coursesVisibilityDescription": "Erlaubt nicht angemeldeten Personen, die Kursliste zu durchsuchen und kostenlose Lektionen zu öffnen.",
       "modernCourseList": "Nutzen Sie die moderne Kurslistenansicht",
       "modernCourseListDescription": "Aktivieren Sie das neue Kurslistendesign mit den Abschnitten Hero und Top-Kurse.",
       "courseListLayout": "Kurslistenlayout",
@@ -4748,11 +4808,11 @@
         "availableCourses": "Verfügbare Kurse"
       },
       "courseDiscussions": "Kursdiskussionen aktivieren",
-      "courseDiscussionsDescription": "Eingeschriebenen Benutzern erlauben, Kursdiskussionen anzuzeigen und daran teilzunehmen",
+      "courseDiscussionsDescription": "Fügt jedem Kurs einen Diskussions-Tab hinzu, in dem eingeschriebene Nutzer Fragen stellen, antworten und reagieren können.",
       "calendar": "Kalender aktivieren",
       "calendarDescription": "Benutzern erlauben, geplante Ereignisse im Kalender anzuzeigen",
       "liveTraining": "Live-Schulung aktivieren",
-      "liveTrainingDescription": "Trainern erlauben, Live-Schulungen zu erstellen und durchzuführen",
+      "liveTrainingDescription": "Ermöglicht Trainern, Live-Online-Sitzungen zu planen und durchzuführen. Lernende sehen anstehende Sitzungen im Kalender und nehmen im Browser teil.",
       "liveTrainingMaxParallelSessions": "Maximale parallele Live-Schulungssitzungen",
       "liveTrainingMaxParallelSessionsDescription": "Begrenzen Sie, wie viele Live-Schulungssitzungen gleichzeitig aktiv sein können.",
       "liveTrainingTooltip": "Aktivieren Sie dies nur, wenn der Mandant trainergeführte Live-Sitzungen verwenden soll.",
@@ -4763,7 +4823,7 @@
       "studentsWithOverdueCourseNotification": "Studierende mit Benachrichtigungen über überfällige Kurse",
       "studentsWithOverdueCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn Studierende Kurse überfällig haben",
       "publicCoursePreview": "Lektionen vor der Kurseinschreibung ansehen",
-      "publicCoursePreviewDescription": "Nutzer können Lektionen in kostenlosen öffentlichen Kursen ohne Einschreibung ansehen."
+      "publicCoursePreviewDescription": "Erlaubt angemeldeten Nutzern, Lektionen kostenloser Kurse vor der Einschreibung zu öffnen. Quizze und Fortschrittsverfolgung erfordern weiterhin eine Einschreibung."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für neue Benutzer wurden erfolgreich aktualisiert",
@@ -5635,7 +5695,9 @@
       "start_learning_path": "Lernpfad gestartet",
       "complete_learning_path": "Lernpfad abgeschlossen",
       "play_scorm": "SCORM gestartet",
-      "complete_scorm": "SCORM abgeschlossen"
+      "complete_scorm": "SCORM abgeschlossen",
+      "export": "Exportiert",
+      "import": "Importiert"
     },
     "entity": {
       "automation": "Automatisierung",
@@ -5969,11 +6031,11 @@
     "settings": {
       "qaEnabled": {
         "label": "Aktivieren Sie den Abschnitt „Fragen und Antworten“.",
-        "description": "Aktivieren Sie den Abschnitt „Fragen und Antworten“. Wenn diese Option deaktiviert ist, ist der Abschnitt „Fragen und Antworten“ für alle Benutzer ausgeblendet."
+        "description": "Fügt einen Q&A-Bereich mit häufigen Fragen und Antworten hinzu. Wenn deaktiviert, ist er für alle ausgeblendet."
       },
       "qaPublic": {
-        "label": "Bereich „Fragen und Antworten“ für nicht registrierte Benutzer anzeigen",
-        "description": "Nicht registrierten Benutzern erlauben, den Abschnitt „Fragen und Antworten“ anzuzeigen (kann nur umgeschaltet werden, wenn der Abschnitt „Fragen und Antworten“ aktiviert ist)."
+        "label": "Sichtbarkeit für Besucher",
+        "description": "Auch nicht angemeldete Personen können den Q&A-Bereich lesen. Verfügbar, sobald Q&A aktiviert ist."
       }
     },
     "toast": {
@@ -5989,11 +6051,11 @@
     "settings": {
       "newsEnabled": {
         "label": "News-Bereich aktivieren",
-        "description": "Aktivieren Sie den News-Bereich. Wenn die Funktion deaktiviert ist, ist der News-Bereich für alle Benutzer ausgeblendet."
+        "description": "Fügt einen Bereich für Neuigkeiten hinzu, in dem du Ankündigungen und Updates für Nutzer veröffentlichst. Wenn deaktiviert, ist der Bereich für alle ausgeblendet."
       },
       "newsPublic": {
-        "label": "News-Bereich für nicht registrierte Benutzer anzeigen",
-        "description": "Nicht registrierten Benutzern erlauben, den News-Bereich anzuzeigen (kann nur umgeschaltet werden, wenn der News-Bereich aktiviert ist)"
+        "label": "Sichtbarkeit für Besucher",
+        "description": "Auch nicht angemeldete Personen können Neuigkeiten lesen. Verfügbar, sobald Neuigkeiten aktiviert sind."
       }
     },
     "toast": {
@@ -6009,11 +6071,11 @@
     "settings": {
       "articlesEnabled": {
         "label": "Aktivieren Sie den Wissensdatenbankbereich",
-        "description": "Aktivieren Sie den Wissensdatenbankbereich. Wenn diese Option deaktiviert ist, ist der Wissensdatenbankbereich für alle Benutzer ausgeblendet."
+        "description": "Fügt eine Wissensdatenbank hinzu, in der du Artikel wie Anleitungen, Abläufe und FAQs veröffentlichst. Wenn deaktiviert, ist sie für alle ausgeblendet."
       },
       "articlesPublic": {
-        "label": "Wissensdatenbankbereich für nicht registrierte Benutzer anzeigen",
-        "description": "Nicht registrierten Benutzern erlauben, den Wissensdatenbank-Abschnitt anzuzeigen (kann nur umgeschaltet werden, wenn der Wissensdatenbank-Abschnitt aktiviert ist)"
+        "label": "Sichtbarkeit für Besucher",
+        "description": "Auch nicht angemeldete Personen können die Wissensdatenbank lesen. Verfügbar, sobald die Wissensdatenbank aktiviert ist."
       }
     },
     "toast": {
@@ -6029,7 +6091,7 @@
     "settings": {
       "learningPathsEnabled": {
         "label": "Entwicklungspfade aktivieren",
-        "description": "Aktivieren Sie Entwicklungspfade. Wenn deaktiviert, werden Entwicklungspfade fuer alle Benutzer ausgeblendet und blockiert."
+        "description": "Fasse Kurse zu Entwicklungspfaden zusammen, die Lernende Schritt für Schritt abschließen. Wenn deaktiviert, sind Entwicklungspfade ausgeblendet und ihre Seiten für alle gesperrt."
       }
     }
   },
@@ -7172,7 +7234,8 @@
       "receiptSynchronizationPending": "Die vorherigen Änderungen werden im AI-Arbeitsbereich gespeichert. Versuchen Sie dieselbe Auswahl gleich erneut anzuwenden.",
       "appliedRefreshPending": "Die Änderungen wurden angewendet. Aktualisieren Sie den Kurs, falls sie noch nicht sichtbar sind.",
       "deepResearchPreferenceNotSaved": "Die vertiefte Recherche wurde für diese Anfrage aktiviert, aber die Einstellung konnte nicht für weitere Nachrichten gespeichert werden.",
-      "webSearchPreferenceNotSaved": "Die Websuche wurde für diese Anfrage erlaubt, aber die Einstellung konnte nicht für weitere Nachrichten gespeichert werden."
+      "webSearchPreferenceNotSaved": "Die Websuche wurde für diese Anfrage erlaubt, aber die Einstellung konnte nicht für weitere Nachrichten gespeichert werden.",
+      "matchingQuestionUnsupported": "Luma kann Quiz mit Zuordnungsfragen noch nicht bearbeiten. Bearbeite dieses Quiz im Quiz-Editor."
     },
     "review": {
       "generatedImage": "Generiertes Bild",
@@ -7708,6 +7771,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Empfänger",
+      "courseCompletionAudience": "Empfänger des Kursabschlusses",
+      "courseCompletionAudiences": {
+        "learner": "Lernender, der den Kurs abgeschlossen hat",
+        "administrators": "Administratoren (gemäß Benachrichtigungseinstellungen)"
+      },
       "event": "Mit dem Ereignis verknüpfte Benutzer",
       "user": "Ausgewählter Benutzer",
       "group": "Mitglieder einer ausgewählten Gruppe",
@@ -8428,11 +8496,7 @@
       "timezone": "Datumsangaben verwenden {{timezone}}."
     },
     "title": "Berichte",
-    "description": "Verfolgen Sie den Lernfortschritt der Organisation über Entwicklungspfade, Kurse und Lernende.",
-    "picker": {
-      "search": "Suchen",
-      "empty": "Keine Treffer"
-    }
+    "description": "Verfolgen Sie den Lernfortschritt der Organisation über Entwicklungspfade, Kurse und Lernende."
   },
   "contentMarketplace": {
     "category": "Kategorie / Thema",
@@ -9290,7 +9354,7 @@
         "updated": "Einstellungen der Bestenlisten aktualisiert.",
         "enabled": {
           "label": "Bestenlisten aktivieren",
-          "description": "Zeigt die Seite mit den Bestenlisten. Wenn deaktiviert, kann niemand Bestenlisten öffnen."
+          "description": "Fügt eine Ranglistenseite hinzu, die Lernende nach XP oder Erfolgen ordnet, pro Gruppe oder für die ganze Organisation. Wenn deaktiviert, kann niemand sie öffnen."
         },
         "visibility": {
           "label": "Sichtbarkeit für Lernende",
@@ -9311,7 +9375,7 @@
       "description": "Aktiviere Gamification für deine Organisation und konfiguriere die Erfolge, die Lernende erhalten können.",
       "enabled": {
         "label": "Gamification aktivieren",
-        "description": "Zeige Nutzern Level, XP, Erfolge und Belohnungsbenachrichtigungen. Belohnungen werden auch berechnet, wenn dies deaktiviert ist."
+        "description": "Zeigt Nutzern ihre Level, XP und Erfolge im Profil und im Dashboard und benachrichtigt bei jeder Belohnung. Der Fortschritt wird auch im deaktivierten Zustand gezählt."
       },
       "achievements": {
         "title": "Erfolge",
@@ -9583,5 +9647,54 @@
       "courseNotPublished": "Dieser Kurs ist wieder ein Entwurf. Veröffentliche ihn, bevor du Antworten bewertest."
     },
     "loadError": "Die Bewertungswarteschlange konnte nicht geladen werden. Lade die Seite neu, um es erneut zu versuchen."
+  },
+  "coursesViewToggle": {
+    "label": "Kursansicht",
+    "catalogue": "Katalog",
+    "table": "Tabelle"
+  },
+  "platformFeatures": {
+    "needsSetup": {
+      "description": "Diese Funktion benötigt eine Integration, die noch nicht eingerichtet ist.",
+      "configure": "Integration einrichten"
+    },
+    "disable": {
+      "title": "„{{feature}}“ deaktivieren?",
+      "description": "Nutzer sehen die Funktion nicht mehr. Alle Daten bleiben gespeichert und sind nach dem erneuten Aktivieren wieder da.",
+      "confirm": "Deaktivieren"
+    },
+    "items": {
+      "learningPaths": {
+        "title": "Entwicklungspfade"
+      },
+      "gamification": {
+        "title": "Gamification"
+      },
+      "liveTraining": {
+        "title": "Live-Trainings"
+      },
+      "courseDiscussions": {
+        "title": "Kursdiskussionen"
+      },
+      "leaderboards": {
+        "title": "Ranglisten"
+      },
+      "news": {
+        "title": "Neuigkeiten"
+      },
+      "articles": {
+        "title": "Wissensdatenbank"
+      },
+      "qa": {
+        "title": "Q&A"
+      },
+      "coursesForVisitors": {
+        "title": "Kurse für Besucher"
+      },
+      "publicCoursePreview": {
+        "title": "Öffentliche Kursvorschau"
+      }
+    },
+    "requiresGamification": "Aktiviere zuerst die Gamification."
   }
 }

@@ -84,3 +84,8 @@ export const EMAIL_TEMPLATE_CONFIRMATION_HINTS = {
   [EMAIL_TEMPLATE_ACTIONS.ARCHIVE]: "emailTemplates.ui.archiveHint",
   [EMAIL_TEMPLATE_ACTIONS.DELETE]: "emailTemplates.ui.deleteHint",
 } as const;
+
+export const EMAIL_TEMPLATES_DEFAULT_PAGE_SIZE = 10;
+
+/** Matches the API's search length limit. */
+export const EMAIL_TEMPLATES_SEARCH_MAX_LENGTH = 200;

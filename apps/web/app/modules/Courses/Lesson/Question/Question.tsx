@@ -2,6 +2,7 @@ import { BriefResponse } from "./BriefResponse";
 import { DetailedResponse } from "./DetailedResponse";
 import { FillInTheBlanksDnd } from "./FillInTheBlanks/dnd/FillInTheBlanksDnd";
 import { FillInTheBlanks } from "./FillInTheBlanks/FillInTheBlanks";
+import { Matching } from "./Matching";
 import { MultipleChoice } from "./MultipleChoice";
 import { PhotoQuestionMultipleChoice } from "./PhotoQuestionMultipleChoice";
 import { PhotoQuestionSingleChoice } from "./PhotoQuestionSingleChoice";
@@ -31,6 +32,7 @@ export const Question = ({ question, isCompleted, lessonId }: QuestionProps) => 
   const isTextFillInTheBlanks = question.type === "fill_in_the_blanks_text";
   const isDraggableFillInTheBlanks = question.type === "fill_in_the_blanks_dnd";
   const isScaleQuestion = question.type === "scale_1_5";
+  const isMatching = question.type === "matching";
 
   switch (true) {
     case isBriefResponse:
@@ -62,6 +64,9 @@ export const Question = ({ question, isCompleted, lessonId }: QuestionProps) => 
 
     case isScaleQuestion:
       return <ScaleQuestion question={question} isCompleted={isCompleted} />;
+
+    case isMatching:
+      return <Matching question={question} isCompleted={isCompleted} />;
 
     default:
       return null;

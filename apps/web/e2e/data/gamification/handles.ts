@@ -16,3 +16,7 @@ export const LEADERBOARD_HANDLES = {
   SETTINGS_ENABLED_SWITCH: "leaderboard-settings-enabled-switch",
   SETTINGS_VISIBILITY: "leaderboard-settings-visibility",
 } as const;
+
+export const GAMIFICATION_SETTINGS_HANDLES = {
+  ENABLED_SWITCH: "gamification-settings-enabled-switch",
+} as const;

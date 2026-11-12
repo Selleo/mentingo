@@ -1,0 +1,4 @@
+DROP INDEX IF EXISTS "outbox_events_gamification_user_idx";--> statement-breakpoint
+ALTER TABLE "outbox_events" ADD COLUMN "succeeded_handlers" jsonb DEFAULT '[]'::jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "outbox_events" ADD COLUMN "claim_id" uuid;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "outbox_events_gamification_user_idx" ON "outbox_events" USING btree ("tenant_id",(COALESCE(payload #>> '{loginData,userId}', payload #>> '{lessonCompletionData,userId}', payload #>> '{courseFinishedData,userId}', payload #>> '{quizCompletionData,userId}')),"event_type") WHERE event_type IN ('UserLoginEvent', 'LessonCompletedEvent', 'UserCourseFinishedEvent', 'QuizCompletedEvent');

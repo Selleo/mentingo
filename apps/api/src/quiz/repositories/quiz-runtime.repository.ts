@@ -10,6 +10,7 @@ import {
   assessmentAttempts,
   assessmentAttemptBlankAnswers,
   assessmentAttemptChoiceSelections,
+  assessmentAttemptMatchingAnswers,
   assessmentAttemptOpenTextAnswers,
   assessmentAttemptQuestionAnswerReviews,
   assessmentAttemptQuestionAnswers,
@@ -28,6 +29,7 @@ import type {
   QuizAttemptBlankAnswerInsert,
   QuizAttemptOpenTextAnswerInsert,
   QuizAttemptScaleSelectionInsert,
+  QuizAttemptMatchingAnswerInsert,
 } from "./quiz-runtime.repository.types";
 
 @Injectable()
@@ -241,6 +243,11 @@ export class QuizRuntimeRepository {
     await db.insert(assessmentAttemptScaleSelections).values(values);
   }
 
+  async insertMatchingAnswers(values: QuizAttemptMatchingAnswerInsert[], db: DatabasePg) {
+    if (!values.length) return;
+    await db.insert(assessmentAttemptMatchingAnswers).values(values);
+  }
+
   async findLatestAttempt(
     assessmentId: UUIDType,
     learnerId: UUIDType,
@@ -344,5 +351,14 @@ export class QuizRuntimeRepository {
         assessmentAttemptQuestionAnswerReviews.questionAnswerId,
         desc(assessmentAttemptQuestionAnswerReviews.revisionNumber),
       );
+  }
+
+  async findMatchingAnswers(questionAnswerIds: UUIDType[], db: DatabasePg = this.db) {
+    if (!questionAnswerIds.length) return [];
+
+    return db
+      .select()
+      .from(assessmentAttemptMatchingAnswers)
+      .where(inArray(assessmentAttemptMatchingAnswers.questionAnswerId, questionAnswerIds));
   }
 }

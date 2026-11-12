@@ -10,9 +10,16 @@ import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 import Stripe from "stripe";
 
-import { BaseResponse, baseResponse, UUIDType } from "src/common";
+import {
+  BaseResponse,
+  baseResponse,
+  PaginatedResponse,
+  paginatedResponse,
+  UUIDType,
+} from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
+import { parsePagination } from "src/common/pagination";
 
 import { checkoutSessionSchema, CreateCheckoutSessionBody } from "./schemas/checkoutSession.schema";
 import { CreatePromotionCode, createPromotionCodeSchema } from "./schemas/createPromotionCode";
@@ -22,6 +29,7 @@ import {
   UpdatePromotionCode,
   updatePromotionCodeSchema,
 } from "./schemas/updatePromotionCode.schema";
+import { PROMOTION_CODES_MAX_PAGE_SIZE } from "./stripe.constants";
 import { StripeService } from "./stripe.service";
 import { StripeWebhookHandler } from "./stripeWebhook.handler";
 
@@ -137,11 +145,26 @@ export class StripeController {
 
   @Get("promotion-codes")
   @Validate({
-    response: baseResponse(Type.Array(promotionCodeSchema)),
+    request: [
+      { type: "query", name: "search", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      {
+        type: "query",
+        name: "perPage",
+        schema: Type.Optional(Type.Number({ minimum: 1, maximum: PROMOTION_CODES_MAX_PAGE_SIZE })),
+      },
+    ],
+    response: paginatedResponse(Type.Array(promotionCodeSchema)),
   })
   @RequirePermission(PERMISSIONS.BILLING_MANAGE)
-  async getPromotionCodes() {
-    return new BaseResponse(await this.stripeService.getPromotionCodes());
+  async getPromotionCodes(
+    @Query("search") search?: string,
+    @Query("page") page?: number,
+    @Query("perPage") perPage?: number,
+  ) {
+    return new PaginatedResponse(
+      await this.stripeService.getPromotionCodes({ search, ...parsePagination(page, perPage) }),
+    );
   }
 
   @Get("promotion-code/:id")

@@ -54,7 +54,10 @@ import type {
 } from "../native-archive.types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { SourceSnapshot } from "src/course-transfer/types/course-transfer-graph.types";
+import type {
+  ResourceSelect,
+  SourceSnapshot,
+} from "src/course-transfer/types/course-transfer-graph.types";
 
 @Injectable()
 export class NativeArchiveAssetsService {
@@ -116,6 +119,7 @@ export class NativeArchiveAssetsService {
         scormDirectories.map((directory) => [directory.sourceReference, directory.targetReference]),
       ),
       uploadedResourceIdsByFileKey: new Map(),
+      audioDurationSecondsByReference: new Map(),
       assetReferences,
       uploadedFileReferences: [],
       uploadedS3Keys: [],
@@ -317,7 +321,7 @@ export class NativeArchiveAssetsService {
     }
 
     const uploadContentType = upload.isLessonFile
-      ? await this.resolveValidatedAudioContentType(asset, context.archive, upload.contentType)
+      ? await this.resolveValidatedAudioContentType(upload, context)
       : upload.contentType;
 
     if (asset.byteLength === 0) {
@@ -340,7 +344,12 @@ export class NativeArchiveAssetsService {
     const rewriteValue = <T>(value: T): T => this.rewriteReferences(value, context.referenceMap);
 
     return {
-      snapshots: snapshots.map(rewriteValue),
+      snapshots: snapshots.map((snapshot) =>
+        this.withImportedAudioDurations(
+          rewriteValue(snapshot),
+          context.audioDurationSecondsByReference,
+        ),
+      ),
       uploadedResourceIdsByFileKey: context.uploadedResourceIdsByFileKey,
       rewriteReference: (reference) =>
         reference ? (context.referenceMap.get(reference) ?? reference) : null,
@@ -513,9 +522,8 @@ export class NativeArchiveAssetsService {
 
   /** Imported lesson audio gets the same content validation as a direct upload. */
   private async resolveValidatedAudioContentType(
-    asset: NativeArchiveAsset,
-    archive: ParsedNativeArchive,
-    contentType: string,
+    { asset, targetReference, contentType }: NativeArchiveAssetUpload,
+    context: NativeArchiveAssetStagingContext,
   ) {
     const isAudioAsset =
       asset.contentType.startsWith("audio/") ||
@@ -523,11 +531,43 @@ export class NativeArchiveAssetsService {
 
     if (!isAudioAsset) return contentType;
 
-    return validateAudioFileAtPath(await archive.extractAsset(asset.path), {
-      originalname: path.posix.basename(asset.sourceReference),
-      mimetype: asset.contentType,
-      size: asset.byteLength,
+    const { contentType: validatedContentType, durationSeconds } = await validateAudioFileAtPath(
+      await context.archive.extractAsset(asset.path),
+      {
+        originalname: path.posix.basename(asset.sourceReference),
+        mimetype: asset.contentType,
+        size: asset.byteLength,
+      },
+    );
+    context.audioDurationSecondsByReference.set(targetReference, durationSeconds);
+
+    return validatedContentType;
+  }
+
+  private withImportedAudioDurations(
+    snapshot: NativeArchiveValidatedCourseSnapshot,
+    audioDurationSecondsByReference: ReadonlyMap<string, number>,
+  ): NativeArchiveValidatedCourseSnapshot {
+    const withAudioDuration = <TResource extends ResourceSelect>(resource: TResource) => {
+      const durationSeconds = audioDurationSecondsByReference.get(resource.reference);
+      if (durationSeconds === undefined || resource.metadata?.durationSeconds !== undefined)
+        return resource;
+
+      return { ...resource, metadata: { ...resource.metadata, durationSeconds } };
+    };
+
+    const withRelatedAudioDuration = <TPair extends { resource: ResourceSelect }>(pair: TPair) => ({
+      ...pair,
+      resource: withAudioDuration(pair.resource),
     });
+
+    return {
+      ...snapshot,
+      lessonContentResources: snapshot.lessonContentResources.map(withAudioDuration),
+      lessonResources: snapshot.lessonResources.map(withRelatedAudioDuration),
+      questionResources: snapshot.questionResources.map(withRelatedAudioDuration),
+      courseResources: snapshot.courseResources.map(withRelatedAudioDuration),
+    };
   }
 
   private rewriteReferences<T>(value: T, referenceMap: ReadonlyMap<string, string>): T {

@@ -71,6 +71,7 @@ export const useQuizLessonForm = ({
       thresholdScore: null,
       attemptsLimit: null,
       quizCooldownInHours: null,
+      timeLimitMinutes: null,
       questions: [],
     },
   });
@@ -84,6 +85,7 @@ export const useQuizLessonForm = ({
         thresholdScore: null,
         attemptsLimit: null,
         quizCooldownInHours: null,
+        timeLimitMinutes: lessonToEdit.timeLimitMinutes ?? null,
         questions:
           lessonToEdit.questions?.map((question: Question) => {
             let processedDescription = question.description || "";
@@ -124,6 +126,7 @@ export const useQuizLessonForm = ({
               requiresReview: question.requiresReview,
               title: question.title,
               displayOrder: question.displayOrder,
+              scoringMode: question.scoringMode,
               options: question.options?.map((option: QuestionOption) => ({
                 id: option.id,
                 sortableId: option.id,

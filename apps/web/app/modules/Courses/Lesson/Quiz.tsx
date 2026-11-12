@@ -1,14 +1,23 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
-import { useEffect, useMemo, useState } from "react";
+import { debounce } from "lodash-es";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
-import { useSubmitQuiz, useRetakeQuiz, useQuizRetakeStatus } from "~/api/mutations";
+import {
+  useSubmitQuiz,
+  useRetakeQuiz,
+  useQuizRetakeStatus,
+  useSaveQuizAttemptDraft,
+  useStartQuizAttempt,
+} from "~/api/mutations";
 import { courseQueryOptions, lessonQueryOptions } from "~/api/queries";
 import { certificatesQueryOptions } from "~/api/queries/useCertificates";
 import { queryClient } from "~/api/queryClient";
 import { invalidateLearningPathProgressionData } from "~/api/utils/invalidateLearningPathProgressionData";
+import { isClosedQuizAttemptError } from "~/api/utils/refetchLessonOnClosedQuizAttempt";
 import { ProgressBadge } from "~/components/Badges/ProgressBadge";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
@@ -20,7 +29,9 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { toast } from "~/components/ui/use-toast";
+import { cn } from "~/lib/utils";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { LEARNING_HANDLES } from "../../../../e2e/data/learning/handles";
@@ -28,16 +39,21 @@ import { QuizContextProvider } from "../components/QuizContextProvider";
 
 import { Questions } from "./Questions";
 import { QuizFormSchema } from "./schemas";
+import { formatQuizTimeLeft, useQuizCountdown } from "./useQuizCountdown";
 import {
   leftAttemptsToDisplay,
+  getDraftQuizAnswers,
   getEmptyQuizAnswers,
   getQuizTooltipText,
+  getRequiredMatchingAnswerCounts,
   getUserAnswers,
   parseQuizFormData,
 } from "./utils";
 
 import type { QuizForm } from "./types";
 import type { GetLessonByIdResponse } from "~/api/generated-api";
+
+const DRAFT_AUTOSAVE_DELAY_MS = 1000;
 
 type QuizProps = {
   lesson: GetLessonByIdResponse["data"];
@@ -63,16 +79,30 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
   const isAwaitingReview = Boolean(lesson.isQuizAwaitingReview);
   const isUserSubmittedAnswer =
     (Boolean(lesson.lessonCompleted) || isAwaitingReview) && !isRetakingQuiz;
+  const isTimedQuiz = Boolean(lesson.timeLimitMinutes) && !isPreviewMode;
+  const quizAttempt = isTimedQuiz && !isUserSubmittedAnswer ? lesson.quizAttempt : null;
+  const quizAttemptId = quizAttempt?.attemptId;
+
+  const getInitialAnswers = () => {
+    if (isUserSubmittedAnswer) return getUserAnswers(questions);
+    if (quizAttempt) return getDraftQuizAnswers(questions, quizAttempt.draftAnswers);
+    return getEmptyQuizAnswers(questions);
+  };
 
   const methods = useForm<QuizForm>({
     mode: "onSubmit",
-    defaultValues: (isUserSubmittedAnswer
-      ? getUserAnswers(questions)
-      : getEmptyQuizAnswers(questions)) as QuizForm,
-    resolver: zodResolver(QuizFormSchema(t)),
+    defaultValues: getInitialAnswers(),
+    // timed quizzes accept partial answers: unanswered questions score 0 points
+    resolver: isTimedQuiz
+      ? undefined
+      : zodResolver(QuizFormSchema(t, getRequiredMatchingAnswerCounts(questions))),
   });
 
-  const submitQuiz = useSubmitQuiz({
+  const { mutate: startQuizAttempt, isPending: isStartingQuizAttempt } = useStartQuizAttempt();
+  const { mutate: saveQuizAttemptDraft } = useSaveQuizAttemptDraft();
+  const scheduledDraftSaveRef = useRef<ReturnType<typeof debounce> | null>(null);
+
+  const { mutate: submitQuiz, isPending: isSubmittingQuiz } = useSubmitQuiz({
     handleOnSuccess: async () => {
       setIsRetakingQuiz(false);
 
@@ -87,7 +117,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
     },
   });
 
-  const retakeQuiz = useRetakeQuiz({
+  const { mutate: retakeQuiz } = useRetakeQuiz({
     lessonId: lesson.id,
     handleOnSuccess: async () => {
       setIsRetakingQuiz(true);
@@ -107,24 +137,138 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
     setIsRetakingQuiz(false);
   }, [lesson.id]);
 
-  if (!questions.length) return null;
+  const lessonQueryKey = lessonQueryOptions(lesson.id, language, userId).queryKey;
+  // pairs the (possibly cached) serverNow with the time it was fetched, for the countdown offset
+  const lessonReceivedAt = queryClient.getQueryState(lessonQueryKey)?.dataUpdatedAt || undefined;
 
-  const handleOnSubmit = async (data: QuizForm) => {
-    if (isPreviewMode) return;
-    const parsedQuestionsAnswers = parseQuizFormData(data);
+  const prefilledDraftRef = useRef(
+    quizAttempt ? `${quizAttempt.attemptId}:${quizAttempt.draftSavedAt}` : null,
+  );
+  const hasEditsSincePrefillRef = useRef(false);
 
-    submitQuiz.mutate({
+  useEffect(() => {
+    if (!quizAttempt) return;
+
+    const draftKey = `${quizAttempt.attemptId}:${quizAttempt.draftSavedAt}`;
+    const isNewAttempt = !prefilledDraftRef.current?.startsWith(`${quizAttempt.attemptId}:`);
+    if (prefilledDraftRef.current === draftKey) return;
+
+    prefilledDraftRef.current = draftKey;
+    // a newer draft of the same attempt (e.g. saved after the cached lesson) must not drop local edits
+    if (!isNewAttempt && hasEditsSincePrefillRef.current) return;
+
+    hasEditsSincePrefillRef.current = false;
+    methods.reset(getDraftQuizAnswers(questions, quizAttempt.draftAnswers));
+  }, [quizAttempt, methods, questions]);
+
+  const saveDraftNow = useCallback(() => {
+    if (!quizAttemptId) return;
+
+    saveQuizAttemptDraft({
       lessonId: lesson.id,
-      questionsAnswers: parsedQuestionsAnswers,
+      attemptId: quizAttemptId,
+      questionsAnswers: parseQuizFormData(methods.getValues()),
       learningStateId: lesson.learningStateId,
-      language,
     });
-  };
+  }, [quizAttemptId, lesson.id, lesson.learningStateId, methods, saveQuizAttemptDraft]);
+
+  useEffect(() => {
+    if (!quizAttemptId) return;
+
+    const scheduleDraftSave = debounce(saveDraftNow, DRAFT_AUTOSAVE_DELAY_MS);
+    scheduledDraftSaveRef.current = scheduleDraftSave;
+
+    const subscription = methods.watch((_, { name }) => {
+      // a reset (prefill) has no field name and only restores what the server already has
+      if (!name) return;
+
+      hasEditsSincePrefillRef.current = true;
+      scheduleDraftSave();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      // leaving the quiz still saves the last answers
+      scheduleDraftSave.flush();
+      scheduledDraftSaveRef.current = null;
+    };
+  }, [quizAttemptId, methods, saveDraftNow]);
+
+  const isSubmitPendingRef = useRef(false);
+
+  const handleOnSubmit = useCallback(
+    (data: QuizForm) => {
+      if (isPreviewMode || isSubmitPendingRef.current) return;
+
+      isSubmitPendingRef.current = true;
+      // the submit carries every answer, so a pending autosave would only race with it
+      scheduledDraftSaveRef.current?.cancel();
+
+      submitQuiz(
+        {
+          lessonId: lesson.id,
+          questionsAnswers: parseQuizFormData(data),
+          learningStateId: lesson.learningStateId,
+          language,
+        },
+        {
+          onError: (error) => {
+            // keep the answers on the server while the attempt is still open; retry stays possible
+            if (quizAttemptId && !isClosedQuizAttemptError(error)) saveDraftNow();
+          },
+          onSettled: () => {
+            isSubmitPendingRef.current = false;
+          },
+        },
+      );
+    },
+    [
+      isPreviewMode,
+      submitQuiz,
+      lesson.id,
+      lesson.learningStateId,
+      language,
+      quizAttemptId,
+      saveDraftNow,
+    ],
+  );
+
+  const handleTimeUp = useCallback(
+    () => handleOnSubmit(methods.getValues()),
+    [handleOnSubmit, methods],
+  );
+
+  const { secondsLeft, isWarning, isGraceOver } = useQuizCountdown({
+    expiresAt: quizAttempt?.expiresAt,
+    serverNow: quizAttempt?.serverNow,
+    receivedAt: lessonReceivedAt,
+    graceSeconds: quizAttempt?.submitGraceSeconds,
+    onExpire: handleTimeUp,
+  });
+
+  useEffect(() => {
+    // the server no longer accepts answers and finalizes the attempt when the lesson is read
+    if (isGraceOver) {
+      void queryClient.invalidateQueries(lessonQueryOptions(lesson.id, language, userId));
+    }
+  }, [isGraceOver, lesson.id, language, userId]);
+
+  if (!questions.length) return null;
 
   const handleRetake = () => {
     if (isPreviewMode) return;
-    retakeQuiz.mutate(lesson.learningStateId);
+    retakeQuiz(lesson.learningStateId);
   };
+
+  const handleStartQuizAttempt = () =>
+    startQuizAttempt({ lessonId: lesson.id, language, learningStateId: lesson.learningStateId });
+
+  const isAwaitingQuizStart = isTimedQuiz && !isUserSubmittedAnswer && !quizAttempt;
+  const isTimeUp = secondsLeft === 0;
+  const timerMessage = match({ isTimeUp, isWarning })
+    .with({ isTimeUp: true }, () => t("studentLessonView.timedQuiz.timeUp"))
+    .with({ isWarning: true }, () => t("studentLessonView.timedQuiz.warning"))
+    .otherwise(() => "");
 
   const requiredCorrect = Math.ceil(((lesson.thresholdScore ?? 0) * questions?.length) / 100);
 
@@ -184,13 +328,79 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
             </div>
           )}
 
-          <fieldset disabled={isPreviewMode} className="flex flex-col gap-y-4">
-            <Questions
-              questions={questions}
-              isQuizCompleted={isUserSubmittedAnswer}
-              lessonId={lesson.id}
-            />
-          </fieldset>
+          {isAwaitingQuizStart && (
+            <div
+              data-testid={LEARNING_HANDLES.QUIZ_TIME_LIMIT_INFO}
+              className="flex flex-col items-start gap-y-4"
+            >
+              <div className="grid w-full gap-2 border-y border-neutral-200 py-3 text-sm">
+                <dl className="grid gap-2">
+                  <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
+                    <dt className="text-neutral-500">
+                      {t("studentLessonView.timedQuiz.timeLimit")}
+                    </dt>
+                    <dd className="font-medium text-neutral-900">
+                      {formatDuration((lesson.timeLimitMinutes ?? 0) * 60, t)}
+                    </dd>
+                  </div>
+                  <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
+                    <dt className="text-neutral-500">
+                      {t("studentLessonView.timedQuiz.questions")}
+                    </dt>
+                    <dd className="font-medium text-neutral-900">{questions.length}</dd>
+                  </div>
+                </dl>
+                <p className="text-neutral-500">{t("studentLessonView.timedQuiz.info")}</p>
+              </div>
+              <Button
+                data-testid={LEARNING_HANDLES.QUIZ_START_BUTTON}
+                type="button"
+                onClick={handleStartQuizAttempt}
+                disabled={isStartingQuizAttempt}
+              >
+                {t("studentLessonView.timedQuiz.start")}
+              </Button>
+            </div>
+          )}
+
+          {quizAttempt && secondsLeft !== null && (
+            <div
+              className={cn(
+                "sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-2",
+                { "border-error-500 bg-error-50 text-error-700": isWarning },
+              )}
+            >
+              <span
+                role="timer"
+                data-testid={LEARNING_HANDLES.QUIZ_TIMER}
+                className="body-base-md tabular-nums"
+              >
+                {t("studentLessonView.timedQuiz.timeLeft", {
+                  time: formatQuizTimeLeft(secondsLeft),
+                })}
+              </span>
+              <span
+                aria-live="polite"
+                data-testid={LEARNING_HANDLES.QUIZ_TIMER_MESSAGE}
+                className="body-sm"
+              >
+                {timerMessage}
+              </span>
+            </div>
+          )}
+
+          {!isAwaitingQuizStart && (
+            <fieldset
+              disabled={isPreviewMode || isTimeUp || isSubmittingQuiz}
+              className="flex flex-col gap-y-4"
+            >
+              <Questions
+                questions={questions}
+                isQuizCompleted={isUserSubmittedAnswer}
+                lessonId={lesson.id}
+              />
+            </fieldset>
+          )}
           {!isPreviewMode && (
             <div className="flex gap-x-2 self-end">
               <div className="group relative">
@@ -239,7 +449,9 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
                 data-testid={LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON}
                 type="submit"
                 className="flex items-center gap-x-2"
-                disabled={isUserSubmittedAnswer}
+                disabled={
+                  isUserSubmittedAnswer || isAwaitingQuizStart || isSubmittingQuiz || isGraceOver
+                }
               >
                 <span>{t("studentLessonView.button.submit")}</span>
                 <Icon name="ArrowRight" className="h-auto w-4" />

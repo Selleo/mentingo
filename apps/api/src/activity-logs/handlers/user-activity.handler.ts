@@ -1,20 +1,26 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
+import { mapValues } from "lodash";
 
 import { CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
-import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
+import {
+  buildActivityLogMetadata,
+  stringifyMetadataValue,
+} from "../utils/build-activity-log-metadata";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type UserEventType = CreateUserEvent | UpdateUserEvent | DeleteUserEvent;
 
 @Injectable()
-@EventsHandler(CreateUserEvent, UpdateUserEvent, DeleteUserEvent)
-export class UserActivityHandler implements IEventHandler<UserEventType> {
+@OutboxEventsHandler(CreateUserEvent, UpdateUserEvent, DeleteUserEvent)
+export class UserActivityHandler implements OutboxEventsHandlerOf<UserEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: UserEventType) {
+  async handleOutboxEvent(event: UserEventType) {
     if (event instanceof CreateUserEvent) return await this.handleCreate(event);
     if (event instanceof UpdateUserEvent) return await this.handleUpdate(event);
     if (event instanceof DeleteUserEvent) return await this.handleDelete(event);
@@ -55,27 +61,17 @@ export class UserActivityHandler implements IEventHandler<UserEventType> {
     });
   }
 
-  private async handleDelete(event: DeleteUserEvent) {
-    const beforeSnapshot =
-      event.deleteUserData.deletedUserData &&
-      Object.fromEntries(
-        Object.entries(event.deleteUserData.deletedUserData).map(([key, value]) => [
-          key,
-          value === null || value === undefined
-            ? ""
-            : typeof value === "object"
-              ? JSON.stringify(value)
-              : String(value),
-        ]),
-      );
+  private async handleDelete({ deleteUserData }: DeleteUserEvent) {
+    const { actor, userId, deletedUserData } = deleteUserData;
+    const before = deletedUserData ? mapValues(deletedUserData, stringifyMetadataValue) : null;
 
     await this.activityLogsService.recordActivity({
-      actor: event.deleteUserData.actor,
+      actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
-      resourceId: event.deleteUserData.userId,
-      before: (beforeSnapshot as Record<string, string>) ?? null,
-      context: beforeSnapshot?.email ? { email: beforeSnapshot.email } : null,
+      resourceId: userId,
+      before,
+      context: before?.email ? { email: before.email } : null,
     });
   }
 }

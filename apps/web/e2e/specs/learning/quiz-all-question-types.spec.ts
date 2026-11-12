@@ -31,7 +31,7 @@ test("student can submit a quiz containing every rendered question type", async 
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
-  const { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId } = lessons;
+  const { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId, matchingPairs } = lessons;
 
   await withWorkerPage(
     USER_ROLE.student,
@@ -51,6 +51,7 @@ test("student can submit a quiz containing every rendered question type", async 
       await answerAllRenderedQuizQuestionTypesFlow(page, {
         dndBlankAnswer,
         dndBlankAnswerId,
+        matchingPairs,
         textBlankAnswer,
       });
 
@@ -95,7 +96,7 @@ test("student can submit a quiz containing every rendered question type", async 
           courseLessonStatus: "completed",
           lessonCompleted: true,
           attempts: 1,
-          correctAnswerCount: 9,
+          correctAnswerCount: 10,
           score: 100,
         });
 
@@ -129,7 +130,7 @@ test("student submits a quiz with every rendered question type and waits for rev
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
-  const { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId } = lessons;
+  const { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId, matchingPairs } = lessons;
 
   await withWorkerPage(
     USER_ROLE.student,
@@ -149,6 +150,7 @@ test("student submits a quiz with every rendered question type and waits for rev
       await answerAllRenderedQuizQuestionTypesFlow(page, {
         dndBlankAnswer,
         dndBlankAnswerId,
+        matchingPairs,
         textBlankAnswer,
       });
 

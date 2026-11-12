@@ -1,6 +1,6 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { EMAIL_TEMPLATE_EVENTS } from "@repo/email-templates";
-import { eq } from "drizzle-orm";
+import { AUTOMATION_RECIPIENT_AUDIENCES, type AutomationPlaceholderValue } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
@@ -16,15 +16,14 @@ import { UsersLongInactivityEvent } from "src/events/user/user-long-inactivity.e
 import { UsersShortInactivityEvent } from "src/events/user/user-short-inactivity.event";
 import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
 import { getNotificationUserFields } from "src/notifications/services/notification-fields";
-import { OutboxNotificationPreparationService } from "src/outbox/outbox-notification-preparation.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { courses, users } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
 
-import type { IEventHandler } from "@nestjs/cqrs";
 import type { InactiveUsers } from "src/events/user/user-short-inactivity.event";
+import type { OutboxDeliveryContext, OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type EventType =
   | UserFirstLoginEvent
@@ -35,7 +34,15 @@ type EventType =
   | UserCourseFinishedEvent;
 
 @Injectable()
-export class NotifyUsersHandler implements IEventHandler {
+@OutboxEventsHandler(
+  UserFirstLoginEvent,
+  UsersAssignedToCourseEvent,
+  UsersShortInactivityEvent,
+  UsersLongInactivityEvent,
+  UserChapterFinishedEvent,
+  UserCourseFinishedEvent,
+)
+export class NotifyUsersHandler implements OutboxEventsHandlerOf<EventType> {
   constructor(
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly emailService: EmailService,
@@ -44,29 +51,15 @@ export class NotifyUsersHandler implements IEventHandler {
     private readonly statisticsService: StatisticsService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly notificationCollectorService: NotificationCollectorService,
-    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
   ) {}
 
-  onModuleInit() {
-    this.outboxNotificationPreparationService.register(async (event) => {
-      if (
-        !(
-          event instanceof UserFirstLoginEvent ||
-          event instanceof UsersAssignedToCourseEvent ||
-          event instanceof UsersShortInactivityEvent ||
-          event instanceof UsersLongInactivityEvent ||
-          event instanceof UserChapterFinishedEvent ||
-          event instanceof UserCourseFinishedEvent
-        )
-      ) {
-        return [];
-      }
-
-      return this.notificationCollectorService.collectNotificationEvents(() => this.handle(event));
-    });
+  async handleOutboxEvent(event: EventType, { eventId }: OutboxDeliveryContext) {
+    await this.notificationCollectorService.publishCollectedNotifications(eventId, () =>
+      this.prepareNotifications(event),
+    );
   }
 
-  async handle(event: EventType) {
+  private async prepareNotifications(event: EventType) {
     if (event instanceof UsersShortInactivityEvent) {
       await this.prepareForTenant(event.usersShortInactivity.tenantId, () =>
         this.notifyUserAboutShortInactivity(event),
@@ -82,16 +75,15 @@ export class NotifyUsersHandler implements IEventHandler {
     }
 
     if (event instanceof UserFirstLoginEvent) {
-      await this.prepareForTenant(await this.getUserTenantId(event.userFirstLogin.userId), () =>
+      await this.prepareForTenant(event.userFirstLogin.tenantId, () =>
         this.notifyUserAboutFirstLogin(event),
       );
       return;
     }
 
     if (event instanceof UsersAssignedToCourseEvent) {
-      await this.prepareForTenant(
-        await this.getCourseTenantId(event.usersAssignedToCourse.courseId),
-        () => this.notifyUserAboutCourseAssignment(event),
+      await this.prepareForTenant(event.usersAssignedToCourse.tenantId, () =>
+        this.notifyUserAboutCourseAssignment(event),
       );
       return;
     }
@@ -114,30 +106,6 @@ export class NotifyUsersHandler implements IEventHandler {
     await this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
       await prepare();
     });
-  }
-
-  private async getUserTenantId(userId: string) {
-    const [user] = await this.dbAdmin
-      .select({ tenantId: users.tenantId })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    if (!user) throw new Error(`Cannot resolve tenant for user ${userId}`);
-
-    return user.tenantId;
-  }
-
-  private async getCourseTenantId(courseId: string) {
-    const [course] = await this.dbAdmin
-      .select({ tenantId: courses.tenantId })
-      .from(courses)
-      .where(eq(courses.id, courseId))
-      .limit(1);
-
-    if (!course) throw new Error(`Cannot resolve tenant for course ${courseId}`);
-
-    return course.tenantId;
   }
 
   async notifyUserAboutFirstLogin(event: UserFirstLoginEvent) {
@@ -348,10 +316,29 @@ export class NotifyUsersHandler implements IEventHandler {
       ? `${baseOrigin}/profile/${user.id}`
       : `${baseOrigin}/courses`;
 
+    const variables = {
+      ...getNotificationUserFields(user),
+      user_name: `${user.firstName} ${user.lastName}`,
+      course_name: courseName,
+      button_link: buttonLink,
+      course_link: `${baseOrigin}/course/${courseFinishedData.courseId}`,
+      progress_link: `${baseOrigin}/course/${courseFinishedData.courseId}`,
+      has_certificate: hasCertificate,
+    };
+
     const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
       courseFinishedData.actor.tenantId,
       user.id,
     );
+
+    this.notificationCollectorService.captureNotificationItem(courseFinishedData.courseId, {
+      tenantId: courseFinishedData.actor.tenantId,
+      template: {
+        event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_COURSE,
+        language: defaultEmailSettings.language,
+        variables,
+      },
+    });
 
     await this.notificationCollectorService.captureNotificationRecipient(
       { to: user.email },
@@ -360,15 +347,46 @@ export class NotifyUsersHandler implements IEventHandler {
         template: {
           event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_COURSE,
           language: defaultEmailSettings.language,
-          variables: {
-            ...getNotificationUserFields(user),
-            course_name: courseName,
-            button_link: buttonLink,
-            course_link: `${baseOrigin}/course/${courseFinishedData.courseId}`,
-            has_certificate: hasCertificate,
-          },
+          variables,
         },
+        audience: AUTOMATION_RECIPIENT_AUDIENCES.LEARNER,
       },
+    );
+
+    await this.captureCourseCompletionAdministratorRecipients(
+      courseFinishedData.actor.tenantId,
+      variables,
+    );
+  }
+
+  private async captureCourseCompletionAdministratorRecipients(
+    tenantId: string,
+    variables: Record<string, AutomationPlaceholderValue>,
+  ) {
+    const administratorsToNotify = await this.userService.getAdminsToNotifyAboutFinishedCourse();
+
+    await processInBatches(
+      administratorsToNotify,
+      async (administrator) => {
+        const administratorEmailSettings = await this.emailService.getDefaultEmailProperties(
+          administrator.tenantId,
+          administrator.id,
+        );
+
+        await this.notificationCollectorService.captureNotificationRecipient(
+          { to: administrator.email },
+          {
+            tenantId,
+            audience: AUTOMATION_RECIPIENT_AUDIENCES.ADMINISTRATORS,
+            template: {
+              event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_COURSE,
+              language: administratorEmailSettings.language,
+              variables,
+            },
+          },
+        );
+      },
+      { batchSize: EMAIL_BATCH_SIZE, throwOnError: true },
     );
   }
 

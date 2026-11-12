@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   CirclePlus,
   Copy,
+  Download,
   KeyRound,
   Languages,
   LogIn,
@@ -22,6 +23,7 @@ import {
   Tags,
   Trash2,
   type LucideIcon,
+  Upload,
   Users2,
 } from "lucide-react";
 
@@ -274,6 +276,18 @@ export const activityLogActionConfig: Record<ActivityLogActionType, ActivityLogA
     badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
     iconClassName: "text-emerald-700",
     ringClassName: "border-emerald-600",
+  },
+  export: {
+    icon: Upload,
+    badgeClassName: "border-indigo-200 bg-indigo-50 text-indigo-700",
+    iconClassName: "text-indigo-700",
+    ringClassName: "border-indigo-600",
+  },
+  import: {
+    icon: Download,
+    badgeClassName: "border-teal-200 bg-teal-50 text-teal-700",
+    iconClassName: "text-teal-700",
+    ringClassName: "border-teal-600",
   },
 };
 

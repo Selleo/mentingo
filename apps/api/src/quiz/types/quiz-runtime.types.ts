@@ -58,10 +58,19 @@ export type QuizAttemptFeedback = {
   scaleSelections: Array<{ questionAnswerId: UUIDType; selectedScaleOptionId: UUIDType }>;
   openTextAnswers: Array<{ questionAnswerId: UUIDType; submittedText: string }>;
   latestReviews: Array<{ questionAnswerId: UUIDType; explanation: string }>;
+  matchingAnswers: QuizMatchingAnswer[];
+};
+
+export type QuizMatchingAnswer = {
+  questionAnswerId: UUIDType;
+  pairId: UUIDType;
+  submittedMatch: string;
 };
 
 export type PreparedQuizAttempt = {
   assessmentId: UUIDType;
+  // Questions that earned their full points.
+  correctAnswerCount: number;
   learnerId: UUIDType;
   language: SupportedLanguages;
   availablePoints: string;
@@ -92,6 +101,7 @@ export type PreparedQuizAttempt = {
   }>;
   openTextAnswers: Array<{ questionAnswerId: UUIDType; submittedText: string }>;
   scaleSelections: Array<{ questionAnswerId: UUIDType; selectedScaleOptionId: UUIDType }>;
+  matchingAnswers: QuizMatchingAnswer[];
 };
 
 export type QuizSubmission = AnswerQuestionBody;

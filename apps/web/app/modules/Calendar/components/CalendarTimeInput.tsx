@@ -6,6 +6,7 @@ import { cn } from "~/lib/utils";
 import { DEFAULT_TIME_STEP_MINUTES } from "./calendarTimeSelect.utils";
 
 type CalendarTimeInputProps = {
+  id?: string;
   value: string;
   stepMinutes?: number;
   testId?: string;
@@ -23,6 +24,7 @@ const normalizeTimeValue = (value: string) => {
 };
 
 export function CalendarTimeInput({
+  id,
   value,
   stepMinutes = DEFAULT_TIME_STEP_MINUTES,
   testId,
@@ -36,6 +38,7 @@ export function CalendarTimeInput({
         aria-hidden="true"
       />
       <Input
+        id={id}
         type="time"
         data-testid={testId}
         value={normalizeTimeValue(value)}
@@ -45,8 +48,9 @@ export function CalendarTimeInput({
         className={cn(
           "block w-full min-w-[10.5rem] appearance-none pl-9 pr-3 tabular-nums",
           "[&::-webkit-calendar-picker-indicator]:hidden",
-          "[&::-webkit-datetime-edit]:m-0 [&::-webkit-datetime-edit]:p-0",
-          "[&::-webkit-datetime-edit-fields-wrapper]:p-0",
+          // index.css shifts date input text right by 16px twice to clear the left picker icon
+          "[&::-webkit-datetime-edit]:left-0 [&::-webkit-datetime-edit]:m-0 [&::-webkit-datetime-edit]:p-0",
+          "[&::-webkit-datetime-edit-fields-wrapper]:left-0 [&::-webkit-datetime-edit-fields-wrapper]:p-0",
         )}
       />
     </div>

@@ -812,6 +812,21 @@
     "validation": {
       "messageRequired": "Žinutė yra privaloma.",
       "nameMaxLength": "Gali būti ne daugiau kaip {{max}} simbolių."
+    },
+    "optionPicker": {
+      "search": "Ieškoti",
+      "empty": "Atitikmenų nerasta"
+    },
+    "dataTable": {
+      "filters": "Filtrai",
+      "resetFilters": "Išvalyti visus filtrus",
+      "removeFilter": "Pašalinti filtrą: {{filter}}",
+      "labeledValue": "{{label}}: {{value}}",
+      "selectedCount": "Pasirinkta: {{count}}",
+      "emptyTitle": "Rezultatų nerasta",
+      "emptyDescription": "Pabandykite kitą paiešką arba atstatykite filtrus.",
+      "selectAll": "Pasirinkti visus",
+      "selectRow": "Pasirinkti eilutę"
     }
   },
   "lessons": {
@@ -2052,11 +2067,13 @@
         "draft": "Juodraštis",
         "published": "Paskelbta",
         "private": "Privatus"
-      }
+      },
+      "allCategories": "Visos kategorijos",
+      "archive": "Archyvas"
     },
     "courses": {
       "header": "Tvarkyti kursus",
-      "subHeader": "Visus kursus galite peržiūrėti ir redaguoti"
+      "learnerHeader": "Visi kursai"
     },
     "field": {
       "title": "Pavadinimas",
@@ -2068,7 +2085,8 @@
       "state": "valstybė",
       "status": "Būsena",
       "sharedCourse": "Bendrinama",
-      "createdAt": "Sukurta"
+      "createdAt": "Sukurta",
+      "duration": "Trukmė"
     },
     "lessonCard": {
       "mappedTypes": {
@@ -2325,7 +2343,16 @@
         "competencies": "kompetencijos",
         "other": "platformos funkcijas",
         "gamification": "žaidybinimą",
-        "quiz_grading": "testų vertinimas"
+        "quiz_grading": "testų vertinimas",
+        "ai_thread": "AI pokalbius",
+        "automation": "automatizacijas",
+        "automation_log": "automatizacijų žurnalus",
+        "content_marketplace": "turinio prekyvietę",
+        "dashboard": "skydelį",
+        "email_template": "el. laiškų šablonus",
+        "managed_group_results": "valdomų grupių rezultatus",
+        "phishing": "sukčiavimo simuliacijas",
+        "todo_task": "užduotis"
       },
       "descriptions": {
         "phishing_manage": "Gali kurti ir valdyti sukčiavimo el. paštu simuliacijas.",
@@ -3165,13 +3192,15 @@
           "attemptsLimit": "Bandymų riba",
           "quizCooldownInHours": "Laiko užraktas po nesėkmingų bandymų (valandomis)",
           "numberOfQuestions": "{{count1}} iš {{count2}} klausimų",
-          "noQuestions": "Jokių klausimų"
+          "noQuestions": "Jokių klausimų",
+          "timeLimitMinutes": "Laiko limitas (hh:mm)"
         },
         "tooltip": {
           "switch": "Jei įjungta, mokinys gali atlikti ribotą testų skaičių.",
           "passingThreshold": "Procentinė viktorinos išlaikymo riba. Jei mokinys pasiekia šį balą, viktorina bus laikoma išlaikyta.",
           "attemptsLimit": "Leidžiamas testų bandymų skaičius prieš suveikiant laiko užraktą.",
-          "quizCooldownInHours": "Viktorinos užrakto trukmė išnaudojus visus bandymus."
+          "quizCooldownInHours": "Viktorinos užrakto trukmė išnaudojus visus bandymus.",
+          "timeLimitMinutes": "Neprivaloma. Nustačius, besimokantieji patys pradeda viktoriną, o jų atsakymai pateikiami automatiškai pasibaigus laikui. Palikite tuščią, jei laiko limito nereikia."
         },
         "validation": {
           "optionTextRequired": "Būtinas parinkties tekstas",
@@ -3197,7 +3226,11 @@
           "maxFileNumber_other": "Negalite įkelti daugiau nei {{ count }} failų",
           "maxResources_five": "Negalite pridėti daugiau nei 5 išteklių",
           "sourceUrlRequired": "Būtinas šaltinio URL",
-          "sourceUrlInvalid": "Įveskite galiojantį HTTPS URL"
+          "sourceUrlInvalid": "Įveskite galiojantį HTTPS URL",
+          "matchingPairsRequired": "Pridėkite bent 2 poras ir užpildykite abi kiekvienos poros puses",
+          "matchingMatchRequired": "Įrašykite šios poros atitikmenį",
+          "matchingPairsUnique": "Kiekviena pora turi turėti unikalų atitikmenį",
+          "timeLimitMinutes": "Įveskite laiko limitą nuo {{min}} iki {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pamokos rodymo tvarka sėkmingai atnaujinta",
@@ -3272,7 +3305,8 @@
           "ttsPreset": "Iš anksto nustatytas TTS",
           "customTTSReference": "Pasirinktinė TTS nuoroda",
           "includeFiles_one": "Pridėkite iki 1 failo žemiau {{maxSize}}, kad būtų naudojamas kaip kontekstas pamokose",
-          "includeFiles_other": "Pridėkite iki {{ count }} failų, mažesnių nei {{maxSize}}, kad galėtumėte naudoti kaip kontekstą pamokose"
+          "includeFiles_other": "Pridėkite iki {{ count }} failų, mažesnių nei {{maxSize}}, kad galėtumėte naudoti kaip kontekstą pamokose",
+          "matchingScoring": "Vertinimas"
         },
         "placeholder": {
           "title": "Pateikite pamokos pavadinimą...",
@@ -3790,7 +3824,7 @@
           "option": "Parinktis",
           "singleChoice": "Vienas pasirinkimas",
           "multipleChoice": "Kelias pasirinkimas",
-          "matchWords": "Derinimas",
+          "matching": "Derinimas",
           "trueOrFalse": "Tiesa ar klaidinga",
           "fillInTheBlanks": "Spragų užpildymas (vilkite ir numeskite)",
           "photoQuestion": "Foto klausimas",
@@ -3899,6 +3933,8 @@
           "betaTooltip": "Ši funkcija pateikiama bandomojoje versijoje. Jame gali būti klaidų arba jis gali neveikti visiškai taip, kaip numatyta, ir naudojamas jūsų pačių rizika.",
           "dragWord": "Vilkite žodį į sakinį",
           "taskDescriptionTooltip": "Trumpai apibūdinkite, ką dalyvis turėtų daryti pokalbio su AI mentoriumi metu.",
+          "matchingScoringAllOrNothing": "Visos poros turi būti teisingos",
+          "matchingScoringPartial": "Taškai už kiekvieną teisingą porą",
           "requiresReview": "Vertina vertintojas"
         }
       }
@@ -4195,6 +4231,13 @@
       "success": "Prisijungimo nuoroda patvirtinta. Peradresuojama...",
       "error": "Prisijungimo nuoroda neteisinga arba pasibaigė.",
       "backToLogin": "Grįžti į prisijungimą"
+    },
+    "oauthError": {
+      "cancelled": "Prisijungimas atšauktas. Bandykite prisijungti dar kartą.",
+      "providerDisabled": "Šis prisijungimo būdas išjungtas. Naudokite kitą būdą.",
+      "providerNotConfigured": "Šis prisijungimo būdas dar nesukonfigūruotas. Susisiekite su administratoriumi.",
+      "providerError": "Nepavyko gauti jūsų paskyros duomenų iš prisijungimo paslaugos teikėjo. Bandykite dar kartą.",
+      "unknown": "Prisijungti nepavyko. Bandykite dar kartą."
     }
   },
   "magicLinkView": {
@@ -4350,7 +4393,10 @@
       "score": "Rezultatas: {{score}}% ({{correct}} iš {{questionsNumber}} klausimų)",
       "contentCantBeEmbedded": "Šio turinio negalima įterpti.",
       "openInNewTab": "Atidaryti naujame skirtuke",
-      "scale_1_5": "Domanda di tipo scala (1–5)"
+      "scale_1_5": "Domanda di tipo scala (1–5)",
+      "matching": "Suderinkite kiekvieną elementą su jo pora.",
+      "noMatchesAvailable": "Šiam klausimui dar nėra atitikmenų.",
+      "correctMatch": "Teisingas atitikmuo:"
     },
     "aiMentor": {
       "title": "AI mentoriaus sesija",
@@ -4464,12 +4510,25 @@
       "courseEnrollmentRequired": "Jūs nesate užregistruoti į šį kursą.",
       "quizRetakeUnavailable": "Viktorinos atsakymų negalima atstatyti dėl bandymų limito arba laukimo laikotarpio.",
       "quizResetFailed": "Nepavyko atstatyti viktorinos atsakymų. Bandykite dar kartą.",
-      "quizAwaitingReview": "Šis testas laukia įvertinimo."
+      "quizAwaitingReview": "Šis testas laukia įvertinimo.",
+      "quizNotTimed": "Ši viktorina neturi laiko limito.",
+      "quizAttemptNotStarted": "Prieš pateikdami atsakymus pradėkite viktoriną.",
+      "quizAttemptExpired": "Šios viktorinos bandymo laikas baigėsi.",
+      "quizDraftInvalid": "Nepavyko automatiškai išsaugoti jūsų atsakymų. Patikrinkite juos ir bandykite dar kartą."
     },
     "preview": {
       "title": "Peržiūrite kurso turinį",
       "enrollmentDescription": "Užsiregistruokite į kursą, kad galėtumėte atlikti testus ir išsaugoti pažangą.",
       "learningModeDescription": "Įjunkite mokymosi režimą, kad galėtumėte atlikti testus ir stebėti pažangą."
+    },
+    "timedQuiz": {
+      "info": "Laikas pradedamas skaičiuoti pasirinkus „Pradėti viktoriną“ ir skaičiuojamas toliau, net jei paliksite puslapį. Atsakymai išsaugomi automatiškai ir pateikiami pasibaigus laikui. Neatsakyti klausimai vertinami 0 taškų.",
+      "timeLimit": "Laiko limitas",
+      "questions": "Klausimai",
+      "start": "Pradėti viktoriną",
+      "timeLeft": "Liko laiko: {{time}}",
+      "warning": "Liko mažiau nei minutė. Pasibaigus laikui atsakymai bus pateikti automatiškai.",
+      "timeUp": "Laikas baigėsi. Jūsų atsakymai pateikiami."
     }
   },
   "studentCourseView": {
@@ -4691,7 +4750,8 @@
       "account": "sąskaita",
       "integrations": "Integracijos",
       "organization": "Organizacija",
-      "platformCustomization": "Platformos pritaikymas"
+      "platformCustomization": "Platformos pritaikymas",
+      "features": "Funkcijos"
     },
     "breadcrumbs": {
       "settings": "Nustatymai"
@@ -4736,7 +4796,7 @@
       "newUserNotifications": "Nauji vartotojo pranešimai",
       "newUserNotificationsDescription": "Gaukite pranešimus, kai sukuriamas naujas vartotojas",
       "coursesVisibility": "Rodyti kursus lankytojams",
-      "coursesVisibilityDescription": "Leiskite lankytojams peržiūrėti kursų sąrašą ir gauti nemokamas pamokas neprisijungus",
+      "coursesVisibilityDescription": "Leidžia neprisijungusiems žmonėms naršyti kursų sąrašą ir atidaryti nemokamas pamokas.",
       "modernCourseList": "Naudokite šiuolaikinį kursų sąrašo rodinį",
       "modernCourseListDescription": "Įgalinkite naują kursų sąrašo dizainą su herojų ir geriausių kursų skiltimis",
       "courseListLayout": "Kursų sąrašo išdėstymas",
@@ -4752,11 +4812,11 @@
         "availableCourses": "Prieinami kursai"
       },
       "courseDiscussions": "Įjungti kursų diskusijas",
-      "courseDiscussionsDescription": "Leiskite užsiregistravusiems naudotojams peržiūrėti kursų diskusijas ir jose dalyvauti",
+      "courseDiscussionsDescription": "Kiekvienam kursui prideda diskusijų skirtuką, kuriame užsiregistravę naudotojai gali klausti, atsakyti ir reaguoti.",
       "calendar": "Įjungti kalendorių",
       "calendarDescription": "Leiskite naudotojams peržiūrėti suplanuotus įvykius kalendoriuje",
       "liveTraining": "Įjungti Tiesioginiai mokymai",
-      "liveTrainingDescription": "Leiskite treneriams kurti ir vesti tiesiogines mokymo sesijas",
+      "liveTrainingDescription": "Leidžia mokytojams planuoti ir vesti tiesiogines internetines sesijas. Besimokantieji mato artėjančias sesijas kalendoriuje ir prisijungia naršyklėje.",
       "liveTrainingMaxParallelSessions": "Maksimalus lygiagrečių Tiesioginiai mokymai sesijų skaičius",
       "liveTrainingMaxParallelSessionsDescription": "Apribokite, kiek Tiesioginiai mokymai sesijų gali būti aktyvios vienu metu.",
       "liveTrainingTooltip": "Įjunkite tik tada, kai klientas turi naudoti trenerių vedamas tiesiogines sesijas.",
@@ -4767,7 +4827,7 @@
       "studentsWithOverdueCourseNotification": "Studentai su pranešimais apie vėluojančius kursus",
       "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis",
       "publicCoursePreview": "Pamokų peržiūra prieš registraciją į kursą",
-      "publicCoursePreviewDescription": "Leiskite naudotojams peržiūrėti nemokamų viešų kursų pamokas neužsiregistravus į kursą."
+      "publicCoursePreviewDescription": "Leidžia prisijungusiems naudotojams atidaryti nemokamų kursų pamokas prieš užsiregistruojant. Testams ir pažangos sekimui vis tiek reikia registracijos."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Naujos vartotojo pranešimų nuostatos sėkmingai atnaujintos",
@@ -5640,7 +5700,9 @@
       "start_learning_path": "Mokymosi kelias pradėtas",
       "complete_learning_path": "Mokymosi kelias užbaigtas",
       "play_scorm": "SCORM paleistas",
-      "complete_scorm": "SCORM užbaigtas"
+      "complete_scorm": "SCORM užbaigtas",
+      "export": "Eksportuota",
+      "import": "Importuota"
     },
     "entity": {
       "automation": "Automatizavimas",
@@ -5978,11 +6040,11 @@
     "settings": {
       "qaEnabled": {
         "label": "Įgalinti klausimų ir atsakymų skiltį",
-        "description": "Įgalinkite klausimų ir atsakymų skyrių. Kai išjungta, klausimų ir atsakymų skiltis yra paslėpta visiems naudotojams."
+        "description": "Prideda Q&A skiltį su dažnais klausimais ir atsakymais. Išjungus ji paslepiama visiems."
       },
       "qaPublic": {
-        "label": "Rodyti klausimų ir atsakymų skyrių neregistruotiems vartotojams",
-        "description": "Leisti neregistruotiems vartotojams peržiūrėti klausimų ir atsakymų skiltį (galima perjungti tik įjungus klausimų ir atsakymų skiltį)"
+        "label": "Matomumas lankytojams",
+        "description": "Q&A skiltį gali skaityti ir neprisijungę žmonės. Prieinama įjungus Q&A."
       }
     },
     "toast": {
@@ -5998,11 +6060,11 @@
     "settings": {
       "newsEnabled": {
         "label": "Įjungti naujienų skiltį",
-        "description": "Įjunkite naujienų skyrių. Kai išjungta, naujienų skyrius yra paslėptas visiems vartotojams."
+        "description": "Prideda naujienų skiltį, kurioje skelbiate pranešimus ir naujienas naudotojams. Išjungus skiltis paslepiama visiems."
       },
       "newsPublic": {
-        "label": "Rodyti naujienų skiltį neregistruotiems vartotojams",
-        "description": "Leisti neregistruotiems vartotojams peržiūrėti naujienų skiltį (galima perjungti tik įjungus naujienų skiltį)"
+        "label": "Matomumas lankytojams",
+        "description": "Naujienas gali skaityti ir neprisijungę žmonės. Prieinama įjungus naujienas."
       }
     },
     "toast": {
@@ -6018,11 +6080,11 @@
     "settings": {
       "articlesEnabled": {
         "label": "Įgalinti žinių bazės skyrių",
-        "description": "Įgalinkite žinių bazės skyrių. Kai išjungta, žinių bazės skyrius yra paslėptas visiems vartotojams."
+        "description": "Prideda žinių bazę, kurioje skelbiate straipsnius, pvz., gidus, procedūras ir DUK. Išjungus ji paslepiama visiems."
       },
       "articlesPublic": {
-        "label": "Rodyti žinių bazės skyrių neregistruotiems vartotojams",
-        "description": "Leisti neregistruotiems naudotojams peržiūrėti žinių bazės skyrių (galima perjungti tik įjungus žinių bazės skyrių)"
+        "label": "Matomumas lankytojams",
+        "description": "Žinių bazę gali skaityti ir neprisijungę žmonės. Prieinama įjungus žinių bazę."
       }
     },
     "toast": {
@@ -6038,7 +6100,7 @@
     "settings": {
       "learningPathsEnabled": {
         "label": "Įjungti tobulėjimo kelius",
-        "description": "Įjunkite tobulėjimo kelius. Išjungus jie paslepiami ir užblokuojami visiems naudotojams."
+        "description": "Sujunkite kursus į tobulėjimo kelius, kuriuos besimokantieji įveikia žingsnis po žingsnio. Išjungus tobulėjimo keliai paslepiami, o jų puslapiai užblokuojami visiems."
       }
     }
   },
@@ -7185,7 +7247,8 @@
       "receiptSynchronizationPending": "Ankstesni pakeitimai saugomi AI darbo srityje. Netrukus bandykite dar kartą pritaikyti tą patį pasirinkimą.",
       "appliedRefreshPending": "Pakeitimai pritaikyti. Atnaujinkite kursą, jei jų dar nematote.",
       "deepResearchPreferenceNotSaved": "Šiai užklausai išsamus tyrimas įjungtas, bet nustatymo nepavyko išsaugoti būsimiems pranešimams.",
-      "webSearchPreferenceNotSaved": "Šiai užklausai paieška internete leista, bet nustatymo nepavyko išsaugoti būsimiems pranešimams."
+      "webSearchPreferenceNotSaved": "Šiai užklausai paieška internete leista, bet nustatymo nepavyko išsaugoti būsimiems pranešimams.",
+      "matchingQuestionUnsupported": "Luma dar negali redaguoti testų su derinimo klausimais. Redaguokite šį testą testų redaktoriuje."
     },
     "review": {
       "generatedImage": "Sugeneruotas paveikslėlis",
@@ -7725,6 +7788,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Gavėjai",
+      "courseCompletionAudience": "Kurso užbaigimo gavėjai",
+      "courseCompletionAudiences": {
+        "learner": "Kursą baigęs dalyvis",
+        "administrators": "Administratoriai (pagal pranešimų nuostatas)"
+      },
       "event": "Su įvykiu susiję naudotojai",
       "user": "Pasirinktas naudotojas",
       "group": "Pasirinktos grupės nariai",
@@ -8445,11 +8513,7 @@
       "timezone": "Datos rodomos laiko juostoje {{timezone}}."
     },
     "title": "Ataskaitos",
-    "description": "Stebėkite organizacijos pažangą mokymosi keliuose, kursuose ir tarp besimokančiųjų.",
-    "picker": {
-      "search": "Ieškoti",
-      "empty": "Atitikmenų nerasta"
-    }
+    "description": "Stebėkite organizacijos pažangą mokymosi keliuose, kursuose ir tarp besimokančiųjų."
   },
   "contentMarketplace": {
     "category": "Kategorija / tema",
@@ -9353,7 +9417,7 @@
         "updated": "Lyderių lentelių nustatymai atnaujinti.",
         "enabled": {
           "label": "Įjungti lyderių lenteles",
-          "description": "Rodo lyderių lentelių puslapį. Išjungus niekas negali jų atidaryti."
+          "description": "Prideda reitingų puslapį, kuriame besimokantieji rikiuojami pagal XP arba pasiekimus grupėse ar visoje organizacijoje. Išjungus niekas negali jo atidaryti."
         },
         "visibility": {
           "label": "Matomumas besimokantiesiems",
@@ -9374,7 +9438,7 @@
       "description": "Įjunkite žaidybinimą savo organizacijoje ir sukonfigūruokite pasiekimus, kuriuos gali gauti besimokantieji.",
       "enabled": {
         "label": "Įjungti žaidybinimą",
-        "description": "Rodyti naudotojams lygius, XP, pasiekimus ir pranešimus apie apdovanojimus. Apdovanojimai skaičiuojami net kai ši parinktis išjungta."
+        "description": "Rodo naudotojams lygius, XP ir pasiekimus profilyje bei skydelyje ir praneša apie kiekvieną apdovanojimą. Pažanga skaičiuojama net ir išjungus."
       },
       "achievements": {
         "title": "Pasiekimai",
@@ -9646,5 +9710,54 @@
       "courseNotPublished": "Šis kursas vėl yra juodraštis. Prieš vertindami atsakymus, jį paskelbkite."
     },
     "loadError": "Nepavyko įkelti vertinimo eilės. Atnaujinkite puslapį ir bandykite dar kartą."
+  },
+  "coursesViewToggle": {
+    "label": "Kursų rodinys",
+    "catalogue": "Katalogas",
+    "table": "Lentelė"
+  },
+  "platformFeatures": {
+    "needsSetup": {
+      "description": "Šiai funkcijai reikia integracijos, kuri dar nesukonfigūruota.",
+      "configure": "Konfigūruoti integraciją"
+    },
+    "disable": {
+      "title": "Išjungti funkciją „{{feature}}“?",
+      "description": "Naudotojai jos nebematys. Duomenys liks išsaugoti ir grįš vėl įjungus.",
+      "confirm": "Išjungti"
+    },
+    "items": {
+      "learningPaths": {
+        "title": "Tobulėjimo keliai"
+      },
+      "gamification": {
+        "title": "Žaidybinimas"
+      },
+      "liveTraining": {
+        "title": "Tiesioginiai mokymai"
+      },
+      "courseDiscussions": {
+        "title": "Kursų diskusijos"
+      },
+      "leaderboards": {
+        "title": "Reitingai"
+      },
+      "news": {
+        "title": "Naujienos"
+      },
+      "articles": {
+        "title": "Žinių bazė"
+      },
+      "qa": {
+        "title": "Q&A"
+      },
+      "coursesForVisitors": {
+        "title": "Kursai lankytojams"
+      },
+      "publicCoursePreview": {
+        "title": "Vieša kurso peržiūra"
+      }
+    },
+    "requiresGamification": "Pirmiausia įjunkite žaidybinimą."
   }
 }

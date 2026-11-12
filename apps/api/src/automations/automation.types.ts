@@ -31,6 +31,8 @@ export type AutomationLocalizedMetadata = {
 };
 
 export type AutomationRecord = Omit<AutomationRow, "name" | "description"> & {
+  /** Original persisted trigger, for draining pre-unification outbox occurrences. */
+  legacyAppliedEventKind?: AutomationEventKind;
   name: string;
   description: string;
   hasLocalizedMetadataChanges: boolean;

@@ -17,6 +17,7 @@ import { CourseDescriptionLimitMessage } from "~/modules/Admin/AddCourse/compone
 import { CourseMetadataFields } from "~/modules/Admin/AddCourse/components/CourseMetadataFields";
 import { CourseThumbnailUploadField } from "~/modules/Admin/AddCourse/components/CourseThumbnailUploadField";
 import { useObjectUrl } from "~/modules/Admin/AddCourse/hooks/useObjectUrl";
+import { COURSES_TABLE_PATH } from "~/modules/Courses/utils/coursesView";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isBrowserFile } from "~/utils/isBrowserFile";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -92,7 +93,7 @@ const CreateNewScormCourse = () => {
 
     await uploadScormPackage({ file: values.scormFile, session });
     await completeScormImport(session.packageId);
-    navigate("/admin/courses");
+    navigate(COURSES_TABLE_PATH);
   };
 
   const isCreatingScormCourse =

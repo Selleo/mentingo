@@ -1,6 +1,8 @@
 import {
   AUTOMATION_EVENT_KINDS,
   AUTOMATION_MAPPING_TYPES,
+  AUTOMATION_RECIPIENT_AUDIENCES,
+  AUTOMATION_RECIPIENT_TYPES,
   BUILT_IN_EMAIL_TEMPLATE_KEYS,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
@@ -9,6 +11,10 @@ import type { BuiltInAutomationDefinition } from "../automation-execution.types"
 
 export const userFinishedCourseAutomation: BuiltInAutomationDefinition = {
   eventKind: AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE,
+  recipients: {
+    type: AUTOMATION_RECIPIENT_TYPES.EVENT,
+    audience: AUTOMATION_RECIPIENT_AUDIENCES.LEARNER,
+  },
   name: {
     [SUPPORTED_LANGUAGES.EN]: "Course completion",
     [SUPPORTED_LANGUAGES.PL]: "Ukończenie kursu",

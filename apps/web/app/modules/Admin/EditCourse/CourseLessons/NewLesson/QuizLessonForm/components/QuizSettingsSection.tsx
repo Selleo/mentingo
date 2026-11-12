@@ -11,8 +11,11 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
+import { CalendarTimeInput } from "~/modules/Calendar/components/CalendarTimeInput";
 
+import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { defaultQuizLessonValues } from "../defaults/defaultQuizLessonValues";
+import { minutesToTimeValue, timeValueToMinutes } from "../utils/timeLimitTime";
 
 import { InfoTooltip } from "./InfoTooltip";
 
@@ -107,6 +110,32 @@ const QuizSettingsSection = ({
               </FormItem>
             );
           }}
+        />
+
+        <FormField
+          control={form.control}
+          name="timeLimitMinutes"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center gap-x-2">
+                <Label htmlFor="timeLimitMinutes" className="body-base-md text-sm">
+                  {t("adminCourseView.curriculum.lesson.settings.timeLimitMinutes")}
+                </Label>
+                <InfoTooltip
+                  message={t("adminCourseView.curriculum.lesson.tooltip.timeLimitMinutes")}
+                  iconClassName="text-sm"
+                />
+              </div>
+              <CalendarTimeInput
+                id="timeLimitMinutes"
+                testId={QUIZ_LESSON_FORM_HANDLES.TIME_LIMIT_INPUT}
+                value={minutesToTimeValue(field.value)}
+                stepMinutes={1}
+                onChange={(value) => field.onChange(timeValueToMinutes(value))}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         <div className="space-y-2">

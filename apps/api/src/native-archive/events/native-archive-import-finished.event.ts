@@ -1,20 +1,22 @@
-import { UUIDType } from "src/common";
+import { OutboxEvent } from "src/outbox/outbox.decorators";
 
-import { NativeArchiveImportOutcome, NativeArchiveImportSource } from "../native-archive.types";
+import {
+  nativeArchiveImportFinishedEventSchema,
+  type nativeArchiveImportFinishedDataSchema,
+} from "../schemas/native-archive.schema";
+
+import type { Static } from "@sinclair/typebox";
+
+export type NativeArchiveImportFinishedData = Static<typeof nativeArchiveImportFinishedDataSchema>;
 
 /**
  * Reports how an import that was queued with an import source ended, so the feature that queued it
  * can react once the imported course has committed. Imports without a source publish nothing.
  */
+@OutboxEvent({
+  clearPayloadAfterDelivery: true,
+  payloadSchema: nativeArchiveImportFinishedEventSchema,
+})
 export class NativeArchiveImportFinishedEvent {
-  constructor(
-    public readonly tenantId: UUIDType,
-    public readonly jobId: string,
-    public readonly actorId: UUIDType,
-    public readonly outcome: NativeArchiveImportOutcome,
-    public readonly courseId: UUIDType | null,
-    public readonly failureCode: string | null,
-    public readonly importSource: NativeArchiveImportSource,
-    public readonly finishedAt: string,
-  ) {}
+  constructor(public readonly importFinishedData: NativeArchiveImportFinishedData) {}
 }

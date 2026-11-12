@@ -367,7 +367,7 @@ export class SettingsController {
   }
 
   @Patch("admin/gamification-enabled")
-  @RequirePermission(PERMISSIONS.GAMIFICATION_MANAGE)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })

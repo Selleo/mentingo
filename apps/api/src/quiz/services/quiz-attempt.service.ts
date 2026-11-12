@@ -120,6 +120,7 @@ export class QuizAttemptService {
     await this.quizRuntimeRepository.insertBlankAnswers(attemptData.blankAnswers, trx);
     await this.quizRuntimeRepository.insertOpenTextAnswers(attemptData.openTextAnswers, trx);
     await this.quizRuntimeRepository.insertScaleSelections(attemptData.scaleSelections, trx);
+    await this.quizRuntimeRepository.insertMatchingAnswers(attemptData.matchingAnswers, trx);
   }
 
   async findLatestAttemptFeedback(
@@ -150,6 +151,7 @@ export class QuizAttemptService {
         scaleSelections: [],
         openTextAnswers: [],
         latestReviews: [],
+        matchingAnswers: [],
       };
     }
 
@@ -160,6 +162,7 @@ export class QuizAttemptService {
       scaleSelections,
       openTextAnswers,
       latestReviews,
+      matchingAnswers,
     ] = await Promise.all([
       this.quizRuntimeRepository.findChoiceSelections(questionAnswerIds, db),
       this.quizRuntimeRepository.findStatementAnswers(questionAnswerIds, db),
@@ -167,6 +170,7 @@ export class QuizAttemptService {
       this.quizRuntimeRepository.findScaleSelections(questionAnswerIds, db),
       this.quizRuntimeRepository.findOpenTextAnswers(questionAnswerIds, db),
       this.quizRuntimeRepository.findLatestReviews(questionAnswerIds, db),
+      this.quizRuntimeRepository.findMatchingAnswers(questionAnswerIds, db),
     ]);
 
     return {
@@ -178,6 +182,7 @@ export class QuizAttemptService {
       scaleSelections,
       openTextAnswers,
       latestReviews,
+      matchingAnswers,
     };
   }
 }

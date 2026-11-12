@@ -1,5 +1,5 @@
 {
-  "id": "e37152b3-618d-460b-9748-6c6300eeeb82",
+  "id": "20b2f97d-7aaa-426b-8e37-a6f4404a492c",
   "prevId": "19cd1b41-2fcf-4cb2-b91b-d2f6bef5d0d7",
   "version": "7",
   "dialect": "postgresql",
@@ -15634,6 +15634,19 @@
           "primaryKey": false,
           "notNull": false
         },
+        "succeeded_handlers": {
+          "name": "succeeded_handlers",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "claim_id": {
+          "name": "claim_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "tenant_id": {
           "name": "tenant_id",
           "type": "uuid",
@@ -15695,7 +15708,7 @@
               "nulls": "last"
             },
             {
-              "expression": "(COALESCE(payload #>> '{loginData,userId}', payload #>> '{lessonCompletionData,userId}', payload #>> '{courseFinishedData,userId}', payload ->> 'userId'))",
+              "expression": "(COALESCE(payload #>> '{loginData,userId}', payload #>> '{lessonCompletionData,userId}', payload #>> '{courseFinishedData,userId}', payload #>> '{quizCompletionData,userId}'))",
               "asc": true,
               "isExpression": true,
               "nulls": "last"
@@ -21322,13 +21335,6 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
-        },
-        "grading_method": {
-          "name": "grading_method",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pass_fail'"
         },
         "awarded_points": {
           "name": "awarded_points",

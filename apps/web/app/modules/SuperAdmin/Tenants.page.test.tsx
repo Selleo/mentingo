@@ -164,7 +164,6 @@ describe("TenantsPage", () => {
       expect(useTenantsSuspenseMock).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 10,
-        search: "",
         status: "active",
         sort: "-lastActivity",
       });
@@ -186,9 +185,7 @@ describe("TenantsPage", () => {
       expect(useTenantsSuspenseMock).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 10,
-        search: "",
         status: "inactive",
-        sort: undefined,
       });
     });
   });

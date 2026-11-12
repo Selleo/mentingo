@@ -19,6 +19,7 @@ import {
   assessmentQuestionBlanks,
   assessmentQuestionChoiceOptions,
   assessmentQuestionDragAndDropOptions,
+  assessmentQuestionMatchingPairs,
   assessmentQuestions,
   assessmentQuestionScaleOptions,
   assessmentQuestionTrueFalseStatements,
@@ -91,72 +92,88 @@ export class CourseTranslationRepository {
         scaleOptions: [],
         dragAndDropOptions: [],
         answerSets: [],
+        matchingPairs: [],
       };
     }
 
-    const [choiceOptions, trueFalseStatements, scaleOptions, dragAndDropOptions, answerSets] =
-      await Promise.all([
-        db
-          .select()
-          .from(assessmentQuestionChoiceOptions)
-          .where(
-            and(
-              inArray(assessmentQuestionChoiceOptions.questionId, questionIds),
-              inArray(assessmentQuestionChoiceOptions.language, [baseLanguage, language]),
-            ),
+    const [
+      choiceOptions,
+      trueFalseStatements,
+      scaleOptions,
+      dragAndDropOptions,
+      answerSets,
+      matchingPairs,
+    ] = await Promise.all([
+      db
+        .select()
+        .from(assessmentQuestionChoiceOptions)
+        .where(
+          and(
+            inArray(assessmentQuestionChoiceOptions.questionId, questionIds),
+            inArray(assessmentQuestionChoiceOptions.language, [baseLanguage, language]),
           ),
-        db
-          .select()
-          .from(assessmentQuestionTrueFalseStatements)
-          .where(
-            and(
-              inArray(assessmentQuestionTrueFalseStatements.questionId, questionIds),
-              inArray(assessmentQuestionTrueFalseStatements.language, [baseLanguage, language]),
-            ),
+        ),
+      db
+        .select()
+        .from(assessmentQuestionTrueFalseStatements)
+        .where(
+          and(
+            inArray(assessmentQuestionTrueFalseStatements.questionId, questionIds),
+            inArray(assessmentQuestionTrueFalseStatements.language, [baseLanguage, language]),
           ),
-        db
-          .select({
-            id: assessmentQuestionScaleOptions.id,
-            questionId: assessmentQuestionScaleOptions.questionId,
-            baseLabel: this.localizationService.getFieldByLanguage(
-              assessmentQuestionScaleOptions.label,
-              baseLanguage,
-            ),
-            translatedLabel: this.localizationService.getFieldByLanguage(
-              assessmentQuestionScaleOptions.label,
-              language,
-            ),
-          })
-          .from(assessmentQuestionScaleOptions)
-          .where(inArray(assessmentQuestionScaleOptions.questionId, questionIds)),
-        db
-          .select()
-          .from(assessmentQuestionDragAndDropOptions)
-          .where(
-            and(
-              inArray(assessmentQuestionDragAndDropOptions.questionId, questionIds),
-              inArray(assessmentQuestionDragAndDropOptions.language, [baseLanguage, language]),
-            ),
+        ),
+      db
+        .select({
+          id: assessmentQuestionScaleOptions.id,
+          questionId: assessmentQuestionScaleOptions.questionId,
+          baseLabel: this.localizationService.getFieldByLanguage(
+            assessmentQuestionScaleOptions.label,
+            baseLanguage,
           ),
-        db
-          .select({
-            blankId: assessmentQuestionBlankAnswerSets.blankId,
-            questionId: assessmentQuestionBlanks.questionId,
-            language: assessmentQuestionBlankAnswerSets.language,
-            preferredAnswer: assessmentQuestionBlankAnswerSets.preferredAnswer,
-          })
-          .from(assessmentQuestionBlankAnswerSets)
-          .innerJoin(
-            assessmentQuestionBlanks,
-            eq(assessmentQuestionBlanks.id, assessmentQuestionBlankAnswerSets.blankId),
-          )
-          .where(
-            and(
-              inArray(assessmentQuestionBlanks.questionId, questionIds),
-              inArray(assessmentQuestionBlankAnswerSets.language, [baseLanguage, language]),
-            ),
+          translatedLabel: this.localizationService.getFieldByLanguage(
+            assessmentQuestionScaleOptions.label,
+            language,
           ),
-      ]);
+        })
+        .from(assessmentQuestionScaleOptions)
+        .where(inArray(assessmentQuestionScaleOptions.questionId, questionIds)),
+      db
+        .select()
+        .from(assessmentQuestionDragAndDropOptions)
+        .where(
+          and(
+            inArray(assessmentQuestionDragAndDropOptions.questionId, questionIds),
+            inArray(assessmentQuestionDragAndDropOptions.language, [baseLanguage, language]),
+          ),
+        ),
+      db
+        .select({
+          blankId: assessmentQuestionBlankAnswerSets.blankId,
+          questionId: assessmentQuestionBlanks.questionId,
+          language: assessmentQuestionBlankAnswerSets.language,
+          preferredAnswer: assessmentQuestionBlankAnswerSets.preferredAnswer,
+        })
+        .from(assessmentQuestionBlankAnswerSets)
+        .innerJoin(
+          assessmentQuestionBlanks,
+          eq(assessmentQuestionBlanks.id, assessmentQuestionBlankAnswerSets.blankId),
+        )
+        .where(
+          and(
+            inArray(assessmentQuestionBlanks.questionId, questionIds),
+            inArray(assessmentQuestionBlankAnswerSets.language, [baseLanguage, language]),
+          ),
+        ),
+      db
+        .select()
+        .from(assessmentQuestionMatchingPairs)
+        .where(
+          and(
+            inArray(assessmentQuestionMatchingPairs.questionId, questionIds),
+            inArray(assessmentQuestionMatchingPairs.language, [baseLanguage, language]),
+          ),
+        ),
+    ]);
 
     return {
       questions,
@@ -165,6 +182,7 @@ export class CourseTranslationRepository {
       scaleOptions,
       dragAndDropOptions,
       answerSets,
+      matchingPairs,
     };
   }
 
@@ -242,6 +260,25 @@ export class CourseTranslationRepository {
             language,
             preferredAnswer: "",
             acceptedAnswers: [],
+          })),
+        )
+        .onConflictDoNothing();
+    }
+
+    const baseMatchingPairs = snapshot.matchingPairs.filter(
+      (pair) => pair.language === baseLanguage,
+    );
+
+    if (baseMatchingPairs.length) {
+      await db
+        .insert(assessmentQuestionMatchingPairs)
+        .values(
+          baseMatchingPairs.map(({ questionId, displayOrder }) => ({
+            questionId,
+            language,
+            displayOrder,
+            prompt: "",
+            match: "",
           })),
         )
         .onConflictDoNothing();
@@ -341,6 +378,38 @@ export class CourseTranslationRepository {
           assessmentQuestionTrueFalseStatements.displayOrder,
         ],
         set: { statement: translatedValue, correctValue },
+      });
+  }
+
+  upsertMatchingPair(
+    target: Extract<
+      QuizTranslationTarget,
+      { type: typeof QUIZ_TRANSLATION_TARGET_TYPES.MATCHING_PAIR }
+    >,
+    language: SupportedLanguages,
+    translatedValue: string,
+    db: DatabasePg,
+  ) {
+    const { questionId, displayOrder, side } = target;
+
+    return db
+      .insert(assessmentQuestionMatchingPairs)
+      .values({
+        questionId,
+        displayOrder,
+        language,
+        prompt: "",
+        match: "",
+        [side]: translatedValue,
+      })
+      .onConflictDoUpdate({
+        target: [
+          assessmentQuestionMatchingPairs.tenantId,
+          assessmentQuestionMatchingPairs.questionId,
+          assessmentQuestionMatchingPairs.language,
+          assessmentQuestionMatchingPairs.displayOrder,
+        ],
+        set: { [side]: translatedValue },
       });
   }
 
@@ -668,6 +737,23 @@ export class CourseTranslationRepository {
         and(
           inArray(assessmentQuestionChoiceOptions.questionId, questionIds),
           eq(assessmentQuestionChoiceOptions.language, language),
+        ),
+      );
+  }
+
+  async deleteMatchingPairsInLanguage(
+    questionIds: UUIDType[],
+    language: SupportedLanguages,
+    db: DatabasePg,
+  ) {
+    if (!questionIds.length) return;
+
+    await db
+      .delete(assessmentQuestionMatchingPairs)
+      .where(
+        and(
+          inArray(assessmentQuestionMatchingPairs.questionId, questionIds),
+          eq(assessmentQuestionMatchingPairs.language, language),
         ),
       );
   }

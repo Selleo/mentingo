@@ -32,6 +32,7 @@ export const getUserAnswers = (questions: Questions): QuizForm => {
     briefResponses: prepareOpenAnswers(groupedQuestions.brief_response),
     detailedResponses: prepareOpenAnswers(groupedQuestions.detailed_response),
     scaleQuestions: prepareOptionAnswers(groupedQuestions.scale_1_5),
+    matchingQuestions: prepareMatchingAnswers(groupedQuestions.matching),
   } as const;
 };
 
@@ -53,6 +54,7 @@ export const getEmptyQuizAnswers = (questions: Questions): QuizForm => {
     briefResponses: prepareEmptyOpenAnswers(groupedQuestions.brief_response),
     detailedResponses: prepareEmptyOpenAnswers(groupedQuestions.detailed_response),
     scaleQuestions: prepareEmptyOptionAnswers(groupedQuestions.scale_1_5),
+    matchingQuestions: prepareEmptyOptionAnswers(groupedQuestions.matching),
   };
 };
 
@@ -69,12 +71,27 @@ const groupQuestionsByType = (questions: Questions) => {
     ),
     fill_in_the_blanks_text: questions.filter(({ type }) => type === "fill_in_the_blanks_text"),
     fill_in_the_blanks_dnd: questions.filter(({ type }) => type === "fill_in_the_blanks_dnd"),
-    match_words: questions.filter(({ type }) => type === "match_words"),
+    matching: questions.filter(({ type }) => type === "matching"),
     scale_1_5: questions.filter(({ type }) => type === "scale_1_5"),
     brief_response: questions.filter(({ type }) => type === "brief_response"),
     detailed_response: questions.filter(({ type }) => type === "detailed_response"),
   };
 };
+
+/**
+ * Each match can be placed once, so a question needs as many answers as it has matches to place,
+ * capped at its pairs. Untranslated pairs have no match, which leaves their pair unanswerable.
+ */
+export const getRequiredMatchingAnswerCounts = (questions: Questions): Record<string, number> =>
+  Object.fromEntries(
+    questions
+      .filter(({ type }) => type === QuestionType.MATCHING)
+      .map((question) => {
+        const matchCount = new Set(question.matchingTargets?.filter(Boolean)).size;
+
+        return [question.id, Math.min(matchCount, question.options?.length ?? 0)];
+      }),
+  );
 
 function prepareEmptyOptionAnswers(questions: Questions): AnswersMap {
   return questions.reduce((result, question) => {
@@ -202,6 +219,17 @@ function prepareOptionAnswers(questions: Questions): AnswersMap {
   }, {} as AnswersMap);
 }
 
+function prepareMatchingAnswers(questions: Questions): AnswersMap {
+  return Object.fromEntries(
+    questions.map((question) => [
+      question.id,
+      Object.fromEntries(
+        (question.options ?? []).map((option) => [option.id, option.studentAnswer ?? null]),
+      ),
+    ]),
+  );
+}
+
 function prepareOpenAnswers(questions: Questions): OpenAnswersMap {
   return questions.reduce((result, question) => {
     const studentAnswer = question.options?.[0]?.studentAnswer || "";
@@ -233,16 +261,26 @@ export const parseQuizFormData = (input: QuizForm) => {
     }
   };
 
-  const processFillInTheBlanks = (questionMap: Record<string, Record<string, string | null>>) => {
+  const processFillInTheBlanks = (
+    questionMap: Record<string, Record<string, string | null>>,
+    { keepBlankPositions }: { keepBlankPositions: boolean },
+  ) => {
     for (const questionId in questionMap) {
       const answers = questionMap[questionId];
-      const answerArray = Object.entries(answers)
-        .filter((entry): entry is [string, string] => {
-          const value = entry[1];
-
-          return typeof value === "string" && value.trim() !== "";
-        })
-        .map(([answerId, value]) => (/^\d+$/.test(answerId) ? { value } : { answerId, value }));
+      const isFilled = (value: string | null): value is string =>
+        typeof value === "string" && value.trim() !== "";
+      const entries = Object.entries(answers);
+      const lastFilledIndex = entries.reduce(
+        (last, [, value], index) => (isFilled(value) ? index : last),
+        -1,
+      );
+      const answerArray = entries.flatMap(([answerId, value], index) => {
+        const isPositional = /^\d+$/.test(answerId);
+        if (isFilled(value)) return [isPositional ? { value } : { answerId, value }];
+        // blanks without ids are graded by position, so an empty one before a filled one keeps its slot
+        if (keepBlankPositions && isPositional && index < lastFilledIndex) return [{ value: "" }];
+        return [];
+      });
 
       if (answerArray.length > 0) {
         result.push({
@@ -250,6 +288,17 @@ export const parseQuizFormData = (input: QuizForm) => {
           answers: answerArray,
         });
       }
+    }
+  };
+
+  // The API requires every matching question, even an untranslated one with nothing to place.
+  const processMatchingQuestions = (questionMap: Record<string, Record<string, string | null>>) => {
+    for (const questionId in questionMap) {
+      const answers = Object.entries(questionMap[questionId])
+        .filter((entry): entry is [string, string] => Boolean(entry[1]))
+        .map(([answerId, value]) => ({ answerId, value }));
+
+      result.push({ questionId, answers });
     }
   };
 
@@ -271,6 +320,9 @@ export const parseQuizFormData = (input: QuizForm) => {
 
   const processSimpleResponses = (questionMap: Record<string, string>) => {
     for (const questionId in questionMap) {
+      // timed quizzes can be submitted partially; an empty response is an unanswered question
+      if (!questionMap[questionId]) continue;
+
       result.push({
         questionId,
         answers: [
@@ -288,12 +340,70 @@ export const parseQuizFormData = (input: QuizForm) => {
   processSingleAnswerQuestions(input.singleAnswerQuestions);
   processSingleAnswerQuestions(input.photoQuestionSingleChoice);
   processSingleAnswerQuestions(input.multiAnswerQuestions);
-  processFillInTheBlanks(input.fillInTheBlanksText);
-  processFillInTheBlanks(input.fillInTheBlanksDnd);
+  processFillInTheBlanks(input.fillInTheBlanksText, { keepBlankPositions: true });
+  // shortcut: an empty drag-and-drop value is rejected by the API, so legacy id-less dnd blanks
+  // still shift when filled partially; upgrade if such quizzes get timed
+  processFillInTheBlanks(input.fillInTheBlanksDnd, { keepBlankPositions: false });
+  processMatchingQuestions(input.matchingQuestions);
   processSingleAnswerQuestions(input.photoQuestionMultipleChoice);
   processBooleanQuestions(input.trueOrFalseQuestions);
 
   return result;
+};
+
+type OpenAnswerField = "briefResponses" | "detailedResponses";
+type OptionAnswerField = Exclude<keyof QuizForm, OpenAnswerField>;
+type QuizQuestionType = Questions[number]["type"];
+
+const OPEN_ANSWER_FIELDS: Partial<Record<QuizQuestionType, OpenAnswerField>> = {
+  brief_response: "briefResponses",
+  detailed_response: "detailedResponses",
+};
+
+const OPTION_ANSWER_FIELDS: Partial<Record<QuizQuestionType, OptionAnswerField>> = {
+  single_choice: "singleAnswerQuestions",
+  multiple_choice: "multiAnswerQuestions",
+  true_or_false: "trueOrFalseQuestions",
+  photo_question_single_choice: "photoQuestionSingleChoice",
+  photo_question_multiple_choice: "photoQuestionMultipleChoice",
+  fill_in_the_blanks_text: "fillInTheBlanksText",
+  fill_in_the_blanks_dnd: "fillInTheBlanksDnd",
+  matching: "matchingQuestions",
+  scale_1_5: "scaleQuestions",
+};
+
+/** Inverse of `parseQuizFormData`: restores autosaved timed-quiz answers into the quiz form. */
+export const getDraftQuizAnswers = (
+  questions: Questions,
+  draftAnswers: EvaluationQuizBody["questionsAnswers"],
+): QuizForm => {
+  const form = getEmptyQuizAnswers(questions);
+
+  draftAnswers.forEach(({ questionId, answers }) => {
+    const questionType = questions.find(({ id }) => id === questionId)?.type;
+    if (!questionType) return;
+
+    const openAnswerField = OPEN_ANSWER_FIELDS[questionType];
+    const optionAnswerField = OPTION_ANSWER_FIELDS[questionType];
+
+    if (openAnswerField) {
+      const [answer] = answers;
+      form[openAnswerField][questionId] = answer && "value" in answer ? answer.value : "";
+      return;
+    }
+
+    if (!optionAnswerField) return;
+
+    const questionMap = { ...form[optionAnswerField][questionId] };
+    answers.forEach((answer, index) => {
+      // blanks without ids are sent positionally (see parseQuizFormData), keyed "1", "2", ...
+      const key = "answerId" in answer ? answer.answerId : `${index + 1}`;
+      questionMap[key] = "value" in answer ? answer.value : answer.answerId;
+    });
+    form[optionAnswerField][questionId] = questionMap;
+  });
+
+  return form;
 };
 
 export function getCurrentChapterId(

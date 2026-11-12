@@ -60,9 +60,9 @@ export function buildConditionalBuiltInAutomationDefinition(
           parentId: null,
           position: 0,
           type: AUTOMATION_STEP_TYPES.TRIGGER,
-          config: { eventKind: builtin.eventKind },
+          config: { eventKind: builtin.triggerEventKind ?? builtin.eventKind },
         },
-        ...buildEmailBranchSteps(branchPlan, triggerStepId, 0),
+        ...buildEmailBranchSteps(branchPlan, triggerStepId, 0, builtin.recipients),
       ],
     },
   };
@@ -72,6 +72,7 @@ function buildEmailBranchSteps(
   branchPlan: AutomationEmailBranchPlan,
   parentStepId: UUIDType,
   branchPosition: number,
+  recipients?: BuiltInAutomationDefinition["recipients"],
 ): AutomationStep[] {
   const stepId = randomUUID();
   const identity = { id: stepId, parentId: parentStepId, position: branchPosition };
@@ -83,8 +84,18 @@ function buildEmailBranchSteps(
         type: AUTOMATION_STEP_TYPES.CONDITION,
         config: { field: branchPlan.field },
       },
-      ...buildEmailBranchSteps(branchPlan.yes, stepId, AUTOMATION_CONDITION_BRANCH_POSITIONS.YES),
-      ...buildEmailBranchSteps(branchPlan.no, stepId, AUTOMATION_CONDITION_BRANCH_POSITIONS.NO),
+      ...buildEmailBranchSteps(
+        branchPlan.yes,
+        stepId,
+        AUTOMATION_CONDITION_BRANCH_POSITIONS.YES,
+        recipients,
+      ),
+      ...buildEmailBranchSteps(
+        branchPlan.no,
+        stepId,
+        AUTOMATION_CONDITION_BRANCH_POSITIONS.NO,
+        recipients,
+      ),
     ];
   }
 
@@ -96,6 +107,7 @@ function buildEmailBranchSteps(
       type: AUTOMATION_STEP_TYPES.SEND_EMAIL,
       config: {
         template: { type: AUTOMATION_TEMPLATE_TYPES.BUILTIN, key: branchPlan.templateKey },
+        ...(recipients ? { recipients } : {}),
         mappings: buildRequiredEventFieldMappings(publication.placeholders),
       },
     },
@@ -128,7 +140,7 @@ function buildSingleEmailWorkflow(
         parentId: null,
         position: 0,
         type: AUTOMATION_STEP_TYPES.TRIGGER,
-        config: { eventKind: builtin.eventKind },
+        config: { eventKind: builtin.triggerEventKind ?? builtin.eventKind },
       },
       {
         id: actionId,
@@ -136,6 +148,7 @@ function buildSingleEmailWorkflow(
         position: 0,
         type: AUTOMATION_STEP_TYPES.SEND_EMAIL,
         config: {
+          ...(builtin.recipients ? { recipients: builtin.recipients } : {}),
           template: customization
             ? { type: AUTOMATION_TEMPLATE_TYPES.CUSTOM, id: customization.id }
             : { type: AUTOMATION_TEMPLATE_TYPES.BUILTIN, key: builtin.templateKey },

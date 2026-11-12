@@ -1,5 +1,5 @@
 import { useSearchParams } from "@remix-run/react";
-import { Building2, Palette, Plug, UserRound } from "lucide-react";
+import { Building2, Palette, Plug, ToggleRight, UserRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
@@ -20,6 +20,7 @@ interface SettingsNavigationTabsProps {
   integrationsContent?: React.ReactNode;
   organizationContent?: React.ReactNode;
   customizePlatformContent?: React.ReactNode;
+  featuresContent?: React.ReactNode;
   hasConfigurationIssues?: boolean;
   hasIntegrationsAvailable?: boolean;
 }
@@ -32,6 +33,7 @@ export function SettingsNavigationTabs({
   integrationsContent,
   organizationContent,
   customizePlatformContent,
+  featuresContent,
   hasConfigurationIssues,
   hasIntegrationsAvailable = true,
 }: SettingsNavigationTabsProps) {
@@ -40,6 +42,7 @@ export function SettingsNavigationTabs({
 
   const adminTabs = [
     { value: SETTINGS_TABS.ORGANIZATION, label: t("settings.tabs.organization"), icon: Building2 },
+    { value: SETTINGS_TABS.FEATURES, label: t("settings.tabs.features"), icon: ToggleRight },
     {
       value: SETTINGS_TABS.PLATFORM_CUSTOMIZATION,
       label: t("settings.tabs.platformCustomization"),
@@ -106,6 +109,7 @@ export function SettingsNavigationTabs({
                 .with(SETTINGS_TABS.ACCOUNT, () => SETTINGS_PAGE_HANDLES.ACCOUNT_TAB)
                 .with(SETTINGS_TABS.INTEGRATIONS, () => SETTINGS_PAGE_HANDLES.INTEGRATIONS_TAB)
                 .with(SETTINGS_TABS.ORGANIZATION, () => SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB)
+                .with(SETTINGS_TABS.FEATURES, () => SETTINGS_PAGE_HANDLES.FEATURES_TAB)
                 .otherwise(() => SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB)}
               className="relative gap-2 rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary-600 data-[state=active]:bg-transparent data-[state=active]:text-primary-700 data-[state=active]:shadow-none"
             >
@@ -148,6 +152,14 @@ export function SettingsNavigationTabs({
         data-testid={SETTINGS_PAGE_HANDLES.ORGANIZATION_CONTENT}
       >
         {organizationContent}
+      </TabsContent>
+
+      <TabsContent
+        value={SETTINGS_TABS.FEATURES}
+        className="m-0"
+        data-testid={SETTINGS_PAGE_HANDLES.FEATURES_CONTENT}
+      >
+        {featuresContent}
       </TabsContent>
 
       <TabsContent

@@ -181,9 +181,10 @@ describe("NativeArchiveAssetsService", () => {
           expect.stringContaining("/native-archive/assets/"),
           "audio/wav",
         );
-        expect(staged.snapshots[0].lessonContentResources[0].reference).toContain(
-          "/native-archive/assets/",
-        );
+        expect(staged.snapshots[0].lessonContentResources[0]).toMatchObject({
+          reference: expect.stringContaining("/native-archive/assets/"),
+          metadata: { durationSeconds: 1 },
+        });
       }
     } finally {
       await rm(directory, { recursive: true, force: true });

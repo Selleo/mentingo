@@ -11,7 +11,7 @@ An administrator can create a course, add chapters and lessons, assign learners,
 - Content creators build and update their own training courses, then review learner outcomes for those courses when they have statistics access.
 - L&D administrators manage the wider catalog, including publication, assignments, ownership, and reporting.
 - Managing-tenant administrators share eligible master courses with other tenants so teams can reuse approved training.
-- Learners see the published course description, outcomes, and curriculum, then access lessons according to enrollment and course rules.
+- Learners see the published course description, outcomes, and curriculum, then access lessons according to enrollment and course rules. They can also browse the course table, limited to the courses visible to them.
 
 ## Feature Functions
 
@@ -23,6 +23,7 @@ An administrator can create a course, add chapters and lessons, assign learners,
 - Share eligible master courses with managed tenants and synchronize later source changes to their read-only copies.
 - Export supported courses as SCORM packages or download an editable Mentingo package; import a Mentingo package to create a draft in the destination tenant.
 - Let learners inspect the course structure while keeping lessons they cannot yet access visible but unavailable to open.
+- Switch between the course catalogue and the course table, and share a filtered table view through its link.
 
 ## End-User Value
 
@@ -33,6 +34,8 @@ Learners get a clear course summary and curriculum, while enrolled learners keep
 ## How It Works
 
 An administrator starts from the course list, creates a course, and opens its editing experience. The curriculum area supports chapter and lesson changes. The modern Course Overview holds the course title, description, category, learning outcomes, media, and settings; the edit area exposes status, enrollment, pricing when available, and sharing. The course list supports filtering and bulk category, status, archive, and eligible draft-deletion actions.
+
+The catalogue and the course table share a view switch, so users move between browsing cards and scanning rows. Table filters for title, category, status, and archive state are kept in the page link, so a filtered view can be bookmarked or sent to a colleague. Learners who cannot manage courses open a read-only table: it lists published courses and the published or private courses they are enrolled in, filters only by title and category, and hides status, selection, and course actions.
 
 Editors can select a course language from the overview. Title and description editing shows the selected language's actual values so translation gaps remain visible. Category titles and learning outcomes can fall back to the base language, and a warning identifies incomplete translations. Editors can add up to five learning outcomes and upload or reposition a cover image or add a trailer. Learners see the curriculum, but enrollment, freemium access, and lesson order determine which lessons they can open.
 
@@ -48,6 +51,7 @@ Managing-tenant administrators can instead share a master course with selected t
 
 - Admin course management lives in `apps/web/app/modules/Admin/Courses`, `AddCourse`, and `EditCourse`; the modern Course Overview supplies language-aware metadata and media editing. Core course operations live in `apps/api/src/courses/course.controller.ts`.
 - Course creation, own-course editing, any-course editing, enrollment, statistics, deletion, export, and category management have separate permission checks. Statistics additionally requires access to the specific course. Group deadline editing requires course-enrollment and group-read access.
+- The course table (`/courses?view=table`, with `/admin/courses` redirecting to it) accepts course editors and learners with assigned-course read access. The API list returns the union of what each of the user's roles grants: own courses for authors, managed groups' courses for group managers, and the learner scope for users with assigned-course read access who cannot read manageable courses. A learner who also manages groups therefore sees both, while draft, archived-only, and unenrolled private courses outside those scopes never reach them.
 - Archive state is separate from draft, private, and published status. Catalog and direct-course access enforce archive visibility while retaining access for enrolled learners.
 - Mentingo package export and import live in `apps/api/src/native-archive`. ZIPs contain a versioned manifest and checked assets; tenant-scoped background jobs process them. Import maps source identities to destination IDs and checks for an existing course before creating one.
 - Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course/master-course.service.ts`; copied media belongs to the target tenant. Course language selection stays in the overview URL, and shared language and learning-outcome rules keep the UI and API aligned.

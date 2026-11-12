@@ -3,10 +3,8 @@ import { ACHIEVEMENT_VISIBILITY } from "@repo/shared";
 import { Eye, EyeOff, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { useToggleGamificationEnabled } from "~/api/mutations/admin/useToggleGamificationEnabled";
 import { useUpdateAchievementStatus } from "~/api/mutations/admin/useUpdateAchievementStatus";
 import { useAdminAchievements } from "~/api/queries/admin/useAdminAchievements";
-import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Badge } from "~/components/ui/badge";
@@ -21,8 +19,9 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { GamificationFeatureGuard } from "~/Guards/GamificationFeatureGuard";
+import { GAMIFICATION_FEATURES } from "~/Guards/GamificationFeatureGuard.constants";
 import Loader from "~/modules/common/Loader/Loader";
-import { SettingItem } from "~/modules/Dashboard/Settings/components/SettingItem";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { AchievementBadge } from "~/modules/Gamification/AchievementBadge";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -34,18 +33,22 @@ import type { MetaFunction } from "@remix-run/react";
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.gamification");
 
 export default function GamificationAdminPage() {
+  return (
+    <GamificationFeatureGuard feature={GAMIFICATION_FEATURES.GAMIFICATION}>
+      <GamificationAdmin />
+    </GamificationFeatureGuard>
+  );
+}
+
+function GamificationAdmin() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const language = useLanguageStore((state) => state.language);
-  const { data: globalSettings } = useGlobalSettings();
   const {
     data: achievements = [],
     isPending: isLoadingAchievements,
     isError: hasAchievementsError,
   } = useAdminAchievements(language);
-  // The endpoint flips the stored value, so a second click mid-request would undo the first.
-  const { mutate: toggleGamification, isPending: isTogglingGamification } =
-    useToggleGamificationEnabled();
   const { mutate: updateStatus, isPending: isUpdatingStatus } = useUpdateAchievementStatus();
 
   return (
@@ -53,25 +56,6 @@ export default function GamificationAdminPage() {
       breadcrumbs={[{ title: t("gamification.admin.title"), href: "/admin/gamification" }]}
     >
       <div className="flex flex-col gap-6" data-testid={GAMIFICATION_ADMIN_HANDLES.PAGE}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="h5">{t("gamification.admin.title")}</CardTitle>
-            <CardDescription className="body-lg-md">
-              {t("gamification.admin.description")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SettingItem
-              id="gamification-enabled"
-              label={t("gamification.admin.enabled.label")}
-              description={t("gamification.admin.enabled.description")}
-              checked={Boolean(globalSettings?.gamificationEnabled)}
-              onCheckedChange={() => toggleGamification()}
-              disabled={isTogglingGamification}
-            />
-          </CardContent>
-        </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-start justify-between gap-4">
             <div className="flex flex-col gap-1.5">

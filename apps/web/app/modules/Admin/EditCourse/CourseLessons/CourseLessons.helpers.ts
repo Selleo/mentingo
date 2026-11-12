@@ -43,7 +43,7 @@ export const mapQuestionTypeToLabel = (questionType: QuestionType): string =>
       QuestionType.FILL_IN_THE_BLANKS_DND,
       () => "adminCourseView.curriculum.lesson.other.fillInTheBlanks",
     )
-    .with(QuestionType.MATCH_WORDS, () => "adminCourseView.curriculum.lesson.other.matchWords")
+    .with(QuestionType.MATCHING, () => "adminCourseView.curriculum.lesson.other.matching")
     .with(QuestionType.SCALE_1_5, () => "adminCourseView.curriculum.lesson.other.scale1_5")
     .otherwise(() => "");
 

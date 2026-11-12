@@ -47,6 +47,7 @@ export const CONTENT_LESSON_FORM_HANDLES = {
 export const QUIZ_LESSON_FORM_HANDLES = {
   ROOT: "curriculum-quiz-lesson-form",
   TITLE_INPUT: "curriculum-quiz-lesson-title-input",
+  TIME_LIMIT_INPUT: "curriculum-quiz-lesson-time-limit-input",
   SAVE_BUTTON: "curriculum-quiz-lesson-save-button",
   DELETE_BUTTON: "curriculum-quiz-lesson-delete-button",
   CANCEL_BUTTON: "curriculum-quiz-lesson-cancel-button",
@@ -64,6 +65,12 @@ export const QUIZ_LESSON_FORM_HANDLES = {
     `curriculum-quiz-question-add-option-button-${questionIndex}`,
   optionInput: (questionIndex: number, optionIndex: number) =>
     `curriculum-quiz-question-${questionIndex}-option-${optionIndex}-input`,
+  matchingScoringSelect: (questionIndex: number) =>
+    `curriculum-quiz-question-${questionIndex}-matching-scoring-select`,
+  matchingPromptInput: (questionIndex: number, pairIndex: number) =>
+    `curriculum-quiz-question-${questionIndex}-pair-${pairIndex}-prompt-input`,
+  matchingMatchInput: (questionIndex: number, pairIndex: number) =>
+    `curriculum-quiz-question-${questionIndex}-pair-${pairIndex}-match-input`,
   correctOptionControl: (questionIndex: number, optionIndex: number) =>
     `curriculum-quiz-question-${questionIndex}-option-${optionIndex}-correct`,
   fillBlanksEditor: (questionIndex: number) =>

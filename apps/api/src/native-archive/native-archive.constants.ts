@@ -63,6 +63,7 @@ export const NATIVE_ARCHIVE_COURSE_ARRAY_FIELDS = [
   "assessmentQuestionBlanks",
   "assessmentQuestionBlankAnswerSets",
   "assessmentQuestionDragAndDropOptions",
+  "assessmentQuestionMatchingPairs",
   "assessmentQuestionScaleOptions",
   "assessmentQuestionTrueFalseStatements",
   "questionResources",

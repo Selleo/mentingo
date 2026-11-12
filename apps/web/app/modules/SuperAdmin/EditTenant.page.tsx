@@ -22,6 +22,7 @@ import {
   editTenantFormSchema,
   type EditTenantFormValues,
 } from "~/modules/SuperAdmin/schemas/tenant.schema";
+import { TENANTS_PATH } from "~/modules/SuperAdmin/tenantsTable.constants";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { TENANT_FORM_HANDLES, TENANT_PAGE_HANDLES } from "../../../e2e/data/tenants/handles";
@@ -63,7 +64,12 @@ export default function EditTenantPage() {
   };
 
   return (
-    <PageWrapper>
+    <PageWrapper
+      breadcrumbs={[
+        { title: t("superAdminTenantsView.title"), href: TENANTS_PATH },
+        { title: t("superAdminTenantsView.edit.title"), href: `${TENANTS_PATH}/${tenantId ?? ""}` },
+      ]}
+    >
       <div data-testid={TENANT_PAGE_HANDLES.PAGE} className="flex flex-col gap-y-6">
         <div>
           <h1 data-testid={TENANT_PAGE_HANDLES.HEADING} className="text-xl font-semibold">

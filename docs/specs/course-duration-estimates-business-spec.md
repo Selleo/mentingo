@@ -2,7 +2,7 @@
 
 ## Business Overview
 
-Course duration estimates help learners decide whether a course fits their available time and help course creators and L&D managers plan learning workloads. Mentingo builds the estimate from the course's readable content, interactive activities, and embedded resources, including authoritative lengths for supported internal videos when that metadata is available.
+Course duration estimates help learners decide whether a course fits their available time and help course creators and L&D managers plan learning workloads. Mentingo builds the estimate from the course's readable content, interactive activities, and embedded resources, including authoritative lengths for supported internal videos and audio recordings when that metadata is available.
 
 Learners see the same rounded course and chapter totals wherever they encounter a course: overview, course lists, cards, the table of contents, and the progress card. As learners complete lessons, the progress card shows the remaining estimate without counting completed lessons. A completed course shows a finished message instead of a zero-minute duration.
 
@@ -14,8 +14,8 @@ Learners see the same rounded course and chapter totals wherever they encounter 
 
 ## Feature Functions
 
-- Estimate course effort from reading, questions, lesson types, images, downloads, presentations, embeds, and video content.
-- Use server-owned video metadata when available while retaining a documented fallback for videos whose metadata is not yet available.
+- Estimate course effort from reading, questions, lesson types, images, downloads, presentations, embeds, video, and audio content.
+- Use server-owned video and audio metadata when available while retaining a documented three-minute fallback for embedded media whose metadata is not yet available.
 - Aggregate lesson estimates into chapter and course totals with an exact internal value and a consistent learner-facing display.
 - Present chapter-based duration labels in 15-minute increments so the displayed course total equals the sum of displayed chapters.
 - Show remaining learning time by excluding completed lessons and rounding each chapter's remaining work once.
@@ -33,7 +33,7 @@ When a learner or course manager opens a course, Mentingo calculates exact secon
 
 For remaining time, Mentingo looks at the learner's current lesson statuses, removes completed lessons, sums the unfinished lesson seconds within each chapter, rounds each non-empty chapter remainder to a 15-minute bucket, and adds the chapter results. Partial progress inside an unfinished lesson is not subtracted in this feature. When every chapter is complete, the progress card shows the localized course-finished message.
 
-The estimate uses localized lesson text independently for each course language, falling back to the base-language text when a translation is unavailable. Internal videos use their positive server-owned duration metadata when present; missing or invalid metadata uses the established 180-second estimate fallback. New uploads and copied Bunny videos discover that metadata in a retryable background flow, so video processing does not hold up course editing or sharing. Resource attachments that are not embedded in lesson content do not add time, and repeated embedded occurrences are counted separately. Persisted lesson, chapter, and course projections contain exactly the base language plus the course's available locales.
+The estimate uses localized lesson text independently for each course language, falling back to the base-language text when a translation is unavailable. Internal videos and embedded audio recordings use their positive server-owned duration metadata when present; missing or invalid metadata uses the established 180-second estimate fallback. New audio uploads retain the validated recording length immediately. Previously uploaded audio is processed in bounded background batches and affected course estimates are refreshed automatically; files that cannot be read retain the fallback until processing succeeds. Video uploads and copied Bunny videos discover metadata in a retryable background flow, so video processing does not hold up course editing or sharing. Resource attachments that are not embedded in lesson content do not add time, and repeated embedded occurrences are counted separately. Persisted lesson, chapter, and course projections contain exactly the base language plus the course's available locales.
 
 ## Key Technical Context
 
@@ -48,4 +48,5 @@ The estimate uses localized lesson text independently for each course language, 
 
 - Frontend utility coverage verifies zero, exact 15-minute, and just-over-boundary values; sums independently rounded chapter displays; and groups unfinished lessons by chapter before display rounding.
 - Course overview, chapter, author, and progress component tests cover the visible duration and completion states. Broader course-flow E2E coverage opens the course overview and learning flows, while API course tests cover duration hierarchy responses and refresh behavior.
+- Backend unit regressions cover repeated embedded audio, canonical metadata, invalid/unresolved duration fallback, unused attachments, download-only audio, and localized lesson/chapter/course projection updates. Audio uploads retain the server-probed length without changing learner activity tracking or video-completion requirements.
 - Dedicated browser assertions for every duration surface, shared-video retry behavior, and migration upgrade coverage remain follow-up validation areas when the backend contract and generated client are regenerated.

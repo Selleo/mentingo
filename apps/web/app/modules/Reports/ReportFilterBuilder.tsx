@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import { DatePicker } from "~/components/DatePicker";
+import { OptionPicker } from "~/components/OptionPicker/OptionPicker";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -14,7 +15,6 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
-import { ReportOptionPicker } from "./components/ReportOptionPicker";
 import {
   addCondition,
   addNestedGroup,
@@ -144,7 +144,7 @@ function RuleEditor({
     }
     if (choices) {
       return (
-        <ReportOptionPicker
+        <OptionPicker
           label={t("reports.filters.value")}
           placeholder={t("reports.filters.selectValue")}
           options={choices}
@@ -219,7 +219,7 @@ function RuleEditor({
 
   return (
     <div className="grid grid-cols-1 items-center gap-2 md:grid-cols-[minmax(150px,1fr)_minmax(130px,0.8fr)_minmax(120px,0.9fr)_minmax(120px,0.9fr)_auto]">
-      <ReportOptionPicker
+      <OptionPicker
         label={t("reports.filters.field")}
         placeholder={t("reports.filters.field")}
         options={fieldKeys.map((field) => ({ id: field, label: t(`reports.fields.${field}`) }))}

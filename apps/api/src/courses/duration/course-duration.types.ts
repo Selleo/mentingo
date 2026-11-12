@@ -1,3 +1,4 @@
+import type { DURATION_MEDIA_KINDS } from "./duration-defaults";
 import type { LocalizedText, SupportedLanguages } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
@@ -64,9 +65,12 @@ export type DurationProjectionUpdate = {
 
 export type DurationDb = DatabasePg;
 
+export type DurationMediaKind = (typeof DURATION_MEDIA_KINDS)[keyof typeof DURATION_MEDIA_KINDS];
+
 export type DurationHeuristics = {
   wordsPerMinute: number;
   videoMinutes: number;
+  audioMinutes: number;
   imageSeconds: number;
   downloadSeconds: number;
   quizSeconds: number;

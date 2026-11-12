@@ -10,6 +10,7 @@ import {
 } from "@nestjs/common";
 import {
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
+  ASSESSMENT_QUESTION_TYPES,
   ENTITY_TYPES,
   PERMISSIONS,
   hasPermission,
@@ -54,6 +55,7 @@ import type {
   AuthoringMentorContextLesson,
   AuthoringSelectedLessonDetails,
 } from "./course-authoring-context.types";
+import type { AuthoringQuestion } from "./schema/course-authoring-operations.schema";
 import type {
   AuthoringContextQuery,
   AuthoringCourseContext,
@@ -499,7 +501,12 @@ export class CourseAuthoringContextService {
               attemptsLimit: quiz.assessment.maximumAttempts,
               quizCooldownInHours:
                 assessmentRows.find((item) => item.lessonId === lesson.id)?.cooldownHours ?? null,
-              questions: quiz.questions,
+              // shortcut: Luma cannot represent matching questions, so they are hidden here and
+              // updates of quizzes containing them are rejected; add matching to Luma in #2172.
+              questions: quiz.questions.filter(
+                (question): question is AuthoringQuestion & typeof question =>
+                  question.questionType !== ASSESSMENT_QUESTION_TYPES.MATCHING,
+              ),
             },
           });
       } else if (lesson.lessonType === "ai_mentor") {

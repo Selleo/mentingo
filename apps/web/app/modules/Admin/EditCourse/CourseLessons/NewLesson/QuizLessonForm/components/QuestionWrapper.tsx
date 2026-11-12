@@ -66,6 +66,11 @@ const QuestionWrapper = ({
             isStructureLocked={isStructureLocked}
             baseLanguageQuestion={baseLanguageQuestion}
           />
+          {errors?.questions?.[questionIndex]?.title?.message && (
+            <p className="ml-14 text-sm text-red-500">
+              {errors.questions[questionIndex]?.title?.message}
+            </p>
+          )}
           {isOpen && <AccordionContent>{children}</AccordionContent>}
         </div>
       </AccordionItem>

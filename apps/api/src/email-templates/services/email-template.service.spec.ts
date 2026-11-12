@@ -130,6 +130,21 @@ describe("EmailTemplateManagementService mutation validation", () => {
     );
   });
 
+  it("exposes the shared condition for existing custom and built-in admin completion templates", async () => {
+    template.triggerEventKind = "admin_finished_course";
+    findCustomEmailTemplatePageWithCount.mockResolvedValue({
+      templates: [template],
+      totalItems: 1,
+    });
+    const result = await service.listEmailTemplates(1, 100);
+    expect(result.data.find(({ id }) => id === template.id)?.triggerEventKind).toBe(
+      "user_finished_course",
+    );
+    expect(
+      result.data.find(({ event }) => event === "admin_finished_course")?.triggerEventKind,
+    ).toBe("user_finished_course");
+  });
+
   it.each(Object.values(EMAIL_TEMPLATE_STATUSES))(
     "deletes a %s template under the publication lock",
     async (status) => {

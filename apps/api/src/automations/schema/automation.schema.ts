@@ -7,6 +7,7 @@ import {
   AUTOMATION_VALIDATION_ISSUE_CODES,
   SUPPORTED_LANGUAGES,
   AUTOMATION_RECIPIENT_TYPES,
+  AUTOMATION_RECIPIENT_AUDIENCES,
   AUTOMATION_MAPPING_TYPES,
   AUTOMATION_STEP_TYPES,
   AUTOMATION_TEMPLATE_TYPES,
@@ -77,7 +78,18 @@ export const automationMappingSchema = Type.Union([
 ]);
 
 export const automationRecipientSelectionSchema = Type.Union([
-  Type.Object({ type: Type.Literal(AUTOMATION_RECIPIENT_TYPES.EVENT) }, closed),
+  Type.Object(
+    {
+      type: Type.Literal(AUTOMATION_RECIPIENT_TYPES.EVENT),
+      audience: Type.Optional(
+        Type.Union([
+          Type.Literal(AUTOMATION_RECIPIENT_AUDIENCES.LEARNER),
+          Type.Literal(AUTOMATION_RECIPIENT_AUDIENCES.ADMINISTRATORS),
+        ]),
+      ),
+    },
+    closed,
+  ),
   Type.Object({ type: Type.Literal(AUTOMATION_RECIPIENT_TYPES.EVERYONE) }, closed),
   Type.Object({ type: Type.Literal(AUTOMATION_RECIPIENT_TYPES.USER), userId: UUIDSchema }, closed),
   Type.Object(

@@ -64,14 +64,17 @@ export class CourseCatalogService {
       perPage,
       sort,
     });
-    const trailerUrls = await this.courseMediaUrlService.getCourseTrailerUrls(
-      data.map((item) => item.id),
-    );
+    const courseIds = data.map((item) => item.id);
+    const [trailerUrls, durationEstimates] = await Promise.all([
+      this.courseMediaUrlService.getCourseTrailerUrls(courseIds),
+      this.courseDurationService.getCourseDurationDisplayMinutes(courseIds, language),
+    ]);
 
     const dataWithS3SignedUrls = await Promise.all(
       data.map(async (item) => {
         const trailerUrl = trailerUrls[item.id] ?? null;
-        if (!item.thumbnailUrl) return { ...item, trailerUrl };
+        const estimatedDurationMinutes = durationEstimates[item.id] ?? 0;
+        if (!item.thumbnailUrl) return { ...item, trailerUrl, estimatedDurationMinutes };
 
         try {
           const signedUrl = await this.courseMediaUrlService.getSignedCourseThumbnailUrl(
@@ -85,10 +88,11 @@ export class CourseCatalogService {
             thumbnailUrl: signedUrl,
             trailerUrl,
             authorAvatarUrl: authorAvatarSignedUrl,
+            estimatedDurationMinutes,
           };
         } catch (error) {
           this.logger.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
-          return { ...item, trailerUrl };
+          return { ...item, trailerUrl, estimatedDurationMinutes };
         }
       }),
     );

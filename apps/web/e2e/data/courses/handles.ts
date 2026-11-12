@@ -28,6 +28,7 @@ export const COURSES_INLINE_EDIT_HANDLES = {
 
 export const COURSES_VIEW_TOGGLE_HANDLES = {
   TOGGLE: "courses-view-toggle",
+  option: (view: "catalogue" | "table") => `courses-view-toggle-${view}`,
 } as const;
 
 export const COURSES_PAGE_HANDLES = {
@@ -40,6 +41,15 @@ export const COURSES_PAGE_HANDLES = {
   STATE_FILTER: "courses-page-state-filter",
   stateFilterOption: (state: CourseStatusFilterValue) => `courses-page-state-option-${state}`,
   ARCHIVED_FILTER: "courses-page-archived-filter",
+  RESET_FILTERS_BUTTON: "courses-page-reset-filters-button",
+  EMPTY_STATE: "courses-page-empty-state",
+  SELECTED_COUNT: "courses-page-selected-count",
+  activeFilterPill: (filter: string) => `courses-page-active-filter-${filter}`,
+  removeFilterButton: (filter: string) => `courses-page-remove-filter-${filter}`,
+  PAGINATION_PREVIOUS: "courses-page-pagination-previous",
+  PAGINATION_NEXT: "courses-page-pagination-next",
+  PAGINATION_ITEMS_PER_PAGE: "courses-page-pagination-items-per-page",
+  paginationPage: (page: number) => `courses-page-pagination-page-${page}`,
   archivedFilterOption: (status: "all" | "active" | "archived") =>
     `courses-page-archived-option-${status}`,
   DELETE_SELECTED_BUTTON: "courses-page-delete-selected-button",

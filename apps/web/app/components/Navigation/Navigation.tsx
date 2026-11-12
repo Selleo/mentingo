@@ -120,6 +120,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         user?.roleSlugs ?? [],
         competenciesConfiguration?.enabled === true && !isCompetenciesConfigurationError,
         areLeaderboardsEnabled(globalSettings),
+        globalSettings?.gamificationEnabled === true,
       ),
     );
   }
@@ -134,7 +135,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
       <header
         className={cn(
           "sticky top-0 h-min max-h-[100dvh] w-full overflow-hidden transition-all duration-300 ease-in-out",
-          "2xl:flex 2xl:h-full 2xl:flex-col 2xl:gap-y-4",
+          "2xl:flex 2xl:h-full 2xl:flex-col 2xl:gap-y-4 2xl:border-r 2xl:border-primary-100",
           "3xl:static",
           isSidebarCollapsed
             ? "2xl:w-14 2xl:px-2 2xl:py-4 3xl:w-14 3xl:px-2 3xl:py-4"

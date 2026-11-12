@@ -51,6 +51,7 @@ export const getNavigationConfig = (
   roleSlugs: readonly string[] = [],
   isCompetenciesEnabled = false,
   isLeaderboardsEnabled = false,
+  isGamificationEnabled = false,
 ): NavigationGroups[] => {
   const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
 
@@ -248,12 +249,16 @@ export const getNavigationConfig = (
           iconName: "Categories",
           testId: NAVIGATION_HANDLES.CATEGORIES_LINK,
         },
-        {
-          label: t("navigationSideBar.gamification"),
-          path: "admin/gamification",
-          iconName: "Trophy",
-          testId: NAVIGATION_HANDLES.GAMIFICATION_LINK,
-        },
+        ...(isGamificationEnabled
+          ? ([
+              {
+                label: t("navigationSideBar.gamification"),
+                path: "admin/gamification",
+                iconName: "Trophy",
+                testId: NAVIGATION_HANDLES.GAMIFICATION_LINK,
+              },
+            ] satisfies NavigationItem[])
+          : []),
         ...(isStripeConfigured
           ? [
               {

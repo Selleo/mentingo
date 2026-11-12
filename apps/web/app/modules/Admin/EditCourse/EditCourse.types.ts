@@ -40,6 +40,7 @@ export interface Lesson {
   thresholdScore?: number;
   attemptsLimit?: number;
   quizCooldownInHours?: number;
+  timeLimitMinutes?: number | null;
   fileS3Key?: string;
   fileS3SignedUrl?: string;
   avatarReferenceUrl?: string;

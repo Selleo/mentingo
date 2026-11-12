@@ -8,6 +8,7 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  UseFilters,
   UseGuards,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
@@ -41,6 +42,7 @@ import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
 import { currentUserResponseSchema } from "src/user/schemas/user.schema";
 
 import { AuthService } from "./auth.service";
+import { OAuthCallbackExceptionFilter } from "./oauth/oauth-callback-exception.filter";
 import { CreateAccountBody, createAccountSchema } from "./schemas/create-account.schema";
 import { type CreatePasswordBody, createPasswordSchema } from "./schemas/create-password.schema";
 import { LoginBody, loginResponseSchema, loginSchema } from "./schemas/login.schema";
@@ -163,7 +165,7 @@ export class AuthController {
       return null;
     }
 
-    await this.sessionService.revokeSession(currentUser);
+    await this.authService.revokeSessionAndCloseSockets(currentUser);
 
     if (isSupportModeSession(currentUser)) {
       await this.authService.revokeSupportSession(currentUser.supportSessionId);
@@ -339,6 +341,7 @@ export class AuthController {
 
   @Public()
   @Get("google/callback")
+  @UseFilters(OAuthCallbackExceptionFilter)
   @UseGuards(GoogleOAuthGuard)
   async googleAuthCallback(
     @Req() request: Request & { user: ProviderLoginUserType },
@@ -374,6 +377,7 @@ export class AuthController {
 
   @Public()
   @Get("microsoft/callback")
+  @UseFilters(OAuthCallbackExceptionFilter)
   @UseGuards(MicrosoftOAuthGuard)
   async microsoftAuthCallback(
     @Req() request: Request & { user: ProviderLoginUserType },
@@ -409,6 +413,7 @@ export class AuthController {
 
   @Public()
   @Get("slack/callback")
+  @UseFilters(OAuthCallbackExceptionFilter)
   @UseGuards(SlackOAuthGuard)
   async slackAuthCallback(
     @Req() request: Request & { user: ProviderLoginUserType },
@@ -444,6 +449,7 @@ export class AuthController {
 
   @Public()
   @Get("entra-id/callback")
+  @UseFilters(OAuthCallbackExceptionFilter)
   @UseGuards(EntraIdOAuthGuard)
   async entraIdAuthCallback(
     @Req() request: Request & { user: ProviderLoginUserType },

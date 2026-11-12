@@ -1,4 +1,5 @@
 import { Outlet } from "@remix-run/react";
+import { Suspense } from "react";
 
 import { useCurrentUser } from "~/api/queries";
 import { Navigation } from "~/components/Navigation/Navigation";
@@ -6,6 +7,7 @@ import { MFAGuard } from "~/Guards/MFAGuard";
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { cn } from "~/lib/utils";
 import { AssistantDock } from "~/modules/Assistant/AssistantDock";
+import Loader from "~/modules/common/Loader/Loader";
 import { SupportModeBanner } from "~/modules/SupportMode/SupportModeBanner";
 
 export default function NavigationWrapper() {
@@ -23,7 +25,20 @@ export default function NavigationWrapper() {
         <MFAGuard mode="public">
           <RouteGuard>
             <>
-              <Outlet />
+              {/* Without this boundary a suspending page falls back to the root loader and unmounts the sidebar. */}
+              <Suspense
+                fallback={
+                  <div
+                    role="status"
+                    aria-busy="true"
+                    className="flex flex-1 items-center justify-center"
+                  >
+                    <Loader />
+                  </div>
+                }
+              >
+                <Outlet />
+              </Suspense>
               {currentUser && <AssistantDock actor={currentUser} />}
             </>
           </RouteGuard>

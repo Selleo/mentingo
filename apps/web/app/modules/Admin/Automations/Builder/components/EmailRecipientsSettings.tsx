@@ -1,6 +1,10 @@
-import { AUTOMATION_RECIPIENT_TYPES } from "@repo/shared";
+import {
+  AUTOMATION_EVENT_KINDS,
+  AUTOMATION_RECIPIENT_AUDIENCES,
+  AUTOMATION_RECIPIENT_TYPES,
+} from "@repo/shared";
 import { useTranslation } from "react-i18next";
-import { match } from "ts-pattern";
+import { match, P } from "ts-pattern";
 
 import { Label } from "~/components/ui/label";
 
@@ -57,6 +61,34 @@ export function EmailRecipientsSettings({
     onChange(selection);
   }
 
+  const courseCompletionAudiences = Object.values(AUTOMATION_RECIPIENT_AUDIENCES);
+
+  const selectsCourseCompletionAudience =
+    event?.kind === AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE &&
+    recipients.type === AUTOMATION_RECIPIENT_TYPES.EVENT;
+
+  const courseCompletionAudience = match(recipients)
+    .with(
+      { type: AUTOMATION_RECIPIENT_TYPES.EVENT, audience: P.nonNullable },
+      (selection) => selection.audience,
+    )
+    .otherwise(() => AUTOMATION_RECIPIENT_AUDIENCES.LEARNER);
+
+  const eventRecipientsDescription = match({ selectsCourseCompletionAudience, event })
+    .with({ selectsCourseCompletionAudience: true }, () =>
+      t(`automationBuilder.recipients.courseCompletionAudiences.${courseCompletionAudience}`),
+    )
+    .with({ event: P.nonNullable }, ({ event: selectedEvent }) =>
+      t(`automationBuilder.recipients.eventDescriptions.${selectedEvent.kind}`),
+    )
+    .otherwise(() => t("automationBuilder.recipients.selectTrigger"));
+
+  function selectCourseCompletionAudience(value: string) {
+    const audience = courseCompletionAudiences.find((candidate) => candidate === value);
+
+    if (audience) onChange({ type: AUTOMATION_RECIPIENT_TYPES.EVENT, audience });
+  }
+
   return (
     <div className="space-y-2">
       <Label>{t("automationBuilder.recipients.title")}</Label>
@@ -77,11 +109,26 @@ export function EmailRecipientsSettings({
           },
         ]}
       />
+      {selectsCourseCompletionAudience && (
+        <AutomationSearchSelect
+          label={t("automationBuilder.recipients.courseCompletionAudience")}
+          placeholder={t("automationBuilder.recipients.courseCompletionAudience")}
+          value={courseCompletionAudience}
+          disabled={disabled}
+          onValueChange={selectCourseCompletionAudience}
+          groups={[
+            {
+              options: courseCompletionAudiences.map((audience) => ({
+                value: audience,
+                label: t(`automationBuilder.recipients.courseCompletionAudiences.${audience}`),
+              })),
+            },
+          ]}
+        />
+      )}
       {recipients.type === AUTOMATION_RECIPIENT_TYPES.EVENT && (
         <p className="text-xs leading-relaxed text-muted-foreground">
-          {event
-            ? t(`automationBuilder.recipients.eventDescriptions.${event.kind}`)
-            : t("automationBuilder.recipients.selectTrigger")}
+          {eventRecipientsDescription}
         </p>
       )}
       {recipients.type === AUTOMATION_RECIPIENT_TYPES.EVERYONE && (

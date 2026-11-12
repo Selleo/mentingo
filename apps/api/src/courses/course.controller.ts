@@ -213,7 +213,11 @@ export class CourseController {
   ) {}
 
   @Get("all")
-  @RequirePermission(PERMISSIONS.COURSE_READ_MANAGEABLE, PERMISSIONS.MANAGED_GROUP_RESULTS_READ)
+  @RequirePermission(
+    PERMISSIONS.COURSE_READ_MANAGEABLE,
+    PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
+    PERMISSIONS.COURSE_READ_ASSIGNED,
+  )
   @Validate(allCoursesValidation)
   async getAllCourses(
     @Query("title") title: string,
