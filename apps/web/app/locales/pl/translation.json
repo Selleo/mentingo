@@ -6405,7 +6405,9 @@
       "start_learning_path": "Rozpoczęto ścieżkę",
       "complete_learning_path": "Ukończono ścieżkę",
       "play_scorm": "Uruchomiono SCORM",
-      "complete_scorm": "Ukończono SCORM"
+      "complete_scorm": "Ukończono SCORM",
+      "export": "Wyeksportowano",
+      "import": "Zaimportowano"
     },
     "entity": {
       "automation": "Automatyzacja",

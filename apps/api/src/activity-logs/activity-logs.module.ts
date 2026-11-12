@@ -22,6 +22,7 @@ import { GroupActivityHandler } from "./handlers/group-activity.handler";
 import { LearningPathActivityHandler } from "./handlers/learning-path-activity.handler";
 import { LessonActivityHandler } from "./handlers/lesson-activity.handler";
 import { LiveTrainingActivityHandler } from "./handlers/live-training-activity.handler";
+import { NativeArchiveActivityHandler } from "./handlers/native-archive-activity.handler";
 import { NewsActivityHandler } from "./handlers/news-activity.handler";
 import { ScormActivityHandler } from "./handlers/scorm-activity.handler";
 import { SettingsActivityHandler } from "./handlers/settings-activity.handler";
@@ -59,6 +60,7 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
     QAActivityHandler,
     LearningPathActivityHandler,
     ScormActivityHandler,
+    NativeArchiveActivityHandler,
   ],
   exports: [ActivityLogsService, CqrsModule],
 })

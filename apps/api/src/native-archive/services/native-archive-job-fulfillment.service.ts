@@ -8,6 +8,7 @@ import { pipeline } from "node:stream/promises";
 import { BadRequestException, ForbiddenException, Injectable } from "@nestjs/common";
 import { match } from "ts-pattern";
 
+import { NativeArchiveExportedEvent, NativeArchiveImportedEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -20,6 +21,7 @@ import {
 import {
   NATIVE_ARCHIVE_EXPORT_ACCESS,
   NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS,
+  NATIVE_ARCHIVE_IMPORT_MODES,
   NATIVE_ARCHIVE_IMPORT_OUTCOMES,
   NATIVE_ARCHIVE_JOB_ACTION,
   NATIVE_ARCHIVE_JOB_STAGES,
@@ -47,6 +49,7 @@ import type {
   NativeArchiveExportAccess,
   NativeArchiveImportArchive,
   NativeArchiveImportOptions,
+  NativeArchiveImportResult,
   NativeArchiveImportSource,
   NativeArchiveJob,
   NativeArchiveJobResult,
@@ -111,7 +114,8 @@ export class NativeArchiveJobFulfillmentService {
   /**
    * Runs the import; when the job came with an import source, its outcome is published for that
    * source. IMPORTED is published by the import inside its content transaction; only FAILED is
-   * published here, because a failed import committed nothing.
+   * published here, because a failed import committed nothing. A successful import is also
+   * published as the actor's activity.
    */
   private async importArchiveAndReportOutcome(
     jobId: string,
@@ -120,15 +124,13 @@ export class NativeArchiveJobFulfillmentService {
     { importSource, importMode }: NativeArchiveImportOptions,
     progress: NativeArchiveProgressReporter,
   ): Promise<NativeArchiveJobResult> {
-    try {
-      return await this.downloadAndImportArchive(
-        jobId,
-        archive,
-        actor,
-        { importMode, importSource },
-        progress,
-      );
-    } catch (error) {
+    const importResult = await this.downloadAndImportArchive(
+      jobId,
+      archive,
+      actor,
+      { importMode, importSource },
+      progress,
+    ).catch(async (error: unknown) => {
       if (importSource)
         await this.publishImportFinished(jobId, actor, importSource, {
           outcome: NATIVE_ARCHIVE_IMPORT_OUTCOMES.FAILED,
@@ -137,7 +139,11 @@ export class NativeArchiveJobFulfillmentService {
         });
 
       throw error;
-    }
+    });
+
+    await this.publishArchiveImported(actor, { importMode, importSource }, importResult);
+
+    return importResult;
   }
 
   private async publishImportFinished(
@@ -162,6 +168,27 @@ export class NativeArchiveJobFulfillmentService {
     );
   }
 
+  private async publishArchiveImported(
+    actor: CurrentUserType,
+    { importMode = NATIVE_ARCHIVE_IMPORT_MODES.COPY, importSource }: NativeArchiveImportOptions,
+    { kind, rootId, alreadyExists, createdCourseIds, reusedCourseIds }: NativeArchiveImportResult,
+  ) {
+    await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
+      this.outboxPublisher.publishDurable(
+        new NativeArchiveImportedEvent({
+          actor,
+          kind,
+          rootId,
+          importMode,
+          importSourceKind: importSource?.kind ?? null,
+          alreadyExists,
+          createdCourseIds,
+          reusedCourseIds,
+        }),
+      ),
+    );
+  }
+
   private async downloadAndImportArchive(
     jobId: string,
     {
@@ -171,7 +198,7 @@ export class NativeArchiveJobFulfillmentService {
     actor: CurrentUserType,
     { importMode, importSource }: NativeArchiveImportOptions,
     progress: NativeArchiveProgressReporter,
-  ): Promise<NativeArchiveJobResult> {
+  ): Promise<NativeArchiveImportResult> {
     const uploadKey = match(archiveOrigin)
       .with(NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS.UPLOAD, () => this.getTenantUploadKey(key, actor))
       .with(NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS.IMPORT_SOURCE, () => null)
@@ -317,6 +344,12 @@ export class NativeArchiveJobFulfillmentService {
 
       return archiveFilename;
     });
+
+    await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
+      this.outboxPublisher.publishDurable(
+        new NativeArchiveExportedEvent({ actor, kind, rootId, exportAccess }),
+      ),
+    );
 
     return { key: exportKey, kind, rootId, filename };
   }

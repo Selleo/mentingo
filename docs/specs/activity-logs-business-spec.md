@@ -27,6 +27,7 @@ The main workflow is investigation: an admin opens Activity Logs, identifies the
 - Record successful single-course and bulk-course deletions, including enough course context to investigate hard-deleted courses later.
 - Track who created, edited, published, archived, restored, or deleted an email template, and when a translation language was added or removed.
 - Audit automation creation (including workflow templates), draft saves and edits, publication/application, activation, deactivation, duplication, archiving, deletion, and simulation.
+- Track who exported or imported a course or learning path as a Mentingo package, including integration exports and content-marketplace imports.
 - Preserve actor identity, actor role, timestamp, action type, resource type, and resource reference where the source event provides it.
 
 ## End-User Value
@@ -47,6 +48,8 @@ When supported domain events happen elsewhere in Mentingo, the activity-log hand
 
 Email-template changes appear with the administrator, template name, and action. Editing details show before and after values for changed localized names, subjects, and content, alongside the affected fields and languages. Publishing one template also records the automatic archive of the previously active template. Administrators can add translations in supported languages and remove a saved non-base translation; removal clears that language's name, subject, and content after confirmation.
 
+Package export and import entries are recorded only after the background job succeeds: an export once the package is built and stored, an import once its content is saved. Failed or abandoned jobs are not logged. The entry points at the exported or imported course or learning path, and its details show only what the resource itself does not: exports note when an integration key pre-authorized them, and imports show the import mode (copy or sync), plus the archive's source (such as the content marketplace), that the content already existed, and the created or reused courses of a learning path, each only when it applies.
+
 Automation entries preserve the workflow name at the time of the action, including after deletion. Draft saves show actual changes to metadata and workflow definitions, while publication/application and activation retain the applied definition and execution-version changes. Changes saved as part of Apply are included in its single publication/application entry; only an explicit Save draft action produces a draft-save entry. Template-based creation and duplication retain their source context. Simulation entries summarize outcomes, issue codes, and counts without recording sample inputs or rendered emails; unsaved simulations have no resource ID. Automatic execution and delivery outcomes are available in automation run history.
 
 ## Key Technical Context
@@ -58,6 +61,7 @@ Automation entries preserve the workflow name at the time of the action, includi
 - Activity-log responses include a nullable `resourceName`, resolved in batches from event metadata first and current tenant-scoped resources second; settings, integrations, and unresolved resources have no name.
 - Activity-log action, resource, and resource-to-action mapping values are exposed from `packages/shared` so API validation and web filter options use the same contract.
 - Activity handlers under `apps/api/src/activity-logs/handlers` convert domain events into user-readable audit metadata, including the course deletion event emitted by the course service.
+- Native package jobs run in a forked queue sandbox without activity-log handlers, so `NativeArchiveJobFulfillmentService` writes `NativeArchiveExportedEvent` and `NativeArchiveImportedEvent` to the outbox after the job's work succeeds; the API's outbox dispatcher materializes them and `NativeArchiveActivityHandler` records `export` and `import` entries on the course or learning-path resource.
 - Email-template actions each publish a distinct domain event through the outbox within the template mutation transaction. The activity handler records those events when dispatched.
 
 ## Test Evidence
@@ -67,5 +71,7 @@ API E2E coverage verifies paginated retrieval, readable resource-name resolution
 Frontend component coverage verifies that metadata-free activity displays its resolved resource name and ID and that unresolved names use the translated fallback. No dedicated frontend Activity Logs E2E spec was found.
 
 Focused handler tests cover email-template actions. Email-template service and handler tests verify distinct events inside successful mutations and before/after edit values; lifecycle API E2E verifies a failed outbox publication rolls back the edit. No authenticated browser E2E check of these new rows was run.
+
+Native package export and import activity has no dedicated automated tests yet; the API and web typechecks pass with the new action types.
 
 Automation unit tests exercise management events through outbox materialization and the activity handler, precise before/after differences, no-op lifecycle requests, failed mutations, and saved/unsaved simulation summaries. Frontend tests verify that the automation filter includes deletion, draft saves, simulation, and lifecycle actions, with labels in every supported language. Database transaction rollback and the new automation rows have not been verified in authenticated browser or database E2E tests.
