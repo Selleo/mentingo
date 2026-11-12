@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
 
-import { BadRequestException, ForbiddenException, Injectable } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { match } from "ts-pattern";
 
 import { NativeArchiveExportedEvent, NativeArchiveImportedEvent } from "src/events";
@@ -44,6 +44,7 @@ import {
   fingerprintArchiveInput,
 } from "./native-archive-zip.utils";
 
+import type { NativeArchiveImportFinishedData } from "../events/native-archive-import-finished.event";
 import type {
   NativeArchiveBuildInput,
   NativeArchiveExportAccess,
@@ -65,6 +66,7 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
  */
 @Injectable()
 export class NativeArchiveJobFulfillmentService {
+  private readonly logger = new Logger(NativeArchiveJobFulfillmentService.name);
   private readonly sourceArchiveDownloadersBySourceKind = new Map<
     string,
     NativeArchiveSourceArchiveDownloader
@@ -150,20 +152,20 @@ export class NativeArchiveJobFulfillmentService {
     jobId: string,
     actor: CurrentUserType,
     importSource: NativeArchiveImportSource,
-    finish: Pick<NativeArchiveImportFinishedEvent, "outcome" | "courseId" | "failureCode">,
+    finish: Pick<NativeArchiveImportFinishedData, "outcome" | "courseId" | "failureCode">,
   ) {
     await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
       this.outboxPublisher.publish(
-        new NativeArchiveImportFinishedEvent(
-          actor.tenantId,
+        new NativeArchiveImportFinishedEvent({
+          tenantId: actor.tenantId,
           jobId,
-          actor.userId,
-          finish.outcome,
-          finish.courseId,
-          finish.failureCode,
+          actorId: actor.userId,
+          outcome: finish.outcome,
+          courseId: finish.courseId,
+          failureCode: finish.failureCode,
           importSource,
-          new Date().toISOString(),
-        ),
+          finishedAt: new Date().toISOString(),
+        }),
       ),
     );
   }
@@ -173,20 +175,34 @@ export class NativeArchiveJobFulfillmentService {
     { importMode = NATIVE_ARCHIVE_IMPORT_MODES.COPY, importSource }: NativeArchiveImportOptions,
     { kind, rootId, alreadyExists, createdCourseIds, reusedCourseIds }: NativeArchiveImportResult,
   ) {
-    await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
-      this.outboxPublisher.publishDurable(
-        new NativeArchiveImportedEvent({
-          actor,
-          kind,
-          rootId,
-          importMode,
-          importSourceKind: importSource?.kind ?? null,
-          alreadyExists,
-          createdCourseIds,
-          reusedCourseIds,
-        }),
-      ),
+    await this.publishActivity(
+      actor,
+      new NativeArchiveImportedEvent({
+        actor,
+        kind,
+        rootId,
+        importMode,
+        importSourceKind: importSource?.kind ?? null,
+        alreadyExists,
+        createdCourseIds,
+        reusedCourseIds,
+      }),
     );
+  }
+
+  /**
+   * Publishes the actor's activity once the job's work has committed. A failure is only logged,
+   * because failing the job would retry an import or export that already succeeded.
+   */
+  private async publishActivity(actor: CurrentUserType, event: object) {
+    await this.tenantDbRunnerService
+      .runWithTenant(actor.tenantId, () => this.outboxPublisher.publish(event))
+      .catch((error: unknown) =>
+        this.logger.error(
+          `[tenant=${actor.tenantId}] Failed to publish ${event.constructor.name}: ${error}`,
+          error instanceof Error ? error.stack : undefined,
+        ),
+      );
   }
 
   private async downloadAndImportArchive(
@@ -345,10 +361,9 @@ export class NativeArchiveJobFulfillmentService {
       return archiveFilename;
     });
 
-    await this.tenantDbRunnerService.runWithTenant(actor.tenantId, () =>
-      this.outboxPublisher.publishDurable(
-        new NativeArchiveExportedEvent({ actor, kind, rootId, exportAccess }),
-      ),
+    await this.publishActivity(
+      actor,
+      new NativeArchiveExportedEvent({ actor, kind, rootId, exportAccess }),
     );
 
     return { key: exportKey, kind, rootId, filename };

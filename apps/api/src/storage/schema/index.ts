@@ -127,6 +127,7 @@ import {
   DEFAULT_LEARNING_PATH_SETTINGS,
   type LearningPathSettings,
 } from "src/learning-path/types/learning-path-settings.types";
+import { OUTBOX_STATUSES, type OutboxStatus } from "src/outbox/outbox.types";
 import { safeJsonb } from "src/utils/safe-jsonb";
 
 import { courseLearningStates } from "./course-learning-state.schema";
@@ -2327,7 +2328,7 @@ export const GAMIFICATION_OUTBOX_EVENT_TYPES = [
 ] as const;
 
 export const OUTBOX_EVENT_USER_ID_SQL =
-  "COALESCE(payload #>> '{loginData,userId}', payload #>> '{lessonCompletionData,userId}', payload #>> '{courseFinishedData,userId}', payload ->> 'userId')";
+  "COALESCE(payload #>> '{loginData,userId}', payload #>> '{lessonCompletionData,userId}', payload #>> '{courseFinishedData,userId}', payload #>> '{quizCompletionData,userId}')";
 
 const gamificationOutboxEventTypesSql = GAMIFICATION_OUTBOX_EVENT_TYPES.map(
   (type) => `'${type}'`,
@@ -2340,7 +2341,7 @@ export const outboxEvents = pgTable(
     ...timestamps,
     eventType: text("event_type").notNull(),
     payload: nativeJsonb<Record<string, unknown>>("payload").notNull(),
-    status: text("status").notNull().default("pending"),
+    status: text("status").$type<OutboxStatus>().notNull().default(OUTBOX_STATUSES.PENDING),
     attemptCount: integer("attempt_count").notNull().default(0),
     publishedAt: timestamp("published_at", {
       mode: "string",
@@ -2348,6 +2349,10 @@ export const outboxEvents = pgTable(
       precision: 3,
     }),
     lastError: text("last_error"),
+    succeededHandlers: nativeJsonb<string[]>("succeeded_handlers")
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    claimId: uuid("claim_id"),
     tenantId,
   },
   withTenantIdIndex("outbox_events", (table) => ({

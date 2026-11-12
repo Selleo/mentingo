@@ -11,9 +11,10 @@ import { SessionService } from "./session.service";
 import type { MfaRepository } from "./mfa.repository";
 import type { ExecutionContext } from "@nestjs/common";
 import type { Reflector } from "@nestjs/core";
-import type { EventBus } from "@nestjs/cqrs";
+import type { OutboxPublisher } from "src/outbox/outbox.publisher";
 import type { SessionRevocationService } from "src/redis";
 import type { RedisClient } from "src/redis/redis.types";
+import type { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 describe("Session authentication boundaries", () => {
   const jwt = new JwtService();
@@ -46,7 +47,8 @@ describe("Session authentication boundaries", () => {
         getOrCreateUserSessionVersion: async () => "v".repeat(32),
       } as unknown as SessionRevocationService,
       { get, set } as unknown as RedisClient,
-      { publish: jest.fn() } as unknown as EventBus,
+      { publish: jest.fn() } as unknown as OutboxPublisher,
+      { runWithTenant: jest.fn((_tenantId, fn) => fn()) } as unknown as TenantDbRunnerService,
     );
   });
 

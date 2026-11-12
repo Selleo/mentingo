@@ -1,6 +1,5 @@
 import { Readable } from "node:stream";
 
-import { EventBus } from "@nestjs/cqrs";
 import {
   COURSE_ENROLLMENT,
   SCORM_COMPLETION_STATUS,
@@ -14,6 +13,7 @@ import { and, eq } from "drizzle-orm";
 import request from "supertest";
 
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
@@ -518,8 +518,7 @@ describe("ScormController (e2e)", () => {
       await enrollStudent(student.id, imported.courseId);
 
       const studentCookies = await cookieFor(student, app);
-      const eventBus = app.get(EventBus);
-      const publishSpy = jest.spyOn(eventBus, "publish");
+      const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish");
       const launchResponse = await request(app.getHttpServer())
         .get(`/api/scorm/runtime/launch?lessonId=${imported.lessonId}&language=en`)
         .set("Cookie", studentCookies)

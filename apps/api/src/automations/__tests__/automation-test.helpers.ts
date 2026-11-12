@@ -13,6 +13,8 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { automations, automationRuns, automationOccurrences } from "src/storage/schema";
 
+import { dispatchOutbox } from "../../../test/helpers/wait-for-outbox";
+
 import type { AutomationResponse, AutomationRunDetailResponse } from "../schema/automation.schema";
 import type { AutomationDefinition, AutomationSendEmailStep } from "@repo/shared";
 
@@ -103,34 +105,42 @@ export async function setupAutomationTestContext() {
       .data as AutomationRunDetailResponse;
 
   const createWelcomeNotificationEvent = () =>
-    new NotificationEvent(randomUUID(), AUTOMATION_EVENT_KINDS.WELCOME, [
-      {
-        itemId: t.student.id,
-        email: t.student.email,
-        name: `${t.student.firstName} ${t.student.lastName}`,
-        language: SUPPORTED_LANGUAGES.EN,
-        eventFields: { courses_link: "https://academy.example/courses" },
-      },
-    ]);
+    new NotificationEvent({
+      occurrenceId: randomUUID(),
+      kind: AUTOMATION_EVENT_KINDS.WELCOME,
+      recipients: [
+        {
+          itemId: t.student.id,
+          email: t.student.email,
+          name: `${t.student.firstName} ${t.student.lastName}`,
+          language: SUPPORTED_LANGUAGES.EN,
+          eventFields: { courses_link: "https://academy.example/courses" },
+        },
+      ],
+    });
 
   const publishNotificationAndGetRuns = async (
     notification = createWelcomeNotificationEvent(),
     tenantId = t.defaultTenantId,
   ) => {
     await t.runAsTenant(tenantId, () => t.app.get(OutboxPublisher).publish(notification));
+    await dispatchOutbox(t.app);
 
     return t.runAsTenant(tenantId, () =>
       t.db
         .select()
         .from(automationRuns)
-        .where(eq(automationRuns.occurrenceId, notification.occurrenceId)),
+        .where(eq(automationRuns.occurrenceId, notification.notificationData.occurrenceId)),
     );
   };
 
-  const deliverAutomationEmail = (id: string, tenantId = t.defaultTenantId) =>
-    t.runAsTenant(tenantId, () =>
+  /** Sends one delivery, then dispatches the outbox so the recipient's next step is queued. */
+  const deliverAutomationEmail = async (id: string, tenantId = t.defaultTenantId) => {
+    await t.runAsTenant(tenantId, () =>
       t.app.get(AutomationEmailDeliveryService).sendAutomationEmail(id, tenantId),
     );
+    await dispatchOutbox(t.app);
+  };
 
   const resetAutomationTestState = async () => {
     await queue.drain(true);

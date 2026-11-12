@@ -1,6 +1,10 @@
 import { Readable } from "node:stream";
 
+import { Logger } from "@nestjs/common";
+
 import {
+  NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS,
+  NATIVE_ARCHIVE_IMPORT_OUTCOMES,
   NATIVE_ARCHIVE_JOB_ACTION,
   NATIVE_ARCHIVE_JOB_STAGES,
 } from "../../native-archive.constants";
@@ -15,7 +19,13 @@ const ACTOR = {
 const PATH_ID = "b7e3f32d-c1ab-4cb9-95e1-79212698bf54";
 const COURSE_ID = "f594d687-096b-4599-84bf-1f296afdb1e1";
 
-function arrangeExport({ hasRememberedExport }: { hasRememberedExport: boolean }) {
+function arrangeExport({
+  hasRememberedExport,
+  publish = jest.fn().mockResolvedValue(undefined),
+}: {
+  hasRememberedExport: boolean;
+  publish?: jest.Mock;
+}) {
   let tenantContextActive = false;
   const openVideo = jest.fn(async () => {
     expect(tenantContextActive).toBe(true);
@@ -62,7 +72,7 @@ function arrangeExport({ hasRememberedExport }: { hasRememberedExport: boolean }
     nativeArchiveSnapshotService as never,
     {} as never,
     nativeArchiveExportReuseService as never,
-    { publishDurable: jest.fn().mockResolvedValue(undefined) } as never,
+    { publish } as never,
   );
 
   const progress = { enterStage: jest.fn(), reportStageWork: jest.fn() };
@@ -121,6 +131,19 @@ describe("NativeArchiveJobFulfillmentService", () => {
       expect.stringMatching(/^[a-f0-9]{64}$/),
       key,
     );
+  });
+
+  it("finishes an export whose activity could not be published", async () => {
+    jest.spyOn(Logger.prototype, "error").mockImplementation(() => undefined);
+    const { exportLearningPath } = arrangeExport({
+      hasRememberedExport: false,
+      publish: jest.fn().mockRejectedValue(new Error("connection reset")),
+    });
+
+    await expect(exportLearningPath()).resolves.toMatchObject({
+      key: expect.stringMatching(EXPORT_KEY_PATTERN),
+      filename: "sales-path.zip",
+    });
   });
 
   it("copies a remembered export of the same content instead of building it", async () => {
@@ -218,7 +241,7 @@ describe("NativeArchiveJobFulfillmentService", () => {
       } as never,
       {} as never,
       { copyRememberedExport: async () => false, rememberExport: async () => undefined } as never,
-      { publishDurable: async () => undefined } as never,
+      { publish: async () => undefined } as never,
     );
 
     await expect(
@@ -228,5 +251,37 @@ describe("NativeArchiveJobFulfillmentService", () => {
         actor: ACTOR,
       }),
     ).resolves.toMatchObject({ filename });
+  });
+
+  it("stores the failed outcome of a sourced import in the outbox", async () => {
+    const outboxPublisher = { publish: jest.fn() };
+    const service = new NativeArchiveJobFulfillmentService(
+      {} as never,
+      {
+        runWithTenant: async (_tenantId: string, callback: () => Promise<unknown>) => callback(),
+      } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      outboxPublisher as never,
+    );
+
+    await service
+      .fulfillArchiveJob("import-job", {
+        action: NATIVE_ARCHIVE_JOB_ACTION.IMPORT,
+        archiveOrigin: NATIVE_ARCHIVE_IMPORT_ARCHIVE_ORIGINS.IMPORT_SOURCE,
+        importSource: { kind: "unregistered-source" },
+        actor: ACTOR,
+      })
+      .catch(() => undefined);
+
+    expect(outboxPublisher.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        importFinishedData: expect.objectContaining({
+          jobId: "import-job",
+          outcome: NATIVE_ARCHIVE_IMPORT_OUTCOMES.FAILED,
+        }),
+      }),
+    );
   });
 });

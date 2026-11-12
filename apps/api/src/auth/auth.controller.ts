@@ -163,7 +163,7 @@ export class AuthController {
       return null;
     }
 
-    await this.sessionService.revokeSession(currentUser);
+    await this.authService.revokeSessionAndCloseSockets(currentUser);
 
     if (isSupportModeSession(currentUser)) {
       await this.authService.revokeSupportSession(currentUser.supportSessionId);

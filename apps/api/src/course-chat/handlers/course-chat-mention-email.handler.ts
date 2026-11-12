@@ -16,7 +16,7 @@ import { processInBatches } from "src/common/utils/processInBatches";
 import { CourseChatRepository } from "src/course-chat/course-chat.repository";
 import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
 import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
-import { OutboxNotificationPreparationService } from "src/outbox/outbox-notification-preparation.service";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { UserService } from "src/user/user.service";
@@ -24,13 +24,14 @@ import { UserService } from "src/user/user.service";
 import { getLocalizedUserMentionContentAnnouncement } from "../chat-mention-localizations/chat-mention-content-localization";
 import { getLocalizedUserMentionTitleAnnouncement } from "../chat-mention-localizations/chat-mention-title-localization";
 
-import type { IEventHandler } from "@nestjs/cqrs";
+import type { OutboxDeliveryContext, OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type CourseChatMentionEmailEventType = CourseChatUserMentionedEvent;
 
 @Injectable()
+@OutboxEventsHandler(CourseChatUserMentionedEvent)
 export class CourseChatMentionEmailHandler
-  implements IEventHandler<CourseChatMentionEmailEventType>
+  implements OutboxEventsHandlerOf<CourseChatMentionEmailEventType>
 {
   constructor(
     private readonly courseChatRepository: CourseChatRepository,
@@ -40,20 +41,18 @@ export class CourseChatMentionEmailHandler
     private readonly tenantDbRunnerService: TenantDbRunnerService,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly notificationCollectorService: NotificationCollectorService,
-    private readonly outboxNotificationPreparationService: OutboxNotificationPreparationService,
   ) {}
 
-  onModuleInit() {
-    this.outboxNotificationPreparationService.register(async (event) => {
-      if (!(event instanceof CourseChatUserMentionedEvent)) {
-        return [];
-      }
-
-      return this.notificationCollectorService.collectNotificationEvents(() => this.handle(event));
-    });
+  async handleOutboxEvent(
+    event: CourseChatMentionEmailEventType,
+    { eventId }: OutboxDeliveryContext,
+  ) {
+    await this.notificationCollectorService.publishCollectedNotifications(eventId, () =>
+      this.prepareNotifications(event),
+    );
   }
 
-  async handle(event: CourseChatMentionEmailEventType) {
+  private async prepareNotifications(event: CourseChatMentionEmailEventType) {
     if (event instanceof CourseChatUserMentionedEvent) {
       return await this.handleUserMentioned(event);
     }

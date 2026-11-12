@@ -1,4 +1,4 @@
-import { Injectable, type OnModuleInit } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
   AUTOMATION_VALIDATION_ISSUE_CODES,
   AUTOMATION_EMAIL_DELIVERY_STATUSES,
@@ -16,7 +16,6 @@ import {
 } from "@repo/shared";
 
 import { AutomationDefinitionStorageService } from "src/automations/services/automation-definition-storage.service";
-import { OutboxDirectHandlerService } from "src/outbox/outbox-direct-handler.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QueueService, QUEUE_NAMES } from "src/queue";
 import { dbAls } from "src/storage/db/db-als.store";
@@ -28,10 +27,7 @@ import {
   AUTOMATION_RETRY_DELAY_MS,
   CLAIMABLE_AUTOMATION_EMAIL_DELIVERY_STATUSES,
 } from "../automation-execution.constants";
-import {
-  AutomationEmailDeliveryRequestedEvent,
-  NotificationEvent,
-} from "../events/notification-event";
+import { AutomationEmailDeliveryRequestedEvent } from "../events/notification-event";
 import { AutomationEmailDeliveryRepository } from "../repositories/automation-email-delivery.repository";
 import { AutomationRunCreationRepository } from "../repositories/automation-run-creation.repository";
 import { acquireAutomationLifecycleLock } from "../utils/acquire-automation-lifecycle-lock";
@@ -45,44 +41,25 @@ import type {
   AutomationWorkflowEvaluationSummary,
   AutomationEmailDeliveryJob,
 } from "../automation-execution.types";
+import type { NotificationEventData } from "../events/notification-event";
 import type { AutomationRecord } from "src/automations/automation.types";
 import type { DatabasePg, UUIDType } from "src/common";
 
 @Injectable()
-export class AutomationRunCreationService implements OnModuleInit {
+export class AutomationRunCreationService {
   constructor(
     private readonly automationDefinitionStorageService: AutomationDefinitionStorageService,
     private readonly automationRunCreationRepository: AutomationRunCreationRepository,
     private readonly automationEmailDeliveryRepository: AutomationEmailDeliveryRepository,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
-    private readonly outboxDirectHandlerService: OutboxDirectHandlerService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly queueService: QueueService,
     private readonly defaultAutomationSetupService: DefaultAutomationSetupService,
     private readonly automationRecipientResolverService: AutomationRecipientResolverService,
   ) {}
 
-  onModuleInit(): void {
-    this.outboxDirectHandlerService.register(
-      NotificationEvent.name,
-      async (payload, _id, transaction) => {
-        await this.createAutomationRunsForNotificationEvent(
-          payload as unknown as NotificationEvent,
-          transaction,
-        );
-      },
-    );
-
-    this.outboxDirectHandlerService.register(
-      AutomationEmailDeliveryRequestedEvent.name,
-      async (payload) => {
-        await this.enqueueAutomationEmailDelivery(String(payload.emailDeliveryId));
-      },
-    );
-  }
-
   async createAutomationRunsForNotificationEvent(
-    event: NotificationEvent,
+    event: NotificationEventData,
     transaction?: DatabasePg,
   ): Promise<void> {
     if (transaction) {
@@ -136,7 +113,7 @@ export class AutomationRunCreationService implements OnModuleInit {
   }
 
   private async createRunsForUnprocessedNotificationEvent(
-    event: NotificationEvent,
+    event: NotificationEventData,
     transaction: DatabasePg,
   ): Promise<void> {
     await acquireAutomationLifecycleLock(transaction);
@@ -162,7 +139,7 @@ export class AutomationRunCreationService implements OnModuleInit {
 
   private async startMatchingAutomationRun(
     automation: AutomationRecord,
-    event: NotificationEvent,
+    event: NotificationEventData,
     transaction: DatabasePg,
   ): Promise<void> {
     if (!automation.appliedDefinition) {
@@ -194,7 +171,7 @@ export class AutomationRunCreationService implements OnModuleInit {
   private async planAutomationRun(
     workflow: AutomationWorkflow,
     path: AutomationStep[],
-    event: NotificationEvent,
+    event: NotificationEventData,
     transaction: DatabasePg,
   ): Promise<AutomationRunPlan> {
     const evaluation = this.summarizeEventWorkflowEvaluation(workflow, path, event);
@@ -211,7 +188,7 @@ export class AutomationRunCreationService implements OnModuleInit {
 
   private async recordPlannedAutomationRun(
     automation: AutomationRecord,
-    event: NotificationEvent,
+    event: NotificationEventData,
     plan: AutomationRunPlan,
     transaction: DatabasePg,
   ) {
@@ -252,7 +229,7 @@ export class AutomationRunCreationService implements OnModuleInit {
   private summarizeEventWorkflowEvaluation(
     workflow: AutomationWorkflow,
     path: AutomationStep[],
-    event: NotificationEvent,
+    event: NotificationEventData,
   ): AutomationWorkflowEvaluationSummary {
     const trace = new Map<UUIDType, AutomationStepTrace>(
       path.map((step) => [
@@ -295,7 +272,7 @@ export class AutomationRunCreationService implements OnModuleInit {
   private async planRecipientEmailSteps(
     workflow: AutomationWorkflow,
     path: AutomationStep[],
-    event: NotificationEvent,
+    event: NotificationEventData,
     transaction: DatabasePg,
   ): Promise<AutomationRecipientEmailPlans> {
     const recipientSteps: AutomationRecipientEmailPlans["recipients"] = new Map();
@@ -374,7 +351,7 @@ export class AutomationRunCreationService implements OnModuleInit {
 
       if (firstEmailDeliveryId) {
         await this.outboxPublisher.publish(
-          new AutomationEmailDeliveryRequestedEvent(firstEmailDeliveryId),
+          new AutomationEmailDeliveryRequestedEvent({ emailDeliveryId: firstEmailDeliveryId }),
           transaction,
         );
       }

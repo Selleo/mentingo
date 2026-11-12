@@ -102,7 +102,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .send({ courseIds: [course.id] })
       .expect(201);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseAddedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: learningPath.id,
@@ -180,7 +180,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .send({ courseIds: [course.id] })
       .expect(201);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseAddedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: learningPath.id,
@@ -193,7 +193,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .set("Cookie", adminCookies)
       .expect(200);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseRemovedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: learningPath.id,
@@ -260,7 +260,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .send({ courseIds: [course.id] })
       .expect(201);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseAddedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: learningPath.id,
@@ -273,7 +273,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .set("Cookie", adminCookies)
       .expect(200);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseRemovedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: learningPath.id,
@@ -331,7 +331,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .send({ courseIds: [course.id] })
       .expect(201);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseAddedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: learningPath.id,
@@ -353,7 +353,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .set("Cookie", adminCookies)
       .expect(200);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseRemovedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: learningPath.id,
@@ -394,7 +394,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
 
     await completeStudentCourse(student.id, firstCourse.id);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new UserCourseFinishedEvent({
         userId: student.id,
         courseId: firstCourse.id,
@@ -496,7 +496,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
     await handleSync(adminUser.tenantId, learningPath.id);
     await completeStudentCourse(student.id, firstCourse.id);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new UserCourseFinishedEvent({
         userId: student.id,
         courseId: firstCourse.id,
@@ -553,7 +553,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
     await handleSync(adminUser.tenantId, learningPath.id);
     await completeStudentCourse(student.id, firstCourse.id);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new UserCourseFinishedEvent({
         userId: student.id,
         courseId: firstCourse.id,
@@ -569,7 +569,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .set("Cookie", adminCookies)
       .expect(200);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseRemovedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: learningPath.id,
@@ -620,7 +620,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .set("Cookie", adminCookies)
       .expect(200);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseRemovedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: learningPath.id,
@@ -665,7 +665,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
     await completeStudentCourse(student.id, firstCourse.id);
     await completeStudentCourse(student.id, secondCourse.id);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new UserCourseFinishedEvent({
         userId: student.id,
         courseId: secondCourse.id,
@@ -686,7 +686,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .send({ courseIds: [thirdCourse.id] })
       .expect(201);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseAddedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: learningPath.id,
@@ -725,7 +725,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
     await handleSync(adminUser.tenantId, learningPath.id);
     await completeStudentCourse(student.id, course.id);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new UserCourseFinishedEvent({
         userId: student.id,
         courseId: course.id,
@@ -745,7 +745,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .set("Cookie", adminCookies)
       .expect(200);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseRemovedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: learningPath.id,
@@ -791,7 +791,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .set("Cookie", adminCookies)
       .expect(200);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseRemovedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: firstPath.id,
@@ -846,7 +846,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .set("Cookie", adminCookies)
       .expect(200);
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseRemovedEvent({
         tenantId: adminUser.tenantId,
         learningPathId: activePath.id,
@@ -1026,7 +1026,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       tenantId: adminUser.tenantId,
     });
 
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new EnrollUserToGroupEvent({
         groupId: group.id,
         userId: student.id,
@@ -1084,7 +1084,7 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
   }
 
   async function handleSync(tenantId: string, learningPathId: string) {
-    await app.get(LearningPathCourseSyncHandler).handle(
+    await app.get(LearningPathCourseSyncHandler).handleOutboxEvent(
       new LearningPathCourseSyncEvent({
         tenantId,
         learningPathId,

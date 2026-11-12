@@ -11,7 +11,7 @@ describe("CourseDurationHandler", () => {
     );
 
     const courseId = "course-id" as never;
-    await handler.handle(new CourseDurationRefreshRequestedEvent({ courseId }));
+    await handler.handleOutboxEvent(new CourseDurationRefreshRequestedEvent({ courseId }));
 
     expect(refreshCourseDurationEstimates).toHaveBeenCalledWith(courseId);
   });

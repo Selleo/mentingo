@@ -8,6 +8,8 @@ import { EmailTemplateRenderingModule } from "src/email-templates/email-template
 import { EMAIL_TEMPLATE_DEPENDENCIES } from "src/email-templates/email-template.types";
 
 import { AutomationRecoveryAndCleanupCron } from "./automation-recovery-and-cleanup.cron";
+import { AutomationEmailDeliveryRequestedHandler } from "./handlers/automation-email-delivery-requested.handler";
+import { NotificationEventHandler } from "./handlers/notification-event.handler";
 import { AutomationEmailDeliveryRepository } from "./repositories/automation-email-delivery.repository";
 import { AutomationRecipientRepository } from "./repositories/automation-recipient.repository";
 import { AutomationRecoveryAndCleanupRepository } from "./repositories/automation-recovery-and-cleanup.repository";
@@ -41,6 +43,8 @@ import { AutomationEmailWorker } from "./workers/automation-email.worker";
     AutomationEmailDeliveryStateService,
     AutomationEmailDeliveryService,
     AutomationRunCreationService,
+    NotificationEventHandler,
+    AutomationEmailDeliveryRequestedHandler,
     AutomationRecoveryAndCleanupService,
     AutomationRecoveryAndCleanupCron,
     DefaultAutomationSetupService,

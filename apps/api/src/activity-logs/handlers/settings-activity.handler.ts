@@ -1,20 +1,22 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import { UpdateSettingsEvent } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
 
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
+
 type SettingsEventType = UpdateSettingsEvent;
 
 @Injectable()
-@EventsHandler(UpdateSettingsEvent)
-export class SettingsActivityHandler implements IEventHandler<SettingsEventType> {
+@OutboxEventsHandler(UpdateSettingsEvent)
+export class SettingsActivityHandler implements OutboxEventsHandlerOf<SettingsEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: SettingsEventType) {
+  async handleOutboxEvent(event: SettingsEventType) {
     if (event instanceof UpdateSettingsEvent) {
       return await this.handleUpdate(event);
     }

@@ -65,7 +65,6 @@ it("queues a personalized welcome only when the group condition matches the assi
       },
       {},
       {},
-      {},
       { publish },
       {},
       { ensureTenantDefaultAutomations: async () => undefined },
@@ -78,7 +77,7 @@ it("queues a personalized welcome only when the group condition matches the assi
     language: "pl",
     eventFields: { group_id: groupId, group_name: "Nowi pracownicy" },
   });
-  await service.createAutomationRunsForNotificationEvent(event, {
+  await service.createAutomationRunsForNotificationEvent(event.notificationData, {
     execute: async () => [],
   } as unknown as DatabasePg);
   expect(insertRun).toHaveBeenCalledWith(
@@ -103,7 +102,7 @@ it("queues a personalized welcome only when the group condition matches the assi
   );
   expect(listRecipients).not.toHaveBeenCalled();
   expect(publish).toHaveBeenCalledWith(
-    expect.objectContaining({ emailDeliveryId: "delivery" }),
+    expect.objectContaining({ emailDeliveryRequestData: { emailDeliveryId: "delivery" } }),
     expect.anything(),
   );
 });

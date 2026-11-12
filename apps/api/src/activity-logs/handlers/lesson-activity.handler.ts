@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import {
   CreateLessonEvent,
@@ -7,10 +6,13 @@ import {
   LessonCompletedEvent,
   UpdateLessonEvent,
 } from "src/events";
+import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
+
+import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
 
 type LessonEventType =
   | LessonCompletedEvent
@@ -26,17 +28,14 @@ const LessonActivityEvents = [
 ] as const;
 
 @Injectable()
-@EventsHandler(...LessonActivityEvents)
-export class LessonActivityHandler implements IEventHandler<LessonEventType> {
+@OutboxEventsHandler(...LessonActivityEvents)
+export class LessonActivityHandler implements OutboxEventsHandlerOf<LessonEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
-  async handle(event: LessonEventType) {
+  async handleOutboxEvent(event: LessonEventType) {
     if (event instanceof LessonCompletedEvent) return await this.handleLessonCompleted(event);
-
     if (event instanceof CreateLessonEvent) return await this.handleCreateLesson(event);
-
     if (event instanceof UpdateLessonEvent) return await this.handleUpdateLesson(event);
-
     if (event instanceof DeleteLessonEvent) return await this.handleDeleteLesson(event);
   }
 
