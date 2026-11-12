@@ -1,13 +1,22 @@
 import * as Accordion from "@radix-ui/react-accordion";
+import { ASSESSMENT_SCORING_MODES, type AssessmentScoringMode } from "@repo/shared";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { SortableList } from "~/components/SortableList";
+import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
@@ -16,22 +25,30 @@ import { findBaseLanguageOption } from "../quizTranslationPlaceholders";
 
 import type { Question, QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
+import type { KeyboardEvent } from "react";
 import type { UseFormReturn } from "react-hook-form";
 
-type MatchWordsQuestionProps = {
+// Pair sides are single-line labels; the textarea only exists to show long text wrapped.
+const preventNewLine = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+  if (event.key === "Enter") event.preventDefault();
+};
+
+type MatchingQuestionProps = {
   form: UseFormReturn<QuizLessonFormValues>;
   questionIndex: number;
   isStructureLocked?: boolean;
   baseLanguageQuestion?: Question;
 };
 
-const MatchWordsQuestion = ({
+const MatchingQuestion = ({
   form,
   questionIndex,
   isStructureLocked = false,
   baseLanguageQuestion,
-}: MatchWordsQuestionProps) => {
+}: MatchingQuestionProps) => {
   const watchedOptions = form.watch(`questions.${questionIndex}.options`);
+  const scoringMode =
+    form.watch(`questions.${questionIndex}.scoringMode`) ?? ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING;
   const errors = form.formState.errors;
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -45,6 +62,7 @@ const MatchWordsQuestion = ({
     const newOption: QuestionOption = {
       sortableId: crypto.randomUUID(),
       optionText: "",
+      matchedWord: "",
       isCorrect: true,
       displayOrder: currentOptions.length + 1,
     };
@@ -81,7 +99,10 @@ const MatchWordsQuestion = ({
       const updatedOptions = [...currentOptions];
 
       updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], [field]: value };
-      form.setValue(`questions.${questionIndex}.options`, updatedOptions, { shouldDirty: true });
+      form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     },
     [form, questionIndex],
   );
@@ -99,7 +120,37 @@ const MatchWordsQuestion = ({
     <Accordion.Root key={questionIndex} type="single" collapsible>
       <Accordion.Item value={`item-${questionIndex}`}>
         <div className="mt-3 rounded-xl border-0 p-2 transition-all duration-300">
-          <div className="ml-14">
+          <div className="sm:ml-14 mb-4 flex max-w-sm flex-col gap-2">
+            <Label className="body-sm-md">
+              {t("adminCourseView.curriculum.lesson.field.matchingScoring")}
+            </Label>
+            <Select
+              value={scoringMode}
+              disabled={isStructureLocked}
+              onValueChange={(value) =>
+                form.setValue(
+                  `questions.${questionIndex}.scoringMode`,
+                  value as AssessmentScoringMode,
+                  { shouldDirty: true },
+                )
+              }
+            >
+              <SelectTrigger
+                data-testid={QUIZ_LESSON_FORM_HANDLES.matchingScoringSelect(questionIndex)}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING}>
+                  {t("adminCourseView.curriculum.lesson.other.matchingScoringAllOrNothing")}
+                </SelectItem>
+                <SelectItem value={ASSESSMENT_SCORING_MODES.PARTIAL}>
+                  {t("adminCourseView.curriculum.lesson.other.matchingScoringPartial")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="sm:ml-14">
             {!isOptionEmpty && (
               <>
                 <span className="mr-1 text-red-500">*</span>
@@ -125,6 +176,9 @@ const MatchWordsQuestion = ({
                     item,
                     index,
                   );
+                  const optionErrors = errors?.questions?.[questionIndex]?.options?.[index];
+                  const promptError = optionErrors?.optionText?.message;
+                  const matchError = optionErrors?.matchedWord?.message;
 
                   return (
                     <SortableList.Item id={item.sortableId}>
@@ -132,37 +186,58 @@ const MatchWordsQuestion = ({
                         <div className="flex items-center space-x-2 rounded-xl border border-neutral-200 p-2 pr-3">
                           {!isStructureLocked && (
                             <SortableList.DragHandle>
-                              <Icon name="DragAndDropIcon" className="ml-4 mr-3 cursor-move" />
+                              <Icon
+                                name="DragAndDropIcon"
+                                className="cursor-move sm:ml-4 sm:mr-3"
+                              />
                             </SortableList.DragHandle>
                           )}
-                          <div className="flex w-full gap-2">
-                            <Input
-                              type="text"
+                          <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row">
+                            <AutosizeTextarea
+                              minRows={1}
+                              maxRows={6}
+                              onKeyDown={preventNewLine}
                               name={`questions.${questionIndex}.options.${index}.optionText`}
+                              data-testid={QUIZ_LESSON_FORM_HANDLES.matchingPromptInput(
+                                questionIndex,
+                                index,
+                              )}
                               value={item.optionText}
-                              onChange={(e) =>
-                                handleOptionChange(index, "optionText", e.target.value)
+                              onChange={(event) =>
+                                handleOptionChange(index, "optionText", event.target.value)
                               }
                               placeholder={
                                 baseLanguageOption?.optionText ||
                                 t("adminCourseView.curriculum.lesson.placeholder.option")
                               }
-                              required
-                              className="w-1/2"
+                              aria-invalid={Boolean(promptError)}
+                              className={cn(
+                                "min-h-10 w-full text-base sm:w-1/2",
+                                promptError && "border-red-500",
+                              )}
                             />
-                            <Input
-                              type="text"
+                            <AutosizeTextarea
+                              minRows={1}
+                              maxRows={6}
+                              onKeyDown={preventNewLine}
                               name={`questions.${questionIndex}.options.${index}.matchedWord`}
+                              data-testid={QUIZ_LESSON_FORM_HANDLES.matchingMatchInput(
+                                questionIndex,
+                                index,
+                              )}
                               value={item.matchedWord}
-                              onChange={(e) =>
-                                handleOptionChange(index, "matchedWord", e.target.value)
+                              onChange={(event) =>
+                                handleOptionChange(index, "matchedWord", event.target.value)
                               }
                               placeholder={
                                 baseLanguageOption?.matchedWord ||
                                 t("adminCourseView.curriculum.lesson.placeholder.matchedWords")
                               }
-                              required
-                              className="w-1/2"
+                              aria-invalid={Boolean(matchError)}
+                              className={cn(
+                                "min-h-10 w-full text-base sm:w-1/2",
+                                matchError && "border-red-500",
+                              )}
                             />
                           </div>
                           <div className="flex items-center">
@@ -173,7 +248,7 @@ const MatchWordsQuestion = ({
                                     <div className="group">
                                       <Icon
                                         name="TrashIcon"
-                                        className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
+                                        className="size-7 cursor-pointer sm:ml-3 rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
                                         onClick={() => handleRemoveOption(index)}
                                       />
                                     </div>
@@ -191,6 +266,11 @@ const MatchWordsQuestion = ({
                           </div>
                         </div>
                       </div>
+                      {(promptError || matchError) && (
+                        <p className="ml-16 mt-1 text-sm text-red-500">
+                          {[promptError, matchError].filter(Boolean).join(" ")}
+                        </p>
+                      )}
                     </SortableList.Item>
                   );
                 }}
@@ -198,12 +278,12 @@ const MatchWordsQuestion = ({
             )}
           </div>
           {errors?.questions?.[questionIndex] && (
-            <p className="ml-14 text-sm text-red-500">
+            <p className="sm:ml-14 text-sm text-red-500">
               {errors?.questions?.[questionIndex]?.options?.message}
             </p>
           )}
           {!isStructureLocked && (
-            <div className="ml-14 mt-4 flex gap-2">
+            <div className="sm:ml-14 mt-4 flex gap-2">
               <Button
                 type="button"
                 data-testid={QUIZ_LESSON_FORM_HANDLES.addOptionButton(questionIndex)}
@@ -233,4 +313,4 @@ const MatchWordsQuestion = ({
   );
 };
 
-export default MatchWordsQuestion;
+export default MatchingQuestion;

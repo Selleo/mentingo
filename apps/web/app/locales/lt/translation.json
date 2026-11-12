@@ -3197,7 +3197,10 @@
           "maxFileNumber_other": "Negalite įkelti daugiau nei {{ count }} failų",
           "maxResources_five": "Negalite pridėti daugiau nei 5 išteklių",
           "sourceUrlRequired": "Būtinas šaltinio URL",
-          "sourceUrlInvalid": "Įveskite galiojantį HTTPS URL"
+          "sourceUrlInvalid": "Įveskite galiojantį HTTPS URL",
+          "matchingPairsRequired": "Pridėkite bent 2 poras ir užpildykite abi kiekvienos poros puses",
+          "matchingMatchRequired": "Įrašykite šios poros atitikmenį",
+          "matchingPairsUnique": "Kiekviena pora turi turėti unikalų atitikmenį"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pamokos rodymo tvarka sėkmingai atnaujinta",
@@ -3272,7 +3275,8 @@
           "ttsPreset": "Iš anksto nustatytas TTS",
           "customTTSReference": "Pasirinktinė TTS nuoroda",
           "includeFiles_one": "Pridėkite iki 1 failo žemiau {{maxSize}}, kad būtų naudojamas kaip kontekstas pamokose",
-          "includeFiles_other": "Pridėkite iki {{ count }} failų, mažesnių nei {{maxSize}}, kad galėtumėte naudoti kaip kontekstą pamokose"
+          "includeFiles_other": "Pridėkite iki {{ count }} failų, mažesnių nei {{maxSize}}, kad galėtumėte naudoti kaip kontekstą pamokose",
+          "matchingScoring": "Vertinimas"
         },
         "placeholder": {
           "title": "Pateikite pamokos pavadinimą...",
@@ -3790,7 +3794,7 @@
           "option": "Parinktis",
           "singleChoice": "Vienas pasirinkimas",
           "multipleChoice": "Kelias pasirinkimas",
-          "matchWords": "Derinimas",
+          "matching": "Derinimas",
           "trueOrFalse": "Tiesa ar klaidinga",
           "fillInTheBlanks": "Spragų užpildymas (vilkite ir numeskite)",
           "photoQuestion": "Foto klausimas",
@@ -3899,6 +3903,8 @@
           "betaTooltip": "Ši funkcija pateikiama bandomojoje versijoje. Jame gali būti klaidų arba jis gali neveikti visiškai taip, kaip numatyta, ir naudojamas jūsų pačių rizika.",
           "dragWord": "Vilkite žodį į sakinį",
           "taskDescriptionTooltip": "Trumpai apibūdinkite, ką dalyvis turėtų daryti pokalbio su AI mentoriumi metu.",
+          "matchingScoringAllOrNothing": "Visos poros turi būti teisingos",
+          "matchingScoringPartial": "Taškai už kiekvieną teisingą porą",
           "requiresReview": "Vertina vertintojas"
         }
       }
@@ -4350,7 +4356,10 @@
       "score": "Rezultatas: {{score}}% ({{correct}} iš {{questionsNumber}} klausimų)",
       "contentCantBeEmbedded": "Šio turinio negalima įterpti.",
       "openInNewTab": "Atidaryti naujame skirtuke",
-      "scale_1_5": "Domanda di tipo scala (1–5)"
+      "scale_1_5": "Domanda di tipo scala (1–5)",
+      "matching": "Suderinkite kiekvieną elementą su jo pora.",
+      "noMatchesAvailable": "Šiam klausimui dar nėra atitikmenų.",
+      "correctMatch": "Teisingas atitikmuo:"
     },
     "aiMentor": {
       "title": "AI mentoriaus sesija",
@@ -7187,7 +7196,8 @@
       "receiptSynchronizationPending": "Ankstesni pakeitimai saugomi AI darbo srityje. Netrukus bandykite dar kartą pritaikyti tą patį pasirinkimą.",
       "appliedRefreshPending": "Pakeitimai pritaikyti. Atnaujinkite kursą, jei jų dar nematote.",
       "deepResearchPreferenceNotSaved": "Šiai užklausai išsamus tyrimas įjungtas, bet nustatymo nepavyko išsaugoti būsimiems pranešimams.",
-      "webSearchPreferenceNotSaved": "Šiai užklausai paieška internete leista, bet nustatymo nepavyko išsaugoti būsimiems pranešimams."
+      "webSearchPreferenceNotSaved": "Šiai užklausai paieška internete leista, bet nustatymo nepavyko išsaugoti būsimiems pranešimams.",
+      "matchingQuestionUnsupported": "Luma dar negali redaguoti testų su derinimo klausimais. Redaguokite šį testą testų redaktoriuje."
     },
     "review": {
       "generatedImage": "Sugeneruotas paveikslėlis",

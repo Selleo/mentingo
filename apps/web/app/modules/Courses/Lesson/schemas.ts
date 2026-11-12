@@ -2,7 +2,10 @@ import { z } from "zod";
 
 import type i18next from "i18next";
 
-export const QuizFormSchema = (t: typeof i18next.t) =>
+export const QuizFormSchema = (
+  t: typeof i18next.t,
+  requiredMatchingAnswerCounts: Record<string, number> = {},
+) =>
   z
     .object({
       briefResponses: z
@@ -41,6 +44,7 @@ export const QuizFormSchema = (t: typeof i18next.t) =>
           ),
         )
         .optional(),
+      matchingQuestions: z.record(z.record(z.string().nullable())).optional(),
       fillInTheBlanksDnd: z
         .record(
           z.record(
@@ -103,6 +107,20 @@ export const QuizFormSchema = (t: typeof i18next.t) =>
           }
         });
       }
+
+      Object.entries(data.matchingQuestions ?? {}).forEach(([questionId, answers]) => {
+        const answerCount = Object.values(answers).filter(Boolean).length;
+        const requiredCount =
+          requiredMatchingAnswerCounts[questionId] ?? Object.keys(answers).length;
+
+        if (answerCount < requiredCount) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["matchingQuestions", questionId],
+            message: t("studentLessonView.validation.answerCannotBeEmpty"),
+          });
+        }
+      });
 
       const trueOrFalseQuestions = data.trueOrFalseQuestions;
       if (trueOrFalseQuestions) {

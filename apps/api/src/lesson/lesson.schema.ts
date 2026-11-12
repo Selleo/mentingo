@@ -4,6 +4,7 @@ import {
   ASSESSMENT_TIME_LIMIT_MINUTES,
   LEARNER_PROGRESS_STATUSES,
   QUIZ_ATTEMPT_START_STATUSES,
+  ASSESSMENT_SCORING_MODES,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -48,6 +49,7 @@ export const adminQuestionSchema = Type.Object({
   requiresReview: Type.Optional(Type.Boolean()),
   options: Type.Optional(Type.Array(adminOptionSchema)),
   language: Type.Optional(supportedLanguagesSchema),
+  scoringMode: Type.Optional(Type.Enum(ASSESSMENT_SCORING_MODES)),
 });
 
 // Canonical quizzes store unrestricted answer text. The legacy editor's input
@@ -70,6 +72,8 @@ export const optionSchema = Type.Object({
   studentAnswer: Type.Union([Type.String(), Type.Null()]),
   isCorrect: Type.Union([Type.Boolean(), Type.Null()]),
   questionId: Type.Optional(UUIDSchema),
+  // Matching only: the correct match, sent once feedback is available.
+  matchedWord: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
 export const questionSchema = Type.Object({
@@ -78,6 +82,7 @@ export const questionSchema = Type.Object({
   solutionExplanation: Type.Union([Type.String(), Type.Null()]),
   options: Type.Optional(Type.Array(optionSchema)),
   passQuestion: Type.Union([Type.Boolean(), Type.Null()]),
+  matchingTargets: Type.Optional(Type.Array(Type.String())),
 });
 
 const lessonQuizSchema = Type.Object({

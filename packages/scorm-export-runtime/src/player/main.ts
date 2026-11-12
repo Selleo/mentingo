@@ -50,6 +50,7 @@ type Lesson = ContentLesson | EmbedLesson | QuizLesson;
 type QuizQuestion = {
   id: string;
   type: string;
+  scoringMode?: string | null;
   title: string;
   description?: string | null;
   solutionExplanation?: string | null;
@@ -207,7 +208,7 @@ const QUESTION_TYPE = {
   PHOTO_MULTIPLE: "photo_question_multiple_choice",
   FILL_TEXT: "fill_in_the_blanks_text",
   FILL_DND: "fill_in_the_blanks_dnd",
-  MATCH_WORDS: "match_words",
+  MATCHING: "matching",
   BRIEF_RESPONSE: "brief_response",
   DETAILED_RESPONSE: "detailed_response",
 } as const;
@@ -707,16 +708,17 @@ function renderAnswerControl(
     return;
   }
 
-  if (question.type === QUESTION_TYPE.MATCH_WORDS) {
-    question.options.forEach((option) => {
-      const optionIndex = question.options.findIndex((candidate) => candidate.id === option.id);
+  if (question.type === QUESTION_TYPE.MATCHING) {
+    const targets = getMatchingTargets(question);
+    question.options.forEach((option, optionIndex) => {
       const row = element("label", "match-row");
       row.append(element("span", "", option.title));
-      const input = element("input", "match-input") as HTMLInputElement;
-      input.name = `${question.id}:${option.id}`;
-      input.value = Array.isArray(savedAnswer) ? (savedAnswer[optionIndex] ?? "") : "";
-      input.disabled = submitted;
-      row.append(input);
+      const select = element("select", "match-input") as HTMLSelectElement;
+      select.name = `${question.id}:${option.id}`;
+      select.append(new Option("", ""), ...targets.map((target) => new Option(target, target)));
+      select.value = Array.isArray(savedAnswer) ? (savedAnswer[optionIndex] ?? "") : "";
+      select.disabled = submitted;
+      row.append(select);
       container.append(row);
     });
     return;
@@ -954,14 +956,12 @@ function collectQuizAnswers(form: HTMLFormElement, lesson: QuizLesson) {
       return;
     }
 
-    if (question.type === QUESTION_TYPE.MATCH_WORDS) {
-      answers[question.id] = question.options.map((option) => {
-        const inputs = Array.from(
-          form.querySelectorAll<HTMLInputElement>(`input[name="${question.id}:${option.id}"]`),
-        );
-        const checkedInput = inputs.find((input) => input.checked);
-        return checkedInput?.value ?? inputs[0]?.value.trim() ?? "";
-      });
+    if (question.type === QUESTION_TYPE.MATCHING) {
+      answers[question.id] = question.options.map(
+        (option) =>
+          form.querySelector<HTMLSelectElement>(`select[name="${question.id}:${option.id}"]`)
+            ?.value ?? "",
+      );
       return;
     }
 
@@ -974,12 +974,37 @@ function collectQuizAnswers(form: HTMLFormElement, lesson: QuizLesson) {
 
 function scoreQuiz(lesson: QuizLesson, answers: Record<string, QuestionAnswer>) {
   let correct = 0;
+  let points = 0;
   lesson.questions.forEach((question) => {
-    if (isQuestionCorrect(question, answers[question.id])) correct += 1;
+    const questionPoints = getQuestionPoints(question, answers[question.id]);
+    points += questionPoints;
+    if (questionPoints === 1) correct += 1;
   });
-  const scorePercent = lesson.questions.length ? (correct / lesson.questions.length) * 100 : 100;
+  const scorePercent = lesson.questions.length ? (points / lesson.questions.length) * 100 : 100;
   const passed = scorePercent >= (lesson.passingScorePercent ?? 0);
   return { correct, scorePercent, passed };
+}
+
+// Every question is worth one point; partial matching questions earn a share per correct pair.
+function getQuestionPoints(question: QuizQuestion, answer: QuestionAnswer | undefined) {
+  if (question.type !== QUESTION_TYPE.MATCHING || question.scoringMode !== "partial")
+    return isQuestionCorrect(question, answer) ? 1 : 0;
+  if (!question.options.length) return 0;
+
+  const values = Array.isArray(answer) ? answer : [];
+  const correctPairs = question.options.filter(
+    (option, index) => values[index] === (option.matchedWord ?? ""),
+  ).length;
+  return correctPairs / question.options.length;
+}
+
+// Stable pseudo-random order that does not follow the pair order.
+function getMatchingTargets(question: QuizQuestion) {
+  const hash = (value: string) =>
+    [...value].reduce((result, char) => (Math.imul(31, result) + char.charCodeAt(0)) | 0, 7);
+  return question.options
+    .map((option) => option.matchedWord ?? "")
+    .sort((first, second) => hash(`${question.id}:${first}`) - hash(`${question.id}:${second}`));
 }
 
 function isQuestionCorrect(question: QuizQuestion, answer: QuestionAnswer | undefined) {
@@ -993,10 +1018,11 @@ function isQuestionCorrect(question: QuizQuestion, answer: QuestionAnswer | unde
     const answerValues = Array.isArray(answer) ? answer : [];
     return isBlankQuestionCorrect(question, answerValues);
   }
-  if (question.type === QUESTION_TYPE.MATCH_WORDS) {
+  if (question.type === QUESTION_TYPE.MATCHING) {
     const values = Array.isArray(answer) ? answer : [];
-    return question.options.every(
-      (option, index) => values[index]?.trim() === (option.matchedWord ?? ""),
+    return (
+      question.options.length > 0 &&
+      question.options.every((option, index) => values[index] === (option.matchedWord ?? ""))
     );
   }
   if (question.type === QUESTION_TYPE.TRUE_OR_FALSE) {
@@ -1150,7 +1176,7 @@ function isChoiceQuestion(question: QuizQuestion) {
 }
 
 function renderCorrectAnswer(question: QuizQuestion, labels: RuntimeLabels) {
-  if (question.type === QUESTION_TYPE.MATCH_WORDS) {
+  if (question.type === QUESTION_TYPE.MATCHING) {
     const values = question.options.map((option) => `${option.title}: ${option.matchedWord ?? ""}`);
     return renderExpectedAnswer(values, labels);
   }

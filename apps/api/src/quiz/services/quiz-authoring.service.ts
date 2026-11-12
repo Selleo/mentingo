@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import {
   ASSESSMENT_ATTEMPT_LIMIT_MODES,
   ASSESSMENT_TIME_LIMIT_MINUTES,
+  ASSESSMENT_QUESTION_TYPES,
   ENTITY_TYPES,
   LESSON_TYPES,
   type SupportedLanguages,
@@ -13,14 +14,16 @@ import { FileService } from "src/file/file.service";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
-import { QUESTION_TYPE } from "src/questions/schema/question.types";
 
 import { mapLegacyQuizAuthoringInput } from "../mappers/legacy-to-quiz-authoring.mapper";
 import { preserveExistingQuizAuthoringIds } from "../mappers/quiz-authoring-identity.mapper";
 import { filterItemsByQuestionId, getBlankMarkerIds } from "../mappers/quiz-authoring-mapper.utils";
 import { mapLocalizedQuizAuthoringReadModelToLegacy } from "../mappers/quiz-authoring-to-legacy.mapper";
 import { QuizAuthoringRepository } from "../repositories/quiz-authoring.repository";
-import { validateCanonicalQuizQuestions } from "../validators/canonical-quiz-authoring.validator";
+import {
+  hasValidMatchingPairs,
+  validateCanonicalQuizQuestions,
+} from "../validators/canonical-quiz-authoring.validator";
 
 import { QuizAuthoringPersistenceService } from "./quiz-authoring-persistence.service";
 
@@ -73,6 +76,13 @@ export class QuizAuthoringService {
     if (lessonId) {
       const existingQuiz = await this.getQuizLessonForAuthoring(lessonId, input.language);
       if (!existingQuiz) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
+      // shortcut: Luma cannot read or write matching questions, so a Luma update would delete them; drop with #2172.
+      if (
+        existingQuiz.questions.some(
+          ({ questionType }) => questionType === ASSESSMENT_QUESTION_TYPES.MATCHING,
+        )
+      )
+        throw new BadRequestException("courseAuthoring.errors.matchingQuestionUnsupported");
       if (!existingQuiz.assessment.availableLocales.includes(input.language)) {
         throw new BadRequestException("adminCourseView.toast.languageNotSupported");
       }
@@ -129,7 +139,6 @@ export class QuizAuthoringService {
   }
 
   async createQuizLesson(input: CreateQuizLessonBody) {
-    this.validateQuestionTypes(input.questions);
     const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
       input.chapterId,
@@ -167,8 +176,6 @@ export class QuizAuthoringService {
   }
 
   async updateQuizLesson(lessonId: UUIDType, input: UpdateQuizLessonBody) {
-    this.validateQuestionTypes(input.questions);
-
     const mappedQuizAuthoringInput = mapLegacyQuizAuthoringInput(input, lessonId);
 
     const existingQuizAuthoringRows = await this.getQuizAuthoringRows(
@@ -317,6 +324,7 @@ export class QuizAuthoringService {
       openTextSettings,
       blanks,
       dragOptions,
+      matchingPairs,
     ] = await Promise.all([
       this.quizAuthoringRepository.findChoiceOptions(questionIds, language),
       this.quizAuthoringRepository.findTrueFalseStatements(questionIds, language),
@@ -324,6 +332,7 @@ export class QuizAuthoringService {
       this.quizAuthoringRepository.findOpenTextSettings(questionIds),
       this.quizAuthoringRepository.findBlanks(questionIds),
       this.quizAuthoringRepository.findDragAndDropOptions(questionIds, language),
+      this.quizAuthoringRepository.findMatchingPairs(questionIds, language),
     ]);
 
     const blankIds = blanks.map(({ id }) => id);
@@ -344,6 +353,7 @@ export class QuizAuthoringService {
       blanks,
       answerSets,
       dragOptions,
+      matchingPairs,
       promptImages,
     };
   }
@@ -373,6 +383,7 @@ export class QuizAuthoringService {
           displayOrder: question.displayOrder,
           maximumPoints: question.maximumPoints,
           gradingMode: question.gradingMode,
+          scoringMode: question.scoringMode,
           prompt: question.prompt,
           title: question.title,
           description: question.description || null,
@@ -418,6 +429,12 @@ export class QuizAuthoringService {
               displayOrder: option.displayOrder,
             }),
           ),
+          matchingPairs: filterItemsByQuestionId(rows.matchingPairs, question.id).map((pair) => ({
+            id: pair.id,
+            displayOrder: pair.displayOrder,
+            prompt: pair.prompt,
+            match: pair.match,
+          })),
         };
       }),
     };
@@ -446,12 +463,13 @@ export class QuizAuthoringService {
         input.timeLimitMinutes > ASSESSMENT_TIME_LIMIT_MINUTES.MAX)
     )
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
-  }
-
-  private validateQuestionTypes(
-    questions: CreateQuizLessonBody["questions"] | UpdateQuizLessonBody["questions"],
-  ) {
-    if (questions?.some((question) => question.type === QUESTION_TYPE.MATCH_WORDS))
+    if (
+      input.questions?.some(
+        (question) =>
+          question.questionType === ASSESSMENT_QUESTION_TYPES.MATCHING &&
+          !hasValidMatchingPairs(question.matchingPairs),
+      )
+    )
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
   }
 
@@ -465,7 +483,8 @@ export class QuizAuthoringService {
     const hasStructureMismatch = translatedQuestions.some(
       (question, index) =>
         question.displayOrder !== existingQuestions[index]?.displayOrder ||
-        question.questionType !== existingQuestions[index]?.questionType,
+        question.questionType !== existingQuestions[index]?.questionType ||
+        question.scoringMode !== existingQuestions[index]?.scoringMode,
     );
 
     if (hasStructureMismatch)

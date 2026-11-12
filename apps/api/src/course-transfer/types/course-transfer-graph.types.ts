@@ -1,6 +1,7 @@
 import type {
   AssessmentGradingMode,
   AssessmentQuestionType,
+  AssessmentScoringMode,
   AssessmentTextComparisonMode,
   EntityType,
   LocalizedText,
@@ -32,6 +33,7 @@ import type {
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionBlanks,
   assessmentQuestionDragAndDropOptions,
+  assessmentQuestionMatchingPairs,
   assessmentQuestionOpenTextSettings,
   assessmentQuestionScaleOptions,
   assessmentQuestionTrueFalseStatements,
@@ -207,6 +209,7 @@ export type QuestionSelect = {
   displayOrder: number;
   photoS3Key: string | null;
   gradingMode: AssessmentGradingMode;
+  scoringMode: AssessmentScoringMode;
   authorId: UUIDType | null;
   createdAt: string;
   updatedAt: string;
@@ -260,6 +263,10 @@ export type AssessmentQuestionBlankAnswerSetSelect = InferSelectModel<
 
 export type AssessmentQuestionDragAndDropOptionSelect = InferSelectModel<
   typeof assessmentQuestionDragAndDropOptions
+>;
+
+export type AssessmentQuestionMatchingPairSelect = InferSelectModel<
+  typeof assessmentQuestionMatchingPairs
 >;
 
 export type AssessmentQuestionScaleOptionSelect = InferSelectModel<
@@ -318,6 +325,15 @@ export type UpsertTargetDragAndDropOptionValues = {
   displayOrder: number;
 };
 
+export type UpsertTargetMatchingPairValues = {
+  id: UUIDType;
+  questionId: UUIDType;
+  language: SupportedLanguages;
+  displayOrder: number;
+  prompt: string;
+  match: string;
+};
+
 export type UpsertTargetScaleOptionValues = {
   id: UUIDType;
   questionId: UUIDType;
@@ -341,6 +357,7 @@ export type DeleteStaleTargetQuestionDetailsValues = {
   trueFalseStatementIds: UUIDType[];
   blankIds: UUIDType[];
   dragAndDropOptionIds: UUIDType[];
+  matchingPairIds: UUIDType[];
 };
 
 export type DuplicateChaptersParams = {
@@ -551,6 +568,7 @@ export type SourceSnapshot = {
   assessmentQuestionBlanks: Array<AssessmentQuestionBlankSelect>;
   assessmentQuestionBlankAnswerSets: Array<AssessmentQuestionBlankAnswerSetSelect>;
   assessmentQuestionDragAndDropOptions: Array<AssessmentQuestionDragAndDropOptionSelect>;
+  assessmentQuestionMatchingPairs: Array<AssessmentQuestionMatchingPairSelect>;
   assessmentQuestionScaleOptions: Array<AssessmentQuestionScaleOptionSelect>;
   assessmentQuestionTrueFalseStatements: Array<AssessmentQuestionTrueFalseStatementSelect>;
   questionResources: Array<ResourceWithRelation>;

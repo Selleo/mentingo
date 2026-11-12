@@ -1,3 +1,5 @@
+import type { AssessmentScoringMode } from "@repo/shared";
+
 export enum QuestionIcons {
   MultiSelect = "MultiSelect",
   SingleSelect = "SingleSelect",
@@ -7,7 +9,7 @@ export enum QuestionIcons {
   PhotoQuestion = "PhotoQuestion",
   FillInTheBlanks = "FillInTheBlanks",
   GapFill = "GapFill",
-  MatchWords = "Equal",
+  Matching = "Equal",
   Scale_1_5 = "Questionnaire",
 }
 
@@ -32,11 +34,11 @@ export type Question = {
   displayOrder: number;
   title: string;
   options?: QuestionOption[];
+  scoringMode?: AssessmentScoringMode;
 };
 
 export enum QuestionType {
   SINGLE_CHOICE = "single_choice",
-  MATCH_WORDS = "match_words",
   MULTIPLE_CHOICE = "multiple_choice",
   TRUE_OR_FALSE = "true_or_false",
   BRIEF_RESPONSE = "brief_response",
@@ -46,4 +48,5 @@ export enum QuestionType {
   FILL_IN_THE_BLANKS_TEXT = "fill_in_the_blanks_text",
   FILL_IN_THE_BLANKS_DND = "fill_in_the_blanks_dnd",
   SCALE_1_5 = "scale_1_5",
+  MATCHING = "matching",
 }

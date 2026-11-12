@@ -50,7 +50,7 @@ const QuestionTitle = ({
     [QuestionType.PHOTO_QUESTION_MULTIPLE_CHOICE]: QuestionIcons.PhotoQuestion,
     [QuestionType.FILL_IN_THE_BLANKS_TEXT]: QuestionIcons.GapFill,
     [QuestionType.FILL_IN_THE_BLANKS_DND]: QuestionIcons.FillInTheBlanks,
-    [QuestionType.MATCH_WORDS]: QuestionIcons.MatchWords,
+    [QuestionType.MATCHING]: QuestionIcons.Matching,
     [QuestionType.SCALE_1_5]: QuestionIcons.Scale_1_5,
   };
 
@@ -103,8 +103,9 @@ const QuestionTitle = ({
         name={`questions.${questionIndex}.title`}
         value={item.title}
         placeholder={baseLanguageQuestion?.title}
-        onChange={(e) => handleOptionChange(e.target.value)}
-        required
+        onChange={(event) => handleOptionChange(event.target.value)}
+        // Matching questions rely on the form schema alone, without the browser's own tooltip.
+        required={questionType !== QuestionType.MATCHING}
         className="flex-1"
       />
       {isOpenQuestion && (

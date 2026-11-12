@@ -1,3 +1,4 @@
+import { ASSESSMENT_SCORING_MODES } from "@repo/shared";
 import { z } from "zod";
 
 import { QuestionType } from "../QuizLessonForm.types";
@@ -27,7 +28,11 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
               key: z.string(),
             }),
           ),
-          title: z.string().min(2).max(250),
+          title: z
+            .string()
+            .min(2, t("adminCourseView.curriculum.lesson.validation.titleMinLength"))
+            .max(250, t("adminCourseView.curriculum.lesson.validation.titleMaxLength")),
+          scoringMode: z.optional(z.nativeEnum(ASSESSMENT_SCORING_MODES)),
           options: z
             .array(
               z.object({
@@ -57,6 +62,44 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
               path: [index, "options"],
               message: t("adminCourseView.curriculum.lesson.validation.atLeastOneOptionRequired"),
               code: z.ZodIssueCode.custom,
+            });
+          }
+
+          if (question.type === QuestionType.MATCHING && (question.options?.length ?? 0) < 2) {
+            ctx.addIssue({
+              path: [index, "options"],
+              message: t("adminCourseView.curriculum.lesson.validation.matchingPairsRequired"),
+              code: z.ZodIssueCode.custom,
+            });
+          }
+
+          // Matching errors stay on pair fields: an issue on the whole options list would hide them.
+          if (question.type === QuestionType.MATCHING) {
+            const matches = question.options?.map((option) => option.matchedWord?.trim()) ?? [];
+
+            question.options?.forEach((option, optionIndex) => {
+              const match = matches[optionIndex];
+
+              // The API trims prompts, so a whitespace-only prompt is empty.
+              if (option.optionText && !option.optionText.trim())
+                ctx.addIssue({
+                  path: [index, "options", optionIndex, "optionText"],
+                  message: t("adminCourseView.curriculum.lesson.validation.optionTextRequired"),
+                  code: z.ZodIssueCode.custom,
+                });
+
+              if (!match)
+                ctx.addIssue({
+                  path: [index, "options", optionIndex, "matchedWord"],
+                  message: t("adminCourseView.curriculum.lesson.validation.matchingMatchRequired"),
+                  code: z.ZodIssueCode.custom,
+                });
+              else if (matches.indexOf(match) !== matches.lastIndexOf(match))
+                ctx.addIssue({
+                  path: [index, "options", optionIndex, "matchedWord"],
+                  message: t("adminCourseView.curriculum.lesson.validation.matchingPairsUnique"),
+                  code: z.ZodIssueCode.custom,
+                });
             });
           }
 

@@ -8,6 +8,7 @@ import type {
   assessmentAttemptBlankAnswers,
   assessmentAttemptOpenTextAnswers,
   assessmentAttemptScaleSelections,
+  assessmentAttemptMatchingAnswers,
 } from "src/storage/schema";
 
 // Allows SQL values such as a database-clock `expiresAt`.
@@ -25,3 +26,4 @@ export type QuizAttemptFinalizeUpdate = Pick<
   typeof assessmentAttempts.$inferInsert,
   "gradingStatus" | "result" | "availablePoints" | "awardedPoints" | "scorePercentage" | "gradedAt"
 > & { submittedAt: string };
+export type QuizAttemptMatchingAnswerInsert = typeof assessmentAttemptMatchingAnswers.$inferInsert;

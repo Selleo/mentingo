@@ -9,6 +9,7 @@ export const ASSESSMENT_QUESTION_TYPES = {
   BRIEF_RESPONSE: "brief_response",
   DETAILED_RESPONSE: "detailed_response",
   SCALE_1_5: "scale_1_5",
+  MATCHING: "matching",
 } as const;
 export type AssessmentQuestionType =
   (typeof ASSESSMENT_QUESTION_TYPES)[keyof typeof ASSESSMENT_QUESTION_TYPES];
@@ -20,6 +21,13 @@ export const ASSESSMENT_GRADING_MODES = {
 } as const;
 export type AssessmentGradingMode =
   (typeof ASSESSMENT_GRADING_MODES)[keyof typeof ASSESSMENT_GRADING_MODES];
+
+export const ASSESSMENT_SCORING_MODES = {
+  ALL_OR_NOTHING: "all_or_nothing",
+  PARTIAL: "partial",
+} as const;
+export type AssessmentScoringMode =
+  (typeof ASSESSMENT_SCORING_MODES)[keyof typeof ASSESSMENT_SCORING_MODES];
 
 export const ASSESSMENT_ATTEMPT_LIMIT_MODES = {
   NONE: "none",

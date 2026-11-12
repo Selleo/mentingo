@@ -3203,7 +3203,10 @@
           "maxFileNumber_other": "Nemůžete nahrát více než {{ count }} souborů",
           "maxResources_five": "Nemůžete přidat více než 5 zdrojů",
           "sourceUrlRequired": "Adresa URL zdroje je povinná",
-          "sourceUrlInvalid": "Zadejte platnou adresu URL HTTPS"
+          "sourceUrlInvalid": "Zadejte platnou adresu URL HTTPS",
+          "matchingPairsRequired": "Přidejte alespoň 2 dvojice a vyplňte obě strany každé dvojice",
+          "matchingMatchRequired": "Vyplňte přiřazení v této dvojici",
+          "matchingPairsUnique": "Každá dvojice musí mít jedinečné přiřazení"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pořadí zobrazení lekce bylo úspěšně aktualizováno",
@@ -3278,7 +3281,8 @@
           "ttsPreset": "Předvolba TTS",
           "customTTSReference": "Vlastní reference TTS",
           "includeFiles_one": "Připojte až 1 soubor pod {{maxSize}}, který bude použit jako kontext v lekcích",
-          "includeFiles_other": "Připojte až {{ count }} soubory menší než {{maxSize}}, které budou použity jako kontext v lekcích"
+          "includeFiles_other": "Připojte až {{ count }} soubory menší než {{maxSize}}, které budou použity jako kontext v lekcích",
+          "matchingScoring": "Bodování"
         },
         "placeholder": {
           "title": "Uveďte název lekce...",
@@ -3795,7 +3799,7 @@
           "option": "Volba",
           "singleChoice": "Jediný výběr",
           "multipleChoice": "Vícenásobný výběr",
-          "matchWords": "Vhodný",
+          "matching": "Přiřazování",
           "trueOrFalse": "Pravda nebo nepravda",
           "fillInTheBlanks": "Doplňování mezer (drag & drop)",
           "photoQuestion": "Otázka na fotku",
@@ -3904,6 +3908,8 @@
           "betaTooltip": "Tato funkce je poskytována v testovací verzi. Může obsahovat chyby nebo nemusí plně fungovat tak, jak bylo zamýšleno, a je používán na vaše vlastní riziko.",
           "dragWord": "Přetáhněte slovo do věty",
           "taskDescriptionTooltip": "Stručně popište, co by měl účastník dělat během rozhovoru s mentorem AI.",
+          "matchingScoringAllOrNothing": "Všechny dvojice musí být správně",
+          "matchingScoringPartial": "Body za každou správnou dvojici",
           "requiresReview": "Hodnotí hodnotitel"
         }
       }
@@ -4355,7 +4361,10 @@
       "score": "Skóre: {{score}}% ({{correct}} z {{questionsNumber}} otázek)",
       "contentCantBeEmbedded": "Tento obsah nelze vložit.",
       "openInNewTab": "Otevřít na nové kartě",
-      "scale_1_5": "Otázka typu škála (1–5)"
+      "scale_1_5": "Otázka typu škála (1–5)",
+      "matching": "Přiřaďte každou položku k její dvojici.",
+      "noMatchesAvailable": "Pro tuto otázku zatím nejsou k dispozici žádná přiřazení.",
+      "correctMatch": "Správné přiřazení:"
     },
     "aiMentor": {
       "title": "Sezení AI Mentor",
@@ -7192,7 +7201,8 @@
       "receiptSynchronizationPending": "Předchozí změny se ukládají do pracovního prostoru AI. Zkuste stejný výběr za chvíli použít znovu.",
       "appliedRefreshPending": "Změny byly použity. Pokud je ještě nevidíte, obnovte kurz.",
       "deepResearchPreferenceNotSaved": "Hloubkový výzkum byl pro tento požadavek povolen, ale nastavení se nepodařilo uložit pro další zprávy.",
-      "webSearchPreferenceNotSaved": "Vyhledávání na webu bylo pro tento požadavek povoleno, ale nastavení se nepodařilo uložit pro další zprávy."
+      "webSearchPreferenceNotSaved": "Vyhledávání na webu bylo pro tento požadavek povoleno, ale nastavení se nepodařilo uložit pro další zprávy.",
+      "matchingQuestionUnsupported": "Luma zatím neumí upravovat kvízy s otázkami na přiřazování. Upravte tento kvíz v editoru kvízů."
     },
     "review": {
       "generatedImage": "Vygenerovaný obrázek",

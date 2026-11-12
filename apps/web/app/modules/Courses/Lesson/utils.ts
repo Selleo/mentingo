@@ -32,6 +32,7 @@ export const getUserAnswers = (questions: Questions): QuizForm => {
     briefResponses: prepareOpenAnswers(groupedQuestions.brief_response),
     detailedResponses: prepareOpenAnswers(groupedQuestions.detailed_response),
     scaleQuestions: prepareOptionAnswers(groupedQuestions.scale_1_5),
+    matchingQuestions: prepareMatchingAnswers(groupedQuestions.matching),
   } as const;
 };
 
@@ -53,6 +54,7 @@ export const getEmptyQuizAnswers = (questions: Questions): QuizForm => {
     briefResponses: prepareEmptyOpenAnswers(groupedQuestions.brief_response),
     detailedResponses: prepareEmptyOpenAnswers(groupedQuestions.detailed_response),
     scaleQuestions: prepareEmptyOptionAnswers(groupedQuestions.scale_1_5),
+    matchingQuestions: prepareEmptyOptionAnswers(groupedQuestions.matching),
   };
 };
 
@@ -69,12 +71,27 @@ const groupQuestionsByType = (questions: Questions) => {
     ),
     fill_in_the_blanks_text: questions.filter(({ type }) => type === "fill_in_the_blanks_text"),
     fill_in_the_blanks_dnd: questions.filter(({ type }) => type === "fill_in_the_blanks_dnd"),
-    match_words: questions.filter(({ type }) => type === "match_words"),
+    matching: questions.filter(({ type }) => type === "matching"),
     scale_1_5: questions.filter(({ type }) => type === "scale_1_5"),
     brief_response: questions.filter(({ type }) => type === "brief_response"),
     detailed_response: questions.filter(({ type }) => type === "detailed_response"),
   };
 };
+
+/**
+ * Each match can be placed once, so a question needs as many answers as it has matches to place,
+ * capped at its pairs. Untranslated pairs have no match, which leaves their pair unanswerable.
+ */
+export const getRequiredMatchingAnswerCounts = (questions: Questions): Record<string, number> =>
+  Object.fromEntries(
+    questions
+      .filter(({ type }) => type === QuestionType.MATCHING)
+      .map((question) => {
+        const matchCount = new Set(question.matchingTargets?.filter(Boolean)).size;
+
+        return [question.id, Math.min(matchCount, question.options?.length ?? 0)];
+      }),
+  );
 
 function prepareEmptyOptionAnswers(questions: Questions): AnswersMap {
   return questions.reduce((result, question) => {
@@ -202,6 +219,17 @@ function prepareOptionAnswers(questions: Questions): AnswersMap {
   }, {} as AnswersMap);
 }
 
+function prepareMatchingAnswers(questions: Questions): AnswersMap {
+  return Object.fromEntries(
+    questions.map((question) => [
+      question.id,
+      Object.fromEntries(
+        (question.options ?? []).map((option) => [option.id, option.studentAnswer ?? null]),
+      ),
+    ]),
+  );
+}
+
 function prepareOpenAnswers(questions: Questions): OpenAnswersMap {
   return questions.reduce((result, question) => {
     const studentAnswer = question.options?.[0]?.studentAnswer || "";
@@ -253,6 +281,17 @@ export const parseQuizFormData = (input: QuizForm) => {
     }
   };
 
+  // The API requires every matching question, even an untranslated one with nothing to place.
+  const processMatchingQuestions = (questionMap: Record<string, Record<string, string | null>>) => {
+    for (const questionId in questionMap) {
+      const answers = Object.entries(questionMap[questionId])
+        .filter((entry): entry is [string, string] => Boolean(entry[1]))
+        .map(([answerId, value]) => ({ answerId, value }));
+
+      result.push({ questionId, answers });
+    }
+  };
+
   const processBooleanQuestions = (questionMap: Record<string, Record<string, string | null>>) => {
     for (const questionId in questionMap) {
       const answers = questionMap[questionId];
@@ -290,6 +329,7 @@ export const parseQuizFormData = (input: QuizForm) => {
   processSingleAnswerQuestions(input.multiAnswerQuestions);
   processFillInTheBlanks(input.fillInTheBlanksText);
   processFillInTheBlanks(input.fillInTheBlanksDnd);
+  processMatchingQuestions(input.matchingQuestions);
   processSingleAnswerQuestions(input.photoQuestionMultipleChoice);
   processBooleanQuestions(input.trueOrFalseQuestions);
 

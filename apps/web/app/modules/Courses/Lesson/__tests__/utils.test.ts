@@ -1,15 +1,19 @@
 import { expect, describe, it } from "vitest";
 
+import i18next from "~/utils/mocks/i18next.mock";
+
 import {
   getAnswers as getFillInTheBlanksDndAnswers,
   getCompletedAnswers as getCompletedFillInTheBlanksDndAnswers,
 } from "../Question/FillInTheBlanks/dnd/FillInTheBlanksDnd";
+import { QuizFormSchema } from "../schemas";
 import {
   findFirstInProgressLessonId,
   findFirstLessonIdForCompletedCourse,
   findFirstNonCompletedLessonId,
   findFirstNotStartedLessonId,
   getEmptyQuizAnswers,
+  getRequiredMatchingAnswerCounts,
   getUserAnswers,
   isNextBlocked,
   isPreviousBlocked,
@@ -502,6 +506,7 @@ describe("parseQuizFormData", () => {
         },
       },
       scaleQuestions: {},
+      matchingQuestions: {},
     };
 
     const parsed = parseQuizFormData(formData);
@@ -603,6 +608,7 @@ describe("fill in the blanks text mapping", () => {
       },
       fillInTheBlanksDnd: {},
       scaleQuestions: {},
+      matchingQuestions: {},
     };
 
     const parsed = parseQuizFormData(formData);
@@ -613,6 +619,88 @@ describe("fill in the blanks text mapping", () => {
         answers: [
           { answerId: "o2", value: "go" },
           { answerId: "o1", value: "park" },
+        ],
+      },
+    ]);
+  });
+});
+
+describe("matching mapping", () => {
+  const questions = [
+    {
+      id: "question-matching",
+      type: "matching",
+      matchingTargets: ["Woof", "Meow"],
+      options: [
+        { id: "pair-1", studentAnswer: "Meow" },
+        { id: "pair-2", studentAnswer: null },
+      ],
+    },
+  ] as unknown as NonNullable<
+    import("~/api/generated-api").GetLessonByIdResponse["data"]["quizDetails"]
+  >["questions"];
+
+  const validateMatching = (answers: Record<string, string | null>, matchingTargets: string[]) => {
+    const schema = QuizFormSchema(
+      i18next.t,
+      getRequiredMatchingAnswerCounts([{ ...questions[0], matchingTargets }]),
+    );
+
+    return schema.safeParse({
+      ...getEmptyQuizAnswers([]),
+      matchingQuestions: { "question-matching": answers },
+    }).success;
+  };
+
+  it("requires one answer per pair when every pair has a match", () => {
+    expect(validateMatching({ "pair-1": "Meow", "pair-2": null }, ["Woof", "Meow"])).toBe(false);
+    expect(validateMatching({ "pair-1": "Meow", "pair-2": "Woof" }, ["Woof", "Meow"])).toBe(true);
+  });
+
+  it("requires only as many answers as there are matches when some pairs are untranslated", () => {
+    expect(validateMatching({ "pair-1": null, "pair-2": null }, ["Meow"])).toBe(false);
+    expect(validateMatching({ "pair-1": "Meow", "pair-2": null }, ["Meow"])).toBe(true);
+  });
+
+  it("lets an untranslated question be submitted without answers", () => {
+    expect(validateMatching({ "pair-1": null, "pair-2": null }, [])).toBe(true);
+    expect(
+      parseQuizFormData({
+        ...getEmptyQuizAnswers([]),
+        matchingQuestions: { "question-matching": {} },
+      }),
+    ).toEqual([{ questionId: "question-matching", answers: [] }]);
+    expect(
+      parseQuizFormData({
+        ...getEmptyQuizAnswers([]),
+        matchingQuestions: { "question-matching": { "pair-1": null, "pair-2": null } },
+      }),
+    ).toEqual([{ questionId: "question-matching", answers: [] }]);
+  });
+
+  it("prepares one answer per pair", () => {
+    expect(getEmptyQuizAnswers(questions).matchingQuestions["question-matching"]).toEqual({
+      "pair-1": null,
+      "pair-2": null,
+    });
+    expect(getUserAnswers(questions).matchingQuestions["question-matching"]).toEqual({
+      "pair-1": "Meow",
+      "pair-2": null,
+    });
+  });
+
+  it("submits the selected match for each answered pair", () => {
+    const parsed = parseQuizFormData({
+      ...getEmptyQuizAnswers([]),
+      matchingQuestions: { "question-matching": { "pair-1": "Meow", "pair-2": "Woof" } },
+    });
+
+    expect(parsed).toEqual([
+      {
+        questionId: "question-matching",
+        answers: [
+          { answerId: "pair-1", value: "Meow" },
+          { answerId: "pair-2", value: "Woof" },
         ],
       },
     ]);

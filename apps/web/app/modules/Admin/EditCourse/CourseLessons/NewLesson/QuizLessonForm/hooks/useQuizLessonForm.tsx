@@ -124,6 +124,7 @@ export const useQuizLessonForm = ({
               requiresReview: question.requiresReview,
               title: question.title,
               displayOrder: question.displayOrder,
+              scoringMode: question.scoringMode,
               options: question.options?.map((option: QuestionOption) => ({
                 id: option.id,
                 sortableId: option.id,
