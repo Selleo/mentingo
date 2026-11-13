@@ -837,7 +837,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "\"Video completion tracking\" option updated successfully",
     "videoCompletionTrackingUpdateFailed": "Failed to update \"Video completion tracking\" option",
     "settingsUpdatedSuccessfully": "Settings updated successfully",
-    "settingsUpdateFailed": "Failed to update settings"
+    "settingsUpdateFailed": "Failed to update settings",
+    "audioCompletionTrackingUpdatedSuccessfully": "\"Audio completion tracking\" option updated successfully",
+    "audioCompletionTrackingUpdateFailed": "Failed to update \"Audio completion tracking\" option"
   },
   "uploadFile": {
     "header": "Click to upload",
@@ -2898,7 +2900,8 @@
         "curriculum": "Curriculum editing is not available for SCORM courses.",
         "lessonSequence": "Lesson sequence enforcement is not available for SCORM courses.",
         "quizFeedback": "Quiz feedback settings are not available for SCORM courses.",
-        "videoCompletionTracking": "Video completion tracking is not available for SCORM courses."
+        "videoCompletionTracking": "Video completion tracking is not available for SCORM courses.",
+        "audioCompletionTracking": "Audio completion tracking is not available for SCORM courses."
       },
       "notFound": {
         "course": "Course not found.",
@@ -3089,7 +3092,9 @@
         "courseAvailabilityTitle": "Course availability",
         "fallbackLanguageWarningTitle": "Note: missing translations",
         "fallbackLanguageWarningDescription": "Some fields in this language version are empty. In those places, students will see content from the default language until you add translations.",
-        "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course."
+        "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course.",
+        "enableAudioCompletionTracking": "Audio completion tracking",
+        "enableAudioCompletionTrackingDescription": "Require learners to listen to at least 90% of each audio recording in a lesson before it is marked as completed."
       },
       "validation": {
         "titleMinLength": "Title must be at least 2 characters.",
@@ -4528,6 +4533,38 @@
       "timeLeft": "Time left: {{time}}",
       "warning": "Less than a minute left. Your answers will be submitted automatically when time runs out.",
       "timeUp": "Time is up. Your answers are being submitted."
+    },
+    "audioProgress": {
+      "label": "Audio progress",
+      "completedSummary": "{{completed}} of {{total}} completed",
+      "overviewAriaLabel": "Lesson audio progress",
+      "segmentAriaLabel": "Audio {{index}} progress: {{progress}}% listened",
+      "requirementSingle": "Listen to the entire audio recording to complete this lesson.",
+      "requirementMultiple": "Listen to all audio recordings to complete this lesson.",
+      "errors": {
+        "resourceNotFound": "Audio progress could not be saved for this lesson.",
+        "unsupportedLessonType": "Audio progress is only available for content lessons.",
+        "unsupportedBucketSize": "Audio progress uses an unsupported tracking interval.",
+        "invalidResourceType": "This resource cannot be tracked as a lesson audio recording.",
+        "accessDenied": "You do not have access to update audio progress for this lesson."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Finish listening before leaving?",
+      "descriptionSingle": "This lesson requires the entire audio recording to be listened to before it can be completed.",
+      "descriptionMultiple": "This lesson requires all audio recordings to be listened to before it can be completed.",
+      "continueListening": "Continue listening"
+    },
+    "requiredMediaLeave": {
+      "title": "Finish the lesson media before leaving?",
+      "description": "This lesson requires all videos to be watched and all audio recordings to be listened to before it can be completed.",
+      "continue": "Continue"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Watch the video and listen to the audio recording to complete this lesson.",
+      "requirementMultiple": "Watch all videos and listen to all audio recordings to complete this lesson.",
+      "label": "Lesson progress",
+      "overviewAriaLabel": "Lesson media progress"
     }
   },
   "studentCourseView": {

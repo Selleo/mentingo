@@ -837,7 +837,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "Die Option „Video-Abschlussverfolgung“ wurde erfolgreich aktualisiert",
     "videoCompletionTrackingUpdateFailed": "Die Option „Video-Abschlussverfolgung“ konnte nicht aktualisiert werden",
     "settingsUpdatedSuccessfully": "Einstellungen erfolgreich aktualisiert",
-    "settingsUpdateFailed": "Die Einstellungen konnten nicht aktualisiert werden"
+    "settingsUpdateFailed": "Die Einstellungen konnten nicht aktualisiert werden",
+    "audioCompletionTrackingUpdatedSuccessfully": "Die Option „Audio-Abschlussverfolgung“ wurde erfolgreich aktualisiert",
+    "audioCompletionTrackingUpdateFailed": "Die Option „Audio-Abschlussverfolgung“ konnte nicht aktualisiert werden"
   },
   "uploadFile": {
     "header": "Klicken Sie zum Hochladen",
@@ -2897,7 +2899,8 @@
         "curriculum": "Die Bearbeitung des Lehrplans ist für SCORM-Kurse nicht verfügbar.",
         "lessonSequence": "Die erzwungene Lektionenreihenfolge ist für SCORM-Kurse nicht verfügbar.",
         "quizFeedback": "Quiz-Feedback-Einstellungen sind für SCORM-Kurse nicht verfügbar.",
-        "videoCompletionTracking": "Video-Abschlussverfolgung ist für SCORM-Kurse nicht verfügbar."
+        "videoCompletionTracking": "Video-Abschlussverfolgung ist für SCORM-Kurse nicht verfügbar.",
+        "audioCompletionTracking": "Audio-Abschlussverfolgung ist für SCORM-Kurse nicht verfügbar."
       },
       "notFound": {
         "course": "Kurs nicht gefunden.",
@@ -3088,7 +3091,9 @@
         "courseAvailabilityTitle": "Kursverfügbarkeit",
         "fallbackLanguageWarningTitle": "Hinweis: fehlende Übersetzungen",
         "fallbackLanguageWarningDescription": "Einige Felder in dieser Sprachversion sind leer. An diesen Stellen sehen die Schüler Inhalte in der Standardsprache, bis Sie Übersetzungen hinzufügen.",
-        "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil des Kurses sein."
+        "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil des Kurses sein.",
+        "enableAudioCompletionTracking": "Audio-Abschlussverfolgung",
+        "enableAudioCompletionTrackingDescription": "Lernende müssen mindestens 90% jeder Audioaufnahme in einer Lektion anhören, bevor sie als abgeschlossen markiert wird."
       },
       "validation": {
         "titleMinLength": "Der Titel muss mindestens 2 Zeichen lang sein.",
@@ -4527,6 +4532,38 @@
       "timeLeft": "Verbleibende Zeit: {{time}}",
       "warning": "Weniger als eine Minute übrig. Deine Antworten werden nach Ablauf der Zeit automatisch abgegeben.",
       "timeUp": "Die Zeit ist abgelaufen. Deine Antworten werden abgegeben."
+    },
+    "audioProgress": {
+      "label": "Audio-Fortschritt",
+      "completedSummary": "{{completed}} von {{total}} abgeschlossen",
+      "overviewAriaLabel": "Audio-Fortschritt der Lektion",
+      "segmentAriaLabel": "Fortschritt von Audio {{index}}: {{progress}}% angehört",
+      "requirementSingle": "Hören Sie die gesamte Audioaufnahme an, um diese Lektion abzuschließen.",
+      "requirementMultiple": "Hören Sie alle Audioaufnahmen an, um diese Lektion abzuschließen.",
+      "errors": {
+        "resourceNotFound": "Der Audio-Fortschritt konnte für diese Lektion nicht gespeichert werden.",
+        "unsupportedLessonType": "Audio-Fortschritt ist nur für Inhaltslektionen verfügbar.",
+        "unsupportedBucketSize": "Der Audio-Fortschritt verwendet ein nicht unterstütztes Erfassungsintervall.",
+        "invalidResourceType": "Diese Ressource kann nicht als Audioaufnahme der Lektion verfolgt werden.",
+        "accessDenied": "Sie haben keine Berechtigung, den Audio-Fortschritt dieser Lektion zu aktualisieren."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Vor dem Verlassen fertig anhören?",
+      "descriptionSingle": "Für den Abschluss dieser Lektion muss die gesamte Audioaufnahme angehört werden.",
+      "descriptionMultiple": "Für den Abschluss dieser Lektion müssen alle Audioaufnahmen angehört werden.",
+      "continueListening": "Weiter anhören"
+    },
+    "requiredMediaLeave": {
+      "title": "Lektionsmedien vor dem Verlassen abschließen?",
+      "description": "Für den Abschluss dieser Lektion müssen alle Videos angesehen und alle Audioaufnahmen angehört werden.",
+      "continue": "Fortfahren"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Sehen Sie sich das Video an und hören Sie die Audioaufnahme an, um diese Lektion abzuschließen.",
+      "requirementMultiple": "Sehen Sie sich alle Videos an und hören Sie alle Audioaufnahmen an, um diese Lektion abzuschließen.",
+      "label": "Lektionsfortschritt",
+      "overviewAriaLabel": "Fortschritt der Lektionsmedien"
     }
   },
   "studentCourseView": {

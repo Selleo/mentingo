@@ -45,6 +45,13 @@ export const streamFileToResponse = (res: Response, file: FileStreamPayload) => 
     destroyFileStream();
   };
 
+  const isClientDisconnected = res.destroyed || Boolean(req?.destroyed);
+
+  if (isClientDisconnected) {
+    destroyFileStream();
+    return;
+  }
+
   const resetStreamTimeout = () => {
     if (!file.streamTimeoutMs) return;
 

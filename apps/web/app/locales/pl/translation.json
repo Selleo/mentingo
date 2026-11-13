@@ -840,7 +840,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "Opcja \"Śledzenie ukończenia wideo\" została pomyślnie zaktualizowana",
     "videoCompletionTrackingUpdateFailed": "Nie udało się zaktualizować opcji \"Śledzenie ukończenia wideo\"",
     "settingsUpdatedSuccessfully": "Ustawienia zostały pomyślnie zaktualizowane",
-    "settingsUpdateFailed": "Nie udało się zaktualizować ustawień"
+    "settingsUpdateFailed": "Nie udało się zaktualizować ustawień",
+    "audioCompletionTrackingUpdatedSuccessfully": "Opcja \"Śledzenie ukończenia audio\" została pomyślnie zaktualizowana",
+    "audioCompletionTrackingUpdateFailed": "Nie udało się zaktualizować opcji \"Śledzenie ukończenia audio\""
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",
@@ -3149,7 +3151,8 @@
         "curriculum": "Edycja programu nie jest dostępna dla kursów SCORM.",
         "lessonSequence": "Wymuszanie kolejności lekcji nie jest dostępne dla kursów SCORM.",
         "quizFeedback": "Ustawienia informacji zwrotnej quizu nie są dostępne dla kursów SCORM.",
-        "videoCompletionTracking": "Śledzenie ukończenia wideo nie jest dostępne dla kursów SCORM."
+        "videoCompletionTracking": "Śledzenie ukończenia wideo nie jest dostępne dla kursów SCORM.",
+        "audioCompletionTracking": "Śledzenie ukończenia audio nie jest dostępne dla kursów SCORM."
       },
       "notFound": {
         "course": "Nie znaleziono kursu.",
@@ -3341,7 +3344,9 @@
         "courseAvailabilityTitle": "Dostępność kursu",
         "fallbackLanguageWarningTitle": "Uwaga: brakujące tłumaczenia",
         "fallbackLanguageWarningDescription": "Niektóre pola w tej wersji językowej są puste. W tych miejscach system wyświetli studentom treści z języka domyślnego, dopóki nie dodasz tłumaczeń.",
-        "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu."
+        "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu.",
+        "enableAudioCompletionTracking": "Śledzenie ukończenia audio",
+        "enableAudioCompletionTrackingDescription": "Uczestnik musi odsłuchać co najmniej 90% każdego nagrania audio w lekcji, aby lekcja została oznaczona jako ukończona."
       },
       "validation": {
         "titleMinLength": "Tytuł musi mieć co najmniej 2 znaki.",
@@ -4797,6 +4802,38 @@
       "timeLeft": "Pozostały czas: {{time}}",
       "warning": "Została mniej niż minuta. Odpowiedzi zostaną wysłane automatycznie po upływie czasu.",
       "timeUp": "Czas minął. Wysyłamy Twoje odpowiedzi."
+    },
+    "audioProgress": {
+      "label": "Postęp audio",
+      "completedSummary": "Ukończono {{completed}} z {{total}}",
+      "overviewAriaLabel": "Postęp nagrań audio w lekcji",
+      "segmentAriaLabel": "Postęp nagrania {{index}}: odsłuchano {{progress}}%",
+      "requirementSingle": "Odsłuchaj całe nagranie, aby ukończyć tę lekcję.",
+      "requirementMultiple": "Odsłuchaj wszystkie nagrania, aby ukończyć tę lekcję.",
+      "errors": {
+        "resourceNotFound": "Nie udało się zapisać postępu audio dla tej lekcji.",
+        "unsupportedLessonType": "Postęp audio jest dostępny tylko dla lekcji z treścią.",
+        "unsupportedBucketSize": "Postęp audio używa nieobsługiwanego interwału śledzenia.",
+        "invalidResourceType": "Tego zasobu nie można śledzić jako nagrania audio lekcji.",
+        "accessDenied": "Nie masz uprawnień do aktualizacji postępu audio w tej lekcji."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Dokończyć słuchanie przed wyjściem?",
+      "descriptionSingle": "Ta lekcja wymaga odsłuchania całego nagrania, zanim zostanie ukończona.",
+      "descriptionMultiple": "Ta lekcja wymaga odsłuchania wszystkich nagrań, zanim zostanie ukończona.",
+      "continueListening": "Kontynuuj słuchanie"
+    },
+    "requiredMediaLeave": {
+      "title": "Dokończyć materiały lekcji przed wyjściem?",
+      "description": "Ta lekcja wymaga obejrzenia wszystkich filmów i odsłuchania wszystkich nagrań, zanim zostanie ukończona.",
+      "continue": "Kontynuuj"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Obejrzyj film i odsłuchaj nagranie, aby ukończyć tę lekcję.",
+      "requirementMultiple": "Obejrzyj wszystkie filmy i odsłuchaj wszystkie nagrania, aby ukończyć tę lekcję.",
+      "label": "Postęp lekcji",
+      "overviewAriaLabel": "Postęp materiałów lekcji"
     }
   },
   "studentCourseView": {

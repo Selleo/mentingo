@@ -7,8 +7,17 @@ export type LessonVideoProgressSnapshotChange = {
   snapshot: VideoCoverageSnapshot;
 };
 
+export const LESSON_PROGRESS_MEDIA_KIND = {
+  VIDEO: "video",
+  AUDIO: "audio",
+} as const;
+
+export type LessonProgressMediaKind =
+  (typeof LESSON_PROGRESS_MEDIA_KIND)[keyof typeof LESSON_PROGRESS_MEDIA_KIND];
+
 export type LessonVideoProgressSegment = {
   id: string;
+  mediaKind: LessonProgressMediaKind;
   resourceEntityId: string | null;
   coveragePercent: number;
   isWatched: boolean;
@@ -20,6 +29,7 @@ export type LessonVideoProgressStripProps = {
   lessonId: string;
   description: string | null;
   enabled: boolean;
+  audioEnabled?: boolean;
   showRequirementWarning?: boolean;
   store: LessonVideoProgressStore;
 };

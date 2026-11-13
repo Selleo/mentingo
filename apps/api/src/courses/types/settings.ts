@@ -6,6 +6,7 @@ import {
 import { Type, type Static } from "@sinclair/typebox";
 
 import {
+  AUDIO_COMPLETION_TRACKING_ENABLED,
   LESSON_SEQUENCE_ENABLED,
   QUIZ_FEEDBACK_ENABLED,
   VIDEO_COMPLETION_TRACKING_ENABLED,
@@ -41,6 +42,11 @@ export const coursesSettingsSchema = Type.Object(
     videoCompletionTrackingEnabled: Type.Optional(
       Type.Boolean({
         default: VIDEO_COMPLETION_TRACKING_ENABLED,
+      }),
+    ),
+    audioCompletionTrackingEnabled: Type.Optional(
+      Type.Boolean({
+        default: AUDIO_COMPLETION_TRACKING_ENABLED,
       }),
     ),
     certificateSignature: Type.Union([Type.String(), Type.Null()], {

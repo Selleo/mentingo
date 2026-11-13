@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { LessonMediaCompletionService } from "src/lesson-media-completion/lesson-media-completion.service";
 
 import { VIDEO_COMPLETION_COVERAGE_THRESHOLD } from "./lesson-video-progress.constants";
 import { LessonVideoProgressService } from "./lesson-video-progress.service";
@@ -32,6 +33,7 @@ const context: LessonVideoContext = {
   courseId: COURSE_ID,
   lessonCompleted: false,
   videoCompletionTrackingEnabled: true,
+  audioCompletionTrackingEnabled: false,
   resourceEntityId: RESOURCE_ENTITY_ID,
   resourceContentType: "video/mp4",
 };
@@ -93,6 +95,7 @@ const createService = () => {
       .fn()
       .mockResolvedValue(lessonDescription(RESOURCE_ENTITY_ID)),
     getRequiredVideoProgressForLesson: jest.fn().mockResolvedValue([]),
+    getRequiredAudioProgressForLesson: jest.fn().mockResolvedValue([]),
     getProgressForResourceIds: jest.fn(),
   };
   const fileService = {
@@ -117,7 +120,11 @@ const createService = () => {
     repository as never,
     watchSessionService as never,
     studentLessonProgressService as never,
-    fileService as never,
+    new LessonMediaCompletionService(
+      repository as never,
+      fileService as never,
+      studentLessonProgressService as never,
+    ),
     db as never,
   );
 

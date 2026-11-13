@@ -45,12 +45,18 @@ export const CourseSettingsSwitches = ({ courseId, courseType = COURSE_TYPE.DEFA
     updateCourseSettings({ courseId, data: { videoCompletionTrackingEnabled: nextValue } });
   };
 
+  const handleAudioCompletionTrackingToggle = (nextValue: boolean) => {
+    if (!courseId) return;
+    updateCourseSettings({ courseId, data: { audioCompletionTrackingEnabled: nextValue } });
+  };
+
   const isDisabled = isLoading || isUpdatingCourseSettings;
   const testIdBySettingKey: Record<string, string> = {
     repetitionEnabled: COURSE_SETTINGS_HANDLES.REPETITION_SWITCH,
     lessonSequenceEnabled: COURSE_SETTINGS_HANDLES.LESSON_SEQUENCE_SWITCH,
     quizFeedbackEnabled: COURSE_SETTINGS_HANDLES.QUIZ_FEEDBACK_SWITCH,
     videoCompletionTrackingEnabled: COURSE_SETTINGS_HANDLES.VIDEO_COMPLETION_TRACKING_SWITCH,
+    audioCompletionTrackingEnabled: COURSE_SETTINGS_HANDLES.AUDIO_COMPLETION_TRACKING_SWITCH,
   };
 
   const settings: CourseSettingsSwitch[] = [
@@ -80,6 +86,15 @@ export const CourseSettingsSwitches = ({ courseId, courseType = COURSE_TYPE.DEFA
       isEnabled: data?.videoCompletionTrackingEnabled,
       onToggle: handleVideoCompletionTrackingToggle,
       ariaLabel: t("adminCourseView.settings.other.enableVideoCompletionTracking"),
+    },
+    {
+      key: "audioCompletionTrackingEnabled",
+      feature: COURSE_FEATURE.AUDIO_COMPLETION_TRACKING_SETTING,
+      label: t("adminCourseView.settings.other.enableAudioCompletionTracking"),
+      description: t("adminCourseView.settings.other.enableAudioCompletionTrackingDescription"),
+      isEnabled: data?.audioCompletionTrackingEnabled,
+      onToggle: handleAudioCompletionTrackingToggle,
+      ariaLabel: t("adminCourseView.settings.other.enableAudioCompletionTracking"),
     },
     {
       key: "repetitionEnabled",

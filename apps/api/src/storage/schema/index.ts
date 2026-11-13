@@ -2562,6 +2562,56 @@ export const lessonVideoProgress = pgTable(
   })),
 );
 
+export const lessonAudioProgress = pgTable(
+  "lesson_audio_progress",
+  {
+    ...id,
+    learningStateId: uuid("learning_state_id").references(() => courseLearningStates.id, {
+      onDelete: "cascade",
+    }),
+    ...timestamps,
+    studentId: uuid("student_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id, { onDelete: "cascade" })
+      .notNull(),
+    resourceEntityId: uuid("resource_entity_id")
+      .references(() => resourceEntity.id, { onDelete: "cascade" })
+      .notNull(),
+    durationSeconds: integer("duration_seconds").notNull(),
+    bucketSizeSeconds: integer("bucket_size_seconds").default(1).notNull(),
+    listenedRanges: int4multirange("listened_ranges")
+      .default(sql`'{}'::int4multirange`)
+      .notNull(),
+    coveredBucketCount: integer("covered_bucket_count").default(0).notNull(),
+    coveragePercent: numeric("coverage_percent", { precision: 5, scale: 4 })
+      .$type<number>()
+      .default(0)
+      .notNull(),
+    activeListenSeconds: numeric("active_listen_seconds", { precision: 10, scale: 2 })
+      .$type<number>()
+      .default(0)
+      .notNull(),
+    isListened: boolean("is_listened").default(false).notNull(),
+    listenedAt: timestamp("listened_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("lesson_audio_progress", (table) => ({
+    lessonIdx: index("lesson_audio_progress_lesson_idx").on(table.lessonId),
+    resourceEntityIdx: index("lesson_audio_progress_resource_entity_idx").on(
+      table.resourceEntityId,
+    ),
+    unq: unique()
+      .on(table.studentId, table.lessonId, table.resourceEntityId, table.learningStateId)
+      .nullsNotDistinct(),
+  })),
+);
+
 export const articleStatusEnum = pgEnum("article_status", ["draft", "published"]);
 
 export const articles = pgTable(

@@ -6,7 +6,6 @@ import { DatabasePg } from "src/common";
 import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { activeLearningStateId } from "src/course-repetition/course-repetition.service";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
-import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
   chapters,
@@ -23,20 +22,15 @@ import { formatInt4MultirangeLiteral, parseInt4Multirange } from "../utils/video
 import type {
   EnsureLessonVideoProgressRowParams,
   GetProgressForResourceIdsParams,
-  GetRequiredVideoProgressForLessonParams,
   LessonVideoContext,
   LessonVideoIdentity,
   LessonVideoProgressRow,
   MergeLessonVideoProgressRangesParams,
 } from "../lesson-video-progress.types";
-import type { SupportedLanguages } from "@repo/shared";
 
 @Injectable()
 export class LessonVideoProgressRepository {
-  constructor(
-    @Inject(DB) private readonly db: DatabasePg,
-    private readonly localizationService: LocalizationService,
-  ) {}
+  constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
   async getLessonVideoContext(
     params: LessonVideoIdentity,
@@ -50,6 +44,7 @@ export class LessonVideoProgressRepository {
         courseId: chapters.courseId,
         lessonCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
         videoCompletionTrackingEnabled: sql<boolean>`COALESCE((${courses.settings}->>'videoCompletionTrackingEnabled')::boolean, TRUE)`,
+        audioCompletionTrackingEnabled: sql<boolean>`COALESCE((${courses.settings}->>'audioCompletionTrackingEnabled')::boolean, FALSE)`,
         resourceEntityId: resourceEntity.id,
         resourceContentType: resources.contentType,
         resourceMetadata: resources.metadata,
@@ -144,23 +139,6 @@ export class LessonVideoProgressRepository {
     return this.mapProgressRow(row);
   }
 
-  async getLocalizedLessonDescription(
-    lessonId: string,
-    language?: SupportedLanguages,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    const [row] = await dbInstance
-      .select({
-        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
-      })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .where(eq(lessons.id, lessonId));
-
-    return row?.description ?? null;
-  }
-
   async mergeWatchedRanges(
     params: MergeLessonVideoProgressRangesParams,
     dbInstance: DatabasePg = this.db,
@@ -218,44 +196,6 @@ export class LessonVideoProgressRepository {
       .returning();
 
     return this.mapProgressRow(row);
-  }
-
-  async getRequiredVideoProgressForLesson(
-    params: GetRequiredVideoProgressForLessonParams,
-    dbInstance: DatabasePg = this.db,
-  ) {
-    const rows = await dbInstance
-      .select({
-        resourceEntityId: resourceEntity.id,
-        isWatched: sql<boolean>`COALESCE(${lessonVideoProgress.isWatched}, FALSE)`,
-      })
-      .from(resourceEntity)
-      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
-      .leftJoin(
-        lessonVideoProgress,
-        and(
-          eq(lessonVideoProgress.resourceEntityId, resourceEntity.id),
-          eq(lessonVideoProgress.lessonId, params.lessonId),
-          and(
-            eq(lessonVideoProgress.studentId, params.studentId),
-            activeLearningState(lessonVideoProgress.learningStateId),
-          ),
-        ),
-      )
-      .where(
-        and(
-          eq(resourceEntity.entityId, params.lessonId),
-          eq(resourceEntity.entityType, ENTITY_TYPES.LESSON),
-          eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT),
-          eq(resources.archived, false),
-          sql<boolean>`${resources.contentType} LIKE 'video/%'`,
-          params.resourceEntityIds?.length
-            ? inArray(resourceEntity.id, params.resourceEntityIds)
-            : undefined,
-        ),
-      );
-
-    return rows;
   }
 
   async getProgressForResourceIds(
