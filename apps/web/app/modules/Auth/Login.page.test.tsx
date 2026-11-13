@@ -57,7 +57,7 @@ it("can hide magic link without hiding password login", () => {
 
 vi.mock("~/api/queries/useGlobalSettings", () => ({
   useGlobalSettingsSuspense: () => ({
-    data: { enforceSSO: false },
+    data: { enforceSSO: true },
   }),
 }));
 

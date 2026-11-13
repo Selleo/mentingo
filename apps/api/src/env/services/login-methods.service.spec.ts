@@ -94,16 +94,22 @@ const REJECTED_UPDATES: RejectedUpdate[] = [
     update: { method: LOGIN_METHODS.PASSWORD, enabled: false },
     expectedError: LOGIN_METHOD_ERROR_KEYS.LAST_METHOD,
   },
-  {
-    title: "counting password login while SSO enforcement blocks it",
-    storedSecrets: {},
-    enforceSSO: true,
-    update: { method: LOGIN_METHODS.MAGIC_LINK, enabled: false },
-    expectedError: LOGIN_METHOD_ERROR_KEYS.LAST_METHOD,
-  },
 ];
 
 describe("LoginMethodsService", () => {
+  it("counts enabled password login despite persisted legacy SSO enforcement", async () => {
+    const { loginMethodsService, envService } = createLoginMethodsService({}, { enforceSSO: true });
+    await expect(
+      loginMethodsService.updateLoginMethod(
+        { method: LOGIN_METHODS.MAGIC_LINK, enabled: false },
+        ACTOR,
+      ),
+    ).resolves.toBeUndefined();
+    expect(envService.bulkUpsertInternalEnv).toHaveBeenCalledWith(
+      [{ name: "MAGIC_LINK_LOGIN_ENABLED", value: "false" }],
+      ACTOR,
+    );
+  });
   it("fails closed instead of enabling defaults when secret storage fails", async () => {
     const { loginMethodsService, envService } = createLoginMethodsService();
     envService.getEnv.mockRejectedValue(new Error("storage unavailable"));
@@ -173,7 +179,12 @@ describe("LoginMethodsService", () => {
     );
   });
 
-  it.each(REJECTED_UPDATES)(
+  it.each(
+    REJECTED_UPDATES.flatMap((scenario) => [
+      { ...scenario, enforceSSO: false },
+      { ...scenario, enforceSSO: true },
+    ]),
+  )(
     "rejects $title without saving anything",
     async ({ storedSecrets, enforceSSO, update, expectedError }) => {
       const { loginMethodsService, envService } = createLoginMethodsService(storedSecrets, {

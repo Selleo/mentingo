@@ -481,7 +481,6 @@ export interface GetPublicGlobalSettingsResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -767,55 +766,6 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
-    certificateBackgroundImage: string | null;
-    companyInformation?: {
-      companyName?: string;
-      /** @maxLength 10 */
-      companyShortName?: string;
-      registeredAddress?: string;
-      taxNumber?: string;
-      emailAddress?: string;
-      courtRegisterNumber?: string;
-    };
-    platformLogoS3Key: string | null;
-    loginBackgroundImageS3Key: string | null;
-    platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: string[];
-    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
-    inviteOnlyRegistration: boolean;
-    primaryColor: string | null;
-    contrastColor: string | null;
-    backgroundColor: string | null;
-    accentColor: string | null;
-    unregisteredUserQAAccessibility: boolean;
-    QAEnabled: boolean;
-    unregisteredUserNewsAccessibility: boolean;
-    newsEnabled: boolean;
-    unregisteredUserArticlesAccessibility: boolean;
-    articlesEnabled: boolean;
-    learningPathsEnabled: boolean;
-    ageLimit: 13 | 16 | null;
-    loginPageFiles: string[];
-  };
-}
-
-export interface UpdateEnforceSSOResponse {
-  data: {
-    unregisteredUserCoursesAccessibility: boolean;
-    modernCourseListEnabled: boolean;
-    publicCoursePreviewEnabled: boolean;
-    featuredCourseId: string | null;
-    courseDiscussionsEnabled: boolean;
-    gamificationEnabled: boolean;
-    leaderboardsEnabled: boolean;
-    leaderboardVisibility: "closed" | "public";
-    calendarEnabled: boolean;
-    liveTrainingEnabled: boolean;
-    /** @min 1 */
-    liveTrainingMaxParallelSessions: number;
-    trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -863,7 +813,6 @@ export interface UpdateModernCourseListEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -911,7 +860,6 @@ export interface UpdatePublicCoursePreviewEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -963,7 +911,6 @@ export interface UpdateFeaturedCourseResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1011,7 +958,6 @@ export interface UpdateCourseDiscussionsEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1064,7 +1010,6 @@ export interface UpdateLeaderboardSettingsResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1112,7 +1057,6 @@ export interface UpdateCalendarEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1160,7 +1104,6 @@ export interface UpdateLiveTrainingEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1213,7 +1156,6 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1261,7 +1203,6 @@ export interface UpdateLearningPathsEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1309,7 +1250,6 @@ export interface UpdateGamificationEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1388,7 +1328,6 @@ export interface UpdateColorSchemaResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -39146,20 +39085,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
       this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
         path: `/api/settings/admin/unregistered-user-courses-accessibility`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateEnforceSso
-     * @request PATCH:/api/settings/admin/enforce-sso
-     */
-    settingsControllerUpdateEnforceSso: (params: RequestParams = {}) =>
-      this.request<UpdateEnforceSSOResponse, any>({
-        path: `/api/settings/admin/enforce-sso`,
         method: "PATCH",
         format: "json",
         ...params,

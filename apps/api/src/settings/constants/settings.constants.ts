@@ -31,7 +31,6 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   liveTrainingEnabled: false,
   liveTrainingMaxParallelSessions: DEFAULT_LIVE_TRAINING_MAX_PARALLEL_SESSIONS,
   companyInformation: DEFAULT_COMPANY_INFORMATION,
-  enforceSSO: false,
   certificateBackgroundImage: null,
   platformLogoS3Key: null,
   loginBackgroundImageS3Key: null,
