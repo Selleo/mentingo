@@ -192,7 +192,7 @@ describe("Practice voice sessions", () => {
       meta: payload.meta,
       lessonId: practiceId,
       preview: true,
-    } as StartAudioBody);
+    });
     expect(result).toEqual({ ok: false, translationKey: "common.toast.noAccess" });
     expect(threadService.createThreadIfNoneExist).not.toHaveBeenCalled();
     expect(repository.checkLessonAssignment).not.toHaveBeenCalled();
@@ -214,7 +214,7 @@ describe("Practice voice sessions", () => {
           meta: payload.meta,
           lessonId: practiceId,
           preview: true,
-        } as StartAudioBody,
+        },
       ),
     ).resolves.toMatchObject({ ok: false });
     expect(threadService.createThreadIfNoneExist).not.toHaveBeenCalled();

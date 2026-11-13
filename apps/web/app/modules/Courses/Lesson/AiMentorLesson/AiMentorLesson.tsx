@@ -87,7 +87,7 @@ const AiMentorLesson = ({
   const canPreviewVoice =
     isPreviewMode &&
     !hideControls &&
-    (courseExperience?.canEditCourse || allowVoiceMentorInPreview);
+    Boolean(courseExperience?.canEditCourse || allowVoiceMentorInPreview);
   const isReadOnly = isPreviewMode || hideControls;
   const isChatReadOnly = hideControls || !lesson.threadId || lesson.status !== "active";
 

@@ -198,7 +198,6 @@ test("admin can create and preview an AI mentor lesson", async ({
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.PREVIEW_BUTTON).click();
     await expect(page.getByText("Ada").first()).toBeVisible();
     await expect(page.getByText(formattedDescriptionText).first()).toBeVisible();
-    // Preview is interactive without switching to Learn mode, but cannot grade.
     const voiceAction = page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_ACTION_BUTTON);
     await expect(voiceAction).toHaveAttribute("data-mode", "voice");
     await expect(voiceAction).toBeEnabled();

@@ -319,6 +319,10 @@ export const LessonForm = ({
     }
   };
 
+  const submitTextMessage = () => {
+    if (!textReadOnly) handleSubmit();
+  };
+
   return (
     <div className={cn("relative mt-3 w-full", compact && "mt-1")}>
       <form
@@ -328,7 +332,7 @@ export const LessonForm = ({
             void stopVoiceMode();
             return;
           }
-          if (!textReadOnly) handleSubmit();
+          submitTextMessage();
         }}
       >
         <div
@@ -371,9 +375,7 @@ export const LessonForm = ({
               onStopVoiceMode={() => void stopVoiceMode()}
               onStartVoiceMentor={() => void startVoiceMentorMode()}
               onStopVoiceMentor={() => void stopVoiceMentorMode()}
-              onSubmit={() => {
-                if (!textReadOnly) handleSubmit();
-              }}
+              onSubmit={submitTextMessage}
               sendLabel={t("studentCourseView.lesson.aiMentorLesson.send")}
               toggleVoiceInputLabel={t("studentCourseView.lesson.aiMentorLesson.toggleVoiceInput")}
               dictateVoiceInputLabel={t(

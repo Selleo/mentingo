@@ -410,10 +410,8 @@ export class ExternalAudioService {
     }
 
     if (typeof payload.lessonId !== "string" || !isUuid(payload.lessonId)) return null;
-    if (payload.preview) {
-      if (!(await canPreviewAiMentorLesson(this.aiRepository, payload.lessonId, currentUser)))
-        return null;
-    } else if (!(await this.canAccessLesson(payload.lessonId, currentUser))) return null;
+    if (!(await this.canStartLessonVoice(payload.lessonId, payload.preview, currentUser)))
+      return null;
 
     const { thread } = await this.threadService.createThreadIfNoneExist({
       lessonId: payload.lessonId,
@@ -858,17 +856,7 @@ export class ExternalAudioService {
     let stoppedByAudioOutputError = false;
     try {
       await this.tenantDbRunner.runWithTenant(session.currentUser.tenantId, async () => {
-        if (
-          session.preview &&
-          (!session.lessonId ||
-            !(await canPreviewAiMentorLesson(
-              this.aiRepository,
-              session.lessonId,
-              session.currentUser,
-            )))
-        ) {
-          throw new Error("common.toast.noAccess");
-        }
+        await this.assertPreviewTurnAccess(session);
         const stream = await this.aiService.streamMessage(
           {
             threadId: session.threadId,
@@ -1136,6 +1124,23 @@ export class ExternalAudioService {
       sessionId,
       payload,
     );
+  }
+
+  private async canStartLessonVoice(
+    lessonId: UUIDType,
+    preview: boolean | undefined,
+    currentUser: WsUser,
+  ): Promise<boolean> {
+    if (preview) return canPreviewAiMentorLesson(this.aiRepository, lessonId, currentUser);
+    return this.canAccessLesson(lessonId, currentUser);
+  }
+
+  private async assertPreviewTurnAccess(session: ExternalAudioSession): Promise<void> {
+    if (!session.preview) return;
+    const canPreview =
+      session.lessonId &&
+      (await canPreviewAiMentorLesson(this.aiRepository, session.lessonId, session.currentUser));
+    if (!canPreview) throw new Error("common.toast.noAccess");
   }
 
   private async canAccessLesson(lessonId: UUIDType, currentUser: WsUser): Promise<boolean> {

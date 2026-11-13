@@ -283,10 +283,12 @@ export class AiService {
         if (thread.aiMentorLessonId) {
           const { lessonId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
           if (!lessonId) throw new ForbiddenException("common.toast.lessonAccessDenied");
-          if (
-            !isVoiceMentor ||
-            !(await canPreviewAiMentorLesson(this.aiRepository, lessonId, currentUser))
-          ) {
+
+          const isAuthorizedVoicePreview =
+            isVoiceMentor &&
+            (await canPreviewAiMentorLesson(this.aiRepository, lessonId, currentUser));
+
+          if (!isAuthorizedVoicePreview) {
             await this.assertLessonConversationAccess(lessonId, currentUser);
           }
         }
