@@ -836,7 +836,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "Option « Suivi de l'achèvement de la vidéo » mise à jour avec succès",
     "videoCompletionTrackingUpdateFailed": "Échec de la mise à jour de l'option \"Suivi de l'achèvement de la vidéo\"",
     "settingsUpdatedSuccessfully": "Paramètres mis à jour avec succès",
-    "settingsUpdateFailed": "Échec de la mise à jour des paramètres"
+    "settingsUpdateFailed": "Échec de la mise à jour des paramètres",
+    "audioCompletionTrackingUpdatedSuccessfully": "Option « Suivi de l'achèvement de l'audio » mise à jour avec succès",
+    "audioCompletionTrackingUpdateFailed": "Échec de la mise à jour de l'option « Suivi de l'achèvement de l'audio »"
   },
   "uploadFile": {
     "header": "Cliquez pour importer",
@@ -2891,7 +2893,8 @@
         "curriculum": "La modification du programme n'est pas disponible pour les cours SCORM.",
         "lessonSequence": "L'application de la séquence de cours n'est pas disponible pour les cours SCORM.",
         "quizFeedback": "Les paramètres de commentaires sur les quiz ne sont pas disponibles pour les cours SCORM.",
-        "videoCompletionTracking": "Le suivi de l'achèvement de la vidéo n'est pas disponible pour les cours SCORM."
+        "videoCompletionTracking": "Le suivi de l'achèvement de la vidéo n'est pas disponible pour les cours SCORM.",
+        "audioCompletionTracking": "Le suivi de l'achèvement de l'audio n'est pas disponible pour les cours SCORM."
       },
       "notFound": {
         "course": "Cours introuvable.",
@@ -3082,7 +3085,9 @@
         "courseAvailabilityTitle": "Disponibilité du cours",
         "fallbackLanguageWarningTitle": "Attention : traductions manquantes",
         "fallbackLanguageWarningDescription": "Certains champs de cette version linguistique sont vides. À ces endroits, les apprenants verront le contenu de la langue par défaut jusqu'à ce que vous ajoutiez des traductions.",
-        "baseLanguageTooltip": "Vous ne pouvez pas modifier ou supprimer cette langue. C'est la valeur par défaut et fera toujours partie du cours."
+        "baseLanguageTooltip": "Vous ne pouvez pas modifier ou supprimer cette langue. C'est la valeur par défaut et fera toujours partie du cours.",
+        "enableAudioCompletionTracking": "Suivi de l'achèvement de l'audio",
+        "enableAudioCompletionTrackingDescription": "Exigez des apprenants qu'ils écoutent au moins 90 % de chaque enregistrement audio d'une leçon avant qu'elle ne soit marquée comme terminée."
       },
       "validation": {
         "titleMinLength": "Le titre doit comporter au moins 2 caractères.",
@@ -4275,6 +4280,38 @@
       "timeLeft": "Temps restant : {{time}}",
       "warning": "Il reste moins d’une minute. Vos réponses seront envoyées automatiquement à la fin du temps imparti.",
       "timeUp": "Le temps est écoulé. Vos réponses sont en cours d’envoi."
+    },
+    "audioProgress": {
+      "label": "Progression audio",
+      "completedSummary": "{{completed}} sur {{total}} terminés",
+      "overviewAriaLabel": "Progression audio de la leçon",
+      "segmentAriaLabel": "Progression de l'audio {{index}} : {{progress}} % écouté",
+      "requirementSingle": "Écoutez l'intégralité de l'enregistrement audio pour terminer cette leçon.",
+      "requirementMultiple": "Écoutez tous les enregistrements audio pour terminer cette leçon.",
+      "errors": {
+        "resourceNotFound": "La progression audio n'a pas pu être enregistrée pour cette leçon.",
+        "unsupportedLessonType": "La progression audio n'est disponible que pour les leçons de contenu.",
+        "unsupportedBucketSize": "La progression audio utilise un intervalle de suivi non pris en charge.",
+        "invalidResourceType": "Cette ressource ne peut pas être suivie comme enregistrement audio de la leçon.",
+        "accessDenied": "Vous n'avez pas l'autorisation de mettre à jour la progression audio de cette leçon."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Terminer l'écoute avant de partir ?",
+      "descriptionSingle": "Cette leçon exige l'écoute de l'intégralité de l'enregistrement audio avant de pouvoir être terminée.",
+      "descriptionMultiple": "Cette leçon exige l'écoute de tous les enregistrements audio avant de pouvoir être terminée.",
+      "continueListening": "Continuer l'écoute"
+    },
+    "requiredMediaLeave": {
+      "title": "Terminer les médias de la leçon avant de partir ?",
+      "description": "Cette leçon exige de regarder toutes les vidéos et d'écouter tous les enregistrements audio avant de pouvoir être terminée.",
+      "continue": "Continuer"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Regardez la vidéo et écoutez l'enregistrement audio pour terminer cette leçon.",
+      "requirementMultiple": "Regardez toutes les vidéos et écoutez tous les enregistrements audio pour terminer cette leçon.",
+      "label": "Progression de la leçon",
+      "overviewAriaLabel": "Progression des médias de la leçon"
     }
   },
   "studentCourseView": {

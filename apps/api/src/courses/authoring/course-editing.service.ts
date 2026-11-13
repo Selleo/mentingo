@@ -35,6 +35,7 @@ import { hasLocalizableUpdates } from "src/utils/getLocalizableKeys";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
+  AUDIO_COMPLETION_TRACKING_ENABLED,
   LESSON_SEQUENCE_ENABLED,
   QUIZ_FEEDBACK_ENABLED,
   VIDEO_COMPLETION_TRACKING_ENABLED,
@@ -143,6 +144,7 @@ export class CourseEditingService {
       lessonSequenceEnabled: isScormCourse ? false : LESSON_SEQUENCE_ENABLED,
       quizFeedbackEnabled: isScormCourse ? false : QUIZ_FEEDBACK_ENABLED,
       videoCompletionTrackingEnabled: isScormCourse ? false : VIDEO_COMPLETION_TRACKING_ENABLED,
+      audioCompletionTrackingEnabled: isScormCourse ? false : AUDIO_COMPLETION_TRACKING_ENABLED,
       certificateFontColor: DEFAULT_CERTIFICATE_FONT_COLOR,
     });
 
@@ -529,6 +531,8 @@ export class CourseEditingService {
       ...course.settings,
       videoCompletionTrackingEnabled:
         course.settings.videoCompletionTrackingEnabled ?? VIDEO_COMPLETION_TRACKING_ENABLED,
+      audioCompletionTrackingEnabled:
+        course.settings.audioCompletionTrackingEnabled ?? AUDIO_COMPLETION_TRACKING_ENABLED,
       certificateSignatureUrl,
     };
   }
@@ -592,6 +596,13 @@ export class CourseEditingService {
       this.courseFeaturePolicyService.assertFeatureEnabled(
         course.courseType,
         COURSE_FEATURE.VIDEO_COMPLETION_TRACKING_SETTING,
+      );
+    }
+
+    if (settings.audioCompletionTrackingEnabled !== undefined) {
+      this.courseFeaturePolicyService.assertFeatureEnabled(
+        course.courseType,
+        COURSE_FEATURE.AUDIO_COMPLETION_TRACKING_SETTING,
       );
     }
   }

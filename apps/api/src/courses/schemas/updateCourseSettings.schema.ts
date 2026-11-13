@@ -7,6 +7,7 @@ export const updateCourseSettingsSchema = Type.Object({
   lessonSequenceEnabled: Type.Optional(Type.Boolean()),
   quizFeedbackEnabled: Type.Optional(Type.Boolean()),
   videoCompletionTrackingEnabled: Type.Optional(Type.Boolean()),
+  audioCompletionTrackingEnabled: Type.Optional(Type.Boolean()),
   certificateFontColor: Type.Optional(Type.String()),
   certificateValidity: Type.Optional(Type.Union([certificateValiditySchema, Type.Null()])),
   applyValidityToExistingCertificates: Type.Optional(Type.Boolean()),

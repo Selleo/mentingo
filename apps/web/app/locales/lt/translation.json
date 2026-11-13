@@ -837,7 +837,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "Parinktis „Vaizdo įrašo užbaigimo sekimas“ sėkmingai atnaujinta",
     "videoCompletionTrackingUpdateFailed": "Nepavyko atnaujinti parinkties „Vaizdo įrašo užbaigimo sekimas“.",
     "settingsUpdatedSuccessfully": "Nustatymai sėkmingai atnaujinti",
-    "settingsUpdateFailed": "Nepavyko atnaujinti nustatymų"
+    "settingsUpdateFailed": "Nepavyko atnaujinti nustatymų",
+    "audioCompletionTrackingUpdatedSuccessfully": "Parinktis „Garso įrašo užbaigimo sekimas“ sėkmingai atnaujinta",
+    "audioCompletionTrackingUpdateFailed": "Nepavyko atnaujinti parinkties „Garso įrašo užbaigimo sekimas“."
   },
   "uploadFile": {
     "header": "Spustelėkite norėdami įkelti",
@@ -2897,7 +2899,8 @@
         "curriculum": "SCORM kursuose mokymo programos redagavimas nepasiekiamas.",
         "lessonSequence": "SCORM kursuose pamokų eigos privalomas laikymasis nepasiekiamas.",
         "quizFeedback": "SCORM kursuose viktorinos grįžtamojo ryšio nustatymai nepasiekiami.",
-        "videoCompletionTracking": "SCORM kursuose vaizdo įrašo užbaigimo sekimas nepasiekiamas."
+        "videoCompletionTracking": "SCORM kursuose vaizdo įrašo užbaigimo sekimas nepasiekiamas.",
+        "audioCompletionTracking": "SCORM kursuose garso įrašo užbaigimo sekimas nepasiekiamas."
       },
       "notFound": {
         "course": "Kursas nerastas.",
@@ -3088,7 +3091,9 @@
         "courseAvailabilityTitle": "Kurso prieinamumas",
         "fallbackLanguageWarningTitle": "Pastaba: trūksta vertimų",
         "fallbackLanguageWarningDescription": "Kai kurie šios kalbos versijos laukai yra tušti. Tose vietose mokiniai matys turinį iš numatytosios kalbos, kol nepridėsite vertimų.",
-        "baseLanguageTooltip": "Negalite pakeisti ar pašalinti šios kalbos. Tai yra numatytoji ir visada bus kurso dalis."
+        "baseLanguageTooltip": "Negalite pakeisti ar pašalinti šios kalbos. Tai yra numatytoji ir visada bus kurso dalis.",
+        "enableAudioCompletionTracking": "Garso įrašo užbaigimo sekimas",
+        "enableAudioCompletionTrackingDescription": "Besimokantysis turi perklausyti bent 90 % kiekvieno pamokos garso įrašo, kad pamoka būtų pažymėta kaip baigta."
       },
       "validation": {
         "titleMinLength": "Pavadinimą turi sudaryti bent 2 simboliai.",
@@ -4529,6 +4534,38 @@
       "timeLeft": "Liko laiko: {{time}}",
       "warning": "Liko mažiau nei minutė. Pasibaigus laikui atsakymai bus pateikti automatiškai.",
       "timeUp": "Laikas baigėsi. Jūsų atsakymai pateikiami."
+    },
+    "audioProgress": {
+      "label": "Garso įrašų pažanga",
+      "completedSummary": "Baigta {{completed}} iš {{total}}",
+      "overviewAriaLabel": "Pamokos garso įrašų pažanga",
+      "segmentAriaLabel": "Garso įrašo {{index}} pažanga: perklausyta {{progress}} %",
+      "requirementSingle": "Perklausykite visą garso įrašą, kad užbaigtumėte šią pamoką.",
+      "requirementMultiple": "Perklausykite visus garso įrašus, kad užbaigtumėte šią pamoką.",
+      "errors": {
+        "resourceNotFound": "Nepavyko išsaugoti šios pamokos garso įrašų pažangos.",
+        "unsupportedLessonType": "Garso įrašų pažanga pasiekiama tik turinio pamokoms.",
+        "unsupportedBucketSize": "Garso įrašų pažangai naudojamas nepalaikomas sekimo intervalas.",
+        "invalidResourceType": "Šio ištekliaus negalima sekti kaip pamokos garso įrašo.",
+        "accessDenied": "Neturite teisės atnaujinti šios pamokos garso įrašų pažangos."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Baigti klausyti prieš išeinant?",
+      "descriptionSingle": "Kad pamoka būtų baigta, reikia perklausyti visą garso įrašą.",
+      "descriptionMultiple": "Kad pamoka būtų baigta, reikia perklausyti visus garso įrašus.",
+      "continueListening": "Tęsti klausymą"
+    },
+    "requiredMediaLeave": {
+      "title": "Baigti pamokos medžiagą prieš išeinant?",
+      "description": "Kad pamoka būtų baigta, reikia peržiūrėti visus vaizdo įrašus ir perklausyti visus garso įrašus.",
+      "continue": "Tęsti"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Peržiūrėkite vaizdo įrašą ir perklausykite garso įrašą, kad užbaigtumėte šią pamoką.",
+      "requirementMultiple": "Peržiūrėkite visus vaizdo įrašus ir perklausykite visus garso įrašus, kad užbaigtumėte šią pamoką.",
+      "label": "Pamokos pažanga",
+      "overviewAriaLabel": "Pamokos medžiagos pažanga"
     }
   },
   "studentCourseView": {

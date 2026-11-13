@@ -843,7 +843,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "Možnost „Sledování dokončení videa“ byla úspěšně aktualizována",
     "videoCompletionTrackingUpdateFailed": "Aktualizace možnosti „Sledování dokončení videa“ se nezdařila",
     "settingsUpdatedSuccessfully": "Nastavení byla úspěšně aktualizována",
-    "settingsUpdateFailed": "Aktualizace nastavení se nezdařila"
+    "settingsUpdateFailed": "Aktualizace nastavení se nezdařila",
+    "audioCompletionTrackingUpdatedSuccessfully": "Možnost „Sledování dokončení zvuku“ byla úspěšně aktualizována",
+    "audioCompletionTrackingUpdateFailed": "Aktualizace možnosti „Sledování dokončení zvuku“ se nezdařila"
   },
   "uploadFile": {
     "header": "Kliknutím nahrajete",
@@ -2903,7 +2905,8 @@
         "curriculum": "Úprava osnovy není pro kurzy SCORM dostupná.",
         "lessonSequence": "Vynucení pořadí lekcí není pro kurzy SCORM dostupné.",
         "quizFeedback": "Nastavení zpětné vazby kvízu není pro kurzy SCORM dostupné.",
-        "videoCompletionTracking": "Sledování dokončení videa není pro kurzy SCORM dostupné."
+        "videoCompletionTracking": "Sledování dokončení videa není pro kurzy SCORM dostupné.",
+        "audioCompletionTracking": "Sledování dokončení zvuku není pro kurzy SCORM dostupné."
       },
       "notFound": {
         "course": "Kurz nenalezen.",
@@ -3094,7 +3097,9 @@
         "courseAvailabilityTitle": "Dostupnost kurzu",
         "fallbackLanguageWarningTitle": "Poznámka: chybějící překlady",
         "fallbackLanguageWarningDescription": "Některá pole v této jazykové verzi jsou prázdná. Na těchto místech studenti uvidí obsah z výchozího jazyka, dokud nepřidáte překlady.",
-        "baseLanguageTooltip": "Tento jazyk nemůžete změnit ani odebrat. Je výchozí a bude vždy součástí kurzu."
+        "baseLanguageTooltip": "Tento jazyk nemůžete změnit ani odebrat. Je výchozí a bude vždy součástí kurzu.",
+        "enableAudioCompletionTracking": "Sledování dokončení zvuku",
+        "enableAudioCompletionTrackingDescription": "Účastník musí poslechnout alespoň 90 % každé zvukové nahrávky v lekci, aby byla lekce označena jako dokončená."
       },
       "validation": {
         "titleMinLength": "Název musí mít alespoň 2 znaky.",
@@ -4534,6 +4539,38 @@
       "timeLeft": "Zbývající čas: {{time}}",
       "warning": "Zbývá méně než minuta. Odpovědi se po uplynutí času odešlou automaticky.",
       "timeUp": "Čas vypršel. Vaše odpovědi se odesílají."
+    },
+    "audioProgress": {
+      "label": "Průběh poslechu",
+      "completedSummary": "Dokončeno {{completed}} z {{total}}",
+      "overviewAriaLabel": "Průběh poslechu zvukových nahrávek lekce",
+      "segmentAriaLabel": "Průběh nahrávky {{index}}: poslechnuto {{progress}} %",
+      "requirementSingle": "Pro dokončení lekce poslechněte celou zvukovou nahrávku.",
+      "requirementMultiple": "Pro dokončení lekce poslechněte všechny zvukové nahrávky.",
+      "errors": {
+        "resourceNotFound": "Průběh poslechu pro tuto lekci se nepodařilo uložit.",
+        "unsupportedLessonType": "Průběh poslechu je dostupný pouze pro obsahové lekce.",
+        "unsupportedBucketSize": "Průběh poslechu používá nepodporovaný interval sledování.",
+        "invalidResourceType": "Tento zdroj nelze sledovat jako zvukovou nahrávku lekce.",
+        "accessDenied": "Nemáte oprávnění aktualizovat průběh poslechu v této lekci."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Dokončit poslech před odchodem?",
+      "descriptionSingle": "Tato lekce vyžaduje poslech celé zvukové nahrávky, aby mohla být dokončena.",
+      "descriptionMultiple": "Tato lekce vyžaduje poslech všech zvukových nahrávek, aby mohla být dokončena.",
+      "continueListening": "Pokračovat v poslechu"
+    },
+    "requiredMediaLeave": {
+      "title": "Dokončit média lekce před odchodem?",
+      "description": "Tato lekce vyžaduje zhlédnutí všech videí a poslech všech zvukových nahrávek, aby mohla být dokončena.",
+      "continue": "Pokračovat"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Pro dokončení lekce zhlédněte video a poslechněte zvukovou nahrávku.",
+      "requirementMultiple": "Pro dokončení lekce zhlédněte všechna videa a poslechněte všechny zvukové nahrávky.",
+      "label": "Průběh lekce",
+      "overviewAriaLabel": "Průběh médií lekce"
     }
   },
   "studentCourseView": {

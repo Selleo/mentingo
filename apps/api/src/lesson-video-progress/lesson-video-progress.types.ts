@@ -39,6 +39,7 @@ export type LessonVideoContext = {
   courseId: UUIDType;
   lessonCompleted: boolean;
   videoCompletionTrackingEnabled: boolean;
+  audioCompletionTrackingEnabled: boolean;
   resourceEntityId: UUIDType;
   resourceContentType: string;
   resourceMetadata?: ResourceMetadata | null;

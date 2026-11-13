@@ -12125,6 +12125,43 @@
         }
       }
     },
+    "/api/lesson-audio-progress": {
+      "post": {
+        "operationId": "LessonAudioProgressController_upsertLessonAudioProgress",
+        "parameters": [
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertLessonAudioProgressBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertLessonAudioProgressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stripe": {
       "post": {
         "operationId": "StripeController_createPaymentIntent",
@@ -41216,6 +41253,9 @@
           "videoCompletionTrackingEnabled": {
             "type": "boolean"
           },
+          "audioCompletionTrackingEnabled": {
+            "type": "boolean"
+          },
           "certificateFontColor": {
             "type": "string"
           },
@@ -41334,6 +41374,10 @@
               },
               "videoCompletionTrackingEnabled": {
                 "default": true,
+                "type": "boolean"
+              },
+              "audioCompletionTrackingEnabled": {
+                "default": false,
                 "type": "boolean"
               },
               "certificateSignature": {
@@ -44824,6 +44868,12 @@
                 "type": "boolean"
               },
               "videoCompletionTrackingEnabled": {
+                "type": "boolean"
+              },
+              "hasTrackedAudio": {
+                "type": "boolean"
+              },
+              "audioCompletionTrackingEnabled": {
                 "type": "boolean"
               },
               "hasAutoplayTrigger": {
@@ -71452,6 +71502,171 @@
               "watchedRanges",
               "isWatched",
               "watchedAt",
+              "lessonCompleted"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpsertLessonAudioProgressBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "resourceEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "durationSeconds": {
+            "minimum": 1,
+            "type": "number"
+          },
+          "bucketSize": {
+            "minimum": 1,
+            "default": 1,
+            "type": "number"
+          },
+          "listenedRanges": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "activeListenSecondsDelta": {
+            "minimum": 0,
+            "default": 0,
+            "type": "number"
+          },
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "lessonId",
+          "resourceEntityId",
+          "durationSeconds",
+          "listenedRanges"
+        ]
+      },
+      "UpsertLessonAudioProgressResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "lessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "resourceEntityId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "durationSeconds": {
+                "type": "number"
+              },
+              "bucketSizeSeconds": {
+                "type": "number"
+              },
+              "coveredBucketCount": {
+                "type": "number"
+              },
+              "coveragePercent": {
+                "type": "number"
+              },
+              "listenedRanges": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "minimum": 0,
+                      "type": "number"
+                    },
+                    {
+                      "minimum": 0,
+                      "type": "number"
+                    }
+                  ],
+                  "additionalItems": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "isListened": {
+                "type": "boolean"
+              },
+              "listenedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lessonCompleted": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "lessonId",
+              "resourceEntityId",
+              "durationSeconds",
+              "bucketSizeSeconds",
+              "coveredBucketCount",
+              "coveragePercent",
+              "listenedRanges",
+              "isListened",
+              "listenedAt",
               "lessonCompleted"
             ]
           }
@@ -189718,6 +189933,10 @@
                       },
                       "videoCompletionTrackingEnabled": {
                         "default": true,
+                        "type": "boolean"
+                      },
+                      "audioCompletionTrackingEnabled": {
+                        "default": false,
                         "type": "boolean"
                       },
                       "certificateFontColor": {

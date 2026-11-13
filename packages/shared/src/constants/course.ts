@@ -39,6 +39,7 @@ export const COURSE_FEATURE = {
   LESSON_SEQUENCE_SETTING: "lesson_sequence_setting",
   QUIZ_FEEDBACK_SETTING: "quiz_feedback_setting",
   VIDEO_COMPLETION_TRACKING_SETTING: "video_completion_tracking_setting",
+  AUDIO_COMPLETION_TRACKING_SETTING: "audio_completion_tracking_setting",
 } as const;
 
 export type CourseFeature = (typeof COURSE_FEATURE)[keyof typeof COURSE_FEATURE];
@@ -50,6 +51,8 @@ export const COURSE_FEATURE_ERROR_TRANSLATION_KEY = {
   [COURSE_FEATURE.QUIZ_FEEDBACK_SETTING]: "adminCourseView.errors.featureUnavailable.quizFeedback",
   [COURSE_FEATURE.VIDEO_COMPLETION_TRACKING_SETTING]:
     "adminCourseView.errors.featureUnavailable.videoCompletionTracking",
+  [COURSE_FEATURE.AUDIO_COMPLETION_TRACKING_SETTING]:
+    "adminCourseView.errors.featureUnavailable.audioCompletionTracking",
 } as const satisfies Record<CourseFeature, string>;
 
 export const COURSE_TYPE_DISABLED_FEATURES = {
@@ -59,6 +62,7 @@ export const COURSE_TYPE_DISABLED_FEATURES = {
     COURSE_FEATURE.LESSON_SEQUENCE_SETTING,
     COURSE_FEATURE.QUIZ_FEEDBACK_SETTING,
     COURSE_FEATURE.VIDEO_COMPLETION_TRACKING_SETTING,
+    COURSE_FEATURE.AUDIO_COMPLETION_TRACKING_SETTING,
   ],
 } as const satisfies Record<CourseType, readonly CourseFeature[]>;
 

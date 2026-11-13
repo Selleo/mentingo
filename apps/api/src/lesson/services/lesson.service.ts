@@ -42,6 +42,7 @@ import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { getVideoProviderFromReference } from "src/file/utils/videoProvider";
+import { LessonAudioProgressService } from "src/lesson-audio-progress/lesson-audio-progress.service";
 import { LessonVideoProgressService } from "src/lesson-video-progress/lesson-video-progress.service";
 import { LiveTrainingService } from "src/live-training/live-training.service";
 import { LocalizationService } from "src/localization/localization.service";
@@ -121,6 +122,7 @@ export class LessonService {
     private readonly permissionsService: PermissionsService,
     private readonly liveTrainingService: LiveTrainingService,
     private readonly lessonVideoProgressService: LessonVideoProgressService,
+    private readonly lessonAudioProgressService: LessonAudioProgressService,
     private readonly resourceLibraryService: ResourceLibraryService,
     private readonly quizRuntimeService: QuizRuntimeService,
     private readonly hostedVideoStatusService: HostedVideoStatusService,
@@ -1255,6 +1257,23 @@ export class LessonService {
       videoProgressRows.map((progress) => [progress.resourceEntityId, progress]),
     );
 
+    const audioResourceEntityIds = lessonResources
+      .filter((resource) => resource.contentType?.startsWith("audio/") && resource.resourceEntityId)
+      .map((resource) => resource.resourceEntityId);
+
+    const audioProgressRows =
+      userId && audioResourceEntityIds.length > 0
+        ? await this.lessonAudioProgressService.getProgressForResources({
+            lessonId: id,
+            studentId: userId,
+            resourceEntityIds: audioResourceEntityIds,
+          })
+        : [];
+
+    const audioProgressByResourceEntityId = new Map(
+      audioProgressRows.map((progress) => [progress.resourceEntityId, progress]),
+    );
+
     const videoProcessingStatusByReference =
       await this.hostedVideoStatusService.findProcessingStatusesInCurrentTenant(
         lessonResources
@@ -1277,6 +1296,9 @@ export class LessonService {
       videoProgress: resource.resourceEntityId
         ? videoProgressByResourceEntityId.get(resource.resourceEntityId)
         : undefined,
+      audioProgress: resource.resourceEntityId
+        ? audioProgressByResourceEntityId.get(resource.resourceEntityId)
+        : undefined,
     }));
 
     const {
@@ -1298,6 +1320,7 @@ export class LessonService {
       hasOnlyVideo: hasVideo,
       hasVideo: contentCount.video > 0,
       hasTrackedVideo: videoResourceEntityIds.length > 0,
+      hasTrackedAudio: audioResourceEntityIds.length > 0,
       hasAutoplayTrigger,
       videos,
     };

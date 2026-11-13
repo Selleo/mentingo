@@ -31,6 +31,15 @@ type LessonContentRendererProps = {
     onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
     onVideoActivated?: (resourceEntityId: string) => void;
   };
+  audioCoverageTracking?: {
+    enabled: boolean;
+    showCoverageMarkers?: boolean;
+    lessonId: string;
+    learningStateId?: string | null;
+    language: SupportedLanguages;
+    onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
+    onAudioActivated?: (resourceEntityId: string) => void;
+  };
 };
 
 export const LessonContentRenderer = memo(
@@ -42,6 +51,7 @@ export const LessonContentRenderer = memo(
     lessonLoading,
     onVideoEnded,
     videoCoverageTracking,
+    audioCoverageTracking,
   }: LessonContentRendererProps) => {
     const courseExperience = useOptionalCourseAccessProvider();
     const isRestrictedPreviewActivity =
@@ -60,6 +70,7 @@ export const LessonContentRenderer = memo(
           content={lesson?.description ?? ""}
           onVideoEnded={onVideoEnded}
           videoCoverageTracking={videoCoverageTracking}
+          audioCoverageTracking={audioCoverageTracking}
         />
       ))
       .with("quiz", () => (

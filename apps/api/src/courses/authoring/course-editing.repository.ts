@@ -189,12 +189,14 @@ export class CourseEditingRepository {
     lessonSequenceEnabled,
     quizFeedbackEnabled,
     videoCompletionTrackingEnabled,
+    audioCompletionTrackingEnabled,
     certificateFontColor,
   }: Pick<
     CoursesSettings,
     | "lessonSequenceEnabled"
     | "quizFeedbackEnabled"
     | "videoCompletionTrackingEnabled"
+    | "audioCompletionTrackingEnabled"
     | "certificateFontColor"
   >) {
     return sql`json_build_object(
@@ -202,6 +204,7 @@ export class CourseEditingRepository {
       'lessonSequenceEnabled', ${lessonSequenceEnabled}::boolean,
       'quizFeedbackEnabled', ${quizFeedbackEnabled}::boolean,
       'videoCompletionTrackingEnabled', ${videoCompletionTrackingEnabled}::boolean,
+      'audioCompletionTrackingEnabled', ${audioCompletionTrackingEnabled}::boolean,
       'certificateSignature', NULL,
       'certificateFontColor', ${certificateFontColor},
       'certificateValidity', NULL

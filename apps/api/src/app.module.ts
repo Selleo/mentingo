@@ -61,6 +61,7 @@ import { HealthModule } from "./health/health.module";
 import { IngestionModule } from "./ingestion/ingestion.module";
 import { IntegrationModule } from "./integration/integration.module";
 import { LessonModule } from "./lesson/lesson.module";
+import { LessonAudioProgressModule } from "./lesson-audio-progress/lesson-audio-progress.module";
 import { LessonVideoProgressModule } from "./lesson-video-progress/lesson-video-progress.module";
 import { LiveTrainingModule } from "./live-training/live-training.module";
 import { LocalizationModule } from "./localization/localization.module";
@@ -143,6 +144,7 @@ import type { RedisClient } from "src/redis";
     GlobalSearchModule,
     LessonModule,
     LessonVideoProgressModule,
+    LessonAudioProgressModule,
     QuizModule,
     QuizGradingModule,
     StudentLessonProgressModule,
