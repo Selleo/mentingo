@@ -1,10 +1,21 @@
 import { faker } from "@faker-js/faker";
-import { DISCUSSION_SCOPES, FORUM_TOPIC_SORTS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { eq, isNull } from "drizzle-orm";
+import {
+  DISCUSSION_SCOPES,
+  FORUM_TOPIC_SORTS,
+  PERMISSIONS,
+  SYSTEM_ROLE_SLUGS,
+  type PermissionKey,
+} from "@repo/shared";
+import { eq, inArray, isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { courseChatThreads, settings, studentCourses } from "src/storage/schema";
+import {
+  courseChatThreads,
+  permissionRuleSetPermissions,
+  settings,
+  studentCourses,
+} from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 
@@ -58,6 +69,7 @@ describe("ForumController (e2e)", () => {
 
   const createUserWithCookie = async (
     roleSlug: (typeof SYSTEM_ROLE_SLUGS)[keyof typeof SYSTEM_ROLE_SLUGS],
+    revokedPermissions: PermissionKey[] = [],
   ) => {
     const factory = userFactory.withCredentials({ password });
     const configuredFactory =
@@ -66,6 +78,12 @@ describe("ForumController (e2e)", () => {
         : factory.withUserSettings(db);
     const user = await configuredFactory.create({ roleSlug, email: faker.internet.email() });
     await assignSystemRoleToUserInTests(db, user.id, user.tenantId, roleSlug);
+
+    if (revokedPermissions.length) {
+      await db
+        .delete(permissionRuleSetPermissions)
+        .where(inArray(permissionRuleSetPermissions.permission, revokedPermissions));
+    }
 
     return { user, cookie: await cookieFor(user, app) };
   };
@@ -175,6 +193,53 @@ describe("ForumController (e2e)", () => {
         .post("/api/forum/topics")
         .send({ title: "Anonymous", content: "Anonymous" })
         .expect(401);
+    });
+
+    it("requires the forum permission for each action", async () => {
+      const { cookie: authorCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const topic = await createTopic(authorCookie, { title: "Welcome", content: "Say hello" });
+
+      const { cookie: readOnlyCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT, [
+        PERMISSIONS.FORUM_TOPIC_CREATE,
+        PERMISSIONS.FORUM_POST_CREATE,
+      ]);
+
+      expect((await listTopics(readOnlyCookie)).data.map(({ id }) => id)).toEqual([topic.id]);
+
+      const writeRequests = [
+        () =>
+          request(app.getHttpServer())
+            .post("/api/forum/topics")
+            .send({ title: "Blocked", content: "Blocked" }),
+        () =>
+          request(app.getHttpServer())
+            .post(`/api/forum/topics/${topic.id}/posts`)
+            .send({ content: "Blocked" }),
+      ];
+
+      for (const buildRequest of writeRequests) {
+        const response = await buildRequest().set("Cookie", readOnlyCookie).expect(403);
+        expect(response.body.message).toBe("auth.error.missingPermission");
+      }
+
+      const { cookie: noAccessCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT, [
+        PERMISSIONS.FORUM_READ,
+      ]);
+
+      const readRequests = [
+        () => request(app.getHttpServer()).get("/api/forum/topics").query({ language: "en" }),
+        () =>
+          request(app.getHttpServer())
+            .get(`/api/forum/topics/${topic.id}`)
+            .query({ language: "en" }),
+        () => request(app.getHttpServer()).get(`/api/forum/topics/${topic.id}/posts`),
+        () => request(app.getHttpServer()).delete(`/api/forum/posts/${topic.firstPost.id}`),
+      ];
+
+      for (const buildRequest of readRequests) {
+        const response = await buildRequest().set("Cookie", noAccessCookie).expect(403);
+        expect(response.body.message).toBe("auth.error.missingPermission");
+      }
     });
   });
 

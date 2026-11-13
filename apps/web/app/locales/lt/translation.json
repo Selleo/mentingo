@@ -2352,7 +2352,8 @@
         "email_template": "el. laiškų šablonus",
         "managed_group_results": "valdomų grupių rezultatus",
         "phishing": "sukčiavimo simuliacijas",
-        "todo_task": "užduotis"
+        "todo_task": "užduotis",
+        "forum": "forumą"
       },
       "descriptions": {
         "phishing_manage": "Gali kurti ir valdyti sukčiavimo el. paštu simuliacijas.",
@@ -2453,7 +2454,11 @@
         "gamification_leaderboard_read_all": "Peržiūrėti organizacijos ir visų grupių lyderių lenteles.",
         "gamification_manage": "Konfigūruoti pasiekimus ir žaidimo elementų nustatymus.",
         "quiz_grading_read": "Peržiūrėti atvirų atsakymų, laukiančių įvertinimo, eilę.",
-        "quiz_grading_grade": "Vertinti atvirus atsakymus ir rašyti komentarus besimokantiesiems."
+        "quiz_grading_grade": "Vertinti atvirus atsakymus ir rašyti komentarus besimokantiesiems.",
+        "forum_read": "Gali peržiūrėti forumą.",
+        "forum_topic_create": "Gali kurti forumo temas.",
+        "forum_post_create": "Gali atsakyti forumo temose.",
+        "forum_post_delete": "Gali trinti bet kuriuos forumo įrašus."
       }
     },
     "dropdown": {

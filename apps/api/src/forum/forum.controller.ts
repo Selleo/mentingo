@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Query } from "@nestjs/commo
 import {
   FEATURES,
   FORUM_TOPIC_SORTS,
+  PERMISSIONS,
   type DiscussionScope,
   type ForumTopicSort,
   type SupportedLanguages,
@@ -18,6 +19,7 @@ import {
   type UUIDType,
 } from "src/common";
 import { RequireFeature } from "src/common/decorators/require-feature.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { CurrentUserType } from "src/common/types/current-user.type";
@@ -44,9 +46,9 @@ import {
   type ForumTopicResponse,
 } from "src/forum/schemas/forum.schema";
 
-/** Open to every signed-in user; course threads additionally follow course discussion access. */
 @Controller("forum")
 @RequireFeature({ features: [FEATURES.FORUM] })
+@RequirePermission(PERMISSIONS.FORUM_READ)
 export class ForumController {
   constructor(private readonly forumService: ForumService) {}
 
@@ -88,6 +90,7 @@ export class ForumController {
   }
 
   @Post("topics")
+  @RequirePermission(PERMISSIONS.FORUM_TOPIC_CREATE)
   @Validate({
     request: [
       { type: "body", schema: createForumTopicSchema },
@@ -144,6 +147,7 @@ export class ForumController {
   }
 
   @Post("topics/:topicId/posts")
+  @RequirePermission(PERMISSIONS.FORUM_POST_CREATE)
   @Validate({
     request: [
       { type: "param", name: "topicId", schema: UUIDSchema },

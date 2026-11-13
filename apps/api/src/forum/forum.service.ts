@@ -193,7 +193,7 @@ export class ForumService {
 
     const canDeleteAnyPost = hasPermission(
       currentUser.permissions ?? [],
-      PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE,
+      PERMISSIONS.FORUM_POST_DELETE,
     );
 
     if (post.userId !== currentUser.userId && !canDeleteAnyPost) {

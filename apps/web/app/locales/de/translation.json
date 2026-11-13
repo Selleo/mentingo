@@ -2352,7 +2352,8 @@
         "email_template": "E-Mail-Vorlagen",
         "managed_group_results": "Ergebnisse verwalteter Gruppen",
         "phishing": "Phishing-Simulationen",
-        "todo_task": "Aufgaben"
+        "todo_task": "Aufgaben",
+        "forum": "Forum"
       },
       "descriptions": {
         "phishing_manage": "Phishing-Simulationen erstellen und verwalten.",
@@ -2453,7 +2454,11 @@
         "gamification_leaderboard_read_all": "Die Bestenliste der Organisation und alle Gruppenbestenlisten ansehen.",
         "gamification_manage": "Erfolge und Gamification-Einstellungen konfigurieren.",
         "quiz_grading_read": "Warteschlange offener Antworten anzeigen, die auf Bewertung warten.",
-        "quiz_grading_grade": "Offene Antworten bewerten und Kommentare für Lernende schreiben."
+        "quiz_grading_grade": "Offene Antworten bewerten und Kommentare für Lernende schreiben.",
+        "forum_read": "Kann das Forum anzeigen.",
+        "forum_topic_create": "Kann Forenthemen erstellen.",
+        "forum_post_create": "Kann in Forenthemen antworten.",
+        "forum_post_delete": "Kann beliebige Forenbeiträge löschen."
       }
     },
     "dropdown": {

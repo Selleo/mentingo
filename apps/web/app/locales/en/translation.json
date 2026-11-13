@@ -2353,7 +2353,8 @@
         "email_template": "email templates",
         "managed_group_results": "managed group results",
         "phishing": "phishing simulations",
-        "todo_task": "tasks"
+        "todo_task": "tasks",
+        "forum": "forum"
       },
       "descriptions": {
         "phishing_manage": "Create and manage phishing simulations.",
@@ -2454,7 +2455,11 @@
         "gamification_leaderboard_read_all": "View the organization leaderboard and every group leaderboard.",
         "gamification_manage": "Configure achievements and gamification settings.",
         "quiz_grading_read": "View the queue of open answers waiting for grading.",
-        "quiz_grading_grade": "Grade open answers and write comments for students."
+        "quiz_grading_grade": "Grade open answers and write comments for students.",
+        "forum_read": "View the forum.",
+        "forum_topic_create": "Create forum topics.",
+        "forum_post_create": "Reply in forum topics.",
+        "forum_post_delete": "Delete any forum post."
       }
     },
     "dropdown": {

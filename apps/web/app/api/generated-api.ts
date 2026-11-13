@@ -300,6 +300,10 @@ export interface CurrentUserResponse {
       | "quiz_grading.grade"
       | "gamification.leaderboard_read"
       | "gamification.leaderboard_read_all"
+      | "forum.read"
+      | "forum.topic.create"
+      | "forum.post.create"
+      | "forum.post.delete"
     )[];
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;

@@ -2358,7 +2358,8 @@
         "email_template": "e-mailové šablony",
         "managed_group_results": "výsledky spravovaných skupin",
         "phishing": "phishingové simulace",
-        "todo_task": "úkoly"
+        "todo_task": "úkoly",
+        "forum": "fórum"
       },
       "descriptions": {
         "phishing_manage": "Může vytvářet a spravovat phishingové simulace.",
@@ -2459,7 +2460,11 @@
         "gamification_leaderboard_read_all": "Zobrazit žebříček organizace a žebříčky všech skupin.",
         "gamification_manage": "Konfigurovat úspěchy a nastavení gamifikace.",
         "quiz_grading_read": "Zobrazit frontu otevřených odpovědí čekajících na hodnocení.",
-        "quiz_grading_grade": "Hodnotit otevřené odpovědi a psát komentáře pro studenty."
+        "quiz_grading_grade": "Hodnotit otevřené odpovědi a psát komentáře pro studenty.",
+        "forum_read": "Může zobrazit fórum.",
+        "forum_topic_create": "Může vytvářet témata ve fóru.",
+        "forum_post_create": "Může odpovídat v tématech fóra.",
+        "forum_post_delete": "Může mazat jakékoli příspěvky ve fóru."
       }
     },
     "dropdown": {
