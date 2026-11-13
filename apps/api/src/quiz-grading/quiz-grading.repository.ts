@@ -160,6 +160,7 @@ export class QuizGradingRepository {
         attemptId: assessmentAttempts.id,
         attemptNumber: assessmentAttempts.attemptNumber,
         attemptGradingStatus: assessmentAttempts.gradingStatus,
+        attemptScorePercentage: sql<number | null>`${assessmentAttempts.scorePercentage}::float`,
         availablePoints: sql<number>`${assessmentAttempts.availablePoints}::float`,
         learningStateId: assessmentAttempts.learningStateId,
         language: assessmentAttempts.language,
