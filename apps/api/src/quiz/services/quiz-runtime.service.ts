@@ -228,6 +228,7 @@ export class QuizRuntimeService {
       (answer) => answer.questionId === question.id,
     );
     const hasFeedback = Boolean(questionAnswer);
+    const requiresReview = question.gradingMode === ASSESSMENT_GRADING_MODES.MANUAL;
     // Answers waiting for a reviewer show the learner's own answer but no correctness yet.
     const showsCorrectness =
       hasFeedback && questionAnswer?.gradingStatus === ASSESSMENT_ANSWER_GRADING_STATUSES.GRADED;
@@ -386,11 +387,22 @@ export class QuizRuntimeService {
         ? this.buildSolutionExplanation(deliveryQuestion)
         : null,
       photoS3Key: question.photoS3Key,
-      requiresReview: question.gradingMode === ASSESSMENT_GRADING_MODES.MANUAL,
+      requiresReview,
       options: deliveryOptions,
       passQuestion: showsCorrectness
         ? Number(questionAnswer?.awardedPoints ?? 0) >= Number(question.maximumPoints)
         : null,
+      reviewerFeedback:
+        requiresReview && showsCorrectness && questionAnswer
+          ? {
+              awardedPoints: Number(questionAnswer.awardedPoints ?? 0),
+              maximumPoints: Number(question.maximumPoints),
+              comment:
+                attemptFeedback?.latestReviews.find(
+                  ({ questionAnswerId }) => questionAnswerId === questionAnswer.id,
+                )?.explanation ?? "",
+            }
+          : undefined,
       ...(question.questionType === ASSESSMENT_QUESTION_TYPES.MATCHING
         ? { matchingTargets: this.shuffleMatchingTargets(question) }
         : {}),

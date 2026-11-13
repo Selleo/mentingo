@@ -1980,27 +1980,6 @@
         "operationId": "StatisticsController_getDashboardDeadlineRisks",
         "parameters": [
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "default": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20,
-              "type": "integer"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -2053,6 +2032,27 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "integer"
             }
           }
         ],
@@ -2213,32 +2213,6 @@
             }
           },
           {
-            "name": "urgency",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "overdue",
-                  "type": "string"
-                },
-                {
-                  "const": "dueSoon",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "maxLength": 200,
-              "type": "string"
-            }
-          },
-          {
             "name": "sortBy",
             "required": false,
             "in": "query",
@@ -2278,6 +2252,32 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "urgency",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "overdue",
+                  "type": "string"
+                },
+                {
+                  "const": "dueSoon",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
             }
           },
           {
@@ -2980,7 +2980,16 @@
     "/api/user/onboarding-status/{page}": {
       "patch": {
         "operationId": "UserController_markOnboardingComplete",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "page",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3760,27 +3769,6 @@
             }
           },
           {
-            "name": "isArchived",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "true",
-                  "type": "string"
-                },
-                {
-                  "const": "false",
-                  "type": "string"
-                },
-                {
-                  "const": "all",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -3813,6 +3801,27 @@
                 },
                 {
                   "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "isArchived",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "true",
+                  "type": "string"
+                },
+                {
+                  "const": "false",
+                  "type": "string"
+                },
+                {
+                  "const": "all",
                   "type": "string"
                 }
               ]
@@ -4292,23 +4301,6 @@
             }
           },
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -4344,6 +4336,23 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
             }
           }
         ],
@@ -6567,15 +6576,6 @@
         "operationId": "CourseController_createLanguage",
         "parameters": [
           {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -6611,6 +6611,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -6685,15 +6694,6 @@
         "operationId": "CourseController_generateTranslations",
         "parameters": [
           {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -6729,6 +6729,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -7297,15 +7306,6 @@
             }
           },
           {
-            "name": "studentId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -7341,6 +7341,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "studentId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -8900,31 +8909,6 @@
             }
           },
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "sort",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -8960,6 +8944,31 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -9913,6 +9922,43 @@
             }
           },
           {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "type",
             "required": false,
             "in": "query",
@@ -9949,43 +9995,6 @@
                 },
                 {
                   "const": "archived",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                },
-                {
-                  "const": "es",
-                  "type": "string"
-                },
-                {
-                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -11549,24 +11558,6 @@
         "operationId": "AnnouncementsController_getAllAnnouncements",
         "parameters": [
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -11639,6 +11630,24 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
             }
           }
         ],
@@ -11734,24 +11743,6 @@
             }
           },
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -11786,6 +11777,24 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
             }
           }
         ],
@@ -15848,6 +15857,44 @@
         "operationId": "ForumController_getTopics",
         "parameters": [
           {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -15920,44 +15967,6 @@
             "schema": {
               "format": "uuid",
               "type": "string"
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "en",
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                },
-                {
-                  "const": "es",
-                  "type": "string"
-                },
-                {
-                  "const": "fr",
-                  "type": "string"
-                }
-              ]
             }
           }
         ],
@@ -17351,6 +17360,167 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quiz-grading/answers": {
+      "get": {
+        "operationId": "QuizGradingController_getAnswers",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "pending",
+                  "type": "string"
+                },
+                {
+                  "const": "graded",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "lessonId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "studentId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAnswersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quiz-grading/filters": {
+      "get": {
+        "operationId": "QuizGradingController_getFilterOptions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFilterOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quiz-grading/answers/{id}": {
+      "get": {
+        "operationId": "QuizGradingController_getAnswerDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAnswerDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quiz-grading/answers/{id}/grade": {
+      "post": {
+        "operationId": "QuizGradingController_gradeAnswer",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GradeAnswerBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeAnswerResponse"
                 }
               }
             }
@@ -20024,15 +20194,6 @@
             }
           },
           {
-            "name": "scoId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -20068,6 +20229,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "scoId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           },
           {
@@ -23278,6 +23448,87 @@
             }
           },
           {
+            "name": "resourceType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "user",
+                  "type": "string"
+                },
+                {
+                  "const": "course",
+                  "type": "string"
+                },
+                {
+                  "const": "chapter",
+                  "type": "string"
+                },
+                {
+                  "const": "lesson",
+                  "type": "string"
+                },
+                {
+                  "const": "announcement",
+                  "type": "string"
+                },
+                {
+                  "const": "group",
+                  "type": "string"
+                },
+                {
+                  "const": "settings",
+                  "type": "string"
+                },
+                {
+                  "const": "integration",
+                  "type": "string"
+                },
+                {
+                  "const": "category",
+                  "type": "string"
+                },
+                {
+                  "const": "qa",
+                  "type": "string"
+                },
+                {
+                  "const": "news",
+                  "type": "string"
+                },
+                {
+                  "const": "article",
+                  "type": "string"
+                },
+                {
+                  "const": "articleSection",
+                  "type": "string"
+                },
+                {
+                  "const": "live_training",
+                  "type": "string"
+                },
+                {
+                  "const": "learning_path",
+                  "type": "string"
+                },
+                {
+                  "const": "scorm",
+                  "type": "string"
+                },
+                {
+                  "const": "email_template",
+                  "type": "string"
+                },
+                {
+                  "const": "automation",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "from",
             "required": false,
             "in": "query",
@@ -23629,87 +23880,6 @@
                       }
                     ]
                   }
-                }
-              ]
-            }
-          },
-          {
-            "name": "resourceType",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "user",
-                  "type": "string"
-                },
-                {
-                  "const": "course",
-                  "type": "string"
-                },
-                {
-                  "const": "chapter",
-                  "type": "string"
-                },
-                {
-                  "const": "lesson",
-                  "type": "string"
-                },
-                {
-                  "const": "announcement",
-                  "type": "string"
-                },
-                {
-                  "const": "group",
-                  "type": "string"
-                },
-                {
-                  "const": "settings",
-                  "type": "string"
-                },
-                {
-                  "const": "integration",
-                  "type": "string"
-                },
-                {
-                  "const": "category",
-                  "type": "string"
-                },
-                {
-                  "const": "qa",
-                  "type": "string"
-                },
-                {
-                  "const": "news",
-                  "type": "string"
-                },
-                {
-                  "const": "article",
-                  "type": "string"
-                },
-                {
-                  "const": "articleSection",
-                  "type": "string"
-                },
-                {
-                  "const": "live_training",
-                  "type": "string"
-                },
-                {
-                  "const": "learning_path",
-                  "type": "string"
-                },
-                {
-                  "const": "scorm",
-                  "type": "string"
-                },
-                {
-                  "const": "email_template",
-                  "type": "string"
-                },
-                {
-                  "const": "automation",
-                  "type": "string"
                 }
               ]
             }
@@ -24239,17 +24409,6 @@
             }
           },
           {
-            "name": "lessonIds",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -24284,6 +24443,17 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "lessonIds",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -24422,6 +24592,43 @@
         "operationId": "PhishingController_searchPhishingOptions",
         "parameters": [
           {
+            "name": "language",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "page",
             "required": true,
             "in": "query",
@@ -24455,43 +24662,6 @@
                 },
                 {
                   "const": "courses",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "language",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                },
-                {
-                  "const": "es",
-                  "type": "string"
-                },
-                {
-                  "const": "fr",
                   "type": "string"
                 }
               ]
@@ -45016,6 +45186,25 @@
                             {
                               "type": "null"
                             }
+                          ]
+                        },
+                        "reviewerFeedback": {
+                          "type": "object",
+                          "properties": {
+                            "awardedPoints": {
+                              "type": "number"
+                            },
+                            "maximumPoints": {
+                              "type": "number"
+                            },
+                            "comment": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "awardedPoints",
+                            "maximumPoints",
+                            "comment"
                           ]
                         },
                         "matchingTargets": {
@@ -141660,6 +141849,18 @@
                                           "type": {
                                             "const": "event",
                                             "type": "string"
+                                          },
+                                          "audience": {
+                                            "anyOf": [
+                                              {
+                                                "const": "learner",
+                                                "type": "string"
+                                              },
+                                              {
+                                                "const": "administrators",
+                                                "type": "string"
+                                              }
+                                            ]
                                           }
                                         },
                                         "required": [
@@ -142299,6 +142500,18 @@
                                                   "type": {
                                                     "const": "event",
                                                     "type": "string"
+                                                  },
+                                                  "audience": {
+                                                    "anyOf": [
+                                                      {
+                                                        "const": "learner",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "administrators",
+                                                        "type": "string"
+                                                      }
+                                                    ]
                                                   }
                                                 },
                                                 "required": [
@@ -143814,6 +144027,18 @@
                                               "type": {
                                                 "const": "event",
                                                 "type": "string"
+                                              },
+                                              "audience": {
+                                                "anyOf": [
+                                                  {
+                                                    "const": "learner",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "administrators",
+                                                    "type": "string"
+                                                  }
+                                                ]
                                               }
                                             },
                                             "required": [
@@ -144435,6 +144660,18 @@
                                     "type": {
                                       "const": "event",
                                       "type": "string"
+                                    },
+                                    "audience": {
+                                      "anyOf": [
+                                        {
+                                          "const": "learner",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "administrators",
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -145628,6 +145865,18 @@
                                     "type": {
                                       "const": "event",
                                       "type": "string"
+                                    },
+                                    "audience": {
+                                      "anyOf": [
+                                        {
+                                          "const": "learner",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "administrators",
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -146245,6 +146494,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -146884,6 +147145,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -147531,6 +147804,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -148170,6 +148455,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -148817,6 +149114,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -149456,6 +149765,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -150100,6 +150421,18 @@
                                     "type": {
                                       "const": "event",
                                       "type": "string"
+                                    },
+                                    "audience": {
+                                      "anyOf": [
+                                        {
+                                          "const": "learner",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "administrators",
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -150713,6 +151046,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -151352,6 +151697,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -152020,6 +152377,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -152659,6 +153028,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -153307,6 +153688,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -153926,6 +154319,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -154565,6 +154970,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -155212,6 +155629,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -155851,6 +156280,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -156498,6 +156939,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -157137,6 +157590,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -157784,6 +158249,18 @@
                                         "type": {
                                           "const": "event",
                                           "type": "string"
+                                        },
+                                        "audience": {
+                                          "anyOf": [
+                                            {
+                                              "const": "learner",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "administrators",
+                                              "type": "string"
+                                            }
+                                          ]
                                         }
                                       },
                                       "required": [
@@ -158423,6 +158900,18 @@
                                                 "type": {
                                                   "const": "event",
                                                   "type": "string"
+                                                },
+                                                "audience": {
+                                                  "anyOf": [
+                                                    {
+                                                      "const": "learner",
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "const": "administrators",
+                                                      "type": "string"
+                                                    }
+                                                  ]
                                                 }
                                               },
                                               "required": [
@@ -164544,6 +165033,475 @@
               "users",
               "categories",
               "groups"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAnswersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "gradingStatus": {
+                  "anyOf": [
+                    {
+                      "const": "pending",
+                      "type": "string"
+                    },
+                    {
+                      "const": "graded",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "awardedPoints": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "maximumPoints": {
+                  "type": "number"
+                },
+                "submittedAt": {
+                  "type": "string"
+                },
+                "questionTitle": {
+                  "type": "string"
+                },
+                "course": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "lesson": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "student": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "gradingStatus",
+                "awardedPoints",
+                "maximumPoints",
+                "submittedAt",
+                "questionTitle",
+                "course",
+                "lesson",
+                "student"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetFilterOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "courses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              },
+              "lessons": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "courseId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "courseId"
+                  ]
+                }
+              },
+              "students": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "courses",
+              "lessons",
+              "students"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAnswerDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "gradingStatus": {
+                    "anyOf": [
+                      {
+                        "const": "pending",
+                        "type": "string"
+                      },
+                      {
+                        "const": "graded",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "awardedPoints": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "maximumPoints": {
+                    "type": "number"
+                  },
+                  "submittedAt": {
+                    "type": "string"
+                  },
+                  "questionTitle": {
+                    "type": "string"
+                  },
+                  "course": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  },
+                  "lesson": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  },
+                  "student": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "gradingStatus",
+                  "awardedPoints",
+                  "maximumPoints",
+                  "submittedAt",
+                  "questionTitle",
+                  "course",
+                  "lesson",
+                  "student"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "questionDescription": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "reviewerInstructions": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "studentAnswer": {
+                    "type": "string"
+                  },
+                  "attemptNumber": {
+                    "type": "integer"
+                  },
+                  "reviews": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "revisionNumber": {
+                          "type": "integer"
+                        },
+                        "reviewerName": {
+                          "type": "string"
+                        },
+                        "method": {
+                          "const": "pass_fail",
+                          "type": "string"
+                        },
+                        "awardedPoints": {
+                          "type": "number"
+                        },
+                        "comment": {
+                          "type": "string"
+                        },
+                        "reviewedAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "revisionNumber",
+                        "reviewerName",
+                        "method",
+                        "awardedPoints",
+                        "comment",
+                        "reviewedAt"
+                      ]
+                    }
+                  },
+                  "nextAnswerId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "questionDescription",
+                  "reviewerInstructions",
+                  "studentAnswer",
+                  "attemptNumber",
+                  "reviews",
+                  "nextAnswerId"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GradeAnswerBody": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "const": "pass_fail",
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "comment": {
+            "maxLength": 5000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "method",
+          "passed"
+        ]
+      },
+      "GradeAnswerResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "attemptGraded": {
+                "type": "boolean"
+              },
+              "nextAnswerId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "attemptGraded",
+              "nextAnswerId"
             ]
           }
         },

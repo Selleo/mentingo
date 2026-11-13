@@ -6,6 +6,7 @@ import {
   ASSESSMENT_FEEDBACK_MODES,
   ASSESSMENT_SCORING_MODES,
   ASSESSMENT_TEXT_COMPARISON_MODES,
+  QUIZ_REVIEW_GRADING_METHODS,
   type AssessmentAnswerGradingStatus,
   type AssessmentAttemptGradingStatus,
   type AssessmentAttemptLimitMode,
@@ -18,6 +19,7 @@ import {
   type AssessmentScoringMode,
   type SupportedLanguages,
   type LocalizedText,
+  type QuizReviewGradingMethod,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -557,6 +559,10 @@ export const assessmentAttemptQuestionAnswerReviews = pgTable(
     revisionNumber: integer("revision_number").notNull(),
     reviewerId: uuid("reviewer_id")
       .references(() => users.id)
+      .notNull(),
+    gradingMethod: text("grading_method")
+      .$type<QuizReviewGradingMethod>()
+      .default(QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL)
       .notNull(),
     awardedPoints: numeric("awarded_points", { precision: 8, scale: 2 }).notNull(),
     explanation: text("explanation").notNull(),

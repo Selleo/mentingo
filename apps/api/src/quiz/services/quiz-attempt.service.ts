@@ -150,6 +150,7 @@ export class QuizAttemptService {
         blankAnswers: [],
         scaleSelections: [],
         openTextAnswers: [],
+        latestReviews: [],
         matchingAnswers: [],
       };
     }
@@ -160,6 +161,7 @@ export class QuizAttemptService {
       blankAnswers,
       scaleSelections,
       openTextAnswers,
+      latestReviews,
       matchingAnswers,
     ] = await Promise.all([
       this.quizRuntimeRepository.findChoiceSelections(questionAnswerIds, db),
@@ -167,6 +169,7 @@ export class QuizAttemptService {
       this.quizRuntimeRepository.findBlankAnswers(questionAnswerIds, db),
       this.quizRuntimeRepository.findScaleSelections(questionAnswerIds, db),
       this.quizRuntimeRepository.findOpenTextAnswers(questionAnswerIds, db),
+      this.quizRuntimeRepository.findLatestReviews(questionAnswerIds, db),
       this.quizRuntimeRepository.findMatchingAnswers(questionAnswerIds, db),
     ]);
 
@@ -178,6 +181,7 @@ export class QuizAttemptService {
       blankAnswers,
       scaleSelections,
       openTextAnswers,
+      latestReviews,
       matchingAnswers,
     };
   }

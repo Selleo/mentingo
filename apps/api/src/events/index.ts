@@ -13,6 +13,7 @@ export * from "./lesson/create-lesson.event";
 export * from "./lesson/update-lesson.event";
 export * from "./lesson/delete-lesson.event";
 export * from "./quiz/quiz-completed.event";
+export * from "./quiz/quiz-attempt-graded.event";
 export * from "./user/user-activity.event";
 export * from "./user/user-registered.event";
 export * from "./user/create-user.event";

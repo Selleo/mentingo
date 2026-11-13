@@ -3450,13 +3450,15 @@
           "attemptsLimit": "Limit prób",
           "quizCooldownInHours": "Blokada czasowa po niezdaniu (w godzinach)",
           "numberOfQuestions": "{{count1}} z {{count2}} pytań",
-          "noQuestions": "Brak pytań"
+          "noQuestions": "Brak pytań",
+          "timeLimitMinutes": "Limit czasu (gg:mm)"
         },
         "tooltip": {
           "switch": "Jeśli włączone, student ma ograniczoną liczbę podejść do quizu.",
           "passingThreshold": "Procentowy próg zaliczenia quizu. Jeśli student osiągnie ten wynik, quiz zostanie uznany za zaliczony.",
           "attemptsLimit": "Liczba podejść do quizu przed uruchomieniem blokady czasowej.",
-          "quizCooldownInHours": "Czas trwania blokady quizu po wykorzystaniu wszystkich prób."
+          "quizCooldownInHours": "Czas trwania blokady quizu po wykorzystaniu wszystkich prób.",
+          "timeLimitMinutes": "Opcjonalne. Po ustawieniu kursant rozpoczyna quiz samodzielnie, a jego odpowiedzi są wysyłane automatycznie po upływie czasu. Pozostaw puste, aby nie ograniczać czasu."
         },
         "validation": {
           "optionTextRequired": "Tekst opcji jest wymagany",
@@ -3487,7 +3489,8 @@
           "sourceUrlInvalid": "Wpisz poprawny adres URL HTTPS",
           "matchingPairsRequired": "Dodaj co najmniej 2 pary i uzupełnij obie strony każdej pary",
           "matchingMatchRequired": "Uzupełnij dopasowanie w tej parze",
-          "matchingPairsUnique": "Każda para musi mieć unikalne dopasowanie"
+          "matchingPairsUnique": "Każda para musi mieć unikalne dopasowanie",
+          "timeLimitMinutes": "Podaj limit czasu od {{min}} do {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
@@ -4780,12 +4783,25 @@
       "courseEnrollmentRequired": "Nie jesteś zapisany/a na ten kurs.",
       "quizRetakeUnavailable": "Nie można zresetować odpowiedzi z powodu limitu podejść lub okresu oczekiwania.",
       "quizResetFailed": "Nie udało się zresetować odpowiedzi quizu. Spróbuj ponownie.",
-      "quizAwaitingReview": "Ten quiz oczekuje na ocenę."
+      "quizAwaitingReview": "Ten quiz oczekuje na ocenę.",
+      "quizNotTimed": "Ten quiz nie ma limitu czasu.",
+      "quizAttemptNotStarted": "Rozpocznij quiz, zanim wyślesz odpowiedzi.",
+      "quizAttemptExpired": "Czas na to podejście do quizu minął.",
+      "quizDraftInvalid": "Nie udało się automatycznie zapisać odpowiedzi. Sprawdź je i spróbuj ponownie."
     },
     "preview": {
       "title": "Przeglądasz podgląd kursu",
       "enrollmentDescription": "Zapisz się na kurs, aby rozwiązywać quizy i zapisywać postępy.",
       "learningModeDescription": "Włącz tryb nauki, aby rozwiązywać quizy i śledzić postępy."
+    },
+    "timedQuiz": {
+      "info": "Czas zaczyna biec po wybraniu „Rozpocznij quiz” i biegnie dalej, nawet jeśli opuścisz stronę. Odpowiedzi zapisują się automatycznie i zostaną wysłane po upływie czasu. Pytania bez odpowiedzi otrzymują 0 punktów.",
+      "timeLimit": "Limit czasu",
+      "questions": "Pytania",
+      "start": "Rozpocznij quiz",
+      "timeLeft": "Pozostały czas: {{time}}",
+      "warning": "Została mniej niż minuta. Odpowiedzi zostaną wysłane automatycznie po upływie czasu.",
+      "timeUp": "Czas minął. Wysyłamy Twoje odpowiedzi."
     }
   },
   "studentCourseView": {
@@ -7843,6 +7859,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Odbiorcy",
+      "courseCompletionAudience": "Odbiorcy ukończenia kursu",
+      "courseCompletionAudiences": {
+        "learner": "Uczestnik, który ukończył kurs",
+        "administrators": "Administratorzy (zgodnie z preferencjami powiadomień)"
+      },
       "event": "Użytkownicy powiązani ze zdarzeniem",
       "user": "Wybrany użytkownik",
       "group": "Członkowie wybranej grupy",
@@ -9715,6 +9736,71 @@
         "invalidBadgeImage": "Obraz odznaki jest nieprawidłowy. Prześlij go ponownie."
       }
     }
+  },
+  "quizGrading": {
+    "title": "Do oceny",
+    "answerTitle": "Ocena odpowiedzi",
+    "pendingCount": "Oczekujące: {{count}}",
+    "empty": "Brak odpowiedzi pasujących do wybranych filtrów.",
+    "filters": {
+      "status": "Status",
+      "course": "Kurs",
+      "lesson": "Lekcja",
+      "student": "Kursant",
+      "allCourses": "Wszystkie kursy",
+      "allLessons": "Wszystkie lekcje",
+      "allStudents": "Wszyscy kursanci"
+    },
+    "status": {
+      "pending": "Oczekuje",
+      "graded": "Oceniona"
+    },
+    "columns": {
+      "question": "Pytanie",
+      "course": "Kurs",
+      "lesson": "Lekcja",
+      "student": "Kursant",
+      "submittedAt": "Przesłano",
+      "status": "Status",
+      "points": "Punkty"
+    },
+    "attempt": "Podejście",
+    "question": "Pytanie",
+    "reviewerInstructions": "Instrukcje dla oceniającego",
+    "studentAnswer": "Odpowiedź kursanta",
+    "nextAnswer": "Następna odpowiedź",
+    "points": "Punkty: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Zaliczone",
+      "failed": "Niezaliczone"
+    },
+    "form": {
+      "title": "Ocena",
+      "verdict": "Wynik ({{max}} pkt za zaliczenie)",
+      "verdictRequired": "Wybierz zaliczone lub niezaliczone.",
+      "comment": "Komentarz (opcjonalnie)",
+      "commentPlaceholder": "Informacja zwrotna dla kursanta",
+      "commentTooLong": "Komentarz może mieć maksymalnie {{max}} znaków.",
+      "submit": "Zapisz ocenę",
+      "regrade": "Zapisz nową ocenę"
+    },
+    "history": {
+      "title": "Historia ocen",
+      "empty": "Ta odpowiedź nie została jeszcze oceniona.",
+      "revision": "Wersja {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Odpowiedź została oceniona.",
+      "attemptGraded": "Odpowiedź została oceniona. Wynik quizu jest już dostępny dla kursanta.",
+      "gradeError": "Nie udało się zapisać oceny."
+    },
+    "errors": {
+      "answerNotFound": "Ta odpowiedź nie istnieje lub nie można jej ocenić.",
+      "ownAnswer": "Nie możesz oceniać własnej odpowiedzi.",
+      "attemptSuperseded": "Kursant rozpoczął ten kurs od nowa, więc tej próby nie można już ocenić.",
+      "courseNotPublished": "Ten kurs wrócił do wersji roboczej. Opublikuj go, zanim ocenisz odpowiedzi."
+    },
+    "loadError": "Nie udało się wczytać kolejki do oceny. Odśwież stronę, aby spróbować ponownie."
   },
   "coursesViewToggle": {
     "label": "Widok kursów",

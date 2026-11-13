@@ -3203,13 +3203,15 @@
           "attemptsLimit": "Omezení pokusů",
           "quizCooldownInHours": "Časový zámek po neúspěšných pokusech (v hodinách)",
           "numberOfQuestions": "{{count1}} z {{count2}} otázek",
-          "noQuestions": "Žádné otázky"
+          "noQuestions": "Žádné otázky",
+          "timeLimitMinutes": "Časový limit (hh:mm)"
         },
         "tooltip": {
           "switch": "Pokud je povoleno, má student omezený počet pokusů o kvíz.",
           "passingThreshold": "Procentuální hranice pro absolvování kvízu. Pokud student dosáhne tohoto skóre, bude kvíz považován za úspěšný.",
           "attemptsLimit": "Počet povolených pokusů o kvíz před spuštěním časového zámku.",
-          "quizCooldownInHours": "Doba trvání zámku kvízu po použití všech pokusů."
+          "quizCooldownInHours": "Doba trvání zámku kvízu po použití všech pokusů.",
+          "timeLimitMinutes": "Volitelné. Pokud je nastaveno, studenti kvíz výslovně spustí a jejich odpovědi se po uplynutí času odešlou automaticky. Ponechte prázdné bez časového limitu."
         },
         "validation": {
           "optionTextRequired": "Text možnosti je povinný",
@@ -3238,7 +3240,8 @@
           "sourceUrlInvalid": "Zadejte platnou adresu URL HTTPS",
           "matchingPairsRequired": "Přidejte alespoň 2 dvojice a vyplňte obě strany každé dvojice",
           "matchingMatchRequired": "Vyplňte přiřazení v této dvojici",
-          "matchingPairsUnique": "Každá dvojice musí mít jedinečné přiřazení"
+          "matchingPairsUnique": "Každá dvojice musí mít jedinečné přiřazení",
+          "timeLimitMinutes": "Zadejte časový limit od {{min}} do {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pořadí zobrazení lekce bylo úspěšně aktualizováno",
@@ -4517,12 +4520,25 @@
       "courseEnrollmentRequired": "Nejste zapsáni do tohoto kurzu.",
       "quizRetakeUnavailable": "Odpovědi v kvízu nelze resetovat kvůli limitu pokusů nebo čekací době.",
       "quizResetFailed": "Odpovědi v kvízu se nepodařilo resetovat. Zkuste to prosím znovu.",
-      "quizAwaitingReview": "Tento kvíz čeká na hodnocení."
+      "quizAwaitingReview": "Tento kvíz čeká na hodnocení.",
+      "quizNotTimed": "Tento kvíz nemá časový limit.",
+      "quizAttemptNotStarted": "Před odesláním odpovědí spusťte kvíz.",
+      "quizAttemptExpired": "Čas na tento pokus o kvíz vypršel.",
+      "quizDraftInvalid": "Vaše odpovědi se nepodařilo automaticky uložit. Zkontrolujte je a zkuste to znovu."
     },
     "preview": {
       "title": "Prohlížíte si náhled kurzu",
       "enrollmentDescription": "Zapište se do kurzu, abyste mohli vyplňovat kvízy a ukládat svůj postup.",
       "learningModeDescription": "Zapněte režim učení, abyste mohli vyplňovat kvízy a sledovat svůj postup."
+    },
+    "timedQuiz": {
+      "info": "Čas začne běžet po výběru „Spustit kvíz“ a běží dál, i když stránku opustíte. Odpovědi se ukládají automaticky a po uplynutí času se odešlou. Nezodpovězené otázky získají 0 bodů.",
+      "timeLimit": "Časový limit",
+      "questions": "Otázky",
+      "start": "Spustit kvíz",
+      "timeLeft": "Zbývající čas: {{time}}",
+      "warning": "Zbývá méně než minuta. Odpovědi se po uplynutí času odešlou automaticky.",
+      "timeUp": "Čas vypršel. Vaše odpovědi se odesílají."
     }
   },
   "studentCourseView": {
@@ -8018,6 +8034,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Příjemci",
+      "courseCompletionAudience": "Příjemci dokončení kurzu",
+      "courseCompletionAudiences": {
+        "learner": "Účastník, který dokončil kurz",
+        "administrators": "Správci (podle předvoleb oznámení)"
+      },
       "event": "Uživatelé spojení s událostí",
       "user": "Vybraný uživatel",
       "group": "Členové vybrané skupiny",
@@ -9631,6 +9652,71 @@
         "invalidBadgeImage": "Obrázek odznaku je neplatný. Nahrajte ho znovu."
       }
     }
+  },
+  "quizGrading": {
+    "title": "K hodnocení",
+    "answerTitle": "Hodnocení odpovědi",
+    "pendingCount": "Čekající: {{count}}",
+    "empty": "Vybraným filtrům neodpovídají žádné odpovědi.",
+    "filters": {
+      "status": "Stav",
+      "course": "Kurz",
+      "lesson": "Lekce",
+      "student": "Student",
+      "allCourses": "Všechny kurzy",
+      "allLessons": "Všechny lekce",
+      "allStudents": "Všichni studenti"
+    },
+    "status": {
+      "pending": "Čeká",
+      "graded": "Ohodnoceno"
+    },
+    "columns": {
+      "question": "Otázka",
+      "course": "Kurz",
+      "lesson": "Lekce",
+      "student": "Student",
+      "submittedAt": "Odesláno",
+      "status": "Stav",
+      "points": "Body"
+    },
+    "attempt": "Pokus",
+    "question": "Otázka",
+    "reviewerInstructions": "Pokyny pro hodnotitele",
+    "studentAnswer": "Odpověď studenta",
+    "nextAnswer": "Další odpověď",
+    "points": "Body: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Splněno",
+      "failed": "Nesplněno"
+    },
+    "form": {
+      "title": "Hodnocení",
+      "verdict": "Výsledek ({{max}} b. za splnění)",
+      "verdictRequired": "Vyberte splněno nebo nesplněno.",
+      "comment": "Komentář (nepovinné)",
+      "commentPlaceholder": "Zpětná vazba pro studenta",
+      "commentTooLong": "Komentář může mít nejvýše {{max}} znaků.",
+      "submit": "Uložit hodnocení",
+      "regrade": "Uložit nové hodnocení"
+    },
+    "history": {
+      "title": "Historie hodnocení",
+      "empty": "Tato odpověď zatím nebyla ohodnocena.",
+      "revision": "Verze {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Odpověď byla ohodnocena.",
+      "attemptGraded": "Odpověď byla ohodnocena. Výsledek kvízu je nyní pro studenta dostupný.",
+      "gradeError": "Hodnocení se nepodařilo uložit."
+    },
+    "errors": {
+      "answerNotFound": "Tato odpověď neexistuje nebo ji nelze ohodnotit.",
+      "ownAnswer": "Nemůžete hodnotit svou vlastní odpověď.",
+      "attemptSuperseded": "Studující začal tento kurz znovu, proto tento pokus již nelze hodnotit.",
+      "courseNotPublished": "Tento kurz je opět koncept. Před hodnocením odpovědí jej zveřejněte."
+    },
+    "loadError": "Frontu k hodnocení se nepodařilo načíst. Obnovte stránku a zkuste to znovu."
   },
   "coursesViewToggle": {
     "label": "Zobrazení kurzů",

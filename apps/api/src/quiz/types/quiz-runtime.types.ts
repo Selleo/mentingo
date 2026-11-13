@@ -57,6 +57,7 @@ export type QuizAttemptFeedback = {
   }>;
   scaleSelections: Array<{ questionAnswerId: UUIDType; selectedScaleOptionId: UUIDType }>;
   openTextAnswers: Array<{ questionAnswerId: UUIDType; submittedText: string }>;
+  latestReviews: Array<{ questionAnswerId: UUIDType; explanation: string }>;
   matchingAnswers: QuizMatchingAnswer[];
 };
 

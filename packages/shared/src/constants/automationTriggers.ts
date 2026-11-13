@@ -3,6 +3,7 @@ import {
   AUTOMATION_EVENT_KINDS,
   AUTOMATION_PLACEHOLDER_TYPES,
   AUTOMATION_FIELD_SENSITIVITIES,
+  resolveCurrentAutomationEventKind,
   type AutomationEventKind,
   type AutomationPlaceholderType,
 } from "./automations";
@@ -391,8 +392,20 @@ export const AUTOMATION_TRIGGER_DEFINITIONS: AutomationTriggerDefinition[] = [
   {
     type: AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE,
     kind: AUTOMATION_NODE_KINDS.TRIGGER,
-    labelKey: "automationBuilder.blocks.userCourseFinished",
+    labelKey: "emailTemplates.events.user_finished_course",
     providedVariables: [
+      variable(
+        "userName",
+        "automationBuilder.variables.userName",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "user_name",
+      ),
+      variable(
+        "progressLink",
+        "automationBuilder.variables.progressLink",
+        AUTOMATION_PLACEHOLDER_TYPES.URL,
+        "progress_link",
+      ),
       variable(
         "userFirstName",
         "automationBuilder.variables.userFirstName",
@@ -533,31 +546,6 @@ export const AUTOMATION_TRIGGER_DEFINITIONS: AutomationTriggerDefinition[] = [
         "automationBuilder.variables.userName",
         AUTOMATION_PLACEHOLDER_TYPES.STRING,
         "user_name",
-      ),
-    ],
-  },
-  {
-    type: AUTOMATION_EVENT_KINDS.ADMIN_FINISHED_COURSE,
-    kind: AUTOMATION_NODE_KINDS.TRIGGER,
-    labelKey: "automationBuilder.blocks.courseCompleted",
-    providedVariables: [
-      variable(
-        "courseName",
-        "automationBuilder.variables.courseName",
-        AUTOMATION_PLACEHOLDER_TYPES.STRING,
-        "course_name",
-      ),
-      variable(
-        "userName",
-        "automationBuilder.variables.userName",
-        AUTOMATION_PLACEHOLDER_TYPES.STRING,
-        "user_name",
-      ),
-      variable(
-        "progressLink",
-        "automationBuilder.variables.progressLink",
-        AUTOMATION_PLACEHOLDER_TYPES.URL,
-        "progress_link",
       ),
     ],
   },
@@ -824,4 +812,6 @@ export const AUTOMATION_TRIGGER_DEFINITIONS: AutomationTriggerDefinition[] = [
 ];
 
 export const getAutomationTriggerDefinition = (type: AutomationEventKind) =>
-  AUTOMATION_TRIGGER_DEFINITIONS.find((definition) => definition.type === type);
+  AUTOMATION_TRIGGER_DEFINITIONS.find(
+    (definition) => definition.type === resolveCurrentAutomationEventKind(type),
+  );

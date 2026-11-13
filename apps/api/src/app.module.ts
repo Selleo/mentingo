@@ -73,6 +73,7 @@ import { OutboxModule } from "./outbox/outbox.module";
 import { PermissionsModule } from "./permissions/permissions.module";
 import { PhishingModule } from "./phishing/phishing.module";
 import { QuizModule } from "./quiz/quiz.module";
+import { QuizGradingModule } from "./quiz-grading/quiz-grading.module";
 import { AppThrottlerGuard } from "./rate-limit/app-throttler.guard";
 import { RedisThrottlerStorage } from "./rate-limit/redis-throttler.storage";
 import { ReportModule } from "./report/report.module";
@@ -145,6 +146,7 @@ import type { RedisClient } from "src/redis";
     LessonModule,
     LessonVideoProgressModule,
     QuizModule,
+    QuizGradingModule,
     StudentLessonProgressModule,
     FileModule,
     S3Module,

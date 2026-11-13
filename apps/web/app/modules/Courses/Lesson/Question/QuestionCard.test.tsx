@@ -63,3 +63,45 @@ describe("QuestionCard review badge", () => {
     },
   );
 });
+
+describe("QuestionCard reviewer feedback", () => {
+  it("shows awarded points and the reviewer comment as text", () => {
+    render(
+      <QuestionCard
+        questionNumber={1}
+        questionType="threeOrFiveWordSentence"
+        title="Explain"
+        reviewerFeedback={{ awardedPoints: 2, maximumPoints: 3, comment: "Good <b>point</b>" }}
+      >
+        Answer
+      </QuestionCard>,
+    );
+
+    expect(screen.getByText("quizGrading.points")).toBeVisible();
+    expect(screen.getByText("Good <b>point</b>")).toBeVisible();
+  });
+
+  it("omits an empty comment and renders nothing without feedback", () => {
+    const { rerender } = render(
+      <QuestionCard
+        questionNumber={1}
+        questionType="threeOrFiveWordSentence"
+        title="Explain"
+        reviewerFeedback={{ awardedPoints: 0, maximumPoints: 1, comment: "" }}
+      >
+        Answer
+      </QuestionCard>,
+    );
+
+    expect(screen.getByText("quizGrading.points")).toBeVisible();
+    expect(screen.queryByTestId("learning-reviewer-feedback-comment")).toBeNull();
+
+    rerender(
+      <QuestionCard questionNumber={1} questionType="threeOrFiveWordSentence" title="Explain">
+        Answer
+      </QuestionCard>,
+    );
+
+    expect(screen.queryByText("quizGrading.points")).toBeNull();
+  });
+});

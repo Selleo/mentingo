@@ -11,6 +11,7 @@ export const NAVIGATION_HANDLES = {
   NEWS_LINK: "navigation-news-link",
   ARTICLES_LINK: "navigation-articles-link",
   QA_LINK: "navigation-qa-link",
+  QUIZ_GRADING_LINK: "navigation-quiz-grading-link",
   MANAGE_TOGGLE: "navigation-manage-toggle",
   ADMIN_LEARNING_PATHS_LINK: "navigation-admin-learning-paths-link",
   USERS_LINK: "navigation-users-link",

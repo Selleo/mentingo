@@ -1,5 +1,5 @@
 {
-  "id": "a25cf215-e364-4d39-803d-68e39dd06426",
+  "id": "00e61ba5-7b0a-4925-a78c-5be41b1b0182",
   "prevId": "77ce6d7d-56d6-480e-a7bd-de7f2b1f70f0",
   "version": "7",
   "dialect": "postgresql",
@@ -7479,7 +7479,7 @@
           "name": "course_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "user_id": {
           "name": "user_id",
@@ -7658,7 +7658,7 @@
           "name": "course_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "user_id": {
           "name": "user_id",
@@ -7867,24 +7867,11 @@
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
         },
-        "scope": {
-          "name": "scope",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'course'"
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "course_id": {
           "name": "course_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "created_by_user_id": {
           "name": "created_by_user_id",
@@ -7949,33 +7936,6 @@
           "columns": [
             {
               "expression": "course_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "course_chat_threads_tenant_id_scope_updated_at_idx": {
-          "name": "course_chat_threads_tenant_id_scope_updated_at_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "scope",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -21496,6 +21456,13 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "grading_method": {
+          "name": "grading_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pass_fail'"
         },
         "awarded_points": {
           "name": "awarded_points",

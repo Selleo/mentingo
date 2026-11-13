@@ -5,8 +5,8 @@ export type StreamInitPayload = {
 };
 
 export type VoiceMentorTarget =
-  | { lessonId: string; practiceSessionId?: never; threadId?: never }
-  | { lessonId?: never; practiceSessionId: string; threadId: string };
+  | { lessonId: string; preview?: boolean; practiceSessionId?: never; threadId?: never }
+  | { lessonId?: never; preview?: never; practiceSessionId: string; threadId: string };
 
 export type PcmChunkMeta = {
   seq: number;

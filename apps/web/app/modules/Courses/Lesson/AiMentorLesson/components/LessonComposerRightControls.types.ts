@@ -13,6 +13,7 @@ export type LessonComposerRightControlsProps = {
   isVoiceMentorStarting: boolean;
   canSubmit: boolean;
   canUseVoiceMentor: boolean;
+  dictationDisabled?: boolean;
   onStartVoiceMode: () => void;
   onStopVoiceMode: () => void;
   onStartVoiceMentor: () => void;

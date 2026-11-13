@@ -4,9 +4,11 @@ import { Injectable } from "@nestjs/common";
 import {
   AUTOMATION_FIELD_SENSITIVITIES,
   AUTOMATION_EVENT_KINDS,
+  AUTOMATION_RECIPIENT_AUDIENCES,
   AUTOMATION_RECIPIENT_TYPES,
   SUPPORTED_LANGUAGES,
   isSupportedLanguage,
+  type AutomationRecipientAudience,
   type AutomationSendEmailStep,
 } from "@repo/shared";
 
@@ -31,7 +33,7 @@ export class AutomationRecipientResolverService {
     const selection = step.config.recipients ?? { type: AUTOMATION_RECIPIENT_TYPES.EVENT };
 
     if (selection.type === AUTOMATION_RECIPIENT_TYPES.EVENT) {
-      return event.recipients;
+      return this.selectEventRecipientsForAudience(event, selection.audience);
     }
 
     const eventDefinition = findAutomationEventDefinition(event.kind);
@@ -95,6 +97,20 @@ export class AutomationRecipientResolverService {
         },
       }));
     });
+  }
+
+  /** Course completion carries learner and administrator recipients; each email action picks one audience. */
+  private selectEventRecipientsForAudience(
+    event: NotificationEventData,
+    audience: AutomationRecipientAudience = AUTOMATION_RECIPIENT_AUDIENCES.LEARNER,
+  ): NotificationRecipient[] {
+    if (event.kind !== AUTOMATION_EVENT_KINDS.USER_FINISHED_COURSE) {
+      return event.recipients;
+    }
+
+    return event.recipients.filter(
+      (recipient) => (recipient.audience ?? AUTOMATION_RECIPIENT_AUDIENCES.LEARNER) === audience,
+    );
   }
 
   private indexOriginalRecipientOccurrences(event: NotificationEventData): Map<string, string> {

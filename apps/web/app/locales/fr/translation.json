@@ -3191,13 +3191,15 @@
           "attemptsLimit": "Limite de tentatives",
           "quizCooldownInHours": "Verrouillage horaire après tentatives infructueuses (en heures)",
           "numberOfQuestions": "{{count1}} questions sur {{count2}}",
-          "noQuestions": "Aucune question"
+          "noQuestions": "Aucune question",
+          "timeLimitMinutes": "Limite de temps (hh:mm)"
         },
         "tooltip": {
           "switch": "Si cette option est activée, l'apprenant dispose d'un nombre limité de tentatives de quiz.",
           "passingThreshold": "Le seuil de pourcentage pour réussir le quiz. Si un apprenant atteint ce score, le quiz sera considéré comme réussi.",
           "attemptsLimit": "Nombre de tentatives de quiz autorisées avant le déclenchement du verrouillage horaire.",
-          "quizCooldownInHours": "Durée du verrouillage du quiz une fois que toutes les tentatives ont été utilisées."
+          "quizCooldownInHours": "Durée du verrouillage du quiz une fois que toutes les tentatives ont été utilisées.",
+          "timeLimitMinutes": "Facultatif. Si elle est définie, les apprenants démarrent le quiz explicitement et leurs réponses sont envoyées automatiquement à la fin du temps imparti. Laissez vide pour ne pas limiter le temps."
         },
         "validation": {
           "optionTextRequired": "Le texte de l'option est requis",
@@ -3226,7 +3228,8 @@
           "sourceUrlInvalid": "Saisissez une URL HTTPS valide",
           "matchingPairsRequired": "Ajoutez au moins 2 paires et remplissez les deux côtés de chaque paire",
           "matchingMatchRequired": "Renseignez la correspondance de cette paire",
-          "matchingPairsUnique": "Chaque paire doit avoir une correspondance unique"
+          "matchingPairsUnique": "Chaque paire doit avoir une correspondance unique",
+          "timeLimitMinutes": "Saisissez une limite de temps entre {{min}} et {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "L'ordre d'affichage des leçons a été mis à jour avec succès",
@@ -4258,12 +4261,25 @@
       "courseEnrollmentRequired": "Vous n'êtes pas inscrit à ce cours.",
       "quizRetakeUnavailable": "Les réponses au quiz ne peuvent pas être réinitialisées en raison de la limite de tentatives ou du temps de recharge.",
       "quizResetFailed": "Échec de la réinitialisation des réponses au quiz. Veuillez réessayer.",
-      "quizAwaitingReview": "Ce quiz est en attente d'évaluation."
+      "quizAwaitingReview": "Ce quiz est en attente d'évaluation.",
+      "quizNotTimed": "Ce quiz n’a pas de limite de temps.",
+      "quizAttemptNotStarted": "Démarrez le quiz avant d’envoyer vos réponses.",
+      "quizAttemptExpired": "Le temps imparti pour cette tentative de quiz est écoulé.",
+      "quizDraftInvalid": "Vos réponses n’ont pas pu être enregistrées automatiquement. Vérifiez-les et réessayez."
     },
     "preview": {
       "title": "Vous consultez un aperçu du cours",
       "enrollmentDescription": "Inscrivez-vous pour répondre aux quiz et enregistrer votre progression.",
       "learningModeDescription": "Activez le mode apprentissage pour répondre aux quiz et suivre votre progression."
+    },
+    "timedQuiz": {
+      "info": "Le chronomètre démarre lorsque vous sélectionnez « Démarrer le quiz » et continue même si vous quittez la page. Vos réponses sont enregistrées automatiquement et envoyées à la fin du temps imparti. Les questions sans réponse valent 0 point.",
+      "timeLimit": "Limite de temps",
+      "questions": "Questions",
+      "start": "Démarrer le quiz",
+      "timeLeft": "Temps restant : {{time}}",
+      "warning": "Il reste moins d’une minute. Vos réponses seront envoyées automatiquement à la fin du temps imparti.",
+      "timeUp": "Le temps est écoulé. Vos réponses sont en cours d’envoi."
     }
   },
   "studentCourseView": {
@@ -7704,6 +7720,11 @@
     },
     "recipients": {
       "title": "Destinataires",
+      "courseCompletionAudience": "Destinataires de fin de cours",
+      "courseCompletionAudiences": {
+        "learner": "Apprenant ayant terminé le cours",
+        "administrators": "Administrateurs (selon les préférences de notification)"
+      },
       "event": "Utilisateurs liés à l’événement",
       "user": "Utilisateur sélectionné",
       "group": "Membres d’un groupe sélectionné",
@@ -9101,6 +9122,71 @@
         "invalidBadgeImage": "L’image du badge n’est pas valide. Importez-la à nouveau."
       }
     }
+  },
+  "quizGrading": {
+    "title": "À noter",
+    "answerTitle": "Noter la réponse",
+    "pendingCount": "En attente : {{count}}",
+    "empty": "Aucune réponse ne correspond aux filtres sélectionnés.",
+    "filters": {
+      "status": "Statut",
+      "course": "Cours",
+      "lesson": "Leçon",
+      "student": "Apprenant",
+      "allCourses": "Tous les cours",
+      "allLessons": "Toutes les leçons",
+      "allStudents": "Tous les apprenants"
+    },
+    "status": {
+      "pending": "En attente",
+      "graded": "Notée"
+    },
+    "columns": {
+      "question": "Question",
+      "course": "Cours",
+      "lesson": "Leçon",
+      "student": "Apprenant",
+      "submittedAt": "Envoyée",
+      "status": "Statut",
+      "points": "Points"
+    },
+    "attempt": "Tentative",
+    "question": "Question",
+    "reviewerInstructions": "Instructions pour le correcteur",
+    "studentAnswer": "Réponse de l'apprenant",
+    "nextAnswer": "Réponse suivante",
+    "points": "Points : {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Réussi",
+      "failed": "Échoué"
+    },
+    "form": {
+      "title": "Note",
+      "verdict": "Résultat ({{max}} pt en cas de réussite)",
+      "verdictRequired": "Choisissez réussi ou échoué.",
+      "comment": "Commentaire (facultatif)",
+      "commentPlaceholder": "Retour pour l'apprenant",
+      "commentTooLong": "Le commentaire peut contenir au maximum {{max}} caractères.",
+      "submit": "Enregistrer la note",
+      "regrade": "Enregistrer la nouvelle note"
+    },
+    "history": {
+      "title": "Historique des notes",
+      "empty": "Cette réponse n'a pas encore été notée.",
+      "revision": "Révision {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Réponse notée.",
+      "attemptGraded": "Réponse notée. Le résultat du quiz est maintenant disponible pour l'apprenant.",
+      "gradeError": "Impossible d'enregistrer la note."
+    },
+    "errors": {
+      "answerNotFound": "Cette réponse n'existe pas ou ne peut pas être notée.",
+      "ownAnswer": "Vous ne pouvez pas noter votre propre réponse.",
+      "attemptSuperseded": "L'apprenant a recommencé ce cours, cette tentative ne peut donc plus être notée.",
+      "courseNotPublished": "Ce cours est repassé en brouillon. Publiez-le avant de noter ses réponses."
+    },
+    "loadError": "Impossible de charger la file de notation. Actualisez la page pour réessayer."
   },
   "coursesViewToggle": {
     "label": "Vue des cours",

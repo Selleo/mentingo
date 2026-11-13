@@ -992,10 +992,15 @@ function getQuestionPoints(question: QuizQuestion, answer: QuestionAnswer | unde
   if (!question.options.length) return 0;
 
   const values = Array.isArray(answer) ? answer : [];
-  const correctPairs = question.options.filter(
-    (option, index) => values[index] === (option.matchedWord ?? ""),
+  const correctPairs = question.options.filter((option, index) =>
+    isMatchingPairCorrect(option, values[index]),
   ).length;
   return correctPairs / question.options.length;
+}
+
+// An untranslated pair has an empty match and never counts, as on the platform.
+function isMatchingPairCorrect(option: QuizOption, value: string | undefined) {
+  return Boolean(option.matchedWord) && value === option.matchedWord;
 }
 
 // Stable pseudo-random order that does not follow the pair order.
@@ -1022,7 +1027,7 @@ function isQuestionCorrect(question: QuizQuestion, answer: QuestionAnswer | unde
     const values = Array.isArray(answer) ? answer : [];
     return (
       question.options.length > 0 &&
-      question.options.every((option, index) => values[index] === (option.matchedWord ?? ""))
+      question.options.every((option, index) => isMatchingPairCorrect(option, values[index]))
     );
   }
   if (question.type === QUESTION_TYPE.TRUE_OR_FALSE) {

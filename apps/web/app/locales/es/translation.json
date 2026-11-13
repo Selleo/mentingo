@@ -3190,13 +3190,15 @@
           "attemptsLimit": "Límite de intentos",
           "quizCooldownInHours": "Bloqueo de tiempo después de intentos fallidos (en horas)",
           "numberOfQuestions": "{{count1}} de preguntas {{count2}}",
-          "noQuestions": "Sin preguntas"
+          "noQuestions": "Sin preguntas",
+          "timeLimitMinutes": "Límite de tiempo (hh:mm)"
         },
         "tooltip": {
           "switch": "Si está habilitado, el estudiante tiene un número limitado de intentos de prueba.",
           "passingThreshold": "El umbral porcentual para aprobar el cuestionario. Si un estudiante alcanza esta puntuación, la prueba se considerará aprobada.",
           "attemptsLimit": "Número de intentos de prueba permitidos antes de que se active el bloqueo de tiempo.",
-          "quizCooldownInHours": "Duración del bloqueo del cuestionario después de utilizar todos los intentos."
+          "quizCooldownInHours": "Duración del bloqueo del cuestionario después de utilizar todos los intentos.",
+          "timeLimitMinutes": "Opcional. Si se define, los alumnos inician el cuestionario de forma explícita y sus respuestas se envían automáticamente cuando se acaba el tiempo. Déjalo vacío para no limitar el tiempo."
         },
         "validation": {
           "optionTextRequired": "El texto de la opción es obligatorio",
@@ -3225,7 +3227,8 @@
           "sourceUrlInvalid": "Introduce una URL HTTPS válida",
           "matchingPairsRequired": "Añade al menos 2 pares y completa ambos lados de cada par",
           "matchingMatchRequired": "Completa la pareja de este elemento",
-          "matchingPairsUnique": "Cada par necesita una pareja única"
+          "matchingPairsUnique": "Cada par necesita una pareja única",
+          "timeLimitMinutes": "Introduce un límite de tiempo entre {{min}} y {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Orden de visualización de lecciones actualizado correctamente",
@@ -4455,12 +4458,25 @@
       "courseEnrollmentRequired": "No estás inscrito en este curso.",
       "quizRetakeUnavailable": "Las respuestas del cuestionario no se pueden restablecer debido al límite de intentos o al tiempo de reutilización.",
       "quizResetFailed": "No se pudieron restablecer las respuestas del cuestionario. Por favor inténtalo de nuevo.",
-      "quizAwaitingReview": "Este cuestionario está pendiente de revisión."
+      "quizAwaitingReview": "Este cuestionario está pendiente de revisión.",
+      "quizNotTimed": "Este cuestionario no tiene límite de tiempo.",
+      "quizAttemptNotStarted": "Inicia el cuestionario antes de enviar respuestas.",
+      "quizAttemptExpired": "El tiempo de este intento del cuestionario se ha agotado.",
+      "quizDraftInvalid": "No se pudieron guardar tus respuestas automáticamente. Revísalas e inténtalo de nuevo."
     },
     "preview": {
       "title": "Estás viendo una vista previa del curso",
       "enrollmentDescription": "Inscríbete para responder cuestionarios y guardar tu progreso.",
       "learningModeDescription": "Activa el modo de aprendizaje para responder cuestionarios y registrar tu progreso."
+    },
+    "timedQuiz": {
+      "info": "El temporizador empieza al seleccionar «Iniciar cuestionario» y sigue corriendo aunque salgas de la página. Tus respuestas se guardan automáticamente y se envían cuando se acaba el tiempo. Las preguntas sin responder obtienen 0 puntos.",
+      "timeLimit": "Límite de tiempo",
+      "questions": "Preguntas",
+      "start": "Iniciar cuestionario",
+      "timeLeft": "Tiempo restante: {{time}}",
+      "warning": "Queda menos de un minuto. Tus respuestas se enviarán automáticamente cuando se acabe el tiempo.",
+      "timeUp": "Se acabó el tiempo. Estamos enviando tus respuestas."
     }
   },
   "studentCourseView": {
@@ -7947,6 +7963,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Destinatarios",
+      "courseCompletionAudience": "Destinatarios de finalización del curso",
+      "courseCompletionAudiences": {
+        "learner": "Alumno que completó el curso",
+        "administrators": "Administradores (según las preferencias de notificación)"
+      },
       "event": "Usuarios vinculados al evento",
       "user": "Usuario seleccionado",
       "group": "Miembros de un grupo seleccionado",
@@ -9516,6 +9537,71 @@
         "invalidBadgeImage": "La imagen de la insignia no es válida. Vuelve a subirla."
       }
     }
+  },
+  "quizGrading": {
+    "title": "Por calificar",
+    "answerTitle": "Calificar respuesta",
+    "pendingCount": "Pendientes: {{count}}",
+    "empty": "Ninguna respuesta coincide con los filtros seleccionados.",
+    "filters": {
+      "status": "Estado",
+      "course": "Curso",
+      "lesson": "Lección",
+      "student": "Estudiante",
+      "allCourses": "Todos los cursos",
+      "allLessons": "Todas las lecciones",
+      "allStudents": "Todos los estudiantes"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "graded": "Calificada"
+    },
+    "columns": {
+      "question": "Pregunta",
+      "course": "Curso",
+      "lesson": "Lección",
+      "student": "Estudiante",
+      "submittedAt": "Enviada",
+      "status": "Estado",
+      "points": "Puntos"
+    },
+    "attempt": "Intento",
+    "question": "Pregunta",
+    "reviewerInstructions": "Instrucciones para el evaluador",
+    "studentAnswer": "Respuesta del estudiante",
+    "nextAnswer": "Siguiente respuesta",
+    "points": "Puntos: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Aprobado",
+      "failed": "Suspenso"
+    },
+    "form": {
+      "title": "Calificación",
+      "verdict": "Resultado ({{max}} pt si aprueba)",
+      "verdictRequired": "Elige aprobado o suspenso.",
+      "comment": "Comentario (opcional)",
+      "commentPlaceholder": "Comentarios para el estudiante",
+      "commentTooLong": "El comentario puede tener como máximo {{max}} caracteres.",
+      "submit": "Guardar calificación",
+      "regrade": "Guardar nueva calificación"
+    },
+    "history": {
+      "title": "Historial de calificaciones",
+      "empty": "Esta respuesta aún no se ha calificado.",
+      "revision": "Revisión {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Respuesta calificada.",
+      "attemptGraded": "Respuesta calificada. El resultado del cuestionario ya está disponible para el estudiante.",
+      "gradeError": "No se pudo guardar la calificación."
+    },
+    "errors": {
+      "answerNotFound": "Esta respuesta no existe o no se puede calificar.",
+      "ownAnswer": "No puedes calificar tu propia respuesta.",
+      "attemptSuperseded": "El estudiante ha vuelto a empezar este curso, por lo que este intento ya no se puede calificar.",
+      "courseNotPublished": "Este curso ha vuelto a borrador. Publícalo antes de calificar sus respuestas."
+    },
+    "loadError": "No se pudo cargar la cola de calificación. Actualiza la página para volver a intentarlo."
   },
   "coursesViewToggle": {
     "label": "Vista de cursos",

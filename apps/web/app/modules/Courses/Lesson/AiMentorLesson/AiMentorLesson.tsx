@@ -68,6 +68,7 @@ interface AiMentorLessonProps {
   previewUser?: LessonPreviewUser;
   hideControls?: boolean;
   autoOpenTaskDescription?: boolean;
+  allowVoiceMentorInPreview?: boolean;
 }
 
 const AiMentorLesson = ({
@@ -76,12 +77,17 @@ const AiMentorLesson = ({
   previewUser,
   hideControls = false,
   autoOpenTaskDescription = true,
+  allowVoiceMentorInPreview = false,
 }: AiMentorLessonProps) => {
   const { t } = useTranslation();
   const { courseId = "" } = useParams();
   const courseExperience = useOptionalCourseAccessProvider();
   const isPreviewMode = courseExperience?.isPreviewMode ?? true;
 
+  const canPreviewVoice =
+    isPreviewMode &&
+    !hideControls &&
+    Boolean(courseExperience?.canEditCourse || allowVoiceMentorInPreview);
   const isReadOnly = isPreviewMode || hideControls;
   const isChatReadOnly = hideControls || !lesson.threadId || lesson.status !== "active";
 
@@ -480,10 +486,12 @@ const AiMentorLesson = ({
             {isJudgePending && <AiMentorEvaluationLoader />}
 
             {shouldShowComposer && !isJudgePending && !hideControls && (
-              <fieldset disabled={isChatReadOnly} className="w-full min-w-0">
+              <fieldset disabled={isChatReadOnly && !canPreviewVoice} className="w-full min-w-0">
                 <LessonForm
-                  voiceTarget={{ lessonId: lesson.id }}
-                  allowVoiceMentor={!isReadOnly}
+                  voiceTarget={{ lessonId: lesson.id, ...(isPreviewMode ? { preview: true } : {}) }}
+                  allowVoiceMentor={!isReadOnly || canPreviewVoice}
+                  allowJudge={!isReadOnly}
+                  textReadOnly={isChatReadOnly}
                   mentorName={
                     lesson.aiMentor?.name ||
                     t("studentCourseView.lesson.aiMentorLesson.aiMentorName")

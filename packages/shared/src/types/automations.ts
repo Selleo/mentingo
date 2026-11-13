@@ -5,6 +5,7 @@ import type {
   AUTOMATION_MAPPING_TYPES,
   AUTOMATION_RECIPIENT_TYPES,
   AUTOMATION_STEP_TYPES,
+  AutomationRecipientAudience,
   AutomationEmailDeliveryStatus,
   AutomationEventKind,
   AutomationRunStatus,
@@ -63,7 +64,7 @@ export type AutomationProvidedVariable = {
 };
 
 export type AutomationRecipientSelection =
-  | { type: typeof AUTOMATION_RECIPIENT_TYPES.EVENT }
+  | { type: typeof AUTOMATION_RECIPIENT_TYPES.EVENT; audience?: AutomationRecipientAudience }
   | { type: typeof AUTOMATION_RECIPIENT_TYPES.EVERYONE }
   | { type: typeof AUTOMATION_RECIPIENT_TYPES.USER; userId: string }
   | { type: typeof AUTOMATION_RECIPIENT_TYPES.GROUP; groupId: string }

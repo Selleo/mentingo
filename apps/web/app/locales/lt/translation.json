@@ -3197,13 +3197,15 @@
           "attemptsLimit": "Bandymų riba",
           "quizCooldownInHours": "Laiko užraktas po nesėkmingų bandymų (valandomis)",
           "numberOfQuestions": "{{count1}} iš {{count2}} klausimų",
-          "noQuestions": "Jokių klausimų"
+          "noQuestions": "Jokių klausimų",
+          "timeLimitMinutes": "Laiko limitas (hh:mm)"
         },
         "tooltip": {
           "switch": "Jei įjungta, mokinys gali atlikti ribotą testų skaičių.",
           "passingThreshold": "Procentinė viktorinos išlaikymo riba. Jei mokinys pasiekia šį balą, viktorina bus laikoma išlaikyta.",
           "attemptsLimit": "Leidžiamas testų bandymų skaičius prieš suveikiant laiko užraktą.",
-          "quizCooldownInHours": "Viktorinos užrakto trukmė išnaudojus visus bandymus."
+          "quizCooldownInHours": "Viktorinos užrakto trukmė išnaudojus visus bandymus.",
+          "timeLimitMinutes": "Neprivaloma. Nustačius, besimokantieji patys pradeda viktoriną, o jų atsakymai pateikiami automatiškai pasibaigus laikui. Palikite tuščią, jei laiko limito nereikia."
         },
         "validation": {
           "optionTextRequired": "Būtinas parinkties tekstas",
@@ -3232,7 +3234,8 @@
           "sourceUrlInvalid": "Įveskite galiojantį HTTPS URL",
           "matchingPairsRequired": "Pridėkite bent 2 poras ir užpildykite abi kiekvienos poros puses",
           "matchingMatchRequired": "Įrašykite šios poros atitikmenį",
-          "matchingPairsUnique": "Kiekviena pora turi turėti unikalų atitikmenį"
+          "matchingPairsUnique": "Kiekviena pora turi turėti unikalų atitikmenį",
+          "timeLimitMinutes": "Įveskite laiko limitą nuo {{min}} iki {{max}}."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pamokos rodymo tvarka sėkmingai atnaujinta",
@@ -4512,12 +4515,25 @@
       "courseEnrollmentRequired": "Jūs nesate užregistruoti į šį kursą.",
       "quizRetakeUnavailable": "Viktorinos atsakymų negalima atstatyti dėl bandymų limito arba laukimo laikotarpio.",
       "quizResetFailed": "Nepavyko atstatyti viktorinos atsakymų. Bandykite dar kartą.",
-      "quizAwaitingReview": "Šis testas laukia įvertinimo."
+      "quizAwaitingReview": "Šis testas laukia įvertinimo.",
+      "quizNotTimed": "Ši viktorina neturi laiko limito.",
+      "quizAttemptNotStarted": "Prieš pateikdami atsakymus pradėkite viktoriną.",
+      "quizAttemptExpired": "Šios viktorinos bandymo laikas baigėsi.",
+      "quizDraftInvalid": "Nepavyko automatiškai išsaugoti jūsų atsakymų. Patikrinkite juos ir bandykite dar kartą."
     },
     "preview": {
       "title": "Peržiūrite kurso turinį",
       "enrollmentDescription": "Užsiregistruokite į kursą, kad galėtumėte atlikti testus ir išsaugoti pažangą.",
       "learningModeDescription": "Įjunkite mokymosi režimą, kad galėtumėte atlikti testus ir stebėti pažangą."
+    },
+    "timedQuiz": {
+      "info": "Laikas pradedamas skaičiuoti pasirinkus „Pradėti viktoriną“ ir skaičiuojamas toliau, net jei paliksite puslapį. Atsakymai išsaugomi automatiškai ir pateikiami pasibaigus laikui. Neatsakyti klausimai vertinami 0 taškų.",
+      "timeLimit": "Laiko limitas",
+      "questions": "Klausimai",
+      "start": "Pradėti viktoriną",
+      "timeLeft": "Liko laiko: {{time}}",
+      "warning": "Liko mažiau nei minutė. Pasibaigus laikui atsakymai bus pateikti automatiškai.",
+      "timeUp": "Laikas baigėsi. Jūsų atsakymai pateikiami."
     }
   },
   "studentCourseView": {
@@ -7777,6 +7793,11 @@
   "automationBuilder": {
     "recipients": {
       "title": "Gavėjai",
+      "courseCompletionAudience": "Kurso užbaigimo gavėjai",
+      "courseCompletionAudiences": {
+        "learner": "Kursą baigęs dalyvis",
+        "administrators": "Administratoriai (pagal pranešimų nuostatas)"
+      },
       "event": "Su įvykiu susiję naudotojai",
       "user": "Pasirinktas naudotojas",
       "group": "Pasirinktos grupės nariai",
@@ -9629,6 +9650,71 @@
         "invalidBadgeImage": "Ženklelio paveikslėlis netinkamas. Įkelkite jį iš naujo."
       }
     }
+  },
+  "quizGrading": {
+    "title": "Vertinti",
+    "answerTitle": "Atsakymo vertinimas",
+    "pendingCount": "Laukia: {{count}}",
+    "empty": "Pasirinktus filtrus atitinkančių atsakymų nėra.",
+    "filters": {
+      "status": "Būsena",
+      "course": "Kursas",
+      "lesson": "Pamoka",
+      "student": "Besimokantysis",
+      "allCourses": "Visi kursai",
+      "allLessons": "Visos pamokos",
+      "allStudents": "Visi besimokantieji"
+    },
+    "status": {
+      "pending": "Laukia",
+      "graded": "Įvertinta"
+    },
+    "columns": {
+      "question": "Klausimas",
+      "course": "Kursas",
+      "lesson": "Pamoka",
+      "student": "Besimokantysis",
+      "submittedAt": "Pateikta",
+      "status": "Būsena",
+      "points": "Taškai"
+    },
+    "attempt": "Bandymas",
+    "question": "Klausimas",
+    "reviewerInstructions": "Nurodymai vertintojui",
+    "studentAnswer": "Besimokančiojo atsakymas",
+    "nextAnswer": "Kitas atsakymas",
+    "points": "Taškai: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Įskaityta",
+      "failed": "Neįskaityta"
+    },
+    "form": {
+      "title": "Įvertinimas",
+      "verdict": "Rezultatas ({{max}} tšk. už įskaitymą)",
+      "verdictRequired": "Pasirinkite įskaityta arba neįskaityta.",
+      "comment": "Komentaras (neprivalomas)",
+      "commentPlaceholder": "Grįžtamasis ryšys besimokančiajam",
+      "commentTooLong": "Komentarą gali sudaryti ne daugiau kaip {{max}} simbolių.",
+      "submit": "Išsaugoti įvertinimą",
+      "regrade": "Išsaugoti naują įvertinimą"
+    },
+    "history": {
+      "title": "Vertinimų istorija",
+      "empty": "Šis atsakymas dar neįvertintas.",
+      "revision": "Versija {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Atsakymas įvertintas.",
+      "attemptGraded": "Atsakymas įvertintas. Testo rezultatas jau matomas besimokančiajam.",
+      "gradeError": "Nepavyko išsaugoti įvertinimo."
+    },
+    "errors": {
+      "answerNotFound": "Šio atsakymo nėra arba jo negalima įvertinti.",
+      "ownAnswer": "Negalite vertinti savo atsakymo.",
+      "attemptSuperseded": "Besimokantysis pradėjo šį kursą iš naujo, todėl šio bandymo nebegalima įvertinti.",
+      "courseNotPublished": "Šis kursas vėl yra juodraštis. Prieš vertindami atsakymus, jį paskelbkite."
+    },
+    "loadError": "Nepavyko įkelti vertinimo eilės. Atnaujinkite puslapį ir bandykite dar kartą."
   },
   "coursesViewToggle": {
     "label": "Kursų rodinys",

@@ -1,5 +1,6 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { EMAIL_TEMPLATE_EVENTS } from "@repo/email-templates";
+import { AUTOMATION_RECIPIENT_AUDIENCES, type AutomationPlaceholderValue } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
@@ -315,10 +316,29 @@ export class NotifyUsersHandler implements OutboxEventsHandlerOf<EventType> {
       ? `${baseOrigin}/profile/${user.id}`
       : `${baseOrigin}/courses`;
 
+    const variables = {
+      ...getNotificationUserFields(user),
+      user_name: `${user.firstName} ${user.lastName}`,
+      course_name: courseName,
+      button_link: buttonLink,
+      course_link: `${baseOrigin}/course/${courseFinishedData.courseId}`,
+      progress_link: `${baseOrigin}/course/${courseFinishedData.courseId}`,
+      has_certificate: hasCertificate,
+    };
+
     const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
       courseFinishedData.actor.tenantId,
       user.id,
     );
+
+    this.notificationCollectorService.captureNotificationItem(courseFinishedData.courseId, {
+      tenantId: courseFinishedData.actor.tenantId,
+      template: {
+        event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_COURSE,
+        language: defaultEmailSettings.language,
+        variables,
+      },
+    });
 
     await this.notificationCollectorService.captureNotificationRecipient(
       { to: user.email },
@@ -327,15 +347,46 @@ export class NotifyUsersHandler implements OutboxEventsHandlerOf<EventType> {
         template: {
           event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_COURSE,
           language: defaultEmailSettings.language,
-          variables: {
-            ...getNotificationUserFields(user),
-            course_name: courseName,
-            button_link: buttonLink,
-            course_link: `${baseOrigin}/course/${courseFinishedData.courseId}`,
-            has_certificate: hasCertificate,
-          },
+          variables,
         },
+        audience: AUTOMATION_RECIPIENT_AUDIENCES.LEARNER,
       },
+    );
+
+    await this.captureCourseCompletionAdministratorRecipients(
+      courseFinishedData.actor.tenantId,
+      variables,
+    );
+  }
+
+  private async captureCourseCompletionAdministratorRecipients(
+    tenantId: string,
+    variables: Record<string, AutomationPlaceholderValue>,
+  ) {
+    const administratorsToNotify = await this.userService.getAdminsToNotifyAboutFinishedCourse();
+
+    await processInBatches(
+      administratorsToNotify,
+      async (administrator) => {
+        const administratorEmailSettings = await this.emailService.getDefaultEmailProperties(
+          administrator.tenantId,
+          administrator.id,
+        );
+
+        await this.notificationCollectorService.captureNotificationRecipient(
+          { to: administrator.email },
+          {
+            tenantId,
+            audience: AUTOMATION_RECIPIENT_AUDIENCES.ADMINISTRATORS,
+            template: {
+              event: EMAIL_TEMPLATE_EVENTS.USER_FINISHED_COURSE,
+              language: administratorEmailSettings.language,
+              variables,
+            },
+          },
+        );
+      },
+      { batchSize: EMAIL_BATCH_SIZE, throwOnError: true },
     );
   }
 

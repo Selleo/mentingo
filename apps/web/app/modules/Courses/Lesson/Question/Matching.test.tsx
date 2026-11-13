@@ -108,6 +108,18 @@ describe("Matching", () => {
     expect(within(bank).queryByText("Woof")).not.toBeInTheDocument();
   });
 
+  it("stretches a placed match across its slot and centers it, unlike bank matches", () => {
+    renderMatching({ isCompleted: false });
+
+    const placedMatch = within(screen.getByTestId("pair-cat")).getByText("Woof");
+    const bankMatch = within(screen.getByTestId("blank_preset")).getByText("Meow");
+
+    expect(placedMatch).toHaveClass("w-full", "justify-center", "text-center");
+    expect(placedMatch).not.toHaveClass("w-auto", "text-left");
+    expect(bankMatch).toHaveClass("w-auto", "text-left");
+    expect(bankMatch).not.toHaveClass("w-full", "text-center");
+  });
+
   it("shows the learner's answers and the correct match for wrong pairs", () => {
     renderMatching({ isCompleted: true });
 

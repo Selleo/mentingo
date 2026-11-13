@@ -46,6 +46,7 @@ const AiMentorLessonPreview = ({ onClose, lesson }: AiMentorPreviewProps) => {
               lesson={lessonData}
               lessonLoading={lessonLoading}
               autoOpenTaskDescription={false}
+              allowVoiceMentorInPreview
             />
           )}
         </div>
