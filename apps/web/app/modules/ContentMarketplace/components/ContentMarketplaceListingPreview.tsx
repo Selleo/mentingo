@@ -81,10 +81,7 @@ export function ContentMarketplaceListingPreview({
               </section>
             </DialogDescription>
             {outline && outline.learningOutcomes.length > 0 && (
-              <LearningOutcomesList
-                learningOutcomes={outline.learningOutcomes}
-                className="lg:hidden"
-              />
+              <LearningOutcomesList learningOutcomes={outline.learningOutcomes} />
             )}
             {isLoading && <ListingOutlineSkeleton />}
             {error && (
@@ -110,6 +107,10 @@ export function ContentMarketplaceListingPreview({
   );
 }
 
+/**
+ * The hero grows with its content instead of keeping the image ratio, so a long title or many
+ * learning outcomes are never clipped.
+ */
 function ListingPreviewHero({
   listing,
   learningOutcomes,
@@ -131,14 +132,14 @@ function ListingPreviewHero({
     <CourseHeroImage
       alt={listing.title}
       imageUrl={thumbnailUrl ?? undefined}
-      className="md:aspect-video"
+      className="overflow-visible sm:min-h-[auto] md:aspect-video"
     >
       <DialogClose className="absolute right-4 top-4 z-20 grid size-9 place-items-center rounded-full bg-black/30 text-white backdrop-blur-sm transition hover:bg-black/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
         <X className="size-4" aria-hidden />
         <span className="sr-only">{t("common.button.close")}</span>
       </DialogClose>
       <div className="relative z-10 flex flex-col justify-end gap-6 px-4 pb-6 pt-16 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8 lg:pb-8">
-        <div className="min-w-0 max-w-full lg:max-w-[58%]">
+        <div className="min-w-0 max-w-full lg:flex-1">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             {category && (
               <span className="rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
@@ -161,18 +162,18 @@ function ListingPreviewHero({
           </DialogTitle>
         </div>
         {learningOutcomes.length > 0 && (
-          <aside className="hidden w-[38%] shrink-0 rounded-2xl bg-black/15 p-4 backdrop-blur-[2px] lg:block">
+          <aside className="hidden w-[40%] shrink-0 rounded-2xl bg-black/15 p-4 backdrop-blur-[2px] lg:block">
             <h3 className="mb-4 flex items-center gap-3 font-gothic text-xl font-bold text-white">
               <CheckCircle2 className="size-8 shrink-0 text-success-500" aria-hidden />
               {t("modernCourseView.overview.whatYouWillMaster")}
             </h3>
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {learningOutcomes.map((learningOutcome, index) => (
                 <li key={index} className="flex items-start gap-3">
                   <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-success-500 text-white">
                     <Check className="size-3" strokeWidth={3} aria-hidden />
                   </span>
-                  <span className="break-words text-base font-medium leading-6 text-white">
+                  <span className="break-words text-sm font-medium leading-6 text-white">
                     {learningOutcome}
                   </span>
                 </li>
@@ -185,24 +186,18 @@ function ListingPreviewHero({
   );
 }
 
-function LearningOutcomesList({
-  learningOutcomes,
-  className,
-}: {
-  learningOutcomes: string[];
-  className?: string;
-}) {
+function LearningOutcomesList({ learningOutcomes }: { learningOutcomes: string[] }) {
   const { t } = useTranslation();
 
   return (
-    <section className={className}>
-      <h3 className="h6 mb-3 flex items-center gap-2 text-neutral-950">
+    <section className="rounded-2xl bg-primary-50 p-5 lg:hidden">
+      <h3 className="h6 mb-4 flex items-center gap-2 text-neutral-950">
         <CheckCircle2 className="size-6 shrink-0 text-success-500" aria-hidden />
         {t("modernCourseView.overview.whatYouWillMaster")}
       </h3>
-      <ul className="grid gap-2 sm:grid-cols-2">
+      <ul className="flex flex-col gap-3">
         {learningOutcomes.map((learningOutcome, index) => (
-          <li key={index} className="flex items-start gap-3 text-sm text-neutral-800">
+          <li key={index} className="flex items-start gap-3 text-sm leading-6 text-neutral-800">
             <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-success-500 text-white">
               <Check className="size-3" strokeWidth={3} aria-hidden />
             </span>
