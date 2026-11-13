@@ -14,6 +14,7 @@ export type StopAudioMessage = {
 export type StartAudioBody = {
   voiceAction: VoiceAction;
   lessonId?: UUIDType;
+  preview?: boolean;
   practiceSessionId?: UUIDType;
   threadId?: UUIDType;
   meta: StreamInitPayload;

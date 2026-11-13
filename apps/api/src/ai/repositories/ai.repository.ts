@@ -875,13 +875,13 @@ export class AiRepository {
   }
 
   async getCourseAuthorByLesson(lessonId: string) {
-    const [{ author }] = await this.db
+    const [course] = await this.db
       .select({ author: courses.authorId })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(chapters.courseId, courses.id))
       .where(eq(lessons.id, lessonId));
 
-    return author;
+    return course?.author;
   }
 }

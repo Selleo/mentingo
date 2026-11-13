@@ -26,6 +26,7 @@ import { SummaryService } from "src/ai/services/summary.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { TokenService } from "src/ai/services/token.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
+import { canPreviewAiMentorLesson } from "src/ai/utils/ai-mentor-preview-access";
 import {
   AI_MENTOR_TRACE_FLOWS,
   buildAiMentorTraceAttributes,
@@ -282,7 +283,14 @@ export class AiService {
         if (thread.aiMentorLessonId) {
           const { lessonId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
           if (!lessonId) throw new ForbiddenException("common.toast.lessonAccessDenied");
-          await this.assertLessonConversationAccess(lessonId, currentUser);
+
+          const isAuthorizedVoicePreview =
+            isVoiceMentor &&
+            (await canPreviewAiMentorLesson(this.aiRepository, lessonId, currentUser));
+
+          if (!isAuthorizedVoicePreview) {
+            await this.assertLessonConversationAccess(lessonId, currentUser);
+          }
         }
         const sessionId = data.voiceSessionId ?? thread.practiceSessionId ?? data.threadId;
 

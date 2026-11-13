@@ -13,6 +13,7 @@ import type { GetLessonByIdResponse } from "~/api/generated-api";
 
 const state = vi.hoisted(() => ({
   preview: true,
+  canEditCourse: false,
   messages: [] as { id: string; role: string; parts: { type: string; text: string }[] }[],
   setMessages: vi.fn(),
   sendMessage: vi.fn(),
@@ -32,7 +33,10 @@ vi.mock("~/api/queries/useCurrentThreadMessages", () => ({
   useCurrentThreadMessages: () => ({ isLoading: false }),
 }));
 vi.mock("~/modules/Courses/context/CourseAccessProvider", () => ({
-  useOptionalCourseAccessProvider: () => ({ isPreviewMode: state.preview }),
+  useOptionalCourseAccessProvider: () => ({
+    isPreviewMode: state.preview,
+    canEditCourse: state.canEditCourse,
+  }),
 }));
 vi.mock("./aiMentorChatTransport", () => ({ createAiMentorChatTransport: vi.fn() }));
 vi.mock("./components/ChatMessage", () => ({
@@ -43,7 +47,13 @@ vi.mock("./components/LessonForm", () => ({
     handleSubmit,
     input,
     handleInputChange,
+    allowVoiceMentor,
+    allowJudge,
+    voiceTarget,
   }: {
+    allowVoiceMentor: boolean;
+    allowJudge: boolean;
+    voiceTarget: { lessonId: string; preview?: boolean };
     handleSubmit: () => void;
     input: string;
     handleInputChange: React.ChangeEventHandler<HTMLTextAreaElement>;
@@ -52,6 +62,8 @@ vi.mock("./components/LessonForm", () => ({
       <textarea aria-label="Message" value={input} onChange={handleInputChange} />
       <button onClick={handleSubmit}>Send</button>
       <button>Microphone</button>
+      {allowVoiceMentor && <button data-preview={String(voiceTarget.preview)}>Voice Mentor</button>}
+      {allowJudge && <button>Voice grade</button>}
     </div>
   ),
 }));
@@ -85,7 +97,25 @@ describe("AI Mentor preview", () => {
     vi.clearAllMocks();
     Element.prototype.scrollTo = vi.fn();
     state.preview = true;
+    state.canEditCourse = false;
     state.messages = [];
+  });
+
+  it("enables voice for an authorized author preview without a thread but never grading", () => {
+    state.canEditCourse = true;
+    renderLesson();
+    expect(screen.getByRole("button", { name: "Voice Mentor" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Voice Mentor" })).toHaveAttribute(
+      "data-preview",
+      "true",
+    );
+    expect(screen.queryByRole("button", { name: "Voice grade" })).not.toBeInTheDocument();
+    expect(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeDisabled();
+  });
+
+  it("does not offer Voice Mentor to a public course preview", () => {
+    renderLesson({ status: "active", threadId: "thread-1" });
+    expect(screen.queryByRole("button", { name: "Voice Mentor" })).not.toBeInTheDocument();
   });
 
   it("shows the full lesson with disabled interaction even without a thread", async () => {

@@ -18,6 +18,7 @@ export function LessonComposerRightControls({
   canSubmit,
   canUseVoiceMentor,
   onStartVoiceMode,
+  dictationDisabled = false,
   onStopVoiceMode,
   onStartVoiceMentor,
   onStopVoiceMentor,
@@ -111,6 +112,7 @@ export function LessonComposerRightControls({
                   type="button"
                   variant="ghost"
                   onClick={onStartVoiceMode}
+                  disabled={dictationDisabled}
                   className="size-8 rounded-lg p-0 text-neutral-700 hover:bg-primary-50 hover:text-primary-700"
                   aria-label={dictateVoiceInputLabel || toggleVoiceInputLabel}
                 >
