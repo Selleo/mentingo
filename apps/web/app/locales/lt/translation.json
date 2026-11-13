@@ -9772,8 +9772,6 @@
   "forum": {
     "title": "Forumas",
     "description": "Užduokite klausimus ir dalinkitės žiniomis su visa organizacija.",
-    "unavailable": "Forumas nepasiekiamas.",
-    "loadError": "Nepavyko įkelti forumo.",
     "newTopic": "Nauja tema",
     "searchPlaceholder": "Ieškoti temų",
     "filter": {

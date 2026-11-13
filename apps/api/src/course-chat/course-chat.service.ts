@@ -26,6 +26,7 @@ import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 import type { PermissionKey } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { CourseChatDeletedMessage } from "src/course-chat/course-chat.types";
 import type {
   CourseChatMessageResponse,
   CourseChatUserResponse,
@@ -157,6 +158,18 @@ export class CourseChatService {
     });
 
     const messageId = await this.db.transaction(async (trx) => {
+      if (parentMessage) {
+        const isParentVisible = await this.courseChatRepository.lockThreadForReply(
+          parentMessage.threadId,
+          parentMessage.id,
+          trx,
+        );
+
+        if (!isParentVisible) {
+          throw new BadRequestException("courseChat.errors.invalidParentMessage");
+        }
+      }
+
       const createdMessageId = await this.courseChatRepository.createMessage({
         courseId,
         userId: currentUser.userId,
@@ -252,6 +265,16 @@ export class CourseChatService {
     userId: UUIDType,
     permissions: PermissionKey[],
   ): Promise<BaseResponse<DeleteCourseChatMessageResponse>> {
+    const { payload } = await this.deleteCourseMessage(messageId, userId, permissions);
+
+    return new BaseResponse(payload);
+  }
+
+  async deleteCourseMessage(
+    messageId: UUIDType,
+    userId: UUIDType,
+    permissions: PermissionKey[],
+  ): Promise<CourseChatDeletedMessage> {
     const message = await this.courseChatRepository.getMessageContext(messageId);
     if (!message || message.deletedAt || !message.userId) {
       throw new NotFoundException("courseChat.errors.messageNotFound");
@@ -268,16 +291,15 @@ export class CourseChatService {
       throw new ForbiddenException("courseChat.errors.cannotDeleteMessage");
     }
 
-    const replyCount = message.parentMessageId
-      ? 0
-      : await this.courseChatRepository.countReplies(message.id);
-    const deletedAt = await this.courseChatRepository.softDeleteMessage(message.id);
+    const deletion = await this.courseChatRepository.deleteMessage(message);
+    if (!deletion) throw new NotFoundException("courseChat.errors.messageNotFound");
+
     const payload = {
       courseId: message.courseId,
       messageId: message.id,
       parentMessageId: message.parentMessageId,
-      removed: Boolean(message.parentMessageId || replyCount === 0),
-      deletedAt,
+      removed: deletion.removed,
+      deletedAt: deletion.deletedAt,
     };
 
     this.realtimePublisher.emitToRoom(
@@ -286,7 +308,7 @@ export class CourseChatService {
       payload,
     );
 
-    return new BaseResponse(payload);
+    return { payload, threadRemoved: deletion.threadRemoved };
   }
 
   private async getAccessibleMessage(messageId: UUIDType, userId: UUIDType) {

@@ -1,7 +1,5 @@
 export const FORUM_HANDLES = {
   PAGE: "forum-page",
-  UNAVAILABLE: "forum-unavailable",
-  ERROR: "forum-error",
   NEW_TOPIC_BUTTON: "forum-new-topic-button",
   SEARCH_INPUT: "forum-search-input",
   FILTER_SELECT: "forum-filter-select",

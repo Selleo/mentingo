@@ -9858,8 +9858,6 @@
   "forum": {
     "title": "Forum",
     "description": "Zadawaj pytania i dziel się wiedzą z całą organizacją.",
-    "unavailable": "Forum jest niedostępne.",
-    "loadError": "Nie udało się wczytać forum.",
     "newTopic": "Nowy temat",
     "searchPlaceholder": "Szukaj tematów",
     "filter": {

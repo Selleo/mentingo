@@ -9751,8 +9751,6 @@
   "forum": {
     "title": "Forum",
     "description": "Ask questions and share knowledge with everyone in your organization.",
-    "unavailable": "The forum is not available.",
-    "loadError": "The forum could not be loaded.",
     "newTopic": "New topic",
     "searchPlaceholder": "Search topics",
     "filter": {

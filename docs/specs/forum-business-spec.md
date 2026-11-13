@@ -46,6 +46,6 @@ The forum is off by default. An administrator enables it in the platform setting
 
 ## Test Evidence
 
-- API E2E coverage verifies the feature gate and authentication, every signed-in role creating and replying, sorting, filters, search and pagination, course threads visible only to enrolled users and hidden when course discussions are off, replying to course threads from the forum, own and moderator deletion with placeholders, input validation, and tenant isolation through the row-level-security proxy.
-- Web unit tests cover the list parameters, the forum permission helpers and the navigation entry. A Playwright spec added with the web forum covers the disabled forum, creating a topic and a reply, and course threads visible only to enrolled users.
+- API E2E coverage verifies the feature gate and authentication, every signed-in role creating and replying, sorting, filters, search and pagination, course threads visible only to enrolled users and hidden when course discussions are off, replying to course threads from the forum, own and moderator deletion with placeholders and the signal that a topic was removed, input validation, and tenant isolation through the row-level-security proxy.
+- Web unit tests cover the list parameters, the forum permission helpers and the navigation entry. Page tests cover an unknown course filter, a page that no longer exists, the redirect while the forum is off, a missing topic, and leaving a topic once its last post is deleted. A Playwright spec added with the web forum covers the disabled forum, creating a topic and a reply, and course threads visible only to enrolled users.
 - Reactions, mentions, live updates and reply notifications are not part of the forum yet.

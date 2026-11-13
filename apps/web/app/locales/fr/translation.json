@@ -9244,8 +9244,6 @@
   "forum": {
     "title": "Forum",
     "description": "Posez des questions et partagez vos connaissances avec toute votre organisation.",
-    "unavailable": "Le forum n'est pas disponible.",
-    "loadError": "Impossible de charger le forum.",
     "newTopic": "Nouveau sujet",
     "searchPlaceholder": "Rechercher des sujets",
     "filter": {

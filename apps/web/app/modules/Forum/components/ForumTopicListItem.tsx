@@ -32,11 +32,13 @@ export function ForumTopicListItem({ topic }: ForumTopicListItemProps) {
       className="flex gap-3 rounded-lg border border-neutral-200 bg-white p-4 transition-colors hover:border-primary-200 hover:bg-primary-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
       data-testid={FORUM_HANDLES.topicItem(topic.id)}
     >
-      <UserAvatar
-        className="size-10 shrink-0"
-        userName={authorName}
-        profilePictureUrl={topic.author.avatarReference}
-      />
+      {!topic.isDeleted && (
+        <UserAvatar
+          className="size-10 shrink-0"
+          userName={authorName}
+          profilePictureUrl={topic.author.avatarReference}
+        />
+      )}
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           <h2
@@ -55,7 +57,7 @@ export function ForumTopicListItem({ topic }: ForumTopicListItemProps) {
           <p className="body-sm line-clamp-2 break-words text-neutral-600">{preview}</p>
         )}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-600">
-          <span>{authorName}</span>
+          {!topic.isDeleted && <span>{authorName}</span>}
           <span
             className="flex items-center gap-1"
             data-testid={FORUM_HANDLES.topicItemReplies(topic.id)}

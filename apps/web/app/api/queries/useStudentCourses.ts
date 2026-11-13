@@ -78,8 +78,8 @@ export const infiniteStudentCoursesQueryOptions = (
   ...options,
 });
 
-export function useStudentCourses(searchParams?: CourseParams, options?: QueryOptions) {
-  return useQuery(studentCoursesQueryOptions(searchParams, options));
+export function useStudentCourses(searchParams?: CourseParams) {
+  return useQuery(studentCoursesQueryOptions(searchParams));
 }
 
 export function useStudentCoursesSuspense(searchParams?: CourseParams) {

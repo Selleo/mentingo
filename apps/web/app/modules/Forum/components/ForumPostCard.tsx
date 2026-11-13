@@ -74,12 +74,14 @@ export function ForumPostCard({ post, canDelete, isDeleting, onDelete }: ForumPo
           {isDeleted ? t("forum.deletedPost") : post.content}
         </p>
       </div>
-      <DeleteForumPostDialog
-        open={isDeleteDialogOpen}
-        isDeleting={isDeleting}
-        onOpenChange={setIsDeleteDialogOpen}
-        onConfirm={() => onDelete(post.id, () => setIsDeleteDialogOpen(false))}
-      />
+      {canDelete && (
+        <DeleteForumPostDialog
+          open={isDeleteDialogOpen}
+          isDeleting={isDeleting}
+          onOpenChange={setIsDeleteDialogOpen}
+          onConfirm={() => onDelete(post.id, () => setIsDeleteDialogOpen(false))}
+        />
+      )}
     </article>
   );
 }

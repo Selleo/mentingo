@@ -1,4 +1,5 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 
 import { ApiClient } from "~/api/api-client";
 
@@ -6,25 +7,26 @@ import { FORUM_QUERY_KEY } from "./forumQueryKeys";
 
 import type { SupportedLanguages } from "@repo/shared";
 
-export const forumTopicQueryOptions = (
-  topicId: string,
-  language: SupportedLanguages,
-  { enabled = true } = {},
-) =>
+const MISSING_TOPIC_STATUSES = [400, 404];
+
+export const forumTopicQueryOptions = (topicId: string, language: SupportedLanguages) =>
   queryOptions({
     queryKey: [...FORUM_QUERY_KEY, "topic", topicId, language],
     queryFn: async () => {
-      const response = await ApiClient.api.forumControllerGetTopic(topicId, { language });
+      try {
+        const response = await ApiClient.api.forumControllerGetTopic(topicId, { language });
 
-      return response.data.data;
+        return response.data.data;
+      } catch (error) {
+        const status = isAxiosError(error) ? error.response?.status : undefined;
+
+        if (status && MISSING_TOPIC_STATUSES.includes(status)) return null;
+
+        throw error;
+      }
     },
-    enabled: enabled && Boolean(topicId),
   });
 
-export function useForumTopic(
-  topicId: string,
-  language: SupportedLanguages,
-  options?: { enabled?: boolean },
-) {
-  return useQuery(forumTopicQueryOptions(topicId, language, options));
+export function useForumTopicSuspense(topicId: string, language: SupportedLanguages) {
+  return useSuspenseQuery(forumTopicQueryOptions(topicId, language));
 }

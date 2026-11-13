@@ -20,11 +20,12 @@ import type { PermissionKey, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
+  ForumPostContext,
   ForumPostRow,
   ForumThreadContext,
   ForumTopicRow,
 } from "src/forum/forum.repository.types";
-import type { ForumTopicListQuery } from "src/forum/forum.types";
+import type { ForumPostDeletion, ForumTopicListQuery } from "src/forum/forum.types";
 import type {
   CreateForumPostBody,
   CreateForumTopicBody,
@@ -149,8 +150,16 @@ export class ForumService {
       return new BaseResponse(await this.getPostResponse(message.id, currentUser.userId));
     }
 
-    const postId = await this.db.transaction((trx) =>
-      this.forumRepository.createGeneralReply(
+    const postId = await this.db.transaction(async (trx) => {
+      const isFirstPostVisible = await this.courseChatRepository.lockThreadForReply(
+        thread.id,
+        thread.firstPostId,
+        trx,
+      );
+
+      if (!isFirstPostVisible) throw new BadRequestException("forum.errors.topicDeleted");
+
+      return this.forumRepository.createGeneralReply(
         {
           threadId: thread.id,
           firstPostId: thread.firstPostId,
@@ -158,8 +167,8 @@ export class ForumService {
           content,
         },
         trx,
-      ),
-    );
+      );
+    });
 
     return new BaseResponse(await this.getPostResponse(postId, currentUser.userId));
   }
@@ -173,24 +182,36 @@ export class ForumService {
     if (!post || post.deletedAt) throw new NotFoundException("forum.errors.postNotFound");
 
     const thread = await this.getAccessibleThread(post.threadId, currentUser);
-    const isFirstPost = post.parentMessageId === null;
+    const deletion =
+      thread.scope === DISCUSSION_SCOPES.COURSE
+        ? await this.deleteCoursePost(post, currentUser)
+        : await this.deleteGeneralPost(post, currentUser);
 
-    if (thread.scope === DISCUSSION_SCOPES.COURSE) {
-      const { data } = await this.courseChatService.deleteMessage(
-        post.id,
-        currentUser.userId,
-        currentUser.permissions ?? [],
-      );
+    return new BaseResponse({
+      topicId: thread.id,
+      postId: post.id,
+      isFirstPost: post.parentMessageId === null,
+      ...deletion,
+    });
+  }
 
-      return new BaseResponse({
-        topicId: thread.id,
-        postId: post.id,
-        isFirstPost,
-        removed: data.removed,
-        deletedAt: data.deletedAt,
-      });
-    }
+  private async deleteCoursePost(
+    post: ForumPostContext,
+    currentUser: CurrentUserType,
+  ): Promise<ForumPostDeletion> {
+    const { payload, threadRemoved } = await this.courseChatService.deleteCourseMessage(
+      post.id,
+      currentUser.userId,
+      currentUser.permissions ?? [],
+    );
 
+    return { removed: payload.removed, deletedAt: payload.deletedAt, topicRemoved: threadRemoved };
+  }
+
+  private async deleteGeneralPost(
+    post: ForumPostContext,
+    currentUser: CurrentUserType,
+  ): Promise<ForumPostDeletion> {
     const canDeleteAnyPost = hasPermission(
       currentUser.permissions ?? [],
       PERMISSIONS.FORUM_POST_DELETE,
@@ -200,16 +221,15 @@ export class ForumService {
       throw new ForbiddenException("forum.errors.cannotDeletePost");
     }
 
-    const replyCount = isFirstPost ? await this.courseChatRepository.countReplies(post.id) : 0;
-    const deletedAt = await this.courseChatRepository.softDeleteMessage(post.id);
+    const deletion = await this.courseChatRepository.deleteMessage(post);
 
-    return new BaseResponse({
-      topicId: thread.id,
-      postId: post.id,
-      isFirstPost,
-      removed: !isFirstPost || replyCount === 0,
-      deletedAt,
-    });
+    if (!deletion) throw new NotFoundException("forum.errors.postNotFound");
+
+    return {
+      removed: deletion.removed,
+      deletedAt: deletion.deletedAt,
+      topicRemoved: deletion.threadRemoved,
+    };
   }
 
   /** Inaccessible topics are reported as missing so their existence is not revealed. */

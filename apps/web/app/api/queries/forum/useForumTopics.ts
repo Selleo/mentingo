@@ -1,4 +1,4 @@
-import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
@@ -10,7 +10,7 @@ export type ForumTopicsQuery = NonNullable<
 
 export const FORUM_TOPICS_PER_PAGE = 20;
 
-export const forumTopicsQueryOptions = (query: ForumTopicsQuery, { enabled = true } = {}) =>
+export const forumTopicsQueryOptions = (query: ForumTopicsQuery) =>
   queryOptions({
     queryKey: [...FORUM_QUERY_KEY, "topics", query],
     queryFn: async () => {
@@ -18,10 +18,8 @@ export const forumTopicsQueryOptions = (query: ForumTopicsQuery, { enabled = tru
 
       return response.data;
     },
-    placeholderData: keepPreviousData,
-    enabled,
   });
 
-export function useForumTopics(query: ForumTopicsQuery, options?: { enabled?: boolean }) {
-  return useQuery(forumTopicsQueryOptions(query, options));
+export function useForumTopicsSuspense(query: ForumTopicsQuery) {
+  return useSuspenseQuery(forumTopicsQueryOptions(query));
 }

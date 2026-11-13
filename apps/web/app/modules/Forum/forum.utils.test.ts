@@ -8,6 +8,7 @@ import {
   canReplyInTopic,
   getLastPage,
   getTopicHeading,
+  isForumTopicFilter,
   parsePageParam,
   parseSortParam,
   toTopicFilterQuery,
@@ -26,6 +27,17 @@ describe("forum list params", () => {
     expect(parsePageParam(null)).toBe(1);
     expect(parseSortParam(FORUM_TOPIC_SORTS.MOST_REPLIES)).toBe(FORUM_TOPIC_SORTS.MOST_REPLIES);
     expect(parseSortParam("random")).toBe(FORUM_TOPIC_SORTS.LAST_ACTIVITY);
+    expect(parseSortParam(undefined)).toBe(FORUM_TOPIC_SORTS.LAST_ACTIVITY);
+  });
+
+  it("accepts the fixed filters and only the courses the viewer can pick", () => {
+    const courseIds = ["course-id"];
+
+    expect(isForumTopicFilter(FORUM_FILTERS.ALL, courseIds)).toBe(true);
+    expect(isForumTopicFilter(FORUM_FILTERS.GENERAL, courseIds)).toBe(true);
+    expect(isForumTopicFilter("course-id", courseIds)).toBe(true);
+    expect(isForumTopicFilter("other-course-id", courseIds)).toBe(false);
+    expect(isForumTopicFilter("foo", [])).toBe(false);
   });
 
   it("maps the filter to the topic query scope", () => {

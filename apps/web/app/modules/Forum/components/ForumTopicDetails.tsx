@@ -1,15 +1,18 @@
 import { Link, useNavigate, useSearchParams } from "@remix-run/react";
 import { ArrowLeft } from "lucide-react";
+import { useDeferredValue } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCreateForumPost } from "~/api/mutations/useCreateForumPost";
 import { useDeleteForumPost } from "~/api/mutations/useDeleteForumPost";
-import { FORUM_POSTS_PER_PAGE, useForumTopicPosts } from "~/api/queries/forum/useForumTopicPosts";
+import {
+  FORUM_POSTS_PER_PAGE,
+  useForumTopicPostsSuspense,
+} from "~/api/queries/forum/useForumTopicPosts";
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
-import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
+import { useClampedPage } from "~/components/DataTable";
 import { Pagination } from "~/components/Pagination/Pagination";
 import { Badge } from "~/components/ui/badge";
-import { Skeleton } from "~/components/ui/skeleton";
 
 import { FORUM_HANDLES } from "../../../../e2e/data/forum/handles";
 import {
@@ -39,7 +42,9 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
   const courseId = topic.course?.id ?? null;
   const firstPostId = topic.firstPost.id;
 
-  const { data: posts, error: postsError } = useForumTopicPosts(topic.id, page);
+  const deferredPage = useDeferredValue(page);
+  const { data: posts } = useForumTopicPostsSuspense(topic.id, deferredPage);
+  const totalReplies = posts.pagination.totalItems;
   const { mutate: createPost, isPending: isSendingReply } = useCreateForumPost({
     topicId: topic.id,
     firstPostId,
@@ -52,7 +57,6 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
 
   const isClosed = Boolean(topic.firstPost.deletedAt);
   const canReply = !isClosed && canReplyInTopic(topic.scope, permissions);
-  const totalReplies = posts?.pagination.totalItems ?? topic.replyCount;
 
   const goToPage = (nextPage: number) => {
     setSearchParams(
@@ -67,6 +71,13 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
       { replace: true },
     );
   };
+
+  useClampedPage({
+    page,
+    perPage: FORUM_POSTS_PER_PAGE,
+    totalItems: totalReplies,
+    setPage: goToPage,
+  });
 
   const canDelete = (post: ForumPost) =>
     !post.deletedAt &&
@@ -91,39 +102,9 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
       onSuccess: (result) => {
         onDeleted();
 
-        if (result.isFirstPost && result.removed) navigate("/forum");
+        if (result.topicRemoved) navigate("/forum");
       },
     });
-  };
-
-  const renderReplies = () => {
-    if (postsError) {
-      return (
-        <p className="body-sm text-neutral-600">
-          {getTranslatedApiErrorMessage(postsError, t, t("forum.loadError"))}
-        </p>
-      );
-    }
-
-    if (!posts) return <Skeleton className="h-32 w-full" />;
-
-    if (!posts.data.length) {
-      return (
-        <p className="body-sm text-neutral-600" data-testid={FORUM_HANDLES.NO_REPLIES}>
-          {t("forum.topic.noReplies")}
-        </p>
-      );
-    }
-
-    return posts.data.map((post) => (
-      <ForumPostCard
-        key={post.id}
-        post={post}
-        canDelete={canDelete(post)}
-        isDeleting={isDeletingPost}
-        onDelete={handleDelete}
-      />
-    ));
   };
 
   return (
@@ -161,10 +142,23 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
         <h2 className="body-base-md text-neutral-950">
           {t("forum.replies", { count: totalReplies })}
         </h2>
-        {renderReplies()}
-        {posts && posts.pagination.totalItems > FORUM_POSTS_PER_PAGE && (
+        {totalReplies === 0 && (
+          <p className="body-sm text-neutral-600" data-testid={FORUM_HANDLES.NO_REPLIES}>
+            {t("forum.topic.noReplies")}
+          </p>
+        )}
+        {posts.data.map((post) => (
+          <ForumPostCard
+            key={post.id}
+            post={post}
+            canDelete={canDelete(post)}
+            isDeleting={isDeletingPost}
+            onDelete={handleDelete}
+          />
+        ))}
+        {totalReplies > FORUM_POSTS_PER_PAGE && (
           <Pagination
-            totalItems={posts.pagination.totalItems}
+            totalItems={totalReplies}
             itemsPerPage={FORUM_POSTS_PER_PAGE}
             currentPage={page}
             canChangeItemsPerPage={false}

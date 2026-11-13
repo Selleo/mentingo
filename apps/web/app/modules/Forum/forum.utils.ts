@@ -20,15 +20,23 @@ export const FORUM_FILTERS = {
   GENERAL: "general",
 } as const;
 
+export const FORUM_URL_PARAMS = {
+  FILTER: "filter",
+  SORT: "sort",
+} as const;
+
 export const parsePageParam = (value: string | null) => {
   const page = Number(value);
 
   return Number.isInteger(page) && page > 0 ? page : 1;
 };
 
-export const parseSortParam = (value: string | null): ForumTopicSort =>
+export const parseSortParam = (value?: string | null): ForumTopicSort =>
   Object.values(FORUM_TOPIC_SORTS).find((sort) => sort === value) ??
   FORUM_TOPIC_SORTS.LAST_ACTIVITY;
+
+export const isForumTopicFilter = (value: string, courseIds: readonly string[]) =>
+  Object.values<string>(FORUM_FILTERS).includes(value) || courseIds.includes(value);
 
 /** Values other than the fixed filters are course ids. */
 export const toTopicFilterQuery = (filter: string): Pick<ForumTopicsQuery, "scope" | "courseId"> =>

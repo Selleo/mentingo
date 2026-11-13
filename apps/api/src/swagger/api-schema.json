@@ -162731,6 +162731,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "topicRemoved": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -162738,7 +162741,8 @@
               "postId",
               "isFirstPost",
               "removed",
-              "deletedAt"
+              "deletedAt",
+              "topicRemoved"
             ]
           }
         },

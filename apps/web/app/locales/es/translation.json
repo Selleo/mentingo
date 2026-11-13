@@ -9659,8 +9659,6 @@
   "forum": {
     "title": "Foro",
     "description": "Haz preguntas y comparte conocimientos con toda tu organización.",
-    "unavailable": "El foro no está disponible.",
-    "loadError": "No se pudo cargar el foro.",
     "newTopic": "Nuevo tema",
     "searchPlaceholder": "Buscar temas",
     "filter": {

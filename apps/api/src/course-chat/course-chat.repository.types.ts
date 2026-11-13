@@ -60,3 +60,9 @@ export type CourseChatMessageContext = {
   parentMessageId: UUIDType | null;
   deletedAt?: string | null;
 };
+
+export type CourseChatMessageDeletion = {
+  deletedAt: string | null;
+  removed: boolean;
+  threadRemoved: boolean;
+};

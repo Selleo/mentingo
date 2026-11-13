@@ -1,4 +1,4 @@
-import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
@@ -6,11 +6,7 @@ import { FORUM_QUERY_KEY } from "./forumQueryKeys";
 
 export const FORUM_POSTS_PER_PAGE = 20;
 
-export const forumTopicPostsQueryOptions = (
-  topicId: string,
-  page: number,
-  { enabled = true } = {},
-) =>
+export const forumTopicPostsQueryOptions = (topicId: string, page: number) =>
   queryOptions({
     queryKey: [...FORUM_QUERY_KEY, "topic", topicId, "posts", page],
     queryFn: async () => {
@@ -21,10 +17,8 @@ export const forumTopicPostsQueryOptions = (
 
       return response.data;
     },
-    placeholderData: keepPreviousData,
-    enabled: enabled && Boolean(topicId),
   });
 
-export function useForumTopicPosts(topicId: string, page: number, options?: { enabled?: boolean }) {
-  return useQuery(forumTopicPostsQueryOptions(topicId, page, options));
+export function useForumTopicPostsSuspense(topicId: string, page: number) {
+  return useSuspenseQuery(forumTopicPostsQueryOptions(topicId, page));
 }

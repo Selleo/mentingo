@@ -9709,8 +9709,6 @@
   "forum": {
     "title": "Forum",
     "description": "Stellen Sie Fragen und teilen Sie Wissen mit allen in Ihrer Organisation.",
-    "unavailable": "Das Forum ist nicht verfügbar.",
-    "loadError": "Das Forum konnte nicht geladen werden.",
     "newTopic": "Neues Thema",
     "searchPlaceholder": "Themen durchsuchen",
     "filter": {

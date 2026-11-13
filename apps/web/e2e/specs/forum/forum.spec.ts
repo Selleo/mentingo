@@ -61,8 +61,9 @@ test("forum stays hidden while it is disabled", async ({ createIsolatedWorkspace
   await prepareNavigationPageFlow(student.page);
   await expect(student.page.getByTestId(NAVIGATION_HANDLES.FORUM_LINK)).toHaveCount(0);
 
-  await openForumFlow(student.page);
-  await expect(student.page.getByTestId(FORUM_HANDLES.UNAVAILABLE)).toBeVisible();
+  await student.page.goto("/forum");
+  await expect(student.page).not.toHaveURL(/\/forum/);
+  await expect(student.page.getByTestId(FORUM_HANDLES.PAGE)).toHaveCount(0);
 });
 
 test("student creates a forum topic and replies to it", async ({ createIsolatedWorkspace }) => {
