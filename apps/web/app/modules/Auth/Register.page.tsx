@@ -85,11 +85,7 @@ export default function RegisterPage() {
   });
 
   const {
-    data: {
-      enforceSSO: isSSOEnforced,
-      inviteOnlyRegistration: inviteOnlyRegistration,
-      loginBackgroundImageS3Key,
-    },
+    data: { inviteOnlyRegistration: inviteOnlyRegistration, loginBackgroundImageS3Key },
   } = useGlobalSettingsSuspense();
 
   const {
@@ -132,7 +128,7 @@ export default function RegisterPage() {
   );
 
   const onSubmit = async (data: RegisterFormValues) => {
-    if (isSSOEnforced && isAnyProviderEnabled) return;
+    if (!loginMethods?.password) return;
 
     /**
      * We need to remove birthday from register data because we don't process personal data
@@ -184,11 +180,13 @@ export default function RegisterPage() {
                 </div>
                 <CardTitle className="text-xl">{t("registerView.header")}</CardTitle>
                 <CardDescription className="max-w-md text-sm leading-6">
-                  {isSSOEnforced ? t("registerView.subHeaderSSO") : t("registerView.subHeader")}
+                  {loginMethods?.password
+                    ? t("registerView.subHeader")
+                    : t("registerView.subHeaderSSO")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {!isSSOEnforced && (
+                {loginMethods?.password && (
                   <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="firstName">{t("registerView.field.firstName")}</Label>
@@ -361,7 +359,7 @@ export default function RegisterPage() {
 
                 {isAnyProviderEnabled && (
                   <SocialLogin
-                    isEmailFormVisible={!isSSOEnforced}
+                    isEmailFormVisible={Boolean(loginMethods?.password)}
                     isMagicLinkEnabled={loginMethods?.magicLink ?? false}
                     isGoogleOAuthEnabled={isGoogleOAuthEnabled}
                     isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}

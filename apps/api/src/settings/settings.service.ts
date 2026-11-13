@@ -1152,41 +1152,6 @@ export class SettingsService {
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
-  public async updateGlobalEnforceSSO(
-    actor?: CurrentUserType,
-  ): Promise<GlobalSettingsJSONContentSchema> {
-    const previousRecord = await this.getGlobalSettingsRecord();
-
-    const enforceSSO = previousRecord.settings.enforceSSO;
-
-    const [{ settings: updatedGlobalSettings }] = await this.db
-      .update(settings)
-      .set({
-        settings: sql`
-          jsonb_set(
-            settings.settings,
-            '{enforceSSO}',
-            to_jsonb(${!enforceSSO}::boolean),
-            true
-          )
-        `,
-      })
-      .where(isNull(settings.userId))
-      .returning({
-        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
-      });
-
-    const updatedRecord = await this.getGlobalSettingsRecord();
-
-    await this.recordSettingsUpdate({
-      actor,
-      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
-      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
-    });
-
-    return this.parseGlobalSettings(updatedGlobalSettings);
-  }
-
   public async updateGlobalModernCourseListEnabled(
     actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
@@ -2492,6 +2457,8 @@ export class SettingsService {
   ): GlobalSettingsJSONContentSchema {
     const publicSettings = { ...settings };
     Reflect.deleteProperty(publicSettings, "userEmailTriggers");
+    // Legacy rows may retain this key; organization login methods are the only auth policy.
+    Reflect.deleteProperty(publicSettings, "enforceSSO");
     return {
       ...publicSettings,
       publicCoursePreviewEnabled:

@@ -64,12 +64,12 @@ export class LoginMethodsService {
    */
   async updateLoginMethod({ method, enabled }: UpdateLoginMethodBody, actor: CurrentUserType) {
     await this.tenantDbRunnerService.transaction(async () => {
-      const globalSettings = await this.envRepository.findGlobalSettingsForUpdate();
+      await this.envRepository.findGlobalSettingsForUpdate();
 
       if (enabled) {
         await this.assertCredentialsConfigured(method);
       } else {
-        await this.assertAnotherLoginMethodRemainsUsable(method, globalSettings?.enforceSSO);
+        await this.assertAnotherLoginMethodRemainsUsable(method);
       }
 
       await this.envService.bulkUpsertInternalEnv(this.buildEnabledFlags(method, enabled), actor);
@@ -84,15 +84,12 @@ export class LoginMethodsService {
     }
   }
 
-  private async assertAnotherLoginMethodRemainsUsable(
-    disabledMethod: LoginMethod,
-    enforceSSO = false,
-  ) {
+  private async assertAnotherLoginMethodRemainsUsable(disabledMethod: LoginMethod) {
     const remainingMethods = Object.values(LOGIN_METHODS).filter(
       (method) => method !== disabledMethod,
     );
     const remainingMethodsUsability = await Promise.all(
-      remainingMethods.map((method) => this.isLoginMethodUsable(method, enforceSSO)),
+      remainingMethods.map((method) => this.isLoginMethodUsable(method)),
     );
 
     if (!remainingMethodsUsability.some(Boolean)) {
@@ -100,10 +97,8 @@ export class LoginMethodsService {
     }
   }
 
-  private async isLoginMethodUsable(method: LoginMethod, enforceSSO: boolean) {
-    const isBlockedBySSOEnforcement = enforceSSO && method === LOGIN_METHODS.PASSWORD;
-
-    if (isBlockedBySSOEnforcement || !(await this.isLoginMethodEnabled(method))) return false;
+  private async isLoginMethodUsable(method: LoginMethod) {
+    if (!(await this.isLoginMethodEnabled(method))) return false;
 
     const missingCredentials = await this.getMissingCredentials(method);
 
