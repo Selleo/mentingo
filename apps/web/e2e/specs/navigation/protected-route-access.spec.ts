@@ -81,9 +81,9 @@ const expectReportApiAllowed = async (client: FixtureApiClient) => {
   expect((await client.api.reportControllerRunReport(reportQuery)).status).toBe(201);
 };
 
-// The reviewer has no dashboard, course, calendar or path access, so it falls back to settings.
+// The reviewer has no dashboard, course, calendar or path access, so it lands on the grading queue.
 const deniedRouteRedirect = (role: string) =>
-  role === SYSTEM_ROLE_SLUGS.REVIEWER ? /\/settings$/ : /\/(dashboard|courses)$/;
+  role === SYSTEM_ROLE_SLUGS.REVIEWER ? /\/quiz-grading$/ : /\/(dashboard|courses)$/;
 
 const expectDeniedRoutes = async (page: Page, role: string) => {
   for (const { path, requirement } of protectedRoutes) {

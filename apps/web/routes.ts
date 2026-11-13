@@ -61,6 +61,8 @@ export const routes: (
           route("phishing", "modules/Phishing/Phishing.page.tsx");
           route("phishing/new", "modules/Phishing/CreatePhishing.page.tsx");
           route("phishing/:id", "modules/Phishing/PhishingReport.page.tsx");
+          route("quiz-grading", "modules/QuizGrading/QuizGradingQueue.page.tsx");
+          route("quiz-grading/:answerId", "modules/QuizGrading/QuizGradingAnswer.page.tsx");
           route("content-marketplace", "modules/ContentMarketplace/ContentMarketplace.page.tsx");
           route("notifications", "modules/Notifications/Notifications.page.tsx");
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");

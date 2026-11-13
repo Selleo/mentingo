@@ -26,6 +26,7 @@ export const DetailedResponse = ({ question, isCompleted = false }: DetailedResp
       questionType="threeOrFiveWordSentence"
       questionNumber={question.displayOrder}
       isAwaitingReview={isQuizAwaitingReview && Boolean(question.requiresReview)}
+      reviewerFeedback={question.reviewerFeedback}
     >
       <Textarea
         data-testid="detailed-response"

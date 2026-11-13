@@ -9625,6 +9625,71 @@
       }
     }
   },
+  "quizGrading": {
+    "title": "To grade",
+    "answerTitle": "Grade answer",
+    "pendingCount": "Pending: {{count}}",
+    "empty": "No answers match the selected filters.",
+    "filters": {
+      "status": "Status",
+      "course": "Course",
+      "lesson": "Lesson",
+      "student": "Student",
+      "allCourses": "All courses",
+      "allLessons": "All lessons",
+      "allStudents": "All students"
+    },
+    "status": {
+      "pending": "Pending",
+      "graded": "Graded"
+    },
+    "columns": {
+      "question": "Question",
+      "course": "Course",
+      "lesson": "Lesson",
+      "student": "Student",
+      "submittedAt": "Submitted",
+      "status": "Status",
+      "points": "Points"
+    },
+    "attempt": "Attempt",
+    "question": "Question",
+    "reviewerInstructions": "Reviewer instructions",
+    "studentAnswer": "Student's answer",
+    "nextAnswer": "Next answer",
+    "points": "Points: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Pass",
+      "failed": "Fail"
+    },
+    "form": {
+      "title": "Grade",
+      "verdict": "Result ({{max}} pt for a pass)",
+      "verdictRequired": "Choose pass or fail.",
+      "comment": "Comment (optional)",
+      "commentPlaceholder": "Feedback for the student",
+      "commentTooLong": "The comment can have at most {{max}} characters.",
+      "submit": "Save grade",
+      "regrade": "Save new grade"
+    },
+    "history": {
+      "title": "Grading history",
+      "empty": "This answer has not been graded yet.",
+      "revision": "Revision {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Answer graded.",
+      "attemptGraded": "Answer graded. The quiz result is now available to the student.",
+      "gradeError": "Could not save the grade."
+    },
+    "errors": {
+      "answerNotFound": "This answer does not exist or cannot be graded.",
+      "ownAnswer": "You cannot grade your own answer.",
+      "attemptSuperseded": "The learner has started this course again, so this attempt can no longer be graded.",
+      "courseNotPublished": "This course is back in draft. Publish it before grading its answers."
+    },
+    "loadError": "Could not load the grading queue. Refresh the page to try again."
+  },
   "coursesViewToggle": {
     "label": "Courses view",
     "catalogue": "Catalogue",

@@ -34,7 +34,7 @@ import {
   shouldRequireLearningModeForProgress,
 } from "src/common/utils/lessonLearningAccess";
 import { courseLearningContext } from "src/course-repetition/course-learning-context";
-import { LessonProgressChangedEvent, QuizCompletedEvent } from "src/events";
+import { LessonProgressChangedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { HostedVideoStatusService } from "src/file/hosted-video-status.service";
@@ -426,6 +426,7 @@ export class LessonService {
           ...question,
           passQuestion: typeof question.passQuestion === "boolean" ? false : question.passQuestion,
           solutionExplanation: null,
+          reviewerFeedback: undefined,
           options: question.options?.map((option) => ({
             ...option,
             isCorrect: typeof option.isCorrect === "boolean" ? false : option.isCorrect,
@@ -802,24 +803,23 @@ export class LessonService {
 
         if (!evaluationResult) return null;
 
-        const isQuizPassed = evaluationResult.passed;
         const { awaitingReview } = evaluationResult;
 
         // A pending attempt keeps the lesson incomplete; grading completes it and emits the events.
-        await this.studentLessonProgressService.updateQuizProgress(
-          accessCourseLessonWithDetails.chapterId,
-          studentQuizAnswers.lessonId,
-          userId,
-          evaluationResult.questionCount,
-          evaluationResult.score,
-          evaluationResult.attemptNumber,
-          isQuizPassed,
-          !awaitingReview,
-          trx,
-          studentQuizAnswers.language,
-        );
-
         if (awaitingReview) {
+          await this.studentLessonProgressService.updateQuizProgress(
+            accessCourseLessonWithDetails.chapterId,
+            studentQuizAnswers.lessonId,
+            userId,
+            evaluationResult.questionCount,
+            evaluationResult.score,
+            evaluationResult.attemptNumber,
+            false,
+            false,
+            trx,
+            studentQuizAnswers.language,
+          );
+
           return {
             correctAnswerCount: 0,
             wrongAnswerCount: 0,
@@ -829,32 +829,22 @@ export class LessonService {
           };
         }
 
-        if (isQuizPassed) {
-          await this.studentLessonProgressService.markLessonAsCompleted({
-            id: studentQuizAnswers.lessonId,
-            studentId: userId,
-            userPermissions: currentUser.permissions,
-            actor: currentUser,
-            quizCompleted: true,
-            completedQuestionCount: evaluationResult.questionCount,
-            dbInstance: trx,
-            isQuizPassed,
-            language: studentQuizAnswers.language,
-          });
-        }
-
-        await this.outboxPublisher.publish(
-          new QuizCompletedEvent({
-            userId,
-            courseId: accessCourseLessonWithDetails.courseId,
-            lessonId: studentQuizAnswers.lessonId,
-            correctAnswers: evaluationResult.correctAnswerCount,
-            wrongAnswers: evaluationResult.wrongAnswerCount,
-            score: evaluationResult.score,
-            isSupportMode: Boolean(currentUser.isSupportMode),
-          }),
-          trx,
-        );
+        await this.studentLessonProgressService.finishQuizProgress({
+          chapterId: accessCourseLessonWithDetails.chapterId,
+          courseId: accessCourseLessonWithDetails.courseId,
+          lessonId: studentQuizAnswers.lessonId,
+          studentId: userId,
+          questionCount: evaluationResult.questionCount,
+          correctAnswerCount: evaluationResult.correctAnswerCount,
+          score: evaluationResult.score,
+          attemptNumber: evaluationResult.attemptNumber,
+          isQuizPassed: evaluationResult.passed,
+          language: studentQuizAnswers.language,
+          userPermissions: currentUser.permissions,
+          actor: currentUser,
+          isSupportMode: Boolean(currentUser.isSupportMode),
+          dbInstance: trx,
+        });
 
         return {
           correctAnswerCount: evaluationResult.correctAnswerCount,

@@ -46,4 +46,19 @@ describe("getDefaultAuthenticatedRedirect", () => {
       }),
     ).toBe("/development-paths");
   });
+
+  it("sends reviewers without other destinations to the grading queue", () => {
+    const user = currentUserWithPermissions([PERMISSIONS.QUIZ_GRADING_READ]);
+
+    expect(getDefaultAuthenticatedRedirect(user, globalSettings())).toBe("/quiz-grading");
+  });
+
+  it("keeps earlier destinations ahead of the grading queue", () => {
+    const user = currentUserWithPermissions([
+      PERMISSIONS.DASHBOARD_READ,
+      PERMISSIONS.QUIZ_GRADING_READ,
+    ]);
+
+    expect(getDefaultAuthenticatedRedirect(user, globalSettings())).toBe("/dashboard");
+  });
 });

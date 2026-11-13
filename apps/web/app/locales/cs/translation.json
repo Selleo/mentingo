@@ -9648,6 +9648,71 @@
       }
     }
   },
+  "quizGrading": {
+    "title": "K hodnocení",
+    "answerTitle": "Hodnocení odpovědi",
+    "pendingCount": "Čekající: {{count}}",
+    "empty": "Vybraným filtrům neodpovídají žádné odpovědi.",
+    "filters": {
+      "status": "Stav",
+      "course": "Kurz",
+      "lesson": "Lekce",
+      "student": "Student",
+      "allCourses": "Všechny kurzy",
+      "allLessons": "Všechny lekce",
+      "allStudents": "Všichni studenti"
+    },
+    "status": {
+      "pending": "Čeká",
+      "graded": "Ohodnoceno"
+    },
+    "columns": {
+      "question": "Otázka",
+      "course": "Kurz",
+      "lesson": "Lekce",
+      "student": "Student",
+      "submittedAt": "Odesláno",
+      "status": "Stav",
+      "points": "Body"
+    },
+    "attempt": "Pokus",
+    "question": "Otázka",
+    "reviewerInstructions": "Pokyny pro hodnotitele",
+    "studentAnswer": "Odpověď studenta",
+    "nextAnswer": "Další odpověď",
+    "points": "Body: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Splněno",
+      "failed": "Nesplněno"
+    },
+    "form": {
+      "title": "Hodnocení",
+      "verdict": "Výsledek ({{max}} b. za splnění)",
+      "verdictRequired": "Vyberte splněno nebo nesplněno.",
+      "comment": "Komentář (nepovinné)",
+      "commentPlaceholder": "Zpětná vazba pro studenta",
+      "commentTooLong": "Komentář může mít nejvýše {{max}} znaků.",
+      "submit": "Uložit hodnocení",
+      "regrade": "Uložit nové hodnocení"
+    },
+    "history": {
+      "title": "Historie hodnocení",
+      "empty": "Tato odpověď zatím nebyla ohodnocena.",
+      "revision": "Verze {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Odpověď byla ohodnocena.",
+      "attemptGraded": "Odpověď byla ohodnocena. Výsledek kvízu je nyní pro studenta dostupný.",
+      "gradeError": "Hodnocení se nepodařilo uložit."
+    },
+    "errors": {
+      "answerNotFound": "Tato odpověď neexistuje nebo ji nelze ohodnotit.",
+      "ownAnswer": "Nemůžete hodnotit svou vlastní odpověď.",
+      "attemptSuperseded": "Studující začal tento kurz znovu, proto tento pokus již nelze hodnotit.",
+      "courseNotPublished": "Tento kurz je opět koncept. Před hodnocením odpovědí jej zveřejněte."
+    },
+    "loadError": "Frontu k hodnocení se nepodařilo načíst. Obnovte stránku a zkuste to znovu."
+  },
   "coursesViewToggle": {
     "label": "Zobrazení kurzů",
     "catalogue": "Katalog",

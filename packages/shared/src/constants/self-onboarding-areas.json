@@ -164,6 +164,17 @@
       ]
     },
     {
+      "key": "quiz-grading",
+      "title": "Grading open quiz answers",
+      "specPaths": ["docs/specs/quiz-assessment-engine-business-spec.md"],
+      "routes": [
+        {
+          "prefix": "/quiz-grading",
+          "pageKey": "quiz-grading"
+        }
+      ]
+    },
+    {
       "key": "content-marketplace",
       "title": "Content marketplace",
       "specPaths": ["docs/specs/content-marketplace-business-spec.md"],

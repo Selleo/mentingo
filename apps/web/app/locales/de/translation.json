@@ -9583,6 +9583,71 @@
       }
     }
   },
+  "quizGrading": {
+    "title": "Zu bewerten",
+    "answerTitle": "Antwort bewerten",
+    "pendingCount": "Ausstehend: {{count}}",
+    "empty": "Keine Antworten entsprechen den ausgewählten Filtern.",
+    "filters": {
+      "status": "Status",
+      "course": "Kurs",
+      "lesson": "Lektion",
+      "student": "Lernende Person",
+      "allCourses": "Alle Kurse",
+      "allLessons": "Alle Lektionen",
+      "allStudents": "Alle Lernenden"
+    },
+    "status": {
+      "pending": "Ausstehend",
+      "graded": "Bewertet"
+    },
+    "columns": {
+      "question": "Frage",
+      "course": "Kurs",
+      "lesson": "Lektion",
+      "student": "Lernende Person",
+      "submittedAt": "Eingereicht",
+      "status": "Status",
+      "points": "Punkte"
+    },
+    "attempt": "Versuch",
+    "question": "Frage",
+    "reviewerInstructions": "Hinweise für Bewertende",
+    "studentAnswer": "Antwort der lernenden Person",
+    "nextAnswer": "Nächste Antwort",
+    "points": "Punkte: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Bestanden",
+      "failed": "Nicht bestanden"
+    },
+    "form": {
+      "title": "Bewertung",
+      "verdict": "Ergebnis ({{max}} Pkt. bei Bestehen)",
+      "verdictRequired": "Wählen Sie bestanden oder nicht bestanden.",
+      "comment": "Kommentar (optional)",
+      "commentPlaceholder": "Feedback für die lernende Person",
+      "commentTooLong": "Der Kommentar darf höchstens {{max}} Zeichen lang sein.",
+      "submit": "Bewertung speichern",
+      "regrade": "Neue Bewertung speichern"
+    },
+    "history": {
+      "title": "Bewertungsverlauf",
+      "empty": "Diese Antwort wurde noch nicht bewertet.",
+      "revision": "Version {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Antwort bewertet.",
+      "attemptGraded": "Antwort bewertet. Das Quizergebnis ist jetzt für die lernende Person verfügbar.",
+      "gradeError": "Die Bewertung konnte nicht gespeichert werden."
+    },
+    "errors": {
+      "answerNotFound": "Diese Antwort existiert nicht oder kann nicht bewertet werden.",
+      "ownAnswer": "Du kannst deine eigene Antwort nicht bewerten.",
+      "attemptSuperseded": "Die lernende Person hat diesen Kurs neu begonnen, daher kann dieser Versuch nicht mehr bewertet werden.",
+      "courseNotPublished": "Dieser Kurs ist wieder ein Entwurf. Veröffentliche ihn, bevor du Antworten bewertest."
+    },
+    "loadError": "Die Bewertungswarteschlange konnte nicht geladen werden. Lade die Seite neu, um es erneut zu versuchen."
+  },
   "coursesViewToggle": {
     "label": "Kursansicht",
     "catalogue": "Katalog",

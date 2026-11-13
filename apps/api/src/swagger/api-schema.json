@@ -16982,6 +16982,167 @@
         }
       }
     },
+    "/api/quiz-grading/answers": {
+      "get": {
+        "operationId": "QuizGradingController_getAnswers",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "pending",
+                  "type": "string"
+                },
+                {
+                  "const": "graded",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "lessonId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "studentId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAnswersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quiz-grading/filters": {
+      "get": {
+        "operationId": "QuizGradingController_getFilterOptions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFilterOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quiz-grading/answers/{id}": {
+      "get": {
+        "operationId": "QuizGradingController_getAnswerDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAnswerDetailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quiz-grading/answers/{id}/grade": {
+      "post": {
+        "operationId": "QuizGradingController_gradeAnswer",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GradeAnswerBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeAnswerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/report/query": {
       "post": {
         "operationId": "ReportController_runReport",
@@ -44285,6 +44446,25 @@
                             {
                               "type": "null"
                             }
+                          ]
+                        },
+                        "reviewerFeedback": {
+                          "type": "object",
+                          "properties": {
+                            "awardedPoints": {
+                              "type": "number"
+                            },
+                            "maximumPoints": {
+                              "type": "number"
+                            },
+                            "comment": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "awardedPoints",
+                            "maximumPoints",
+                            "comment"
                           ]
                         },
                         "matchingTargets": {
@@ -163201,6 +163381,475 @@
               "users",
               "categories",
               "groups"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAnswersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "gradingStatus": {
+                  "anyOf": [
+                    {
+                      "const": "pending",
+                      "type": "string"
+                    },
+                    {
+                      "const": "graded",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "awardedPoints": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "maximumPoints": {
+                  "type": "number"
+                },
+                "submittedAt": {
+                  "type": "string"
+                },
+                "questionTitle": {
+                  "type": "string"
+                },
+                "course": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "lesson": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "student": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "gradingStatus",
+                "awardedPoints",
+                "maximumPoints",
+                "submittedAt",
+                "questionTitle",
+                "course",
+                "lesson",
+                "student"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetFilterOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "courses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              },
+              "lessons": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "courseId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "courseId"
+                  ]
+                }
+              },
+              "students": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "courses",
+              "lessons",
+              "students"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAnswerDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "gradingStatus": {
+                    "anyOf": [
+                      {
+                        "const": "pending",
+                        "type": "string"
+                      },
+                      {
+                        "const": "graded",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "awardedPoints": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "maximumPoints": {
+                    "type": "number"
+                  },
+                  "submittedAt": {
+                    "type": "string"
+                  },
+                  "questionTitle": {
+                    "type": "string"
+                  },
+                  "course": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  },
+                  "lesson": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  },
+                  "student": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "gradingStatus",
+                  "awardedPoints",
+                  "maximumPoints",
+                  "submittedAt",
+                  "questionTitle",
+                  "course",
+                  "lesson",
+                  "student"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "questionDescription": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "reviewerInstructions": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "studentAnswer": {
+                    "type": "string"
+                  },
+                  "attemptNumber": {
+                    "type": "integer"
+                  },
+                  "reviews": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "revisionNumber": {
+                          "type": "integer"
+                        },
+                        "reviewerName": {
+                          "type": "string"
+                        },
+                        "method": {
+                          "const": "pass_fail",
+                          "type": "string"
+                        },
+                        "awardedPoints": {
+                          "type": "number"
+                        },
+                        "comment": {
+                          "type": "string"
+                        },
+                        "reviewedAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "revisionNumber",
+                        "reviewerName",
+                        "method",
+                        "awardedPoints",
+                        "comment",
+                        "reviewedAt"
+                      ]
+                    }
+                  },
+                  "nextAnswerId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "questionDescription",
+                  "reviewerInstructions",
+                  "studentAnswer",
+                  "attemptNumber",
+                  "reviews",
+                  "nextAnswerId"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GradeAnswerBody": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "const": "pass_fail",
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "comment": {
+            "maxLength": 5000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "method",
+          "passed"
+        ]
+      },
+      "GradeAnswerResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "attemptGraded": {
+                "type": "boolean"
+              },
+              "nextAnswerId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "attemptGraded",
+              "nextAnswerId"
             ]
           }
         },

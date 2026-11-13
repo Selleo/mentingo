@@ -1,0 +1,1 @@
+ALTER TABLE "assessment_attempt_question_answer_reviews" ADD COLUMN "grading_method" text DEFAULT 'pass_fail' NOT NULL;

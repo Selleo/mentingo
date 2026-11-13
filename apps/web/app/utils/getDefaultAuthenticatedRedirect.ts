@@ -60,5 +60,12 @@ export const getDefaultAuthenticatedRedirect = (
     return "/development-paths";
   }
 
+  if (
+    isAvailableRoute("/quiz-grading", excludedRoutes) &&
+    hasPermission(permissions, PERMISSIONS.QUIZ_GRADING_READ)
+  ) {
+    return "/quiz-grading";
+  }
+
   return DEFAULT_AUTHENTICATED_ROUTE;
 };

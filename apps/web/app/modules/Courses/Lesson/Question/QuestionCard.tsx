@@ -5,6 +5,7 @@ import { ProgressBadge } from "~/components/Badges/ProgressBadge";
 
 import { LEARNING_HANDLES } from "../../../../../e2e/data/learning/handles";
 
+import type { QuizQuestion } from "./types";
 import type { ReactNode } from "react";
 
 type QuestionCardProps = {
@@ -19,6 +20,7 @@ type QuestionCardProps = {
     | "scale_1_5"
     | "matching";
   isAwaitingReview?: boolean;
+  reviewerFeedback?: QuizQuestion["reviewerFeedback"];
   children: ReactNode;
 };
 
@@ -27,6 +29,7 @@ export const QuestionCard = ({
   questionNumber,
   questionType,
   isAwaitingReview = false,
+  reviewerFeedback,
   title = "Question title not provided",
 }: QuestionCardProps) => {
   const { t } = useTranslation();
@@ -50,6 +53,27 @@ export const QuestionCard = ({
         {t(`studentLessonView.other.${questionType}`)}
       </div>
       <div className="mt-4 flex flex-col gap-4">{children}</div>
+      {reviewerFeedback && (
+        <div className="mt-2 flex flex-col gap-1 rounded-lg bg-neutral-50 p-4">
+          <span
+            className="body-sm-md text-neutral-950"
+            data-testid={LEARNING_HANDLES.REVIEWER_FEEDBACK_POINTS}
+          >
+            {t("quizGrading.points", {
+              points: reviewerFeedback.awardedPoints,
+              max: reviewerFeedback.maximumPoints,
+            })}
+          </span>
+          {reviewerFeedback.comment && (
+            <p
+              className="body-sm whitespace-pre-wrap break-words text-neutral-900"
+              data-testid={LEARNING_HANDLES.REVIEWER_FEEDBACK_COMMENT}
+            >
+              {reviewerFeedback.comment}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

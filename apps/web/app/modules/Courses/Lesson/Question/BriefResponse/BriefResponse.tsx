@@ -27,6 +27,7 @@ export const BriefResponse = ({ question, isCompleted = false }: BriefResponsePr
       questionType="oneOrTwoWordSentence"
       questionNumber={question.displayOrder}
       isAwaitingReview={isQuizAwaitingReview && Boolean(question.requiresReview)}
+      reviewerFeedback={question.reviewerFeedback}
     >
       <Textarea
         data-testid="brief-response"

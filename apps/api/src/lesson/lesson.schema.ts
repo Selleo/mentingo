@@ -82,6 +82,14 @@ export const questionSchema = Type.Object({
   solutionExplanation: Type.Union([Type.String(), Type.Null()]),
   options: Type.Optional(Type.Array(optionSchema)),
   passQuestion: Type.Union([Type.Boolean(), Type.Null()]),
+  // Reviewer-graded questions of a graded attempt: the points and comment the learner received.
+  reviewerFeedback: Type.Optional(
+    Type.Object({
+      awardedPoints: Type.Number(),
+      maximumPoints: Type.Number(),
+      comment: Type.String(),
+    }),
+  ),
   matchingTargets: Type.Optional(Type.Array(Type.String())),
 });
 

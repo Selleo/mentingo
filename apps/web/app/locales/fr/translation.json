@@ -9118,6 +9118,71 @@
       }
     }
   },
+  "quizGrading": {
+    "title": "À noter",
+    "answerTitle": "Noter la réponse",
+    "pendingCount": "En attente : {{count}}",
+    "empty": "Aucune réponse ne correspond aux filtres sélectionnés.",
+    "filters": {
+      "status": "Statut",
+      "course": "Cours",
+      "lesson": "Leçon",
+      "student": "Apprenant",
+      "allCourses": "Tous les cours",
+      "allLessons": "Toutes les leçons",
+      "allStudents": "Tous les apprenants"
+    },
+    "status": {
+      "pending": "En attente",
+      "graded": "Notée"
+    },
+    "columns": {
+      "question": "Question",
+      "course": "Cours",
+      "lesson": "Leçon",
+      "student": "Apprenant",
+      "submittedAt": "Envoyée",
+      "status": "Statut",
+      "points": "Points"
+    },
+    "attempt": "Tentative",
+    "question": "Question",
+    "reviewerInstructions": "Instructions pour le correcteur",
+    "studentAnswer": "Réponse de l'apprenant",
+    "nextAnswer": "Réponse suivante",
+    "points": "Points : {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Réussi",
+      "failed": "Échoué"
+    },
+    "form": {
+      "title": "Note",
+      "verdict": "Résultat ({{max}} pt en cas de réussite)",
+      "verdictRequired": "Choisissez réussi ou échoué.",
+      "comment": "Commentaire (facultatif)",
+      "commentPlaceholder": "Retour pour l'apprenant",
+      "commentTooLong": "Le commentaire peut contenir au maximum {{max}} caractères.",
+      "submit": "Enregistrer la note",
+      "regrade": "Enregistrer la nouvelle note"
+    },
+    "history": {
+      "title": "Historique des notes",
+      "empty": "Cette réponse n'a pas encore été notée.",
+      "revision": "Révision {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Réponse notée.",
+      "attemptGraded": "Réponse notée. Le résultat du quiz est maintenant disponible pour l'apprenant.",
+      "gradeError": "Impossible d'enregistrer la note."
+    },
+    "errors": {
+      "answerNotFound": "Cette réponse n'existe pas ou ne peut pas être notée.",
+      "ownAnswer": "Vous ne pouvez pas noter votre propre réponse.",
+      "attemptSuperseded": "L'apprenant a recommencé ce cours, cette tentative ne peut donc plus être notée.",
+      "courseNotPublished": "Ce cours est repassé en brouillon. Publiez-le avant de noter ses réponses."
+    },
+    "loadError": "Impossible de charger la file de notation. Actualisez la page pour réessayer."
+  },
   "coursesViewToggle": {
     "label": "Vue des cours",
     "catalogue": "Catalogue",

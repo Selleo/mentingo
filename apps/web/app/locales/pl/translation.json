@@ -9732,6 +9732,71 @@
       }
     }
   },
+  "quizGrading": {
+    "title": "Do oceny",
+    "answerTitle": "Ocena odpowiedzi",
+    "pendingCount": "Oczekujące: {{count}}",
+    "empty": "Brak odpowiedzi pasujących do wybranych filtrów.",
+    "filters": {
+      "status": "Status",
+      "course": "Kurs",
+      "lesson": "Lekcja",
+      "student": "Kursant",
+      "allCourses": "Wszystkie kursy",
+      "allLessons": "Wszystkie lekcje",
+      "allStudents": "Wszyscy kursanci"
+    },
+    "status": {
+      "pending": "Oczekuje",
+      "graded": "Oceniona"
+    },
+    "columns": {
+      "question": "Pytanie",
+      "course": "Kurs",
+      "lesson": "Lekcja",
+      "student": "Kursant",
+      "submittedAt": "Przesłano",
+      "status": "Status",
+      "points": "Punkty"
+    },
+    "attempt": "Podejście",
+    "question": "Pytanie",
+    "reviewerInstructions": "Instrukcje dla oceniającego",
+    "studentAnswer": "Odpowiedź kursanta",
+    "nextAnswer": "Następna odpowiedź",
+    "points": "Punkty: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Zaliczone",
+      "failed": "Niezaliczone"
+    },
+    "form": {
+      "title": "Ocena",
+      "verdict": "Wynik ({{max}} pkt za zaliczenie)",
+      "verdictRequired": "Wybierz zaliczone lub niezaliczone.",
+      "comment": "Komentarz (opcjonalnie)",
+      "commentPlaceholder": "Informacja zwrotna dla kursanta",
+      "commentTooLong": "Komentarz może mieć maksymalnie {{max}} znaków.",
+      "submit": "Zapisz ocenę",
+      "regrade": "Zapisz nową ocenę"
+    },
+    "history": {
+      "title": "Historia ocen",
+      "empty": "Ta odpowiedź nie została jeszcze oceniona.",
+      "revision": "Wersja {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Odpowiedź została oceniona.",
+      "attemptGraded": "Odpowiedź została oceniona. Wynik quizu jest już dostępny dla kursanta.",
+      "gradeError": "Nie udało się zapisać oceny."
+    },
+    "errors": {
+      "answerNotFound": "Ta odpowiedź nie istnieje lub nie można jej ocenić.",
+      "ownAnswer": "Nie możesz oceniać własnej odpowiedzi.",
+      "attemptSuperseded": "Kursant rozpoczął ten kurs od nowa, więc tej próby nie można już ocenić.",
+      "courseNotPublished": "Ten kurs wrócił do wersji roboczej. Opublikuj go, zanim ocenisz odpowiedzi."
+    },
+    "loadError": "Nie udało się wczytać kolejki do oceny. Odśwież stronę, aby spróbować ponownie."
+  },
   "coursesViewToggle": {
     "label": "Widok kursów",
     "catalogue": "Katalog",

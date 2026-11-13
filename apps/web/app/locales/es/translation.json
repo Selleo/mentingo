@@ -9533,6 +9533,71 @@
       }
     }
   },
+  "quizGrading": {
+    "title": "Por calificar",
+    "answerTitle": "Calificar respuesta",
+    "pendingCount": "Pendientes: {{count}}",
+    "empty": "Ninguna respuesta coincide con los filtros seleccionados.",
+    "filters": {
+      "status": "Estado",
+      "course": "Curso",
+      "lesson": "Lección",
+      "student": "Estudiante",
+      "allCourses": "Todos los cursos",
+      "allLessons": "Todas las lecciones",
+      "allStudents": "Todos los estudiantes"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "graded": "Calificada"
+    },
+    "columns": {
+      "question": "Pregunta",
+      "course": "Curso",
+      "lesson": "Lección",
+      "student": "Estudiante",
+      "submittedAt": "Enviada",
+      "status": "Estado",
+      "points": "Puntos"
+    },
+    "attempt": "Intento",
+    "question": "Pregunta",
+    "reviewerInstructions": "Instrucciones para el evaluador",
+    "studentAnswer": "Respuesta del estudiante",
+    "nextAnswer": "Siguiente respuesta",
+    "points": "Puntos: {{points}} / {{max}}",
+    "verdict": {
+      "passed": "Aprobado",
+      "failed": "Suspenso"
+    },
+    "form": {
+      "title": "Calificación",
+      "verdict": "Resultado ({{max}} pt si aprueba)",
+      "verdictRequired": "Elige aprobado o suspenso.",
+      "comment": "Comentario (opcional)",
+      "commentPlaceholder": "Comentarios para el estudiante",
+      "commentTooLong": "El comentario puede tener como máximo {{max}} caracteres.",
+      "submit": "Guardar calificación",
+      "regrade": "Guardar nueva calificación"
+    },
+    "history": {
+      "title": "Historial de calificaciones",
+      "empty": "Esta respuesta aún no se ha calificado.",
+      "revision": "Revisión {{number}}"
+    },
+    "toast": {
+      "answerGraded": "Respuesta calificada.",
+      "attemptGraded": "Respuesta calificada. El resultado del cuestionario ya está disponible para el estudiante.",
+      "gradeError": "No se pudo guardar la calificación."
+    },
+    "errors": {
+      "answerNotFound": "Esta respuesta no existe o no se puede calificar.",
+      "ownAnswer": "No puedes calificar tu propia respuesta.",
+      "attemptSuperseded": "El estudiante ha vuelto a empezar este curso, por lo que este intento ya no se puede calificar.",
+      "courseNotPublished": "Este curso ha vuelto a borrador. Publícalo antes de calificar sus respuestas."
+    },
+    "loadError": "No se pudo cargar la cola de calificación. Actualiza la página para volver a intentarlo."
+  },
   "coursesViewToggle": {
     "label": "Vista de cursos",
     "catalogue": "Catálogo",

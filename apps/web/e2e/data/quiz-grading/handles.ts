@@ -1,0 +1,17 @@
+export const QUIZ_GRADING_HANDLES = {
+  QUEUE_PAGE: "quiz-grading-queue-page",
+  PENDING_COUNT: "quiz-grading-pending-count",
+  STATUS_FILTER: "quiz-grading-status-filter",
+  COURSE_FILTER: "quiz-grading-course-filter",
+  LESSON_FILTER: "quiz-grading-lesson-filter",
+  STUDENT_FILTER: "quiz-grading-student-filter",
+  ROW: "quiz-grading-row",
+  ANSWER_PAGE: "quiz-grading-answer-page",
+  QUESTION_TITLE: "quiz-grading-question-title",
+  STUDENT_ANSWER: "quiz-grading-student-answer",
+  VERDICT_OPTION: (verdict: "passed" | "failed") => `quiz-grading-verdict-${verdict}`,
+  COMMENT_INPUT: "quiz-grading-comment-input",
+  SUBMIT_BUTTON: "quiz-grading-submit-button",
+  NEXT_ANSWER_BUTTON: "quiz-grading-next-answer-button",
+  REVIEW_HISTORY_ITEM: "quiz-grading-review-history-item",
+} as const;
