@@ -1113,7 +1113,8 @@
     "adminLearningPathEditor": "Edytor ścieżki rozwoju",
     "reports": "Raporty",
     "leaderboards": "Rankingi",
-    "gamification": "Grywalizacja"
+    "gamification": "Grywalizacja",
+    "forum": "Forum"
   },
   "microsoftCalendar": {
     "title": "Kalendarz Microsoft",
@@ -5142,7 +5143,9 @@
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
       "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy",
       "publicCoursePreview": "Podgląd lekcji przed zapisem do kursu",
-      "publicCoursePreviewDescription": "Pozwala zalogowanym użytkownikom otwierać lekcje darmowych kursów przed zapisaniem się. Quizy i śledzenie postępu nadal wymagają zapisu."
+      "publicCoursePreviewDescription": "Pozwala zalogowanym użytkownikom otwierać lekcje darmowych kursów przed zapisaniem się. Quizy i śledzenie postępu nadal wymagają zapisu.",
+      "forum": "Włącz forum",
+      "forumDescription": "Pozwól wszystkim w organizacji zakładać tematy i odpowiadać. Zapisani użytkownicy widzą tam też dyskusje ze swoich kursów"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
@@ -5156,7 +5159,8 @@
       "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o zaległych kursach zostały pomyślnie zaktualizowane",
       "overdueCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o zaległych kursach",
-      "publicCoursePreviewPreferenceChangeSuccess": "Zaktualizowano ustawienie podglądu kursów"
+      "publicCoursePreviewPreferenceChangeSuccess": "Zaktualizowano ustawienie podglądu kursów",
+      "forumPreferenceChangeSuccess": "Preferencje forum zostały pomyślnie zaktualizowane"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   },
@@ -9850,5 +9854,64 @@
       }
     },
     "requiresGamification": "Najpierw włącz grywalizację."
+  },
+  "forum": {
+    "title": "Forum",
+    "description": "Zadawaj pytania i dziel się wiedzą z całą organizacją.",
+    "newTopic": "Nowy temat",
+    "searchPlaceholder": "Szukaj tematów",
+    "filter": {
+      "label": "Pokaż tematy",
+      "all": "Wszystkie tematy",
+      "general": "Ogólne"
+    },
+    "sort": {
+      "label": "Sortuj tematy",
+      "lastActivity": "Ostatnia aktywność",
+      "newest": "Najnowsze",
+      "mostReplies": "Najwięcej odpowiedzi"
+    },
+    "empty": "Nie ma jeszcze tematów. Rozpocznij pierwszy.",
+    "noResults": "Żaden temat nie pasuje do filtrów.",
+    "replies_one": "{{count}} odpowiedź",
+    "replies_few": "{{count}} odpowiedzi",
+    "replies_many": "{{count}} odpowiedzi",
+    "replies_other": "{{count}} odpowiedzi",
+    "lastActivity": "Ostatnia aktywność {{time}}",
+    "deletedPost": "Ten post został usunięty.",
+    "deletePost": "Usuń post",
+    "createDialog": {
+      "title": "Nowy temat",
+      "titleLabel": "Tytuł",
+      "titlePlaceholder": "Czego dotyczy temat?",
+      "contentLabel": "Wiadomość",
+      "contentPlaceholder": "Napisz pierwszy post",
+      "submit": "Utwórz temat"
+    },
+    "topic": {
+      "backToForum": "Wróć do forum",
+      "courseThreadTitle": "Dyskusja w kursie {{course}}",
+      "noReplies": "Nie ma jeszcze odpowiedzi.",
+      "replyPlaceholder": "Napisz odpowiedź",
+      "replySubmit": "Odpowiedz",
+      "closed": "Odpowiedzi są zamknięte, bo pierwszy post został usunięty."
+    },
+    "deleteDialog": {
+      "title": "Usunąć ten post?",
+      "description": "Post zniknie dla wszystkich. Tej operacji nie można cofnąć."
+    },
+    "toast": {
+      "createTopicError": "Nie udało się utworzyć tematu.",
+      "createPostError": "Nie udało się wysłać odpowiedzi.",
+      "deletePostError": "Nie udało się usunąć postu."
+    },
+    "errors": {
+      "topicNotFound": "Ten temat nie istnieje albo nie masz do niego dostępu.",
+      "postNotFound": "Ten post już nie istnieje.",
+      "cannotDeletePost": "Możesz usuwać tylko własne posty.",
+      "topicDeleted": "Odpowiedzi są zamknięte, bo pierwszy post został usunięty.",
+      "emptyTitle": "Wpisz tytuł.",
+      "emptyContent": "Wpisz wiadomość."
+    }
   }
 }

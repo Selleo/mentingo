@@ -343,6 +343,35 @@ describe("getNavigationConfig", () => {
     });
   });
 
+  it("shows the forum only when it is enabled and gates it by the forum read permission", () => {
+    const forumItem = (isForumEnabled: boolean) =>
+      mapNavigationItems(
+        getNavigationConfig(
+          t,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          [],
+          false,
+          false,
+          false,
+          isForumEnabled,
+        ),
+      )
+        .flatMap((group) => group.items)
+        .find((item) => item.path === "forum");
+
+    expect(forumItem(false)).toBeUndefined();
+    expect(forumItem(true)?.accessRequirement).toEqual({ allOf: [PERMISSIONS.FORUM_READ] });
+    expect(findMatchingRoute("forum/topics/topic-id")).toEqual({
+      allOf: [PERMISSIONS.FORUM_READ],
+    });
+  });
+
   const getCourseItems = (isLearningPathsEnabled: boolean, shouldShowLearningPaths: boolean) =>
     getNavigationConfig(
       t,

@@ -1107,7 +1107,8 @@
     "activityLogs": "Journaux d'activité",
     "reports": "Rapports",
     "leaderboards": "Classements",
-    "gamification": "Gamification"
+    "gamification": "Gamification",
+    "forum": "Forum"
   },
   "microsoftCalendar": {
     "title": "Calendrier Microsoft",
@@ -4560,7 +4561,9 @@
       "studentsWithOverdueCourseNotification": "Apprenants avec notifications de cours en retard",
       "studentsWithOverdueCourseNotificationDescription": "Recevez des notifications lorsque les apprenants ont des cours en retard",
       "publicCoursePreview": "Consulter les leçons avant de s’inscrire à un cours",
-      "publicCoursePreviewDescription": "Permet aux utilisateurs connectés d'ouvrir les leçons des cours gratuits avant de s'inscrire. Les quiz et le suivi de la progression nécessitent toujours une inscription."
+      "publicCoursePreviewDescription": "Permet aux utilisateurs connectés d'ouvrir les leçons des cours gratuits avant de s'inscrire. Les quiz et le suivi de la progression nécessitent toujours une inscription.",
+      "forum": "Activer le forum",
+      "forumDescription": "Permettre à tous les membres de l'organisation de créer des sujets et d'y répondre. Les utilisateurs inscrits y voient aussi les discussions de leurs cours"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Les préférences de notification des nouveaux utilisateurs ont été mises à jour avec succès",
@@ -4574,7 +4577,8 @@
       "finishedCourseNotificationsPreferenceChangeError": "Échec de la mise à jour des préférences de notification de cours terminé",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Les préférences de notification de cours en retard ont été mises à jour avec succès",
       "overdueCourseNotificationsPreferenceChangeError": "Échec de la mise à jour des préférences de notification de cours en retard",
-      "publicCoursePreviewPreferenceChangeSuccess": "Préférence d’aperçu des cours mise à jour"
+      "publicCoursePreviewPreferenceChangeSuccess": "Préférence d’aperçu des cours mise à jour",
+      "forumPreferenceChangeSuccess": "La préférence du forum a été mise à jour avec succès"
     }
   },
   "registrationFormBuilder": {
@@ -9236,5 +9240,62 @@
       }
     },
     "requiresGamification": "Activez d'abord la gamification."
+  },
+  "forum": {
+    "title": "Forum",
+    "description": "Posez des questions et partagez vos connaissances avec toute votre organisation.",
+    "newTopic": "Nouveau sujet",
+    "searchPlaceholder": "Rechercher des sujets",
+    "filter": {
+      "label": "Afficher les sujets",
+      "all": "Tous les sujets",
+      "general": "Général"
+    },
+    "sort": {
+      "label": "Trier les sujets",
+      "lastActivity": "Activité récente",
+      "newest": "Plus récents",
+      "mostReplies": "Plus de réponses"
+    },
+    "empty": "Aucun sujet pour l'instant. Lancez le premier.",
+    "noResults": "Aucun sujet ne correspond à vos filtres.",
+    "replies_one": "{{count}} réponse",
+    "replies_other": "{{count}} réponses",
+    "lastActivity": "Dernière activité {{time}}",
+    "deletedPost": "Ce message a été supprimé.",
+    "deletePost": "Supprimer le message",
+    "createDialog": {
+      "title": "Nouveau sujet",
+      "titleLabel": "Titre",
+      "titlePlaceholder": "De quoi parle votre sujet ?",
+      "contentLabel": "Message",
+      "contentPlaceholder": "Rédigez le premier message",
+      "submit": "Créer le sujet"
+    },
+    "topic": {
+      "backToForum": "Retour au forum",
+      "courseThreadTitle": "Discussion du cours {{course}}",
+      "noReplies": "Aucune réponse pour l'instant.",
+      "replyPlaceholder": "Écrivez une réponse",
+      "replySubmit": "Répondre",
+      "closed": "Les réponses sont fermées car le premier message a été supprimé."
+    },
+    "deleteDialog": {
+      "title": "Supprimer ce message ?",
+      "description": "Le message sera supprimé pour tout le monde. Cette action est irréversible."
+    },
+    "toast": {
+      "createTopicError": "Impossible de créer le sujet.",
+      "createPostError": "Impossible d'envoyer la réponse.",
+      "deletePostError": "Impossible de supprimer le message."
+    },
+    "errors": {
+      "topicNotFound": "Ce sujet n'existe pas ou vous n'y avez pas accès.",
+      "postNotFound": "Ce message n'existe plus.",
+      "cannotDeletePost": "Vous ne pouvez supprimer que vos propres messages.",
+      "topicDeleted": "Les réponses sont fermées car le premier message a été supprimé.",
+      "emptyTitle": "Saisissez un titre.",
+      "emptyContent": "Saisissez un message."
+    }
   }
 }

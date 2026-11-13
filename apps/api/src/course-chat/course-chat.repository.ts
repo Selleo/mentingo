@@ -21,6 +21,7 @@ import type {
   CourseChatEmailContext,
   CourseChatMentionEmailRecipient,
   CourseChatMessageContext,
+  CourseChatMessageDeletion,
   CourseChatMessageReactionSummaryRow,
   CourseChatMessageRow,
   CourseChatReplyParticipantRow,
@@ -495,34 +496,70 @@ export class CourseChatRepository {
     `);
   }
 
-  async countReplies(parentMessageId: UUIDType): Promise<number> {
-    const [summary] = await this.db
-      .select({ totalItems: count() })
-      .from(courseChatMessages)
-      .where(
-        and(
-          eq(courseChatMessages.parentMessageId, parentMessageId),
-          isNull(courseChatMessages.deletedAt),
-        ),
-      );
+  async lockThreadForReply(
+    threadId: UUIDType,
+    parentMessageId: UUIDType,
+    db: DatabasePg,
+  ): Promise<boolean> {
+    await this.lockThread(threadId, db);
 
-    return summary?.totalItems ?? 0;
+    const [parentMessage] = await db
+      .select({ deletedAt: courseChatMessages.deletedAt })
+      .from(courseChatMessages)
+      .where(eq(courseChatMessages.id, parentMessageId))
+      .limit(1);
+
+    return Boolean(parentMessage) && parentMessage.deletedAt === null;
   }
 
-  async softDeleteMessage(messageId: UUIDType): Promise<string | null> {
-    const [message] = await this.db.transaction(async (trx) => {
-      await trx
-        .delete(courseChatMessageReactions)
-        .where(eq(courseChatMessageReactions.messageId, messageId));
+  async deleteMessage(
+    message: Pick<CourseChatMessageContext, "id" | "threadId" | "parentMessageId">,
+  ): Promise<CourseChatMessageDeletion | null> {
+    return this.db.transaction(async (trx) => {
+      await this.lockThread(message.threadId, trx);
 
-      return trx
+      const [deletedMessage] = await trx
         .update(courseChatMessages)
         .set({ deletedAt: sql`CURRENT_TIMESTAMP` })
-        .where(eq(courseChatMessages.id, messageId))
+        .where(and(eq(courseChatMessages.id, message.id), isNull(courseChatMessages.deletedAt)))
         .returning({ deletedAt: courseChatMessages.deletedAt });
-    });
 
-    return message?.deletedAt ?? null;
+      if (!deletedMessage) return null;
+
+      await trx
+        .delete(courseChatMessageReactions)
+        .where(eq(courseChatMessageReactions.messageId, message.id));
+
+      const [threadState] = await trx
+        .select({
+          visibleReplyCount: sql<number>`COUNT(*) FILTER (
+            WHERE ${courseChatMessages.parentMessageId} IS NOT NULL
+              AND ${courseChatMessages.deletedAt} IS NULL
+          )::int`,
+          isFirstMessageDeleted: sql<boolean>`COALESCE(BOOL_OR(
+            ${courseChatMessages.parentMessageId} IS NULL
+              AND ${courseChatMessages.deletedAt} IS NOT NULL
+          ), false)`,
+        })
+        .from(courseChatMessages)
+        .where(eq(courseChatMessages.threadId, message.threadId));
+
+      const hasVisibleReplies = threadState.visibleReplyCount > 0;
+
+      return {
+        deletedAt: deletedMessage.deletedAt,
+        removed: message.parentMessageId !== null || !hasVisibleReplies,
+        threadRemoved: threadState.isFirstMessageDeleted && !hasVisibleReplies,
+      };
+    });
+  }
+
+  private async lockThread(threadId: UUIDType, db: DatabasePg) {
+    await db
+      .select({ id: courseChatThreads.id })
+      .from(courseChatThreads)
+      .where(eq(courseChatThreads.id, threadId))
+      .for("update");
   }
 
   private messageSelect() {

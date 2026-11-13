@@ -31154,6 +31154,7 @@ export interface DeletePostResponse {
     isFirstPost: boolean;
     removed: boolean;
     deletedAt: string | null;
+    topicRemoved: boolean;
   };
 }
 

@@ -1108,7 +1108,8 @@
     "activityLogs": "Activity Logs",
     "reports": "Reports",
     "leaderboards": "Leaderboards",
-    "gamification": "Gamification"
+    "gamification": "Gamification",
+    "forum": "Forum"
   },
   "microsoftCalendar": {
     "title": "Microsoft Calendar",
@@ -4829,7 +4830,9 @@
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
       "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses",
       "publicCoursePreview": "View lessons before enrolling in a course",
-      "publicCoursePreviewDescription": "Lets signed-in users open lessons of free courses before they enroll. Quizzes and progress tracking still require enrolling."
+      "publicCoursePreviewDescription": "Lets signed-in users open lessons of free courses before they enroll. Quizzes and progress tracking still require enrolling.",
+      "forum": "Enable forum",
+      "forumDescription": "Let everyone in the organization start topics and reply. Enrolled users also see their course discussions there"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
@@ -4843,7 +4846,8 @@
       "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Overdue course notification preferences have been successfully updated",
       "overdueCourseNotificationsPreferenceChangeError": "Failed to update overdue course notification preferences",
-      "publicCoursePreviewPreferenceChangeSuccess": "Course preview preference updated"
+      "publicCoursePreviewPreferenceChangeSuccess": "Course preview preference updated",
+      "forumPreferenceChangeSuccess": "Forum preference has been updated successfully"
     }
   },
   "registrationFormBuilder": {
@@ -9743,5 +9747,62 @@
       }
     },
     "requiresGamification": "Turn on Gamification first."
+  },
+  "forum": {
+    "title": "Forum",
+    "description": "Ask questions and share knowledge with everyone in your organization.",
+    "newTopic": "New topic",
+    "searchPlaceholder": "Search topics",
+    "filter": {
+      "label": "Show topics",
+      "all": "All topics",
+      "general": "General"
+    },
+    "sort": {
+      "label": "Sort topics",
+      "lastActivity": "Latest activity",
+      "newest": "Newest",
+      "mostReplies": "Most replies"
+    },
+    "empty": "No topics yet. Start the first one.",
+    "noResults": "No topics match your filters.",
+    "replies_one": "{{count}} reply",
+    "replies_other": "{{count}} replies",
+    "lastActivity": "Last activity {{time}}",
+    "deletedPost": "This post was deleted.",
+    "deletePost": "Delete post",
+    "createDialog": {
+      "title": "New topic",
+      "titleLabel": "Title",
+      "titlePlaceholder": "What is your topic about?",
+      "contentLabel": "Message",
+      "contentPlaceholder": "Write the first post",
+      "submit": "Create topic"
+    },
+    "topic": {
+      "backToForum": "Back to forum",
+      "courseThreadTitle": "Discussion in {{course}}",
+      "noReplies": "No replies yet.",
+      "replyPlaceholder": "Write a reply",
+      "replySubmit": "Reply",
+      "closed": "Replies are closed because the first post was deleted."
+    },
+    "deleteDialog": {
+      "title": "Delete this post?",
+      "description": "The post will be removed for everyone. This can't be undone."
+    },
+    "toast": {
+      "createTopicError": "The topic could not be created.",
+      "createPostError": "The reply could not be sent.",
+      "deletePostError": "The post could not be deleted."
+    },
+    "errors": {
+      "topicNotFound": "This topic doesn't exist or you don't have access to it.",
+      "postNotFound": "This post no longer exists.",
+      "cannotDeletePost": "You can only delete your own posts.",
+      "topicDeleted": "Replies are closed because the first post was deleted.",
+      "emptyTitle": "Enter a title.",
+      "emptyContent": "Enter a message."
+    }
   }
 }

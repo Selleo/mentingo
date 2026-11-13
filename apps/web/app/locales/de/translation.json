@@ -1107,7 +1107,8 @@
     "tenants": "Organisationen",
     "reports": "Berichte",
     "leaderboards": "Bestenlisten",
-    "gamification": "Gamification"
+    "gamification": "Gamification",
+    "forum": "Forum"
   },
   "microsoftCalendar": {
     "title": "Microsoft-Kalender",
@@ -4828,7 +4829,9 @@
       "studentsWithOverdueCourseNotification": "Studierende mit Benachrichtigungen über überfällige Kurse",
       "studentsWithOverdueCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn Studierende Kurse überfällig haben",
       "publicCoursePreview": "Lektionen vor der Kurseinschreibung ansehen",
-      "publicCoursePreviewDescription": "Erlaubt angemeldeten Nutzern, Lektionen kostenloser Kurse vor der Einschreibung zu öffnen. Quizze und Fortschrittsverfolgung erfordern weiterhin eine Einschreibung."
+      "publicCoursePreviewDescription": "Erlaubt angemeldeten Nutzern, Lektionen kostenloser Kurse vor der Einschreibung zu öffnen. Quizze und Fortschrittsverfolgung erfordern weiterhin eine Einschreibung.",
+      "forum": "Forum aktivieren",
+      "forumDescription": "Allen in der Organisation erlauben, Themen zu erstellen und zu antworten. Eingeschriebene Benutzer sehen dort auch die Diskussionen ihrer Kurse"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für neue Benutzer wurden erfolgreich aktualisiert",
@@ -4842,7 +4845,8 @@
       "finishedCourseNotificationsPreferenceChangeError": "Die Benachrichtigungseinstellungen für abgeschlossene Kurse konnten nicht aktualisiert werden",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für überfällige Kurse wurden erfolgreich aktualisiert",
       "overdueCourseNotificationsPreferenceChangeError": "Die Benachrichtigungseinstellungen für überfällige Kurse konnten nicht aktualisiert werden",
-      "publicCoursePreviewPreferenceChangeSuccess": "Einstellung zur Kursvorschau aktualisiert"
+      "publicCoursePreviewPreferenceChangeSuccess": "Einstellung zur Kursvorschau aktualisiert",
+      "forumPreferenceChangeSuccess": "Die Einstellung für das Forum wurde erfolgreich aktualisiert"
     }
   },
   "registrationFormBuilder": {
@@ -9701,5 +9705,62 @@
       }
     },
     "requiresGamification": "Aktiviere zuerst die Gamification."
+  },
+  "forum": {
+    "title": "Forum",
+    "description": "Stellen Sie Fragen und teilen Sie Wissen mit allen in Ihrer Organisation.",
+    "newTopic": "Neues Thema",
+    "searchPlaceholder": "Themen durchsuchen",
+    "filter": {
+      "label": "Themen anzeigen",
+      "all": "Alle Themen",
+      "general": "Allgemein"
+    },
+    "sort": {
+      "label": "Themen sortieren",
+      "lastActivity": "Neueste Aktivität",
+      "newest": "Neueste",
+      "mostReplies": "Meiste Antworten"
+    },
+    "empty": "Noch keine Themen. Starten Sie das erste.",
+    "noResults": "Keine Themen entsprechen Ihren Filtern.",
+    "replies_one": "{{count}} Antwort",
+    "replies_other": "{{count}} Antworten",
+    "lastActivity": "Letzte Aktivität {{time}}",
+    "deletedPost": "Dieser Beitrag wurde gelöscht.",
+    "deletePost": "Beitrag löschen",
+    "createDialog": {
+      "title": "Neues Thema",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "Worum geht es in Ihrem Thema?",
+      "contentLabel": "Nachricht",
+      "contentPlaceholder": "Schreiben Sie den ersten Beitrag",
+      "submit": "Thema erstellen"
+    },
+    "topic": {
+      "backToForum": "Zurück zum Forum",
+      "courseThreadTitle": "Diskussion im Kurs {{course}}",
+      "noReplies": "Noch keine Antworten.",
+      "replyPlaceholder": "Antwort schreiben",
+      "replySubmit": "Antworten",
+      "closed": "Antworten sind geschlossen, weil der erste Beitrag gelöscht wurde."
+    },
+    "deleteDialog": {
+      "title": "Diesen Beitrag löschen?",
+      "description": "Der Beitrag wird für alle entfernt. Dies kann nicht rückgängig gemacht werden."
+    },
+    "toast": {
+      "createTopicError": "Das Thema konnte nicht erstellt werden.",
+      "createPostError": "Die Antwort konnte nicht gesendet werden.",
+      "deletePostError": "Der Beitrag konnte nicht gelöscht werden."
+    },
+    "errors": {
+      "topicNotFound": "Dieses Thema existiert nicht oder Sie haben keinen Zugriff darauf.",
+      "postNotFound": "Dieser Beitrag existiert nicht mehr.",
+      "cannotDeletePost": "Sie können nur Ihre eigenen Beiträge löschen.",
+      "topicDeleted": "Antworten sind geschlossen, weil der erste Beitrag gelöscht wurde.",
+      "emptyTitle": "Geben Sie einen Titel ein.",
+      "emptyContent": "Geben Sie eine Nachricht ein."
+    }
   }
 }

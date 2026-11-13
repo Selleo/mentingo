@@ -1113,7 +1113,8 @@
     "tenants": "Organizace",
     "reports": "Přehledy",
     "leaderboards": "Žebříčky",
-    "gamification": "Gamifikace"
+    "gamification": "Gamifikace",
+    "forum": "Fórum"
   },
   "microsoftCalendar": {
     "title": "Kalendář Microsoft",
@@ -4837,7 +4838,9 @@
       "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",
       "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy",
       "publicCoursePreview": "Náhled lekcí před zápisem do kurzu",
-      "publicCoursePreviewDescription": "Umožňuje přihlášeným uživatelům otevírat lekce bezplatných kurzů před zápisem. Kvízy a sledování postupu stále vyžadují zápis."
+      "publicCoursePreviewDescription": "Umožňuje přihlášeným uživatelům otevírat lekce bezplatných kurzů před zápisem. Kvízy a sledování postupu stále vyžadují zápis.",
+      "forum": "Povolit fórum",
+      "forumDescription": "Umožnit všem v organizaci zakládat témata a odpovídat. Zapsaní uživatelé zde uvidí i diskuse ze svých kurzů"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Předvolby upozornění pro nové uživatele byly úspěšně aktualizovány",
@@ -4851,7 +4854,8 @@
       "finishedCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o dokončeném kurzu se nezdařila",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o zpoždění kurzu byly úspěšně aktualizovány",
       "overdueCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o zpožděném kurzu se nezdařila",
-      "publicCoursePreviewPreferenceChangeSuccess": "Nastavení náhledu kurzů aktualizováno"
+      "publicCoursePreviewPreferenceChangeSuccess": "Nastavení náhledu kurzů aktualizováno",
+      "forumPreferenceChangeSuccess": "Předvolba fóra byla úspěšně aktualizována"
     }
   },
   "registrationFormBuilder": {
@@ -9766,5 +9770,64 @@
       }
     },
     "requiresGamification": "Nejprve zapněte gamifikaci."
+  },
+  "forum": {
+    "title": "Fórum",
+    "description": "Pokládejte otázky a sdílejte znalosti s celou organizací.",
+    "newTopic": "Nové téma",
+    "searchPlaceholder": "Hledat témata",
+    "filter": {
+      "label": "Zobrazit témata",
+      "all": "Všechna témata",
+      "general": "Obecné"
+    },
+    "sort": {
+      "label": "Seřadit témata",
+      "lastActivity": "Poslední aktivita",
+      "newest": "Nejnovější",
+      "mostReplies": "Nejvíce odpovědí"
+    },
+    "empty": "Zatím zde nejsou žádná témata. Založte první.",
+    "noResults": "Filtrům neodpovídají žádná témata.",
+    "replies_one": "{{count}} odpověď",
+    "replies_few": "{{count}} odpovědi",
+    "replies_many": "{{count}} odpovědí",
+    "replies_other": "{{count}} odpovědí",
+    "lastActivity": "Poslední aktivita {{time}}",
+    "deletedPost": "Tento příspěvek byl smazán.",
+    "deletePost": "Smazat příspěvek",
+    "createDialog": {
+      "title": "Nové téma",
+      "titleLabel": "Název",
+      "titlePlaceholder": "O čem je vaše téma?",
+      "contentLabel": "Zpráva",
+      "contentPlaceholder": "Napište první příspěvek",
+      "submit": "Založit téma"
+    },
+    "topic": {
+      "backToForum": "Zpět na fórum",
+      "courseThreadTitle": "Diskuse v kurzu {{course}}",
+      "noReplies": "Zatím žádné odpovědi.",
+      "replyPlaceholder": "Napište odpověď",
+      "replySubmit": "Odpovědět",
+      "closed": "Odpovědi jsou uzavřené, protože první příspěvek byl smazán."
+    },
+    "deleteDialog": {
+      "title": "Smazat tento příspěvek?",
+      "description": "Příspěvek bude odstraněn pro všechny. Tuto akci nelze vrátit."
+    },
+    "toast": {
+      "createTopicError": "Téma se nepodařilo založit.",
+      "createPostError": "Odpověď se nepodařilo odeslat.",
+      "deletePostError": "Příspěvek se nepodařilo smazat."
+    },
+    "errors": {
+      "topicNotFound": "Toto téma neexistuje nebo k němu nemáte přístup.",
+      "postNotFound": "Tento příspěvek již neexistuje.",
+      "cannotDeletePost": "Můžete mazat pouze vlastní příspěvky.",
+      "topicDeleted": "Odpovědi jsou uzavřené, protože první příspěvek byl smazán.",
+      "emptyTitle": "Zadejte název.",
+      "emptyContent": "Zadejte zprávu."
+    }
   }
 }
