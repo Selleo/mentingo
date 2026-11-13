@@ -59,8 +59,9 @@ export const canReadCourseThreads = (permissions: Permissions, courseDiscussions
   courseDiscussionsEnabled && hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_READ);
 
 export const canReplyInTopic = (scope: DiscussionScope, permissions: Permissions) =>
-  scope === DISCUSSION_SCOPES.GENERAL ||
-  hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_CREATE);
+  hasPermission(permissions, PERMISSIONS.FORUM_POST_CREATE) &&
+  (scope === DISCUSSION_SCOPES.GENERAL ||
+    hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_CREATE));
 
 export const canDeleteForumPost = ({
   authorId,
@@ -73,7 +74,12 @@ export const canDeleteForumPost = ({
   scope: DiscussionScope;
   permissions: Permissions;
 }) => {
-  if (hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE)) return true;
+  const deleteAnyPostPermission =
+    scope === DISCUSSION_SCOPES.GENERAL
+      ? PERMISSIONS.FORUM_POST_DELETE
+      : PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE;
+
+  if (hasPermission(permissions, deleteAnyPostPermission)) return true;
   if (authorId !== currentUserId) return false;
 
   return (

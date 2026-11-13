@@ -1,4 +1,10 @@
-import { DISCUSSION_SCOPES, FORUM_TOPIC_SORTS, PERMISSIONS } from "@repo/shared";
+import {
+  DISCUSSION_SCOPES,
+  FORUM_TOPIC_SORTS,
+  PERMISSIONS,
+  type DiscussionScope,
+  type PermissionKey,
+} from "@repo/shared";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -78,13 +84,17 @@ describe("forum permissions", () => {
     expect(canReadCourseThreads([], true)).toBe(false);
   });
 
-  it("lets everyone reply to general topics but requires course access for course threads", () => {
-    expect(canReplyInTopic(DISCUSSION_SCOPES.GENERAL, [])).toBe(true);
-    expect(canReplyInTopic(DISCUSSION_SCOPES.COURSE, [])).toBe(false);
-    expect(canReplyInTopic(DISCUSSION_SCOPES.COURSE, learner)).toBe(true);
+  it("requires the forum reply permission, plus course access for course threads", () => {
+    const forumMember = [PERMISSIONS.FORUM_POST_CREATE];
+
+    expect(canReplyInTopic(DISCUSSION_SCOPES.GENERAL, forumMember)).toBe(true);
+    expect(canReplyInTopic(DISCUSSION_SCOPES.GENERAL, [])).toBe(false);
+    expect(canReplyInTopic(DISCUSSION_SCOPES.COURSE, forumMember)).toBe(false);
+    expect(canReplyInTopic(DISCUSSION_SCOPES.COURSE, learner)).toBe(false);
+    expect(canReplyInTopic(DISCUSSION_SCOPES.COURSE, [...forumMember, ...learner])).toBe(true);
   });
 
-  it("lets authors delete their own posts and moderators delete any post", () => {
+  it("lets authors delete their own posts", () => {
     const ownGeneralPost = {
       authorId: "user-1",
       currentUserId: "user-1",
@@ -105,12 +115,18 @@ describe("forum permissions", () => {
         permissions: learner,
       }),
     ).toBe(true);
-    expect(
-      canDeleteForumPost({
-        ...ownGeneralPost,
-        currentUserId: "moderator",
-        permissions: [PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE],
-      }),
-    ).toBe(true);
+  });
+
+  it("lets moderators delete any post with the permission of the topic's scope", () => {
+    const someoneElsesPost = { authorId: "user-1", currentUserId: "moderator" };
+    const forumModerator = [PERMISSIONS.FORUM_POST_DELETE];
+    const courseModerator = [PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE];
+    const canDelete = (scope: DiscussionScope, permissions: PermissionKey[]) =>
+      canDeleteForumPost({ ...someoneElsesPost, scope, permissions });
+
+    expect(canDelete(DISCUSSION_SCOPES.GENERAL, forumModerator)).toBe(true);
+    expect(canDelete(DISCUSSION_SCOPES.GENERAL, courseModerator)).toBe(false);
+    expect(canDelete(DISCUSSION_SCOPES.COURSE, courseModerator)).toBe(true);
+    expect(canDelete(DISCUSSION_SCOPES.COURSE, forumModerator)).toBe(false);
   });
 });

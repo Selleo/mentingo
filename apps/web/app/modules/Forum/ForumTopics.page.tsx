@@ -1,4 +1,9 @@
-import { FORUM_SEARCH_MAX_LENGTH, FORUM_TOPIC_SORTS, type ForumTopicSort } from "@repo/shared";
+import {
+  FORUM_SEARCH_MAX_LENGTH,
+  FORUM_TOPIC_SORTS,
+  PERMISSIONS,
+  type ForumTopicSort,
+} from "@repo/shared";
 import { Plus } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,6 +16,7 @@ import {
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useStudentCoursesSuspense } from "~/api/queries/useStudentCourses";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { useClampedPage } from "~/components/DataTable";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Pagination } from "~/components/Pagination/Pagination";
@@ -86,6 +92,11 @@ function ForumTopics({ courses }: ForumTopicsProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const { data: currentUser } = useCurrentUser();
+  const canCreateTopic = hasPermission(
+    currentUser?.permissions ?? [],
+    PERMISSIONS.FORUM_TOPIC_CREATE,
+  );
 
   const tableState = useUrlTableState({
     filterKeys: FORUM_TOPICS_FILTER_KEYS,
@@ -134,13 +145,15 @@ function ForumTopics({ courses }: ForumTopicsProps) {
             <h1 className="h4 text-neutral-950">{t("forum.title")}</h1>
             <p className="body-sm text-neutral-600">{t("forum.description")}</p>
           </div>
-          <Button
-            onClick={() => setIsCreateDialogOpen(true)}
-            data-testid={FORUM_HANDLES.NEW_TOPIC_BUTTON}
-          >
-            <Plus className="mr-2 size-4" aria-hidden />
-            {t("forum.newTopic")}
-          </Button>
+          {canCreateTopic && (
+            <Button
+              onClick={() => setIsCreateDialogOpen(true)}
+              data-testid={FORUM_HANDLES.NEW_TOPIC_BUTTON}
+            >
+              <Plus className="mr-2 size-4" aria-hidden />
+              {t("forum.newTopic")}
+            </Button>
+          )}
         </header>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -245,7 +258,9 @@ function ForumTopics({ courses }: ForumTopicsProps) {
         )}
       </section>
 
-      <CreateForumTopicDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
+      {canCreateTopic && (
+        <CreateForumTopicDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
+      )}
     </PageWrapper>
   );
 }

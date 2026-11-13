@@ -22,10 +22,12 @@ vi.mock("~/api/api-client", () => ({
   },
 }));
 
+const currentUserPermissions = vi.hoisted(() => ({ value: [] as string[] }));
+
 vi.mock("~/api/queries/useCurrentUser", async (importOriginal) => ({
   ...(await importOriginal<typeof import("~/api/queries/useCurrentUser")>()),
   useCurrentUser: () => ({
-    data: { id: "user-1", permissions: [PERMISSIONS.COURSE_DISCUSSION_READ] },
+    data: { id: "user-1", permissions: currentUserPermissions.value },
   }),
 }));
 
@@ -80,6 +82,10 @@ const lastTopicsQuery = () => vi.mocked(ApiClient.api.forumControllerGetTopics).
 
 describe("ForumTopicsPage", () => {
   beforeEach(() => {
+    currentUserPermissions.value = [
+      PERMISSIONS.COURSE_DISCUSSION_READ,
+      PERMISSIONS.FORUM_TOPIC_CREATE,
+    ];
     queryClient.clear();
     vi.clearAllMocks();
     mockSettings(true);
@@ -117,6 +123,19 @@ describe("ForumTopicsPage", () => {
     expect(await screen.findByText(TOPIC_TITLE)).toBeInTheDocument();
     expect(lastTopicsQuery()).toMatchObject({ page: 1 });
     expect(screen.queryByTestId(FORUM_HANDLES.EMPTY_STATE)).not.toBeInTheDocument();
+  });
+
+  it("offers a new topic only to users who may create one", async () => {
+    const { unmount } = renderForum("/forum");
+
+    expect(await screen.findByTestId(FORUM_HANDLES.NEW_TOPIC_BUTTON)).toBeInTheDocument();
+
+    unmount();
+    currentUserPermissions.value = [];
+    renderForum("/forum");
+
+    expect(await screen.findByText(TOPIC_TITLE)).toBeInTheDocument();
+    expect(screen.queryByTestId(FORUM_HANDLES.NEW_TOPIC_BUTTON)).not.toBeInTheDocument();
   });
 
   it("redirects away without loading topics while the forum is disabled", async () => {
