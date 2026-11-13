@@ -97,9 +97,7 @@ export class AuthController {
     data: CreateAccountBody,
     @Res({ passthrough: true }) response: Response,
   ): Promise<BaseResponse<Static<typeof loginResponseSchema>>> {
-    const { enforceSSO, inviteOnlyRegistration } = await this.settingsService.getGlobalSettings();
-
-    if (enforceSSO) throw new UnauthorizedException("ssoEnforcementView.toast.registerRedirect");
+    const { inviteOnlyRegistration } = await this.settingsService.getGlobalSettings();
 
     if (inviteOnlyRegistration)
       throw new UnauthorizedException("inviteOnlyRegistrationView.toast.registerRedirect");
@@ -133,12 +131,6 @@ export class AuthController {
     data: LoginBody,
     response: Response,
   ): Promise<BaseResponse<Static<typeof loginResponseSchema>>> {
-    const { enforceSSO } = await this.settingsService.getGlobalSettings();
-
-    if (enforceSSO) {
-      throw new UnauthorizedException("SSO is enforced, login via email is not allowed");
-    }
-
     const { accessToken, refreshToken, shouldVerifyMFA, ...account } =
       await this.authService.login(data);
 

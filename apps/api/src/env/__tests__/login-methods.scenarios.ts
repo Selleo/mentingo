@@ -56,8 +56,8 @@ export const REJECTED_LOGIN_METHOD_UPDATES = [
     expectedError: LOGIN_METHOD_ERROR_KEYS.LAST_METHOD,
   },
   {
-    title: "disabling magic link when SSO enforcement blocks password login",
-    storedSecrets: {},
+    title: "disabling magic link when password is disabled despite the legacy SSO flag",
+    storedSecrets: { PASSWORD_LOGIN_ENABLED: "false" },
     enforceSSO: true,
     update: { method: LOGIN_METHODS.MAGIC_LINK, enabled: false },
     expectedError: LOGIN_METHOD_ERROR_KEYS.LAST_METHOD,
@@ -65,6 +65,13 @@ export const REJECTED_LOGIN_METHOD_UPDATES = [
 ] as const;
 
 export const ACCEPTED_LOGIN_METHOD_UPDATES = [
+  {
+    title: "disabling magic link while legacy enforcement must not block enabled password",
+    storedSecrets: {},
+    update: { method: LOGIN_METHODS.MAGIC_LINK, enabled: false },
+    expectedMethods: { password: true, magicLink: false },
+    expectedPublicSSOFlags: {},
+  },
   {
     title: "enabling Google with stored credentials",
     storedSecrets: { GOOGLE_CLIENT_ID: "google-id", GOOGLE_CLIENT_SECRET: "google-secret" },

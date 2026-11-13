@@ -33,7 +33,7 @@ it.each([true, false])(
     const { renderWith } = await import("~/utils/testUtils");
     renderWith({ withQuery: true }).render(
       <Content
-        globalSettings={{ enforceSSO: true } as GlobalSettings}
+        globalSettings={{ enforceSSO: true } as unknown as GlobalSettings}
         canManageEnvs={canManageEnvs}
       />,
     );

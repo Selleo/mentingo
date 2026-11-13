@@ -227,6 +227,7 @@ describe("Organization login methods (e2e)", () => {
       async ({ storedSecrets, update, expectedMethods, expectedPublicSSOFlags }) => {
         await storeSecrets(storedSecrets);
         const cookie = await arrangeAdminCookie();
+        await enforceSSO();
 
         const response = await request(app.getHttpServer())
           .post("/api/env/login-methods")

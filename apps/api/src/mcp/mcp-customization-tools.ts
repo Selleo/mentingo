@@ -35,7 +35,9 @@ export const MCP_CUSTOMIZATION_TOOL_NAMES = [
   "delete_platform_login_document",
 ] as const;
 
-function customizationSettings(settings: GlobalSettingsJSONContentSchema) {
+function customizationSettings(
+  settings: GlobalSettingsJSONContentSchema & { enforceSSO?: boolean },
+) {
   const { enforceSSO: _sso, MFAEnforcedRoles: _mfa, ...customization } = settings;
   return customization;
 }
