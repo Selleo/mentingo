@@ -48,9 +48,6 @@ vi.mock("~/api/queries/self-onboarding/useSelfOnboardingSearch", () => ({
 vi.mock("~/components/VideoPlayer/VideoPlayer", () => ({
   VideoPlayer: () => <div>Published help video</div>,
 }));
-vi.mock("~/modules/Gamification/GamificationRewardToasts", () => ({
-  GamificationRewardToasts: () => null,
-}));
 vi.mock("~/modules/Dashboard/Dashboard", () => ({
   Dashboard: () => (
     <RouteGuard>
