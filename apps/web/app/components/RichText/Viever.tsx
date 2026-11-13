@@ -1,6 +1,7 @@
 import { sanitizeRichText } from "@repo/shared";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { match } from "ts-pattern";
 
 import { useRichTextContentPolicy } from "~/components/RichText/contentPolicyContext";
 import { cn } from "~/lib/utils";
@@ -32,6 +33,15 @@ type ViewerProps = {
     onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
     onVideoActivated?: (resourceEntityId: string) => void;
   };
+  audioCoverageTracking?: {
+    enabled: boolean;
+    showCoverageMarkers?: boolean;
+    lessonId?: string;
+    learningStateId?: string | null;
+    language?: SupportedLanguages;
+    onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
+    onAudioActivated?: (resourceEntityId: string) => void;
+  };
 };
 
 const Viewer = ({
@@ -41,6 +51,7 @@ const Viewer = ({
   variant = RICH_TEXT_VIEWER_VARIANT.DEFAULT,
   onVideoEnded,
   videoCoverageTracking,
+  audioCoverageTracking,
 }: ViewerProps) => {
   const variantStyles = {
     default: {
@@ -97,12 +108,17 @@ const Viewer = ({
     const plugins =
       variant === RICH_TEXT_VIEWER_VARIANT.DEFAULT ? baseViewerPlugins : contentViewerPlugins;
 
+    if (variant !== RICH_TEXT_VIEWER_VARIANT.CONTENT) return plugins;
+
     return plugins.map((extension) =>
-      extension.name === "video" && variant === RICH_TEXT_VIEWER_VARIANT.CONTENT
-        ? extension.configure({ onVideoEnded: handleVideoEnded, videoCoverageTracking })
-        : extension,
+      match(extension.name)
+        .with("video", () =>
+          extension.configure({ onVideoEnded: handleVideoEnded, videoCoverageTracking }),
+        )
+        .with("audio", () => extension.configure({ audioCoverageTracking }))
+        .otherwise(() => extension),
     );
-  }, [handleVideoEnded, variant, videoCoverageTracking]);
+  }, [audioCoverageTracking, handleVideoEnded, variant, videoCoverageTracking]);
 
   const mediaPolicy = useRichTextContentPolicy();
   const normalizedContent = useMemo(() => {

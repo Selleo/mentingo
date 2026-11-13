@@ -5,14 +5,10 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { ENTITY_TYPES, SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
-import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
-import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
-import { FileService } from "src/file/file.service";
-import { createLessonResourceIdRegex } from "src/lesson/lesson-resource-references";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { LessonMediaCompletionService } from "src/lesson-media-completion/lesson-media-completion.service";
 import { DB } from "src/storage/db/db.providers";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 
@@ -36,45 +32,9 @@ export class LessonVideoProgressService {
     private readonly lessonVideoProgressRepository: LessonVideoProgressRepository,
     private readonly watchSessionService: LessonVideoWatchSessionService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
-    private readonly fileService: FileService,
+    private readonly lessonMediaCompletionService: LessonMediaCompletionService,
     @Inject(DB) private readonly db: DatabasePg,
   ) {}
-
-  private async getInternalVideoResourceEntityIdsInContent(
-    body: Pick<UpsertLessonVideoProgress, "lessonId" | "language">,
-    dbInstance: DatabasePg,
-  ) {
-    const [lessonDescription, lessonResources] = await Promise.all([
-      this.lessonVideoProgressRepository.getLocalizedLessonDescription(
-        body.lessonId,
-        body.language,
-        dbInstance,
-      ),
-      this.fileService.getResourcesForEntity(
-        body.lessonId,
-        ENTITY_TYPES.LESSON,
-        RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-      ),
-    ]);
-
-    const { internalVideoResourceEntityIds } = injectResourcesIntoContent(
-      lessonDescription,
-      lessonResources.map((resource) => ({
-        id: resource.id,
-        resourceEntityId: resource.resourceEntityId,
-        fileUrl: resource.fileUrl,
-        fileUrlError: resource.fileUrlError,
-        contentType: resource.contentType,
-      })),
-      {
-        resourceIdRegex: createLessonResourceIdRegex(),
-        trackNodeTypes: ["video"],
-        convertImageAnchors: false,
-      },
-    );
-
-    return internalVideoResourceEntityIds;
-  }
 
   async upsertProgress(body: UpsertLessonVideoProgress, currentUser: CurrentUserType) {
     const bucketSizeSeconds = body.bucketSize ?? VIDEO_TRACKING_BUCKET_SIZE_SECONDS;
@@ -209,40 +169,22 @@ export class LessonVideoProgressService {
             )
           : progress;
 
-      const requiredInternalVideoResourceEntityIds = context.videoCompletionTrackingEnabled
-        ? await this.getInternalVideoResourceEntityIdsInContent(body, trx)
-        : [];
-      const requiredVideos =
-        context.videoCompletionTrackingEnabled && requiredInternalVideoResourceEntityIds.length > 0
-          ? await this.lessonVideoProgressRepository.getRequiredVideoProgressForLesson(
-              {
-                lessonId: body.lessonId,
-                studentId: currentUser.userId,
-                resourceEntityIds: requiredInternalVideoResourceEntityIds,
-              },
-              trx,
-            )
-          : [];
-
       const lessonCompleted =
-        context.videoCompletionTrackingEnabled &&
-        requiredVideos.length > 0 &&
-        requiredVideos.every((video) => video.isWatched);
-
-      if (lessonCompleted && !context.lessonCompleted) {
-        await this.studentLessonProgressService.markLessonAsCompleted({
-          id: body.lessonId,
-          studentId: currentUser.userId,
-          userPermissions: currentUser.permissions,
-          actor: currentUser,
-          dbInstance: trx,
-          language: body.language ?? SUPPORTED_LANGUAGES.EN,
-        });
-      }
+        await this.lessonMediaCompletionService.completeLessonWhenRequiredMediaConsumed(
+          {
+            lessonId: body.lessonId,
+            language: body.language,
+            currentUser,
+            lessonCompleted: context.lessonCompleted,
+            videoCompletionTrackingEnabled: context.videoCompletionTrackingEnabled,
+            audioCompletionTrackingEnabled: context.audioCompletionTrackingEnabled,
+          },
+          trx,
+        );
 
       return {
         ...watchedProgress,
-        lessonCompleted: lessonCompleted || context.lessonCompleted,
+        lessonCompleted,
       };
     });
   }

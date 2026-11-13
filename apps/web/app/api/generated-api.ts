@@ -2977,6 +2977,7 @@ export interface UpdateCourseSettingsBody {
   lessonSequenceEnabled?: boolean;
   quizFeedbackEnabled?: boolean;
   videoCompletionTrackingEnabled?: boolean;
+  audioCompletionTrackingEnabled?: boolean;
   certificateFontColor?: string;
   certificateValidity?:
     | (
@@ -3015,6 +3016,8 @@ export interface GetCourseSettingsResponse {
     quizFeedbackEnabled: boolean;
     /** @default true */
     videoCompletionTrackingEnabled?: boolean;
+    /** @default false */
+    audioCompletionTrackingEnabled?: boolean;
     /** @default null */
     certificateSignature: string | null;
     /** @default "#000000" */
@@ -3803,6 +3806,8 @@ export interface GetLessonByIdResponse {
     hasVideo?: boolean;
     hasTrackedVideo?: boolean;
     videoCompletionTrackingEnabled?: boolean;
+    hasTrackedAudio?: boolean;
+    audioCompletionTrackingEnabled?: boolean;
     hasAutoplayTrigger?: boolean;
     videos?: string[];
     isQuizFeedbackRedacted?: boolean;
@@ -9276,6 +9281,45 @@ export interface UpsertProgressResponse {
     watchedRanges: [number, number][];
     isWatched: boolean;
     watchedAt: string | null;
+    lessonCompleted: boolean;
+  };
+}
+
+export interface UpsertLessonAudioProgressBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  resourceEntityId: string;
+  /** @min 1 */
+  durationSeconds: number;
+  /**
+   * @min 1
+   * @default 1
+   */
+  bucketSize?: number;
+  listenedRanges: [number, number][];
+  /**
+   * @min 0
+   * @default 0
+   */
+  activeListenSecondsDelta?: number;
+  /** @default "en" */
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface UpsertLessonAudioProgressResponse {
+  data: {
+    /** @format uuid */
+    lessonId: string;
+    /** @format uuid */
+    resourceEntityId: string;
+    durationSeconds: number;
+    bucketSizeSeconds: number;
+    coveredBucketCount: number;
+    coveragePercent: number;
+    listenedRanges: [number, number][];
+    isListened: boolean;
+    listenedAt: string | null;
     lessonCompleted: boolean;
   };
 }
@@ -37209,6 +37253,8 @@ export interface GetAuthoringCourseContextResponse {
         quizFeedbackEnabled: boolean;
         /** @default true */
         videoCompletionTrackingEnabled?: boolean;
+        /** @default false */
+        audioCompletionTrackingEnabled?: boolean;
         /** @default "#000000" */
         certificateFontColor: string | null;
         /** @default null */
@@ -44825,6 +44871,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<UpsertProgressResponse, any>({
         path: `/api/lesson-video-progress`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonAudioProgressControllerUpsertLessonAudioProgress
+     * @request POST:/api/lesson-audio-progress
+     */
+    lessonAudioProgressControllerUpsertLessonAudioProgress: (
+      data: UpsertLessonAudioProgressBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpsertLessonAudioProgressResponse, any>({
+        path: `/api/lesson-audio-progress`,
         method: "POST",
         body: data,
         type: ContentType.Json,
