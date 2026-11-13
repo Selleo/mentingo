@@ -355,8 +355,16 @@ describe("QuizGradingController (e2e)", () => {
     await grade(t.reviewerCookie, first.id, true).expect(201);
     await grade(t.reviewerCookie, second.id, true).expect(201);
 
+    const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish");
+
     await grade(t.reviewerCookie, first.id, false, "Re-checked").expect(201);
     await grade(t.reviewerCookie, second.id, false).expect(201);
+
+    const regradeEvents = publishSpy.mock.calls.map(([event]) => event);
+
+    publishSpy.mockRestore();
+    // A lower re-graded score is not a new quiz result for achievements.
+    expect(regradeEvents.some((event) => event instanceof QuizCompletedEvent)).toBe(false);
 
     const reviews = await dbAdmin
       .select()
@@ -416,6 +424,10 @@ describe("QuizGradingController (e2e)", () => {
     expect(events.find((event) => event instanceof QuizAttemptGradedEvent)).toMatchObject({
       passed: true,
       isRegrade: true,
+    });
+    // Score-based achievements count the re-graded score.
+    expect(events.find((event) => event instanceof QuizCompletedEvent)).toMatchObject({
+      quizCompletionData: { userId: t.student.id, lessonId: t.lesson.id, score: 50 },
     });
     expect(await findAttempt(t.student.id)).toMatchObject({
       result: ASSESSMENT_ATTEMPT_RESULTS.PASSED,

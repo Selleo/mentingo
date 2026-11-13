@@ -21,7 +21,7 @@ import { DatabasePg, type Pagination, type UUIDType } from "src/common";
 import { parsePagination } from "src/common/pagination";
 import { courseLearningContext } from "src/course-repetition/course-learning-context";
 import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
-import { QuizAttemptGradedEvent } from "src/events";
+import { QuizAttemptGradedEvent, QuizCompletedEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QuizRuntimeRepository } from "src/quiz/repositories/quiz-runtime.repository";
 import { DB } from "src/storage/db/db.providers";
@@ -188,6 +188,9 @@ export class QuizGradingService {
     const isQuizPassed = scorePercentage >= answer.passingScorePercentage;
     const isRegrade = answer.attemptGradingStatus === ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED;
     const score = Math.floor(scorePercentage);
+    const correctAnswerCount = attemptAnswers.filter(
+      ({ awardedPoints }) => awardedPoints > 0,
+    ).length;
 
     await this.quizGradingRepository.updateGradedAttempt(
       answer.attemptId,
@@ -205,6 +208,22 @@ export class QuizGradingService {
 
     if (isRegrade) {
       await this.updateRegradedProgress(answer, score, isQuizPassed);
+
+      // A higher re-graded score is a new quiz result, so score-based achievements can count it.
+      if (score > Math.floor(answer.attemptScorePercentage ?? 0)) {
+        await this.outboxPublisher.publish(
+          new QuizCompletedEvent({
+            userId: answer.studentId,
+            courseId: answer.courseId,
+            lessonId: answer.lessonId,
+            correctAnswers: correctAnswerCount,
+            wrongAnswers: attemptAnswers.length - correctAnswerCount,
+            score,
+            isSupportMode: false,
+          }),
+          this.db,
+        );
+      }
     } else {
       await this.studentLessonProgressService.finishQuizProgress({
         chapterId: answer.chapterId,
@@ -212,7 +231,7 @@ export class QuizGradingService {
         lessonId: answer.lessonId,
         studentId: answer.studentId,
         questionCount: attemptAnswers.length,
-        correctAnswerCount: attemptAnswers.filter(({ awardedPoints }) => awardedPoints > 0).length,
+        correctAnswerCount,
         score,
         attemptNumber: answer.attemptNumber,
         isQuizPassed,
