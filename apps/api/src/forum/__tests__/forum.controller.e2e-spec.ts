@@ -241,18 +241,29 @@ describe("ForumController (e2e)", () => {
         expect(response.body.message).toBe("auth.error.missingPermission");
       }
     });
+
+    it("keeps reviewers out of the forum", async () => {
+      const { cookie: reviewerCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.REVIEWER);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/forum/topics")
+        .query({ language: "en" })
+        .set("Cookie", reviewerCookie)
+        .expect(403);
+      expect(response.body.message).toBe("auth.error.missingPermission");
+    });
   });
 
   describe("general topics", () => {
-    it("lets every signed-in role create, read and reply to topics", async () => {
-      const { user: reviewer, cookie: reviewerCookie } = await createUserWithCookie(
-        SYSTEM_ROLE_SLUGS.REVIEWER,
+    it("lets users of different roles create, read and reply to topics", async () => {
+      const { user: contentCreator, cookie: contentCreatorCookie } = await createUserWithCookie(
+        SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
       );
       const { cookie: trainerCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.TRAINER);
       const { cookie: studentCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
       const { cookie: adminCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.ADMIN);
 
-      const topic = await createTopic(reviewerCookie, {
+      const topic = await createTopic(contentCreatorCookie, {
         title: "  Onboarding tips  ",
         content: "  What helped you most in your first week?  ",
       });
@@ -262,7 +273,7 @@ describe("ForumController (e2e)", () => {
         title: "Onboarding tips",
         course: null,
         replyCount: 0,
-        author: { id: reviewer.id },
+        author: { id: contentCreator.id },
         firstPost: {
           content: "What helped you most in your first week?",
           isFirstPost: true,
@@ -294,7 +305,7 @@ describe("ForumController (e2e)", () => {
 
       const posts = await request(app.getHttpServer())
         .get(`/api/forum/topics/${topic.id}/posts`)
-        .set("Cookie", reviewerCookie)
+        .set("Cookie", contentCreatorCookie)
         .expect(200);
       expect(posts.body.data.map((post: { content: string }) => post.content)).toEqual([
         "Shadowing a teammate.",
