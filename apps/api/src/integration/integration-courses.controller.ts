@@ -1,10 +1,17 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
 import { ApiForbiddenResponse, ApiHeader, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
-import { PaginatedResponse, paginatedResponse } from "src/common";
+import {
+  BaseResponse,
+  baseResponse,
+  PaginatedResponse,
+  paginatedResponse,
+  UUIDSchema,
+  type UUIDType,
+} from "src/common";
 import { API_HEADERS, ApiEndpointDocs } from "src/common/decorators/api-endpoint-docs.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
@@ -19,12 +26,12 @@ import { IntegrationApiKeyGuard } from "./guards/integration-api-key.guard";
 import { INTEGRATION_COURSES_MAX_PAGE_SIZE } from "./integration.constants";
 import { IntegrationKeyTenantContext } from "./integration.types";
 import {
+  integrationCourseOutlineSchema,
   integrationCoursesSchema,
+  type IntegrationCourseOutline,
   type IntegrationCoursesResponse,
 } from "./schemas/integration-course.schema";
 import { IntegrationCourseCatalogService } from "./services/integration-course-catalog.service";
-
-import type { SupportedLanguages } from "@repo/shared";
 
 @ApiHeader({
   name: "X-API-Key",
@@ -80,6 +87,37 @@ export class IntegrationCoursesController {
           language,
           ...parsePagination(page, perPage, { perPage: DEFAULT_PAGE_SIZE }),
         },
+        actor,
+        keyTenant,
+      ),
+    );
+  }
+
+  @Get("courses/:courseId/outline")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @ApiEndpointDocs({
+    summary: "Get a course outline for an external catalog",
+    description:
+      "Returns the chapters and lessons of a non-archived course of the tenant selected by X-Tenant-Id, in course order, with its learning outcomes. Lesson content is not included.\n\nRequires a managing tenant key whose owner has the course export permission. Titles and learning outcomes use the given language and fall back to the course's base language.",
+    headers: [API_HEADERS.X_TENANT_ID],
+  })
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema, required: true },
+      { type: "query", name: "language", schema: supportedLanguagesSchema, required: true },
+    ],
+    response: baseResponse(integrationCourseOutlineSchema),
+  })
+  async getTenantCourseOutline(
+    @Param("courseId") courseId: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser() actor: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationCourseOutline>> {
+    return new BaseResponse(
+      await this.integrationCourseCatalogService.getCourseOutline(
+        courseId,
+        language,
         actor,
         keyTenant,
       ),

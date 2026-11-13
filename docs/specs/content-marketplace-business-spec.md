@@ -19,6 +19,7 @@ The marketplace is a connected service (a Mentingo plugin) that platform operato
 
 - Browse marketplace courses with thumbnails, descriptions, languages, category, duration and lesson counts, including a "Recently updated" spotlight.
 - Search by keyword, filter by category and duration (under 1 hour, 1–3 hours, over 3 hours), and sort by most recently updated or by title.
+- Preview a marketplace course's content before adding it: its learning outcomes, chapters and lessons with their types, in the administrator's language where the course offers it.
 - Add a marketplace course to the organization as a read-only shared course and open it once copying finishes.
 - See when a copied course is outdated and sync it to the latest marketplace version, keeping learners' progress.
 - Duplicate a copied marketplace course into an editable course that still counts toward the marketplace listing's usage.
@@ -34,6 +35,8 @@ Organizations launch training faster because they can add finished courses inste
 
 An administrator opens the content marketplace from the Courses page. Mentingo shows the catalog served by the marketplace for that organization, with search, category and duration filters, sorting, and paging. Each listing that the organization has already copied links to the local course; a listing whose marketplace version is newer than the copy offers Sync instead of Add to courses.
 
+Before adding a course, the administrator can open its preview from the listing card. The preview shows the course's learning outcomes and its chapters with their lessons and lesson types, but no lesson content. It describes the listing's current version, the same content a copy would receive, and is shown in the administrator's interface language when the course is available in it, otherwise in the course's base language. Courses whose current version was published before previews existed show that no preview is available until the marketplace publishes a new version. The preview also offers the same Add to courses, Sync and Open course actions as the card.
+
 When the administrator adds a course, Mentingo accepts the request and immediately returns a copy job that the page follows until it finishes. In the background, Mentingo obtains the course package from the marketplace, stores it, and imports it as a read-only shared course; the page then confirms the copy and offers to open the course. Adding the same listing again syncs the existing copy instead of creating a second course: content the newer version changes is updated, lessons it no longer contains are removed, live-training lessons are kept, and learners' progress, including SCORM progress, is preserved. A course that was originally imported as an editable copy is never overwritten by a sync.
 
 If copying fails, the page shows the reason and the marketplace is told that the copy failed. A copy whose package exceeds the 500 MiB archive limit is rejected while it is downloaded, so an oversized package never fills storage.
@@ -42,7 +45,7 @@ Duplicating a marketplace course creates an ordinary editable course in the same
 
 The marketplace is available only when a platform operator has connected the organization. Operators save the marketplace address and API key through the integration API and can check whether the organization reaches the marketplace and whether the marketplace is enabled for it. Only this connection can set the marketplace address, and addresses on private or internal networks are rejected, so an organization cannot be pointed at an internal service. Without an enabled connection, the marketplace entry point is hidden and the marketplace screens report that it is unavailable.
 
-The marketplace itself reads course content from Mentingo through the integration API: a managing-organization key can list an organization's non-archived courses with localized titles, category, duration, and lesson counts, and can export a course as a package that the marketplace publishes as a listing version.
+The marketplace itself reads course content from Mentingo through the integration API: a managing-organization key can list an organization's non-archived courses with localized titles, category, duration, and lesson counts, read a course's outline (chapters, lessons and learning outcomes) in a given language, and can export a course as a package that the marketplace publishes as a listing version.
 
 ## Key Technical Context
 
@@ -50,7 +53,8 @@ The marketplace itself reads course content from Mentingo through the integratio
 - `apps/api/src/content-marketplace/services/content-marketplace.service.ts` orchestrates browsing and copying; copies run through the native archive import in its `SYNC` mode (`apps/api/src/native-archive/native-archive.constants.ts`), which creates or updates a read-only shared course and remembers which local entity each archive entity became.
 - Course lineage (listing, version, acquisition) is stored per tenant and drives the "outdated" indicator. Copy and duplication reports are durable outbox events delivered to the marketplace by a retrying queue job that reuses the event ID, so a redelivered report is counted once (`apps/api/src/content-marketplace/handlers/content-marketplace-analytics.handler.ts`).
 - The tenant connection is stored as tenant environment values written by `PUT /integration/tenants/:tenantId/plugins/content-marketplace` and checked by the matching `GET`; both need a managing-tenant integration key.
-- The marketplace-facing catalog (`GET /integration/courses`) and package export (`POST /integration/courses/:courseId/native-archive` and its job status and download endpoints) need a managing-tenant integration key whose owner may export courses, and only read the tenant selected by the request.
+- The preview is served by `GET /content-marketplace/listings/:listingId/outline?language=` from the marketplace's snapshot of the listing version. The marketplace captures that snapshot, one outline per course language, from `GET /integration/courses/:courseId/outline` when it prepares the version, so preview and package always describe the same content.
+- The marketplace-facing catalog (`GET /integration/courses`), course outline (`GET /integration/courses/:courseId/outline`) and package export (`POST /integration/courses/:courseId/native-archive` and its job status and download endpoints) need a managing-tenant integration key whose owner may export courses, and only read the tenant selected by the request.
 - Copied marketplace courses follow the same read-only shared-course model as centrally shared courses; see [Course Sharing](course-sharing-business-spec.md).
 
 ## Test Evidence
@@ -59,4 +63,4 @@ API E2E coverage verifies the integration side: saving a marketplace connection 
 
 Native archive E2E coverage verifies the shared-course import: the first import creates a shared course that remembers its source entities, a newer archive updates the course in place while keeping progress, removed lessons are deleted, editable copies are not overwritten, and learning paths cannot be imported as shared courses.
 
-There is no backend E2E for the tenant-facing browse and copy endpoints or for marketplace usage reporting, and no Playwright coverage of the marketplace screens; those flows are supported by implementation review only.
+There is no backend E2E for the tenant-facing browse, preview and copy endpoints, or for the integration course outline endpoint or for marketplace usage reporting, and no Playwright coverage of the marketplace screens; those flows are supported by implementation review only.

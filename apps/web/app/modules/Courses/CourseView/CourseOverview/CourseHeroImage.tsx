@@ -1,3 +1,5 @@
+import { cn } from "~/lib/utils";
+
 import { COURSE_HERO_PLACEHOLDER_BACKGROUND } from "./courseHeroPlaceholder";
 
 import type { ReactNode } from "react";
@@ -5,6 +7,7 @@ import type { ReactNode } from "react";
 type CourseHeroImageProps = {
   alt: string;
   children?: ReactNode;
+  className?: string;
   imagePosition?: number;
   imageUrl?: string;
 };
@@ -12,11 +15,17 @@ type CourseHeroImageProps = {
 export default function CourseHeroImage({
   alt,
   children,
+  className,
   imagePosition = 50,
   imageUrl,
 }: CourseHeroImageProps) {
   return (
-    <div className="group relative grid aspect-auto min-h-[22rem] w-full min-w-0 max-w-full grid-cols-[minmax(0,1fr)] overflow-hidden sm:aspect-video sm:min-h-0 md:aspect-[21/9]">
+    <div
+      className={cn(
+        "group relative grid aspect-auto min-h-[22rem] w-full min-w-0 max-w-full grid-cols-[minmax(0,1fr)] overflow-hidden sm:aspect-video sm:min-h-0 md:aspect-[21/9]",
+        className,
+      )}
+    >
       <div
         role="img"
         aria-label={alt}

@@ -8083,7 +8083,15 @@
       "unavailable": "La place de marché de contenus n'est pas disponible pour cette organisation.",
       "listingNotFound": "Ce cours de la place de marché est introuvable.",
       "thumbnailNotFound": "Ce cours de la place de marché n'a pas de miniature.",
-      "serviceError": "La place de marché de contenus n'a pas pu traiter la demande. Réessayez plus tard."
+      "serviceError": "La place de marché de contenus n'a pas pu traiter la demande. Réessayez plus tard.",
+      "outlineNotFound": "L'aperçu du contenu de ce cours n'est pas encore disponible."
+    },
+    "preview": {
+      "open": "Aperçu du contenu",
+      "noChapters": "Ce cours n'a pas encore de chapitres.",
+      "chaptersCount_one": "{{count}} chapitre",
+      "chaptersCount_many": "{{count}} chapitres",
+      "chaptersCount_other": "{{count}} chapitres"
     }
   },
   "aiJudgeConfiguration": {

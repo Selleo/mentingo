@@ -8498,7 +8498,15 @@
       "unavailable": "El marketplace de contenidos no está disponible para esta organización.",
       "listingNotFound": "No se encontró este curso del marketplace.",
       "thumbnailNotFound": "Este curso del marketplace no tiene miniatura.",
-      "serviceError": "El marketplace de contenidos no pudo completar la solicitud. Inténtalo de nuevo más tarde."
+      "serviceError": "El marketplace de contenidos no pudo completar la solicitud. Inténtalo de nuevo más tarde.",
+      "outlineNotFound": "La vista previa del contenido de este curso aún no está disponible."
+    },
+    "preview": {
+      "open": "Ver contenido",
+      "noChapters": "Este curso aún no tiene capítulos.",
+      "chaptersCount_one": "{{count}} capítulo",
+      "chaptersCount_many": "{{count}} capítulos",
+      "chaptersCount_other": "{{count}} capítulos"
     }
   },
   "aiJudgeConfiguration": {

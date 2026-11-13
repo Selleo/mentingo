@@ -8563,7 +8563,16 @@
       "unavailable": "Turinio prekyvietė šiai organizacijai nepasiekiama.",
       "listingNotFound": "Šis prekyvietės kursas nerastas.",
       "thumbnailNotFound": "Šis prekyvietės kursas neturi miniatiūros.",
-      "serviceError": "Turinio prekyvietė negalėjo įvykdyti užklausos. Bandykite vėliau."
+      "serviceError": "Turinio prekyvietė negalėjo įvykdyti užklausos. Bandykite vėliau.",
+      "outlineNotFound": "Šio kurso turinio peržiūra dar neprieinama."
+    },
+    "preview": {
+      "open": "Peržiūrėti turinį",
+      "noChapters": "Šis kursas dar neturi skyrių.",
+      "chaptersCount_one": "{{count}} skyrius",
+      "chaptersCount_few": "{{count}} skyriai",
+      "chaptersCount_many": "{{count}} skyriaus",
+      "chaptersCount_other": "{{count}} skyrių"
     }
   },
   "aiJudgeConfiguration": {

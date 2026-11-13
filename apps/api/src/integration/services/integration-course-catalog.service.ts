@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 
 import { CourseDurationService } from "src/courses/duration/course-duration.service";
 import { FileService } from "src/file/file.service";
@@ -13,11 +13,16 @@ import { assertCanExportTenantCourses } from "../utils/integration-course-access
 
 import type { IntegrationCoursesQuery } from "../integration-course.types";
 import type { IntegrationKeyTenantContext } from "../integration.types";
-import type { IntegrationCoursesResponse } from "../schemas/integration-course.schema";
+import type {
+  IntegrationCourseOutline,
+  IntegrationCourseOutlineChapter,
+  IntegrationCoursesResponse,
+} from "../schemas/integration-course.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Pagination } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
-/** Lists the selected tenant's courses for external catalogs such as the content marketplace. */
+/** Lists the selected tenant's courses, and their outlines, for external catalogs such as the content marketplace. */
 @Injectable()
 export class IntegrationCourseCatalogService {
   constructor(
@@ -66,5 +71,58 @@ export class IntegrationCourseCatalogService {
       data,
       pagination: { totalItems, page: query.page, perPage: query.perPage },
     };
+  }
+
+  /** The course's chapters, lessons and learning outcomes in the given language, falling back to the base language. */
+  async getCourseOutline(
+    courseId: string,
+    language: SupportedLanguages,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationCourseOutline> {
+    assertCanExportTenantCourses(actor, keyTenant);
+
+    const { course, outlineRows } = await this.tenantDbRunnerService.transactionWithHandle(
+      async () => ({
+        course: await this.integrationCourseRepository.findCourseLearningOutcomes(
+          courseId,
+          language,
+        ),
+        outlineRows: await this.integrationCourseRepository.findCourseOutlineRows(
+          courseId,
+          language,
+        ),
+      }),
+      INTEGRATION_COURSE_CATALOG_TRANSACTION,
+    );
+
+    if (!course) throw new NotFoundException("adminCourseView.toast.courseNotFound");
+
+    return {
+      id: course.id,
+      learningOutcomes: course.learningOutcomes,
+      chapters: this.groupLessonsByChapter(outlineRows),
+    };
+  }
+
+  private groupLessonsByChapter(
+    outlineRows: Awaited<ReturnType<IntegrationCourseRepository["findCourseOutlineRows"]>>,
+  ) {
+    const chaptersById = new Map<string, IntegrationCourseOutlineChapter>();
+
+    for (const { chapterId, chapterTitle, lessonId, lessonTitle, lessonType } of outlineRows) {
+      const chapter = chaptersById.get(chapterId) ?? {
+        id: chapterId,
+        title: chapterTitle,
+        lessons: [],
+      };
+
+      if (lessonId && lessonType)
+        chapter.lessons.push({ id: lessonId, title: lessonTitle, type: lessonType });
+
+      chaptersById.set(chapterId, chapter);
+    }
+
+    return [...chaptersById.values()];
   }
 }

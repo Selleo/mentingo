@@ -8588,7 +8588,14 @@
       "unavailable": "The content marketplace is not available for this organization.",
       "listingNotFound": "This marketplace course was not found.",
       "thumbnailNotFound": "This marketplace course has no thumbnail.",
-      "serviceError": "The content marketplace could not complete the request. Try again later."
+      "serviceError": "The content marketplace could not complete the request. Try again later.",
+      "outlineNotFound": "A preview of this course's content is not available yet."
+    },
+    "preview": {
+      "open": "Preview content",
+      "noChapters": "This course has no chapters yet.",
+      "chaptersCount_one": "{{count}} chapter",
+      "chaptersCount_other": "{{count}} chapters"
     }
   },
   "aiJudgeConfiguration": {

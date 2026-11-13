@@ -21518,6 +21518,100 @@
         ]
       }
     },
+    "/api/integration/courses/{courseId}/outline": {
+      "get": {
+        "operationId": "IntegrationCoursesController_getTenantCourseOutline",
+        "summary": "Get a course outline for an external catalog",
+        "description": "Returns the chapters and lessons of a non-archived course of the tenant selected by X-Tenant-Id, in course order, with its learning outcomes. Lesson content is not included.\n\nRequires a managing tenant key whose owner has the course export permission. Titles and learning outcomes use the given language and fall back to the course's base language.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTenantCourseOutlineResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/courses/{courseId}/native-archive": {
       "post": {
         "operationId": "IntegrationNativeArchiveController_startCourseArchiveExport",
@@ -22804,6 +22898,73 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetContentMarketplaceListingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content-marketplace/listings/{listingId}/outline": {
+      "get": {
+        "operationId": "ContentMarketplaceController_getContentMarketplaceListingOutline",
+        "summary": "Preview a content marketplace course's content",
+        "description": "Returns the chapters, lessons and learning outcomes of the listing's current version, the one a copy would get. They are in the given language when the listing has it, otherwise in the course's base language. Lesson content is not included.",
+        "parameters": [
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetContentMarketplaceListingOutlineResponse"
                 }
               }
             }
@@ -174589,6 +174750,102 @@
           "pagination"
         ]
       },
+      "GetTenantCourseOutlineResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "learningOutcomes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "chapters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "lessons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "anyOf": [
+                              {
+                                "const": "content",
+                                "type": "string"
+                              },
+                              {
+                                "const": "quiz",
+                                "type": "string"
+                              },
+                              {
+                                "const": "ai_mentor",
+                                "type": "string"
+                              },
+                              {
+                                "const": "embed",
+                                "type": "string"
+                              },
+                              {
+                                "const": "scorm",
+                                "type": "string"
+                              },
+                              {
+                                "const": "live_training",
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "lessons"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "learningOutcomes",
+              "chapters"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "StartCourseArchiveExportResponse": {
         "type": "object",
         "properties": {
@@ -178869,6 +179126,66 @@
                   "copiedCourse"
                 ]
               }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetContentMarketplaceListingOutlineResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "learningOutcomes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "chapters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "lessons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "title",
+                          "type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "title",
+                    "lessons"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "language",
+              "learningOutcomes",
+              "chapters"
             ]
           }
         },
