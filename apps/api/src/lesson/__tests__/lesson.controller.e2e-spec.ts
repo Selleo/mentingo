@@ -26,6 +26,7 @@ import {
   type AssessmentScoringMode,
   type SupportedLanguages,
 } from "@repo/shared";
+import AdmZip from "adm-zip";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
@@ -77,6 +78,7 @@ import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
+import { waitForOutbox } from "../../../test/helpers/wait-for-outbox";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
@@ -2207,6 +2209,134 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         "Kot",
         "Pies",
       ]);
+    });
+
+    const createMatchingAdmin = () =>
+      userFactory.withCredentials({ password }).withAdminSettings(db).withAdminRole().create();
+
+    const getCoursePairs = (courseId: UUIDType) =>
+      db
+        .select({
+          scoringMode: assessmentQuestions.scoringMode,
+          language: assessmentQuestionMatchingPairs.language,
+          prompt: assessmentQuestionMatchingPairs.prompt,
+          match: assessmentQuestionMatchingPairs.match,
+          displayOrder: assessmentQuestionMatchingPairs.displayOrder,
+        })
+        .from(assessmentQuestionMatchingPairs)
+        .innerJoin(
+          assessmentQuestions,
+          eq(assessmentQuestions.id, assessmentQuestionMatchingPairs.questionId),
+        )
+        .innerJoin(assessments, eq(assessments.id, assessmentQuestions.assessmentId))
+        .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
+        .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+        .where(eq(chapters.courseId, courseId))
+        .orderBy(
+          assessmentQuestionMatchingPairs.language,
+          assessmentQuestionMatchingPairs.displayOrder,
+        );
+
+    it("keeps all pairs and the scoring mode when the course is duplicated", async () => {
+      const admin = await createMatchingAdmin();
+      const cookie = await cookieFor(admin, app);
+      const { courseId } = await createMatchingQuiz(ASSESSMENT_SCORING_MODES.PARTIAL, {
+        authorId: admin.id,
+        thumbnailS3Key: null,
+      });
+
+      const duplicateResponse = await request(app.getHttpServer())
+        .post(`/api/course/${courseId}/duplicate`)
+        .set("Cookie", cookie)
+        .expect(201);
+      const { courseId: copyId, jobId } = duplicateResponse.body.data;
+
+      const job = await waitForOutbox(
+        app,
+        async () =>
+          (
+            await request(app.getHttpServer())
+              .get(`/api/course/duplication-jobs/${jobId}`)
+              .set("Cookie", cookie)
+              .expect(200)
+          ).body.data as { state: string; failedReason: string | null },
+        ({ state }) => state === "completed" || state === "failed",
+      );
+
+      expect(job).toMatchObject({ state: "completed", failedReason: null });
+      expect(copyId).not.toBe(courseId);
+      expect(await getCoursePairs(copyId)).toEqual(await getCoursePairs(courseId));
+      expect(await getCoursePairs(copyId)).toMatchObject([
+        { scoringMode: ASSESSMENT_SCORING_MODES.PARTIAL, prompt: "Cat", match: "Meow" },
+        { scoringMode: ASSESSMENT_SCORING_MODES.PARTIAL, prompt: "Dog", match: "Woof" },
+      ]);
+    });
+
+    it("translates both sides of every pair with automatic course translation", async () => {
+      const admin = await createMatchingAdmin();
+      const cookie = await cookieFor(admin, app);
+      const { courseId } = await createMatchingQuiz(ASSESSMENT_SCORING_MODES.PARTIAL, {
+        authorId: admin.id,
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+      });
+
+      await request(app.getHttpServer())
+        .post(`/api/course/beta-create-language/${courseId}`)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", cookie)
+        .expect(201);
+
+      const generateTranslations = jest
+        .spyOn(app.get(AiService), "generateMissingTranslations")
+        .mockImplementation(async (items) => [items.map(({ data }) => `pl ${data.base}`)]);
+
+      try {
+        await request(app.getHttpServer())
+          .post(`/api/course/generate-translations/${courseId}`)
+          .query({ language: SUPPORTED_LANGUAGES.PL })
+          .set("Cookie", cookie)
+          .expect(201);
+      } finally {
+        generateTranslations.mockRestore();
+      }
+
+      const polishPairs = (await getCoursePairs(courseId)).filter(
+        ({ language }) => language === SUPPORTED_LANGUAGES.PL,
+      );
+
+      expect(polishPairs).toMatchObject([
+        { prompt: "pl Cat", match: "pl Meow", displayOrder: 1 },
+        { prompt: "pl Dog", match: "pl Woof", displayOrder: 2 },
+      ]);
+    });
+
+    it("exports pairs and the scoring mode to SCORM", async () => {
+      const admin = await createMatchingAdmin();
+      const { courseId, lesson } = await createMatchingQuiz(ASSESSMENT_SCORING_MODES.PARTIAL, {
+        authorId: admin.id,
+        thumbnailS3Key: null,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post(`/api/course/${courseId}/scorm-export?language=en`)
+        .set("Cookie", await cookieFor(admin, app))
+        .responseType("arraybuffer")
+        .expect(201);
+
+      const courseJson = new AdmZip(response.body).getEntry("data/course.json");
+      if (!courseJson) throw new Error("SCORM package has no course.json");
+
+      const [question] = JSON.parse(courseJson.getData().toString("utf8")).lessons[lesson.id]
+        .questions;
+
+      expect(question).toMatchObject({
+        type: ASSESSMENT_QUESTION_TYPES.MATCHING,
+        scoringMode: ASSESSMENT_SCORING_MODES.PARTIAL,
+        options: [
+          { title: "Cat", matchedWord: "Meow", isCorrect: true },
+          { title: "Dog", matchedWord: "Woof", isCorrect: true },
+        ],
+      });
     });
 
     it("rejects matching questions with too few pairs or repeated matches", async () => {
