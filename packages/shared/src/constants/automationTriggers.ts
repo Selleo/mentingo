@@ -809,6 +809,74 @@ export const AUTOMATION_TRIGGER_DEFINITIONS: AutomationTriggerDefinition[] = [
       ),
     ],
   },
+  {
+    type: AUTOMATION_EVENT_KINDS.QUIZ_ATTEMPT_GRADED,
+    kind: AUTOMATION_NODE_KINDS.TRIGGER,
+    labelKey: "automationBuilder.blocks.quizAttemptGraded",
+    providedVariables: [
+      variable(
+        "userFirstName",
+        "automationBuilder.variables.userFirstName",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "userFirstName",
+      ),
+      variable(
+        "userLastName",
+        "automationBuilder.variables.userLastName",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "userLastName",
+      ),
+      variable(
+        "courseName",
+        "automationBuilder.variables.courseName",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "course_name",
+      ),
+      variable(
+        "lessonName",
+        "automationBuilder.variables.lessonName",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "lesson_name",
+      ),
+      variable(
+        "quizScore",
+        "automationBuilder.variables.quizScore",
+        AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+        "score",
+      ),
+      variable(
+        "lessonUrl",
+        "automationBuilder.variables.lessonUrl",
+        AUTOMATION_PLACEHOLDER_TYPES.URL,
+        "lesson_link",
+      ),
+    ],
+  },
+  {
+    type: AUTOMATION_EVENT_KINDS.QUIZ_GRADING_DIGEST,
+    kind: AUTOMATION_NODE_KINDS.TRIGGER,
+    labelKey: "automationBuilder.blocks.quizGradingDigest",
+    providedVariables: [
+      variable(
+        "newAnswersCount",
+        "automationBuilder.variables.newAnswersCount",
+        AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+        "new_answers_count",
+      ),
+      variable(
+        "pendingAnswersCount",
+        "automationBuilder.variables.pendingAnswersCount",
+        AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+        "pending_answers_count",
+      ),
+      variable(
+        "gradingQueueUrl",
+        "automationBuilder.variables.gradingQueueUrl",
+        AUTOMATION_PLACEHOLDER_TYPES.URL,
+        "grading_queue_link",
+      ),
+    ],
+  },
 ];
 
 export const getAutomationTriggerDefinition = (type: AutomationEventKind) =>

@@ -345,7 +345,9 @@
       "announcement": "Opublikowano ogłoszenie",
       "live_training_started": "Rozpoczęło się szkolenie na żywo",
       "live_training_reminder": "Szkolenie na żywo rozpocznie się za 15 minut",
-      "live_training_ended": "Zakończyło się szkolenie na żywo"
+      "live_training_ended": "Zakończyło się szkolenie na żywo",
+      "quiz_attempt_graded": "Quiz oceniony przez osobę oceniającą",
+      "quiz_grading_digest": "Nowe odpowiedzi czekają na ocenę (codziennie)"
     },
     "errors": {
       "incompleteButton": "Wpisz tekst przycisku i adres URL.",
@@ -7897,7 +7899,9 @@
         "announcement": "Użytkownicy należący do grona odbiorców ogłoszenia.",
         "live_training_started": "Uczestnicy zapisani na kursy powiązane z rozpoczętym szkoleniem na żywo.",
         "live_training_reminder": "Uczestnicy zapisani na kursy powiązane z nadchodzącym szkoleniem na żywo.",
-        "live_training_ended": "Uczestnicy zapisani na kursy powiązane z zakończonym szkoleniem na żywo."
+        "live_training_ended": "Uczestnicy zapisani na kursy powiązane z zakończonym szkoleniem na żywo.",
+        "quiz_attempt_graded": "Uczestnik, którego odpowiedzi w quizie zostały ocenione.",
+        "quiz_grading_digest": "Użytkownicy, którzy mogą oceniać odpowiedzi w quizach."
       }
     },
     "mapping": {
@@ -7995,7 +7999,9 @@
       "certificateArchived": "Certyfikat zarchiwizowany",
       "announcementPublished": "Ogłoszenie opublikowane",
       "courseChatUserMentioned": "Użytkownik wspomniany na czacie",
-      "courseDueDateReminder": "Przypomnienie o terminie kursu"
+      "courseDueDateReminder": "Przypomnienie o terminie kursu",
+      "quizAttemptGraded": "Quiz oceniony",
+      "quizGradingDigest": "Podsumowanie kolejki ocen"
     },
     "canvas": {
       "emptyTitle": "Płótno automatyzacji jest puste",
@@ -8151,7 +8157,13 @@
       "live_training_title": "Tytuł szkolenia na żywo",
       "live_training_content": "Treść wiadomości o szkoleniu",
       "live_training_link": "Link do szkolenia na żywo",
-      "create_password_link": "Link do ustawienia hasła"
+      "create_password_link": "Link do ustawienia hasła",
+      "lessonName": "Nazwa lekcji",
+      "quizScore": "Wynik quizu (%)",
+      "lessonUrl": "Link do lekcji",
+      "newAnswersCount": "Nowe odpowiedzi",
+      "pendingAnswersCount": "Odpowiedzi czekające na ocenę",
+      "gradingQueueUrl": "Link do kolejki ocen"
     },
     "simulation": {
       "title": "Wynik symulacji",

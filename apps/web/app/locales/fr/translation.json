@@ -345,7 +345,9 @@
       "announcement": "Annonce publiée",
       "live_training_started": "Formation en direct commencée",
       "live_training_reminder": "La formation en direct commence dans 15 minutes",
-      "live_training_ended": "Formation en direct terminée"
+      "live_training_ended": "Formation en direct terminée",
+      "quiz_attempt_graded": "Quiz évalué par un évaluateur",
+      "quiz_grading_digest": "Nouvelles réponses en attente d’évaluation (quotidien)"
     },
     "errors": {
       "incompleteButton": "Saisissez le libellé du bouton et son URL.",
@@ -7711,7 +7713,9 @@
   },
   "automationBuilder": {
     "blocks": {
-      "userAssignedToGroup": "Utilisateur affecté à un groupe"
+      "userAssignedToGroup": "Utilisateur affecté à un groupe",
+      "quizAttemptGraded": "Quiz évalué",
+      "quizGradingDigest": "Récapitulatif de la file d’évaluation"
     },
     "recipients": {
       "title": "Destinataires",
@@ -7758,7 +7762,9 @@
         "announcement": "Les utilisateurs faisant partie du public de l’annonce.",
         "live_training_started": "Les apprenants inscrits aux cours liés à la formation en direct qui a commencé.",
         "live_training_reminder": "Les apprenants inscrits aux cours liés à la prochaine formation en direct.",
-        "live_training_ended": "Les apprenants inscrits aux cours liés à la formation en direct qui s’est terminée."
+        "live_training_ended": "Les apprenants inscrits aux cours liés à la formation en direct qui s’est terminée.",
+        "quiz_attempt_graded": "L’apprenant dont les réponses au quiz ont été évaluées.",
+        "quiz_grading_digest": "Les utilisateurs pouvant évaluer les réponses aux quiz."
       }
     },
     "mapping": {
@@ -7902,7 +7908,13 @@
       "live_training_title": "Titre de la formation en direct",
       "live_training_content": "Message de la formation en direct",
       "live_training_link": "Lien vers la formation en direct",
-      "create_password_link": "Lien de création du mot de passe"
+      "create_password_link": "Lien de création du mot de passe",
+      "lessonName": "Nom de la leçon",
+      "quizScore": "Score du quiz (%)",
+      "lessonUrl": "Lien de la leçon",
+      "newAnswersCount": "Nouvelles réponses",
+      "pendingAnswersCount": "Réponses en attente d’évaluation",
+      "gradingQueueUrl": "Lien de la file d’évaluation"
     },
     "simulation": {
       "title": "Résultat de la simulation",

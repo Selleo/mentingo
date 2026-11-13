@@ -588,4 +588,70 @@ export const AUTOMATION_EVENT_DEFINITIONS: Omit<AutomationEventDefinition, "prov
         },
       ],
     },
+    {
+      kind: AUTOMATION_EVENT_KINDS.QUIZ_ATTEMPT_GRADED,
+      label: "Quiz graded",
+      description: "Sent when a reviewer grades a learner's quiz answers.",
+      recipientPolicy:
+        "The learner whose quiz attempt was graded or re-graded. The in-app notification remains independent.",
+      fields: [
+        {
+          key: "course_name",
+          label: "Course name",
+          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
+          sampleValue: "Leadership essentials",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "lesson_name",
+          label: "Lesson name",
+          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
+          sampleValue: "Final quiz",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "score",
+          label: "Score",
+          type: AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+          sampleValue: 80,
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "lesson_link",
+          label: "Lesson link",
+          type: AUTOMATION_PLACEHOLDER_TYPES.URL,
+          sampleValue: "https://example.com/course/leadership/lesson/final-quiz",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+      ],
+    },
+    {
+      kind: AUTOMATION_EVENT_KINDS.QUIZ_GRADING_DIGEST,
+      label: "Grading queue digest",
+      description: "Sent once a day when new quiz answers are waiting for grading.",
+      recipientPolicy: "Users who can grade quiz answers.",
+      fields: [
+        {
+          key: "new_answers_count",
+          label: "New answers",
+          type: AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+          sampleValue: 3,
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "pending_answers_count",
+          label: "Answers waiting",
+          type: AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+          sampleValue: 7,
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "grading_queue_link",
+          label: "Grading queue link",
+          type: AUTOMATION_PLACEHOLDER_TYPES.URL,
+          sampleValue: "https://example.com/quiz-grading",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+      ],
+    },
   ];
