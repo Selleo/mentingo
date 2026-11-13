@@ -71,7 +71,7 @@ describe("Quiz grading notifications (e2e)", () => {
     return user;
   };
 
-  // A published quiz with one reviewer-graded open question and a learner who submitted it.
+  // A published quiz with two reviewer-graded open questions and a learner who submitted it.
   const setupSubmittedQuiz = async () => {
     const context = await runAsTenant(defaultTenantId, async () => {
       const author = await createUser(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
@@ -109,6 +109,11 @@ describe("Quiz grading notifications (e2e)", () => {
         quizCooldownInHours: null,
         questions: [
           { type: ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE, title: "Brief", requiresReview: true },
+          {
+            type: ASSESSMENT_QUESTION_TYPES.DETAILED_RESPONSE,
+            title: "Detailed",
+            requiresReview: true,
+          },
         ],
       });
       const questions = (await authoring.getLegacyQuizLessonForAuthoring(lesson.id))?.questions;
@@ -118,7 +123,7 @@ describe("Quiz grading notifications (e2e)", () => {
         reviewer,
         course,
         lesson,
-        questionId: questions?.[0]?.id as UUIDType,
+        questionIds: (questions ?? []).map(({ id }) => id as UUIDType),
         studentCookie: await cookieFor(student, app),
         reviewerCookie: await cookieFor(reviewer, app),
       };
@@ -130,9 +135,10 @@ describe("Quiz grading notifications (e2e)", () => {
       .send({
         lessonId: context.lesson.id,
         language: "en",
-        questionsAnswers: [
-          { questionId: context.questionId, answers: [{ value: "Brief answer" }] },
-        ],
+        questionsAnswers: context.questionIds.map((questionId) => ({
+          questionId,
+          answers: [{ value: "Open answer" }],
+        })),
       })
       .expect(201);
 
@@ -142,42 +148,70 @@ describe("Quiz grading notifications (e2e)", () => {
   const sendDigest = (now?: Date) =>
     runAsTenant(defaultTenantId, () => app.get(QuizGradingDigestService).sendGradingDigest(now));
 
-  it("notifies the learner in the app and by email with a link to the lesson", async () => {
+  const grade = (cookie: string, answerId: UUIDType, passed: boolean) =>
+    request(app.getHttpServer())
+      .post(`/api/quiz-grading/answers/${answerId}/grade`)
+      .set("Cookie", cookie)
+      .send({ method: QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL, passed })
+      .expect(201);
+
+  const findGradingNotifications = () =>
+    dbAdmin
+      .select({ userId: userAnnouncements.userId, content: announcements.content })
+      .from(userAnnouncements)
+      .innerJoin(announcements, eq(announcements.id, userAnnouncements.announcementId))
+      .where(eq(announcements.sourceType, ANNOUNCEMENT_SOURCE_TYPES.QUIZ_GRADING))
+      .orderBy(announcements.createdAt);
+
+  it("notifies only the learner, once the attempt is graded and again on re-grade", async () => {
     const context = await setupSubmittedQuiz();
     const queue = await request(app.getHttpServer())
       .get("/api/quiz-grading/answers")
       .set("Cookie", context.reviewerCookie)
       .expect(200);
+    const [firstAnswer, secondAnswer] = queue.body.data;
 
-    await request(app.getHttpServer())
-      .post(`/api/quiz-grading/answers/${queue.body.data[0].id}/grade`)
-      .set("Cookie", context.reviewerCookie)
-      .send({ method: QUIZ_REVIEW_GRADING_METHODS.PASS_FAIL, passed: true })
-      .expect(201);
+    await grade(context.reviewerCookie, firstAnswer.id, true);
+    await deliverPendingAutomationEmails(app, defaultTenantId);
 
+    expect(await findGradingNotifications()).toHaveLength(0);
+    expect(emailAdapter.getAllEmails()).toHaveLength(0);
+
+    await grade(context.reviewerCookie, secondAnswer.id, false);
     await deliverPendingAutomationEmails(app, defaultTenantId);
 
     const lessonPath = `/course/${context.course.id}/lesson/${context.lesson.id}`;
-    const notifications = await dbAdmin
-      .select({ userId: userAnnouncements.userId, content: announcements.content })
-      .from(userAnnouncements)
-      .innerJoin(announcements, eq(announcements.id, userAnnouncements.announcementId))
-      .where(eq(announcements.sourceType, ANNOUNCEMENT_SOURCE_TYPES.QUIZ_GRADING));
+    const [notification] = await findGradingNotifications();
 
-    expect(notifications).toHaveLength(1);
-    expect(notifications[0].userId).toBe(context.student.id);
-    expect(notifications[0].content.en).toContain(`href="${lessonPath}"`);
-    expect(notifications[0].content.en).toContain("100%");
+    expect(await findGradingNotifications()).toHaveLength(1);
+    expect(notification.userId).toBe(context.student.id);
+    expect(notification.content.en).toContain(`href="${lessonPath}"`);
+    expect(notification.content.en).toContain("50%");
 
-    const emails = emailAdapter.getAllEmails();
+    const [email] = emailAdapter.getAllEmails();
 
-    expect(emails).toHaveLength(1);
-    expect(emails[0]).toMatchObject({
+    expect(emailAdapter.getAllEmails()).toHaveLength(1);
+    expect(email).toMatchObject({
       to: context.student.email,
       subject: "Your quiz has been graded - Open answers",
     });
-    expect(emails[0].html).toContain(lessonPath);
-    expect(emails[0].text?.replace(/\s+/g, " ")).toContain("Your score: 100%");
+    expect(email.html).toContain(lessonPath);
+    expect(email.text?.replace(/\s+/g, " ")).toContain("Your score: 50%");
+
+    await grade(context.reviewerCookie, secondAnswer.id, true);
+    await deliverPendingAutomationEmails(app, defaultTenantId);
+
+    const notifications = await findGradingNotifications();
+    const emails = emailAdapter.getAllEmails();
+
+    expect(notifications.map(({ userId }) => userId)).toEqual([
+      context.student.id,
+      context.student.id,
+    ]);
+    expect(notifications[1].content.en).toContain("100%");
+    expect(emails).toHaveLength(2);
+    expect(emails[1].to).toBe(context.student.email);
+    expect(emails[1].text?.replace(/\s+/g, " ")).toContain("Your score: 100%");
   });
 
   it("sends reviewers one daily digest of new answers and skips days without any", async () => {
@@ -201,7 +235,7 @@ describe("Quiz grading notifications (e2e)", () => {
     });
     expect(emails[0].html).toContain("/quiz-grading");
     expect(emails[0].text?.replace(/\s+/g, " ")).toContain(
-      "New answers submitted in the last 24 hours: 1.",
+      "New answers submitted in the last 24 hours: 2.",
     );
   });
 });

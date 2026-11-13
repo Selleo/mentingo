@@ -282,7 +282,7 @@ export class QuizGradingRepository {
     return row ?? null;
   }
 
-  // Tenant-wide counts; the queue only hides a reviewer's own answers, which the digest ignores.
+  // Tenant-wide counts: the only reviewer-specific queue filter (own answers) is not applied.
   async countPendingAnswers(newSince: Date) {
     const queue = this.queueSubquery({ status: ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING });
 
@@ -339,7 +339,7 @@ export class QuizGradingRepository {
   }
 
   // Reviewer-graded answers from the learner's current learning state that can still complete
-  // the lesson, never the reviewer's own.
+  // the lesson; a given reviewer never sees their own.
   private queueSubquery(
     filters: QuizGradingAnswerFilters,
     reviewerId?: UUIDType,
