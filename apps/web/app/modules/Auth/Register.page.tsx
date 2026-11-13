@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useLocation } from "@remix-run/react";
+import { Link, Navigate, useLocation } from "@remix-run/react";
 import { format, startOfDay, subYears } from "date-fns";
 import { enUS, pl } from "date-fns/locale";
 import { useEffect, useMemo } from "react";
@@ -160,6 +160,12 @@ export default function RegisterPage() {
         to={`/auth/login${location.search}`}
       />
     );
+  }
+
+  if (!loginMethods) return null;
+
+  if (!loginMethods.password) {
+    return <Navigate to={`/auth/login${location.search}`} replace />;
   }
 
   return (
