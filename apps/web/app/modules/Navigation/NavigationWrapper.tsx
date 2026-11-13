@@ -8,6 +8,7 @@ import { RouteGuard } from "~/Guards/RouteGuard";
 import { cn } from "~/lib/utils";
 import { AssistantDock } from "~/modules/Assistant/AssistantDock";
 import Loader from "~/modules/common/Loader/Loader";
+import { GamificationRewardToasts } from "~/modules/Gamification/GamificationRewardToasts";
 import { SupportModeBanner } from "~/modules/SupportMode/SupportModeBanner";
 
 export default function NavigationWrapper() {
@@ -40,6 +41,8 @@ export default function NavigationWrapper() {
                 <Outlet />
               </Suspense>
               {currentUser && <AssistantDock actor={currentUser} />}
+              {/* Mounted here, not per layout: rewards are mostly earned in lessons, and a remount marks pending rewards as already seen. */}
+              {currentUser && <GamificationRewardToasts />}
             </>
           </RouteGuard>
         </MFAGuard>
