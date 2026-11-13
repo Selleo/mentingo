@@ -8649,7 +8649,16 @@
       "unavailable": "Katalog kursów nie jest dostępny dla tej organizacji.",
       "listingNotFound": "Nie znaleziono tego kursu w katalogu kursów.",
       "thumbnailNotFound": "Ten kurs z katalogu kursów nie ma miniatury.",
-      "serviceError": "Katalog kursów nie mógł zrealizować żądania. Spróbuj ponownie później."
+      "serviceError": "Katalog kursów nie mógł zrealizować żądania. Spróbuj ponownie później.",
+      "outlineNotFound": "Podgląd zawartości tego kursu nie jest jeszcze dostępny."
+    },
+    "preview": {
+      "open": "Podgląd zawartości",
+      "noChapters": "Ten kurs nie ma jeszcze rozdziałów.",
+      "chaptersCount_one": "{{count}} rozdział",
+      "chaptersCount_few": "{{count}} rozdziały",
+      "chaptersCount_many": "{{count}} rozdziałów",
+      "chaptersCount_other": "{{count}} rozdziałów"
     }
   },
   "aiJudgeConfiguration": {

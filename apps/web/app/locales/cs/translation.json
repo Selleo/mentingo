@@ -8565,7 +8565,16 @@
       "unavailable": "Tržiště obsahu není pro tuto organizaci dostupné.",
       "listingNotFound": "Tento kurz z tržiště nebyl nalezen.",
       "thumbnailNotFound": "Tento kurz z tržiště nemá náhled.",
-      "serviceError": "Tržiště obsahu nemohlo dokončit požadavek. Zkuste to později."
+      "serviceError": "Tržiště obsahu nemohlo dokončit požadavek. Zkuste to později.",
+      "outlineNotFound": "Náhled obsahu tohoto kurzu zatím není k dispozici."
+    },
+    "preview": {
+      "open": "Náhled obsahu",
+      "noChapters": "Tento kurz zatím nemá žádné kapitoly.",
+      "chaptersCount_one": "{{count}} kapitola",
+      "chaptersCount_few": "{{count}} kapitoly",
+      "chaptersCount_many": "{{count}} kapitol",
+      "chaptersCount_other": "{{count}} kapitol"
     }
   },
   "aiJudgeConfiguration": {

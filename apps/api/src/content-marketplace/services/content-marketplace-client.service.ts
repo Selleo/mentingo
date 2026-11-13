@@ -22,12 +22,14 @@ import {
   contentMarketplaceEventReceiptSchema,
   contentMarketplaceCatalogFiltersSchema,
   contentMarketplaceCatalogPageSchema,
+  contentMarketplaceListingOutlineSchema,
   contentMarketplaceListingSchema,
   type ContentMarketplaceAnalyticsEvent,
   type ContentMarketplaceCatalogQuery,
 } from "../schemas/content-marketplace.schema";
 
 import type { ContentMarketplaceConnection } from "../content-marketplace.types";
+import type { SupportedLanguages } from "@repo/shared";
 import type { TSchema, Static } from "@sinclair/typebox";
 
 /**
@@ -94,6 +96,19 @@ export class ContentMarketplaceClientService {
     return this.readValidatedMarketplaceResponse(
       client.listings.get(listingId),
       contentMarketplaceListingSchema,
+    );
+  }
+
+  async getListingOutline(
+    connection: ContentMarketplaceConnection,
+    listingId: string,
+    language: SupportedLanguages,
+  ) {
+    const client = await this.createTenantMarketplaceClient(connection);
+
+    return this.readValidatedMarketplaceResponse(
+      client.listings.outline(listingId, { language }),
+      contentMarketplaceListingOutlineSchema,
     );
   }
 

@@ -8546,7 +8546,14 @@
       "unavailable": "Der Content-Marktplatz ist für diese Organisation nicht verfügbar.",
       "listingNotFound": "Dieser Marktplatz-Kurs wurde nicht gefunden.",
       "thumbnailNotFound": "Dieser Marktplatz-Kurs hat kein Vorschaubild.",
-      "serviceError": "Der Content-Marktplatz konnte die Anfrage nicht abschließen. Versuchen Sie es später erneut."
+      "serviceError": "Der Content-Marktplatz konnte die Anfrage nicht abschließen. Versuchen Sie es später erneut.",
+      "outlineNotFound": "Eine Vorschau des Kursinhalts ist noch nicht verfügbar."
+    },
+    "preview": {
+      "open": "Inhalt ansehen",
+      "noChapters": "Dieser Kurs hat noch keine Kapitel.",
+      "chaptersCount_one": "{{count}} Kapitel",
+      "chaptersCount_other": "{{count}} Kapitel"
     }
   },
   "aiJudgeConfiguration": {

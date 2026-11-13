@@ -27,6 +27,17 @@ export const contentMarketplaceListingSchema = Type.Object({
   updatedAt: Type.String(),
 });
 
+export const contentMarketplaceListingOutlineSchema = Type.Object({
+  language: Type.String(),
+  learningOutcomes: Type.Array(Type.String()),
+  chapters: Type.Array(
+    Type.Object({
+      title: Type.String(),
+      lessons: Type.Array(Type.Object({ title: Type.String(), type: Type.String() })),
+    }),
+  ),
+});
+
 export const contentMarketplaceListingsSchema = Type.Array(contentMarketplaceListingSchema);
 
 export const contentMarketplaceCopiedCourseSchema = Type.Object({
@@ -134,6 +145,9 @@ export const contentMarketplaceEventDeliverySchema = Type.Object({
 });
 
 export type ContentMarketplaceListing = Static<typeof contentMarketplaceListingSchema>;
+export type ContentMarketplaceListingOutline = Static<
+  typeof contentMarketplaceListingOutlineSchema
+>;
 export type ContentMarketplaceTenantListing = Static<typeof contentMarketplaceTenantListingSchema>;
 export type ContentMarketplaceAcquisition = Static<typeof contentMarketplaceAcquisitionSchema>;
 export type ContentMarketplaceAvailability = Static<typeof contentMarketplaceAvailabilitySchema>;

@@ -40,5 +40,6 @@ export const CONTENT_MARKETPLACE_ERRORS = {
   UNAVAILABLE: "contentMarketplace.error.unavailable",
   LISTING_NOT_FOUND: "contentMarketplace.error.listingNotFound",
   THUMBNAIL_NOT_FOUND: "contentMarketplace.error.thumbnailNotFound",
+  OUTLINE_NOT_FOUND: "contentMarketplace.error.outlineNotFound",
   SERVICE_ERROR: "contentMarketplace.error.serviceError",
 } as const;

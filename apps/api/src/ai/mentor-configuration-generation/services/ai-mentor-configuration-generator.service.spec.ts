@@ -66,8 +66,8 @@ describe("AiMentorConfigurationGeneratorService", () => {
         id === "aiMentorConfigurationGeneratorBase"
           ? "BASE"
           : id === "aiMentorConfigurationGeneratorPractice"
-          ? "The learner's brief describes what the learner wants to practise"
-          : `MODE:${id}`,
+            ? "The learner's brief describes what the learner wants to practise"
+            : `MODE:${id}`,
       ),
       isNotEmpty: jest.fn().mockResolvedValue(undefined),
       getOpenAI: jest.fn().mockResolvedValue(jest.fn().mockReturnValue("MODEL")),

@@ -39,6 +39,7 @@ import type {
   ContentMarketplaceListing,
   ContentMarketplaceTenantListing,
 } from "../schemas/content-marketplace.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
@@ -101,6 +102,15 @@ export class ContentMarketplaceService implements OnModuleInit {
     const [tenantListing] = await this.attachCopiedCourses([listing]);
 
     return tenantListing;
+  }
+
+  /** Falls back to the course's base language when the listing has no outline in the requested one. */
+  getListingOutline(listingId: string, language: SupportedLanguages) {
+    return this.callEnabledMarketplace(
+      (connection) =>
+        this.contentMarketplaceClientService.getListingOutline(connection, listingId, language),
+      CONTENT_MARKETPLACE_ERRORS.OUTLINE_NOT_FOUND,
+    );
   }
 
   openListingThumbnail(listingId: string) {
