@@ -1,13 +1,15 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  PERMISSIONS,
   ASSESSMENT_ANSWER_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   ASSESSMENT_GRADING_MODES,
   COURSE_STATUSES,
 } from "@repo/shared";
-import { and, asc, count, desc, eq, max, ne, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, isNull, max, ne, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { userHasPermissionCondition } from "src/common/permissions/permission-sql.utils";
 import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
@@ -22,6 +24,7 @@ import {
   chapters,
   courses,
   lessons,
+  settings,
   studentLessonProgress,
   users,
 } from "src/storage/schema";
@@ -31,6 +34,7 @@ import type {
   QuizGradedAttemptUpdate,
   QuizGradingAnswerFilters,
 } from "./quiz-grading.types";
+import type { LocalizedText, SupportedLanguages } from "@repo/shared";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
 const fullName = sql<string>`concat_ws(' ', ${users.firstName}, ${users.lastName})`;
@@ -256,6 +260,70 @@ export class QuizGradingRepository {
       .where(eq(studentLessonProgress.id, progressId));
   }
 
+  async findGradedAttemptNotificationData(attemptId: UUIDType) {
+    const [row] = await this.db
+      .select({
+        studentId: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        courseTitle: sql<LocalizedText>`${courses.title}`,
+        lessonTitle: sql<LocalizedText>`${lessons.title}`,
+        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+      })
+      .from(assessmentAttempts)
+      .innerJoin(assessments, eq(assessments.id, assessmentAttempts.assessmentId))
+      .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .innerJoin(users, eq(users.id, assessmentAttempts.learnerId))
+      .where(and(eq(assessmentAttempts.id, attemptId), isNull(users.deletedAt)));
+
+    return row ?? null;
+  }
+
+  // Tenant-wide counts; the queue only hides a reviewer's own answers, which the digest ignores.
+  async countPendingAnswers(newSince: Date) {
+    const queue = this.queueSubquery({ status: ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING });
+
+    const [counts] = await this.db
+      .select({
+        pendingAnswersCount: count(),
+        newAnswersCount: sql<number>`count(*) filter (where ${gte(
+          queue.submittedAt,
+          newSince.toISOString(),
+        )})::int`,
+      })
+      .from(queue);
+
+    return counts;
+  }
+
+  async findDigestReviewers() {
+    return this.db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        language: sql<string | null>`${settings.settings}->>'language'`,
+      })
+      .from(users)
+      .leftJoin(settings, eq(settings.userId, users.id))
+      .where(
+        and(
+          isNull(users.deletedAt),
+          eq(users.archived, false),
+          userHasPermissionCondition(
+            this.db,
+            users.id,
+            users.tenantId,
+            PERMISSIONS.QUIZ_GRADING_GRADE,
+          ),
+        ),
+      );
+  }
+
   private listFields(queue: ReturnType<QuizGradingRepository["queueSubquery"]>) {
     return {
       id: queue.id,
@@ -274,7 +342,7 @@ export class QuizGradingRepository {
   // the lesson, never the reviewer's own.
   private queueSubquery(
     filters: QuizGradingAnswerFilters,
-    reviewerId: UUIDType,
+    reviewerId?: UUIDType,
     db: DatabasePg = this.db,
   ) {
     return db
@@ -322,7 +390,7 @@ export class QuizGradingRepository {
           eq(assessmentQuestions.gradingMode, ASSESSMENT_GRADING_MODES.MANUAL),
           eq(assessmentAttempts.submissionStatus, ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED),
           activeLearningState(assessmentAttempts.learningStateId),
-          ne(users.id, reviewerId),
+          reviewerId ? ne(users.id, reviewerId) : undefined,
           ne(courses.status, COURSE_STATUSES.DRAFT),
           filters.status
             ? eq(assessmentAttemptQuestionAnswers.gradingStatus, filters.status)

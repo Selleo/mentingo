@@ -345,7 +345,9 @@
       "announcement": "Anuncio publicado",
       "live_training_started": "Formación en directo iniciada",
       "live_training_reminder": "La formación en directo comienza en 15 minutos",
-      "live_training_ended": "Formación en directo finalizada"
+      "live_training_ended": "Formación en directo finalizada",
+      "quiz_attempt_graded": "Cuestionario calificado por un revisor",
+      "quiz_grading_digest": "Nuevas respuestas pendientes de revisión (diario)"
     },
     "errors": {
       "incompleteButton": "Introduce el texto del botón y la URL.",
@@ -8001,7 +8003,9 @@
         "announcement": "Los usuarios que forman parte del público del anuncio.",
         "live_training_started": "Los alumnos inscritos en cursos vinculados a la formación en directo que comenzó.",
         "live_training_reminder": "Los alumnos inscritos en cursos vinculados a la próxima formación en directo.",
-        "live_training_ended": "Los alumnos inscritos en cursos vinculados a la formación en directo que terminó."
+        "live_training_ended": "Los alumnos inscritos en cursos vinculados a la formación en directo que terminó.",
+        "quiz_attempt_graded": "El participante cuyas respuestas del cuestionario fueron calificadas.",
+        "quiz_grading_digest": "Los usuarios que pueden calificar respuestas de cuestionarios."
       }
     },
     "mapping": {
@@ -8099,7 +8103,9 @@
       "certificateArchived": "Certificado archivado",
       "announcementPublished": "Anuncio publicado",
       "courseChatUserMentioned": "Usuario mencionado en el chat",
-      "courseDueDateReminder": "Recordatorio de plazo del curso"
+      "courseDueDateReminder": "Recordatorio de plazo del curso",
+      "quizAttemptGraded": "Cuestionario calificado",
+      "quizGradingDigest": "Resumen de la cola de calificación"
     },
     "canvas": {
       "emptyTitle": "El lienzo de automatización está vacío",
@@ -8255,7 +8261,13 @@
       "live_training_title": "Título de la formación en directo",
       "live_training_content": "Mensaje de la formación en directo",
       "live_training_link": "Enlace a la formación en directo",
-      "create_password_link": "Enlace para crear la contraseña"
+      "create_password_link": "Enlace para crear la contraseña",
+      "lessonName": "Nombre de la lección",
+      "quizScore": "Puntuación del cuestionario (%)",
+      "lessonUrl": "Enlace de la lección",
+      "newAnswersCount": "Nuevas respuestas",
+      "pendingAnswersCount": "Respuestas pendientes de revisión",
+      "gradingQueueUrl": "Enlace a la cola de calificación"
     },
     "simulation": {
       "title": "Resultado de la simulación",

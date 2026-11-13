@@ -345,7 +345,9 @@
       "announcement": "Oznámení zveřejněno",
       "live_training_started": "Živé školení začalo",
       "live_training_reminder": "Živé školení začne za 15 minut",
-      "live_training_ended": "Živé školení skončilo"
+      "live_training_ended": "Živé školení skončilo",
+      "quiz_attempt_graded": "Kvíz ohodnocen hodnotitelem",
+      "quiz_grading_digest": "Nové odpovědi čekají na hodnocení (denně)"
     },
     "errors": {
       "incompleteButton": "Zadejte popisek tlačítka a URL.",
@@ -8072,7 +8074,9 @@
         "announcement": "Uživatelé, kterým je oznámení určeno.",
         "live_training_started": "Účastníci zapsaní do kurzů propojených s živým školením, které začalo.",
         "live_training_reminder": "Účastníci zapsaní do kurzů propojených s nadcházejícím živým školením.",
-        "live_training_ended": "Účastníci zapsaní do kurzů propojených s živým školením, které skončilo."
+        "live_training_ended": "Účastníci zapsaní do kurzů propojených s živým školením, které skončilo.",
+        "quiz_attempt_graded": "Účastník, jehož odpovědi v kvízu byly ohodnoceny.",
+        "quiz_grading_digest": "Uživatelé, kteří mohou hodnotit odpovědi v kvízech."
       }
     },
     "mapping": {
@@ -8170,7 +8174,9 @@
       "certificateArchived": "Certifikát archivován",
       "announcementPublished": "Oznámení zveřejněno",
       "courseChatUserMentioned": "Uživatel zmíněn v chatu",
-      "courseDueDateReminder": "Připomínka termínu kurzu"
+      "courseDueDateReminder": "Připomínka termínu kurzu",
+      "quizAttemptGraded": "Kvíz ohodnocen",
+      "quizGradingDigest": "Přehled fronty hodnocení"
     },
     "canvas": {
       "emptyTitle": "Vaše plátno automatizace je prázdné",
@@ -8322,7 +8328,13 @@
       "live_training_title": "Název živého školení",
       "live_training_content": "Zpráva k živému školení",
       "live_training_link": "Odkaz na živé školení",
-      "create_password_link": "Odkaz pro vytvoření hesla"
+      "create_password_link": "Odkaz pro vytvoření hesla",
+      "lessonName": "Název lekce",
+      "quizScore": "Výsledek kvízu (%)",
+      "lessonUrl": "Odkaz na lekci",
+      "newAnswersCount": "Nové odpovědi",
+      "pendingAnswersCount": "Odpovědi čekající na hodnocení",
+      "gradingQueueUrl": "Odkaz na frontu hodnocení"
     },
     "simulation": {
       "title": "Výsledek simulace",
