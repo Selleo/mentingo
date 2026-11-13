@@ -1002,6 +1002,23 @@
         }
       }
     },
+    "/api/settings/admin/forum": {
+      "patch": {
+        "operationId": "SettingsController_updateForumEnabled",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateForumEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/admin/leaderboards": {
       "patch": {
         "operationId": "SettingsController_updateLeaderboardSettings",
@@ -15835,6 +15852,374 @@
         }
       }
     },
+    "/api/forum/topics": {
+      "get": {
+        "operationId": "ForumController_getTopics",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "lastActivity",
+                  "type": "string"
+                },
+                {
+                  "const": "newest",
+                  "type": "string"
+                },
+                {
+                  "const": "mostReplies",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "general",
+                  "type": "string"
+                },
+                {
+                  "const": "course",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTopicsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "ForumController_createTopic",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTopicBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTopicResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/topics/{topicId}": {
+      "get": {
+        "operationId": "ForumController_getTopic",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTopicResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/topics/{topicId}/posts": {
+      "get": {
+        "operationId": "ForumController_getTopicPosts",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTopicPostsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "ForumController_createPost",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePostBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePostResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/posts/{postId}": {
+      "delete": {
+        "operationId": "ForumController_deletePost",
+        "parameters": [
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletePostResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/learning-path": {
       "get": {
         "operationId": "LearningPathController_getLearningPaths",
@@ -27087,6 +27472,22 @@
                     {
                       "const": "gamification.leaderboard_read_all",
                       "type": "string"
+                    },
+                    {
+                      "const": "forum.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "forum.topic.create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "forum.post.create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "forum.post.delete",
+                      "type": "string"
                     }
                   ]
                 }
@@ -27810,6 +28211,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -28026,6 +28430,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -29550,6 +29955,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -29766,6 +30174,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -29829,6 +30238,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -30045,6 +30457,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -30108,6 +30521,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -30324,6 +30740,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -30387,6 +30804,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -30603,6 +31023,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -30685,6 +31106,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -30901,6 +31325,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -30964,6 +31389,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -31180,6 +31608,290 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
+              "calendarEnabled",
+              "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration",
+              "primaryColor",
+              "contrastColor",
+              "backgroundColor",
+              "accentColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled",
+              "learningPathsEnabled",
+              "ageLimit",
+              "loginPageFiles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateForumEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "modernCourseListEnabled": {
+                "type": "boolean"
+              },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
+              "featuredCourseId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "courseDiscussionsEnabled": {
+                "type": "boolean"
+              },
+              "forumEnabled": {
+                "type": "boolean"
+              },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
+              "trainerRoleUserCount": {
+                "type": "number"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
+              },
+              "learningPathsEnabled": {
+                "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
+              "featuredCourseId",
+              "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -31264,6 +31976,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -31480,6 +32195,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -31543,6 +32259,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -31759,6 +32478,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -31822,6 +32542,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -32038,6 +32761,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -32113,6 +32837,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -32329,6 +33056,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -32392,6 +33120,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -32608,6 +33339,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -32671,6 +33403,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -32887,6 +33622,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -33119,6 +33855,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -33335,6 +34074,7 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
@@ -161085,6 +161825,918 @@
               "courseId",
               "messageId",
               "parentMessageId",
+              "removed",
+              "deletedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetTopicsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "scope": {
+                  "anyOf": [
+                    {
+                      "const": "general",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "title": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "course": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "author": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "avatarReference": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "firstName",
+                    "lastName",
+                    "avatarReference"
+                  ]
+                },
+                "replyCount": {
+                  "type": "number"
+                },
+                "lastActivityAt": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "excerpt": {
+                  "type": "string"
+                },
+                "isDeleted": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "scope",
+                "title",
+                "course",
+                "author",
+                "replyCount",
+                "lastActivityAt",
+                "createdAt",
+                "excerpt",
+                "isDeleted"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "CreateTopicBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "minLength": 1,
+            "maxLength": 200,
+            "type": "string"
+          },
+          "content": {
+            "minLength": 1,
+            "maxLength": 5000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "content"
+        ]
+      },
+      "CreateTopicResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "scope": {
+                "anyOf": [
+                  {
+                    "const": "general",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course",
+                    "type": "string"
+                  }
+                ]
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "course": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "author": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "avatarReference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "firstName",
+                  "lastName",
+                  "avatarReference"
+                ]
+              },
+              "replyCount": {
+                "type": "number"
+              },
+              "lastActivityAt": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "firstPost": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "topicId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "userId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "isFirstPost": {
+                    "type": "boolean"
+                  },
+                  "deletedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "avatarReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "firstName",
+                      "lastName",
+                      "avatarReference"
+                    ]
+                  },
+                  "reactions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "reaction": {
+                          "type": "string"
+                        },
+                        "count": {
+                          "type": "number"
+                        },
+                        "reactedByCurrentUser": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "reaction",
+                        "count",
+                        "reactedByCurrentUser"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "topicId",
+                  "userId",
+                  "content",
+                  "isFirstPost",
+                  "deletedAt",
+                  "createdAt",
+                  "updatedAt",
+                  "user",
+                  "reactions"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "scope",
+              "title",
+              "course",
+              "author",
+              "replyCount",
+              "lastActivityAt",
+              "createdAt",
+              "firstPost"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetTopicResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "scope": {
+                "anyOf": [
+                  {
+                    "const": "general",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course",
+                    "type": "string"
+                  }
+                ]
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "course": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "author": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "avatarReference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "firstName",
+                  "lastName",
+                  "avatarReference"
+                ]
+              },
+              "replyCount": {
+                "type": "number"
+              },
+              "lastActivityAt": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "firstPost": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "topicId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "userId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "isFirstPost": {
+                    "type": "boolean"
+                  },
+                  "deletedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "avatarReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "firstName",
+                      "lastName",
+                      "avatarReference"
+                    ]
+                  },
+                  "reactions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "reaction": {
+                          "type": "string"
+                        },
+                        "count": {
+                          "type": "number"
+                        },
+                        "reactedByCurrentUser": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "reaction",
+                        "count",
+                        "reactedByCurrentUser"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "topicId",
+                  "userId",
+                  "content",
+                  "isFirstPost",
+                  "deletedAt",
+                  "createdAt",
+                  "updatedAt",
+                  "user",
+                  "reactions"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "scope",
+              "title",
+              "course",
+              "author",
+              "replyCount",
+              "lastActivityAt",
+              "createdAt",
+              "firstPost"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetTopicPostsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "topicId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "isFirstPost": {
+                  "type": "boolean"
+                },
+                "deletedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "avatarReference": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "firstName",
+                    "lastName",
+                    "avatarReference"
+                  ]
+                },
+                "reactions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "reaction": {
+                        "type": "string"
+                      },
+                      "count": {
+                        "type": "number"
+                      },
+                      "reactedByCurrentUser": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "reaction",
+                      "count",
+                      "reactedByCurrentUser"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "topicId",
+                "userId",
+                "content",
+                "isFirstPost",
+                "deletedAt",
+                "createdAt",
+                "updatedAt",
+                "user",
+                "reactions"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "CreatePostBody": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "minLength": 1,
+            "maxLength": 5000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "CreatePostResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "topicId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "isFirstPost": {
+                "type": "boolean"
+              },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "user": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "avatarReference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "firstName",
+                  "lastName",
+                  "avatarReference"
+                ]
+              },
+              "reactions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reaction": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "number"
+                    },
+                    "reactedByCurrentUser": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "reaction",
+                    "count",
+                    "reactedByCurrentUser"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "topicId",
+              "userId",
+              "content",
+              "isFirstPost",
+              "deletedAt",
+              "createdAt",
+              "updatedAt",
+              "user",
+              "reactions"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeletePostResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "topicId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "postId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isFirstPost": {
+                "type": "boolean"
+              },
+              "removed": {
+                "type": "boolean"
+              },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "topicId",
+              "postId",
+              "isFirstPost",
               "removed",
               "deletedAt"
             ]

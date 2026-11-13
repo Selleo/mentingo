@@ -647,6 +647,58 @@ describe("SettingsController (e2e)", () => {
       });
     });
 
+    describe("PATCH /api/settings/admin/forum", () => {
+      let adminCookies: string;
+
+      beforeEach(async () => {
+        await truncateTables(db, ["settings"]);
+        await globalSettingsFactory.create({ userId: null });
+
+        const adminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withAdminSettings(db)
+          .create();
+
+        adminCookies = await cookieFor(adminUser, app);
+      });
+
+      afterEach(async () => {
+        await truncateTables(db, ["settings"]);
+      });
+
+      it("should toggle the global forum setting as admin", async () => {
+        const response = await request(app.getHttpServer())
+          .patch("/api/settings/admin/forum")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(response.body.data.forumEnabled).toBe(true);
+
+        const toggleResponse = await request(app.getHttpServer())
+          .patch("/api/settings/admin/forum")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(toggleResponse.body.data.forumEnabled).toBe(false);
+      });
+
+      it("should return 403 if user is not an admin", async () => {
+        const nonAdminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withUserSettings(db)
+          .create();
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/forum")
+          .set("Cookie", await cookieFor(nonAdminUser, app))
+          .expect(403);
+      });
+
+      it("should return 401 if not authenticated", async () => {
+        await request(app.getHttpServer()).patch("/api/settings/admin/forum").expect(401);
+      });
+    });
+
     describe("PATCH /api/settings/admin/leaderboards", () => {
       const LEADERBOARDS_URL = "/api/settings/admin/leaderboards";
       let adminCookies: string;

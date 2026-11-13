@@ -1,0 +1,2 @@
+export const FORUM_TOPIC_EXCERPT_LENGTH = 200;
+export const FORUM_MAX_PAGE_SIZE = 100;

@@ -299,6 +299,18 @@ export class SettingsController {
     return new BaseResponse(result);
   }
 
+  @Patch("admin/forum")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateForumEnabled(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalForumEnabled(currentUser);
+    return new BaseResponse(result);
+  }
+
   @Patch("admin/leaderboards")
   @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({

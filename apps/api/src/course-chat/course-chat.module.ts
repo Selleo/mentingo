@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 
 import { AnnouncementsModule } from "src/announcements/announcements.module";
+import { CourseChatMessageMapper } from "src/course-chat/course-chat-message.mapper";
 import { CourseChatPresenceService } from "src/course-chat/course-chat-presence.service";
 import { CourseChatPresenceStore } from "src/course-chat/course-chat-presence.store";
 import { CourseChatController } from "src/course-chat/course-chat.controller";
@@ -17,10 +18,11 @@ import { SettingsModule } from "src/settings/settings.module";
   providers: [
     CourseChatService,
     CourseChatRepository,
+    CourseChatMessageMapper,
     CourseChatPresenceService,
     CourseChatPresenceStore,
     CourseChatGateway,
   ],
-  exports: [CourseChatService, CourseChatRepository],
+  exports: [CourseChatService, CourseChatRepository, CourseChatMessageMapper],
 })
 export class CourseChatModule {}

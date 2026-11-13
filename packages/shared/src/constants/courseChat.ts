@@ -11,3 +11,11 @@ export const COURSE_CHAT_SOCKET_EVENTS = {
 export const COURSE_CHAT_ALLOWED_REACTIONS = ["👍", "❤️", "😂", "🎉", "😮"] as const;
 
 export const getCourseChatRoom = (courseId: string) => `course-chat:${courseId}`;
+
+/** Course discussion threads and general forum topics share one thread model. */
+export const DISCUSSION_SCOPES = {
+  GENERAL: "general",
+  COURSE: "course",
+} as const;
+
+export type DiscussionScope = (typeof DISCUSSION_SCOPES)[keyof typeof DISCUSSION_SCOPES];

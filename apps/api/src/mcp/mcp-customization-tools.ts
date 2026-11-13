@@ -52,6 +52,8 @@ async function toggleFlag(
       return service.updateGlobalModernCourseListEnabled(actor);
     case "courseDiscussionsEnabled":
       return service.updateGlobalCourseDiscussionsEnabled(actor);
+    case "forumEnabled":
+      return service.updateGlobalForumEnabled(actor);
     case "calendarEnabled":
       return service.updateGlobalCalendarEnabled(actor);
     case "liveTrainingEnabled":

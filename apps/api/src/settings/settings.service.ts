@@ -1340,6 +1340,34 @@ export class SettingsService {
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
+  public async updateGlobalForumEnabled(
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const current = previousRecord.settings.forumEnabled ?? DEFAULT_GLOBAL_SETTINGS.forumEnabled;
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: setJsonbField(settings.settings, "forumEnabled", !current),
+      })
+      .where(isNull(settings.userId))
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
   public async updateGlobalLeaderboardSettings(
     body: UpdateLeaderboardSettingsBody,
     actor?: CurrentUserType,
@@ -2500,6 +2528,7 @@ export class SettingsService {
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
       courseDiscussionsEnabled:
         settings.courseDiscussionsEnabled ?? DEFAULT_GLOBAL_SETTINGS.courseDiscussionsEnabled,
+      forumEnabled: settings.forumEnabled ?? DEFAULT_GLOBAL_SETTINGS.forumEnabled,
       gamificationEnabled:
         settings.gamificationEnabled ?? DEFAULT_GLOBAL_SETTINGS.gamificationEnabled,
       leaderboardsEnabled:

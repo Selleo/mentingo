@@ -24,6 +24,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   publicCoursePreviewEnabled: false,
   featuredCourseId: null,
   courseDiscussionsEnabled: false,
+  forumEnabled: false,
   gamificationEnabled: false,
   leaderboardsEnabled: false,
   leaderboardVisibility: LEADERBOARD_VISIBILITY.CLOSED,
