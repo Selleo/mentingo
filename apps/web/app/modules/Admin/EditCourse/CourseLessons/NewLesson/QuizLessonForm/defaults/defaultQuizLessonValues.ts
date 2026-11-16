@@ -17,7 +17,6 @@ export const defaultQuizLessonValues: QuizLessonProps = {
   feedbackMode: ASSESSMENT_FEEDBACK_MODES.FULL,
 };
 
-// Contiguous, inclusive buckets covering 0..100 that the author can edit, extend, or remove.
 export const defaultQuizFeedbackRanges: QuizFeedbackRange[] = [
   { minPercent: 0, maxPercent: 49, message: "" },
   { minPercent: 50, maxPercent: 79, message: "" },

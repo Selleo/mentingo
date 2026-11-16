@@ -17,6 +17,7 @@ import {
 
 import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { defaultQuizFeedbackRanges } from "../defaults/defaultQuizLessonValues";
+import { appendFeedbackRange } from "../utils/feedbackRanges";
 
 import { InfoTooltip } from "./InfoTooltip";
 
@@ -28,12 +29,14 @@ import type { UseFormReturn } from "react-hook-form";
 type Props = {
   form: UseFormReturn<QuizLessonFormValues>;
   isStructureLocked: boolean;
+  readOnly: boolean;
 };
 
 type RangeRowProps = {
   range: QuizFeedbackRange;
   rangeIndex: number;
   isStructureLocked: boolean;
+  readOnly: boolean;
   onChange: (patch: Partial<QuizFeedbackRange>) => void;
   onRemove: () => void;
 };
@@ -55,6 +58,7 @@ const FeedbackRangeRow = ({
   range,
   rangeIndex,
   isStructureLocked,
+  readOnly,
   onChange,
   onRemove,
 }: RangeRowProps) => {
@@ -113,7 +117,7 @@ const FeedbackRangeRow = ({
         <BaseEditor
           id={`feedbackRangeMessage-${rangeIndex}`}
           content={range.message}
-          editable={!isStructureLocked}
+          editable={!readOnly}
           onChange={(value) => onChange({ message: value })}
           compactToolbar
           parentClassName="flex h-[8lh] flex-col"
@@ -125,7 +129,7 @@ const FeedbackRangeRow = ({
   );
 };
 
-const QuizFeedbackSection = ({ form, isStructureLocked }: Props) => {
+const QuizFeedbackSection = ({ form, isStructureLocked, readOnly }: Props) => {
   const { t } = useTranslation();
 
   const feedbackRanges = form.watch("feedbackRanges") ?? [];
@@ -143,12 +147,7 @@ const QuizFeedbackSection = ({ form, isStructureLocked }: Props) => {
     );
   };
 
-  const addRange = () => {
-    const lastRange = feedbackRanges[feedbackRanges.length - 1];
-    const nextMin = lastRange ? Math.min(lastRange.maxPercent + 1, 100) : 0;
-
-    setRanges([...feedbackRanges, { minPercent: nextMin, maxPercent: 100, message: "" }]);
-  };
+  const rangesWithAddedRange = appendFeedbackRange(feedbackRanges);
 
   const removeRange = (rangeIndex: number) => {
     setRanges(feedbackRanges.filter((_, index) => index !== rangeIndex));
@@ -212,10 +211,11 @@ const QuizFeedbackSection = ({ form, isStructureLocked }: Props) => {
 
         {feedbackRanges.map((range, rangeIndex) => (
           <FeedbackRangeRow
-            key={rangeIndex}
+            key={range.id ?? rangeIndex}
             range={range}
             rangeIndex={rangeIndex}
             isStructureLocked={isStructureLocked}
+            readOnly={readOnly}
             onChange={(patch) => updateRange(rangeIndex, patch)}
             onRemove={() => removeRange(rangeIndex)}
           />
@@ -228,7 +228,8 @@ const QuizFeedbackSection = ({ form, isStructureLocked }: Props) => {
             <Button
               type="button"
               data-testid={QUIZ_LESSON_FORM_HANDLES.FEEDBACK_ADD_RANGE_BUTTON}
-              onClick={addRange}
+              disabled={!rangesWithAddedRange}
+              onClick={() => rangesWithAddedRange && setRanges(rangesWithAddedRange)}
               className="bg-color-white border border-neutral-300"
             >
               {t("adminCourseView.curriculum.lesson.settings.feedbackRangeAdd")}

@@ -30,6 +30,7 @@ type Props = {
   questionsCount: number;
   isAttemptsLimitEnabled: boolean;
   isStructureLocked: boolean;
+  readOnly: boolean;
   onSwitchChange: (checked: boolean) => void;
 };
 
@@ -39,6 +40,7 @@ const QuizSettingsSection = ({
   questionsCount,
   isAttemptsLimitEnabled,
   isStructureLocked,
+  readOnly,
   onSwitchChange,
 }: Props) => {
   const { t } = useTranslation();
@@ -257,7 +259,7 @@ const QuizSettingsSection = ({
         </div>
       </div>
 
-      <QuizFeedbackSection form={form} isStructureLocked={isStructureLocked} />
+      <QuizFeedbackSection form={form} isStructureLocked={isStructureLocked} readOnly={readOnly} />
     </>
   );
 };

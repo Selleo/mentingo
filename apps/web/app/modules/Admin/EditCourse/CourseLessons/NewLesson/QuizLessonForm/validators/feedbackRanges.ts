@@ -11,9 +11,7 @@ export const FEEDBACK_RANGE_VALIDATION_KEYS = {
 
 export type FeedbackRangeIssue = keyof typeof FEEDBACK_RANGE_VALIDATION_KEYS;
 
-// Mirrors the server validator (apps/api quiz-feedback-range.validator.ts): an empty set is valid
-// (no custom feedback); a non-empty set must partition 0..100 contiguously with inclusive integer
-// bounds, in any submission order. Messages are not checked here.
+// Mirrors apps/api quiz-feedback-range.validator.ts.
 export const collectFeedbackRangeIssues = (ranges: QuizFeedbackRange[]): FeedbackRangeIssue[] => {
   if (!ranges.length) return [];
 

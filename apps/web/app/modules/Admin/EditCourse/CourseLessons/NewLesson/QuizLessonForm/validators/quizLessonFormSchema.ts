@@ -40,6 +40,7 @@ export const quizLessonFormSchema = (
     feedbackRanges: z
       .array(
         z.object({
+          id: z.string().optional(),
           minPercent: z.number(),
           maxPercent: z.number(),
           message: z.string(),

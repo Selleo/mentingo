@@ -368,6 +368,7 @@ const QuizLessonForm = ({
               questionsCount={questions?.length || 0}
               isAttemptsLimitEnabled={isAttemptsLimitEnabled}
               isStructureLocked={isStructureLocked}
+              readOnly={readOnly}
               onSwitchChange={onSwitchChange}
             />
 
