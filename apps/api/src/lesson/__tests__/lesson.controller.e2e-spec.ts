@@ -79,13 +79,14 @@ import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { getCourseLessonStatus } from "../../../test/helpers/course-lesson-status";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 import { waitForOutbox } from "../../../test/helpers/wait-for-outbox";
 import { exportCourseAsScormPackage } from "../../courses/__tests__/course-scorm-export.e2e-utils";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
-import type { AdminQuestionBody } from "src/lesson/lesson.schema";
+import type { AdminQuestionBody, AnswerQuestionBody } from "src/lesson/lesson.schema";
 
 describe("LessonController (e2e) - quiz feedback redaction", () => {
   let app: INestApplication;
@@ -3376,22 +3377,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   });
 
   describe("GET /api/course - quiz lesson status after a graded attempt", () => {
-    const getCourseLessonStatus = async (
-      cookies: string,
-      courseId: UUIDType,
-      lessonId: UUIDType,
-    ) => {
-      const response = await request(app.getHttpServer())
-        .get(`/api/course?id=${courseId}&language=en`)
-        .set("Cookie", cookies)
-        .expect(200);
-
-      return response.body.data.chapters
-        .flatMap((chapter: { lessons: { id: string; status: string }[] }) => chapter.lessons)
-        .find(({ id }: { id: string }) => id === lessonId)?.status;
-    };
-
-    it("reports failed after a failed attempt and completed once a retake passes", async () => {
+    it("reports failed after a failed attempt, keeps it during a retake and completes once a retake passes", async () => {
       const category = await categoryFactory.create();
       const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const student = await userFactory
@@ -3424,7 +3410,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         )
         .limit(1);
 
-      const submitAnswers = (questionsAnswers: unknown) =>
+      const submitAnswers = (questionsAnswers: AnswerQuestionBody["questionsAnswers"]) =>
         request(app.getHttpServer())
           .post("/api/lesson/evaluation-quiz")
           .set("Cookie", cookies)
@@ -3433,7 +3419,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       await submitAnswers([{ questionId: question.id, answers: [{ answerId: wrongOption.id }] }]);
 
-      expect(await getCourseLessonStatus(cookies, course.id, lesson.id)).toBe(
+      expect(await getCourseLessonStatus(app, cookies, course.id, lesson.id)).toBe(
         LEARNER_PROGRESS_STATUSES.FAILED,
       );
 
@@ -3441,9 +3427,14 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .delete(`/api/lesson/delete-student-quiz-answers?lessonId=${lesson.id}`)
         .set("Cookie", cookies)
         .expect(200);
+
+      // Starting the retake clears the lesson progress; the failed attempt still decides the status.
+      expect(await getCourseLessonStatus(app, cookies, course.id, lesson.id)).toBe(
+        LEARNER_PROGRESS_STATUSES.FAILED,
+      );
       await submitAnswers(await buildQuizAnswers(lesson.id));
 
-      expect(await getCourseLessonStatus(cookies, course.id, lesson.id)).toBe(
+      expect(await getCourseLessonStatus(app, cookies, course.id, lesson.id)).toBe(
         LEARNER_PROGRESS_STATUSES.COMPLETED,
       );
     });

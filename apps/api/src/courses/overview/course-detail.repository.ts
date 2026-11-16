@@ -12,6 +12,7 @@ import { activeLearningState } from "src/course-repetition/course-learning-state
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
 import { quizAwaitingReview } from "src/quiz/quiz-awaiting-review.sql";
+import { quizLastGradedAttemptFailed } from "src/quiz/quiz-last-graded-attempt-failed.sql";
 import { DB } from "src/storage/db/db.providers";
 import {
   assessmentQuestions,
@@ -226,9 +227,9 @@ export class CourseDetailRepository {
                     WHEN ${quizAwaitingReview(lessons.id, userId)} THEN ${
                       LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW
                     }
-                    WHEN ${studentLessonProgress.completedAt} IS NOT NULL AND ${
-                      studentLessonProgress.isQuizPassed
-                    } IS FALSE THEN ${LEARNER_PROGRESS_STATUSES.FAILED}
+                    WHEN ${quizLastGradedAttemptFailed(lessons.id, userId)} THEN ${
+                      LEARNER_PROGRESS_STATUSES.FAILED
+                    }
                     WHEN ${studentLessonProgress.isStarted} THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
                   END AS status,
