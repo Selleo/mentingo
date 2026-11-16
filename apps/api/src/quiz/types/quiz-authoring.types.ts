@@ -1,5 +1,6 @@
 import type { QuizAuthoringRepository } from "../repositories/quiz-authoring.repository";
 import type {
+  AssessmentFeedbackMode,
   AssessmentGradingMode,
   AssessmentAttemptLimitMode,
   AssessmentQuestionType,
@@ -10,6 +11,7 @@ import type {
 import type { InferSelectModel } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type {
+  assessmentFeedbackRanges,
   assessmentQuestionBlanks,
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionChoiceOptions,
@@ -32,7 +34,18 @@ export type QuizAuthoringInput = {
   timeLimitMinutes?: number | null;
   displayOrder?: number;
   language: SupportedLanguages;
+  /** Undefined keeps the stored feedback mode on update. */
+  feedbackMode?: AssessmentFeedbackMode;
+  /** Undefined keeps the stored ranges on update; an array (including empty) replaces them. */
+  feedbackRanges?: QuizAuthoringFeedbackRange[];
   questions?: QuizAuthoringQuestion[];
+};
+
+export type QuizAuthoringFeedbackRange = {
+  minPercent: number;
+  maxPercent: number;
+  /** The message in the authored language; empty means no message for this band. */
+  message: string;
 };
 
 export type QuizAuthoringQuestion = {
@@ -123,9 +136,11 @@ export type QuizLessonCreateData = {
     maximumAttempts: number | null;
     attemptCooldown: string | null;
     timeLimitMinutes: number | null;
+    feedbackMode: AssessmentFeedbackMode;
     baseLanguage: SupportedLanguages;
     availableLocales: SupportedLanguages[];
   };
+  feedbackRanges: QuizAuthoringFeedbackRange[];
   questions: QuizAuthoringQuestion[];
 };
 
@@ -145,7 +160,10 @@ export type QuizLessonUpdateData = {
     maximumAttempts?: number | null;
     attemptCooldown?: string | null;
     timeLimitMinutes?: number | null;
+    feedbackMode?: AssessmentFeedbackMode;
   };
+  /** Undefined keeps the stored ranges; an array (including empty) replaces them for the language. */
+  feedbackRanges?: QuizAuthoringFeedbackRange[];
   questions?: QuizAuthoringQuestion[];
 };
 
@@ -156,6 +174,7 @@ export type QuizAuthoringAssessment = {
   maximumAttempts: number | null;
   attemptCooldown: string | null;
   timeLimitMinutes: number | null;
+  feedbackMode: AssessmentFeedbackMode;
   baseLanguage: SupportedLanguages;
   availableLocales: SupportedLanguages[];
 };
@@ -179,12 +198,15 @@ export type QuizAuthoringLocalizedReadModel = {
     displayOrder: number | null;
   };
   assessment: QuizAuthoringAssessment;
+  feedbackRanges: QuizAuthoringFeedbackRange[];
   questions: QuizAuthoringLocalizedQuestion[];
 };
 
 export type ChoiceOptionRow = InferSelectModel<typeof assessmentQuestionChoiceOptions>;
 export type TrueFalseStatementRow = InferSelectModel<typeof assessmentQuestionTrueFalseStatements>;
 export type ScaleOptionRow = InferSelectModel<typeof assessmentQuestionScaleOptions>;
+export type FeedbackRangeRow = InferSelectModel<typeof assessmentFeedbackRanges>;
+export type LocalizedFeedbackRangeRow = Omit<FeedbackRangeRow, "message"> & { message: string };
 export type OpenTextSettingsRow = InferSelectModel<typeof assessmentQuestionOpenTextSettings>;
 export type BlankRow = InferSelectModel<typeof assessmentQuestionBlanks>;
 export type DragAndDropOptionRow = InferSelectModel<typeof assessmentQuestionDragAndDropOptions>;
@@ -210,6 +232,7 @@ export type QuizAuthoringRows = {
   choiceOptions: LocalizedChoiceOptionRow[];
   trueFalseStatements: LocalizedTrueFalseStatementRow[];
   scaleOptions: LocalizedScaleOptionRow[];
+  feedbackRanges: LocalizedFeedbackRangeRow[];
   openTextSettings: OpenTextSettingsRow[];
   blanks: BlankRow[];
   answerSets: BlankAnswerSetRow[];

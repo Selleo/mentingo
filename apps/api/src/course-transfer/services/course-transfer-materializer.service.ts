@@ -86,6 +86,7 @@ import type {
   CourseTransferResourceCollection,
   SourceSnapshot,
   SyncAiMentorsParams,
+  SyncAssessmentFeedbackRangesParams,
   SyncAssessmentQuestionDetailsParams,
   SyncChaptersParams,
   SyncFillInTheBlanksQuestionReferencesParams,
@@ -268,6 +269,11 @@ export class CourseTransferMaterializerService {
       questionMap,
       targetCourseId: resolvedTargetCourseId,
     });
+    await this.syncAssessmentFeedbackRanges({
+      sourceSnapshot,
+      lessonMap,
+      targetCourseId: resolvedTargetCourseId,
+    });
 
     const aiMentorMap = await this.syncAiMentors({
       sourceSnapshot,
@@ -416,6 +422,11 @@ export class CourseTransferMaterializerService {
     const blankMap = await this.syncAssessmentQuestionDetails({
       sourceSnapshot,
       questionMap,
+      targetCourseId,
+    });
+    await this.syncAssessmentFeedbackRanges({
+      sourceSnapshot,
+      lessonMap,
       targetCourseId,
     });
     const aiMentorMap = await this.syncAiMentors({
@@ -1348,6 +1359,59 @@ export class CourseTransferMaterializerService {
     }
 
     return blankMap;
+  }
+
+  /**
+   * Copies author-defined feedback ranges onto the target assessments. Ranges belong to the
+   * assessment (resolved through the lesson map), so their target ids are remapped deterministically
+   * off the source range id and target course, mirroring the question-level detail sync.
+   */
+  private async syncAssessmentFeedbackRanges(params: SyncAssessmentFeedbackRangesParams) {
+    const targetAssessmentIds: UUIDType[] = [];
+    const plannedRanges: Array<{
+      targetAssessmentId: UUIDType;
+      targetRangeId: UUIDType;
+      source: SourceSnapshot["assessmentFeedbackRanges"][number];
+    }> = [];
+
+    for (const sourceAssessment of params.sourceSnapshot.assessments) {
+      const targetLessonId = params.lessonMap.get(sourceAssessment.lessonId);
+      if (!targetLessonId) continue;
+
+      const targetAssessmentId =
+        await this.courseTransferGraphRepository.findAssessmentIdByLessonId(targetLessonId);
+      if (!targetAssessmentId) continue;
+
+      targetAssessmentIds.push(targetAssessmentId);
+
+      for (const source of params.sourceSnapshot.assessmentFeedbackRanges.filter(
+        (range) => range.assessmentId === sourceAssessment.id,
+      )) {
+        plannedRanges.push({
+          targetAssessmentId,
+          targetRangeId: uuidv5(source.id, params.targetCourseId) as UUIDType,
+          source,
+        });
+      }
+    }
+
+    // Drop ranges that no longer exist before upserting, so a freed display order cannot
+    // collide with a surviving range on the unique (tenant, assessment, display_order) index.
+    await this.courseTransferGraphRepository.deleteStaleTargetFeedbackRanges(
+      targetAssessmentIds,
+      plannedRanges.map(({ targetRangeId }) => targetRangeId),
+    );
+
+    for (const { targetAssessmentId, targetRangeId, source } of plannedRanges) {
+      await this.courseTransferGraphRepository.upsertTargetFeedbackRange({
+        id: targetRangeId,
+        assessmentId: targetAssessmentId,
+        minPercent: source.minPercent,
+        maxPercent: source.maxPercent,
+        displayOrder: source.displayOrder,
+        message: source.message as LocalizedText,
+      });
+    }
   }
 
   private omitCopiedRowFields<T extends object, K extends keyof T>(

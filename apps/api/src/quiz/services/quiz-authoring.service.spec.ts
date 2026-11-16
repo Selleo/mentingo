@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import {
   ASSESSMENT_ATTEMPT_LIMIT_MODES,
+  ASSESSMENT_FEEDBACK_MODES,
   ASSESSMENT_TIME_LIMIT_MINUTES,
   ASSESSMENT_SCORING_MODES,
   LESSON_TYPES,
@@ -94,9 +95,11 @@ describe("QuizAuthoringService.saveCanonicalLesson", () => {
         maximumAttempts: 3,
         attemptCooldown: "6 hours",
         timeLimitMinutes: null,
+        feedbackMode: ASSESSMENT_FEEDBACK_MODES.FULL,
         baseLanguage: language,
         availableLocales: [language],
       },
+      feedbackRanges: [],
       questions,
     });
     expect(updateQuizLesson).not.toHaveBeenCalled();

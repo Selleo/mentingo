@@ -93,6 +93,9 @@ export class CourseTransferSnapshotService {
     const questionRows = await this.courseTransferSnapshotRepository.getSourceQuestions(lessonIds);
     const assessmentRows =
       await this.courseTransferSnapshotRepository.getSourceAssessments(lessonIds);
+    const feedbackRangeRows = await this.courseTransferSnapshotRepository.getSourceFeedbackRanges(
+      assessmentRows.map((row) => row.id),
+    );
     const questionIds = questionRows.map((row) => row.id);
     const openTextSettingsRows =
       await this.courseTransferSnapshotRepository.getSourceOpenTextSettings(questionIds);
@@ -195,6 +198,7 @@ export class CourseTransferSnapshotService {
       assessmentQuestionMatchingPairs: matchingPairRows,
       assessmentQuestionScaleOptions: scaleOptionRows,
       assessmentQuestionTrueFalseStatements: trueFalseStatementRows,
+      assessmentFeedbackRanges: feedbackRangeRows,
       questionResources: questionResourceRows,
       assessmentQuestionOpenTextSettings: openTextSettingsRows,
       aiMentors: aiMentorRows,

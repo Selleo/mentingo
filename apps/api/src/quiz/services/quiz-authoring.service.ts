@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import {
   ASSESSMENT_ATTEMPT_LIMIT_MODES,
+  ASSESSMENT_FEEDBACK_MODES,
   ASSESSMENT_TIME_LIMIT_MINUTES,
   ASSESSMENT_QUESTION_TYPES,
   ENTITY_TYPES,
@@ -24,6 +25,7 @@ import {
   hasValidMatchingPairs,
   validateCanonicalQuizQuestions,
 } from "../validators/canonical-quiz-authoring.validator";
+import { validateFeedbackRanges } from "../validators/quiz-feedback-range.validator";
 
 import { QuizAuthoringPersistenceService } from "./quiz-authoring-persistence.service";
 
@@ -110,7 +112,9 @@ export class QuizAuthoringService {
           ...(input.timeLimitMinutes === undefined
             ? {}
             : { timeLimitMinutes: input.timeLimitMinutes }),
+          ...(input.feedbackMode === undefined ? {} : { feedbackMode: input.feedbackMode }),
         },
+        ...(input.feedbackRanges === undefined ? {} : { feedbackRanges: input.feedbackRanges }),
         questions,
       });
       if (!assessmentRow) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
@@ -132,6 +136,7 @@ export class QuizAuthoringService {
         displayOrder: input.displayOrder,
       },
       assessment: this.toAssessmentData(input),
+      feedbackRanges: input.feedbackRanges ?? [],
       questions: input.questions ?? [],
     });
     await this.createPromptImageResources(input.questions ?? []);
@@ -168,6 +173,7 @@ export class QuizAuthoringService {
       language: quizAuthoringInput.language,
       lesson,
       assessment: this.toAssessmentData(quizAuthoringInput),
+      feedbackRanges: quizAuthoringInput.feedbackRanges ?? [],
       questions: quizAuthoringInput.questions ?? [],
     });
     await this.createPromptImageResources(quizAuthoringInput.questions ?? []);
@@ -248,7 +254,11 @@ export class QuizAuthoringService {
         ...(input.timeLimitMinutes === undefined
           ? {}
           : { timeLimitMinutes: input.timeLimitMinutes }),
+        ...(input.feedbackMode === undefined ? {} : { feedbackMode: input.feedbackMode }),
       },
+      ...(quizAuthoringInput.feedbackRanges === undefined
+        ? {}
+        : { feedbackRanges: quizAuthoringInput.feedbackRanges }),
       ...(input.questions === undefined ? {} : { questions: quizAuthoringInput.questions ?? [] }),
     };
 
@@ -337,9 +347,10 @@ export class QuizAuthoringService {
 
     const blankIds = blanks.map(({ id }) => id);
 
-    const [answerSets, promptImages] = await Promise.all([
+    const [answerSets, promptImages, feedbackRanges] = await Promise.all([
       this.quizAuthoringRepository.findBlankAnswerSets(blankIds, language),
       this.quizAuthoringRepository.findPromptImages(questionIds),
+      this.quizAuthoringRepository.findFeedbackRanges(assessment.id, language),
     ]);
 
     return {
@@ -349,6 +360,7 @@ export class QuizAuthoringService {
       choiceOptions,
       trueFalseStatements,
       scaleOptions,
+      feedbackRanges,
       openTextSettings,
       blanks,
       answerSets,
@@ -370,9 +382,15 @@ export class QuizAuthoringService {
         maximumAttempts: assessment.maximumAttempts,
         attemptCooldown: assessment.attemptCooldown,
         timeLimitMinutes: assessment.timeLimitMinutes,
+        feedbackMode: assessment.feedbackMode,
         baseLanguage: assessment.baseLanguage,
         availableLocales: assessment.availableLocales,
       },
+      feedbackRanges: rows.feedbackRanges.map((range) => ({
+        minPercent: range.minPercent,
+        maxPercent: range.maxPercent,
+        message: range.message,
+      })),
       questions: questions.map((question) => {
         const blanks = filterItemsByQuestionId(rows.blanks, question.id);
         const orderedBlanks = orderBlanksByPrompt(question.prompt, blanks);
@@ -471,6 +489,14 @@ export class QuizAuthoringService {
       )
     )
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+    if (input.feedbackRanges) {
+      const feedbackRangeIssues = validateFeedbackRanges(input.feedbackRanges);
+      if (feedbackRangeIssues.length)
+        throw new BadRequestException({
+          message: "courseAuthoring.errors.invalidFeedbackRanges",
+          issues: feedbackRangeIssues,
+        });
+    }
   }
 
   private validateTranslatedQuizStructure(
@@ -504,6 +530,7 @@ export class QuizAuthoringService {
           ? null
           : `${input.quizCooldownInHours} hours`,
       timeLimitMinutes: input.timeLimitMinutes ?? null,
+      feedbackMode: input.feedbackMode ?? ASSESSMENT_FEEDBACK_MODES.FULL,
       baseLanguage: input.language,
       availableLocales: [input.language],
     };

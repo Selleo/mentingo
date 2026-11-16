@@ -8,6 +8,7 @@ import {
 import { QuizAuthoringRepository } from "../repositories/quiz-authoring.repository";
 
 import type {
+  QuizAuthoringFeedbackRange,
   QuizAuthoringQuestion,
   QuizLessonCreateData,
   QuizLessonUpdateData,
@@ -34,12 +35,25 @@ export class QuizAuthoringPersistenceService {
 
       await this.insertAssessmentQuestions(assessment.id, data.questions, data.language, trx);
 
+      await this.quizAuthoringRepository.insertFeedbackRanges(
+        assessment.id,
+        data.feedbackRanges,
+        data.language,
+        trx,
+      );
+
       return lesson;
     }, db);
   }
 
   async updateQuizLesson(
-    { lesson, lessonId, assessment: assessmentData, questions }: QuizLessonUpdateData,
+    {
+      lesson,
+      lessonId,
+      assessment: assessmentData,
+      feedbackRanges,
+      questions,
+    }: QuizLessonUpdateData,
     db?: DatabasePg,
   ) {
     return this.quizAuthoringRepository.withTransaction(async (trx) => {
@@ -53,8 +67,46 @@ export class QuizAuthoringPersistenceService {
       if (questions)
         await this.syncAssessmentQuestions(assessment.id, questions, lesson.language, trx);
 
+      if (feedbackRanges)
+        await this.syncFeedbackRanges(assessment.id, feedbackRanges, lesson.language, trx);
+
       return assessment;
     }, db);
+  }
+
+  /**
+   * Replaces the assessment's feedback ranges, matching kept bands by display order so that
+   * messages already translated into other languages survive an edit in one language.
+   */
+  private async syncFeedbackRanges(
+    assessmentId: UUIDType,
+    ranges: QuizAuthoringFeedbackRange[],
+    language: SupportedLanguages,
+    trx: DatabasePg,
+  ) {
+    const existing = await this.quizAuthoringRepository.findFeedbackRangeRows(assessmentId, trx);
+    const keptCount = Math.min(existing.length, ranges.length);
+
+    const staleIds = existing.slice(keptCount).map(({ id }) => id);
+    await this.quizAuthoringRepository.deleteFeedbackRanges(staleIds, trx);
+
+    for (let index = 0; index < keptCount; index++) {
+      await this.quizAuthoringRepository.updateFeedbackRange(
+        existing[index].id,
+        ranges[index],
+        index,
+        language,
+        trx,
+      );
+    }
+
+    await this.quizAuthoringRepository.insertFeedbackRanges(
+      assessmentId,
+      ranges.slice(keptCount),
+      language,
+      trx,
+      keptCount,
+    );
   }
 
   private async insertAssessmentQuestions(

@@ -41,6 +41,7 @@ import {
   aiMentorLessons,
   aiMentorRoleplayConfigurations,
   aiMentorTeacherConfigurations,
+  assessmentFeedbackRanges,
   categories,
   chapters,
   courses,
@@ -114,6 +115,7 @@ import type {
   UpsertTargetBlankAnswerSetValues,
   UpsertTargetBlankValues,
   UpsertTargetDragAndDropOptionValues,
+  UpsertTargetFeedbackRangeValues,
   UpsertTargetMatchingPairValues,
   UpsertTargetScaleOptionValues,
   UpsertTargetTrueFalseStatementValues,
@@ -667,6 +669,40 @@ export class CourseTransferGraphRepository {
           label: buildJsonbFieldWithMultipleEntries(values.label),
         },
       });
+  }
+
+  async upsertTargetFeedbackRange(values: UpsertTargetFeedbackRangeValues) {
+    await this.db
+      .insert(assessmentFeedbackRanges)
+      .values({
+        ...values,
+        message: buildJsonbFieldWithMultipleEntries(values.message),
+      })
+      .onConflictDoUpdate({
+        target: assessmentFeedbackRanges.id,
+        set: {
+          assessmentId: values.assessmentId,
+          minPercent: values.minPercent,
+          maxPercent: values.maxPercent,
+          displayOrder: values.displayOrder,
+          message: buildJsonbFieldWithMultipleEntries(values.message),
+        },
+      });
+  }
+
+  async deleteStaleTargetFeedbackRanges(assessmentIds: UUIDType[], retainedIds: UUIDType[]) {
+    if (!assessmentIds.length) return;
+
+    await this.db
+      .delete(assessmentFeedbackRanges)
+      .where(
+        retainedIds.length
+          ? and(
+              inArray(assessmentFeedbackRanges.assessmentId, assessmentIds),
+              notInArray(assessmentFeedbackRanges.id, retainedIds),
+            )
+          : inArray(assessmentFeedbackRanges.assessmentId, assessmentIds),
+      );
   }
 
   async upsertTargetTrueFalseStatement(values: UpsertTargetTrueFalseStatementValues) {

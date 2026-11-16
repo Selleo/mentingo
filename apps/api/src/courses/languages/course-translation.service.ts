@@ -18,6 +18,7 @@ import { BLANK_ANSWER_MARKER_REGEX } from "src/questions/fill-in-the-blanks.util
 import { DB } from "src/storage/db/db.providers";
 import {
   aiMentorLessons,
+  assessmentFeedbackRanges,
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionChoiceOptions,
   assessmentQuestionDragAndDropOptions,
@@ -375,6 +376,26 @@ export class CourseTranslationService {
         },
         option.questionId,
       );
+    }
+
+    // Feedback ranges belong to the assessment, not a question, so their context comes from the
+    // range row itself. Like scale labels they are jsonb and need no quiz translation target.
+    for (const range of snapshot.feedbackRanges) {
+      if (range.translatedMessage?.length || !range.baseMessage?.length) continue;
+      translations.push({
+        data: {
+          id: range.id,
+          base: range.baseMessage,
+          field: assessmentFeedbackRanges.message,
+          idColumn: assessmentFeedbackRanges.id,
+        },
+        metadata: assessmentFeedbackRanges.message.name,
+        context: {
+          courseTitle: range.courseTitle || undefined,
+          chapterTitle: range.chapterTitle || undefined,
+          lessonTitle: range.lessonTitle || undefined,
+        },
+      });
     }
 
     const translatedDragOptionKeys = new Set(

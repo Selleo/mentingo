@@ -8,6 +8,7 @@ import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
+  assessmentFeedbackRanges,
   assessmentQuestionBlanks,
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionChoiceOptions,
@@ -40,7 +41,9 @@ import type {
   QuizMatchingPairUpdate,
 } from "./quiz-authoring.repository.types";
 import type {
+  FeedbackRangeRow,
   LocalizedChoiceOptionRow,
+  LocalizedFeedbackRangeRow,
   LocalizedTrueFalseStatementRow,
   LocalizedScaleOptionRow,
   LocalizedDragAndDropOptionRow,
@@ -49,6 +52,7 @@ import type {
   MatchingPairRow,
   OpenTextSettingsRow,
   PromptImageRow,
+  QuizAuthoringFeedbackRange,
   QuizAuthoringQuestion,
   QuizAuthoringScaleOption,
   QuizLessonCreateData,
@@ -167,6 +171,83 @@ export class QuizAuthoringRepository {
       })
       .from(assessmentQuestionScaleOptions)
       .where(inArray(assessmentQuestionScaleOptions.questionId, questionIds));
+  }
+
+  async findFeedbackRanges(
+    assessmentId: UUIDType,
+    language: SupportedLanguages,
+    db: DatabasePg = this.db,
+  ): Promise<LocalizedFeedbackRangeRow[]> {
+    return db
+      .select({
+        ...getTableColumns(assessmentFeedbackRanges),
+        message: this.localizationService.getFieldByLanguage(
+          assessmentFeedbackRanges.message,
+          language,
+        ),
+      })
+      .from(assessmentFeedbackRanges)
+      .where(eq(assessmentFeedbackRanges.assessmentId, assessmentId))
+      .orderBy(asc(assessmentFeedbackRanges.displayOrder));
+  }
+
+  async findFeedbackRangeRows(
+    assessmentId: UUIDType,
+    db: DatabasePg = this.db,
+  ): Promise<FeedbackRangeRow[]> {
+    return db
+      .select()
+      .from(assessmentFeedbackRanges)
+      .where(eq(assessmentFeedbackRanges.assessmentId, assessmentId))
+      .orderBy(asc(assessmentFeedbackRanges.displayOrder));
+  }
+
+  async insertFeedbackRanges(
+    assessmentId: UUIDType,
+    ranges: QuizAuthoringFeedbackRange[],
+    language: SupportedLanguages,
+    trx: DatabasePg,
+    startOrder = 0,
+  ) {
+    if (!ranges.length) return;
+    await trx.insert(assessmentFeedbackRanges).values(
+      ranges.map((range, index) => ({
+        assessmentId,
+        minPercent: range.minPercent,
+        maxPercent: range.maxPercent,
+        displayOrder: startOrder + index,
+        message: buildJsonbField(language, range.message),
+      })),
+    );
+  }
+
+  async updateFeedbackRange(
+    id: UUIDType,
+    range: QuizAuthoringFeedbackRange,
+    displayOrder: number,
+    language: SupportedLanguages,
+    trx: DatabasePg,
+  ) {
+    await trx
+      .update(assessmentFeedbackRanges)
+      .set({
+        minPercent: range.minPercent,
+        maxPercent: range.maxPercent,
+        displayOrder,
+        message: setJsonbField(
+          assessmentFeedbackRanges.message,
+          language,
+          range.message,
+          true,
+          true,
+        ),
+      })
+      .where(eq(assessmentFeedbackRanges.id, id));
+  }
+
+  async deleteFeedbackRanges(ids: UUIDType[], trx: DatabasePg) {
+    if (!ids.length) return;
+    await trx.delete(assessmentFeedbackRanges).where(inArray(assessmentFeedbackRanges.id, ids));
   }
 
   async findOpenTextSettings(

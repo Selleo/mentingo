@@ -157,6 +157,8 @@ export const mapLocalizedQuizAuthoringReadModelToLegacy = (
   attemptsLimit: model.assessment.maximumAttempts,
   quizCooldownInHours: parseAttemptCooldown(model.assessment.attemptCooldown),
   timeLimitMinutes: model.assessment.timeLimitMinutes,
+  feedbackMode: model.assessment.feedbackMode,
+  feedbackRanges: model.feedbackRanges,
   questions: model.questions.map(mapTargetQuestionToLegacy),
   aiMentor: null,
 });

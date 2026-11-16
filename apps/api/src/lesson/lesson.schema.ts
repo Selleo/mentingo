@@ -1,6 +1,7 @@
 import {
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_VOICE_MODE,
+  ASSESSMENT_FEEDBACK_MODES,
   ASSESSMENT_TIME_LIMIT_MINUTES,
   LEARNER_PROGRESS_STATUSES,
   QUIZ_ATTEMPT_START_STATUSES,
@@ -93,6 +94,12 @@ export const questionSchema = Type.Object({
   matchingTargets: Type.Optional(Type.Array(Type.String())),
 });
 
+export const quizFeedbackRangeSchema = Type.Object({
+  minPercent: Type.Integer({ minimum: 0, maximum: 100 }),
+  maxPercent: Type.Integer({ minimum: 0, maximum: 100 }),
+  message: Type.String(),
+});
+
 const lessonQuizSchema = Type.Object({
   id: UUIDSchema,
   title: Type.String(),
@@ -114,6 +121,8 @@ const lessonQuizSchema = Type.Object({
       Type.Null(),
     ]),
   ),
+  feedbackMode: Type.Optional(Type.Enum(ASSESSMENT_FEEDBACK_MODES)),
+  feedbackRanges: Type.Optional(Type.Array(quizFeedbackRangeSchema)),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
 });
 
@@ -148,6 +157,8 @@ export const adminLessonSchema = Type.Object({
   attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
   quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
   timeLimitMinutes: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  feedbackMode: Type.Optional(Type.Enum(ASSESSMENT_FEEDBACK_MODES)),
+  feedbackRanges: Type.Optional(Type.Array(quizFeedbackRangeSchema)),
   fileS3Key: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.String()),
   questions: Type.Optional(Type.Array(adminQuestionResponseSchema)),
