@@ -6692,14 +6692,6 @@
       "averageRating": "Vid. įvertinimas",
       "detailedStatisticsSoon": "Išsami statistika jau netrukus",
       "detailedStatisticsDescription": "Šioje skiltyje bus rodoma išsami pažangos, skyrių baigimo, įsitraukimo ir kitų duomenų analizė.",
-      "status": {
-        "started": "Pradėta",
-        "completed": "Baigta",
-        "inProgress": "Vykdoma",
-        "notStarted": "Nepradėta",
-        "awaitingReview": "Laukia įvertinimo",
-        "failed": "Neišlaikyta"
-      },
       "lessonTypes": {
         "content": "Turinys",
         "quiz": "Testas",

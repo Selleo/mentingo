@@ -421,16 +421,14 @@ export const findFirstNotStartedLessonId = (course: GetCourseResponse["data"]) =
   return find(allLessons, (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.NOT_STARTED)?.id;
 };
 
+// A failed quiz can still be retaken, so it resumes like an in-progress lesson.
+export const isResumableLessonStatus = (status: string) =>
+  status === LESSON_PROGRESS_STATUSES.IN_PROGRESS || status === LESSON_PROGRESS_STATUSES.FAILED;
+
 export const findFirstInProgressLessonId = (course: GetCourseResponse["data"]) => {
   const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);
 
-  // A failed quiz can still be retaken, so it resumes like an in-progress lesson.
-  return find(
-    allLessons,
-    (lesson) =>
-      lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS ||
-      lesson.status === LESSON_PROGRESS_STATUSES.FAILED,
-  )?.id;
+  return find(allLessons, (lesson) => isResumableLessonStatus(lesson.status))?.id;
 };
 
 export const findFirstLessonId = (course: GetCourseResponse["data"]) => {
@@ -516,7 +514,6 @@ export const findFirstNonCompletedLessonId = (course: GetCourseResponse["data"])
     allLessons,
     (lesson) =>
       lesson.status === LESSON_PROGRESS_STATUSES.NOT_STARTED ||
-      lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS ||
-      lesson.status === LESSON_PROGRESS_STATUSES.FAILED,
+      isResumableLessonStatus(lesson.status),
   )?.id;
 };

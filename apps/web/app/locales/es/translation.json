@@ -6638,13 +6638,6 @@
       "averageRating": "Valoración media",
       "detailedStatisticsSoon": "Estadísticas detalladas próximamente",
       "detailedStatisticsDescription": "Esta sección mostrará análisis completos del progreso, finalización de capítulos, participación y mucho más.",
-      "status": {
-        "completed": "Completado",
-        "inProgress": "En curso",
-        "notStarted": "No iniciado",
-        "awaitingReview": "Pendiente de revisión",
-        "failed": "No superado"
-      },
       "lessonTypes": {
         "content": "Contenido",
         "quiz": "Cuestionario",

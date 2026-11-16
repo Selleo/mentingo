@@ -6696,14 +6696,6 @@
       "averageRating": "Prům. hodnocení",
       "detailedStatisticsSoon": "Podrobné statistiky již brzy",
       "detailedStatisticsDescription": "Tato sekce zobrazí podrobnou analýzu pokroku, dokončení kapitol, zapojení a další údaje.",
-      "status": {
-        "started": "Zahájeno",
-        "completed": "Dokončeno",
-        "inProgress": "Probíhá",
-        "notStarted": "Nezahájeno",
-        "awaitingReview": "Čeká na hodnocení",
-        "failed": "Nesplněno"
-      },
       "lessonTypes": {
         "content": "Obsah",
         "quiz": "Kvíz",

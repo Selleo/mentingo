@@ -8,6 +8,7 @@ import {
   getCompletedAnswers as getCompletedFillInTheBlanksDndAnswers,
 } from "../Question/FillInTheBlanks/dnd/FillInTheBlanksDnd";
 import { QuizFormSchema } from "../schemas";
+import { LESSON_PROGRESS_STATUSES } from "../types";
 import {
   findFirstInProgressLessonId,
   findFirstLessonIdForCompletedCourse,
@@ -19,6 +20,7 @@ import {
   getUserAnswers,
   isNextBlocked,
   isPreviousBlocked,
+  isResumableLessonStatus,
   parseQuizFormData,
 } from "../utils";
 
@@ -150,6 +152,15 @@ describe("failed quiz lessons", () => {
 
   it("does not treat a failed quiz as completed", () => {
     expect(findFirstLessonIdForCompletedCourse(course)).toBeUndefined();
+  });
+  it("resumes only in-progress and failed lessons", () => {
+    const resumableStatuses =
+      Object.values(LESSON_PROGRESS_STATUSES).filter(isResumableLessonStatus);
+
+    expect(resumableStatuses).toEqual([
+      LESSON_PROGRESS_STATUSES.IN_PROGRESS,
+      LESSON_PROGRESS_STATUSES.FAILED,
+    ]);
   });
 });
 
