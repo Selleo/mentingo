@@ -21,6 +21,7 @@ import { ScormPlayer } from "./ScormPlayer";
 type ScormLessonProps = {
   learningStateId?: string | null;
   lessonId: string;
+  isPreview?: boolean;
 };
 
 type ScormNavigationProps = {
@@ -70,7 +71,7 @@ function ScormNavigation({
   );
 }
 
-export function ScormLesson({ lessonId, learningStateId }: ScormLessonProps) {
+export function ScormLesson({ lessonId, learningStateId, isPreview = false }: ScormLessonProps) {
   const { t } = useTranslation();
   const { language } = useLanguageStore();
   const [selectedScoId, setSelectedScoId] = useState<string | null>(null);
@@ -85,6 +86,7 @@ export function ScormLesson({ lessonId, learningStateId }: ScormLessonProps) {
     learningStateId,
     scoId: selectedScoId,
     language,
+    isPreview,
   });
 
   if (isLoading) {

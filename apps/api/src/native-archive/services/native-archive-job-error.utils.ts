@@ -1,4 +1,9 @@
 const PUBLIC_ARCHIVE_ERROR_CODES = new Set([
+  "adminCourseView.scormExport.error.accessDenied",
+  "adminCourseView.scormExport.error.bunnyNotConfigured",
+  "adminCourseView.scormExport.error.courseNotFound",
+  "adminCourseView.scormExport.error.missingAsset",
+  "adminCourseView.scormExport.error.noExportableLessons",
   "nativeArchive.error.accessDenied",
   "nativeArchive.error.archiveTooLarge",
   "nativeArchive.error.assetTooLarge",

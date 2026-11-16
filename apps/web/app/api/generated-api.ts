@@ -3239,6 +3239,12 @@ export interface GetCourseStudentsAiMentorResultsResponse {
   appliedFilters?: object;
 }
 
+export interface ExportCourseAsScormResponse {
+  data: {
+    jobId: string;
+  };
+}
+
 export interface TransferCourseOwnershipBody {
   /** @format uuid */
   courseId: string;
@@ -3332,6 +3338,87 @@ export interface GetCourseOwnershipResponse {
       name: string;
       email: string;
     }[];
+  };
+}
+
+export interface InitTusImportBody {
+  /**
+   * @min 1
+   * @max 838860800
+   */
+  sizeBytes: number;
+}
+
+export interface InitTusImportResponse {
+  data: {
+    uploadId: string;
+    tusEndpoint: string;
+    tusHeaders: object;
+    expiresAt: string;
+    partSize: number;
+  };
+}
+
+export interface CompleteTusImportResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface ExportNativeCourseResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface ExportNativeLearningPathResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface ImportNativeArchiveResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface GetNativeArchiveStatusResponse {
+  data: {
+    jobId: string;
+    state: string;
+    result: null | {
+      kind: "course" | "learning-path";
+      /** @format uuid */
+      rootId: string;
+      alreadyExists?: boolean;
+      createdCourseIds?: string[];
+      reusedCourseIds?: string[];
+    };
+    failedReason: string | null;
+    progress: {
+      stage:
+        | "collecting-content"
+        | "copying-files"
+        | "packaging"
+        | "downloading"
+        | "verifying"
+        | "uploading-files"
+        | "indexing"
+        | "saving";
+      /**
+       * @min 0
+       * @max 100
+       */
+      percent: number;
+    } | null;
+  };
+}
+
+export interface GetNativeArchiveDownloadUrlResponse {
+  data: {
+    url: string;
+    expiresInSeconds: number;
   };
 }
 
@@ -30707,87 +30794,6 @@ export interface DeleteManyCategoriesResponse {
   };
 }
 
-export interface InitTusImportBody {
-  /**
-   * @min 1
-   * @max 838860800
-   */
-  sizeBytes: number;
-}
-
-export interface InitTusImportResponse {
-  data: {
-    uploadId: string;
-    tusEndpoint: string;
-    tusHeaders: object;
-    expiresAt: string;
-    partSize: number;
-  };
-}
-
-export interface CompleteTusImportResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface ExportNativeCourseResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface ExportNativeLearningPathResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface ImportNativeArchiveResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface GetNativeArchiveStatusResponse {
-  data: {
-    jobId: string;
-    state: string;
-    result: null | {
-      kind: "course" | "learning-path";
-      /** @format uuid */
-      rootId: string;
-      alreadyExists?: boolean;
-      createdCourseIds?: string[];
-      reusedCourseIds?: string[];
-    };
-    failedReason: string | null;
-    progress: {
-      stage:
-        | "collecting-content"
-        | "copying-files"
-        | "packaging"
-        | "downloading"
-        | "verifying"
-        | "uploading-files"
-        | "indexing"
-        | "saving";
-      /**
-       * @min 0
-       * @max 100
-       */
-      percent: number;
-    } | null;
-  };
-}
-
-export interface GetNativeArchiveDownloadUrlResponse {
-  data: {
-    url: string;
-    expiresInSeconds: number;
-  };
-}
-
 export interface GetMessagesResponse {
   data: {
     /** @format uuid */
@@ -33740,6 +33746,26 @@ export interface LaunchScormAttemptResponse {
     learningStateId?: string | null;
     /** @format uuid */
     attemptId: string;
+    /** @format uuid */
+    packageId: string;
+    /** @format uuid */
+    scoId: string;
+    /** @format uuid */
+    lessonId: string;
+    /** @format uuid */
+    courseId: string;
+    launchUrl: string;
+    scoTitle: string;
+    navigation: {
+      previousScoId: string | null;
+      nextScoId: string | null;
+    };
+    runtime: object;
+  };
+}
+
+export interface LaunchScormPreviewResponse {
+  data: {
     /** @format uuid */
     packageId: string;
     /** @format uuid */
@@ -42147,10 +42173,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<void, any>({
+      this.request<ExportCourseAsScormResponse, any>({
         path: `/api/course/${courseId}/scorm-export`,
         method: "POST",
         query: query,
+        format: "json",
         ...params,
       }),
 
@@ -42254,6 +42281,205 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/course-ownership/${courseId}`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerInitTusImport
+     * @request POST:/api/native-archives/tus/init
+     */
+    nativeArchiveControllerInitTusImport: (data: InitTusImportBody, params: RequestParams = {}) =>
+      this.request<InitTusImportResponse, any>({
+        path: `/api/native-archives/tus/init`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerTusOptionsBase
+     * @request OPTIONS:/api/native-archives/tus
+     */
+    nativeArchiveControllerTusOptionsBase: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerCreateTusUpload
+     * @request POST:/api/native-archives/tus
+     */
+    nativeArchiveControllerCreateTusUpload: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerTusOptionsUpload
+     * @request OPTIONS:/api/native-archives/tus/{id}
+     */
+    nativeArchiveControllerTusOptionsUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus/${id}`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerHeadTusUpload
+     * @request HEAD:/api/native-archives/tus/{id}
+     */
+    nativeArchiveControllerHeadTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus/${id}`,
+        method: "HEAD",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerPatchTusUpload
+     * @request PATCH:/api/native-archives/tus/{id}
+     */
+    nativeArchiveControllerPatchTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus/${id}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerCompleteTusImport
+     * @request POST:/api/native-archives/tus/{id}/complete
+     */
+    nativeArchiveControllerCompleteTusImport: (id: string, params: RequestParams = {}) =>
+      this.request<CompleteTusImportResponse, any>({
+        path: `/api/native-archives/tus/${id}/complete`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerDismissLiveTrainingReview
+     * @request PATCH:/api/native-archives/live-training/{id}/dismiss-review
+     */
+    nativeArchiveControllerDismissLiveTrainingReview: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/live-training/${id}/dismiss-review`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerExportNativeCourse
+     * @request POST:/api/native-archives/courses/{id}/export
+     */
+    nativeArchiveControllerExportNativeCourse: (id: string, params: RequestParams = {}) =>
+      this.request<ExportNativeCourseResponse, any>({
+        path: `/api/native-archives/courses/${id}/export`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerExportNativeLearningPath
+     * @request POST:/api/native-archives/learning-paths/{id}/export
+     */
+    nativeArchiveControllerExportNativeLearningPath: (id: string, params: RequestParams = {}) =>
+      this.request<ExportNativeLearningPathResponse, any>({
+        path: `/api/native-archives/learning-paths/${id}/export`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerImportNativeArchive
+     * @request POST:/api/native-archives/import
+     */
+    nativeArchiveControllerImportNativeArchive: (
+      data: {
+        /** @format binary */
+        file: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ImportNativeArchiveResponse, any>({
+        path: `/api/native-archives/import`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerGetNativeArchiveStatus
+     * @request GET:/api/native-archives/jobs/{id}
+     */
+    nativeArchiveControllerGetNativeArchiveStatus: (id: string, params: RequestParams = {}) =>
+      this.request<GetNativeArchiveStatusResponse, any>({
+        path: `/api/native-archives/jobs/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerGetNativeArchiveDownloadUrl
+     * @request GET:/api/native-archives/jobs/{id}/download-url
+     */
+    nativeArchiveControllerGetNativeArchiveDownloadUrl: (id: string, params: RequestParams = {}) =>
+      this.request<GetNativeArchiveDownloadUrlResponse, any>({
+        path: `/api/native-archives/jobs/${id}/download-url`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerDownloadNativeArchive
+     * @request GET:/api/native-archives/jobs/{id}/download
+     */
+    nativeArchiveControllerDownloadNativeArchive: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/jobs/${id}/download`,
+        method: "GET",
         ...params,
       }),
 
@@ -45941,205 +46167,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name NativeArchiveControllerInitTusImport
-     * @request POST:/api/native-archives/tus/init
-     */
-    nativeArchiveControllerInitTusImport: (data: InitTusImportBody, params: RequestParams = {}) =>
-      this.request<InitTusImportResponse, any>({
-        path: `/api/native-archives/tus/init`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerTusOptionsBase
-     * @request OPTIONS:/api/native-archives/tus
-     */
-    nativeArchiveControllerTusOptionsBase: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus`,
-        method: "OPTIONS",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerCreateTusUpload
-     * @request POST:/api/native-archives/tus
-     */
-    nativeArchiveControllerCreateTusUpload: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus`,
-        method: "POST",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerTusOptionsUpload
-     * @request OPTIONS:/api/native-archives/tus/{id}
-     */
-    nativeArchiveControllerTusOptionsUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus/${id}`,
-        method: "OPTIONS",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerHeadTusUpload
-     * @request HEAD:/api/native-archives/tus/{id}
-     */
-    nativeArchiveControllerHeadTusUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus/${id}`,
-        method: "HEAD",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerPatchTusUpload
-     * @request PATCH:/api/native-archives/tus/{id}
-     */
-    nativeArchiveControllerPatchTusUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus/${id}`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerCompleteTusImport
-     * @request POST:/api/native-archives/tus/{id}/complete
-     */
-    nativeArchiveControllerCompleteTusImport: (id: string, params: RequestParams = {}) =>
-      this.request<CompleteTusImportResponse, any>({
-        path: `/api/native-archives/tus/${id}/complete`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerDismissLiveTrainingReview
-     * @request PATCH:/api/native-archives/live-training/{id}/dismiss-review
-     */
-    nativeArchiveControllerDismissLiveTrainingReview: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/live-training/${id}/dismiss-review`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerExportNativeCourse
-     * @request POST:/api/native-archives/courses/{id}/export
-     */
-    nativeArchiveControllerExportNativeCourse: (id: string, params: RequestParams = {}) =>
-      this.request<ExportNativeCourseResponse, any>({
-        path: `/api/native-archives/courses/${id}/export`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerExportNativeLearningPath
-     * @request POST:/api/native-archives/learning-paths/{id}/export
-     */
-    nativeArchiveControllerExportNativeLearningPath: (id: string, params: RequestParams = {}) =>
-      this.request<ExportNativeLearningPathResponse, any>({
-        path: `/api/native-archives/learning-paths/${id}/export`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerImportNativeArchive
-     * @request POST:/api/native-archives/import
-     */
-    nativeArchiveControllerImportNativeArchive: (
-      data: {
-        /** @format binary */
-        file: File;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ImportNativeArchiveResponse, any>({
-        path: `/api/native-archives/import`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerGetNativeArchiveStatus
-     * @request GET:/api/native-archives/jobs/{id}
-     */
-    nativeArchiveControllerGetNativeArchiveStatus: (id: string, params: RequestParams = {}) =>
-      this.request<GetNativeArchiveStatusResponse, any>({
-        path: `/api/native-archives/jobs/${id}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerGetNativeArchiveDownloadUrl
-     * @request GET:/api/native-archives/jobs/{id}/download-url
-     */
-    nativeArchiveControllerGetNativeArchiveDownloadUrl: (id: string, params: RequestParams = {}) =>
-      this.request<GetNativeArchiveDownloadUrlResponse, any>({
-        path: `/api/native-archives/jobs/${id}/download-url`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerDownloadNativeArchive
-     * @request GET:/api/native-archives/jobs/{id}/download
-     */
-    nativeArchiveControllerDownloadNativeArchive: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/jobs/${id}/download`,
-        method: "GET",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name CourseChatControllerGetMessages
      * @request GET:/api/course-chat/{courseId}/messages
      */
@@ -48279,6 +48306,31 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<LaunchScormAttemptResponse, any>({
         path: `/api/scorm/runtime/launch`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerLaunchScormPreview
+     * @request GET:/api/scorm/runtime/preview
+     */
+    scormControllerLaunchScormPreview: (
+      query?: {
+        /** @format uuid */
+        lessonId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @format uuid */
+        scoId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<LaunchScormPreviewResponse, any>({
+        path: `/api/scorm/runtime/preview`,
         method: "GET",
         query: query,
         format: "json",

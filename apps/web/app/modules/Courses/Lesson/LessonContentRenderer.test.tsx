@@ -5,7 +5,7 @@ import { renderWith } from "~/utils/testUtils";
 
 import { LessonContentRenderer } from "./LessonContentRenderer";
 
-import type { GetLessonByIdResponse } from "~/api/generated-api";
+import type { CurrentUserResponse, GetLessonByIdResponse } from "~/api/generated-api";
 
 const state = vi.hoisted(() => ({ preview: true }));
 vi.mock("~/modules/Courses/context/CourseAccessProvider", () => ({
@@ -18,7 +18,9 @@ vi.mock("./AiMentorLesson/AiMentorLesson", () => ({
   default: () => <button>Start AI activity</button>,
 }));
 vi.mock("./ScormLesson/ScormLesson", () => ({
-  ScormLesson: () => <button>Launch SCORM</button>,
+  ScormLesson: ({ isPreview }: { isPreview: boolean }) => (
+    <button>{isPreview ? "Preview SCORM" : "Launch SCORM"}</button>
+  ),
 }));
 vi.mock("./LiveTrainingLesson/LiveTrainingLesson", () => ({
   LiveTrainingLesson: () => <button>Join live training</button>,
@@ -26,7 +28,12 @@ vi.mock("./LiveTrainingLesson/LiveTrainingLesson", () => ({
 vi.mock("./Quiz", () => ({ Quiz: () => <p>Quiz questions</p> }));
 vi.mock("./EmbedLesson/EmbedLesson", () => ({ EmbedLesson: () => <p>Embedded content</p> }));
 
-const renderLesson = (type: GetLessonByIdResponse["data"]["type"]) =>
+const signedInUser = { id: "user-1" } as CurrentUserResponse["data"];
+
+const renderLesson = (
+  type: GetLessonByIdResponse["data"]["type"],
+  user: CurrentUserResponse["data"] | undefined = undefined,
+) =>
   renderWith().render(
     <LessonContentRenderer
       lesson={
@@ -36,7 +43,7 @@ const renderLesson = (type: GetLessonByIdResponse["data"]["type"]) =>
           description: "Activity description",
         } as GetLessonByIdResponse["data"]
       }
-      user={undefined}
+      user={user}
       lessonLoading={false}
     />,
   );
@@ -47,13 +54,31 @@ describe("LessonContentRenderer preview activities", () => {
   });
 
   it.each(["scorm", "live_training"] as const)(
-    "shows the description without mounting the interactive %s activity in preview",
+    "shows the description without mounting the interactive %s activity to guests in preview",
     (type) => {
       renderLesson(type);
       expect(screen.getByText("Activity description")).toBeInTheDocument();
       expect(screen.queryByRole("button")).not.toBeInTheDocument();
     },
   );
+
+  it("shows live training as its description to signed-in users in preview", () => {
+    renderLesson("live_training", signedInUser);
+    expect(screen.getByText("Activity description")).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("plays SCORM as an unsaved preview for signed-in users in preview", () => {
+    renderLesson("scorm", signedInUser);
+    expect(screen.getByRole("button", { name: "Preview SCORM" })).toBeInTheDocument();
+    expect(screen.queryByText("Activity description")).not.toBeInTheDocument();
+  });
+
+  it("launches a saved SCORM attempt once the user starts learning", () => {
+    state.preview = false;
+    renderLesson("scorm", signedInUser);
+    expect(screen.getByRole("button", { name: "Launch SCORM" })).toBeInTheDocument();
+  });
 
   it("shows the full AI Mentor lesson in preview", () => {
     renderLesson("ai_mentor");

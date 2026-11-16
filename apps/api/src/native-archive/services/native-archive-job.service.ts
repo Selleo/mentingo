@@ -47,6 +47,7 @@ import type {
   NativeArchiveJobReceipt,
   NativeArchiveJobStatus,
 } from "../native-archive.types";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Job, Queue } from "bullmq";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -80,6 +81,32 @@ export class NativeArchiveJobService {
         action,
         rootId: id,
         exportAccess,
+        actor,
+      } satisfies NativeArchiveJob,
+      { attempts: 1, removeOnComplete: false, removeOnFail: false },
+    );
+
+    return { jobId: String(job.id) };
+  }
+
+  async enqueueScormExport(
+    courseId: UUIDType,
+    actor: CurrentUserType,
+    language?: SupportedLanguages,
+    tenantOrigin?: string | null,
+  ): Promise<NativeArchiveJobReceipt> {
+    if (!this.s3Service.isConfigured()) {
+      throw new BadRequestException("nativeArchive.error.storageUnavailable");
+    }
+
+    const job = await this.queueService.enqueue(
+      QUEUE_NAMES.NATIVE_ARCHIVE,
+      NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE_SCORM,
+      {
+        action: NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE_SCORM,
+        rootId: courseId,
+        language,
+        tenantOrigin,
         actor,
       } satisfies NativeArchiveJob,
       { attempts: 1, removeOnComplete: false, removeOnFail: false },

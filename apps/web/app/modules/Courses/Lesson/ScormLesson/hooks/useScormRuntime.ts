@@ -20,7 +20,6 @@ import type { ScormLaunchData, ScormRuntimeValues } from "../ScormLesson.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { RefObject } from "react";
 import type { Scorm12API } from "scorm-again";
-import type { LaunchScormAttemptResponse } from "~/api/generated-api";
 
 type UseScormRuntimeParams = {
   launch: ScormLaunchData;
@@ -68,8 +67,10 @@ export function useScormRuntime({
     const api = createScorm12Api();
     const runtimeValues = asRuntimeValues(launchRuntimeRef.current.runtime);
 
-    const buildRuntimePayload = (values: ScormRuntimeValues) => ({
-      attemptId: launch.attemptId,
+    const attemptId = launch.attemptId;
+
+    const buildRuntimePayload = (savedAttemptId: string, values: ScormRuntimeValues) => ({
+      attemptId: savedAttemptId,
       packageId: launch.packageId,
       scoId: launch.scoId,
       lessonId: launch.lessonId,
@@ -105,21 +106,18 @@ export function useScormRuntime({
     };
 
     const updateLaunchRuntimeCache = (values: ScormRuntimeValues) => {
-      queryClient.setQueriesData<LaunchScormAttemptResponse>(
+      queryClient.setQueriesData<ScormLaunchData>(
         { queryKey: ["scorm", "launch", launch.lessonId] },
         (cachedLaunch) => {
-          if (!cachedLaunch || cachedLaunch.data.attemptId !== launch.attemptId) {
+          if (!cachedLaunch || cachedLaunch.attemptId !== launch.attemptId) {
             return cachedLaunch;
           }
 
           return {
             ...cachedLaunch,
-            data: {
-              ...cachedLaunch.data,
-              runtime: {
-                ...asRuntimeValues(cachedLaunch.data.runtime),
-                ...values,
-              },
+            runtime: {
+              ...asRuntimeValues(cachedLaunch.runtime),
+              ...values,
             },
           };
         },
@@ -129,7 +127,7 @@ export function useScormRuntime({
     const commitDirtyValues = async () => {
       const values = filterWritableRuntimeValues(dirtyValuesRef.current);
 
-      if (!hasRuntimeValues(values)) {
+      if (!attemptId || !hasRuntimeValues(values)) {
         dirtyValuesRef.current = {};
         return;
       }
@@ -139,7 +137,7 @@ export function useScormRuntime({
       beginRuntimeSave();
       try {
         const result = await commitRuntimeRef.current({
-          data: buildRuntimePayload(values),
+          data: buildRuntimePayload(attemptId, values),
           params: courseLearningHeaders(launch.learningStateId),
         });
         updateLaunchRuntimeCache(values);
@@ -159,7 +157,8 @@ export function useScormRuntime({
         ...dirtyValuesRef.current,
       });
 
-      if (!hasRuntimeValues(values)) {
+      if (!attemptId || !hasRuntimeValues(values)) {
+        dirtyValuesRef.current = {};
         return;
       }
 
@@ -168,7 +167,7 @@ export function useScormRuntime({
       beginRuntimeSave();
       try {
         const result = await finishRuntimeRef.current({
-          data: buildRuntimePayload(values),
+          data: buildRuntimePayload(attemptId, values),
           params: courseLearningHeaders(launch.learningStateId),
         });
         updateLaunchRuntimeCache(values);

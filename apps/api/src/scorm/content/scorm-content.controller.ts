@@ -65,8 +65,9 @@ export class ScormContentController {
     const grant = request.scormGrant;
     const file = await this.scormService.getContentFile({
       packageId: grant.packageId,
+      actor: grant.actor,
+      previewLessonId: grant.previewLessonId,
       relativePath,
-      currentUser: grant.actor,
       range,
     });
     streamFileToResponse(response, { ...file, contentDisposition: "inline" });

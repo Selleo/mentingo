@@ -9,9 +9,10 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
+import { setJsonbField } from "src/common/helpers/sqlHelpers";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
@@ -24,6 +25,7 @@ import {
   scormPackages,
   scormRuntimeState,
   scormScos,
+  settings,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
@@ -1055,6 +1057,77 @@ describe("ScormController (e2e)", () => {
       await request(app.getHttpServer())
         .get(`/api/scorm/runtime/launch?lessonId=${imported.lessonId}&language=en`)
         .set("Cookie", await cookieFor(student, app))
+        .expect(403);
+    });
+
+    it("launches a preview for a course editor without recording an attempt or progress", async () => {
+      const admin = await createAdmin();
+      const imported = await importScormCourse(admin);
+
+      const preview = await request(app.getHttpServer())
+        .get(`/api/scorm/runtime/preview?lessonId=${imported.lessonId}&language=en`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(preview.body.data).not.toHaveProperty("attemptId");
+      expect(preview.body.data).toMatchObject({
+        packageId: imported.packageId,
+        scoId: imported.scoId,
+        lessonId: imported.lessonId,
+        runtime: { "cmi.core.lesson_status": "not attempted", "cmi.core.entry": "ab-initio" },
+      });
+
+      const url = new URL(preview.body.data.launchUrl);
+      const prefix = url.pathname.replace(/\/player$/, "");
+      await request(app.getHttpServer()).get(url.pathname).set("Host", url.host).expect(200);
+      await request(app.getHttpServer())
+        .get(`${prefix}/assets/scripts/runtime.js`)
+        .set("Host", url.host)
+        .expect(200);
+
+      expect(await db.select().from(scormAttempts)).toHaveLength(0);
+      expect(
+        await db
+          .select()
+          .from(studentLessonProgress)
+          .where(eq(studentLessonProgress.lessonId, imported.lessonId)),
+      ).toHaveLength(0);
+    });
+
+    it("lets public course preview users play a free course and stops serving it once disabled", async () => {
+      const admin = await createAdmin();
+      const student = await createStudent();
+      const imported = await importScormCourse(admin);
+      const cookies = await cookieFor(student, app);
+      const setPublicCoursePreview = (enabled: boolean) =>
+        db
+          .update(settings)
+          .set({
+            settings: setJsonbField(settings.settings, "publicCoursePreviewEnabled", enabled),
+          })
+          .where(isNull(settings.userId));
+
+      await request(app.getHttpServer())
+        .get(`/api/scorm/runtime/preview?lessonId=${imported.lessonId}&language=en`)
+        .set("Cookie", cookies)
+        .expect(403);
+
+      await setPublicCoursePreview(true);
+      const preview = await request(app.getHttpServer())
+        .get(`/api/scorm/runtime/preview?lessonId=${imported.lessonId}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const url = new URL(preview.body.data.launchUrl);
+      const prefix = url.pathname.replace(/\/player$/, "");
+      await request(app.getHttpServer())
+        .get(`${prefix}/assets/index.html`)
+        .set("Host", url.host)
+        .expect(200);
+
+      await setPublicCoursePreview(false);
+      await request(app.getHttpServer())
+        .get(`${prefix}/assets/index.html`)
+        .set("Host", url.host)
         .expect(403);
     });
 

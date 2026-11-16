@@ -8,6 +8,7 @@ import { pipeline } from "node:stream/promises";
 import { BadRequestException, ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { match } from "ts-pattern";
 
+import { CourseScormExportService } from "src/courses/scorm-export/course-scorm-export.service";
 import { NativeArchiveExportedEvent, NativeArchiveImportedEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
@@ -47,6 +48,7 @@ import {
 import type { NativeArchiveImportFinishedData } from "../events/native-archive-import-finished.event";
 import type {
   NativeArchiveBuildInput,
+  NativeArchiveBuiltZip,
   NativeArchiveExportAccess,
   NativeArchiveImportArchive,
   NativeArchiveImportOptions,
@@ -79,6 +81,7 @@ export class NativeArchiveJobFulfillmentService {
     private readonly nativeArchiveImportService: NativeArchiveImportService,
     private readonly nativeArchiveExportReuseService: NativeArchiveExportReuseService,
     private readonly outboxPublisher: OutboxPublisher,
+    private readonly courseScormExportService: CourseScormExportService,
   ) {}
 
   /**
@@ -99,6 +102,10 @@ export class NativeArchiveJobFulfillmentService {
   ): Promise<NativeArchiveJobResult> {
     const { action, actor, rootId, key, archiveOrigin, exportAccess, importSource, importMode } =
       jobData;
+
+    if (action === NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE_SCORM) {
+      return this.exportScormPackageToStorage(jobData, progress);
+    }
 
     if (action === NATIVE_ARCHIVE_JOB_ACTION.IMPORT) {
       return this.importArchiveAndReportOutcome(
@@ -369,6 +376,59 @@ export class NativeArchiveJobFulfillmentService {
     return { key: exportKey, kind, rootId, filename };
   }
 
+  /** Builds a SCORM 1.2 package of a course, or copies an earlier one built from the same content. */
+  private async exportScormPackageToStorage(
+    { rootId, actor, language, tenantOrigin }: NativeArchiveJob,
+    progress: NativeArchiveProgressReporter,
+  ): Promise<NativeArchiveJobResult> {
+    if (!rootId) throw new ForbiddenException("nativeArchive.error.invalidJob");
+
+    const exportKey = getNativeArchiveExportKey(actor.tenantId, randomUUID());
+
+    progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.COLLECTING_CONTENT);
+
+    const filename = await this.tenantDbRunnerService.runWithTenant(actor.tenantId, async () => {
+      const preparedExport = await this.courseScormExportService.prepareExport(
+        rootId,
+        actor,
+        language,
+      );
+
+      if (
+        await this.nativeArchiveExportReuseService.copyRememberedExport(
+          actor.tenantId,
+          preparedExport.fingerprint,
+          exportKey,
+        )
+      ) {
+        progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.PACKAGING);
+        return preparedExport.filename;
+      }
+
+      progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.COPYING_FILES);
+      const scormPackage = await this.courseScormExportService.buildPackage(preparedExport, {
+        tenantOrigin,
+        onFileStaged: (stagedCount, totalCount) =>
+          progress.reportStageWork(
+            NATIVE_ARCHIVE_JOB_STAGES.COPYING_FILES,
+            stagedCount,
+            totalCount,
+          ),
+      });
+
+      await this.uploadPackage(scormPackage, exportKey, progress);
+      await this.nativeArchiveExportReuseService.rememberExport(
+        actor.tenantId,
+        preparedExport.fingerprint,
+        exportKey,
+      );
+
+      return preparedExport.filename;
+    });
+
+    return { key: exportKey, kind: NATIVE_ARCHIVE_KIND.COURSE, rootId, filename };
+  }
+
   private async uploadBuiltArchive(
     archiveInput: NativeArchiveBuildInput,
     exportKey: string,
@@ -379,6 +439,15 @@ export class NativeArchiveJobFulfillmentService {
       onAssetStaged: (stagedCount, totalCount) =>
         progress.reportStageWork(NATIVE_ARCHIVE_JOB_STAGES.COPYING_FILES, stagedCount, totalCount),
     });
+
+    await this.uploadPackage(archive, exportKey, progress);
+  }
+
+  private async uploadPackage(
+    archive: NativeArchiveBuiltZip,
+    exportKey: string,
+    progress: NativeArchiveProgressReporter,
+  ) {
     progress.enterStage(NATIVE_ARCHIVE_JOB_STAGES.PACKAGING);
 
     try {
