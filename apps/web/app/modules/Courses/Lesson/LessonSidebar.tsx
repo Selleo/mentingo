@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
+import { ProgressBadge } from "~/components/Badges/ProgressBadge";
 import CourseProgress from "~/components/CourseProgress";
 import { Icon } from "~/components/Icon";
 import {
@@ -43,6 +44,14 @@ const progressBadge = {
   not_started: "NotStartedRounded",
   blocked: "Blocked",
   awaiting_review: "InProgress",
+} as const;
+
+const lessonProgressBadgeKey = {
+  completed: "completed",
+  in_progress: "inProgress",
+  not_started: "notStarted",
+  blocked: "blocked",
+  awaiting_review: "awaitingReview",
 } as const;
 
 export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
@@ -169,31 +178,29 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                               ? LESSON_PROGRESS_STATUSES.BLOCKED
                               : effectiveStatus;
 
-                            const badgeIcon = isPreviewMode
-                              ? getPreviewIcon()
-                              : progressBadge[badgeStatus];
-
                             return (
                               <Link
                                 key={id}
                                 to={isBlocked ? "#" : `/course/${course.slug}/lesson/${id}`}
                                 data-testid={LEARNING_HANDLES.lessonSidebarLessonItem(id)}
+                                aria-current={lessonId === id ? "page" : undefined}
                                 className={cn("flex gap-x-4 px-6 py-2 hover:bg-neutral-50 pl-10", {
                                   "cursor-not-allowed hover:bg-transparent opacity-30": isBlocked,
                                   "border-l-2 border-l-primary-600 bg-primary-50 last:rounded-es-lg":
                                     lessonId === id,
                                 })}
                               >
-                                <Badge
-                                  data-testid={
-                                    isBlocked
-                                      ? LEARNING_HANDLES.lessonSidebarBlockedIndicator(id)
-                                      : undefined
-                                  }
-                                  variant="icon"
-                                  icon={badgeIcon}
-                                  iconClasses="w-6 h-auto shrink-0"
-                                />{" "}
+                                {!isPreviewMode && (
+                                  <ProgressBadge
+                                    progress={lessonProgressBadgeKey[badgeStatus]}
+                                    hideLabel
+                                    data-testid={
+                                      isBlocked
+                                        ? LEARNING_HANDLES.lessonSidebarBlockedIndicator(id)
+                                        : undefined
+                                    }
+                                  />
+                                )}{" "}
                                 <div className="flex flex-1 flex-col break-words overflow-x-hidden">
                                   <p className="body-sm-md text-neutral-950">{title}</p>
                                 </div>
