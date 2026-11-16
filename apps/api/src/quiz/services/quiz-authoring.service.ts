@@ -90,10 +90,12 @@ export class QuizAuthoringService {
         throw new BadRequestException("adminCourseView.toast.languageNotSupported");
       }
       const existingQuestions = existingQuiz.questions;
-      if (input.language !== existingQuiz.assessment.baseLanguage) {
-        this.validateTranslatedQuizStructure(input.questions ?? [], existingQuestions);
-        this.validateTranslatedFeedbackRanges(input.feedbackRanges, existingQuiz.feedbackRanges);
-      }
+      this.validateTranslatedSave(
+        input.language,
+        existingQuiz,
+        input.questions ?? [],
+        input.feedbackRanges,
+      );
       const assessment = this.toAssessmentData(input);
       const questions = preserveExistingQuizAuthoringIds(input.questions ?? [], existingQuestions);
       const assessmentRow = await this.quizAuthoringPersistenceService.updateQuizLesson({
@@ -114,9 +116,9 @@ export class QuizAuthoringService {
           ...(input.timeLimitMinutes === undefined
             ? {}
             : { timeLimitMinutes: input.timeLimitMinutes }),
-          ...(input.feedbackMode === undefined ? {} : { feedbackMode: input.feedbackMode }),
+          feedbackMode: input.feedbackMode,
         },
-        ...(input.feedbackRanges === undefined ? {} : { feedbackRanges: input.feedbackRanges }),
+        feedbackRanges: input.feedbackRanges,
         questions,
       });
       if (!assessmentRow) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
@@ -204,23 +206,14 @@ export class QuizAuthoringService {
       ? this.mapQuizAuthoringRows(existingQuizAuthoringRows)
       : null;
     const existingQuestions = existingQuiz?.questions ?? [];
-    const isTranslatedSave =
-      existingQuiz !== null &&
-      mappedQuizAuthoringInput.language !== existingQuiz.assessment.baseLanguage;
 
-    if (isTranslatedSave && input.questions !== undefined) {
-      this.validateTranslatedQuizStructure(
-        mappedQuizAuthoringInput.questions ?? [],
-        existingQuestions,
-      );
-    }
-
-    if (isTranslatedSave) {
-      this.validateTranslatedFeedbackRanges(
+    if (existingQuiz)
+      this.validateTranslatedSave(
+        mappedQuizAuthoringInput.language,
+        existingQuiz,
+        mappedQuizAuthoringInput.questions,
         mappedQuizAuthoringInput.feedbackRanges,
-        existingQuiz.feedbackRanges,
       );
-    }
 
     const quizAuthoringInput =
       input.questions !== undefined
@@ -263,11 +256,9 @@ export class QuizAuthoringService {
         ...(input.timeLimitMinutes === undefined
           ? {}
           : { timeLimitMinutes: input.timeLimitMinutes }),
-        ...(input.feedbackMode === undefined ? {} : { feedbackMode: input.feedbackMode }),
+        feedbackMode: input.feedbackMode,
       },
-      ...(quizAuthoringInput.feedbackRanges === undefined
-        ? {}
-        : { feedbackRanges: quizAuthoringInput.feedbackRanges }),
+      feedbackRanges: quizAuthoringInput.feedbackRanges,
       ...(input.questions === undefined ? {} : { questions: quizAuthoringInput.questions ?? [] }),
     };
 
@@ -499,14 +490,31 @@ export class QuizAuthoringService {
       )
     )
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
-    if (input.feedbackRanges) {
-      const feedbackRangeIssues = validateFeedbackRanges(input.feedbackRanges);
-      if (feedbackRangeIssues.length)
-        throw new BadRequestException({
-          message: "courseAuthoring.errors.invalidFeedbackRanges",
-          issues: feedbackRangeIssues,
-        });
-    }
+    this.assertValidFeedbackRanges(input.feedbackRanges);
+  }
+
+  private assertValidFeedbackRanges(ranges: QuizAuthoringFeedbackRange[] | undefined) {
+    if (!ranges) return;
+
+    const issues = validateFeedbackRanges(ranges);
+
+    if (issues.length)
+      throw new BadRequestException({
+        message: "courseAuthoring.errors.invalidFeedbackRanges",
+        issues,
+      });
+  }
+
+  private validateTranslatedSave(
+    language: QuizAuthoringInput["language"],
+    existingQuiz: QuizAuthoringLocalizedReadModel,
+    questions: QuizAuthoringQuestion[] | undefined,
+    feedbackRanges: QuizAuthoringFeedbackRange[] | undefined,
+  ) {
+    if (language === existingQuiz.assessment.baseLanguage) return;
+
+    if (questions) this.validateTranslatedQuizStructure(questions, existingQuiz.questions);
+    this.validateTranslatedFeedbackRanges(feedbackRanges, existingQuiz.feedbackRanges);
   }
 
   private validateTranslatedQuizStructure(
