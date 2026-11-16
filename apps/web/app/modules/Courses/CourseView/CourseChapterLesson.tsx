@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
-import { ProgressBadge } from "~/components/Badges/ProgressBadge";
+import { LESSON_STATUS_TO_PROGRESS, ProgressBadge } from "~/components/Badges/ProgressBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
@@ -12,14 +12,6 @@ import { LESSON_PROGRESS_STATUSES } from "../Lesson/types";
 
 import type { Lesson } from "./CourseChapter";
 import type { ProgressStatus } from "../Lesson/types";
-
-const progressBadge = {
-  completed: "completed",
-  in_progress: "inProgress",
-  not_started: "notStarted",
-  blocked: "blocked",
-  awaiting_review: "awaitingReview",
-} as const;
 
 type CourseChapterLessonProps = {
   lesson: Lesson;
@@ -81,7 +73,10 @@ export const CourseChapterLesson = ({
         </p>
       </div>
       {!isPreviewMode && (
-        <ProgressBadge progress={progressBadge[badgeProgress]} className="self-center" />
+        <ProgressBadge
+          progress={LESSON_STATUS_TO_PROGRESS[badgeProgress]}
+          className="self-center"
+        />
       )}
     </div>
   );

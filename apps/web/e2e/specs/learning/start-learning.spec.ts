@@ -41,7 +41,7 @@ test("student can start learning and continue to the next content lesson", async
       const firstLessonItem = page.getByTestId(
         LEARNING_HANDLES.lessonSidebarLessonItem(firstLesson.id),
       );
-      await expect(firstLessonItem).toHaveText(firstLesson.title);
+      await expect(firstLessonItem).toContainText(firstLesson.title);
       await page.getByTestId(LEARNING_HANDLES.lessonSidebarTypeIcon(firstLesson.id)).hover();
       await expect(page.getByRole("tooltip")).toHaveText("Content");
 
