@@ -378,8 +378,6 @@ export class CourseTranslationService {
       );
     }
 
-    // Feedback ranges belong to the assessment, not a question, so their context comes from the
-    // range row itself. Like scale labels they are jsonb and need no quiz translation target.
     for (const range of snapshot.feedbackRanges) {
       if (range.translatedMessage?.length || !range.baseMessage?.length) continue;
       translations.push({

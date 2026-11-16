@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ENTITY_TYPES, sanitizeQuizQuestionTitle, type SupportedLanguages } from "@repo/shared";
-import { and, asc, eq, getTableColumns, inArray } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
@@ -216,8 +216,7 @@ export class QuizAuthoringRepository {
         minPercent: range.minPercent,
         maxPercent: range.maxPercent,
         displayOrder: startOrder + index,
-        // allowEmpty mirrors the update path so an empty message is stored as { language: "" }
-        // on both create and update, giving translation collection a single state to key off.
+        // allowEmpty matches the update path, so an empty message is stored as { language: "" } both ways.
         message: buildJsonbField(language, range.message, true),
       })),
     );
@@ -245,6 +244,14 @@ export class QuizAuthoringRepository {
         ),
       })
       .where(eq(assessmentFeedbackRanges.id, id));
+  }
+
+  // Moves display orders out of the way so re-ordering updates cannot collide on the unique index.
+  async parkFeedbackRanges(assessmentId: UUIDType, trx: DatabasePg) {
+    await trx
+      .update(assessmentFeedbackRanges)
+      .set({ displayOrder: sql`-ABS(${assessmentFeedbackRanges.displayOrder}) - 1` })
+      .where(eq(assessmentFeedbackRanges.assessmentId, assessmentId));
   }
 
   async deleteFeedbackRanges(ids: UUIDType[], trx: DatabasePg) {

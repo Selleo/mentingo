@@ -16,7 +16,6 @@ import type {
 import type { SupportedLanguages } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
 
-// Display order is derived from ascending min percent, so submission order does not matter.
 const sortFeedbackRangesByMin = (
   ranges: QuizAuthoringFeedbackRange[],
 ): QuizAuthoringFeedbackRange[] =>
@@ -80,40 +79,45 @@ export class QuizAuthoringPersistenceService {
     }, db);
   }
 
-  /**
-   * Replaces the assessment's feedback ranges, matching kept bands by display order so that
-   * messages already translated into other languages survive an edit in one language.
-   */
   private async syncFeedbackRanges(
     assessmentId: UUIDType,
     incomingRanges: QuizAuthoringFeedbackRange[],
     language: SupportedLanguages,
     trx: DatabasePg,
   ) {
-    const ranges = sortFeedbackRangesByMin(incomingRanges);
-    const existing = await this.quizAuthoringRepository.findFeedbackRangeRows(assessmentId, trx);
-    const keptCount = Math.min(existing.length, ranges.length);
-
-    const staleIds = existing.slice(keptCount).map(({ id }) => id);
-    await this.quizAuthoringRepository.deleteFeedbackRanges(staleIds, trx);
-
-    for (let index = 0; index < keptCount; index++) {
-      await this.quizAuthoringRepository.updateFeedbackRange(
-        existing[index].id,
-        ranges[index],
-        index,
-        language,
-        trx,
-      );
-    }
-
-    await this.quizAuthoringRepository.insertFeedbackRanges(
+    const existingRows = await this.quizAuthoringRepository.findFeedbackRangeRows(
       assessmentId,
-      ranges.slice(keptCount),
-      language,
       trx,
-      keptCount,
     );
+    const unmatchedExistingIds = new Set(existingRows.map(({ id }) => id));
+    const ranges = sortFeedbackRangesByMin(incomingRanges).map((range) => {
+      // Ids from another assessment or repeated in the payload are treated as new bands.
+      if (!range.id || !unmatchedExistingIds.delete(range.id)) return { ...range, id: undefined };
+      return range;
+    });
+
+    await this.quizAuthoringRepository.deleteFeedbackRanges([...unmatchedExistingIds], trx);
+    await this.quizAuthoringRepository.parkFeedbackRanges(assessmentId, trx);
+
+    for (const [displayOrder, range] of ranges.entries()) {
+      if (range.id) {
+        await this.quizAuthoringRepository.updateFeedbackRange(
+          range.id,
+          range,
+          displayOrder,
+          language,
+          trx,
+        );
+      } else {
+        await this.quizAuthoringRepository.insertFeedbackRanges(
+          assessmentId,
+          [range],
+          language,
+          trx,
+          displayOrder,
+        );
+      }
+    }
   }
 
   private async insertAssessmentQuestions(

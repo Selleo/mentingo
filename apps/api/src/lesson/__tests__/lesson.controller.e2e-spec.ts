@@ -1924,6 +1924,92 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     expect((await authoring.getQuizLessonForAuthoring(lesson.id))?.questions).toEqual([]);
   });
 
+  it("keeps translated feedback messages on their band when the base language edits bands", async () => {
+    const authoring = app.get(QuizAuthoringService);
+    const course = await courseFactory.create({
+      baseLanguage: SUPPORTED_LANGUAGES.EN,
+      availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+    });
+    const chapter = await chapterFactory.create({ courseId: course.id });
+    const lesson = await authoring.createQuizLesson({
+      chapterId: chapter.id,
+      title: "Feedback bands",
+      type: LESSON_TYPES.QUIZ,
+      thresholdScore: 50,
+      attemptsLimit: null,
+      quizCooldownInHours: null,
+      feedbackRanges: [
+        { minPercent: 50, maxPercent: 100, message: "High" },
+        { minPercent: 0, maxPercent: 49, message: "Low" },
+      ],
+      questions: [
+        {
+          type: ASSESSMENT_QUESTION_TYPES.SINGLE_CHOICE,
+          title: "Capital of Poland?",
+          options: [
+            { optionText: "Warsaw", isCorrect: true, displayOrder: 1 },
+            { optionText: "Paris", isCorrect: false, displayOrder: 2 },
+          ],
+        },
+      ],
+    });
+    await db
+      .update(assessments)
+      .set({ availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL] })
+      .where(eq(assessments.lessonId, lesson.id));
+    const readRanges = async (language: SupportedLanguages) =>
+      (await authoring.getLegacyQuizLessonForAuthoring(lesson.id, language))?.feedbackRanges ?? [];
+
+    const [low, high] = await readRanges(SUPPORTED_LANGUAGES.EN);
+    expect([low, high]).toMatchObject([
+      { minPercent: 0, maxPercent: 49, message: "Low" },
+      { minPercent: 50, maxPercent: 100, message: "High" },
+    ]);
+
+    await authoring.updateQuizLesson(lesson.id, {
+      language: SUPPORTED_LANGUAGES.PL,
+      feedbackRanges: [
+        { ...low, message: "Nisko" },
+        { ...high, message: "Wysoko" },
+      ],
+    });
+    await expect(
+      authoring.updateQuizLesson(lesson.id, {
+        language: SUPPORTED_LANGUAGES.PL,
+        feedbackRanges: [
+          { ...low, maxPercent: 59, message: "Nisko" },
+          { ...high, minPercent: 60, message: "Wysoko" },
+        ],
+      }),
+    ).rejects.toThrow(BadRequestException);
+
+    await authoring.updateQuizLesson(lesson.id, {
+      language: SUPPORTED_LANGUAGES.EN,
+      feedbackRanges: [
+        { ...low, maxPercent: 29 },
+        { minPercent: 30, maxPercent: 69, message: "Middle" },
+        { ...high, minPercent: 70 },
+      ],
+    });
+    const withMiddle = await readRanges(SUPPORTED_LANGUAGES.PL);
+    expect(withMiddle).toHaveLength(3);
+    expect(withMiddle[0]).toMatchObject({ id: low.id, minPercent: 0, message: "Nisko" });
+    expect(withMiddle[2]).toMatchObject({ id: high.id, minPercent: 70, message: "Wysoko" });
+    expect(withMiddle[1].message).not.toBe("Wysoko");
+
+    await authoring.updateQuizLesson(lesson.id, {
+      language: SUPPORTED_LANGUAGES.EN,
+      feedbackRanges: [
+        { ...high, minPercent: 0, maxPercent: 49 },
+        { ...low, minPercent: 50, maxPercent: 100 },
+      ],
+    });
+    expect(await readRanges(SUPPORTED_LANGUAGES.PL)).toMatchObject([
+      { id: high.id, minPercent: 0, maxPercent: 49, message: "Wysoko" },
+      { id: low.id, minPercent: 50, maxPercent: 100, message: "Nisko" },
+    ]);
+  });
+
   describe("matching questions", () => {
     const createMatchingQuiz = async (
       scoringMode: AssessmentScoringMode,

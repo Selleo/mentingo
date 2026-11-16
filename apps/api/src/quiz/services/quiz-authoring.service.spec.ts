@@ -14,6 +14,7 @@ import { QuizAuthoringService } from "./quiz-authoring.service";
 
 import type { QuizAuthoringPersistenceService } from "./quiz-authoring-persistence.service";
 import type {
+  QuizAuthoringFeedbackRange,
   QuizAuthoringInput,
   QuizAuthoringLocalizedReadModel,
   QuizAuthoringQuestion,
@@ -35,6 +36,7 @@ const questions = fixture.payload.questions.map((question) => ({
 
 describe("QuizAuthoringService.saveCanonicalLesson", () => {
   const language = "en" as SupportedLanguages;
+  const translatedLanguage = "pl" as SupportedLanguages;
   const chapterId = "00000000-0000-4000-8000-000000000001";
   const lessonId = "00000000-0000-4000-8000-000000000002";
   const assessmentId = "00000000-0000-4000-8000-000000000003";
@@ -68,6 +70,25 @@ describe("QuizAuthoringService.saveCanonicalLesson", () => {
       language,
       questions,
     };
+  }
+
+  function makeExistingQuiz(
+    feedbackRanges: QuizAuthoringFeedbackRange[] = [],
+  ): QuizAuthoringLocalizedReadModel {
+    return {
+      lesson: { id: lessonId, chapterId, title: "Existing", description: null, displayOrder: 1 },
+      assessment: {
+        id: assessmentId,
+        passingScorePercentage: "70",
+        attemptLimitMode: ASSESSMENT_ATTEMPT_LIMIT_MODES.LIFETIME,
+        maximumAttempts: 3,
+        attemptCooldown: "6 hours",
+        baseLanguage: language,
+        availableLocales: [language, translatedLanguage],
+      },
+      feedbackRanges,
+      questions,
+    } as unknown as QuizAuthoringLocalizedReadModel;
   }
 
   it("creates through the native persistence service while retaining canonical question IDs", async () => {
@@ -130,20 +151,7 @@ describe("QuizAuthoringService.saveCanonicalLesson", () => {
 
   it("updates the existing lesson through native persistence after checking its language", async () => {
     const { service, createQuizLesson, updateQuizLesson } = setup();
-    const existingQuiz = {
-      lesson: { id: lessonId, chapterId, title: "Existing", description: null, displayOrder: 1 },
-      assessment: {
-        id: assessmentId,
-        passingScorePercentage: "70",
-        attemptLimitMode: ASSESSMENT_ATTEMPT_LIMIT_MODES.LIFETIME,
-        maximumAttempts: 3,
-        attemptCooldown: "6 hours",
-        baseLanguage: language,
-        availableLocales: [language],
-      },
-      questions,
-    } as unknown as QuizAuthoringLocalizedReadModel;
-    jest.spyOn(service, "getQuizLessonForAuthoring").mockResolvedValue(existingQuiz);
+    jest.spyOn(service, "getQuizLessonForAuthoring").mockResolvedValue(makeExistingQuiz());
     const updatedAssessment = { id: assessmentId };
     updateQuizLesson.mockResolvedValue(updatedAssessment);
 
@@ -170,5 +178,67 @@ describe("QuizAuthoringService.saveCanonicalLesson", () => {
       questions,
     });
     expect(createQuizLesson).not.toHaveBeenCalled();
+  });
+
+  describe("translated feedback ranges", () => {
+    const lowRangeId = "00000000-0000-4000-8000-000000000010";
+    const highRangeId = "00000000-0000-4000-8000-000000000011";
+    const storedRanges: QuizAuthoringFeedbackRange[] = [
+      { id: lowRangeId, minPercent: 0, maxPercent: 49, message: "Low" },
+      { id: highRangeId, minPercent: 50, maxPercent: 100, message: "High" },
+    ];
+    const saveTranslated = (feedbackRanges: QuizAuthoringFeedbackRange[]) => {
+      const { service, updateQuizLesson } = setup();
+      jest
+        .spyOn(service, "getQuizLessonForAuthoring")
+        .mockResolvedValue(makeExistingQuiz(storedRanges));
+      updateQuizLesson.mockResolvedValue({ id: assessmentId });
+
+      const result = service.saveCanonicalLesson(
+        { ...makeInput(), language: translatedLanguage, feedbackRanges },
+        lessonId,
+      );
+
+      return { result, updateQuizLesson };
+    };
+
+    it("saves messages when the band structure matches the stored one", async () => {
+      const translatedRanges = storedRanges.map((range) => ({
+        ...range,
+        message: "Przetłumaczone",
+      }));
+      const { result, updateQuizLesson } = saveTranslated(translatedRanges);
+
+      await expect(result).resolves.toEqual({ id: assessmentId });
+      expect(updateQuizLesson).toHaveBeenCalledWith(
+        expect.objectContaining({ feedbackRanges: translatedRanges }),
+      );
+    });
+
+    it.each([
+      [
+        "changed bounds",
+        [
+          { ...storedRanges[0], maxPercent: 59 },
+          { ...storedRanges[1], minPercent: 60 },
+        ],
+      ],
+      ["a missing id", [storedRanges[0], { ...storedRanges[1], id: undefined }]],
+      ["a repeated id", [storedRanges[0], { ...storedRanges[1], id: lowRangeId }]],
+      [
+        "an extra band",
+        [
+          storedRanges[0],
+          { ...storedRanges[1], maxPercent: 89 },
+          { minPercent: 90, maxPercent: 100, message: "" },
+        ],
+      ],
+      ["a removed band", [{ ...storedRanges[0], maxPercent: 100 }]],
+    ])("rejects a translated save with %s", async (_, feedbackRanges) => {
+      const { result, updateQuizLesson } = saveTranslated(feedbackRanges);
+
+      await expect(result).rejects.toThrow("adminCourseView.errors.lesson.quizCreateFailed");
+      expect(updateQuizLesson).not.toHaveBeenCalled();
+    });
   });
 });

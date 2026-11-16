@@ -9,12 +9,7 @@ export const FEEDBACK_RANGE_ISSUES = {
   GAP_OR_OVERLAP: "feedback_ranges_gap_or_overlap",
 } as const;
 
-/**
- * Validates author-defined quiz feedback bands. Bounds are inclusive integer percentages;
- * a non-empty set must partition 0..100 contiguously (no gaps, no overlaps) in display order.
- * An empty set is valid: it means the author configured no custom feedback. Messages are not
- * checked here (an empty message map is allowed for a band).
- */
+// A non-empty set must partition 0..100 into contiguous inclusive bands; empty means no custom feedback.
 export const validateFeedbackRanges = (ranges: QuizAuthoringFeedbackRange[]): string[] => {
   if (!ranges.length) return [];
 

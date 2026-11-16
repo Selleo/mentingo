@@ -680,7 +680,7 @@ export class CourseTransferGraphRepository {
       });
   }
 
-  // Negates kept ranges' display orders so re-ordered upserts cannot collide on the unique index.
+  // Moves display orders out of the way so re-ordered upserts cannot collide on the unique index.
   async parkTargetFeedbackRanges(assessmentIds: UUIDType[]) {
     if (!assessmentIds.length) return;
 

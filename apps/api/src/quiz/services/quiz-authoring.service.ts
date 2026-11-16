@@ -30,6 +30,7 @@ import { validateFeedbackRanges } from "../validators/quiz-feedback-range.valida
 import { QuizAuthoringPersistenceService } from "./quiz-authoring-persistence.service";
 
 import type {
+  QuizAuthoringFeedbackRange,
   QuizAuthoringRows,
   QuizAuthoringInput,
   QuizAuthoringQuestion,
@@ -91,6 +92,7 @@ export class QuizAuthoringService {
       const existingQuestions = existingQuiz.questions;
       if (input.language !== existingQuiz.assessment.baseLanguage) {
         this.validateTranslatedQuizStructure(input.questions ?? [], existingQuestions);
+        this.validateTranslatedFeedbackRanges(input.feedbackRanges, existingQuiz.feedbackRanges);
       }
       const assessment = this.toAssessmentData(input);
       const questions = preserveExistingQuizAuthoringIds(input.questions ?? [], existingQuestions);
@@ -198,18 +200,25 @@ export class QuizAuthoringService {
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
     }
 
-    const existingQuestions = existingQuizAuthoringRows
-      ? this.mapQuizAuthoringRows(existingQuizAuthoringRows).questions
-      : [];
+    const existingQuiz = existingQuizAuthoringRows
+      ? this.mapQuizAuthoringRows(existingQuizAuthoringRows)
+      : null;
+    const existingQuestions = existingQuiz?.questions ?? [];
+    const isTranslatedSave =
+      existingQuiz !== null &&
+      mappedQuizAuthoringInput.language !== existingQuiz.assessment.baseLanguage;
 
-    if (
-      input.questions !== undefined &&
-      existingQuizAuthoringRows &&
-      mappedQuizAuthoringInput.language !== existingQuizAuthoringRows.assessment.baseLanguage
-    ) {
+    if (isTranslatedSave && input.questions !== undefined) {
       this.validateTranslatedQuizStructure(
         mappedQuizAuthoringInput.questions ?? [],
         existingQuestions,
+      );
+    }
+
+    if (isTranslatedSave) {
+      this.validateTranslatedFeedbackRanges(
+        mappedQuizAuthoringInput.feedbackRanges,
+        existingQuiz.feedbackRanges,
       );
     }
 
@@ -387,6 +396,7 @@ export class QuizAuthoringService {
         availableLocales: assessment.availableLocales,
       },
       feedbackRanges: rows.feedbackRanges.map((range) => ({
+        id: range.id,
         minPercent: range.minPercent,
         maxPercent: range.maxPercent,
         message: range.message,
@@ -512,6 +522,30 @@ export class QuizAuthoringService {
         question.questionType !== existingQuestions[index]?.questionType ||
         question.scoringMode !== existingQuestions[index]?.scoringMode,
     );
+
+    if (hasStructureMismatch)
+      throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+  }
+
+  private validateTranslatedFeedbackRanges(
+    translatedRanges: QuizAuthoringFeedbackRange[] | undefined,
+    existingRanges: QuizAuthoringFeedbackRange[],
+  ) {
+    if (!translatedRanges) return;
+
+    const existingRangesById = new Map(existingRanges.map((range) => [range.id, range]));
+    const matchedIds = new Set(translatedRanges.map(({ id }) => id));
+    const hasStructureMismatch =
+      translatedRanges.length !== existingRanges.length ||
+      matchedIds.size !== existingRanges.length ||
+      translatedRanges.some((range) => {
+        const existingRange = range.id ? existingRangesById.get(range.id) : undefined;
+        return (
+          !existingRange ||
+          existingRange.minPercent !== range.minPercent ||
+          existingRange.maxPercent !== range.maxPercent
+        );
+      });
 
     if (hasStructureMismatch)
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");

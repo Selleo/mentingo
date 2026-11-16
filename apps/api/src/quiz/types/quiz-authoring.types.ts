@@ -34,17 +34,15 @@ export type QuizAuthoringInput = {
   timeLimitMinutes?: number | null;
   displayOrder?: number;
   language: SupportedLanguages;
-  /** Undefined keeps the stored feedback mode on update. */
   feedbackMode?: AssessmentFeedbackMode;
-  /** Undefined keeps the stored ranges on update; an array (including empty) replaces them. */
   feedbackRanges?: QuizAuthoringFeedbackRange[];
   questions?: QuizAuthoringQuestion[];
 };
 
 export type QuizAuthoringFeedbackRange = {
+  id?: UUIDType;
   minPercent: number;
   maxPercent: number;
-  /** The message in the authored language; empty means no message for this band. */
   message: string;
 };
 
@@ -162,7 +160,6 @@ export type QuizLessonUpdateData = {
     timeLimitMinutes?: number | null;
     feedbackMode?: AssessmentFeedbackMode;
   };
-  /** Undefined keeps the stored ranges; an array (including empty) replaces them for the language. */
   feedbackRanges?: QuizAuthoringFeedbackRange[];
   questions?: QuizAuthoringQuestion[];
 };

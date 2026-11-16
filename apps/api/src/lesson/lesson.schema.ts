@@ -95,6 +95,7 @@ export const questionSchema = Type.Object({
 });
 
 export const quizFeedbackRangeSchema = Type.Object({
+  id: Type.Optional(UUIDSchema),
   minPercent: Type.Integer({ minimum: 0, maximum: 100 }),
   maxPercent: Type.Integer({ minimum: 0, maximum: 100 }),
   message: Type.String(),

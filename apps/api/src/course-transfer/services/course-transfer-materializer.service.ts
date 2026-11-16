@@ -1361,13 +1361,7 @@ export class CourseTransferMaterializerService {
     return blankMap;
   }
 
-  /**
-   * Copies author-defined feedback ranges onto the target assessments. Ranges belong to the
-   * assessment (resolved through the lesson map), so their target ids are remapped deterministically
-   * off the source range id and target course, mirroring the question-level detail sync.
-   */
   private async syncAssessmentFeedbackRanges(params: SyncAssessmentFeedbackRangesParams) {
-    // Resolve every target assessment id in one query (no per-assessment round trip)...
     const targetLessonIds = params.sourceSnapshot.assessments
       .map((assessment) => params.lessonMap.get(assessment.lessonId))
       .filter((lessonId): lessonId is UUIDType => Boolean(lessonId));
@@ -1377,10 +1371,7 @@ export class CourseTransferMaterializerService {
       targetAssessmentRows.map((row) => [row.lessonId, row.id]),
     );
 
-    // ...and group source ranges by assessment in one pass instead of filtering per assessment.
-    // Guard the field: not every snapshot producer populates it (e.g. native-archive imports
-    // carry no feedback ranges), so a missing array must read as empty rather than throw.
-    const sourceFeedbackRanges = params.sourceSnapshot.assessmentFeedbackRanges ?? [];
+    const sourceFeedbackRanges = params.sourceSnapshot.assessmentFeedbackRanges;
     const rangesBySourceAssessmentId = new Map<
       UUIDType,
       SourceSnapshot["assessmentFeedbackRanges"]
@@ -1416,9 +1407,6 @@ export class CourseTransferMaterializerService {
       }
     }
 
-    // Drop ranges that no longer exist, then park the survivors' display orders negative so the
-    // re-ordered upserts below cannot transiently collide on the unique
-    // (tenant, assessment, display_order) index when bands are permuted between transfers.
     await this.courseTransferGraphRepository.deleteStaleTargetFeedbackRanges(
       targetAssessmentIds,
       plannedRanges.map(({ targetRangeId }) => targetRangeId),
