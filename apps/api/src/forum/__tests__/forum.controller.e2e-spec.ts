@@ -528,6 +528,7 @@ describe("ForumController (e2e)", () => {
         postId: ownReply.id,
         isFirstPost: false,
         removed: true,
+        topicRemoved: false,
       });
 
       await request(app.getHttpServer())
@@ -539,7 +540,11 @@ describe("ForumController (e2e)", () => {
         .delete(`/api/forum/posts/${topic.firstPost.id}`)
         .set("Cookie", adminCookie)
         .expect(200);
-      expect(deletedFirstPost.body.data).toMatchObject({ isFirstPost: true, removed: false });
+      expect(deletedFirstPost.body.data).toMatchObject({
+        isFirstPost: true,
+        removed: false,
+        topicRemoved: false,
+      });
 
       const [listedTopic] = (await listTopics(otherCookie)).data;
       expect(listedTopic).toMatchObject({
@@ -563,10 +568,15 @@ describe("ForumController (e2e)", () => {
         .expect(400);
       expect(replyToDeleted.body.message).toBe("forum.errors.topicDeleted");
 
-      await request(app.getHttpServer())
+      const deletedLastReply = await request(app.getHttpServer())
         .delete(`/api/forum/posts/${keptReply.id}`)
         .set("Cookie", otherCookie)
         .expect(200);
+      expect(deletedLastReply.body.data).toMatchObject({
+        isFirstPost: false,
+        removed: true,
+        topicRemoved: true,
+      });
 
       expect((await listTopics(otherCookie)).data).toEqual([]);
       await request(app.getHttpServer())
@@ -584,7 +594,34 @@ describe("ForumController (e2e)", () => {
         .set("Cookie", cookie)
         .expect(200);
 
-      expect(response.body.data).toMatchObject({ isFirstPost: true, removed: true });
+      expect(response.body.data).toMatchObject({
+        isFirstPost: true,
+        removed: true,
+        topicRemoved: true,
+      });
+      expect((await listTopics(cookie)).data).toEqual([]);
+    });
+
+    it("reports a removed course thread when its only post is deleted from the forum", async () => {
+      const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const course = await courseFactory.create({ authorId: student.id });
+      await enroll(course.id, student);
+      const courseThread = await createCourseThread(
+        cookie,
+        course.id,
+        "Posted in the wrong course",
+      );
+
+      const response = await request(app.getHttpServer())
+        .delete(`/api/forum/posts/${courseThread.id}`)
+        .set("Cookie", cookie)
+        .expect(200);
+
+      expect(response.body.data).toMatchObject({
+        isFirstPost: true,
+        removed: true,
+        topicRemoved: true,
+      });
       expect((await listTopics(cookie)).data).toEqual([]);
     });
   });

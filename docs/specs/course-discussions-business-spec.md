@@ -24,6 +24,7 @@ For HR and L&D teams, discussions add peer learning and course-specific collabor
 - Show online presence for course discussion participants.
 - Soft-delete messages and preserve deleted placeholders when replies remain.
 - Broadcast new messages, replies, reactions, deletions, mentions, and presence updates in realtime.
+- Show course threads in the organization-wide forum for enrolled users when the forum is enabled.
 
 ## End-User Value
 
@@ -39,6 +40,8 @@ Learners can post a thread or open a thread to reply. Mentions are limited to us
 
 Discussion APIs are feature-gated and permission-gated. Reading, posting, reacting, deleting, and joining realtime rooms all check course access so users cannot participate in discussions for courses they are not allowed to access.
 
+When the forum is enabled, enrolled users also see their course threads in the forum and can reply there. Replies and deletions made in the forum appear in the Discussion tab, because both views use the same course threads and rules.
+
 ## Key Technical Context
 
 - Frontend UI lives under `apps/web/app/modules/Courses/CourseView/CourseChat` and is surfaced from the table-of-contents tabs.
@@ -47,6 +50,7 @@ Discussion APIs are feature-gated and permission-gated. Reading, posting, reacti
 - Core permissions include `PERMISSIONS.COURSE_DISCUSSION_READ`, `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_CREATE`, `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_REACT`, `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE_OWN`, and `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE`.
 - Realtime behavior uses Socket.IO rooms plus course-chat events for messages, reactions, deletions, mentions, and presence.
 - Mention email handling uses the existing event/outbox pattern.
+- Course threads and forum topics share the discussion tables with a `course` or `general` scope; course discussion endpoints ignore general forum posts. See `docs/specs/forum-business-spec.md`.
 
 ## Test Evidence
 

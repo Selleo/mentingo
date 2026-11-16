@@ -1107,7 +1107,8 @@
     "tenants": "Organizacijos",
     "reports": "Ataskaitos",
     "leaderboards": "Lyderių lentelės",
-    "gamification": "Žaidybinimas"
+    "gamification": "Žaidybinimas",
+    "forum": "Forumas"
   },
   "microsoftCalendar": {
     "title": "Microsoft kalendorius",
@@ -4832,7 +4833,9 @@
       "studentsWithOverdueCourseNotification": "Studentai su pranešimais apie vėluojančius kursus",
       "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis",
       "publicCoursePreview": "Pamokų peržiūra prieš registraciją į kursą",
-      "publicCoursePreviewDescription": "Leidžia prisijungusiems naudotojams atidaryti nemokamų kursų pamokas prieš užsiregistruojant. Testams ir pažangos sekimui vis tiek reikia registracijos."
+      "publicCoursePreviewDescription": "Leidžia prisijungusiems naudotojams atidaryti nemokamų kursų pamokas prieš užsiregistruojant. Testams ir pažangos sekimui vis tiek reikia registracijos.",
+      "forum": "Įjungti forumą",
+      "forumDescription": "Leiskite visiems organizacijos nariams kurti temas ir atsakyti. Užsiregistravę naudotojai ten taip pat mato savo kursų diskusijas"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Naujos vartotojo pranešimų nuostatos sėkmingai atnaujintos",
@@ -4846,7 +4849,8 @@
       "finishedCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimo apie baigtą kursą nuostatų",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie pradelstą kursą nuostatos sėkmingai atnaujintos",
       "overdueCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimų apie pradelstą kursą nuostatų",
-      "publicCoursePreviewPreferenceChangeSuccess": "Kursų peržiūros nustatymas atnaujintas"
+      "publicCoursePreviewPreferenceChangeSuccess": "Kursų peržiūros nustatymas atnaujintas",
+      "forumPreferenceChangeSuccess": "Forumo nuostata sėkmingai atnaujinta"
     }
   },
   "registrationFormBuilder": {
@@ -9764,5 +9768,64 @@
       }
     },
     "requiresGamification": "Pirmiausia įjunkite žaidybinimą."
+  },
+  "forum": {
+    "title": "Forumas",
+    "description": "Užduokite klausimus ir dalinkitės žiniomis su visa organizacija.",
+    "newTopic": "Nauja tema",
+    "searchPlaceholder": "Ieškoti temų",
+    "filter": {
+      "label": "Rodyti temas",
+      "all": "Visos temos",
+      "general": "Bendros temos"
+    },
+    "sort": {
+      "label": "Rūšiuoti temas",
+      "lastActivity": "Naujausia veikla",
+      "newest": "Naujausios",
+      "mostReplies": "Daugiausia atsakymų"
+    },
+    "empty": "Temų dar nėra. Pradėkite pirmąją.",
+    "noResults": "Pagal filtrus temų nerasta.",
+    "replies_one": "{{count}} atsakymas",
+    "replies_few": "{{count}} atsakymai",
+    "replies_many": "{{count}} atsakymų",
+    "replies_other": "{{count}} atsakymo",
+    "lastActivity": "Paskutinė veikla {{time}}",
+    "deletedPost": "Šis įrašas buvo ištrintas.",
+    "deletePost": "Ištrinti įrašą",
+    "createDialog": {
+      "title": "Nauja tema",
+      "titleLabel": "Pavadinimas",
+      "titlePlaceholder": "Apie ką jūsų tema?",
+      "contentLabel": "Žinutė",
+      "contentPlaceholder": "Parašykite pirmąjį įrašą",
+      "submit": "Sukurti temą"
+    },
+    "topic": {
+      "backToForum": "Grįžti į forumą",
+      "courseThreadTitle": "Kurso „{{course}}“ diskusija",
+      "noReplies": "Atsakymų dar nėra.",
+      "replyPlaceholder": "Parašykite atsakymą",
+      "replySubmit": "Atsakyti",
+      "closed": "Atsakymai uždaryti, nes pirmasis įrašas buvo ištrintas."
+    },
+    "deleteDialog": {
+      "title": "Ištrinti šį įrašą?",
+      "description": "Įrašas bus pašalintas visiems. Šio veiksmo negalima atšaukti."
+    },
+    "toast": {
+      "createTopicError": "Nepavyko sukurti temos.",
+      "createPostError": "Nepavyko išsiųsti atsakymo.",
+      "deletePostError": "Nepavyko ištrinti įrašo."
+    },
+    "errors": {
+      "topicNotFound": "Ši tema neegzistuoja arba neturite prieigos prie jos.",
+      "postNotFound": "Šis įrašas nebeegzistuoja.",
+      "cannotDeletePost": "Galite ištrinti tik savo įrašus.",
+      "topicDeleted": "Atsakymai uždaryti, nes pirmasis įrašas buvo ištrintas.",
+      "emptyTitle": "Įveskite pavadinimą.",
+      "emptyContent": "Įveskite žinutę."
+    }
   }
 }

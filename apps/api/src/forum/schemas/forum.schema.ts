@@ -82,6 +82,7 @@ export const deleteForumPostResponseSchema = Type.Object({
   isFirstPost: Type.Boolean(),
   removed: Type.Boolean(),
   deletedAt: Type.Union([Type.String(), Type.Null()]),
+  topicRemoved: Type.Boolean(),
 });
 
 export const forumPageQuerySchema = Type.Optional(Type.Number({ minimum: 1 }));

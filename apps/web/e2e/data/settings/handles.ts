@@ -82,6 +82,7 @@ export const SETTINGS_PAGE_HANDLES = {
   COURSES_VISIBILITY_SWITCH: "settings-courses-visibility-switch",
   courseListLayoutOption: (layout: string) => `settings-course-list-layout-${layout}`,
   COURSE_DISCUSSIONS_SWITCH: "settings-course-discussions-switch",
+  FORUM_SWITCH: "settings-forum-switch",
   CALENDAR_SWITCH: "settings-calendar-switch",
   LIVE_TRAINING_SWITCH: "settings-live-training-switch",
   LIVE_TRAINING_MAX_PARALLEL_SESSIONS_INPUT: "settings-live-training-max-parallel-sessions-input",
