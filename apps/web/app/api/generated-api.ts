@@ -4336,6 +4336,8 @@ export type BetaCreateQuizLessonBody = {
   timeLimitMinutes?: number | null;
   feedbackMode?: "full" | "score_only" | "none";
   feedbackRanges?: {
+    /** @format uuid */
+    id?: string;
     /**
      * @min 0
      * @max 100
@@ -4415,6 +4417,8 @@ export type BetaUpdateQuizLessonBody = ({
   timeLimitMinutes?: number | null;
   feedbackMode?: "full" | "score_only" | "none";
   feedbackRanges?: {
+    /** @format uuid */
+    id?: string;
     /**
      * @min 0
      * @max 100

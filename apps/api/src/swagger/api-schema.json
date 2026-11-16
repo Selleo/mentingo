@@ -48520,6 +48520,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
                     "minPercent": {
                       "minimum": 0,
                       "maximum": 100,
@@ -48915,6 +48919,10 @@
                     "items": {
                       "type": "object",
                       "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
                         "minPercent": {
                           "minimum": 0,
                           "maximum": 100,
