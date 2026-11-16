@@ -58,6 +58,22 @@ describe("ForumMentionNotificationHandler", () => {
     );
   });
 
+  it("escapes the topic title, which is shown as HTML in the notification", async () => {
+    const { handler, createAnnouncement } = createHandler(
+      '<a href="https://evil.example">Click</a>',
+    );
+
+    await handler.handleOutboxEvent(buildEvent([mentionedUserId]));
+
+    expect(createAnnouncement).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: expect.objectContaining({
+          en: 'In the forum topic "&lt;a href=&quot;https://evil.example&quot;&gt;Click&lt;/a&gt;"',
+        }),
+      }),
+    );
+  });
+
   it("skips the notification when nobody is mentioned or the topic is gone", async () => {
     const withoutMentions = createHandler("Release notes");
     await withoutMentions.handler.handleOutboxEvent(buildEvent([]));

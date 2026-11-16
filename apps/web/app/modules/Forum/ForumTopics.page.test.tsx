@@ -161,6 +161,20 @@ describe("ForumTopicsPage", () => {
     );
   });
 
+  it("reloads the list after the live connection comes back", async () => {
+    renderForum("/forum");
+    expect(await screen.findByText(TOPIC_TITLE)).toBeInTheDocument();
+    const requestsBefore = vi.mocked(ApiClient.api.forumControllerGetTopics).mock.calls.length;
+
+    fakeSocket.receive("connect");
+
+    await waitFor(() =>
+      expect(vi.mocked(ApiClient.api.forumControllerGetTopics).mock.calls.length).toBeGreaterThan(
+        requestsBefore,
+      ),
+    );
+  });
+
   it("redirects away without loading topics while the forum is disabled", async () => {
     mockSettings(false);
 

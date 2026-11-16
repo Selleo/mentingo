@@ -1,6 +1,7 @@
 import {
   DISCUSSION_SCOPES,
   FORUM_POST_MAX_LENGTH,
+  FORUM_POST_MAX_MENTIONS,
   FORUM_SEARCH_MAX_LENGTH,
   FORUM_TOPIC_SORTS,
   FORUM_TOPIC_TITLE_MAX_LENGTH,
@@ -67,15 +68,19 @@ export const forumTopicSchema = Type.Composite([
 export const forumTopicListSchema = Type.Array(forumTopicListItemSchema);
 export const forumPostListSchema = Type.Array(forumPostSchema);
 
+const forumMentionedUserIdsSchema = Type.Optional(
+  Type.Array(UUIDSchema, { maxItems: FORUM_POST_MAX_MENTIONS }),
+);
+
 export const createForumTopicSchema = Type.Object({
   title: Type.String({ minLength: 1, maxLength: FORUM_TOPIC_TITLE_MAX_LENGTH }),
   content: Type.String({ minLength: 1, maxLength: FORUM_POST_MAX_LENGTH }),
-  mentionedUserIds: Type.Optional(Type.Array(UUIDSchema)),
+  mentionedUserIds: forumMentionedUserIdsSchema,
 });
 
 export const createForumPostSchema = Type.Object({
   content: Type.String({ minLength: 1, maxLength: FORUM_POST_MAX_LENGTH }),
-  mentionedUserIds: Type.Optional(Type.Array(UUIDSchema)),
+  mentionedUserIds: forumMentionedUserIdsSchema,
 });
 
 export const forumPostReactionsSchema = Type.Object({

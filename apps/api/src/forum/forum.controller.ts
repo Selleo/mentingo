@@ -194,8 +194,10 @@ export class ForumController {
   @Validate({
     response: baseResponse(forumUserListSchema),
   })
-  async getMentionableUsers(): Promise<BaseResponse<ForumUserResponse[]>> {
-    return this.forumService.getMentionableUsers();
+  async getMentionableUsers(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<ForumUserResponse[]>> {
+    return this.forumService.getMentionableUsers(currentUser);
   }
 
   @Delete("posts/:postId")

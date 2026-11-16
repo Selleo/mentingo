@@ -90,7 +90,7 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
     toast({ description: t("forum.toast.mentioned") });
   }, [t, toast]);
 
-  useForumSocket({ topicId: topic.id, enabled: !courseId, onMentioned: handleMentioned });
+  useForumSocket({ topicId: courseId ? undefined : topic.id, onMentioned: handleMentioned });
   useCourseChatSocket({ courseId: courseId ?? "", enabled: Boolean(courseId) });
 
   const goToPage = (nextPage: number) => {

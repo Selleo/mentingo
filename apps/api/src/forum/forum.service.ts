@@ -9,6 +9,7 @@ import {
   DISCUSSION_SCOPES,
   FORUM_SOCKET_EVENTS,
   PERMISSIONS,
+  findMentionedUserIds,
   getForumRoom,
   getForumTopicRoom,
 } from "@repo/shared";
@@ -130,9 +131,15 @@ export class ForumService {
     language: SupportedLanguages;
   }): Promise<BaseResponse<ForumTopicResponse>> {
     const { body, currentUser, language } = params;
+    this.assertHasPermission(currentUser, PERMISSIONS.FORUM_READ);
+
     const title = this.normalizeText(body.title, "forum.errors.emptyTitle");
     const content = this.normalizeText(body.content, "forum.errors.emptyContent");
-    const mentionedUserIds = await this.getMentionableUserIds(body.mentionedUserIds, currentUser);
+    const mentionedUserIds = await this.getMentionedUserIds(
+      body.mentionedUserIds,
+      content,
+      currentUser,
+    );
 
     const { topicId, postId } = await this.db.transaction(async (trx) => {
       const createdTopic = await this.forumRepository.createGeneralTopic(
@@ -162,6 +169,8 @@ export class ForumService {
     tenantId: UUIDType;
   }): Promise<BaseResponse<ForumPostResponse>> {
     const { topicId, body, currentUser, tenantId } = params;
+    this.assertHasPermission(currentUser, PERMISSIONS.FORUM_READ);
+
     const thread = await this.getAccessibleThread(topicId, currentUser);
     const content = this.normalizeText(body.content, "forum.errors.emptyContent");
 
@@ -186,7 +195,11 @@ export class ForumService {
       return new BaseResponse(await this.getPostResponse(message.id, currentUser.userId));
     }
 
-    const mentionedUserIds = await this.getMentionableUserIds(body.mentionedUserIds, currentUser);
+    const mentionedUserIds = await this.getMentionedUserIds(
+      body.mentionedUserIds,
+      content,
+      currentUser,
+    );
 
     const postId = await this.db.transaction(async (trx) => {
       const isFirstPostVisible = await this.courseChatRepository.lockThreadForReply(
@@ -236,6 +249,8 @@ export class ForumService {
     body: ToggleCourseChatMessageReactionBody,
     currentUser: CurrentUserType,
   ): Promise<BaseResponse<ForumPostReactionsResponse>> {
+    this.assertHasPermission(currentUser, PERMISSIONS.FORUM_READ);
+
     const post = await this.forumRepository.findPostContext(postId);
 
     if (!post || post.deletedAt) throw new NotFoundException("forum.errors.postNotFound");
@@ -274,7 +289,11 @@ export class ForumService {
     return new BaseResponse({ topicId: thread.id, postId: post.id, reactions });
   }
 
-  async getMentionableUsers(): Promise<BaseResponse<ForumUserResponse[]>> {
+  async getMentionableUsers(
+    currentUser: CurrentUserType,
+  ): Promise<BaseResponse<ForumUserResponse[]>> {
+    this.assertHasPermission(currentUser, PERMISSIONS.FORUM_READ);
+
     const users = await this.forumRepository.findMentionableUsers();
     const avatarUrlByReference = await this.courseChatMessageMapper.getAvatarUrlByReference(
       users.map((user) => user.avatarReference),
@@ -310,7 +329,8 @@ export class ForumService {
         : await this.deleteGeneralPost(post, currentUser);
 
     this.emitTopicChanged(thread.id);
-    this.emitForumChanged(currentUser.tenantId);
+
+    if (thread.scope === DISCUSSION_SCOPES.GENERAL) this.emitForumChanged(currentUser.tenantId);
 
     return new BaseResponse({
       topicId: thread.id,
@@ -396,16 +416,17 @@ export class ForumService {
     return globalSettings.courseDiscussionsEnabled === true;
   }
 
-  private async getMentionableUserIds(
-    mentionedUserIds: UUIDType[] | undefined,
+  private async getMentionedUserIds(
+    requestedUserIds: UUIDType[] | undefined,
+    content: string,
     currentUser: CurrentUserType,
   ): Promise<UUIDType[]> {
-    const requestedUserIds = Array.from(new Set(mentionedUserIds ?? [])).filter(
-      (mentionedUserId) => mentionedUserId !== currentUser.userId,
+    const otherUserIds = Array.from(new Set(requestedUserIds ?? [])).filter(
+      (requestedUserId) => requestedUserId !== currentUser.userId,
     );
-    const mentionableUsers = await this.forumRepository.findMentionableUsers(requestedUserIds);
+    const mentionableUsers = await this.forumRepository.findMentionableUsers(otherUserIds);
 
-    return mentionableUsers.map((user) => user.id);
+    return findMentionedUserIds(content, mentionableUsers);
   }
 
   private async publishMentionEvent(

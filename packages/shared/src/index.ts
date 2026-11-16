@@ -87,6 +87,7 @@ export * from "./utils/courseAuthoringOrder.types";
 export * from "./utils/emailTemplateLayout";
 export * from "./utils/formatFileSize";
 export * from "./utils/iframeUrls";
+export * from "./utils/mentions";
 export * from "./utils/normalizeAuthoringQuizQuestionOrder";
 export * from "./utils/permissions";
 export * from "./utils/sanitizeQuizQuestionTitle";

@@ -289,6 +289,7 @@ export class CourseChatRepository {
         id: courseChatMessages.id,
         threadId: courseChatMessages.threadId,
         courseId: sql<UUIDType>`${courseChatMessages.courseId}`,
+        tenantId: courseChatMessages.tenantId,
         userId: courseChatMessages.userId,
         parentMessageId: courseChatMessages.parentMessageId,
         deletedAt: courseChatMessages.deletedAt,

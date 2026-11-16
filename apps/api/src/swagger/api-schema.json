@@ -162055,6 +162055,7 @@
             "type": "string"
           },
           "mentionedUserIds": {
+            "maxItems": 20,
             "type": "array",
             "items": {
               "format": "uuid",
@@ -162651,6 +162652,7 @@
             "type": "string"
           },
           "mentionedUserIds": {
+            "maxItems": 20,
             "type": "array",
             "items": {
               "format": "uuid",

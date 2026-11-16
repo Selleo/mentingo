@@ -60,9 +60,9 @@ export class ForumGateway {
   @SubscribeMessage(FORUM_SOCKET_EVENTS.JOIN_TOPIC)
   async handleJoinTopic(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: ForumTopicRoomPayload,
+    @MessageBody() payload: ForumTopicRoomPayload | undefined,
   ) {
-    const { topicId } = payload;
+    const topicId = payload?.topicId;
     const user = client.data.user;
 
     if (!topicId) throw new WsException("forum.errors.topicNotFound");
@@ -88,11 +88,13 @@ export class ForumGateway {
   @SubscribeMessage(FORUM_SOCKET_EVENTS.LEAVE_TOPIC)
   async handleLeaveTopic(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: ForumTopicRoomPayload,
+    @MessageBody() payload: ForumTopicRoomPayload | undefined,
   ) {
-    if (!payload.topicId) throw new WsException("forum.errors.topicNotFound");
+    const topicId = payload?.topicId;
 
-    await client.leave(getForumTopicRoom(payload.topicId));
+    if (!topicId) throw new WsException("forum.errors.topicNotFound");
+
+    await client.leave(getForumTopicRoom(topicId));
 
     return { success: true };
   }

@@ -2,11 +2,11 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
-import { FORUM_QUERY_KEY } from "./forumQueryKeys";
+export const FORUM_USERS_QUERY_KEY = ["forum-users"];
 
 export const forumUsersQueryOptions = ({ enabled = true } = {}) =>
   queryOptions({
-    queryKey: [...FORUM_QUERY_KEY, "users"],
+    queryKey: FORUM_USERS_QUERY_KEY,
     queryFn: async () => {
       const response = await ApiClient.api.forumControllerGetMentionableUsers();
 

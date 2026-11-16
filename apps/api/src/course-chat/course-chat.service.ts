@@ -310,6 +310,11 @@ export class CourseChatService {
       getCourseChatRoom(message.courseId),
       payload,
     );
+    this.realtimePublisher.emitToRoom(
+      FORUM_SOCKET_EVENTS.CHANGED,
+      getForumRoom(message.tenantId),
+      {},
+    );
 
     return { payload, threadRemoved: deletion.threadRemoved };
   }

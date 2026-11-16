@@ -30976,6 +30976,7 @@ export interface CreateTopicBody {
    * @maxLength 5000
    */
   content: string;
+  /** @maxItems 20 */
   mentionedUserIds?: string[];
 }
 
@@ -31117,6 +31118,7 @@ export interface CreatePostBody {
    * @maxLength 5000
    */
   content: string;
+  /** @maxItems 20 */
   mentionedUserIds?: string[];
 }
 

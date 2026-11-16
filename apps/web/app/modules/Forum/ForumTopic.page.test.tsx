@@ -223,6 +223,7 @@ describe("ForumTopicPage", () => {
   it("reloads the topic when it changes elsewhere", async () => {
     renderTopic();
     expect(await screen.findByText(REPLY_CONTENT)).toBeInTheDocument();
+    expect(fakeSocket.emitted).toContainEqual([FORUM_SOCKET_EVENTS.JOIN, undefined]);
     expect(fakeSocket.emitted).toContainEqual([
       FORUM_SOCKET_EVENTS.JOIN_TOPIC,
       { topicId: TOPIC_ID },
@@ -235,6 +236,20 @@ describe("ForumTopicPage", () => {
       expect(
         vi.mocked(ApiClient.api.forumControllerGetTopicPosts).mock.calls.length,
       ).toBeGreaterThan(requestsBefore),
+    );
+  });
+
+  it("marks cached topics as outdated when the forum changes, so reopening one refetches it", async () => {
+    renderTopic();
+    expect(await screen.findByText(REPLY_CONTENT)).toBeInTheDocument();
+    const cachedTopicQueries = () =>
+      queryClient.getQueryCache().findAll({ queryKey: ["forum", "topic"] });
+    expect(cachedTopicQueries().some((query) => query.state.isInvalidated)).toBe(false);
+
+    fakeSocket.receive(FORUM_SOCKET_EVENTS.CHANGED, {});
+
+    await waitFor(() =>
+      expect(cachedTopicQueries().every((query) => query.state.isInvalidated)).toBe(true),
     );
   });
 });

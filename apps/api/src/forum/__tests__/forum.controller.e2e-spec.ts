@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import {
   DISCUSSION_SCOPES,
+  FORUM_POST_MAX_MENTIONS,
   FORUM_SOCKET_EVENTS,
   FORUM_TOPIC_SORTS,
   PERMISSIONS,
@@ -244,6 +245,27 @@ describe("ForumController (e2e)", () => {
       ];
 
       for (const buildRequest of readRequests) {
+        const response = await buildRequest().set("Cookie", noAccessCookie).expect(403);
+        expect(response.body.message).toBe("auth.error.missingPermission");
+      }
+
+      const actionsThatAlsoNeedReadAccess = [
+        () =>
+          request(app.getHttpServer())
+            .post("/api/forum/topics")
+            .send({ title: "Blocked", content: "Blocked" }),
+        () =>
+          request(app.getHttpServer())
+            .post(`/api/forum/topics/${topic.id}/posts`)
+            .send({ content: "Blocked" }),
+        () =>
+          request(app.getHttpServer())
+            .post(`/api/forum/posts/${topic.firstPost.id}/reactions`)
+            .send({ reaction: "👍" }),
+        () => request(app.getHttpServer()).get("/api/forum/users"),
+      ];
+
+      for (const buildRequest of actionsThatAlsoNeedReadAccess) {
         const response = await buildRequest().set("Cookie", noAccessCookie).expect(403);
         expect(response.body.message).toBe("auth.error.missingPermission");
       }
@@ -763,17 +785,20 @@ describe("ForumController (e2e)", () => {
       const { user: author, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
       const { user: target } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
       const { user: reviewer } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.REVIEWER);
-      const mentionedUserIds = [target.id, target.id, author.id, reviewer.id];
+      const { user: bystander } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const mentionOf = (user: UserWithCredentials) => `@${user.firstName} ${user.lastName}`;
+      const mentionedUserIds = [target.id, target.id, author.id, reviewer.id, bystander.id];
+      const content = `${mentionOf(target)} ${mentionOf(author)} ${mentionOf(reviewer)} please review`;
 
       const topic = await createTopic(cookie, {
         title: "Release notes",
-        content: "Please review",
+        content,
         mentionedUserIds,
       });
       const replyResponse = await request(app.getHttpServer())
         .post(`/api/forum/topics/${topic.id}/posts`)
         .set("Cookie", cookie)
-        .send({ content: "Any feedback?", mentionedUserIds })
+        .send({ content, mentionedUserIds })
         .expect(201);
 
       const mentionCalls = emitToRoom.mock.calls.filter(
@@ -804,6 +829,19 @@ describe("ForumController (e2e)", () => {
           mentionedUserIds: [target.id],
         },
       });
+    });
+
+    it("rejects more mentions than a post may carry", async () => {
+      const { cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const mentionedUserIds = Array.from({ length: FORUM_POST_MAX_MENTIONS + 1 }, () =>
+        faker.string.uuid(),
+      );
+
+      await request(app.getHttpServer())
+        .post("/api/forum/topics")
+        .set("Cookie", cookie)
+        .send({ title: "Everyone", content: "hi", mentionedUserIds })
+        .expect(400);
     });
   });
 
@@ -857,19 +895,22 @@ describe("ForumController (e2e)", () => {
       );
     });
 
-    it("signals the forum when a thread is started in a course discussion", async () => {
+    it("signals the forum when a course discussion thread is started or deleted", async () => {
       const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
       const course = await courseFactory.create({ authorId: student.id });
       await enroll(course.id, student);
+      const forumChanged = [FORUM_SOCKET_EVENTS.CHANGED, getForumRoom(student.tenantId), {}];
       emitToRoom.mockClear();
 
-      await createCourseThread(cookie, course.id, "Started in the course tab");
+      const courseThread = await createCourseThread(cookie, course.id, "Started in the course tab");
+      expect(emitToRoom.mock.calls).toContainEqual(forumChanged);
 
-      expect(emitToRoom).toHaveBeenCalledWith(
-        FORUM_SOCKET_EVENTS.CHANGED,
-        getForumRoom(student.tenantId),
-        {},
-      );
+      emitToRoom.mockClear();
+      await request(app.getHttpServer())
+        .delete(`/api/course-chat/messages/${courseThread.id}`)
+        .set("Cookie", cookie)
+        .expect(200);
+      expect(emitToRoom.mock.calls).toContainEqual(forumChanged);
     });
   });
 });

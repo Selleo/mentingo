@@ -5,28 +5,43 @@ import { FORUM_QUERY_KEY } from "~/api/queries/forum/forumQueryKeys";
 import { queryClient } from "~/api/queryClient";
 import { acquireSocket, releaseSocket } from "~/api/socket";
 
+const FORUM_CHANGED_DEBOUNCE_MS = 500;
+
 type ForumSocketOptions = {
-  /** Without a topic the hook follows the topic list. */
+  /** An organization-wide topic to follow in addition to the forum itself. */
   topicId?: string;
-  enabled?: boolean;
   onMentioned?: () => void;
 };
 
-export function useForumSocket({ topicId, enabled = true, onMentioned }: ForumSocketOptions) {
+export function useForumSocket({ topicId, onMentioned }: ForumSocketOptions) {
   useEffect(() => {
-    if (!enabled) return;
-
     const socket = acquireSocket();
-    const joinRoom = () =>
-      topicId
-        ? socket.emit(FORUM_SOCKET_EVENTS.JOIN_TOPIC, { topicId })
-        : socket.emit(FORUM_SOCKET_EVENTS.JOIN);
-    const leaveRoom = () =>
-      topicId
-        ? socket.emit(FORUM_SOCKET_EVENTS.LEAVE_TOPIC, { topicId })
-        : socket.emit(FORUM_SOCKET_EVENTS.LEAVE);
-    const handleForumChanged = () => {
+    let forumChangedTimeout: number | undefined;
+
+    const joinRooms = () => {
+      socket.emit(FORUM_SOCKET_EVENTS.JOIN);
+
+      if (topicId) socket.emit(FORUM_SOCKET_EVENTS.JOIN_TOPIC, { topicId });
+    };
+    const leaveRooms = () => {
+      socket.emit(FORUM_SOCKET_EVENTS.LEAVE);
+
+      if (topicId) socket.emit(FORUM_SOCKET_EVENTS.LEAVE_TOPIC, { topicId });
+    };
+    const handleConnect = () => {
+      joinRooms();
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEY });
+    };
+    const refreshForum = () => {
       queryClient.invalidateQueries({ queryKey: [...FORUM_QUERY_KEY, "topics"] });
+      queryClient.invalidateQueries({
+        queryKey: [...FORUM_QUERY_KEY, "topic"],
+        refetchType: "none",
+      });
+    };
+    const handleForumChanged = () => {
+      window.clearTimeout(forumChangedTimeout);
+      forumChangedTimeout = window.setTimeout(refreshForum, FORUM_CHANGED_DEBOUNCE_MS);
     };
     const handleTopicChanged = (payload: { topicId: string }) => {
       if (payload.topicId !== topicId) return;
@@ -35,21 +50,22 @@ export function useForumSocket({ topicId, enabled = true, onMentioned }: ForumSo
     };
     const handleMentioned = () => onMentioned?.();
 
-    socket.on("connect", joinRoom);
+    socket.on("connect", handleConnect);
     socket.on(FORUM_SOCKET_EVENTS.CHANGED, handleForumChanged);
     socket.on(FORUM_SOCKET_EVENTS.TOPIC_CHANGED, handleTopicChanged);
     socket.on(FORUM_SOCKET_EVENTS.USER_MENTIONED, handleMentioned);
     socket.connect();
 
-    if (socket.connected) joinRoom();
+    if (socket.connected) joinRooms();
 
     return () => {
-      leaveRoom();
-      socket.off("connect", joinRoom);
+      window.clearTimeout(forumChangedTimeout);
+      leaveRooms();
+      socket.off("connect", handleConnect);
       socket.off(FORUM_SOCKET_EVENTS.CHANGED, handleForumChanged);
       socket.off(FORUM_SOCKET_EVENTS.TOPIC_CHANGED, handleTopicChanged);
       socket.off(FORUM_SOCKET_EVENTS.USER_MENTIONED, handleMentioned);
       releaseSocket();
     };
-  }, [topicId, enabled, onMentioned]);
+  }, [topicId, onMentioned]);
 }
