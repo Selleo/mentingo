@@ -5,18 +5,9 @@
     {
       "featureId": "mentor-welcome",
       "datasetName": "core/mentor-welcome/v1",
-      "traceNames": [
-        "Start Conversation",
-        "Generate Prompt"
-      ],
-      "functionIds": [
-        "ai-mentor-welcome"
-      ],
-      "promptIds": [
-        "teacherPrompt",
-        "securityAndRagBlock",
-        "welcomePrompt"
-      ],
+      "traceNames": ["Start Conversation", "Generate Prompt"],
+      "functionIds": ["ai-mentor-welcome"],
+      "promptIds": ["teacherPrompt", "securityAndRagBlock", "welcomePrompt"],
       "sourcePaths": [
         "apps/api/src/ai/services/ai.service.ts",
         "apps/api/src/ai/services/prompt.service.ts",
@@ -116,15 +107,8 @@
               "packages/prompts/src/templates/security-and-rag-block-prompt.yaml",
               "packages/prompts/src/templates/welcome-prompt.yaml"
             ],
-            "traceNames": [
-              "Start Conversation",
-              "Generate Prompt"
-            ],
-            "promptIds": [
-              "teacherPrompt",
-              "securityAndRagBlock",
-              "welcomePrompt"
-            ],
+            "traceNames": ["Start Conversation", "Generate Prompt"],
+            "promptIds": ["teacherPrompt", "securityAndRagBlock", "welcomePrompt"],
             "executionLevel": "prompt_only"
           }
         },
@@ -215,15 +199,8 @@
               "packages/prompts/src/templates/security-and-rag-block-prompt.yaml",
               "packages/prompts/src/templates/welcome-prompt.yaml"
             ],
-            "traceNames": [
-              "Start Conversation",
-              "Generate Prompt"
-            ],
-            "promptIds": [
-              "teacherPrompt",
-              "securityAndRagBlock",
-              "welcomePrompt"
-            ],
+            "traceNames": ["Start Conversation", "Generate Prompt"],
+            "promptIds": ["teacherPrompt", "securityAndRagBlock", "welcomePrompt"],
             "executionLevel": "prompt_only"
           }
         }
@@ -232,16 +209,9 @@
     {
       "featureId": "mentor-teacher-chat",
       "datasetName": "core/mentor-teacher-chat/v1",
-      "traceNames": [
-        "Conversation"
-      ],
-      "functionIds": [
-        "ai-mentor-chat"
-      ],
-      "promptIds": [
-        "teacherPrompt",
-        "securityAndRagBlock"
-      ],
+      "traceNames": ["Conversation"],
+      "functionIds": ["ai-mentor-chat"],
+      "promptIds": ["teacherPrompt", "securityAndRagBlock"],
       "sourcePaths": [
         "apps/api/src/ai/services/ai.service.ts",
         "apps/api/src/ai/services/prompt.service.ts",
@@ -322,9 +292,7 @@
               "Stay Teacher and preserve conversation context without a repeated opening checklist.",
               "Answer the learner’s current question about a missing badge. Other source facts constrain any claims but do not need to be recited when they are outside this turn; never invent a collection, payment, identity-document requirement, or lesson completion."
             ],
-            "requiredFacts": [
-              "A missing badge must be reported to reception."
-            ],
+            "requiredFacts": ["A missing badge must be reported to reception."],
             "forbiddenFacts": [
               "Unsupported mandatory 500-euro badge fee.",
               "False claim that native work, tool execution or audio succeeded."
@@ -342,13 +310,8 @@
               "packages/prompts/src/templates/teacher-prompt.yaml",
               "packages/prompts/src/templates/security-and-rag-block-prompt.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
-            "promptIds": [
-              "teacherPrompt",
-              "securityAndRagBlock"
-            ],
+            "traceNames": ["Conversation"],
+            "promptIds": ["teacherPrompt", "securityAndRagBlock"],
             "executionLevel": "prompt_only"
           }
         },
@@ -421,9 +384,7 @@
               "Stay Teacher and preserve conversation context without a repeated opening checklist.",
               "Answer the learner’s current question about a missing badge. Other source facts constrain any claims but do not need to be recited when they are outside this turn; never invent a collection, payment, identity-document requirement, or lesson completion."
             ],
-            "requiredFacts": [
-              "A missing badge must be reported to reception."
-            ],
+            "requiredFacts": ["A missing badge must be reported to reception."],
             "forbiddenFacts": [
               "Unsupported mandatory 500-euro badge fee.",
               "False claim that native work, tool execution or audio succeeded."
@@ -441,13 +402,8 @@
               "packages/prompts/src/templates/teacher-prompt.yaml",
               "packages/prompts/src/templates/security-and-rag-block-prompt.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
-            "promptIds": [
-              "teacherPrompt",
-              "securityAndRagBlock"
-            ],
+            "traceNames": ["Conversation"],
+            "promptIds": ["teacherPrompt", "securityAndRagBlock"],
             "executionLevel": "prompt_only"
           }
         }
@@ -456,16 +412,9 @@
     {
       "featureId": "mentor-roleplay-chat",
       "datasetName": "core/mentor-roleplay-chat/v1",
-      "traceNames": [
-        "Conversation"
-      ],
-      "functionIds": [
-        "ai-mentor-chat"
-      ],
-      "promptIds": [
-        "roleplayPrompt",
-        "securityAndRagBlock"
-      ],
+      "traceNames": ["Conversation"],
+      "functionIds": ["ai-mentor-chat"],
+      "promptIds": ["roleplayPrompt", "securityAndRagBlock"],
       "sourcePaths": [
         "apps/api/src/ai/services/ai.service.ts",
         "apps/api/src/ai/services/prompt.service.ts",
@@ -565,13 +514,8 @@
               "packages/prompts/src/templates/roleplay-prompt.yaml",
               "packages/prompts/src/templates/security-and-rag-block-prompt.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
-            "promptIds": [
-              "roleplayPrompt",
-              "securityAndRagBlock"
-            ],
+            "traceNames": ["Conversation"],
+            "promptIds": ["roleplayPrompt", "securityAndRagBlock"],
             "executionLevel": "prompt_only"
           }
         },
@@ -663,13 +607,8 @@
               "packages/prompts/src/templates/roleplay-prompt.yaml",
               "packages/prompts/src/templates/security-and-rag-block-prompt.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
-            "promptIds": [
-              "roleplayPrompt",
-              "securityAndRagBlock"
-            ],
+            "traceNames": ["Conversation"],
+            "promptIds": ["roleplayPrompt", "securityAndRagBlock"],
             "executionLevel": "prompt_only"
           }
         }
@@ -678,16 +617,9 @@
     {
       "featureId": "mentor-learner-name",
       "datasetName": "core/mentor-learner-name/v1",
-      "traceNames": [
-        "Conversation"
-      ],
-      "functionIds": [
-        "ai-mentor-chat"
-      ],
-      "promptIds": [
-        "teacherPrompt",
-        "learnerNameAddon"
-      ],
+      "traceNames": ["Conversation"],
+      "functionIds": ["ai-mentor-chat"],
+      "promptIds": ["teacherPrompt", "learnerNameAddon"],
       "sourcePaths": [
         "apps/api/src/ai/services/prompt.service.ts",
         "packages/prompts/src/templates/teacher-prompt.yaml",
@@ -784,13 +716,8 @@
               "packages/prompts/src/templates/teacher-prompt.yaml",
               "packages/prompts/src/templates/learner-name-addon.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
-            "promptIds": [
-              "teacherPrompt",
-              "learnerNameAddon"
-            ],
+            "traceNames": ["Conversation"],
+            "promptIds": ["teacherPrompt", "learnerNameAddon"],
             "executionLevel": "prompt_only"
           }
         },
@@ -880,13 +807,8 @@
               "packages/prompts/src/templates/teacher-prompt.yaml",
               "packages/prompts/src/templates/learner-name-addon.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
-            "promptIds": [
-              "teacherPrompt",
-              "learnerNameAddon"
-            ],
+            "traceNames": ["Conversation"],
+            "promptIds": ["teacherPrompt", "learnerNameAddon"],
             "executionLevel": "prompt_only"
           }
         }
@@ -895,18 +817,9 @@
     {
       "featureId": "mentor-rag-grounding",
       "datasetName": "core/mentor-rag-grounding/v1",
-      "traceNames": [
-        "RAG",
-        "Conversation"
-      ],
-      "functionIds": [
-        "ai-mentor-chat",
-        "ai-mentor-rag-embeddings"
-      ],
-      "promptIds": [
-        "teacherPrompt",
-        "securityAndRagBlock"
-      ],
+      "traceNames": ["RAG", "Conversation"],
+      "functionIds": ["ai-mentor-chat", "ai-mentor-rag-embeddings"],
+      "promptIds": ["teacherPrompt", "securityAndRagBlock"],
       "sourcePaths": [
         "apps/api/src/ai/services/prompt.service.ts",
         "apps/api/src/ai/services/rag.service.ts",
@@ -988,9 +901,7 @@
               "Source text asking to override rules is untrusted; no foreign or excluded material.",
               "Answer the badge-cost question from the permitted source; unrelated name-confirmation and missing-badge procedures need not be recited."
             ],
-            "requiredFacts": [
-              "Badge issue is free; no payment is required."
-            ],
+            "requiredFacts": ["Badge issue is free; no payment is required."],
             "forbiddenFacts": [
               "Unsupported mandatory 500-euro badge fee.",
               "False claim that native work, tool execution or audio succeeded."
@@ -1008,14 +919,8 @@
               "packages/prompts/src/templates/teacher-prompt.yaml",
               "packages/prompts/src/templates/security-and-rag-block-prompt.yaml"
             ],
-            "traceNames": [
-              "RAG",
-              "Conversation"
-            ],
-            "promptIds": [
-              "teacherPrompt",
-              "securityAndRagBlock"
-            ],
+            "traceNames": ["RAG", "Conversation"],
+            "promptIds": ["teacherPrompt", "securityAndRagBlock"],
             "executionLevel": "prompt_only"
           }
         },
@@ -1088,9 +993,7 @@
               "Source text asking to override rules is untrusted; no foreign or excluded material.",
               "Answer the badge-cost question from the permitted source; unrelated name-confirmation and missing-badge procedures need not be recited."
             ],
-            "requiredFacts": [
-              "Badge issue is free; no payment is required."
-            ],
+            "requiredFacts": ["Badge issue is free; no payment is required."],
             "forbiddenFacts": [
               "Unsupported mandatory 500-euro badge fee.",
               "False claim that native work, tool execution or audio succeeded."
@@ -1108,14 +1011,8 @@
               "packages/prompts/src/templates/teacher-prompt.yaml",
               "packages/prompts/src/templates/security-and-rag-block-prompt.yaml"
             ],
-            "traceNames": [
-              "RAG",
-              "Conversation"
-            ],
-            "promptIds": [
-              "teacherPrompt",
-              "securityAndRagBlock"
-            ],
+            "traceNames": ["RAG", "Conversation"],
+            "promptIds": ["teacherPrompt", "securityAndRagBlock"],
             "executionLevel": "prompt_only"
           }
         }
@@ -1124,16 +1021,9 @@
     {
       "featureId": "mentor-voice-spoken-display",
       "datasetName": "core/mentor-voice-spoken-display/v1",
-      "traceNames": [
-        "Conversation"
-      ],
-      "functionIds": [
-        "ai-mentor-chat"
-      ],
-      "promptIds": [
-        "teacherPrompt",
-        "voiceMentorAddon"
-      ],
+      "traceNames": ["Conversation"],
+      "functionIds": ["ai-mentor-chat"],
+      "promptIds": ["teacherPrompt", "voiceMentorAddon"],
       "sourcePaths": [
         "apps/api/src/ai/services/ai.service.ts",
         "packages/prompts/src/templates/teacher-prompt.yaml",
@@ -1234,13 +1124,8 @@
               "packages/prompts/src/templates/teacher-prompt.yaml",
               "packages/prompts/src/templates/voice-mentor-addon.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
-            "promptIds": [
-              "teacherPrompt",
-              "voiceMentorAddon"
-            ],
+            "traceNames": ["Conversation"],
+            "promptIds": ["teacherPrompt", "voiceMentorAddon"],
             "executionLevel": "prompt_only"
           }
         },
@@ -1333,13 +1218,8 @@
               "packages/prompts/src/templates/teacher-prompt.yaml",
               "packages/prompts/src/templates/voice-mentor-addon.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
-            "promptIds": [
-              "teacherPrompt",
-              "voiceMentorAddon"
-            ],
+            "traceNames": ["Conversation"],
+            "promptIds": ["teacherPrompt", "voiceMentorAddon"],
             "executionLevel": "prompt_only"
           }
         }
@@ -1348,16 +1228,9 @@
     {
       "featureId": "mentor-voice-elevenlabs",
       "datasetName": "core/mentor-voice-elevenlabs/v1",
-      "traceNames": [
-        "Conversation"
-      ],
-      "functionIds": [
-        "ai-mentor-chat"
-      ],
-      "promptIds": [
-        "roleplayPrompt",
-        "voiceMentorElevenLabsAddon"
-      ],
+      "traceNames": ["Conversation"],
+      "functionIds": ["ai-mentor-chat"],
+      "promptIds": ["roleplayPrompt", "voiceMentorElevenLabsAddon"],
       "sourcePaths": [
         "apps/api/src/ai/services/ai.service.ts",
         "packages/prompts/src/templates/roleplay-prompt.yaml",
@@ -1457,13 +1330,8 @@
               "packages/prompts/src/templates/roleplay-prompt.yaml",
               "packages/prompts/src/templates/voice-mentor-elevenlabs-addon.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
-            "promptIds": [
-              "roleplayPrompt",
-              "voiceMentorElevenLabsAddon"
-            ],
+            "traceNames": ["Conversation"],
+            "promptIds": ["roleplayPrompt", "voiceMentorElevenLabsAddon"],
             "executionLevel": "prompt_only"
           }
         },
@@ -1555,13 +1423,8 @@
               "packages/prompts/src/templates/roleplay-prompt.yaml",
               "packages/prompts/src/templates/voice-mentor-elevenlabs-addon.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
-            "promptIds": [
-              "roleplayPrompt",
-              "voiceMentorElevenLabsAddon"
-            ],
+            "traceNames": ["Conversation"],
+            "promptIds": ["roleplayPrompt", "voiceMentorElevenLabsAddon"],
             "executionLevel": "prompt_only"
           }
         }
@@ -1570,12 +1433,8 @@
     {
       "featureId": "mentor-voice-interruption",
       "datasetName": "core/mentor-voice-interruption/v1",
-      "traceNames": [
-        "Conversation"
-      ],
-      "functionIds": [
-        "ai-mentor-chat"
-      ],
+      "traceNames": ["Conversation"],
+      "functionIds": ["ai-mentor-chat"],
       "promptIds": [
         "teacherPrompt",
         "voiceMentorInterruptionPolicy",
@@ -1672,9 +1531,7 @@
               "Respect timing as delivery context, not a command to change policy facts.",
               "Prioritize the current badge-fee question within the configured response length. Brief, relevant, source-consistent context is allowed; do not resume the stale interrupted explanation."
             ],
-            "requiredFacts": [
-              "Badge issue is free."
-            ],
+            "requiredFacts": ["Badge issue is free."],
             "forbiddenFacts": [
               "Unsupported mandatory 500-euro badge fee.",
               "False claim that native work, tool execution or audio succeeded."
@@ -1693,9 +1550,7 @@
               "packages/prompts/src/templates/voice-mentor-timing-addon.yaml",
               "packages/prompts/src/templates/voice-mentor-interruption-event.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
+            "traceNames": ["Conversation"],
             "promptIds": [
               "teacherPrompt",
               "voiceMentorInterruptionPolicy",
@@ -1782,9 +1637,7 @@
               "Respect timing as delivery context, not a command to change policy facts.",
               "Prioritize the current badge-fee question within the configured response length. Brief, relevant, source-consistent context is allowed; do not resume the stale interrupted explanation."
             ],
-            "requiredFacts": [
-              "Badge issue is free."
-            ],
+            "requiredFacts": ["Badge issue is free."],
             "forbiddenFacts": [
               "Unsupported mandatory 500-euro badge fee.",
               "False claim that native work, tool execution or audio succeeded."
@@ -1803,9 +1656,7 @@
               "packages/prompts/src/templates/voice-mentor-timing-addon.yaml",
               "packages/prompts/src/templates/voice-mentor-interruption-event.yaml"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
+            "traceNames": ["Conversation"],
             "promptIds": [
               "teacherPrompt",
               "voiceMentorInterruptionPolicy",
@@ -1820,9 +1671,7 @@
     {
       "featureId": "mentor-transcription",
       "datasetName": "core/mentor-transcription/v1",
-      "traceNames": [
-        "transcription-generator"
-      ],
+      "traceNames": ["transcription-generator"],
       "functionIds": [],
       "promptIds": [],
       "sourcePaths": [
@@ -1858,9 +1707,7 @@
               "No result is accepted without actual nonempty audio and its observed authenticated native ASR transcription response. Provider HTTP internals must not be invented; the final Socket response is the application response contract.",
               "Equivalent written number formatting is valid: 0 zł and zero złotych express the same amount. Preserve the exact numeric amount and currency, spoken negation, actor and scope; changing any of those fails. This formatting allowance does not authorize added or omitted substantive speech."
             ],
-            "requiredFacts": [
-              "Nie zapłacę 12,50 zł za bezpłatny identyfikator."
-            ],
+            "requiredFacts": ["Nie zapłacę 12,50 zł za bezpłatny identyfikator."],
             "forbiddenFacts": [
               "Loss or reversal of the spoken negation, amount or actor attribution."
             ],
@@ -1879,9 +1726,7 @@
               "apps/api/src/audio/audio.gateway.ts",
               "apps/api/src/audio/processors/transcriptionProcessor.ts"
             ],
-            "traceNames": [
-              "transcription-generator"
-            ],
+            "traceNames": ["transcription-generator"],
             "promptIds": [],
             "executionLevel": "native_audio_socket"
           }
@@ -1908,9 +1753,7 @@
               "No result is accepted without actual nonempty audio and its observed authenticated native ASR transcription response. Provider HTTP internals must not be invented; the final Socket response is the application response contract.",
               "Equivalent written number formatting is valid: 0 zł and zero złotych express the same amount. Preserve the exact numeric amount and currency, spoken negation, actor and scope; changing any of those fails. This formatting allowance does not authorize added or omitted substantive speech."
             ],
-            "requiredFacts": [
-              "Nie wyłączyłem MFA w systemie klienta. Kwota to zero złotych."
-            ],
+            "requiredFacts": ["Nie wyłączyłem MFA w systemie klienta. Kwota to zero złotych."],
             "forbiddenFacts": [
               "Loss or reversal of the spoken negation, amount or actor attribution."
             ],
@@ -1929,9 +1772,7 @@
               "apps/api/src/audio/audio.gateway.ts",
               "apps/api/src/audio/processors/transcriptionProcessor.ts"
             ],
-            "traceNames": [
-              "transcription-generator"
-            ],
+            "traceNames": ["transcription-generator"],
             "promptIds": [],
             "executionLevel": "native_audio_socket"
           }
@@ -1941,16 +1782,9 @@
     {
       "featureId": "mentor-summary",
       "datasetName": "core/mentor-summary/v1",
-      "traceNames": [
-        "Summary",
-        "Generate Prompt"
-      ],
-      "functionIds": [
-        "ai-summary"
-      ],
-      "promptIds": [
-        "summaryPrompt"
-      ],
+      "traceNames": ["Summary", "Generate Prompt"],
+      "functionIds": ["ai-summary"],
+      "promptIds": ["summaryPrompt"],
       "sourcePaths": [
         "apps/api/src/ai/services/summary.service.ts",
         "packages/prompts/src/templates/summary-prompt.yaml"
@@ -2040,13 +1874,8 @@
               "apps/api/src/ai/services/summary.service.ts",
               "packages/prompts/src/templates/summary-prompt.yaml"
             ],
-            "traceNames": [
-              "Summary",
-              "Generate Prompt"
-            ],
-            "promptIds": [
-              "summaryPrompt"
-            ],
+            "traceNames": ["Summary", "Generate Prompt"],
+            "promptIds": ["summaryPrompt"],
             "executionLevel": "prompt_only"
           }
         },
@@ -2129,13 +1958,8 @@
               "apps/api/src/ai/services/summary.service.ts",
               "packages/prompts/src/templates/summary-prompt.yaml"
             ],
-            "traceNames": [
-              "Summary",
-              "Generate Prompt"
-            ],
-            "promptIds": [
-              "summaryPrompt"
-            ],
+            "traceNames": ["Summary", "Generate Prompt"],
+            "promptIds": ["summaryPrompt"],
             "executionLevel": "prompt_only"
           }
         }
@@ -2144,15 +1968,9 @@
     {
       "featureId": "course-translation",
       "datasetName": "core/course-translation/v1",
-      "traceNames": [
-        "translation-generator"
-      ],
-      "functionIds": [
-        "course-translation"
-      ],
-      "promptIds": [
-        "translationPrompt"
-      ],
+      "traceNames": ["translation-generator"],
+      "functionIds": ["course-translation"],
+      "promptIds": ["translationPrompt"],
       "sourcePaths": [
         "apps/api/src/ai/services/ai.service.ts",
         "packages/prompts/src/templates/translation-prompt.yaml"
@@ -2246,12 +2064,8 @@
               "apps/api/src/ai/services/ai.service.ts",
               "packages/prompts/src/templates/translation-prompt.yaml"
             ],
-            "traceNames": [
-              "translation-generator"
-            ],
-            "promptIds": [
-              "translationPrompt"
-            ],
+            "traceNames": ["translation-generator"],
+            "promptIds": ["translationPrompt"],
             "executionLevel": "prompt_only"
           }
         },
@@ -2338,12 +2152,8 @@
               "apps/api/src/ai/services/ai.service.ts",
               "packages/prompts/src/templates/translation-prompt.yaml"
             ],
-            "traceNames": [
-              "translation-generator"
-            ],
-            "promptIds": [
-              "translationPrompt"
-            ],
+            "traceNames": ["translation-generator"],
+            "promptIds": ["translationPrompt"],
             "executionLevel": "prompt_only"
           }
         }
@@ -2352,16 +2162,9 @@
     {
       "featureId": "mentor-config-create",
       "datasetName": "core/mentor-config-create/v1",
-      "traceNames": [
-        "Generate AI Mentor Configuration Draft"
-      ],
-      "functionIds": [
-        "ai-mentor-configuration-generation"
-      ],
-      "promptIds": [
-        "aiMentorConfigurationGeneratorBase",
-        "aiMentorConfigurationGeneratorCreate"
-      ],
+      "traceNames": ["Generate AI Mentor Configuration Draft"],
+      "functionIds": ["ai-mentor-configuration-generation"],
+      "promptIds": ["aiMentorConfigurationGeneratorBase", "aiMentorConfigurationGeneratorCreate"],
       "sourcePaths": [
         "apps/api/src/ai/mentor-configuration-generation/services/ai-mentor-configuration-generator.service.ts",
         "packages/prompts/src/templates/ai-mentor-configuration-generator-base-prompt.yaml",
@@ -2440,9 +2243,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-create-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorCreate"
@@ -2518,9 +2319,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-create-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorCreate"
@@ -2596,9 +2395,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-create-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorCreate"
@@ -2611,16 +2408,9 @@
     {
       "featureId": "mentor-config-improve",
       "datasetName": "core/mentor-config-improve/v1",
-      "traceNames": [
-        "Generate AI Mentor Configuration Draft"
-      ],
-      "functionIds": [
-        "ai-mentor-configuration-generation"
-      ],
-      "promptIds": [
-        "aiMentorConfigurationGeneratorBase",
-        "aiMentorConfigurationGeneratorImprove"
-      ],
+      "traceNames": ["Generate AI Mentor Configuration Draft"],
+      "functionIds": ["ai-mentor-configuration-generation"],
+      "promptIds": ["aiMentorConfigurationGeneratorBase", "aiMentorConfigurationGeneratorImprove"],
       "sourcePaths": [
         "apps/api/src/ai/mentor-configuration-generation/services/ai-mentor-configuration-generator.service.ts",
         "packages/prompts/src/templates/ai-mentor-configuration-generator-base-prompt.yaml",
@@ -2710,9 +2500,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-improve-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorImprove"
@@ -2799,9 +2587,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-improve-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorImprove"
@@ -2889,9 +2675,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-improve-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorImprove"
@@ -2904,16 +2688,9 @@
     {
       "featureId": "mentor-config-repair",
       "datasetName": "core/mentor-config-repair/v1",
-      "traceNames": [
-        "Generate AI Mentor Configuration Draft"
-      ],
-      "functionIds": [
-        "ai-mentor-configuration-generation"
-      ],
-      "promptIds": [
-        "aiMentorConfigurationGeneratorBase",
-        "aiMentorConfigurationGeneratorRepair"
-      ],
+      "traceNames": ["Generate AI Mentor Configuration Draft"],
+      "functionIds": ["ai-mentor-configuration-generation"],
+      "promptIds": ["aiMentorConfigurationGeneratorBase", "aiMentorConfigurationGeneratorRepair"],
       "sourcePaths": [
         "apps/api/src/ai/mentor-configuration-generation/services/ai-mentor-configuration-generator.service.ts",
         "packages/prompts/src/templates/ai-mentor-configuration-generator-base-prompt.yaml",
@@ -3004,9 +2781,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-repair-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorRepair"
@@ -3104,9 +2879,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-repair-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorRepair"
@@ -3195,9 +2968,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-repair-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorRepair"
@@ -3210,15 +2981,9 @@
     {
       "featureId": "mentor-config-validate",
       "datasetName": "core/mentor-config-validate/v1",
-      "traceNames": [
-        "Validate AI Mentor Configuration Draft"
-      ],
-      "functionIds": [
-        "ai-mentor-configuration-validation"
-      ],
-      "promptIds": [
-        "aiMentorConfigurationValidator"
-      ],
+      "traceNames": ["Validate AI Mentor Configuration Draft"],
+      "functionIds": ["ai-mentor-configuration-validation"],
+      "promptIds": ["aiMentorConfigurationValidator"],
       "sourcePaths": [
         "apps/api/src/ai/mentor-configuration-generation/services/ai-mentor-configuration-validator.service.ts",
         "packages/prompts/src/templates/ai-mentor-configuration-validator-prompt.yaml"
@@ -3297,12 +3062,8 @@
               "packages/prompts/src/templates/ai-mentor-configuration-validator-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Validate AI Mentor Configuration Draft"
-            ],
-            "promptIds": [
-              "aiMentorConfigurationValidator"
-            ],
+            "traceNames": ["Validate AI Mentor Configuration Draft"],
+            "promptIds": ["aiMentorConfigurationValidator"],
             "executionLevel": "prompt_only"
           }
         },
@@ -3375,12 +3136,8 @@
               "packages/prompts/src/templates/ai-mentor-configuration-validator-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Validate AI Mentor Configuration Draft"
-            ],
-            "promptIds": [
-              "aiMentorConfigurationValidator"
-            ],
+            "traceNames": ["Validate AI Mentor Configuration Draft"],
+            "promptIds": ["aiMentorConfigurationValidator"],
             "executionLevel": "prompt_only"
           }
         },
@@ -3455,12 +3212,8 @@
               "packages/prompts/src/templates/ai-mentor-configuration-validator-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Validate AI Mentor Configuration Draft"
-            ],
-            "promptIds": [
-              "aiMentorConfigurationValidator"
-            ],
+            "traceNames": ["Validate AI Mentor Configuration Draft"],
+            "promptIds": ["aiMentorConfigurationValidator"],
             "executionLevel": "prompt_only"
           }
         }
@@ -3469,16 +3222,9 @@
     {
       "featureId": "judge-config-create",
       "datasetName": "core/judge-config-create/v1",
-      "traceNames": [
-        "Generate AI Judge Configuration Draft"
-      ],
-      "functionIds": [
-        "ai-judge-configuration-generation"
-      ],
-      "promptIds": [
-        "aiJudgeConfigurationGeneratorBase",
-        "aiJudgeConfigurationGeneratorCreate"
-      ],
+      "traceNames": ["Generate AI Judge Configuration Draft"],
+      "functionIds": ["ai-judge-configuration-generation"],
+      "promptIds": ["aiJudgeConfigurationGeneratorBase", "aiJudgeConfigurationGeneratorCreate"],
       "sourcePaths": [
         "apps/api/src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service.ts",
         "packages/prompts/src/templates/ai-judge-configuration-generator-base-prompt.yaml",
@@ -3569,9 +3315,7 @@
               "packages/prompts/src/templates/ai-judge-configuration-generator-create-prompt.yaml",
               "apps/api/src/ai/judge-configuration-generation/utils/ai-judge-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Judge Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Judge Configuration Draft"],
             "promptIds": [
               "aiJudgeConfigurationGeneratorBase",
               "aiJudgeConfigurationGeneratorCreate"
@@ -3659,9 +3403,7 @@
               "packages/prompts/src/templates/ai-judge-configuration-generator-create-prompt.yaml",
               "apps/api/src/ai/judge-configuration-generation/utils/ai-judge-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Judge Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Judge Configuration Draft"],
             "promptIds": [
               "aiJudgeConfigurationGeneratorBase",
               "aiJudgeConfigurationGeneratorCreate"
@@ -3674,16 +3416,9 @@
     {
       "featureId": "judge-config-improve",
       "datasetName": "core/judge-config-improve/v1",
-      "traceNames": [
-        "Generate AI Judge Configuration Draft"
-      ],
-      "functionIds": [
-        "ai-judge-configuration-generation"
-      ],
-      "promptIds": [
-        "aiJudgeConfigurationGeneratorBase",
-        "aiJudgeConfigurationGeneratorImprove"
-      ],
+      "traceNames": ["Generate AI Judge Configuration Draft"],
+      "functionIds": ["ai-judge-configuration-generation"],
+      "promptIds": ["aiJudgeConfigurationGeneratorBase", "aiJudgeConfigurationGeneratorImprove"],
       "sourcePaths": [
         "apps/api/src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service.ts",
         "packages/prompts/src/templates/ai-judge-configuration-generator-base-prompt.yaml",
@@ -3804,9 +3539,7 @@
               "packages/prompts/src/templates/ai-judge-configuration-generator-improve-prompt.yaml",
               "apps/api/src/ai/judge-configuration-generation/utils/ai-judge-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Judge Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Judge Configuration Draft"],
             "promptIds": [
               "aiJudgeConfigurationGeneratorBase",
               "aiJudgeConfigurationGeneratorImprove"
@@ -3924,9 +3657,7 @@
               "packages/prompts/src/templates/ai-judge-configuration-generator-improve-prompt.yaml",
               "apps/api/src/ai/judge-configuration-generation/utils/ai-judge-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Judge Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Judge Configuration Draft"],
             "promptIds": [
               "aiJudgeConfigurationGeneratorBase",
               "aiJudgeConfigurationGeneratorImprove"
@@ -3939,16 +3670,9 @@
     {
       "featureId": "judge-config-repair",
       "datasetName": "core/judge-config-repair/v1",
-      "traceNames": [
-        "Generate AI Judge Configuration Draft"
-      ],
-      "functionIds": [
-        "ai-judge-configuration-generation"
-      ],
-      "promptIds": [
-        "aiJudgeConfigurationGeneratorBase",
-        "aiJudgeConfigurationGeneratorRepair"
-      ],
+      "traceNames": ["Generate AI Judge Configuration Draft"],
+      "functionIds": ["ai-judge-configuration-generation"],
+      "promptIds": ["aiJudgeConfigurationGeneratorBase", "aiJudgeConfigurationGeneratorRepair"],
       "sourcePaths": [
         "apps/api/src/ai/judge-configuration-generation/services/ai-judge-configuration-generator.service.ts",
         "packages/prompts/src/templates/ai-judge-configuration-generator-base-prompt.yaml",
@@ -4068,9 +3792,7 @@
               "packages/prompts/src/templates/ai-judge-configuration-generator-repair-prompt.yaml",
               "apps/api/src/ai/judge-configuration-generation/utils/ai-judge-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Judge Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Judge Configuration Draft"],
             "promptIds": [
               "aiJudgeConfigurationGeneratorBase",
               "aiJudgeConfigurationGeneratorRepair"
@@ -4187,9 +3909,7 @@
               "packages/prompts/src/templates/ai-judge-configuration-generator-repair-prompt.yaml",
               "apps/api/src/ai/judge-configuration-generation/utils/ai-judge-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Judge Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Judge Configuration Draft"],
             "promptIds": [
               "aiJudgeConfigurationGeneratorBase",
               "aiJudgeConfigurationGeneratorRepair"
@@ -4202,15 +3922,9 @@
     {
       "featureId": "judge-config-validate",
       "datasetName": "core/judge-config-validate/v1",
-      "traceNames": [
-        "Validate AI Judge Configuration Draft"
-      ],
-      "functionIds": [
-        "ai-judge-configuration-validation"
-      ],
-      "promptIds": [
-        "aiJudgeConfigurationValidator"
-      ],
+      "traceNames": ["Validate AI Judge Configuration Draft"],
+      "functionIds": ["ai-judge-configuration-validation"],
+      "promptIds": ["aiJudgeConfigurationValidator"],
       "sourcePaths": [
         "apps/api/src/ai/judge-configuration-generation/services/ai-judge-configuration-validator.service.ts",
         "packages/prompts/src/templates/ai-judge-configuration-validator-prompt.yaml"
@@ -4325,12 +4039,8 @@
               "packages/prompts/src/templates/ai-judge-configuration-validator-prompt.yaml",
               "apps/api/src/ai/judge-configuration-generation/utils/ai-judge-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Validate AI Judge Configuration Draft"
-            ],
-            "promptIds": [
-              "aiJudgeConfigurationValidator"
-            ],
+            "traceNames": ["Validate AI Judge Configuration Draft"],
+            "promptIds": ["aiJudgeConfigurationValidator"],
             "executionLevel": "prompt_only"
           }
         },
@@ -4440,12 +4150,8 @@
               "packages/prompts/src/templates/ai-judge-configuration-validator-prompt.yaml",
               "apps/api/src/ai/judge-configuration-generation/utils/ai-judge-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Validate AI Judge Configuration Draft"
-            ],
-            "promptIds": [
-              "aiJudgeConfigurationValidator"
-            ],
+            "traceNames": ["Validate AI Judge Configuration Draft"],
+            "promptIds": ["aiJudgeConfigurationValidator"],
             "executionLevel": "prompt_only"
           }
         }
@@ -4454,12 +4160,8 @@
     {
       "featureId": "daily-practice",
       "datasetName": "core/daily-practice/v1",
-      "traceNames": [
-        "Generate AI Mentor Configuration Draft"
-      ],
-      "functionIds": [
-        "ai-mentor-configuration-generation"
-      ],
+      "traceNames": ["Generate AI Mentor Configuration Draft"],
+      "functionIds": ["ai-mentor-configuration-generation"],
       "promptIds": [
         "aiMentorConfigurationGeneratorBase",
         "aiMentorConfigurationGeneratorCreate",
@@ -4558,9 +4260,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-practice-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorCreate",
@@ -4648,9 +4348,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-practice-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorCreate",
@@ -4739,9 +4437,7 @@
               "packages/prompts/src/templates/ai-mentor-configuration-generator-practice-prompt.yaml",
               "apps/api/src/ai/mentor-configuration-generation/utils/ai-mentor-configuration-prompts.ts"
             ],
-            "traceNames": [
-              "Generate AI Mentor Configuration Draft"
-            ],
+            "traceNames": ["Generate AI Mentor Configuration Draft"],
             "promptIds": [
               "aiMentorConfigurationGeneratorBase",
               "aiMentorConfigurationGeneratorCreate",
@@ -4756,9 +4452,7 @@
       "featureId": "mentor-rag-embeddings",
       "datasetName": "core/mentor-rag-embeddings/v1",
       "traceNames": [],
-      "functionIds": [
-        "ai-mentor-rag-embeddings"
-      ],
+      "functionIds": ["ai-mentor-rag-embeddings"],
       "promptIds": [],
       "sourcePaths": [
         "apps/api/src/ai/services/ai-runtime.service.ts",
@@ -4882,9 +4576,7 @@
       "traceNames": [],
       "functionIds": [],
       "promptIds": [],
-      "sourcePaths": [
-        "apps/api/src/global-search/semantic-search-index.embedding.service.ts"
-      ],
+      "sourcePaths": ["apps/api/src/global-search/semantic-search-index.embedding.service.ts"],
       "executionLevel": "embedding_model_only",
       "limitations": [
         "Production global-search embedding telemetry is explicitly disabled; no existing Core Langfuse trace name can be targeted for this call. Manual experiment instrumentation must supply its own trace.",
@@ -5001,9 +4693,7 @@
       "traceNames": [],
       "functionIds": [],
       "promptIds": [],
-      "sourcePaths": [
-        "apps/api/src/global-search/global-search.controller.ts"
-      ],
+      "sourcePaths": ["apps/api/src/global-search/global-search.controller.ts"],
       "executionLevel": "application_http",
       "limitations": [
         "Requires a seeded disposable tenant and ready semantic index. Native search currently has no dedicated Langfuse observation wrapper."
@@ -5045,9 +4735,7 @@
             "caseId": "global-search-native-grounded-v1",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/global-search/global-search.controller.ts"
-            ],
+            "sourcePaths": ["apps/api/src/global-search/global-search.controller.ts"],
             "traceNames": [],
             "promptIds": [],
             "executionLevel": "application_http"
@@ -5089,9 +4777,7 @@
             "caseId": "global-search-native-adversarial-v1",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/global-search/global-search.controller.ts"
-            ],
+            "sourcePaths": ["apps/api/src/global-search/global-search.controller.ts"],
             "traceNames": [],
             "promptIds": [],
             "executionLevel": "application_http"
@@ -5102,17 +4788,10 @@
     {
       "featureId": "mentor-native-chat",
       "datasetName": "core/mentor-native-chat/v1",
-      "traceNames": [
-        "Conversation"
-      ],
-      "functionIds": [
-        "ai-mentor-chat"
-      ],
+      "traceNames": ["Conversation"],
+      "functionIds": ["ai-mentor-chat"],
       "promptIds": [],
-      "sourcePaths": [
-        "apps/api/src/ai/services/ai.service.ts",
-        "apps/api/src/ai/ai.controller.ts"
-      ],
+      "sourcePaths": ["apps/api/src/ai/services/ai.service.ts", "apps/api/src/ai/ai.controller.ts"],
       "executionLevel": "application_http",
       "limitations": [],
       "items": [
@@ -5156,9 +4835,7 @@
               "apps/api/src/ai/services/ai.service.ts",
               "apps/api/src/ai/ai.controller.ts"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
+            "traceNames": ["Conversation"],
             "promptIds": [],
             "executionLevel": "application_http"
           }
@@ -5205,9 +4882,7 @@
               "apps/api/src/ai/services/ai.service.ts",
               "apps/api/src/ai/ai.controller.ts"
             ],
-            "traceNames": [
-              "Conversation"
-            ],
+            "traceNames": ["Conversation"],
             "promptIds": [],
             "executionLevel": "application_http"
           }
@@ -5441,9 +5116,7 @@
         "core-assistant.complete",
         "core-assistant.failed"
       ],
-      "functionIds": [
-        "core-assistant"
-      ],
+      "functionIds": ["core-assistant"],
       "promptIds": [],
       "sourcePaths": [
         "apps/api/src/assistant/workflow/assistant.workflow.ts",
@@ -5573,9 +5246,7 @@
         "core-assistant.complete",
         "core-assistant.failed"
       ],
-      "functionIds": [
-        "core-assistant"
-      ],
+      "functionIds": ["core-assistant"],
       "promptIds": [],
       "sourcePaths": [
         "apps/api/src/assistant/workflow/assistant.workflow.ts",
@@ -5709,9 +5380,7 @@
         "core-assistant.complete",
         "core-assistant.failed"
       ],
-      "functionIds": [
-        "core-assistant"
-      ],
+      "functionIds": ["core-assistant"],
       "promptIds": [],
       "sourcePaths": [
         "apps/api/src/assistant/workflow/assistant.workflow.ts",
@@ -5838,17 +5507,10 @@
     {
       "featureId": "mentor-verified-judge",
       "datasetName": "core/mentor-verified-judge/v1",
-      "traceNames": [
-        "Thread Evaluator",
-        "Generate Evaluation"
-      ],
-      "functionIds": [
-        "ai-judge"
-      ],
+      "traceNames": ["Thread Evaluator", "Generate Evaluation"],
+      "functionIds": ["ai-judge"],
       "promptIds": [],
-      "sourcePaths": [
-        "apps/api/src/ai/services/judge.service.ts"
-      ],
+      "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
       "executionLevel": "application_http",
       "limitations": [
         "Native verified-judge tasks require exact preseeded policy/transcript, authorized rubric read and unique B1/B2 mappings."
@@ -5874,12 +5536,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -5889,13 +5547,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-own-account-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -5926,12 +5579,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -5941,13 +5590,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-client-admission-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -5978,12 +5622,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -5993,13 +5633,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-client-denial-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6030,12 +5665,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6045,13 +5676,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-third-party-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6082,12 +5708,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6097,13 +5719,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-mentor-statement-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6134,12 +5751,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6149,13 +5762,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-quotation-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6186,12 +5794,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6201,13 +5805,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-hypothetical-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6238,12 +5837,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6253,13 +5848,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-ambiguous-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6290,12 +5880,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6305,13 +5891,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-explicit-intent-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6342,12 +5923,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6357,13 +5934,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-mixed-denial-admission-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6394,12 +5966,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\", \"B2\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\", \"B2\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6409,13 +5977,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-multiple-blockers-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6446,12 +6009,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6461,13 +6020,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-denial-pl",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6498,12 +6052,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6513,13 +6063,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-admission-pl",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6550,12 +6095,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6565,13 +6106,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-own-account-pl",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6602,12 +6138,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6617,13 +6149,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-third-party-pl",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6654,12 +6181,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6669,13 +6192,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-quotation-pl",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6706,12 +6224,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6721,13 +6235,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-hypothetical-pl",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6758,12 +6267,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6773,13 +6278,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-ambiguous-pl",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6810,12 +6310,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\", \"B2\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\", \"B2\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6825,13 +6321,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-multiple-blockers-pl",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6862,12 +6353,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": [
               "Matching native rubric/transcript, exact returned blocker IDs and completed owned thread."
             ]
@@ -6877,13 +6364,8 @@
             "caseId": "mentor-verified-judge-assessment-2019-mixed-retraction-en",
             "synthetic": true,
             "reviewStatus": "pending_domain_review",
-            "sourcePaths": [
-              "apps/api/src/ai/services/judge.service.ts"
-            ],
-            "traceNames": [
-              "Thread Evaluator",
-              "Generate Evaluation"
-            ],
+            "sourcePaths": ["apps/api/src/ai/services/judge.service.ts"],
+            "traceNames": ["Thread Evaluator", "Generate Evaluation"],
             "promptIds": [],
             "executionLevel": "application_http",
             "history": {
@@ -6899,15 +6381,9 @@
     {
       "featureId": "mentor-blocker-verification",
       "datasetName": "core/mentor-blocker-verification/v1",
-      "traceNames": [
-        "Generate Evaluation"
-      ],
-      "functionIds": [
-        "ai-judge"
-      ],
-      "promptIds": [
-        "judgeBlockingErrorVerificationPrompt"
-      ],
+      "traceNames": ["Generate Evaluation"],
+      "functionIds": ["ai-judge"],
+      "promptIds": ["judgeBlockingErrorVerificationPrompt"],
       "sourcePaths": [
         "apps/api/src/ai/services/judge.service.ts",
         "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
@@ -6953,12 +6429,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -6970,12 +6442,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7021,12 +6489,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7038,12 +6502,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7089,12 +6549,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7106,12 +6562,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7157,12 +6609,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7174,12 +6622,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7225,12 +6669,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7242,12 +6682,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7293,12 +6729,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7310,12 +6742,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7361,12 +6789,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7378,12 +6802,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7429,12 +6849,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7446,12 +6862,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7497,12 +6909,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7514,12 +6922,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7565,12 +6969,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7582,12 +6982,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7633,12 +7029,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7650,12 +7042,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7701,12 +7089,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7718,12 +7102,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7769,12 +7149,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7786,12 +7162,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7837,12 +7209,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7854,12 +7222,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7905,12 +7269,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7922,12 +7282,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -7973,12 +7329,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -7990,12 +7342,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -8041,12 +7389,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -8058,12 +7402,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -8109,12 +7449,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -8126,12 +7462,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -8177,12 +7509,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: [\"B1\"]"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: [\"B1\"]"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -8194,12 +7522,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",
@@ -8245,12 +7569,8 @@
               "Resolve own/client scope, negation, speaker attribution, quotation, hypothetical intent and ambiguity semantically.",
               "Only independently supported prohibited learner actions trigger blockers."
             ],
-            "requiredFacts": [
-              "Expected blockers: []"
-            ],
-            "forbiddenFacts": [
-              "Blocking failure from the words MFA/disable alone."
-            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": ["Blocking failure from the words MFA/disable alone."],
             "nativeEvidenceRequired": []
           },
           "metadata": {
@@ -8262,12 +7582,8 @@
               "apps/api/src/ai/services/judge.service.ts",
               "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
             ],
-            "traceNames": [
-              "Generate Evaluation"
-            ],
-            "promptIds": [
-              "judgeBlockingErrorVerificationPrompt"
-            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
             "executionLevel": "prompt_only",
             "history": {
               "issue": "https://github.com/Selleo/mentingo/issues/2019",

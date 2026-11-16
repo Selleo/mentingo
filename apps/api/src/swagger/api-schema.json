@@ -907,23 +907,6 @@
         }
       }
     },
-    "/api/settings/admin/enforce-sso": {
-      "patch": {
-        "operationId": "SettingsController_updateEnforceSSO",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/settings/admin/modern-course-list": {
       "patch": {
         "operationId": "SettingsController_updateModernCourseListEnabled",
@@ -13101,6 +13084,14 @@
                 {
                   "const": "live_training_ended",
                   "type": "string"
+                },
+                {
+                  "const": "quiz_attempt_graded",
+                  "type": "string"
+                },
+                {
+                  "const": "quiz_grading_digest",
+                  "type": "string"
                 }
               ]
             }
@@ -13243,6 +13234,14 @@
                 },
                 {
                   "const": "live_training_ended",
+                  "type": "string"
+                },
+                {
+                  "const": "quiz_attempt_graded",
+                  "type": "string"
+                },
+                {
+                  "const": "quiz_grading_digest",
                   "type": "string"
                 }
               ]
@@ -14175,6 +14174,14 @@
                 },
                 {
                   "const": "live_training_ended",
+                  "type": "string"
+                },
+                {
+                  "const": "quiz_attempt_graded",
+                  "type": "string"
+                },
+                {
+                  "const": "quiz_grading_digest",
                   "type": "string"
                 }
               ]
@@ -28245,9 +28252,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -28437,7 +28441,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -29989,9 +29992,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -30181,290 +30181,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
-              "certificateBackgroundImage",
-              "platformLogoS3Key",
-              "loginBackgroundImageS3Key",
-              "platformSimpleLogoS3Key",
-              "MFAEnforcedRoles",
-              "defaultCourseCurrency",
-              "inviteOnlyRegistration",
-              "primaryColor",
-              "contrastColor",
-              "backgroundColor",
-              "accentColor",
-              "unregisteredUserQAAccessibility",
-              "QAEnabled",
-              "unregisteredUserNewsAccessibility",
-              "newsEnabled",
-              "unregisteredUserArticlesAccessibility",
-              "articlesEnabled",
-              "learningPathsEnabled",
-              "ageLimit",
-              "loginPageFiles"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateEnforceSSOResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "modernCourseListEnabled": {
-                "type": "boolean"
-              },
-              "publicCoursePreviewEnabled": {
-                "type": "boolean"
-              },
-              "featuredCourseId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "courseDiscussionsEnabled": {
-                "type": "boolean"
-              },
-              "forumEnabled": {
-                "type": "boolean"
-              },
-              "gamificationEnabled": {
-                "type": "boolean"
-              },
-              "leaderboardsEnabled": {
-                "type": "boolean"
-              },
-              "leaderboardVisibility": {
-                "anyOf": [
-                  {
-                    "const": "closed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "public",
-                    "type": "string"
-                  }
-                ]
-              },
-              "calendarEnabled": {
-                "type": "boolean"
-              },
-              "liveTrainingEnabled": {
-                "type": "boolean"
-              },
-              "liveTrainingMaxParallelSessions": {
-                "minimum": 1,
-                "type": "number"
-              },
-              "trainerRoleUserCount": {
-                "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "certificateBackgroundImage": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "companyShortName": {
-                    "maxLength": 10,
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "loginBackgroundImageS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "platformSimpleLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "MFAEnforcedRoles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "defaultCourseCurrency": {
-                "anyOf": [
-                  {
-                    "const": "pln",
-                    "type": "string"
-                  },
-                  {
-                    "const": "eur",
-                    "type": "string"
-                  },
-                  {
-                    "const": "gbp",
-                    "type": "string"
-                  },
-                  {
-                    "const": "usd",
-                    "type": "string"
-                  }
-                ]
-              },
-              "inviteOnlyRegistration": {
-                "type": "boolean"
-              },
-              "primaryColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "contrastColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "backgroundColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "accentColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "unregisteredUserQAAccessibility": {
-                "type": "boolean"
-              },
-              "QAEnabled": {
-                "type": "boolean"
-              },
-              "unregisteredUserNewsAccessibility": {
-                "type": "boolean"
-              },
-              "newsEnabled": {
-                "type": "boolean"
-              },
-              "unregisteredUserArticlesAccessibility": {
-                "type": "boolean"
-              },
-              "articlesEnabled": {
-                "type": "boolean"
-              },
-              "learningPathsEnabled": {
-                "type": "boolean"
-              },
-              "ageLimit": {
-                "anyOf": [
-                  {
-                    "const": 13,
-                    "type": "number"
-                  },
-                  {
-                    "const": 16,
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "loginPageFiles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "modernCourseListEnabled",
-              "publicCoursePreviewEnabled",
-              "featuredCourseId",
-              "courseDiscussionsEnabled",
-              "forumEnabled",
-              "gamificationEnabled",
-              "leaderboardsEnabled",
-              "leaderboardVisibility",
-              "calendarEnabled",
-              "liveTrainingEnabled",
-              "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -30555,9 +30271,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -30747,7 +30460,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -30838,9 +30550,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -31030,7 +30739,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -31140,9 +30848,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -31332,7 +31037,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -31423,9 +31127,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -31615,7 +31316,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -31706,9 +31406,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -31898,7 +31595,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -32010,9 +31706,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -32202,7 +31895,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -32293,9 +31985,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -32485,7 +32174,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -32576,9 +32264,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -32768,7 +32453,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -32871,9 +32555,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -33063,7 +32744,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -33154,9 +32834,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -33346,7 +33023,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -33437,9 +33113,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -33629,7 +33302,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -33889,9 +33561,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -34081,7 +33750,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -73572,6 +73240,14 @@
                     {
                       "const": "live_training_ended",
                       "type": "string"
+                    },
+                    {
+                      "const": "quiz_attempt_graded",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading_digest",
+                      "type": "string"
                     }
                   ]
                 },
@@ -77938,6 +77614,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -78064,6 +77748,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -82247,6 +81939,14 @@
                         {
                           "const": "live_training_ended",
                           "type": "string"
+                        },
+                        {
+                          "const": "quiz_attempt_graded",
+                          "type": "string"
+                        },
+                        {
+                          "const": "quiz_grading_digest",
+                          "type": "string"
                         }
                       ]
                     },
@@ -82373,6 +82073,14 @@
                         },
                         {
                           "const": "live_training_ended",
+                          "type": "string"
+                        },
+                        {
+                          "const": "quiz_attempt_graded",
+                          "type": "string"
+                        },
+                        {
+                          "const": "quiz_grading_digest",
                           "type": "string"
                         }
                       ]
@@ -86581,6 +86289,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -86707,6 +86423,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -90888,6 +90612,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -91014,6 +90746,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -95195,6 +94935,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -95321,6 +95069,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -99393,6 +99149,14 @@
               {
                 "const": "live_training_ended",
                 "type": "string"
+              },
+              {
+                "const": "quiz_attempt_graded",
+                "type": "string"
+              },
+              {
+                "const": "quiz_grading_digest",
+                "type": "string"
               }
             ]
           },
@@ -103417,6 +103181,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -103543,6 +103315,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -107617,6 +107397,14 @@
                   {
                     "const": "live_training_ended",
                     "type": "string"
+                  },
+                  {
+                    "const": "quiz_attempt_graded",
+                    "type": "string"
+                  },
+                  {
+                    "const": "quiz_grading_digest",
+                    "type": "string"
                   }
                 ]
               },
@@ -111606,6 +111394,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -111732,6 +111528,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -115955,6 +115759,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -116081,6 +115893,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -120308,6 +120128,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -120434,6 +120262,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -124615,6 +124451,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -124741,6 +124585,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -128933,6 +128785,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -129059,6 +128919,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -133240,6 +133108,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -133366,6 +133242,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -141262,6 +141146,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -141556,6 +141448,14 @@
                                           {
                                             "const": "live_training_ended",
                                             "type": "string"
+                                          },
+                                          {
+                                            "const": "quiz_attempt_graded",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "quiz_grading_digest",
+                                            "type": "string"
                                           }
                                         ]
                                       },
@@ -141738,6 +141638,14 @@
                                                   },
                                                   {
                                                     "const": "live_training_ended",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "quiz_attempt_graded",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "quiz_grading_digest",
                                                     "type": "string"
                                                   }
                                                 ]
@@ -142207,6 +142115,14 @@
                                                   {
                                                     "const": "live_training_ended",
                                                     "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "quiz_attempt_graded",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "quiz_grading_digest",
+                                                    "type": "string"
                                                   }
                                                 ]
                                               },
@@ -142389,6 +142305,14 @@
                                                           },
                                                           {
                                                             "const": "live_training_ended",
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "const": "quiz_attempt_graded",
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "const": "quiz_grading_digest",
                                                             "type": "string"
                                                           }
                                                         ]
@@ -142830,6 +142754,14 @@
                     {
                       "const": "live_training_ended",
                       "type": "string"
+                    },
+                    {
+                      "const": "quiz_attempt_graded",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading_digest",
+                      "type": "string"
                     }
                   ]
                 },
@@ -143225,6 +143157,14 @@
                             {
                               "const": "live_training_ended",
                               "type": "string"
+                            },
+                            {
+                              "const": "quiz_attempt_graded",
+                              "type": "string"
+                            },
+                            {
+                              "const": "quiz_grading_digest",
+                              "type": "string"
                             }
                           ]
                         }
@@ -143512,6 +143452,14 @@
                     {
                       "const": "live_training_ended",
                       "type": "string"
+                    },
+                    {
+                      "const": "quiz_attempt_graded",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading_digest",
+                      "type": "string"
                     }
                   ]
                 },
@@ -143734,6 +143682,14 @@
                                               {
                                                 "const": "live_training_ended",
                                                 "type": "string"
+                                              },
+                                              {
+                                                "const": "quiz_attempt_graded",
+                                                "type": "string"
+                                              },
+                                              {
+                                                "const": "quiz_grading_digest",
+                                                "type": "string"
                                               }
                                             ]
                                           },
@@ -143916,6 +143872,14 @@
                                                       },
                                                       {
                                                         "const": "live_training_ended",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "quiz_attempt_graded",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "quiz_grading_digest",
                                                         "type": "string"
                                                       }
                                                     ]
@@ -144367,6 +144331,14 @@
                                     {
                                       "const": "live_training_ended",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_attempt_graded",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_grading_digest",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -144549,6 +144521,14 @@
                                             },
                                             {
                                               "const": "live_training_ended",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_attempt_graded",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_grading_digest",
                                               "type": "string"
                                             }
                                           ]
@@ -145261,6 +145241,14 @@
                                 {
                                   "const": "live_training_ended",
                                   "type": "string"
+                                },
+                                {
+                                  "const": "quiz_attempt_graded",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "quiz_grading_digest",
+                                  "type": "string"
                                 }
                               ]
                             }
@@ -145572,6 +145560,14 @@
                                     {
                                       "const": "live_training_ended",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_attempt_graded",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_grading_digest",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -145754,6 +145750,14 @@
                                             },
                                             {
                                               "const": "live_training_ended",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_attempt_graded",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_grading_digest",
                                               "type": "string"
                                             }
                                           ]
@@ -146201,6 +146205,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -146383,6 +146395,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -146852,6 +146872,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -147034,6 +147062,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -147511,6 +147547,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -147693,6 +147737,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -148162,6 +148214,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -148344,6 +148404,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -148821,6 +148889,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -149003,6 +149079,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -149472,6 +149556,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -149654,6 +149746,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -150128,6 +150228,14 @@
                                     {
                                       "const": "live_training_ended",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_attempt_graded",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_grading_digest",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -150310,6 +150418,14 @@
                                             },
                                             {
                                               "const": "live_training_ended",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_attempt_graded",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_grading_digest",
                                               "type": "string"
                                             }
                                           ]
@@ -150753,6 +150869,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -150935,6 +151059,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -151404,6 +151536,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -151586,6 +151726,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -152084,6 +152232,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -152266,6 +152422,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -152735,6 +152899,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -152917,6 +153089,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -153395,6 +153575,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -153577,6 +153765,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -154026,6 +154222,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -154208,6 +154412,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -154677,6 +154889,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -154859,6 +155079,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -155336,6 +155564,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -155518,6 +155754,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -155987,6 +156231,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -156169,6 +156421,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -156646,6 +156906,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -156828,6 +157096,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -157297,6 +157573,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -157479,6 +157763,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -157956,6 +158248,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -158138,6 +158438,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -158607,6 +158915,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -158789,6 +159105,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -159236,6 +159560,14 @@
                     {
                       "const": "live_training_ended",
                       "type": "string"
+                    },
+                    {
+                      "const": "quiz_attempt_graded",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading_digest",
+                      "type": "string"
                     }
                   ]
                 },
@@ -159533,6 +159865,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -159757,6 +160097,14 @@
                                 },
                                 {
                                   "const": "live_training_ended",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "quiz_attempt_graded",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "quiz_grading_digest",
                                   "type": "string"
                                 }
                               ]

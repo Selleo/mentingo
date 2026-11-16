@@ -345,7 +345,9 @@
       "announcement": "Ankündigung veröffentlicht",
       "live_training_started": "Live-Schulung gestartet",
       "live_training_reminder": "Live-Schulung beginnt in 15 Minuten",
-      "live_training_ended": "Live-Schulung beendet"
+      "live_training_ended": "Live-Schulung beendet",
+      "quiz_attempt_graded": "Quiz von einer prüfenden Person bewertet",
+      "quiz_grading_digest": "Neue Antworten warten auf Bewertung (täglich)"
     },
     "errors": {
       "incompleteButton": "Geben Sie eine Schaltflächenbeschriftung und URL ein.",
@@ -1689,20 +1691,6 @@
     },
     "validation": {
       "email": "E-Mail ist erforderlich"
-    }
-  },
-  "ssoEnforcementView": {
-    "header": "SSO-Durchsetzung",
-    "subHeader": "Erzwingen Sie die SSO-Anmeldung für alle Benutzer",
-    "description": "Dieser Schalter erzwingt die Google-/Microsoft-Anmeldung für alle Benutzer. Wenn diese Option deaktiviert ist, können sich Benutzer mit dem herkömmlichen Anmeldeformular anmelden.",
-    "switch": {
-      "enabled": "Ermöglicht",
-      "disabled": "Deaktiviert"
-    },
-    "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "SSO-Erzwingung erfolgreich aktualisiert",
-      "ssoEnforcementUpdateFailed": "Die SSO-Erzwingung konnte nicht aktualisiert werden",
-      "registerRedirect": "Die Registrierung per E-Mail ist deaktiviert, da SSO erzwungen wird."
     }
   },
   "userEmailTriggers": {
@@ -4148,7 +4136,6 @@
   "registerView": {
     "header": "Melden Sie sich an",
     "subHeader": "Geben Sie Ihre Daten ein, um ein Konto zu erstellen",
-    "subHeaderSSO": "Melden Sie sich mit Ihrem Google-/Microsoft-Konto an",
     "field": {
       "firstName": "Vorname",
       "lastName": "Nachname",
@@ -7823,7 +7810,9 @@
         "announcement": "Die Benutzer, an die sich die Ankündigung richtet.",
         "live_training_started": "Lernende, die in Kursen eingeschrieben sind, die mit dem gestarteten Live-Training verknüpft sind.",
         "live_training_reminder": "Lernende, die in Kursen eingeschrieben sind, die mit dem bevorstehenden Live-Training verknüpft sind.",
-        "live_training_ended": "Lernende, die in Kursen eingeschrieben sind, die mit dem beendeten Live-Training verknüpft sind."
+        "live_training_ended": "Lernende, die in Kursen eingeschrieben sind, die mit dem beendeten Live-Training verknüpft sind.",
+        "quiz_attempt_graded": "Die lernende Person, deren Quizantworten bewertet wurden.",
+        "quiz_grading_digest": "Nutzer, die Quizantworten bewerten dürfen."
       }
     },
     "mapping": {
@@ -7922,7 +7911,9 @@
       "certificateArchived": "Zertifikat archiviert",
       "announcementPublished": "Ankündigung veröffentlicht",
       "courseChatUserMentioned": "Benutzer im Chat erwähnt",
-      "courseDueDateReminder": "Kurs-Fälligkeitserinnerung"
+      "courseDueDateReminder": "Kurs-Fälligkeitserinnerung",
+      "quizAttemptGraded": "Quiz bewertet",
+      "quizGradingDigest": "Übersicht der Bewertungswarteschlange"
     },
     "canvas": {
       "emptyTitle": "Ihre Automatisierungsleinwand ist leer",
@@ -8075,7 +8066,13 @@
       "live_training_title": "Titel der Live-Schulung",
       "live_training_content": "Nachricht zur Live-Schulung",
       "live_training_link": "Link zur Live-Schulung",
-      "create_password_link": "Link zum Festlegen des Passworts"
+      "create_password_link": "Link zum Festlegen des Passworts",
+      "lessonName": "Lektionsname",
+      "quizScore": "Quizergebnis (%)",
+      "lessonUrl": "Lektionslink",
+      "newAnswersCount": "Neue Antworten",
+      "pendingAnswersCount": "Antworten in Bewertung",
+      "gradingQueueUrl": "Link zur Bewertungswarteschlange"
     },
     "simulation": {
       "title": "Simulationsergebnis",

@@ -7,16 +7,27 @@ import { renderWith } from "~/utils/testUtils";
 
 import RegisterPage from "./Register.page";
 
+vi.mock("~/components/PlatformLogo", () => ({ PlatformLogo: () => <div /> }));
+
 vi.mock("~/api/mutations/useRegisterUser", () => ({
   useRegisterUser: () => ({ mutate: vi.fn() }),
+}));
+
+const settings = vi.hoisted(() => ({ inviteOnlyRegistration: true }));
+const loginMethods = vi.hoisted(() => ({
+  password: true,
+  magicLink: true,
+  google: false,
+  microsoft: false,
+  slack: false,
+  entraId: false,
 }));
 
 vi.mock("~/api/queries/useGlobalSettings", () => ({
   useGlobalSettings: () => ({ data: null }),
   useGlobalSettingsSuspense: () => ({
     data: {
-      enforceSSO: false,
-      inviteOnlyRegistration: true,
+      ...settings,
       loginBackgroundImageS3Key: null,
     },
   }),
@@ -27,10 +38,23 @@ vi.mock("~/api/queries/useRegistrationForm", () => ({
 }));
 
 vi.mock("~/api/queries/useLoginMethods", () => ({
-  useLoginMethods: () => ({ data: undefined }),
+  useLoginMethodsSuspense: () => ({ data: loginMethods }),
 }));
 
 describe("Register page with invite-only registration", () => {
+  beforeEach(() => {
+    settings.inviteOnlyRegistration = true;
+    loginMethods.password = true;
+  });
+
+  it("shows password registration when password login is enabled", async () => {
+    settings.inviteOnlyRegistration = false;
+    await i18next.changeLanguage("en");
+    const Stub = createRemixStub([{ path: "/auth/register", Component: RegisterPage }]);
+    renderWith().render(<Stub initialEntries={["/auth/register"]} />);
+    expect(screen.getByLabelText("Password")).toBeInTheDocument();
+  });
+
   it("explains the restriction and links to login without showing the form", async () => {
     await i18next.changeLanguage("en");
     const RemixStub = createRemixStub([{ path: "/auth/register", Component: RegisterPage }]);

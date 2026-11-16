@@ -174,6 +174,24 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     es: "Te han mencionado en {{courseName}}",
     fr: "Vous avez été mentionné(e) dans {{courseName}}",
   },
+  quizAttemptGradedEmail: {
+    en: "Your quiz has been graded - {{lessonName}}",
+    pl: "Twój quiz został oceniony - {{lessonName}}",
+    de: "Dein Quiz wurde bewertet - {{lessonName}}",
+    lt: "Tavo testas įvertintas - {{lessonName}}",
+    cs: "Tvůj kvíz byl ohodnocen - {{lessonName}}",
+    es: "Tu cuestionario ha sido calificado - {{lessonName}}",
+    fr: "Votre quiz a été évalué - {{lessonName}}",
+  },
+  quizGradingDigestEmail: {
+    en: "New answers are waiting for review",
+    pl: "Nowe odpowiedzi czekają na ocenę",
+    de: "Neue Antworten warten auf Bewertung",
+    lt: "Nauji atsakymai laukia įvertinimo",
+    cs: "Nové odpovědi čekají na hodnocení",
+    es: "Hay nuevas respuestas pendientes de revisión",
+    fr: "De nouvelles réponses attendent une évaluation",
+  },
 } as const;
 
 export const getEmailSubject = (

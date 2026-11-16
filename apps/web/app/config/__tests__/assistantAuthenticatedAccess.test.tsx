@@ -36,9 +36,6 @@ vi.mock("~/api/queries/useAuthSession", async () => {
 vi.mock("~/api/queries/useCurrentUserSessionSuspense", () => ({
   useCurrentUserSessionSuspense: () => ({ data: session.user }),
 }));
-vi.mock("~/modules/Gamification/GamificationRewardToasts", () => ({
-  GamificationRewardToasts: () => null,
-}));
 vi.mock("~/modules/Dashboard/Dashboard", () => ({
   Dashboard: () => (
     <RouteGuard>
