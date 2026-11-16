@@ -25,6 +25,13 @@ export const scormLaunchResponseSchema = Type.Object({
 
 export type ScormLaunchResponse = Static<typeof scormLaunchResponseSchema>;
 
+export const scormPreviewLaunchResponseSchema = Type.Omit(scormLaunchResponseSchema, [
+  "learningStateId",
+  "attemptId",
+]);
+
+export type ScormPreviewLaunchResponse = Static<typeof scormPreviewLaunchResponseSchema>;
+
 export const scormRuntimeCommitSchema = Type.Object({
   attemptId: UUIDSchema,
   packageId: UUIDSchema,

@@ -81,49 +81,30 @@ export class CourseScormAssetsService {
       };
     }
 
-    if (asset.contentType?.startsWith("audio/")) {
-      return {
-        asset,
-        packagePath: asset.packagePath,
-        file: {
-          path: asset.packagePath,
-          streamFactory: async () => {
-            const file = await this.fileService.getFileStream(asset.sourceReference);
-            return file.stream;
-          },
-        },
-      };
-    }
-
-    const buffer = await this.fileService.getRawFileBuffer(asset.sourceReference);
-
-    if (!buffer) {
-      this.logger.error({
-        message: "SCORM export missing asset: file buffer could not be resolved",
-        assetId: asset.id,
-        assetType: asset.type,
-        sourceReference: asset.sourceReference,
-        packagePath: asset.packagePath,
-        contentType: asset.contentType,
-      });
-      throw new BadRequestException("adminCourseView.scormExport.error.missingAsset");
-    }
-
     return {
       asset,
       packagePath: asset.packagePath,
       file: {
         path: asset.packagePath,
-        buffer,
+        streamFactory: () => this.openStoredAsset(asset),
       },
     };
+  }
+
+  private async openStoredAsset(asset: ScormExportAssetReference) {
+    try {
+      const file = await this.fileService.getFileStream(asset.sourceReference);
+      return file.stream;
+    } catch (error) {
+      this.logMissingAsset(asset, "file stream could not be resolved", error);
+      throw new BadRequestException("adminCourseView.scormExport.error.missingAsset");
+    }
   }
 
   private async resolveBunnyVideoAsset(
     asset: ScormExportAssetReference,
     options: CourseScormCollectAssetsOptions,
   ): Promise<CourseScormAssetResolution> {
-    const videoId = asset.sourceReference.replace("bunny-", "");
     const isConfigured = await this.bunnyStreamService.isConfigured();
 
     if (!isConfigured) {
@@ -138,33 +119,43 @@ export class CourseScormAssetsService {
       throw new BadRequestException("adminCourseView.scormExport.error.bunnyNotConfigured");
     }
 
+    return {
+      asset,
+      packagePath: asset.packagePath,
+      file: {
+        path: asset.packagePath,
+        streamFactory: () => this.downloadBunnyVideo(asset, options),
+      },
+    };
+  }
+
+  private async downloadBunnyVideo(
+    asset: ScormExportAssetReference,
+    options: CourseScormCollectAssetsOptions,
+  ) {
     try {
       const file = await this.bunnyStreamService.downloadMp4Fallback(
-        videoId,
+        asset.sourceReference.replace("bunny-", ""),
         720,
         options.tenantOrigin,
       );
-
-      return {
-        asset,
-        packagePath: asset.packagePath,
-        file: {
-          path: asset.packagePath,
-          stream: file.stream,
-        },
-      };
+      return file.stream;
     } catch (error) {
-      this.logger.error({
-        message: "SCORM export missing asset: Bunny video could not be downloaded",
-        assetId: asset.id,
-        assetType: asset.type,
-        sourceReference: asset.sourceReference,
-        packagePath: asset.packagePath,
-        contentType: asset.contentType,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logMissingAsset(asset, "Bunny video could not be downloaded", error);
       throw new BadRequestException("adminCourseView.scormExport.error.missingAsset");
     }
+  }
+
+  private logMissingAsset(asset: ScormExportAssetReference, reason: string, error: unknown) {
+    this.logger.error({
+      message: `SCORM export missing asset: ${reason}`,
+      assetId: asset.id,
+      assetType: asset.type,
+      sourceReference: asset.sourceReference,
+      packagePath: asset.packagePath,
+      contentType: asset.contentType,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 
   private rewriteSnapshotAssetReferences(

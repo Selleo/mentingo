@@ -78,6 +78,52 @@ describe("streamFileToResponse", () => {
     expect(fileStream.destroyed).toBe(true);
     expect(loggerErrorSpy).not.toHaveBeenCalled();
   });
+
+  describe("stream timeout", () => {
+    beforeEach(() => {
+      jest.useFakeTimers({ doNotFake: ["nextTick"] });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("destroys the file stream when the source stalls", () => {
+      const fileStream = new PassThrough();
+      const response = new MockResponse();
+
+      streamFileToResponse(response as unknown as Response, {
+        stream: fileStream,
+        streamTimeoutMs: 1000,
+      });
+
+      jest.advanceTimersByTime(1000);
+
+      expect(fileStream.destroyed).toBe(true);
+    });
+
+    it("does not time out while the client applies backpressure", async () => {
+      const fileStream = new PassThrough();
+      const response = new MockResponse();
+
+      streamFileToResponse(response as unknown as Response, {
+        stream: fileStream,
+        streamTimeoutMs: 1000,
+      });
+
+      fileStream.pause();
+      jest.advanceTimersByTime(5000);
+
+      expect(fileStream.destroyed).toBe(false);
+
+      fileStream.resume();
+      await new Promise(process.nextTick);
+      jest.advanceTimersByTime(1000);
+
+      expect(fileStream.destroyed).toBe(true);
+    });
+  });
+
   it.each([
     ["image/png", undefined, "inline"],
     ["image/svg+xml", undefined, "attachment"],

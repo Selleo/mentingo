@@ -74,6 +74,7 @@ import {
 } from "./schemas/scormImport.schema";
 import {
   scormLaunchResponseSchema,
+  scormPreviewLaunchResponseSchema,
   ScormRuntimeCommitBody,
   scormRuntimeCommitResponseSchema,
   scormRuntimeCommitSchema,
@@ -92,6 +93,7 @@ import type {
 } from "./schemas/scormImport.schema";
 import type {
   ScormLaunchResponse,
+  ScormPreviewLaunchResponse,
   ScormRuntimeCommitResponse,
   ScormRuntimeFinishResponse,
 } from "./schemas/scormRuntime.schema";
@@ -483,6 +485,31 @@ export class ScormController {
     @Req() request: Request,
   ): Promise<BaseResponse<ScormLaunchResponse>> {
     const launch = await this.scormContentAccessService.launchIsolatedRuntime(
+      { lessonId, scoId, language, currentUser },
+      request,
+    );
+
+    return new BaseResponse(launch);
+  }
+
+  @Get("runtime/preview")
+  @RequirePermission(PERMISSIONS.COURSE_READ)
+  @Validate({
+    request: [
+      { type: "query" as const, name: "lessonId", schema: UUIDSchema },
+      { type: "query" as const, name: "scoId", schema: Type.Optional(UUIDSchema) },
+      { type: "query" as const, name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: baseResponse(scormPreviewLaunchResponseSchema),
+  })
+  async launchScormPreview(
+    @Query("lessonId") lessonId: UUIDType,
+    @Query("scoId") scoId: UUIDType | undefined,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: Request,
+  ): Promise<BaseResponse<ScormPreviewLaunchResponse>> {
+    const launch = await this.scormContentAccessService.launchIsolatedPreviewRuntime(
       { lessonId, scoId, language, currentUser },
       request,
     );

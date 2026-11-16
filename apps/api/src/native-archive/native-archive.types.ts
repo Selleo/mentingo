@@ -15,7 +15,7 @@ import type {
   nativeArchiveDownloadUrlResponseSchema,
   nativeArchiveJobProgressSchema,
 } from "./schemas/native-archive.schema";
-import type { PERMISSIONS } from "@repo/shared";
+import type { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import type { Static } from "@sinclair/typebox";
 import type { Readable } from "node:stream";
 import type { UUIDType } from "src/common";
@@ -144,6 +144,8 @@ export type NativeArchiveJob = {
   exportAccess?: NativeArchiveExportAccess;
   importSource?: NativeArchiveImportSource;
   importMode?: NativeArchiveImportMode;
+  language?: SupportedLanguages;
+  tenantOrigin?: string | null;
   actor: CurrentUserType;
 };
 

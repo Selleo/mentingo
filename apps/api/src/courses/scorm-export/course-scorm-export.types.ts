@@ -8,10 +8,26 @@ import type { Readable } from "node:stream";
 import type { UUIDType } from "src/common";
 import type { scormScos } from "src/storage/schema";
 
-export type CourseScormExportResult = {
-  stream: Readable;
+export type CourseScormPreparedExport = {
+  snapshot: ScormExportCourseSnapshot;
+  fingerprint: string;
   filename: string;
-  contentType: string;
+};
+
+export type CourseScormBuildPackageOptions = CourseScormCollectAssetsOptions & {
+  onFileStaged?: (stagedCount: number, totalCount: number) => void;
+};
+
+export type CourseScormBuiltPackage = {
+  stream: Readable;
+  estimatedByteLength: number;
+  cleanup: () => Promise<void>;
+};
+
+export type CourseScormStagedFile = {
+  path: string;
+  stagedFilePath: string;
+  byteLength: number;
 };
 
 export type CourseScormSnapshotResult = {
