@@ -2399,19 +2399,25 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       ]);
     });
 
-    it("exports pairs and the scoring mode to SCORM", async () => {
+    it("exports pairs, the scoring mode and the feedback mode to SCORM", async () => {
       const admin = await createMatchingAdmin();
       const { courseId, lesson } = await createMatchingQuiz(ASSESSMENT_SCORING_MODES.PARTIAL, {
         authorId: admin.id,
         thumbnailS3Key: null,
       });
+      await db
+        .update(assessments)
+        .set({ feedbackMode: ASSESSMENT_FEEDBACK_MODES.SCORE_ONLY })
+        .where(eq(assessments.lessonId, lesson.id));
 
       const zip = await exportCourseAsScormPackage(app, courseId, await cookieFor(admin, app));
       const courseJson = zip.getEntry("data/course.json");
       if (!courseJson) throw new Error("SCORM package has no course.json");
 
-      const [question] = JSON.parse(courseJson.getData().toString("utf8")).lessons[lesson.id]
-        .questions;
+      const exportedLesson = JSON.parse(courseJson.getData().toString("utf8")).lessons[lesson.id];
+      const [question] = exportedLesson.questions;
+
+      expect(exportedLesson.feedbackMode).toBe(ASSESSMENT_FEEDBACK_MODES.SCORE_ONLY);
 
       expect(question).toMatchObject({
         type: ASSESSMENT_QUESTION_TYPES.MATCHING,

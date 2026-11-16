@@ -13,7 +13,6 @@ const makeFeedbackRange = (
   ...overrides,
 });
 
-// Partition of 0..100 as the author validator guarantees (contiguous, inclusive integer bounds).
 const ranges: QuizAuthoringFeedbackRange[] = [
   makeFeedbackRange({ minPercent: 0, maxPercent: 50, message: "Keep going {{firstName}}!" }),
   makeFeedbackRange({
@@ -43,8 +42,37 @@ describe("resolveQuizFeedbackRangeMessage", () => {
       firstName: "Ada",
     });
 
-    // 50.99 floors to 50, which belongs to the lower band (no {{score}} token there).
     expect(message).toBe("Keep going Ada!");
+  });
+
+  it.each(["49.5", "49.99"])(
+    "puts a fractional %s%% score into the 0-49 band",
+    (scorePercentage) => {
+      const message = resolveQuizFeedbackRangeMessage({
+        ranges: [
+          makeFeedbackRange({ minPercent: 0, maxPercent: 49, message: "Low {{score}}" }),
+          makeFeedbackRange({ minPercent: 50, maxPercent: 100, message: "High {{score}}" }),
+        ],
+        scorePercentage,
+        gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+        firstName: "Ada",
+      });
+
+      expect(message).toBe("Low 49");
+    },
+  );
+
+  it("escapes HTML in the first name", () => {
+    const message = resolveQuizFeedbackRangeMessage({
+      ranges: [
+        makeFeedbackRange({ minPercent: 0, maxPercent: 100, message: "<p>Hi {{firstName}}</p>" }),
+      ],
+      scorePercentage: "42.00",
+      gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
+      firstName: '<img src=x onerror="alert(1)">',
+    });
+
+    expect(message).toBe("<p>Hi &lt;img src=x onerror=&quot;alert(1)&quot;&gt;</p>");
   });
 
   it("matches the inclusive upper bound of the top band", () => {
