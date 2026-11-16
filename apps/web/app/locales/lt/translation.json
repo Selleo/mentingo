@@ -345,7 +345,9 @@
       "announcement": "Paskelbtas pranešimas",
       "live_training_started": "Prasidėjo tiesioginis mokymas",
       "live_training_reminder": "Tiesioginis mokymas prasidės po 15 minučių",
-      "live_training_ended": "Tiesioginis mokymas baigėsi"
+      "live_training_ended": "Tiesioginis mokymas baigėsi",
+      "quiz_attempt_graded": "Testą įvertino vertintojas",
+      "quiz_grading_digest": "Nauji atsakymai laukia įvertinimo (kasdien)"
     },
     "errors": {
       "incompleteButton": "Įveskite mygtuko tekstą ir URL.",
@@ -7831,7 +7833,9 @@
         "announcement": "Naudotojai, kuriems skirtas skelbimas.",
         "live_training_started": "Besimokantieji, užsiregistravę į kursus, susietus su prasidėjusiais tiesioginiais mokymais.",
         "live_training_reminder": "Besimokantieji, užsiregistravę į kursus, susietus su artėjančiais tiesioginiais mokymais.",
-        "live_training_ended": "Besimokantieji, užsiregistravę į kursus, susietus su pasibaigusiais tiesioginiais mokymais."
+        "live_training_ended": "Besimokantieji, užsiregistravę į kursus, susietus su pasibaigusiais tiesioginiais mokymais.",
+        "quiz_attempt_graded": "Besimokantysis, kurio testo atsakymai buvo įvertinti.",
+        "quiz_grading_digest": "Naudotojai, galintys vertinti testų atsakymus."
       }
     },
     "mapping": {
@@ -7930,7 +7934,9 @@
       "certificateArchived": "Sertifikatas archyvuotas",
       "announcementPublished": "Skelbimas paskelbtas",
       "courseChatUserMentioned": "Vartotojas paminėtas pokalbyje",
-      "courseDueDateReminder": "Kurso termino priminimas"
+      "courseDueDateReminder": "Kurso termino priminimas",
+      "quizAttemptGraded": "Testas įvertintas",
+      "quizGradingDigest": "Vertinimo eilės suvestinė"
     },
     "canvas": {
       "emptyTitle": "Jūsų automatizavimo drobė tuščia",
@@ -8083,7 +8089,13 @@
       "live_training_title": "Tiesioginių mokymų pavadinimas",
       "live_training_content": "Pranešimas apie tiesioginius mokymus",
       "live_training_link": "Tiesioginių mokymų nuoroda",
-      "create_password_link": "Slaptažodžio sukūrimo nuoroda"
+      "create_password_link": "Slaptažodžio sukūrimo nuoroda",
+      "lessonName": "Pamokos pavadinimas",
+      "quizScore": "Testo rezultatas (%)",
+      "lessonUrl": "Pamokos nuoroda",
+      "newAnswersCount": "Nauji atsakymai",
+      "pendingAnswersCount": "Atsakymai, laukiantys įvertinimo",
+      "gradingQueueUrl": "Vertinimo eilės nuoroda"
     },
     "simulation": {
       "title": "Simuliacijos rezultatas",

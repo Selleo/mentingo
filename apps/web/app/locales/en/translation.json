@@ -345,7 +345,9 @@
       "announcement": "Announcement published",
       "live_training_started": "Live training started",
       "live_training_reminder": "Live training starts in 15 minutes",
-      "live_training_ended": "Live training ended"
+      "live_training_ended": "Live training ended",
+      "quiz_attempt_graded": "Quiz graded by a reviewer",
+      "quiz_grading_digest": "New answers waiting for review (daily)"
     },
     "errors": {
       "incompleteButton": "Enter a button label and URL.",
@@ -8073,7 +8075,9 @@
         "announcement": "The users in the announcement’s audience.",
         "live_training_started": "Learners enrolled in courses linked to the live training that started.",
         "live_training_reminder": "Learners enrolled in courses linked to the upcoming live training.",
-        "live_training_ended": "Learners enrolled in courses linked to the live training that ended."
+        "live_training_ended": "Learners enrolled in courses linked to the live training that ended.",
+        "quiz_attempt_graded": "The learner whose quiz answers were graded.",
+        "quiz_grading_digest": "Users who can grade quiz answers."
       }
     },
     "mapping": {
@@ -8171,7 +8175,9 @@
       "certificateArchived": "Certificate archived",
       "announcementPublished": "Announcement published",
       "courseChatUserMentioned": "User mentioned in chat",
-      "courseDueDateReminder": "Course due date reminder"
+      "courseDueDateReminder": "Course due date reminder",
+      "quizAttemptGraded": "Quiz graded",
+      "quizGradingDigest": "Grading queue digest"
     },
     "canvas": {
       "emptyTitle": "Your automation canvas is empty",
@@ -8327,7 +8333,13 @@
       "live_training_title": "Live training title",
       "live_training_content": "Live training message",
       "live_training_link": "Live training link",
-      "create_password_link": "Create password link"
+      "create_password_link": "Create password link",
+      "lessonName": "Lesson name",
+      "quizScore": "Quiz score (%)",
+      "lessonUrl": "Lesson link",
+      "newAnswersCount": "New answers",
+      "pendingAnswersCount": "Answers waiting for review",
+      "gradingQueueUrl": "Grading queue link"
     },
     "simulation": {
       "title": "Simulation Result",

@@ -345,7 +345,9 @@
       "announcement": "Ankündigung veröffentlicht",
       "live_training_started": "Live-Schulung gestartet",
       "live_training_reminder": "Live-Schulung beginnt in 15 Minuten",
-      "live_training_ended": "Live-Schulung beendet"
+      "live_training_ended": "Live-Schulung beendet",
+      "quiz_attempt_graded": "Quiz von einer prüfenden Person bewertet",
+      "quiz_grading_digest": "Neue Antworten warten auf Bewertung (täglich)"
     },
     "errors": {
       "incompleteButton": "Geben Sie eine Schaltflächenbeschriftung und URL ein.",
@@ -7814,7 +7816,9 @@
         "announcement": "Die Benutzer, an die sich die Ankündigung richtet.",
         "live_training_started": "Lernende, die in Kursen eingeschrieben sind, die mit dem gestarteten Live-Training verknüpft sind.",
         "live_training_reminder": "Lernende, die in Kursen eingeschrieben sind, die mit dem bevorstehenden Live-Training verknüpft sind.",
-        "live_training_ended": "Lernende, die in Kursen eingeschrieben sind, die mit dem beendeten Live-Training verknüpft sind."
+        "live_training_ended": "Lernende, die in Kursen eingeschrieben sind, die mit dem beendeten Live-Training verknüpft sind.",
+        "quiz_attempt_graded": "Die lernende Person, deren Quizantworten bewertet wurden.",
+        "quiz_grading_digest": "Nutzer, die Quizantworten bewerten dürfen."
       }
     },
     "mapping": {
@@ -7913,7 +7917,9 @@
       "certificateArchived": "Zertifikat archiviert",
       "announcementPublished": "Ankündigung veröffentlicht",
       "courseChatUserMentioned": "Benutzer im Chat erwähnt",
-      "courseDueDateReminder": "Kurs-Fälligkeitserinnerung"
+      "courseDueDateReminder": "Kurs-Fälligkeitserinnerung",
+      "quizAttemptGraded": "Quiz bewertet",
+      "quizGradingDigest": "Übersicht der Bewertungswarteschlange"
     },
     "canvas": {
       "emptyTitle": "Ihre Automatisierungsleinwand ist leer",
@@ -8066,7 +8072,13 @@
       "live_training_title": "Titel der Live-Schulung",
       "live_training_content": "Nachricht zur Live-Schulung",
       "live_training_link": "Link zur Live-Schulung",
-      "create_password_link": "Link zum Festlegen des Passworts"
+      "create_password_link": "Link zum Festlegen des Passworts",
+      "lessonName": "Lektionsname",
+      "quizScore": "Quizergebnis (%)",
+      "lessonUrl": "Lektionslink",
+      "newAnswersCount": "Neue Antworten",
+      "pendingAnswersCount": "Antworten in Bewertung",
+      "gradingQueueUrl": "Link zur Bewertungswarteschlange"
     },
     "simulation": {
       "title": "Simulationsergebnis",
