@@ -89,7 +89,6 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
                   trailerUrl={course.trailerUrl}
                   estimatedDurationMinutes={course.estimatedDurationMinutes}
                   lessonCount={course.lessonCount}
-                  category={course.category}
                   className="w-[320px] max-w-none md:w-[380px] lg:w-[400px]"
                   enrolled={course.enrolled}
                   hasFreeChapters={course.hasFreeChapters}
