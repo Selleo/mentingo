@@ -18,6 +18,7 @@ import { defaultQuizLessonValues } from "../defaults/defaultQuizLessonValues";
 import { minutesToTimeValue, timeValueToMinutes } from "../utils/timeLimitTime";
 
 import { InfoTooltip } from "./InfoTooltip";
+import QuizFeedbackSection from "./QuizFeedbackSection";
 
 import type { Lesson } from "../../../../EditCourse.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
@@ -28,6 +29,7 @@ type Props = {
   lessonToEdit: Lesson | null;
   questionsCount: number;
   isAttemptsLimitEnabled: boolean;
+  isStructureLocked: boolean;
   onSwitchChange: (checked: boolean) => void;
 };
 
@@ -36,6 +38,7 @@ const QuizSettingsSection = ({
   lessonToEdit,
   questionsCount,
   isAttemptsLimitEnabled,
+  isStructureLocked,
   onSwitchChange,
 }: Props) => {
   const { t } = useTranslation();
@@ -253,6 +256,8 @@ const QuizSettingsSection = ({
           />
         </div>
       </div>
+
+      <QuizFeedbackSection form={form} isStructureLocked={isStructureLocked} />
     </>
   );
 };

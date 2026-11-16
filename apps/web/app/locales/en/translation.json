@@ -3195,14 +3195,27 @@
           "quizCooldownInHours": "Time lock after failed attempts (in hours)",
           "numberOfQuestions": "{{count1}} of {{count2}} questions",
           "noQuestions": "No questions",
-          "timeLimitMinutes": "Time limit (hh:mm)"
+          "timeLimitMinutes": "Time limit (hh:mm)",
+          "feedbackMode": "Feedback visibility",
+          "feedbackModeFull": "Score and messages",
+          "feedbackModeScoreOnly": "Score only",
+          "feedbackModeNone": "No feedback",
+          "feedbackRanges": "Score-range messages",
+          "feedbackVariablesHint": "You can use {{firstNameVar}} for the learner's first name and {{scoreVar}} for their score.",
+          "feedbackRangeMin": "From (%)",
+          "feedbackRangeMax": "To (%)",
+          "feedbackRangeMessage": "Message",
+          "feedbackRangeAdd": "Add range",
+          "feedbackRangeReset": "Restore default ranges"
         },
         "tooltip": {
           "switch": "If enabled, the student has a limited number of quiz attempts.",
           "passingThreshold": "The percentage threshold for passing the quiz. If a student reaches this score, the quiz will be considered passed.",
           "attemptsLimit": "Number of quiz attempts allowed before time lock is triggered.",
           "quizCooldownInHours": "Duration of the quiz lock after all attempts are used.",
-          "timeLimitMinutes": "Optional. When set, learners start the quiz explicitly and their answers are submitted automatically when time runs out. Leave empty for no time limit."
+          "timeLimitMinutes": "Optional. When set, learners start the quiz explicitly and their answers are submitted automatically when time runs out. Leave empty for no time limit.",
+          "feedbackMode": "Controls what learners see after submitting: the score and messages, only the score, or nothing.",
+          "feedbackRanges": "Ordered score bands shown to learners. Bands must cover 0-100% with no gaps or overlaps."
         },
         "validation": {
           "optionTextRequired": "Option text is required",
@@ -3232,7 +3245,13 @@
           "matchingPairsRequired": "Add at least 2 pairs and fill in both sides of each pair",
           "matchingMatchRequired": "Fill in the match for this pair",
           "matchingPairsUnique": "Each pair needs a unique match",
-          "timeLimitMinutes": "Enter a time limit between {{min}} and {{max}}."
+          "timeLimitMinutes": "Enter a time limit between {{min}} and {{max}}.",
+          "feedbackRangeNotInteger": "Range bounds must be whole numbers.",
+          "feedbackRangeOutOfBounds": "Range bounds must be between 0 and 100.",
+          "feedbackRangeBoundsReversed": "A range's start cannot be greater than its end.",
+          "feedbackRangesMustStartAtZero": "Ranges must start at 0%.",
+          "feedbackRangesMustEndAtHundred": "Ranges must end at 100%.",
+          "feedbackRangesGapOrOverlap": "Ranges must cover 0-100% with no gaps or overlaps."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",

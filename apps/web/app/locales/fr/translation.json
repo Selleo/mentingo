@@ -3188,14 +3188,27 @@
           "quizCooldownInHours": "Verrouillage horaire après tentatives infructueuses (en heures)",
           "numberOfQuestions": "{{count1}} questions sur {{count2}}",
           "noQuestions": "Aucune question",
-          "timeLimitMinutes": "Limite de temps (hh:mm)"
+          "timeLimitMinutes": "Limite de temps (hh:mm)",
+          "feedbackMode": "Visibilité du retour",
+          "feedbackModeFull": "Score et messages",
+          "feedbackModeScoreOnly": "Score uniquement",
+          "feedbackModeNone": "Aucun retour",
+          "feedbackRanges": "Messages par plage de score",
+          "feedbackVariablesHint": "Vous pouvez utiliser {{firstNameVar}} pour le prénom de l'apprenant et {{scoreVar}} pour son score.",
+          "feedbackRangeMin": "De (%)",
+          "feedbackRangeMax": "À (%)",
+          "feedbackRangeMessage": "Message",
+          "feedbackRangeAdd": "Ajouter une plage",
+          "feedbackRangeReset": "Rétablir les plages par défaut"
         },
         "tooltip": {
           "switch": "Si cette option est activée, l'apprenant dispose d'un nombre limité de tentatives de quiz.",
           "passingThreshold": "Le seuil de pourcentage pour réussir le quiz. Si un apprenant atteint ce score, le quiz sera considéré comme réussi.",
           "attemptsLimit": "Nombre de tentatives de quiz autorisées avant le déclenchement du verrouillage horaire.",
           "quizCooldownInHours": "Durée du verrouillage du quiz une fois que toutes les tentatives ont été utilisées.",
-          "timeLimitMinutes": "Facultatif. Si elle est définie, les apprenants démarrent le quiz explicitement et leurs réponses sont envoyées automatiquement à la fin du temps imparti. Laissez vide pour ne pas limiter le temps."
+          "timeLimitMinutes": "Facultatif. Si elle est définie, les apprenants démarrent le quiz explicitement et leurs réponses sont envoyées automatiquement à la fin du temps imparti. Laissez vide pour ne pas limiter le temps.",
+          "feedbackMode": "Détermine ce que voient les apprenants après l'envoi : le score et les messages, le score seul ou rien.",
+          "feedbackRanges": "Plages de score ordonnées affichées aux apprenants. Elles doivent couvrir 0-100 % sans trou ni chevauchement."
         },
         "validation": {
           "optionTextRequired": "Le texte de l'option est requis",
@@ -3225,7 +3238,13 @@
           "matchingPairsRequired": "Ajoutez au moins 2 paires et remplissez les deux côtés de chaque paire",
           "matchingMatchRequired": "Renseignez la correspondance de cette paire",
           "matchingPairsUnique": "Chaque paire doit avoir une correspondance unique",
-          "timeLimitMinutes": "Saisissez une limite de temps entre {{min}} et {{max}}."
+          "timeLimitMinutes": "Saisissez une limite de temps entre {{min}} et {{max}}.",
+          "feedbackRangeNotInteger": "Les bornes de la plage doivent être des nombres entiers.",
+          "feedbackRangeOutOfBounds": "Les bornes de la plage doivent être comprises entre 0 et 100.",
+          "feedbackRangeBoundsReversed": "Le début d'une plage ne peut pas être supérieur à sa fin.",
+          "feedbackRangesMustStartAtZero": "Les plages doivent commencer à 0 %.",
+          "feedbackRangesMustEndAtHundred": "Les plages doivent se terminer à 100 %.",
+          "feedbackRangesGapOrOverlap": "Les plages doivent couvrir 0-100 % sans trou ni chevauchement."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "L'ordre d'affichage des leçons a été mis à jour avec succès",

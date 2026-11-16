@@ -3194,14 +3194,27 @@
           "quizCooldownInHours": "Laiko užraktas po nesėkmingų bandymų (valandomis)",
           "numberOfQuestions": "{{count1}} iš {{count2}} klausimų",
           "noQuestions": "Jokių klausimų",
-          "timeLimitMinutes": "Laiko limitas (hh:mm)"
+          "timeLimitMinutes": "Laiko limitas (hh:mm)",
+          "feedbackMode": "Atsiliepimo matomumas",
+          "feedbackModeFull": "Rezultatas ir žinutės",
+          "feedbackModeScoreOnly": "Tik rezultatas",
+          "feedbackModeNone": "Jokio atsiliepimo",
+          "feedbackRanges": "Rezultatų intervalų žinutės",
+          "feedbackVariablesHint": "Galite naudoti {{firstNameVar}} besimokančiojo vardui ir {{scoreVar}} jo rezultatui.",
+          "feedbackRangeMin": "Nuo (%)",
+          "feedbackRangeMax": "Iki (%)",
+          "feedbackRangeMessage": "Žinutė",
+          "feedbackRangeAdd": "Pridėti intervalą",
+          "feedbackRangeReset": "Atkurti numatytuosius intervalus"
         },
         "tooltip": {
           "switch": "Jei įjungta, mokinys gali atlikti ribotą testų skaičių.",
           "passingThreshold": "Procentinė viktorinos išlaikymo riba. Jei mokinys pasiekia šį balą, viktorina bus laikoma išlaikyta.",
           "attemptsLimit": "Leidžiamas testų bandymų skaičius prieš suveikiant laiko užraktą.",
           "quizCooldownInHours": "Viktorinos užrakto trukmė išnaudojus visus bandymus.",
-          "timeLimitMinutes": "Neprivaloma. Nustačius, besimokantieji patys pradeda viktoriną, o jų atsakymai pateikiami automatiškai pasibaigus laikui. Palikite tuščią, jei laiko limito nereikia."
+          "timeLimitMinutes": "Neprivaloma. Nustačius, besimokantieji patys pradeda viktoriną, o jų atsakymai pateikiami automatiškai pasibaigus laikui. Palikite tuščią, jei laiko limito nereikia.",
+          "feedbackMode": "Nustato, ką besimokantysis mato pateikęs: rezultatą ir žinutes, tik rezultatą arba nieko.",
+          "feedbackRanges": "Surikiuoti rezultatų intervalai, rodomi besimokantiesiems. Intervalai turi padengti 0-100% be tarpų ir persidengimų."
         },
         "validation": {
           "optionTextRequired": "Būtinas parinkties tekstas",
@@ -3231,7 +3244,13 @@
           "matchingPairsRequired": "Pridėkite bent 2 poras ir užpildykite abi kiekvienos poros puses",
           "matchingMatchRequired": "Įrašykite šios poros atitikmenį",
           "matchingPairsUnique": "Kiekviena pora turi turėti unikalų atitikmenį",
-          "timeLimitMinutes": "Įveskite laiko limitą nuo {{min}} iki {{max}}."
+          "timeLimitMinutes": "Įveskite laiko limitą nuo {{min}} iki {{max}}.",
+          "feedbackRangeNotInteger": "Intervalo ribos turi būti sveikieji skaičiai.",
+          "feedbackRangeOutOfBounds": "Intervalo ribos turi būti nuo 0 iki 100.",
+          "feedbackRangeBoundsReversed": "Intervalo pradžia negali būti didesnė už jo pabaigą.",
+          "feedbackRangesMustStartAtZero": "Intervalai turi prasidėti nuo 0%.",
+          "feedbackRangesMustEndAtHundred": "Intervalai turi baigtis ties 100%.",
+          "feedbackRangesGapOrOverlap": "Intervalai turi padengti 0-100% be tarpų ir persidengimų."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pamokos rodymo tvarka sėkmingai atnaujinta",

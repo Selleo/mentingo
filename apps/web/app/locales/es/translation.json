@@ -3187,14 +3187,27 @@
           "quizCooldownInHours": "Bloqueo de tiempo después de intentos fallidos (en horas)",
           "numberOfQuestions": "{{count1}} de preguntas {{count2}}",
           "noQuestions": "Sin preguntas",
-          "timeLimitMinutes": "Límite de tiempo (hh:mm)"
+          "timeLimitMinutes": "Límite de tiempo (hh:mm)",
+          "feedbackMode": "Visibilidad de los comentarios",
+          "feedbackModeFull": "Puntuación y mensajes",
+          "feedbackModeScoreOnly": "Solo puntuación",
+          "feedbackModeNone": "Sin comentarios",
+          "feedbackRanges": "Mensajes por rango de puntuación",
+          "feedbackVariablesHint": "Puedes usar {{firstNameVar}} para el nombre del estudiante y {{scoreVar}} para su puntuación.",
+          "feedbackRangeMin": "Desde (%)",
+          "feedbackRangeMax": "Hasta (%)",
+          "feedbackRangeMessage": "Mensaje",
+          "feedbackRangeAdd": "Añadir rango",
+          "feedbackRangeReset": "Restaurar rangos predeterminados"
         },
         "tooltip": {
           "switch": "Si está habilitado, el estudiante tiene un número limitado de intentos de prueba.",
           "passingThreshold": "El umbral porcentual para aprobar el cuestionario. Si un estudiante alcanza esta puntuación, la prueba se considerará aprobada.",
           "attemptsLimit": "Número de intentos de prueba permitidos antes de que se active el bloqueo de tiempo.",
           "quizCooldownInHours": "Duración del bloqueo del cuestionario después de utilizar todos los intentos.",
-          "timeLimitMinutes": "Opcional. Si se define, los alumnos inician el cuestionario de forma explícita y sus respuestas se envían automáticamente cuando se acaba el tiempo. Déjalo vacío para no limitar el tiempo."
+          "timeLimitMinutes": "Opcional. Si se define, los alumnos inician el cuestionario de forma explícita y sus respuestas se envían automáticamente cuando se acaba el tiempo. Déjalo vacío para no limitar el tiempo.",
+          "feedbackMode": "Controla lo que ven los estudiantes tras enviar: la puntuación y los mensajes, solo la puntuación o nada.",
+          "feedbackRanges": "Rangos de puntuación ordenados que se muestran a los estudiantes. Deben cubrir del 0 al 100% sin huecos ni solapamientos."
         },
         "validation": {
           "optionTextRequired": "El texto de la opción es obligatorio",
@@ -3224,7 +3237,13 @@
           "matchingPairsRequired": "Añade al menos 2 pares y completa ambos lados de cada par",
           "matchingMatchRequired": "Completa la pareja de este elemento",
           "matchingPairsUnique": "Cada par necesita una pareja única",
-          "timeLimitMinutes": "Introduce un límite de tiempo entre {{min}} y {{max}}."
+          "timeLimitMinutes": "Introduce un límite de tiempo entre {{min}} y {{max}}.",
+          "feedbackRangeNotInteger": "Los límites del rango deben ser números enteros.",
+          "feedbackRangeOutOfBounds": "Los límites del rango deben estar entre 0 y 100.",
+          "feedbackRangeBoundsReversed": "El inicio de un rango no puede ser mayor que su fin.",
+          "feedbackRangesMustStartAtZero": "Los rangos deben empezar en 0%.",
+          "feedbackRangesMustEndAtHundred": "Los rangos deben terminar en 100%.",
+          "feedbackRangesGapOrOverlap": "Los rangos deben cubrir del 0 al 100% sin huecos ni solapamientos."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Orden de visualización de lecciones actualizado correctamente",

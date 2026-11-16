@@ -1,5 +1,13 @@
 import type { AssessmentScoringMode } from "@repo/shared";
 
+// Author-defined feedback band. Bounds are inclusive integer percentages; `message` is the
+// rich-text feedback resolved to the lesson's current language (empty when none is set).
+export type QuizFeedbackRange = {
+  minPercent: number;
+  maxPercent: number;
+  message: string;
+};
+
 export enum QuestionIcons {
   MultiSelect = "MultiSelect",
   SingleSelect = "SingleSelect",

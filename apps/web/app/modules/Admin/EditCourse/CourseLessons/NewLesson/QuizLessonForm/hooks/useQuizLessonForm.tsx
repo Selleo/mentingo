@@ -22,7 +22,10 @@ import {
 import { StringifiedIcons } from "~/utils/stringifiedIcons";
 
 import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "../components/constants";
-import { defaultQuizLessonValues } from "../defaults/defaultQuizLessonValues";
+import {
+  defaultQuizFeedbackRanges,
+  defaultQuizLessonValues,
+} from "../defaults/defaultQuizLessonValues";
 import { QuestionType } from "../QuizLessonForm.types";
 import { quizLessonFormSchema } from "../validators/quizLessonFormSchema";
 
@@ -72,6 +75,8 @@ export const useQuizLessonForm = ({
       attemptsLimit: null,
       quizCooldownInHours: null,
       timeLimitMinutes: null,
+      feedbackMode: defaultQuizLessonValues.feedbackMode,
+      feedbackRanges: defaultQuizFeedbackRanges,
       questions: [],
     },
   });
@@ -86,6 +91,15 @@ export const useQuizLessonForm = ({
         attemptsLimit: null,
         quizCooldownInHours: null,
         timeLimitMinutes: lessonToEdit.timeLimitMinutes ?? null,
+        feedbackMode: lessonToEdit.feedbackMode ?? defaultQuizLessonValues.feedbackMode,
+        feedbackRanges:
+          lessonToEdit.feedbackRanges && lessonToEdit.feedbackRanges.length > 0
+            ? lessonToEdit.feedbackRanges.map((range) => ({
+                minPercent: range.minPercent,
+                maxPercent: range.maxPercent,
+                message: range.message ?? "",
+              }))
+            : defaultQuizFeedbackRanges,
         questions:
           lessonToEdit.questions?.map((question: Question) => {
             let processedDescription = question.description || "";
