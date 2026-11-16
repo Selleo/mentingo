@@ -22,7 +22,6 @@ describe("MentionTextarea", () => {
               firstName: "Mention",
               lastName: "Target",
               avatarReference: null,
-              isOnline: false,
             },
           ]}
           placeholder="Write a message"

@@ -2452,7 +2452,8 @@
         "forum_read": "Ver el foro.",
         "forum_topic_create": "Crear temas en el foro.",
         "forum_post_create": "Responder en los temas del foro.",
-        "forum_post_delete": "Eliminar cualquier publicación del foro."
+        "forum_post_delete": "Eliminar cualquier publicación del foro.",
+        "forum_post_react": "Reaccionar a las publicaciones del foro."
       }
     },
     "dropdown": {
@@ -9702,7 +9703,9 @@
     "toast": {
       "createTopicError": "No se pudo crear el tema.",
       "createPostError": "No se pudo enviar la respuesta.",
-      "deletePostError": "No se pudo eliminar la publicación."
+      "deletePostError": "No se pudo eliminar la publicación.",
+      "mentioned": "Alguien te ha mencionado en el foro.",
+      "reactionError": "No se pudo guardar la reacción."
     },
     "errors": {
       "topicNotFound": "Este tema no existe o no tienes acceso a él.",
@@ -9710,7 +9713,8 @@
       "cannotDeletePost": "Solo puedes eliminar tus propias publicaciones.",
       "topicDeleted": "Las respuestas están cerradas porque se eliminó la primera publicación.",
       "emptyTitle": "Escribe un título.",
-      "emptyContent": "Escribe un mensaje."
+      "emptyContent": "Escribe un mensaje.",
+      "invalidReaction": "Elige una de las reacciones disponibles."
     }
   }
 }

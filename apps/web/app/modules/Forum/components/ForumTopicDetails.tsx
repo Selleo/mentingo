@@ -1,27 +1,37 @@
 import { Link, useNavigate, useSearchParams } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { ArrowLeft } from "lucide-react";
-import { useDeferredValue } from "react";
+import { useCallback, useDeferredValue } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCreateForumPost } from "~/api/mutations/useCreateForumPost";
 import { useDeleteForumPost } from "~/api/mutations/useDeleteForumPost";
+import { useToggleForumPostReaction } from "~/api/mutations/useToggleForumPostReaction";
+import { useCourseChatUsers } from "~/api/queries/course-chat/useCourseChatUsers";
 import {
   FORUM_POSTS_PER_PAGE,
   useForumTopicPostsSuspense,
 } from "~/api/queries/forum/useForumTopicPosts";
+import { useForumUsers } from "~/api/queries/forum/useForumUsers";
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
+import { hasAnyPermission } from "~/common/permissions/permission.utils";
 import { useClampedPage } from "~/components/DataTable";
 import { Pagination } from "~/components/Pagination/Pagination";
 import { Badge } from "~/components/ui/badge";
+import { useToast } from "~/components/ui/use-toast";
+import { getMentionedUserIds } from "~/modules/Courses/CourseView/CourseChat/courseChatUtils";
+import { useCourseChatSocket } from "~/modules/Courses/CourseView/CourseChat/useCourseChatSocket";
 
 import { FORUM_HANDLES } from "../../../../e2e/data/forum/handles";
 import {
   canDeleteForumPost,
+  canReactInTopic,
   canReplyInTopic,
   getLastPage,
   getTopicHeading,
   parsePageParam,
 } from "../forum.utils";
+import { useForumSocket } from "../useForumSocket";
 
 import { ForumPostCard } from "./ForumPostCard";
 import { ForumReplyForm } from "./ForumReplyForm";
@@ -34,6 +44,7 @@ type ForumTopicDetailsProps = {
 
 export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parsePageParam(searchParams.get("page"));
@@ -55,8 +66,32 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
     courseId,
   });
 
+  const { mutate: toggleReaction, isPending: isReacting } = useToggleForumPostReaction({
+    firstPostId,
+    courseId,
+  });
+
   const isClosed = Boolean(topic.firstPost.deletedAt);
   const canReply = !isClosed && canReplyInTopic(topic.scope, permissions);
+  const canReact = canReactInTopic(topic.scope, permissions);
+
+  const { data: forumUsers = [] } = useForumUsers({
+    enabled:
+      !courseId &&
+      hasAnyPermission(permissions, [
+        PERMISSIONS.FORUM_TOPIC_CREATE,
+        PERMISSIONS.FORUM_POST_CREATE,
+      ]),
+  });
+  const { data: courseUsers = [] } = useCourseChatUsers(courseId ?? "");
+  const mentionableUsers = courseId ? courseUsers : forumUsers;
+
+  const handleMentioned = useCallback(() => {
+    toast({ description: t("forum.toast.mentioned") });
+  }, [t, toast]);
+
+  useForumSocket({ topicId: topic.id, enabled: !courseId, onMentioned: handleMentioned });
+  useCourseChatSocket({ courseId: courseId ?? "", enabled: Boolean(courseId) });
 
   const goToPage = (nextPage: number) => {
     setSearchParams(
@@ -89,13 +124,21 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
     });
 
   const handleReply = (content: string, onSent: () => void) => {
-    createPost(content, {
-      onSuccess: () => {
-        onSent();
-        goToPage(getLastPage(totalReplies + 1, FORUM_POSTS_PER_PAGE));
+    const mentionedUserIds = getMentionedUserIds(content, mentionableUsers);
+
+    createPost(
+      { content, mentionedUserIds },
+      {
+        onSuccess: () => {
+          onSent();
+          goToPage(getLastPage(totalReplies + 1, FORUM_POSTS_PER_PAGE));
+        },
       },
-    });
+    );
   };
+
+  const handleToggleReaction = (postId: string, reaction: string) =>
+    toggleReaction({ postId, reaction });
 
   const handleDelete = (postId: string, onDeleted: () => void) => {
     deletePost(postId, {
@@ -133,9 +176,13 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
 
       <ForumPostCard
         post={topic.firstPost}
+        mentionableUsers={mentionableUsers}
         canDelete={canDelete(topic.firstPost)}
         isDeleting={isDeletingPost}
         onDelete={handleDelete}
+        canReact={canReact}
+        isReacting={isReacting}
+        onToggleReaction={handleToggleReaction}
       />
 
       <div className="space-y-3">
@@ -151,9 +198,13 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
           <ForumPostCard
             key={post.id}
             post={post}
+            mentionableUsers={mentionableUsers}
             canDelete={canDelete(post)}
             isDeleting={isDeletingPost}
             onDelete={handleDelete}
+            canReact={canReact}
+            isReacting={isReacting}
+            onToggleReaction={handleToggleReaction}
           />
         ))}
         {totalReplies > FORUM_POSTS_PER_PAGE && (
@@ -167,7 +218,13 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
         )}
       </div>
 
-      {canReply && <ForumReplyForm isSubmitting={isSendingReply} onSubmit={handleReply} />}
+      {canReply && (
+        <ForumReplyForm
+          users={mentionableUsers}
+          isSubmitting={isSendingReply}
+          onSubmit={handleReply}
+        />
+      )}
       {isClosed && (
         <p className="body-sm text-neutral-600" data-testid={FORUM_HANDLES.TOPIC_CLOSED}>
           {t("forum.topic.closed")}

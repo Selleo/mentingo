@@ -2454,7 +2454,8 @@
         "forum_read": "Consultez le forum.",
         "forum_topic_create": "Créez des sujets sur le forum.",
         "forum_post_create": "Répondez aux sujets du forum.",
-        "forum_post_delete": "Supprimez n'importe quel message du forum."
+        "forum_post_delete": "Supprimez n'importe quel message du forum.",
+        "forum_post_react": "Réagissez aux messages du forum."
       }
     },
     "dropdown": {
@@ -9287,7 +9288,9 @@
     "toast": {
       "createTopicError": "Impossible de créer le sujet.",
       "createPostError": "Impossible d'envoyer la réponse.",
-      "deletePostError": "Impossible de supprimer le message."
+      "deletePostError": "Impossible de supprimer le message.",
+      "mentioned": "Quelqu'un vous a mentionné(e) sur le forum.",
+      "reactionError": "La réaction n'a pas pu être enregistrée."
     },
     "errors": {
       "topicNotFound": "Ce sujet n'existe pas ou vous n'y avez pas accès.",
@@ -9295,7 +9298,8 @@
       "cannotDeletePost": "Vous ne pouvez supprimer que vos propres messages.",
       "topicDeleted": "Les réponses sont fermées car le premier message a été supprimé.",
       "emptyTitle": "Saisissez un titre.",
-      "emptyContent": "Saisissez un message."
+      "emptyContent": "Saisissez un message.",
+      "invalidReaction": "Choisissez l'une des réactions disponibles."
     }
   }
 }

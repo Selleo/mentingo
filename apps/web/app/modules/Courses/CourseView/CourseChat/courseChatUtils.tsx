@@ -1,8 +1,8 @@
 import { match } from "ts-pattern";
 
-import type { CourseChatUser } from "~/api/queries/course-chat/courseChatTypes";
+import type { MentionableUser } from "~/api/queries/course-chat/courseChatTypes";
 
-export function getUserDisplayName(user: CourseChatUser) {
+export function getUserDisplayName(user: Pick<MentionableUser, "firstName" | "lastName">) {
   return `${user.firstName} ${user.lastName}`;
 }
 
@@ -12,13 +12,13 @@ export function getActiveMentionQuery(value: string) {
   return match?.[2] ?? null;
 }
 
-export function getMentionedUserIds(content: string, users: CourseChatUser[]) {
+export function getMentionedUserIds(content: string, users: MentionableUser[]) {
   return users
     .filter((user) => content.includes(`@${getUserDisplayName(user)}`))
     .map((user) => user.id);
 }
 
-export function renderMessageContent(content: string, users: CourseChatUser[]) {
+export function renderMessageContent(content: string, users: MentionableUser[]) {
   const mentionLabels = users
     .map((user) => `@${getUserDisplayName(user)}`)
     .sort((a, b) => b.length - a.length);

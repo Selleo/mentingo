@@ -1,10 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, DISCUSSION_SCOPES, FORUM_TOPIC_SORTS } from "@repo/shared";
-import { and, asc, count, desc, eq, exists, ilike, isNull, or, sql } from "drizzle-orm";
+import { COURSE_ENROLLMENT, DISCUSSION_SCOPES, FORUM_TOPIC_SORTS, PERMISSIONS } from "@repo/shared";
+import { and, asc, count, desc, eq, exists, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
+import { userHasPermissionCondition } from "src/common/permissions/permission-sql.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import {
   courseChatMessages,
@@ -16,6 +17,7 @@ import {
 
 import type { DiscussionScope, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
+import type { CourseChatUserProfileRow } from "src/course-chat/course-chat.repository.types";
 import type {
   ForumPostContext,
   ForumPostRow,
@@ -169,7 +171,7 @@ export class ForumRepository {
   async createGeneralTopic(
     params: { userId: UUIDType; title: string; content: string },
     dbInstance: DatabasePg = this.db,
-  ): Promise<UUIDType> {
+  ): Promise<{ topicId: UUIDType; postId: UUIDType }> {
     const [thread] = await dbInstance
       .insert(courseChatThreads)
       .values({
@@ -179,13 +181,16 @@ export class ForumRepository {
       })
       .returning({ id: courseChatThreads.id });
 
-    await dbInstance.insert(courseChatMessages).values({
-      threadId: thread.id,
-      userId: params.userId,
-      content: params.content,
-    });
+    const [post] = await dbInstance
+      .insert(courseChatMessages)
+      .values({
+        threadId: thread.id,
+        userId: params.userId,
+        content: params.content,
+      })
+      .returning({ id: courseChatMessages.id });
 
-    return thread.id;
+    return { topicId: thread.id, postId: post.id };
   }
 
   async createGeneralReply(
@@ -208,6 +213,48 @@ export class ForumRepository {
       .where(eq(courseChatThreads.id, params.threadId));
 
     return post.id;
+  }
+
+  async findMentionableUsers(userIds?: UUIDType[]): Promise<CourseChatUserProfileRow[]> {
+    if (userIds && !userIds.length) return [];
+
+    return this.db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        avatarReference: users.avatarReference,
+      })
+      .from(users)
+      .where(
+        and(
+          isNull(users.deletedAt),
+          eq(users.archived, false),
+          userHasPermissionCondition(this.db, users.id, users.tenantId, PERMISSIONS.FORUM_READ),
+          userIds ? inArray(users.id, userIds) : undefined,
+        ),
+      )
+      .orderBy(users.firstName, users.lastName);
+  }
+
+  async findTopicTitle(topicId: UUIDType): Promise<string | null> {
+    const [topic] = await this.db
+      .select({ title: courseChatThreads.title })
+      .from(courseChatThreads)
+      .where(eq(courseChatThreads.id, topicId))
+      .limit(1);
+
+    return topic?.title ?? null;
+  }
+
+  async findUserFullName(userId: UUIDType): Promise<string | null> {
+    const [user] = await this.db
+      .select({ firstName: users.firstName, lastName: users.lastName })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    return user ? `${user.firstName} ${user.lastName}` : null;
   }
 
   private topicQuery(language: SupportedLanguages) {

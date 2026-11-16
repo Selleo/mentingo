@@ -2708,7 +2708,8 @@
         "forum_read": "Może przeglądać forum.",
         "forum_topic_create": "Może tworzyć tematy na forum.",
         "forum_post_create": "Może odpowiadać w tematach na forum.",
-        "forum_post_delete": "Może usuwać dowolne posty na forum."
+        "forum_post_delete": "Może usuwać dowolne posty na forum.",
+        "forum_post_react": "Może reagować na posty na forum."
       }
     },
     "dropdown": {
@@ -9903,7 +9904,9 @@
     "toast": {
       "createTopicError": "Nie udało się utworzyć tematu.",
       "createPostError": "Nie udało się wysłać odpowiedzi.",
-      "deletePostError": "Nie udało się usunąć postu."
+      "deletePostError": "Nie udało się usunąć postu.",
+      "mentioned": "Ktoś wspomniał o Tobie na forum.",
+      "reactionError": "Nie udało się zapisać reakcji."
     },
     "errors": {
       "topicNotFound": "Ten temat nie istnieje albo nie masz do niego dostępu.",
@@ -9911,7 +9914,8 @@
       "cannotDeletePost": "Możesz usuwać tylko własne posty.",
       "topicDeleted": "Odpowiedzi są zamknięte, bo pierwszy post został usunięty.",
       "emptyTitle": "Wpisz tytuł.",
-      "emptyContent": "Wpisz wiadomość."
+      "emptyContent": "Wpisz wiadomość.",
+      "invalidReaction": "Wybierz jedną z dostępnych reakcji."
     }
   }
 }

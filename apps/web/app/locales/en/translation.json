@@ -2460,7 +2460,8 @@
         "forum_read": "View the forum.",
         "forum_topic_create": "Create forum topics.",
         "forum_post_create": "Reply in forum topics.",
-        "forum_post_delete": "Delete any forum post."
+        "forum_post_delete": "Delete any forum post.",
+        "forum_post_react": "React to forum posts."
       }
     },
     "dropdown": {
@@ -9794,7 +9795,9 @@
     "toast": {
       "createTopicError": "The topic could not be created.",
       "createPostError": "The reply could not be sent.",
-      "deletePostError": "The post could not be deleted."
+      "deletePostError": "The post could not be deleted.",
+      "mentioned": "Someone mentioned you in the forum.",
+      "reactionError": "The reaction could not be saved."
     },
     "errors": {
       "topicNotFound": "This topic doesn't exist or you don't have access to it.",
@@ -9802,7 +9805,8 @@
       "cannotDeletePost": "You can only delete your own posts.",
       "topicDeleted": "Replies are closed because the first post was deleted.",
       "emptyTitle": "Enter a title.",
-      "emptyContent": "Enter a message."
+      "emptyContent": "Enter a message.",
+      "invalidReaction": "Choose one of the available reactions."
     }
   }
 }

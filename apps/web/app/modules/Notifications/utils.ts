@@ -38,5 +38,9 @@ export const getNotificationHref = (announcement: NotificationAnnouncement) => {
     return `/course/${announcement.sourceId}`;
   }
 
+  if (announcement.sourceType === ANNOUNCEMENT_SOURCE_TYPES.FORUM && announcement.sourceId) {
+    return `/forum/topics/${announcement.sourceId}`;
+  }
+
   return null;
 };

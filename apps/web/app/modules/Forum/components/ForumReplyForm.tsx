@@ -3,18 +3,20 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
-import { Textarea } from "~/components/ui/textarea";
+import { MentionTextarea } from "~/modules/Courses/CourseView/CourseChat/MentionTextarea";
 
 import { FORUM_HANDLES } from "../../../../e2e/data/forum/handles";
 
 import type { FormEvent } from "react";
+import type { MentionableUser } from "~/api/queries/course-chat/courseChatTypes";
 
 type ForumReplyFormProps = {
+  users: MentionableUser[];
   isSubmitting: boolean;
   onSubmit: (content: string, onSent: () => void) => void;
 };
 
-export function ForumReplyForm({ isSubmitting, onSubmit }: ForumReplyFormProps) {
+export function ForumReplyForm({ users, isSubmitting, onSubmit }: ForumReplyFormProps) {
   const { t } = useTranslation();
   const [content, setContent] = useState("");
   const trimmedContent = content.trim();
@@ -29,14 +31,18 @@ export function ForumReplyForm({ isSubmitting, onSubmit }: ForumReplyFormProps) 
 
   return (
     <form className="space-y-2" onSubmit={handleSubmit}>
-      <Textarea
+      <MentionTextarea
         value={content}
-        onChange={(event) => setContent(event.target.value)}
+        onChange={setContent}
+        users={users}
         placeholder={t("forum.topic.replyPlaceholder")}
         maxLength={FORUM_POST_MAX_LENGTH}
-        rows={4}
-        aria-label={t("forum.topic.replyPlaceholder")}
-        data-testid={FORUM_HANDLES.REPLY_INPUT}
+        className="min-h-24"
+        testIds={{
+          input: FORUM_HANDLES.REPLY_INPUT,
+          mentionList: FORUM_HANDLES.MENTION_LIST,
+          mentionOption: FORUM_HANDLES.mentionOption,
+        }}
       />
       <div className="flex justify-end">
         <Button

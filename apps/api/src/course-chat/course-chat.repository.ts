@@ -309,7 +309,7 @@ export class CourseChatRepository {
 
   async toggleMessageReaction(params: {
     messageId: UUIDType;
-    courseId: UUIDType;
+    courseId: UUIDType | null;
     userId: UUIDType;
     reaction: string;
   }): Promise<boolean> {

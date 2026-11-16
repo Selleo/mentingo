@@ -70,11 +70,21 @@ export const forumPostListSchema = Type.Array(forumPostSchema);
 export const createForumTopicSchema = Type.Object({
   title: Type.String({ minLength: 1, maxLength: FORUM_TOPIC_TITLE_MAX_LENGTH }),
   content: Type.String({ minLength: 1, maxLength: FORUM_POST_MAX_LENGTH }),
+  mentionedUserIds: Type.Optional(Type.Array(UUIDSchema)),
 });
 
 export const createForumPostSchema = Type.Object({
   content: Type.String({ minLength: 1, maxLength: FORUM_POST_MAX_LENGTH }),
+  mentionedUserIds: Type.Optional(Type.Array(UUIDSchema)),
 });
+
+export const forumPostReactionsSchema = Type.Object({
+  topicId: UUIDSchema,
+  postId: UUIDSchema,
+  reactions: Type.Array(courseChatMessageReactionSchema),
+});
+
+export const forumUserListSchema = Type.Array(forumAuthorSchema);
 
 export const deleteForumPostResponseSchema = Type.Object({
   topicId: UUIDSchema,
@@ -96,6 +106,8 @@ export const forumSearchQuerySchema = Type.Optional(
 );
 
 export type ForumPostResponse = Static<typeof forumPostSchema>;
+export type ForumPostReactionsResponse = Static<typeof forumPostReactionsSchema>;
+export type ForumUserResponse = Static<typeof forumAuthorSchema>;
 export type ForumTopicListItemResponse = Static<typeof forumTopicListItemSchema>;
 export type ForumTopicResponse = Static<typeof forumTopicSchema>;
 export type CreateForumTopicBody = Static<typeof createForumTopicSchema>;

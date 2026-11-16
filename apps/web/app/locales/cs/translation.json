@@ -2465,7 +2465,8 @@
         "forum_read": "Může zobrazit fórum.",
         "forum_topic_create": "Může vytvářet témata ve fóru.",
         "forum_post_create": "Může odpovídat v tématech fóra.",
-        "forum_post_delete": "Může mazat jakékoli příspěvky ve fóru."
+        "forum_post_delete": "Může mazat jakékoli příspěvky ve fóru.",
+        "forum_post_react": "Může reagovat na příspěvky ve fóru."
       }
     },
     "dropdown": {
@@ -9819,7 +9820,9 @@
     "toast": {
       "createTopicError": "Téma se nepodařilo založit.",
       "createPostError": "Odpověď se nepodařilo odeslat.",
-      "deletePostError": "Příspěvek se nepodařilo smazat."
+      "deletePostError": "Příspěvek se nepodařilo smazat.",
+      "mentioned": "Někdo vás zmínil ve fóru.",
+      "reactionError": "Reakci se nepodařilo uložit."
     },
     "errors": {
       "topicNotFound": "Toto téma neexistuje nebo k němu nemáte přístup.",
@@ -9827,7 +9830,8 @@
       "cannotDeletePost": "Můžete mazat pouze vlastní příspěvky.",
       "topicDeleted": "Odpovědi jsou uzavřené, protože první příspěvek byl smazán.",
       "emptyTitle": "Zadejte název.",
-      "emptyContent": "Zadejte zprávu."
+      "emptyContent": "Zadejte zprávu.",
+      "invalidReaction": "Vyberte jednu z dostupných reakcí."
     }
   }
 }

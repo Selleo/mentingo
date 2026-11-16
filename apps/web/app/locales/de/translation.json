@@ -2459,7 +2459,8 @@
         "forum_read": "Kann das Forum anzeigen.",
         "forum_topic_create": "Kann Forenthemen erstellen.",
         "forum_post_create": "Kann in Forenthemen antworten.",
-        "forum_post_delete": "Kann beliebige Forenbeiträge löschen."
+        "forum_post_delete": "Kann beliebige Forenbeiträge löschen.",
+        "forum_post_react": "Kann auf Forenbeiträge reagieren."
       }
     },
     "dropdown": {
@@ -9752,7 +9753,9 @@
     "toast": {
       "createTopicError": "Das Thema konnte nicht erstellt werden.",
       "createPostError": "Die Antwort konnte nicht gesendet werden.",
-      "deletePostError": "Der Beitrag konnte nicht gelöscht werden."
+      "deletePostError": "Der Beitrag konnte nicht gelöscht werden.",
+      "mentioned": "Jemand hat dich im Forum erwähnt.",
+      "reactionError": "Die Reaktion konnte nicht gespeichert werden."
     },
     "errors": {
       "topicNotFound": "Dieses Thema existiert nicht oder Sie haben keinen Zugriff darauf.",
@@ -9760,7 +9763,8 @@
       "cannotDeletePost": "Sie können nur Ihre eigenen Beiträge löschen.",
       "topicDeleted": "Antworten sind geschlossen, weil der erste Beitrag gelöscht wurde.",
       "emptyTitle": "Geben Sie einen Titel ein.",
-      "emptyContent": "Geben Sie eine Nachricht ein."
+      "emptyContent": "Geben Sie eine Nachricht ein.",
+      "invalidReaction": "Wähle eine der verfügbaren Reaktionen."
     }
   }
 }

@@ -1,12 +1,13 @@
 import { createRemixStub } from "@remix-run/testing";
-import { DISCUSSION_SCOPES } from "@repo/shared";
+import { DISCUSSION_SCOPES, FORUM_SOCKET_EVENTS, PERMISSIONS } from "@repo/shared";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { AxiosError } from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiClient } from "~/api/api-client";
 import { queryClient } from "~/api/queryClient";
+import { fakeSocket } from "~/utils/mocks/socket.mock";
 import { renderWith } from "~/utils/testUtils";
 
 import { FORUM_HANDLES } from "../../../e2e/data/forum/handles";
@@ -20,19 +21,36 @@ vi.mock("~/api/api-client", () => ({
       forumControllerGetTopic: vi.fn(),
       forumControllerGetTopicPosts: vi.fn(),
       forumControllerDeletePost: vi.fn(),
+      forumControllerCreatePost: vi.fn(),
+      forumControllerTogglePostReaction: vi.fn(),
+      forumControllerGetMentionableUsers: vi.fn(),
     },
   },
 }));
+
+vi.mock("~/api/socket", async () => {
+  const { fakeSocket } = await import("~/utils/mocks/socket.mock");
+
+  return { acquireSocket: () => fakeSocket, releaseSocket: () => undefined };
+});
+
+const currentUserPermissions = vi.hoisted(() => ({ value: [] as string[] }));
 
 const CURRENT_USER_ID = "user-1";
 
 vi.mock("~/api/queries/useCurrentUser", async (importOriginal) => ({
   ...(await importOriginal<typeof import("~/api/queries/useCurrentUser")>()),
-  useCurrentUser: () => ({ data: { id: "user-1", permissions: [] } }),
+  useCurrentUser: () => ({ data: { id: "user-1", permissions: currentUserPermissions.value } }),
 }));
 
 const TOPIC_ID = "topic-1";
 const REPLY_CONTENT = "Count me in";
+const MENTIONED_USER = {
+  id: "user-2",
+  firstName: "Bea",
+  lastName: "Target",
+  avatarReference: null,
+};
 
 const buildPost = (overrides: Record<string, unknown> = {}) => ({
   id: "post-1",
@@ -92,8 +110,13 @@ const renderTopic = (url = `/forum/topics/${TOPIC_ID}`) => {
 
 describe("ForumTopicPage", () => {
   beforeEach(() => {
+    currentUserPermissions.value = [];
     queryClient.clear();
+    fakeSocket.reset();
     vi.clearAllMocks();
+    vi.mocked(ApiClient.api.forumControllerGetMentionableUsers).mockResolvedValue({
+      data: { data: [MENTIONED_USER] },
+    } as never);
     vi.mocked(ApiClient.api.settingsControllerGetPublicGlobalSettings).mockResolvedValue({
       data: { data: { forumEnabled: true } },
     } as never);
@@ -144,5 +167,74 @@ describe("ForumTopicPage", () => {
     fireEvent.click(await screen.findByTestId(FORUM_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON));
 
     expect(await screen.findByText("forum list")).toBeInTheDocument();
+  });
+
+  it("reacts to a post when the user may react", async () => {
+    currentUserPermissions.value = [PERMISSIONS.FORUM_POST_REACT];
+    vi.mocked(ApiClient.api.forumControllerTogglePostReaction).mockResolvedValue({
+      data: { data: { topicId: TOPIC_ID, postId: reply.id, reactions: [] } },
+    } as never);
+
+    renderTopic();
+
+    fireEvent.click(await screen.findByTestId(FORUM_HANDLES.postReaction(reply.id, "👍")));
+
+    await waitFor(() =>
+      expect(ApiClient.api.forumControllerTogglePostReaction).toHaveBeenCalledWith(reply.id, {
+        reaction: "👍",
+      }),
+    );
+  });
+
+  it("offers no reactions to a user who may not react", async () => {
+    renderTopic();
+
+    expect(await screen.findByText(REPLY_CONTENT)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(FORUM_HANDLES.postReaction(reply.id, "👍")),
+    ).not.toBeInTheDocument();
+  });
+
+  it("sends the mentioned users with a reply", async () => {
+    currentUserPermissions.value = [PERMISSIONS.FORUM_POST_CREATE];
+    vi.mocked(ApiClient.api.forumControllerCreatePost).mockResolvedValue({
+      data: { data: buildPost({ id: "reply-2", isFirstPost: false }) },
+    } as never);
+    const content = `@${MENTIONED_USER.firstName} ${MENTIONED_USER.lastName} what do you think?`;
+
+    renderTopic();
+
+    const replyInput = await screen.findByTestId(FORUM_HANDLES.REPLY_INPUT);
+    await waitFor(() =>
+      expect(ApiClient.api.forumControllerGetMentionableUsers).toHaveBeenCalled(),
+    );
+    await screen.findByText(REPLY_CONTENT);
+    fireEvent.change(replyInput, { target: { value: content } });
+    fireEvent.click(screen.getByTestId(FORUM_HANDLES.REPLY_SUBMIT_BUTTON));
+
+    await waitFor(() =>
+      expect(ApiClient.api.forumControllerCreatePost).toHaveBeenCalledWith(TOPIC_ID, {
+        content,
+        mentionedUserIds: [MENTIONED_USER.id],
+      }),
+    );
+  });
+
+  it("reloads the topic when it changes elsewhere", async () => {
+    renderTopic();
+    expect(await screen.findByText(REPLY_CONTENT)).toBeInTheDocument();
+    expect(fakeSocket.emitted).toContainEqual([
+      FORUM_SOCKET_EVENTS.JOIN_TOPIC,
+      { topicId: TOPIC_ID },
+    ]);
+    const requestsBefore = vi.mocked(ApiClient.api.forumControllerGetTopicPosts).mock.calls.length;
+
+    fakeSocket.receive(FORUM_SOCKET_EVENTS.TOPIC_CHANGED, { topicId: TOPIC_ID });
+
+    await waitFor(() =>
+      expect(
+        vi.mocked(ApiClient.api.forumControllerGetTopicPosts).mock.calls.length,
+      ).toBeGreaterThan(requestsBefore),
+    );
   });
 });

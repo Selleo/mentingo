@@ -11,6 +11,8 @@ import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
+import type { CreatePostBody } from "~/api/generated-api";
+
 type CreateForumPostParams = {
   topicId: string;
   firstPostId: string;
@@ -22,8 +24,8 @@ export function useCreateForumPost({ topicId, firstPostId, courseId }: CreateFor
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (content: string) => {
-      const response = await ApiClient.api.forumControllerCreatePost(topicId, { content });
+    mutationFn: async (body: CreatePostBody) => {
+      const response = await ApiClient.api.forumControllerCreatePost(topicId, body);
 
       return response.data.data;
     },

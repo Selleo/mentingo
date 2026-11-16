@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@remix-run/react";
 import { FORUM_POST_MAX_LENGTH, FORUM_TOPIC_TITLE_MAX_LENGTH } from "@repo/shared";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { useCreateForumTopic } from "~/api/mutations/useCreateForumTopic";
+import { useForumUsers } from "~/api/queries/forum/useForumUsers";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -16,7 +17,8 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
+import { getMentionedUserIds } from "~/modules/Courses/CourseView/CourseChat/courseChatUtils";
+import { MentionTextarea } from "~/modules/Courses/CourseView/CourseChat/MentionTextarea";
 
 import { FORUM_HANDLES } from "../../../../e2e/data/forum/handles";
 
@@ -36,6 +38,7 @@ export function CreateForumTopicDialog({ open, onOpenChange }: CreateForumTopicD
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { mutate: createTopic, isPending } = useCreateForumTopic();
+  const { data: users = [] } = useForumUsers({ enabled: open });
   const form = useForm<CreateForumTopicFormValues>({
     resolver: zodResolver(createForumTopicFormSchema),
     defaultValues: { title: "", content: "" },
@@ -44,13 +47,16 @@ export function CreateForumTopicDialog({ open, onOpenChange }: CreateForumTopicD
   const canSubmit = Boolean(title.trim() && content.trim()) && !isPending;
 
   const handleSubmit = form.handleSubmit((values) => {
-    createTopic(values, {
-      onSuccess: (topic) => {
-        form.reset();
-        onOpenChange(false);
-        navigate(`/forum/topics/${topic.id}`);
+    createTopic(
+      { ...values, mentionedUserIds: getMentionedUserIds(values.content, users) },
+      {
+        onSuccess: (topic) => {
+          form.reset();
+          onOpenChange(false);
+          navigate(`/forum/topics/${topic.id}`);
+        },
       },
-    });
+    );
   });
 
   return (
@@ -71,14 +77,25 @@ export function CreateForumTopicDialog({ open, onOpenChange }: CreateForumTopicD
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="forum-topic-content">{t("forum.createDialog.contentLabel")}</Label>
-            <Textarea
-              id="forum-topic-content"
-              rows={6}
-              maxLength={FORUM_POST_MAX_LENGTH}
-              placeholder={t("forum.createDialog.contentPlaceholder")}
-              data-testid={FORUM_HANDLES.CONTENT_INPUT}
-              {...form.register("content")}
+            <Label>{t("forum.createDialog.contentLabel")}</Label>
+            <Controller
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <MentionTextarea
+                  value={field.value}
+                  onChange={field.onChange}
+                  users={users}
+                  maxLength={FORUM_POST_MAX_LENGTH}
+                  placeholder={t("forum.createDialog.contentPlaceholder")}
+                  className="min-h-32"
+                  testIds={{
+                    input: FORUM_HANDLES.CONTENT_INPUT,
+                    mentionList: FORUM_HANDLES.MENTION_LIST,
+                    mentionOption: FORUM_HANDLES.mentionOption,
+                  }}
+                />
+              )}
             />
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
