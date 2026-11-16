@@ -4,6 +4,7 @@ import { DEFAULT_CERTIFICATE_FONT_COLOR, type ENTITY_TYPES, LESSON_TYPES } from 
 import { v5 as uuidv5 } from "uuid";
 
 import {
+  AUDIO_COMPLETION_TRACKING_ENABLED,
   LESSON_SEQUENCE_ENABLED,
   QUIZ_FEEDBACK_ENABLED,
   VIDEO_COMPLETION_TRACKING_ENABLED,
@@ -37,6 +38,7 @@ export const normalizeCourseSettings = (settings: unknown) =>
     lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
     quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
     videoCompletionTrackingEnabled: VIDEO_COMPLETION_TRACKING_ENABLED,
+    audioCompletionTrackingEnabled: AUDIO_COMPLETION_TRACKING_ENABLED,
     certificateSignature: null,
     certificateFontColor: DEFAULT_CERTIFICATE_FONT_COLOR,
     certificateValidity: null,

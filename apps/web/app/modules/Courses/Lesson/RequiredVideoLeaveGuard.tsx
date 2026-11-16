@@ -1,6 +1,7 @@
 import { useBlocker } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 import { useStore } from "zustand";
 
 import { Button } from "~/components/ui/button";
@@ -14,6 +15,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
+import { LESSON_PROGRESS_MEDIA_KIND } from "./LessonVideoProgressStrip.types";
 import {
   getLessonVideoResumeTarget,
   hasStartedLessonVideo,
@@ -23,11 +25,45 @@ import {
   useRequiredVideoLeavePreferenceStore,
 } from "./requiredVideoLeavePreferenceStore";
 
-import type { LessonVideoProgressStore } from "./LessonVideoProgressStrip.types";
+import type {
+  LessonVideoProgressSegment,
+  LessonVideoProgressStore,
+} from "./LessonVideoProgressStrip.types";
 
 const BLOCKER_STATES = {
   BLOCKED: "blocked",
 } as const;
+
+const getRequiredMediaLeaveTranslationKeys = (segments: LessonVideoProgressSegment[]) => {
+  const requiresVideo = segments.some(
+    (segment) => segment.mediaKind === LESSON_PROGRESS_MEDIA_KIND.VIDEO,
+  );
+  const requiresAudio = segments.some(
+    (segment) => segment.mediaKind === LESSON_PROGRESS_MEDIA_KIND.AUDIO,
+  );
+  const hasSingleSegment = segments.length === 1;
+
+  return match({ requiresVideo, requiresAudio })
+    .with({ requiresVideo: true, requiresAudio: true }, () => ({
+      title: "studentLessonView.requiredMediaLeave.title",
+      description: "studentLessonView.requiredMediaLeave.description",
+      continue: "studentLessonView.requiredMediaLeave.continue",
+    }))
+    .with({ requiresAudio: true }, () => ({
+      title: "studentLessonView.requiredAudioLeave.title",
+      description: hasSingleSegment
+        ? "studentLessonView.requiredAudioLeave.descriptionSingle"
+        : "studentLessonView.requiredAudioLeave.descriptionMultiple",
+      continue: "studentLessonView.requiredAudioLeave.continueListening",
+    }))
+    .otherwise(() => ({
+      title: "studentLessonView.requiredVideoLeave.title",
+      description: hasSingleSegment
+        ? "studentLessonView.requiredVideoLeave.descriptionSingle"
+        : "studentLessonView.requiredVideoLeave.descriptionMultiple",
+      continue: "studentLessonView.requiredVideoLeave.continueWatching",
+    }));
+};
 
 type RequiredVideoLeaveGuardProps = {
   courseId: string;
@@ -61,6 +97,7 @@ export const RequiredVideoLeaveGuard = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const hasStartedVideo = segments.some(hasStartedLessonVideo);
+  const translationKeys = getRequiredMediaLeaveTranslationKeys(segments);
   const shouldBlock = enabled && !lessonCompleted && hasStartedVideo && !dismissed;
 
   const blocker = useBlocker(shouldBlock);
@@ -110,14 +147,8 @@ export const RequiredVideoLeaveGuard = ({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("studentLessonView.requiredVideoLeave.title")}</DialogTitle>
-          <DialogDescription>
-            {t(
-              segments.length === 1
-                ? "studentLessonView.requiredVideoLeave.descriptionSingle"
-                : "studentLessonView.requiredVideoLeave.descriptionMultiple",
-            )}
-          </DialogDescription>
+          <DialogTitle>{t(translationKeys.title)}</DialogTitle>
+          <DialogDescription>{t(translationKeys.description)}</DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-2 text-sm text-neutral-700">
           <Checkbox
@@ -134,7 +165,7 @@ export const RequiredVideoLeaveGuard = ({
             {t("studentLessonView.requiredVideoLeave.exitAnyway")}
           </Button>
           <Button type="button" onClick={continueWatching}>
-            {t("studentLessonView.requiredVideoLeave.continueWatching")}
+            {t(translationKeys.continue)}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -6,12 +6,32 @@ import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 
 import { AudioPlayer } from "../components/AudioPlayer";
+import { TrackedAudioPlayer } from "../components/TrackedAudioPlayer";
 
-import { safeAudioSrc } from "./utils/audio";
+import {
+  getAudioCoverageAttrsFromElement,
+  getAudioCoverageDataAttributes,
+  normalizeAudioCoverageAttributes,
+  safeAudioSrc,
+} from "./utils/audio";
 import { removeResourceNode } from "./utils/resourceNode";
 
 import type { RichTextResourceNodeOptions } from "./utils/resourceNode";
+import type { SupportedLanguages } from "@repo/shared";
 import type { NodeViewProps } from "@tiptap/react";
+import type { VideoCoverageSnapshotChange } from "~/components/VideoPlayer/videoCoverage.types";
+
+type AudioViewerOptions = {
+  audioCoverageTracking?: {
+    enabled: boolean;
+    showCoverageMarkers?: boolean;
+    lessonId?: string;
+    learningStateId?: string | null;
+    language?: SupportedLanguages;
+    onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
+    onAudioActivated?: (resourceEntityId: string) => void;
+  };
+};
 
 const AudioEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   const { t } = useTranslation();
@@ -51,11 +71,14 @@ const AudioEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   );
 };
 
-const AudioViewerView = ({ node }: NodeViewProps) => {
+const AudioViewerView = ({ node, extension }: NodeViewProps) => {
   const { t } = useTranslation();
+  const { audioCoverageTracking } = extension.options as AudioViewerOptions;
   const src = safeAudioSrc(node.attrs.src);
   const name = node.attrs.name || t("richText.audio.label");
   if (!src) return null;
+
+  const coverageAttrs = normalizeAudioCoverageAttributes(node.attrs);
 
   return (
     <NodeViewWrapper className="audio-node my-3 w-full max-w-full" contentEditable={false}>
@@ -64,7 +87,29 @@ const AudioViewerView = ({ node }: NodeViewProps) => {
           <FileAudio className="size-4 shrink-0" aria-hidden />
           <span className="min-w-0 truncate">{name}</span>
         </div>
-        <AudioPlayer src={src} name={name} />
+        {audioCoverageTracking?.enabled && coverageAttrs.resourceEntityId ? (
+          <TrackedAudioPlayer
+            src={src}
+            name={name}
+            resourceEntityId={coverageAttrs.resourceEntityId}
+            coverageTracking={{
+              enabled: true,
+              showCoverageMarkers: audioCoverageTracking.showCoverageMarkers,
+              lessonId: audioCoverageTracking.lessonId,
+              learningStateId: audioCoverageTracking.learningStateId,
+              language: audioCoverageTracking.language,
+              initialCoveragePercent: coverageAttrs.audioCoveragePercent ?? 0,
+              initialWatchedRanges: coverageAttrs.audioListenedRanges,
+              initialIsWatched: coverageAttrs.audioIsListened,
+              initialDurationSeconds: coverageAttrs.audioDurationSeconds,
+              initialBucketSizeSeconds: coverageAttrs.audioBucketSizeSeconds,
+              onSnapshotChange: audioCoverageTracking.onSnapshotChange,
+              onVideoActivated: audioCoverageTracking.onAudioActivated,
+            }}
+          />
+        ) : (
+          <AudioPlayer src={src} name={name} />
+        )}
       </div>
     </NodeViewWrapper>
   );
@@ -86,6 +131,12 @@ export const AudioEmbedEditor = Node.create<RichTextResourceNodeOptions>({
     return {
       src: { default: null },
       name: { default: null },
+      resourceEntityId: { default: null },
+      audioCoveragePercent: { default: null },
+      audioIsListened: { default: false },
+      audioListenedRanges: { default: [] },
+      audioDurationSeconds: { default: null },
+      audioBucketSizeSeconds: { default: null },
     };
   },
   parseHTML() {
@@ -94,7 +145,13 @@ export const AudioEmbedEditor = Node.create<RichTextResourceNodeOptions>({
         tag: 'audio[data-node-type="audio"]',
         getAttrs: (element) => {
           const src = safeAudioSrc(element.getAttribute("src"));
-          return src ? { src, name: element.getAttribute("data-name") } : false;
+          return src
+            ? {
+                src,
+                name: element.getAttribute("data-name"),
+                ...getAudioCoverageAttrsFromElement(element),
+              }
+            : false;
         },
       },
     ];
@@ -106,6 +163,7 @@ export const AudioEmbedEditor = Node.create<RichTextResourceNodeOptions>({
         "data-node-type": "audio",
         src: safeAudioSrc(node.attrs.src),
         "data-name": node.attrs.name,
+        ...getAudioCoverageDataAttributes(normalizeAudioCoverageAttributes(node.attrs)),
         controls: "",
         preload: "metadata",
       },
@@ -113,7 +171,12 @@ export const AudioEmbedEditor = Node.create<RichTextResourceNodeOptions>({
   },
 });
 
-export const AudioEmbedViewer = AudioEmbedEditor.extend({
+export const AudioEmbedViewer = AudioEmbedEditor.extend<AudioViewerOptions>({
+  addOptions() {
+    return {
+      audioCoverageTracking: undefined,
+    };
+  },
   addNodeView() {
     return ReactNodeViewRenderer(AudioViewerView);
   },

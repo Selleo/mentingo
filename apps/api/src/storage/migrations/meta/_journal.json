@@ -1723,6 +1723,20 @@
       "when": 1794582392630,
       "tag": "0245_add_course_chat_scope_check_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 246,
+      "version": "7",
+      "when": 1794842474417,
+      "tag": "0246_add_lesson_audio_progress",
+      "breakpoints": true
+    },
+    {
+      "idx": 247,
+      "version": "7",
+      "when": 1794842477276,
+      "tag": "0247_enable_lesson_audio_progress_tenant_rls",
+      "breakpoints": true
     }
   ]
 }

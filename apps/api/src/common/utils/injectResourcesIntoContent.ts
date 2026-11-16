@@ -23,6 +23,13 @@ export type ContentResource = {
     durationSeconds?: number;
     bucketSizeSeconds?: number;
   };
+  audioProgress?: {
+    coveragePercent: number;
+    isListened: boolean;
+    listenedRanges: readonly (readonly [number, number])[];
+    durationSeconds?: number;
+    bucketSizeSeconds?: number;
+  };
 };
 
 type InjectResourcesOptions<T extends ContentResource> = {
@@ -43,16 +50,24 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
   hasAutoplayTrigger: boolean;
   videos?: string[];
   internalVideoResourceEntityIds: UUIDType[];
+  internalAudioResourceEntityIds: UUIDType[];
 } => {
   const contentCount: Record<string, number> = {};
   const videos: string[] = [];
   const internalVideoResourceEntityIds: UUIDType[] = [];
+  const internalAudioResourceEntityIds: UUIDType[] = [];
   let hasAutoplayTrigger = false;
 
   const increment = (key: string) => (contentCount[key] = (contentCount[key] ?? 0) + 1);
 
   if (!content)
-    return { html: content, contentCount, hasAutoplayTrigger, internalVideoResourceEntityIds };
+    return {
+      html: content,
+      contentCount,
+      hasAutoplayTrigger,
+      internalVideoResourceEntityIds,
+      internalAudioResourceEntityIds,
+    };
 
   const normalizedContent = annotateVideoAutoplayAndBlockIndexesInContent(content) ?? content;
   const $ = loadHtml(normalizedContent);
@@ -155,6 +170,52 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
         }
       }
     }
+
+    if (nodeType === "audio") {
+      const src = $(element).attr("src") ?? $(element).attr("data-src");
+      const resourceId = src?.match(options.resourceIdRegex)?.[1] ?? null;
+      const resource = resourceId ? resourceMap.get(resourceId as UUIDType) : null;
+
+      if (
+        !resource?.resourceEntityId ||
+        resource.fileUrlError ||
+        !resource.contentType?.startsWith("audio/")
+      ) {
+        return;
+      }
+
+      if (!internalAudioResourceEntityIds.includes(resource.resourceEntityId)) {
+        internalAudioResourceEntityIds.push(resource.resourceEntityId);
+      }
+
+      $(element).attr("data-resource-entity-id", resource.resourceEntityId);
+      $(element).attr(
+        "data-audio-coverage-percent",
+        String(resource.audioProgress?.coveragePercent ?? 0),
+      );
+      $(element).attr(
+        "data-audio-is-listened",
+        String(resource.audioProgress?.isListened ?? false),
+      );
+      $(element).attr(
+        "data-audio-listened-ranges",
+        JSON.stringify(resource.audioProgress?.listenedRanges ?? []),
+      );
+
+      if (resource.audioProgress?.durationSeconds) {
+        $(element).attr(
+          "data-audio-duration-seconds",
+          String(resource.audioProgress.durationSeconds),
+        );
+      }
+
+      if (resource.audioProgress?.bucketSizeSeconds) {
+        $(element).attr(
+          "data-audio-bucket-size-seconds",
+          String(resource.audioProgress.bucketSizeSeconds),
+        );
+      }
+    }
   });
 
   if (convertImageAnchors) {
@@ -191,5 +252,6 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
     hasAutoplayTrigger,
     videos,
     internalVideoResourceEntityIds,
+    internalAudioResourceEntityIds,
   };
 };
