@@ -40,6 +40,10 @@ const FEEDBACK_RANGES = [
   { minPercent: 80, maxPercent: 100, message: "<p>Well done {{firstName}}!</p>" },
 ];
 
+// Stored ranges also carry their row id.
+const rangesMatching = (ranges: Array<Record<string, unknown>>) =>
+  ranges.map((range) => expect.objectContaining(range));
+
 describe("Course transfer quiz feedback (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
@@ -161,7 +165,7 @@ describe("Course transfer quiz feedback (e2e)", () => {
     if (!targetCourseId) throw new Error("Course was not exported");
     expect(await readTargetQuizFeedback(targetCourseId)).toEqual({
       feedbackMode: ASSESSMENT_FEEDBACK_MODES.SCORE_ONLY,
-      feedbackRanges: FEEDBACK_RANGES,
+      feedbackRanges: rangesMatching(FEEDBACK_RANGES),
     });
   });
 
@@ -185,7 +189,7 @@ describe("Course transfer quiz feedback (e2e)", () => {
     if (!targetCourseId) throw new Error("Course was not exported");
     expect(await readTargetQuizFeedback(targetCourseId)).toEqual({
       feedbackMode: ASSESSMENT_FEEDBACK_MODES.FULL,
-      feedbackRanges: updatedRanges,
+      feedbackRanges: rangesMatching(updatedRanges),
     });
   });
 });

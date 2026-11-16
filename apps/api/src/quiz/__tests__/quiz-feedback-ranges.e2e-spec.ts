@@ -30,6 +30,10 @@ const FEEDBACK_RANGES = [
   { minPercent: 80, maxPercent: 100, message: "<p>Well done {{firstName}}!</p>" },
 ];
 
+// Stored ranges also carry their row id.
+const rangesMatching = (ranges: Array<Record<string, unknown>>) =>
+  ranges.map((range) => expect.objectContaining(range));
+
 describe("Quiz feedback ranges round-trips (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
@@ -166,7 +170,7 @@ describe("Quiz feedback ranges round-trips (e2e)", () => {
 
     expect(copy.lessonId).not.toBe(source.lessonId);
     expect(copy.feedbackMode).toBe(ASSESSMENT_FEEDBACK_MODES.SCORE_ONLY);
-    expect(copy.feedbackRanges).toEqual(FEEDBACK_RANGES);
+    expect(copy.feedbackRanges).toEqual(rangesMatching(FEEDBACK_RANGES));
   });
 
   it("translates every range message with automatic course translation and keeps the bounds", async () => {
@@ -200,10 +204,12 @@ describe("Quiz feedback ranges round-trips (e2e)", () => {
     const english = await getCourseQuizFeedback(courseId, SUPPORTED_LANGUAGES.EN);
     const polish = await getCourseQuizFeedback(courseId, SUPPORTED_LANGUAGES.PL);
 
-    expect(english.feedbackRanges).toEqual(FEEDBACK_RANGES);
+    expect(english.feedbackRanges).toEqual(rangesMatching(FEEDBACK_RANGES));
     expect(polish.feedbackMode).toBe(ASSESSMENT_FEEDBACK_MODES.SCORE_ONLY);
     expect(polish.feedbackRanges).toEqual(
-      FEEDBACK_RANGES.map((range) => ({ ...range, message: `pl ${range.message}` })),
+      rangesMatching(
+        FEEDBACK_RANGES.map((range) => ({ ...range, message: `pl ${range.message}` })),
+      ),
     );
   });
 });
