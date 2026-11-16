@@ -3748,6 +3748,7 @@ export interface GetLessonByIdResponse {
       correctAnswerCount: number | null;
       wrongAnswerCount: number | null;
       score: number | null;
+      feedbackMessage?: string | null;
     };
     lessonCompleted?: boolean;
     thresholdScore: number | null;

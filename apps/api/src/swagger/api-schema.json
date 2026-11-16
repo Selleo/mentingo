@@ -45521,6 +45521,16 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "feedbackMessage": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [

@@ -11,6 +11,7 @@ import {
   ASSESSMENT_QUESTION_TYPES,
   ASSESSMENT_ATTEMPT_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_RESULTS,
+  ASSESSMENT_FEEDBACK_MODES,
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
   ASSESSMENT_ANSWER_GRADING_STATUSES,
   ASSESSMENT_SCORING_MODES,
@@ -54,6 +55,7 @@ import {
   courses,
   lessons,
   assessments,
+  assessmentFeedbackRanges,
   assessmentAttempts,
   assessmentAttemptBlankAnswers,
   assessmentAttemptOpenTextAnswers,
@@ -3608,6 +3610,148 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(attempt.gradingStatus).toBe(ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED);
       expect(attempt.gradedAt).not.toBeNull();
+    });
+  });
+
+  describe("GET /api/lesson/:id - author feedback range message", () => {
+    const FEEDBACK_RANGES = [
+      { minPercent: 0, maxPercent: 50, message: "<p>Keep practising {{firstName}}.</p>" },
+      {
+        minPercent: 51,
+        maxPercent: 100,
+        message: "<p>Well done {{firstName}}! You scored {{score}}%.</p>",
+      },
+    ];
+    // The top band message interpolated for a student named Ada scoring 100%.
+    const TOP_BAND_MESSAGE = "<p>Well done Ada! You scored 100%.</p>";
+
+    const setupFeedbackQuiz = async (
+      feedbackMode: (typeof ASSESSMENT_FEEDBACK_MODES)[keyof typeof ASSESSMENT_FEEDBACK_MODES],
+      { quizFeedbackEnabled = true, withOpenQuestion = false } = {},
+    ) => {
+      const category = await categoryFactory.create();
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT, firstName: "Ada" });
+      const cookies = await cookieFor(student, app);
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        settings: { lessonSequenceEnabled: false, quizFeedbackEnabled },
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id });
+
+      await enrollStudentToCourse(student.id, course.id);
+
+      const { lesson } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
+      const [{ assessmentId }] = await db
+        .select({ assessmentId: assessments.id })
+        .from(assessments)
+        .where(eq(assessments.lessonId, lesson.id));
+
+      await db.update(assessments).set({ feedbackMode }).where(eq(assessments.id, assessmentId));
+      await db.insert(assessmentFeedbackRanges).values(
+        FEEDBACK_RANGES.map((range, index) => ({
+          assessmentId,
+          minPercent: range.minPercent,
+          maxPercent: range.maxPercent,
+          displayOrder: index,
+          message: buildJsonbField(SUPPORTED_LANGUAGES.EN, range.message, true),
+        })),
+      );
+
+      const questionsAnswers: unknown[] = await buildQuizAnswers(lesson.id);
+
+      if (withOpenQuestion) {
+        const [openQuestion] = await db
+          .insert(assessmentQuestions)
+          .values({
+            assessmentId,
+            questionType: ASSESSMENT_QUESTION_TYPES.BRIEF_RESPONSE,
+            displayOrder: 99,
+            maximumPoints: "1",
+            gradingMode: ASSESSMENT_GRADING_MODES.MANUAL,
+            prompt: buildJsonbField("en", "Explain"),
+            title: buildJsonbField("en", "Explain"),
+          })
+          .returning();
+
+        questionsAnswers.push({
+          questionId: openQuestion.id,
+          answers: [{ value: "My open answer" }],
+        });
+      }
+
+      return { cookies, lesson, questionsAnswers };
+    };
+
+    const submitAndFetchLesson = async ({
+      cookies,
+      lesson,
+      questionsAnswers,
+    }: Awaited<ReturnType<typeof setupFeedbackQuiz>>) => {
+      await request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({ lessonId: lesson.id, language: "en", questionsAnswers })
+        .expect(201);
+
+      const { body } = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      return body.data;
+    };
+
+    it("full mode shows the band message and per-question correctness", async () => {
+      const lessonData = await submitAndFetchLesson(
+        await setupFeedbackQuiz(ASSESSMENT_FEEDBACK_MODES.FULL),
+      );
+
+      expect(lessonData.isQuizFeedbackRedacted).toBe(false);
+      expect(lessonData.quizDetails.feedbackMessage).toBe(TOP_BAND_MESSAGE);
+      expect(
+        lessonData.quizDetails.questions.some(
+          (question: { solutionExplanation: string | null }) =>
+            question.solutionExplanation !== null,
+        ),
+      ).toBe(true);
+    });
+
+    it("score_only mode shows the band message but redacts per-question correctness", async () => {
+      const lessonData = await submitAndFetchLesson(
+        await setupFeedbackQuiz(ASSESSMENT_FEEDBACK_MODES.SCORE_ONLY),
+      );
+
+      expect(lessonData.isQuizFeedbackRedacted).toBe(true);
+      expect(lessonData.quizDetails.feedbackMessage).toBe(TOP_BAND_MESSAGE);
+
+      for (const question of lessonData.quizDetails.questions) {
+        expect(question.solutionExplanation).toBeNull();
+        for (const option of question.options) expect(option.isCorrect).not.toBe(true);
+      }
+    });
+
+    it("none mode shows no band message and redacts correctness", async () => {
+      const lessonData = await submitAndFetchLesson(
+        await setupFeedbackQuiz(ASSESSMENT_FEEDBACK_MODES.NONE),
+      );
+
+      expect(lessonData.isQuizFeedbackRedacted).toBe(true);
+      expect(lessonData.quizDetails.feedbackMessage ?? null).toBeNull();
+    });
+
+    it("withholds the band message until an open-question attempt is graded", async () => {
+      const lessonData = await submitAndFetchLesson(
+        await setupFeedbackQuiz(ASSESSMENT_FEEDBACK_MODES.FULL, { withOpenQuestion: true }),
+      );
+
+      expect(lessonData.isQuizAwaitingReview).toBe(true);
+      expect(lessonData.quizDetails.feedbackMessage ?? null).toBeNull();
     });
   });
 });

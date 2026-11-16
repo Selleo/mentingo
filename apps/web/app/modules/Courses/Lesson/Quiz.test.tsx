@@ -54,6 +54,11 @@ vi.mock("./Questions", () => ({
     );
   },
 }));
+vi.mock("~/components/RichText/Viever", () => ({
+  default: ({ content }: { content: string }) => (
+    <div dangerouslySetInnerHTML={{ __html: content }} />
+  ),
+}));
 
 const NOW = new Date("2026-01-01T10:00:00.000Z");
 const SELECTED_ANSWER = [{ questionId: "question-1", answers: [{ answerId: "option-1" }] }];
@@ -301,5 +306,41 @@ describe("timed quiz", () => {
     expect(screen.getByTestId("answer")).toBeInTheDocument();
     expect(screen.queryByTestId(LEARNING_HANDLES.QUIZ_START_BUTTON)).not.toBeInTheDocument();
     expect(screen.queryByTestId(LEARNING_HANDLES.QUIZ_TIMER)).not.toBeInTheDocument();
+  });
+});
+
+describe("author feedback message", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.isPreviewMode = false;
+  });
+
+  const completedLesson = (feedbackMessage: string | null) => {
+    const lesson = buildLesson({ timeLimitMinutes: null, lessonCompleted: true });
+
+    if (lesson.quizDetails) lesson.quizDetails.feedbackMessage = feedbackMessage;
+
+    return lesson;
+  };
+
+  it("renders the delivered range message on the result screen", () => {
+    renderQuiz(completedLesson("<p>Great job, Ada!</p>"));
+
+    expect(screen.getByTestId(LEARNING_HANDLES.QUIZ_FEEDBACK_MESSAGE)).toHaveTextContent(
+      "Great job, Ada!",
+    );
+  });
+
+  it("shows nothing when no message was delivered (none mode / master gate off)", () => {
+    renderQuiz(completedLesson(null));
+
+    expect(screen.queryByTestId(LEARNING_HANDLES.QUIZ_FEEDBACK_MESSAGE)).not.toBeInTheDocument();
+  });
+
+  it("hides the message in preview mode", () => {
+    mocks.isPreviewMode = true;
+    renderQuiz(completedLesson("<p>Great job, Ada!</p>"));
+
+    expect(screen.queryByTestId(LEARNING_HANDLES.QUIZ_FEEDBACK_MESSAGE)).not.toBeInTheDocument();
   });
 });
