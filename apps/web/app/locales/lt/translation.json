@@ -4396,7 +4396,18 @@
       "scale_1_5": "Domanda di tipo scala (1–5)",
       "matching": "Suderinkite kiekvieną elementą su jo pora.",
       "noMatchesAvailable": "Šiam klausimui dar nėra atitikmenų.",
-      "correctMatch": "Teisingas atitikmuo:"
+      "correctMatch": "Teisingas atitikmuo:",
+      "fillInTheBlanksInstruction": "Spustelėkite tarpą ir pasirinkite žodį.",
+      "matchingInstruction": "Spustelėkite elementą ir pasirinkite jo atitikmenį.",
+      "chooseMatch": "Pasirinkite atitikmenį",
+      "blankLabel": "Tarpas {{current}} iš {{total}}",
+      "answerBank": "atsakymų banką",
+      "removeWord": "Pašalinti žodį",
+      "dndInstructions": "Norėdami paimti žodį, paspauskite tarpą arba enter. Rodyklių klavišais perkelkite jį tarp tarpų. Norėdami padėti, dar kartą paspauskite tarpą arba enter, arba escape, kad atšauktumėte.",
+      "dndOnStart": "Paimtas žodis {{word}}.",
+      "dndOnOver": "Žodis {{word}} yra virš {{blank}}.",
+      "dndOnEnd": "Žodis {{word}} įdėtas į {{blank}}.",
+      "dndOnCancel": "Vilkimas atšauktas. Žodis {{word}} grįžo į ankstesnę vietą."
     },
     "aiMentor": {
       "title": "AI mentoriaus sesija",

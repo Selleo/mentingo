@@ -4664,7 +4664,18 @@
       "scale_1_5": "Pytanie typu skala (1-5)",
       "matching": "Dopasuj każdy element do jego pary.",
       "noMatchesAvailable": "To pytanie nie ma jeszcze dopasowań do ułożenia.",
-      "correctMatch": "Poprawne dopasowanie:"
+      "correctMatch": "Poprawne dopasowanie:",
+      "fillInTheBlanksInstruction": "Kliknij lukę i wybierz słowo.",
+      "matchingInstruction": "Kliknij element i wybierz dopasowanie.",
+      "chooseMatch": "Wybierz dopasowanie",
+      "blankLabel": "Luka {{current}} z {{total}}",
+      "answerBank": "bank odpowiedzi",
+      "removeWord": "Usuń słowo",
+      "dndInstructions": "Aby podnieść słowo, naciśnij spację lub enter. Używaj strzałek, aby przenosić je między lukami. Naciśnij ponownie spację lub enter, aby je upuścić, lub escape, aby anulować.",
+      "dndOnStart": "Podniesiono słowo {{word}}.",
+      "dndOnOver": "Słowo {{word}} znajduje się nad {{blank}}.",
+      "dndOnEnd": "Słowo {{word}} zostało umieszczone w {{blank}}.",
+      "dndOnCancel": "Przeciąganie anulowane. Słowo {{word}} wróciło na poprzednie miejsce."
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",

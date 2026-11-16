@@ -4401,7 +4401,18 @@
       "scale_1_5": "Otázka typu škála (1–5)",
       "matching": "Přiřaďte každou položku k její dvojici.",
       "noMatchesAvailable": "Pro tuto otázku zatím nejsou k dispozici žádná přiřazení.",
-      "correctMatch": "Správné přiřazení:"
+      "correctMatch": "Správné přiřazení:",
+      "fillInTheBlanksInstruction": "Klikněte na mezeru a vyberte slovo.",
+      "matchingInstruction": "Klikněte na položku a vyberte její protějšek.",
+      "chooseMatch": "Vyberte protějšek",
+      "blankLabel": "Mezera {{current}} z {{total}}",
+      "answerBank": "zásobníku odpovědí",
+      "removeWord": "Odebrat slovo",
+      "dndInstructions": "Slovo zvednete stisknutím mezerníku nebo klávesy enter. Pomocí šipek je přesouvejte mezi mezerami. Dalším stisknutím mezerníku nebo enteru je položíte, klávesou escape zrušíte.",
+      "dndOnStart": "Zvednuto slovo {{word}}.",
+      "dndOnOver": "Slovo {{word}} je nad {{blank}}.",
+      "dndOnEnd": "Slovo {{word}} bylo umístěno do {{blank}}.",
+      "dndOnCancel": "Přetažení zrušeno. Slovo {{word}} se vrátilo na předchozí místo."
     },
     "aiMentor": {
       "title": "Sezení AI Mentor",

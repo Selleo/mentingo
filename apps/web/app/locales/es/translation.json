@@ -4339,7 +4339,18 @@
       "scale_1_5": "Escala del 1 al 5",
       "matching": "Empareja cada elemento con su pareja.",
       "noMatchesAvailable": "Esta pregunta aún no tiene parejas disponibles.",
-      "correctMatch": "Pareja correcta:"
+      "correctMatch": "Pareja correcta:",
+      "fillInTheBlanksInstruction": "Haz clic en un espacio y elige una palabra.",
+      "matchingInstruction": "Haz clic en un elemento y elige su correspondencia.",
+      "chooseMatch": "Elige una correspondencia",
+      "blankLabel": "Espacio {{current}} de {{total}}",
+      "answerBank": "el banco de respuestas",
+      "removeWord": "Quitar palabra",
+      "dndInstructions": "Para tomar una palabra, pulsa espacio o intro. Usa las teclas de flecha para moverla entre los espacios. Pulsa espacio o intro de nuevo para soltarla, o escape para cancelar.",
+      "dndOnStart": "Palabra {{word}} tomada.",
+      "dndOnOver": "La palabra {{word}} está sobre {{blank}}.",
+      "dndOnEnd": "La palabra {{word}} se colocó en {{blank}}.",
+      "dndOnCancel": "Arrastre cancelado. La palabra {{word}} volvió a su posición anterior."
     },
     "aiMentor": {
       "title": "Sesión de mentores de IA",

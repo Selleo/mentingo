@@ -108,16 +108,25 @@ describe("Matching", () => {
     expect(within(bank).queryByText("Woof")).not.toBeInTheDocument();
   });
 
-  it("stretches a placed match across its slot and centers it, unlike bank matches", () => {
+  it("shows a placed match in the pair's labelled combobox and keeps bank matches as chips", () => {
     renderMatching({ isCompleted: false });
 
-    const placedMatch = within(screen.getByTestId("pair-cat")).getByText("Woof");
+    const trigger = within(screen.getByTestId("pair-cat")).getByRole("combobox");
+
+    expect(trigger).toHaveTextContent("Woof");
+    expect(trigger).toHaveAccessibleName("Cat, Woof");
+
     const bankMatch = within(screen.getByTestId("blank_preset")).getByText("Meow");
 
-    expect(placedMatch).toHaveClass("w-full", "justify-center", "text-center");
-    expect(placedMatch).not.toHaveClass("w-auto", "text-left");
     expect(bankMatch).toHaveClass("w-auto", "text-left");
-    expect(bankMatch).not.toHaveClass("w-full", "text-center");
+  });
+
+  it("shows the click-to-choose instruction while answering", () => {
+    renderMatching({ isCompleted: false });
+
+    expect(
+      screen.getByText(i18next.t("studentLessonView.other.matchingInstruction")),
+    ).toBeInTheDocument();
   });
 
   it("shows the learner's answers and the correct match for wrong pairs", () => {

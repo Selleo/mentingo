@@ -4395,7 +4395,18 @@
       "scale_1_5": "Scale question (1-5)",
       "matching": "Match each item with its pair.",
       "noMatchesAvailable": "No matches are available for this question yet.",
-      "correctMatch": "Correct match:"
+      "correctMatch": "Correct match:",
+      "fillInTheBlanksInstruction": "Click a blank and choose a word.",
+      "matchingInstruction": "Click an item and choose its match.",
+      "chooseMatch": "Choose a match",
+      "blankLabel": "Blank {{current}} of {{total}}",
+      "answerBank": "the answer bank",
+      "removeWord": "Remove word",
+      "dndInstructions": "To pick up a word, press space or enter. Use the arrow keys to move it between blanks. Press space or enter again to drop it, or escape to cancel.",
+      "dndOnStart": "Picked up the word {{word}}.",
+      "dndOnOver": "Word {{word}} is over {{blank}}.",
+      "dndOnEnd": "Word {{word}} was placed in {{blank}}.",
+      "dndOnCancel": "Dragging cancelled. Word {{word}} returned to its previous position."
     },
     "aiMentor": {
       "title": "AI Mentor Session",
