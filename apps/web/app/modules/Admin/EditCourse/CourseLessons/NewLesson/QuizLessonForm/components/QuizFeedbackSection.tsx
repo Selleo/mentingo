@@ -115,6 +115,7 @@ const FeedbackRangeRow = ({
           content={range.message}
           editable={!isStructureLocked}
           onChange={(value) => onChange({ message: value })}
+          compactToolbar
           parentClassName="flex h-[8lh] flex-col"
           contentClassName="min-h-0 flex-1 overflow-y-auto"
           editorClassName="min-h-0"

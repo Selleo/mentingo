@@ -38,6 +38,7 @@ type EditorToolbarProps = {
   assetLibrary?: AssetLibraryConfig;
   showTableControls?: boolean;
   limitedFormatting?: boolean;
+  compact?: boolean;
 };
 
 type ToolbarButtonProps = {
@@ -89,8 +90,11 @@ const EditorToolbar = ({
   assetLibrary,
   showTableControls = false,
   limitedFormatting = false,
+  compact = false,
 }: EditorToolbarProps) => {
   const { t } = useTranslation();
+  // compact keeps inline formatting and lists only, so the toolbar fits one row in narrow editors
+  const showBlockFormatting = !limitedFormatting && !compact;
 
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [isAssetLibraryOpen, setIsAssetLibraryOpen] = useState(false);
@@ -119,7 +123,7 @@ const EditorToolbar = ({
     >
       <TooltipProvider>
         <ToggleGroup className="flex flex-row flex-wrap items-center gap-2" type="multiple">
-          {!limitedFormatting && (
+          {showBlockFormatting && (
             <ToolbarSection>
               <FormatType editor={editor} />
             </ToolbarSection>
@@ -171,17 +175,19 @@ const EditorToolbar = ({
                   isActive={editor.isActive("orderedList")}
                   onClick={handleToggle(() => editor.chain().focus().toggleOrderedList().run())}
                 />
-                <ToolbarIconButton
-                  icon={CheckSquare}
-                  tooltip={t("richTextEditor.toolbar.taskList.tooltip")}
-                  isActive={editor.isActive("taskList")}
-                  onClick={handleToggle(() => editor.chain().focus().toggleTaskList().run())}
-                />
+                {!compact && (
+                  <ToolbarIconButton
+                    icon={CheckSquare}
+                    tooltip={t("richTextEditor.toolbar.taskList.tooltip")}
+                    isActive={editor.isActive("taskList")}
+                    onClick={handleToggle(() => editor.chain().focus().toggleTaskList().run())}
+                  />
+                )}
               </>
             )}
           </ToolbarSection>
 
-          {!limitedFormatting && (
+          {showBlockFormatting && (
             <ToolbarSection>
               <ToolbarIconButton
                 icon={Quote}
@@ -220,7 +226,7 @@ const EditorToolbar = ({
             </ToolbarSection>
           )}
         </ToggleGroup>
-        {!limitedFormatting && (
+        {showBlockFormatting && (
           <ToggleGroup
             className="hidden shrink-0 flex-row items-center gap-x-2 sm:flex"
             type="multiple"
