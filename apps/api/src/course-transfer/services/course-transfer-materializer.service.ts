@@ -1378,11 +1378,14 @@ export class CourseTransferMaterializerService {
     );
 
     // ...and group source ranges by assessment in one pass instead of filtering per assessment.
+    // Guard the field: not every snapshot producer populates it (e.g. native-archive imports
+    // carry no feedback ranges), so a missing array must read as empty rather than throw.
+    const sourceFeedbackRanges = params.sourceSnapshot.assessmentFeedbackRanges ?? [];
     const rangesBySourceAssessmentId = new Map<
       UUIDType,
       SourceSnapshot["assessmentFeedbackRanges"]
     >();
-    for (const range of params.sourceSnapshot.assessmentFeedbackRanges) {
+    for (const range of sourceFeedbackRanges) {
       const group = rangesBySourceAssessmentId.get(range.assessmentId) ?? [];
       group.push(range);
       rangesBySourceAssessmentId.set(range.assessmentId, group);

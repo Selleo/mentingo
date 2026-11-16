@@ -121,6 +121,9 @@ export class NativeArchiveValidationService {
     const snapshot = {
       ...value,
       assessmentQuestionMatchingPairs: value.assessmentQuestionMatchingPairs ?? [],
+      // Archives do not serialize author-defined feedback ranges; set empty so the snapshot
+      // satisfies SourceSnapshot and the transfer sync treats it as "no ranges".
+      assessmentFeedbackRanges: [],
     } as unknown as NativeArchiveValidatedCourseSnapshot;
     const hasIncompleteMatchingQuestion = snapshot.questions.some(
       (question) =>
