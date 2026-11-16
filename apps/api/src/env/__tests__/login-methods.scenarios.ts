@@ -23,50 +23,51 @@ export const REJECTED_LOGIN_METHOD_UPDATES = [
   {
     title: "enabling Google without any credentials",
     storedSecrets: {},
-    enforceSSO: false,
     update: { method: LOGIN_METHODS.GOOGLE, enabled: true },
     expectedError: LOGIN_METHOD_ERROR_KEYS.MISSING_CONFIGURATION,
   },
   {
     title: "enabling Microsoft without its client secret",
     storedSecrets: { MICROSOFT_CLIENT_ID: "microsoft-id" },
-    enforceSSO: false,
     update: { method: LOGIN_METHODS.MICROSOFT, enabled: true },
     expectedError: LOGIN_METHOD_ERROR_KEYS.MISSING_CONFIGURATION,
   },
   {
     title: "enabling Slack with a blank client secret",
     storedSecrets: { SLACK_CLIENT_ID: "slack-id", SLACK_CLIENT_SECRET: "   " },
-    enforceSSO: false,
     update: { method: LOGIN_METHODS.SLACK, enabled: true },
     expectedError: LOGIN_METHOD_ERROR_KEYS.MISSING_CONFIGURATION,
   },
   {
     title: "disabling password when magic link is already disabled",
     storedSecrets: { MAGIC_LINK_LOGIN_ENABLED: "false" },
-    enforceSSO: false,
     update: { method: LOGIN_METHODS.PASSWORD, enabled: false },
     expectedError: LOGIN_METHOD_ERROR_KEYS.LAST_METHOD,
   },
   {
     title: "disabling password when the only other enabled method is an unconfigured provider",
     storedSecrets: { MAGIC_LINK_LOGIN_ENABLED: "false", GOOGLE_OAUTH_ENABLED: "true" },
-    enforceSSO: false,
     update: { method: LOGIN_METHODS.PASSWORD, enabled: false },
     expectedError: LOGIN_METHOD_ERROR_KEYS.LAST_METHOD,
   },
+] as const;
+
+export const LEGACY_SSO_ENFORCEMENT_BACKFILLS = [
   {
-    title: "disabling magic link when password is disabled despite the legacy SSO flag",
-    storedSecrets: { PASSWORD_LOGIN_ENABLED: "false" },
+    title: "disables password login for an organization that enforced SSO",
     enforceSSO: true,
-    update: { method: LOGIN_METHODS.MAGIC_LINK, enabled: false },
-    expectedError: LOGIN_METHOD_ERROR_KEYS.LAST_METHOD,
+    expectedMethods: { password: false, magicLink: true },
+  },
+  {
+    title: "keeps password login for an organization that did not enforce SSO",
+    enforceSSO: false,
+    expectedMethods: { password: true, magicLink: true },
   },
 ] as const;
 
 export const ACCEPTED_LOGIN_METHOD_UPDATES = [
   {
-    title: "disabling magic link while legacy enforcement must not block enabled password",
+    title: "disabling magic link while password login stays enabled",
     storedSecrets: {},
     update: { method: LOGIN_METHODS.MAGIC_LINK, enabled: false },
     expectedMethods: { password: true, magicLink: false },

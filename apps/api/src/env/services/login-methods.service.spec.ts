@@ -28,10 +28,7 @@ const NO_OAUTH_PROVIDERS = {
   ENTRA_ID_CLIENT_SECRET: "",
 };
 
-const createLoginMethodsService = (
-  storedSecrets: Record<string, string> = {},
-  { enforceSSO = false } = {},
-) => {
+const createLoginMethodsService = (storedSecrets: Record<string, string> = {}) => {
   const secrets = { ...NO_OAUTH_PROVIDERS, ...storedSecrets };
   const envService = {
     getEnv: jest.fn(async (name: string) => {
@@ -42,7 +39,7 @@ const createLoginMethodsService = (
     bulkUpsertInternalEnv: jest.fn(),
   };
   const envRepository = {
-    findGlobalSettingsForUpdate: jest.fn().mockResolvedValue({ enforceSSO }),
+    lockGlobalSettings: jest.fn(),
   };
   const tenantDbRunnerService = {
     transaction: jest.fn((transactionBody: () => Promise<unknown>) => transactionBody()),
@@ -60,7 +57,6 @@ const createLoginMethodsService = (
 type RejectedUpdate = {
   title: string;
   storedSecrets: Record<string, string>;
-  enforceSSO: boolean;
   update: UpdateLoginMethodBody;
   expectedError: string;
 };
@@ -69,47 +65,30 @@ const REJECTED_UPDATES: RejectedUpdate[] = [
   {
     title: "enabling a provider without credentials",
     storedSecrets: {},
-    enforceSSO: false,
     update: { method: LOGIN_METHODS.MICROSOFT, enabled: true },
     expectedError: LOGIN_METHOD_ERROR_KEYS.MISSING_CONFIGURATION,
   },
   {
     title: "enabling a provider with only part of its credentials",
     storedSecrets: { MICROSOFT_CLIENT_ID: "microsoft-id" },
-    enforceSSO: false,
     update: { method: LOGIN_METHODS.MICROSOFT, enabled: true },
     expectedError: LOGIN_METHOD_ERROR_KEYS.MISSING_CONFIGURATION,
   },
   {
     title: "disabling the last usable login method",
     storedSecrets: { MAGIC_LINK_LOGIN_ENABLED: "false" },
-    enforceSSO: false,
     update: { method: LOGIN_METHODS.PASSWORD, enabled: false },
     expectedError: LOGIN_METHOD_ERROR_KEYS.LAST_METHOD,
   },
   {
     title: "counting an enabled but unconfigured provider as a lockout escape",
     storedSecrets: { MAGIC_LINK_LOGIN_ENABLED: "false", GOOGLE_OAUTH_ENABLED: "true" },
-    enforceSSO: false,
     update: { method: LOGIN_METHODS.PASSWORD, enabled: false },
     expectedError: LOGIN_METHOD_ERROR_KEYS.LAST_METHOD,
   },
 ];
 
 describe("LoginMethodsService", () => {
-  it("counts enabled password login despite persisted legacy SSO enforcement", async () => {
-    const { loginMethodsService, envService } = createLoginMethodsService({}, { enforceSSO: true });
-    await expect(
-      loginMethodsService.updateLoginMethod(
-        { method: LOGIN_METHODS.MAGIC_LINK, enabled: false },
-        ACTOR,
-      ),
-    ).resolves.toBeUndefined();
-    expect(envService.bulkUpsertInternalEnv).toHaveBeenCalledWith(
-      [{ name: "MAGIC_LINK_LOGIN_ENABLED", value: "false" }],
-      ACTOR,
-    );
-  });
   it("fails closed instead of enabling defaults when secret storage fails", async () => {
     const { loginMethodsService, envService } = createLoginMethodsService();
     envService.getEnv.mockRejectedValue(new Error("storage unavailable"));
@@ -156,7 +135,7 @@ describe("LoginMethodsService", () => {
     );
 
     expect(tenantDbRunnerService.transaction).toHaveBeenCalledTimes(1);
-    expect(envRepository.findGlobalSettingsForUpdate).toHaveBeenCalledTimes(1);
+    expect(envRepository.lockGlobalSettings).toHaveBeenCalledTimes(1);
   });
 
   it("saves both provider flags as internal secrets when enabling a configured provider", async () => {
@@ -179,17 +158,10 @@ describe("LoginMethodsService", () => {
     );
   });
 
-  it.each(
-    REJECTED_UPDATES.flatMap((scenario) => [
-      { ...scenario, enforceSSO: false },
-      { ...scenario, enforceSSO: true },
-    ]),
-  )(
+  it.each(REJECTED_UPDATES)(
     "rejects $title without saving anything",
-    async ({ storedSecrets, enforceSSO, update, expectedError }) => {
-      const { loginMethodsService, envService } = createLoginMethodsService(storedSecrets, {
-        enforceSSO,
-      });
+    async ({ storedSecrets, update, expectedError }) => {
+      const { loginMethodsService, envService } = createLoginMethodsService(storedSecrets);
 
       await expect(loginMethodsService.updateLoginMethod(update, ACTOR)).rejects.toThrow(
         expectedError,

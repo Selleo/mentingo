@@ -34,7 +34,7 @@ export function useUpdateInviteOnlyRegistration() {
       }
       toast({
         variant: "destructive",
-        description: t("ssoEnforcementView.toast.inviteOnlyRegistrationUpdateFailed"),
+        description: t("inviteOnlyRegistrationView.toast.inviteOnlyRegistrationUpdateFailed"),
       });
     },
   });

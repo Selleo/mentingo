@@ -9,7 +9,7 @@ import { renderWith } from "~/utils/testUtils";
 import RegisterPage from "./Register.page";
 
 const state = vi.hoisted(() => ({
-  loginMethods: undefined as { password: boolean; slack: boolean; magicLink: boolean } | undefined,
+  loginMethods: { password: true, slack: false, magicLink: false },
 }));
 
 vi.mock("~/api/mutations/useRegisterUser", () => ({
@@ -19,7 +19,7 @@ vi.mock("~/api/mutations/useRegisterUser", () => ({
 vi.mock("~/api/queries/useGlobalSettings", () => ({
   useGlobalSettings: () => ({ data: null }),
   useGlobalSettingsSuspense: () => ({
-    data: { enforceSSO: false, inviteOnlyRegistration: false, loginBackgroundImageS3Key: null },
+    data: { inviteOnlyRegistration: false, loginBackgroundImageS3Key: null },
   }),
 }));
 
@@ -28,7 +28,7 @@ vi.mock("~/api/queries/useRegistrationForm", () => ({
 }));
 
 vi.mock("~/api/queries/useLoginMethods", () => ({
-  useLoginMethods: () => ({ data: state.loginMethods }),
+  useLoginMethodsSuspense: () => ({ data: state.loginMethods }),
 }));
 
 vi.mock("~/components/PlatformLogo", () => ({ PlatformLogo: () => null }));
@@ -68,20 +68,6 @@ describe("password registration availability", () => {
     ).toBeInTheDocument();
     expect(screen.queryByLabelText("Password")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Create an account" })).not.toBeInTheDocument();
-  });
-
-  it("does not expose the password form before login methods are available", async () => {
-    await i18next.changeLanguage("en");
-    state.loginMethods = undefined;
-    renderRegisterPage();
-
-    expect(screen.queryByLabelText("Password")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Create an account" })).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("heading", {
-        name: "Login destination: /auth/login?returnTo=%2Fcourses%2Fcourse-1",
-      }),
-    ).not.toBeInTheDocument();
   });
 
   it("keeps password registration available when enabled", async () => {

@@ -31,18 +31,6 @@ const expectSwitchState = async (locator: Locator, checked: boolean) => {
   }
 };
 
-test("organization settings do not show the redundant SSO enforcement card", async ({
-  withWorkerPage,
-}) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await openOrganizationSettings(page);
-    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.SSO_ENFORCEMENT_CARD)).toHaveCount(0);
-    await expect(
-      page.getByTestId(SETTINGS_PAGE_HANDLES.INVITE_ONLY_REGISTRATION_SWITCH),
-    ).toBeVisible();
-  });
-});
-
 test("admin can toggle invite-only registration and the setting persists", async ({
   apiClient,
   cleanup,

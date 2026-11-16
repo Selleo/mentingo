@@ -83,9 +83,8 @@ export class AutomationRunCreationService {
       throw new Error("Automation delivery requires tenant context");
     }
 
-    const delivery = await this.automationEmailDeliveryRepository.findAutomationEmailDeliveryById(
-      emailDeliveryId,
-    );
+    const delivery =
+      await this.automationEmailDeliveryRepository.findAutomationEmailDeliveryById(emailDeliveryId);
 
     if (!delivery || !CLAIMABLE_AUTOMATION_EMAIL_DELIVERY_STATUSES.includes(delivery.status)) {
       return;
@@ -133,9 +132,8 @@ export class AutomationRunCreationService {
       return;
     }
 
-    const enabledAutomations = await this.automationDefinitionStorageService.listEnabledAutomations(
-      transaction,
-    );
+    const enabledAutomations =
+      await this.automationDefinitionStorageService.listEnabledAutomations(transaction);
 
     for (const automation of enabledAutomations) {
       await this.startMatchingAutomationRun(automation, event, transaction);

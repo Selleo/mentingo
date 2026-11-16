@@ -64,7 +64,7 @@ export class LoginMethodsService {
    */
   async updateLoginMethod({ method, enabled }: UpdateLoginMethodBody, actor: CurrentUserType) {
     await this.tenantDbRunnerService.transaction(async () => {
-      await this.envRepository.findGlobalSettingsForUpdate();
+      await this.envRepository.lockGlobalSettings();
 
       if (enabled) {
         await this.assertCredentialsConfigured(method);

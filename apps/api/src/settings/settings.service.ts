@@ -2457,8 +2457,6 @@ export class SettingsService {
   ): GlobalSettingsJSONContentSchema {
     const publicSettings = { ...settings };
     Reflect.deleteProperty(publicSettings, "userEmailTriggers");
-    // Legacy rows may retain this key; organization login methods are the only auth policy.
-    Reflect.deleteProperty(publicSettings, "enforceSSO");
     return {
       ...publicSettings,
       publicCoursePreviewEnabled:

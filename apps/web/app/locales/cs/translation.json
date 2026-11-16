@@ -1698,20 +1698,6 @@
       "email": "E-mail je povinný"
     }
   },
-  "ssoEnforcementView": {
-    "header": "Vynucení jednotného přihlášení",
-    "subHeader": "Vynutit přihlášení SSO pro všechny uživatele",
-    "description": "Tento přepínač vynutí přihlášení Google/Microsoft pro všechny uživatele. Pokud je zakázáno, uživatelé se budou moci přihlásit pomocí tradičního přihlašovacího formuláře.",
-    "switch": {
-      "enabled": "Povoleno",
-      "disabled": "Zakázáno"
-    },
-    "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "Vynucení jednotného přihlášení bylo úspěšně aktualizováno",
-      "ssoEnforcementUpdateFailed": "Aktualizace vynucení jednotného přihlášení se nezdařila",
-      "registerRedirect": "Registrace pomocí e-mailu je zakázána, protože je vynuceno jednotné přihlášení."
-    }
-  },
   "userEmailTriggers": {
     "header": "Spouštěče e-mailu uživatele",
     "subHeader": "Spravujte automatická e-mailová upozornění zasílaná uživatelům",
@@ -4151,7 +4137,6 @@
   "registerView": {
     "header": "Zaregistrujte se",
     "subHeader": "Chcete-li vytvořit účet, zadejte své údaje",
-    "subHeaderSSO": "Zaregistrujte se pomocí svého účtu Google/Microsoft",
     "field": {
       "firstName": "Křestní jméno",
       "lastName": "Příjmení",

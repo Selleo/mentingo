@@ -1688,20 +1688,6 @@
       "email": "L'e-mail est requis"
     }
   },
-  "ssoEnforcementView": {
-    "header": "Connexion SSO obligatoire",
-    "subHeader": "Appliquer la connexion SSO pour tous les utilisateurs",
-    "description": "Ce commutateur imposera la connexion Google/Microsoft à tous les utilisateurs. S'il est désactivé, les utilisateurs pourront se connecter en utilisant le formulaire de connexion traditionnel.",
-    "switch": {
-      "enabled": "Activé",
-      "disabled": "Désactivé"
-    },
-    "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "Les paramètres SSO ont bien été mis à jour",
-      "ssoEnforcementUpdateFailed": "Impossible de mettre à jour les paramètres SSO",
-      "registerRedirect": "L'inscription par e-mail est désactivée car le SSO est appliqué."
-    }
-  },
   "userEmailTriggers": {
     "header": "E-mails automatiques",
     "subHeader": "Gérer les notifications automatiques par e-mail envoyées aux utilisateurs",
@@ -3906,7 +3892,6 @@
   "registerView": {
     "header": "Créer un compte",
     "subHeader": "Renseignez vos informations pour créer votre compte",
-    "subHeaderSSO": "Créez votre compte avec Google ou Microsoft",
     "field": {
       "firstName": "Prénom",
       "lastName": "Nom de famille",
