@@ -216,7 +216,9 @@ export class QuizAuthoringRepository {
         minPercent: range.minPercent,
         maxPercent: range.maxPercent,
         displayOrder: startOrder + index,
-        message: buildJsonbField(language, range.message),
+        // allowEmpty mirrors the update path so an empty message is stored as { language: "" }
+        // on both create and update, giving translation collection a single state to key off.
+        message: buildJsonbField(language, range.message, true),
       })),
     );
   }

@@ -499,6 +499,15 @@ export class CourseTransferGraphRepository {
     return assessment?.id;
   }
 
+  async findAssessmentIdsByLessonIds(lessonIds: UUIDType[]) {
+    if (!lessonIds.length) return [];
+
+    return this.db
+      .select({ lessonId: assessments.lessonId, id: assessments.id })
+      .from(assessments)
+      .where(inArray(assessments.lessonId, lessonIds));
+  }
+
   async createTargetQuestion(
     assessmentId: UUIDType,
     values: QuestionJsonbInsert,
@@ -669,6 +678,16 @@ export class CourseTransferGraphRepository {
           label: buildJsonbFieldWithMultipleEntries(values.label),
         },
       });
+  }
+
+  // Negates kept ranges' display orders so re-ordered upserts cannot collide on the unique index.
+  async parkTargetFeedbackRanges(assessmentIds: UUIDType[]) {
+    if (!assessmentIds.length) return;
+
+    await this.db
+      .update(assessmentFeedbackRanges)
+      .set({ displayOrder: sql`-ABS(${assessmentFeedbackRanges.displayOrder}) - 1` })
+      .where(inArray(assessmentFeedbackRanges.assessmentId, assessmentIds));
   }
 
   async upsertTargetFeedbackRange(values: UpsertTargetFeedbackRangeValues) {

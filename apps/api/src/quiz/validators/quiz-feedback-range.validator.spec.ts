@@ -21,6 +21,10 @@ describe("validateFeedbackRanges", () => {
     expect(validateFeedbackRanges([range(0, 49), range(50, 100)])).toEqual([]);
   });
 
+  it("accepts a valid partition submitted out of order", () => {
+    expect(validateFeedbackRanges([range(50, 100), range(0, 49)])).toEqual([]);
+  });
+
   it("accepts a band with an empty message", () => {
     expect(validateFeedbackRanges([range(0, 100, "")])).toEqual([]);
   });

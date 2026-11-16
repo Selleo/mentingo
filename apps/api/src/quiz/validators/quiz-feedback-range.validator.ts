@@ -38,12 +38,15 @@ export const validateFeedbackRanges = (ranges: QuizAuthoringFeedbackRange[]): st
   // Coverage checks only make sense once every bound is a usable integer.
   if (issues.length) return [...new Set(issues)];
 
-  if (ranges[0].minPercent !== 0) issues.push(FEEDBACK_RANGE_ISSUES.MUST_START_AT_ZERO);
-  if (ranges[ranges.length - 1].maxPercent !== 100)
+  // Submission order is irrelevant: the stored display order is derived from ascending min.
+  const sorted = [...ranges].sort((first, second) => first.minPercent - second.minPercent);
+
+  if (sorted[0].minPercent !== 0) issues.push(FEEDBACK_RANGE_ISSUES.MUST_START_AT_ZERO);
+  if (sorted[sorted.length - 1].maxPercent !== 100)
     issues.push(FEEDBACK_RANGE_ISSUES.MUST_END_AT_HUNDRED);
 
-  for (let index = 1; index < ranges.length; index++) {
-    if (ranges[index].minPercent !== ranges[index - 1].maxPercent + 1) {
+  for (let index = 1; index < sorted.length; index++) {
+    if (sorted[index].minPercent !== sorted[index - 1].maxPercent + 1) {
       issues.push(FEEDBACK_RANGE_ISSUES.GAP_OR_OVERLAP);
       break;
     }

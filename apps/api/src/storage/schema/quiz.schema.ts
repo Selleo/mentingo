@@ -244,9 +244,6 @@ export const assessmentFeedbackRanges = pgTable(
     assessmentDisplayOrderUniqueIdx: uniqueIndex(
       "assessment_feedback_ranges_tenant_assessment_display_order_idx",
     ).on(table.tenantId, table.assessmentId, table.displayOrder),
-    assessmentDisplayOrderIdx: index(
-      "assessment_feedback_ranges_tenant_assessment_display_order_lookup_idx",
-    ).on(table.tenantId, table.assessmentId, table.displayOrder),
   })),
 );
 

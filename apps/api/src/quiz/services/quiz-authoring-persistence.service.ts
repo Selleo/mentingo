@@ -16,6 +16,12 @@ import type {
 import type { SupportedLanguages } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
 
+// Display order is derived from ascending min percent, so submission order does not matter.
+const sortFeedbackRangesByMin = (
+  ranges: QuizAuthoringFeedbackRange[],
+): QuizAuthoringFeedbackRange[] =>
+  [...ranges].sort((first, second) => first.minPercent - second.minPercent);
+
 @Injectable()
 export class QuizAuthoringPersistenceService {
   constructor(private readonly quizAuthoringRepository: QuizAuthoringRepository) {}
@@ -37,7 +43,7 @@ export class QuizAuthoringPersistenceService {
 
       await this.quizAuthoringRepository.insertFeedbackRanges(
         assessment.id,
-        data.feedbackRanges,
+        sortFeedbackRangesByMin(data.feedbackRanges),
         data.language,
         trx,
       );
@@ -80,10 +86,11 @@ export class QuizAuthoringPersistenceService {
    */
   private async syncFeedbackRanges(
     assessmentId: UUIDType,
-    ranges: QuizAuthoringFeedbackRange[],
+    incomingRanges: QuizAuthoringFeedbackRange[],
     language: SupportedLanguages,
     trx: DatabasePg,
   ) {
+    const ranges = sortFeedbackRangesByMin(incomingRanges);
     const existing = await this.quizAuthoringRepository.findFeedbackRangeRows(assessmentId, trx);
     const keptCount = Math.min(existing.length, ranges.length);
 

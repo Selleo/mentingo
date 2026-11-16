@@ -1367,6 +1367,27 @@ export class CourseTransferMaterializerService {
    * off the source range id and target course, mirroring the question-level detail sync.
    */
   private async syncAssessmentFeedbackRanges(params: SyncAssessmentFeedbackRangesParams) {
+    // Resolve every target assessment id in one query (no per-assessment round trip)...
+    const targetLessonIds = params.sourceSnapshot.assessments
+      .map((assessment) => params.lessonMap.get(assessment.lessonId))
+      .filter((lessonId): lessonId is UUIDType => Boolean(lessonId));
+    const targetAssessmentRows =
+      await this.courseTransferGraphRepository.findAssessmentIdsByLessonIds(targetLessonIds);
+    const targetAssessmentIdByLessonId = new Map(
+      targetAssessmentRows.map((row) => [row.lessonId, row.id]),
+    );
+
+    // ...and group source ranges by assessment in one pass instead of filtering per assessment.
+    const rangesBySourceAssessmentId = new Map<
+      UUIDType,
+      SourceSnapshot["assessmentFeedbackRanges"]
+    >();
+    for (const range of params.sourceSnapshot.assessmentFeedbackRanges) {
+      const group = rangesBySourceAssessmentId.get(range.assessmentId) ?? [];
+      group.push(range);
+      rangesBySourceAssessmentId.set(range.assessmentId, group);
+    }
+
     const targetAssessmentIds: UUIDType[] = [];
     const plannedRanges: Array<{
       targetAssessmentId: UUIDType;
@@ -1378,15 +1399,12 @@ export class CourseTransferMaterializerService {
       const targetLessonId = params.lessonMap.get(sourceAssessment.lessonId);
       if (!targetLessonId) continue;
 
-      const targetAssessmentId =
-        await this.courseTransferGraphRepository.findAssessmentIdByLessonId(targetLessonId);
+      const targetAssessmentId = targetAssessmentIdByLessonId.get(targetLessonId);
       if (!targetAssessmentId) continue;
 
       targetAssessmentIds.push(targetAssessmentId);
 
-      for (const source of params.sourceSnapshot.assessmentFeedbackRanges.filter(
-        (range) => range.assessmentId === sourceAssessment.id,
-      )) {
+      for (const source of rangesBySourceAssessmentId.get(sourceAssessment.id) ?? []) {
         plannedRanges.push({
           targetAssessmentId,
           targetRangeId: uuidv5(source.id, params.targetCourseId) as UUIDType,
@@ -1395,12 +1413,14 @@ export class CourseTransferMaterializerService {
       }
     }
 
-    // Drop ranges that no longer exist before upserting, so a freed display order cannot
-    // collide with a surviving range on the unique (tenant, assessment, display_order) index.
+    // Drop ranges that no longer exist, then park the survivors' display orders negative so the
+    // re-ordered upserts below cannot transiently collide on the unique
+    // (tenant, assessment, display_order) index when bands are permuted between transfers.
     await this.courseTransferGraphRepository.deleteStaleTargetFeedbackRanges(
       targetAssessmentIds,
       plannedRanges.map(({ targetRangeId }) => targetRangeId),
     );
+    await this.courseTransferGraphRepository.parkTargetFeedbackRanges(targetAssessmentIds);
 
     for (const { targetAssessmentId, targetRangeId, source } of plannedRanges) {
       await this.courseTransferGraphRepository.upsertTargetFeedbackRange({
