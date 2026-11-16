@@ -104,7 +104,8 @@ const FeedbackRangeRow = ({
             type="button"
             data-testid={QUIZ_LESSON_FORM_HANDLES.feedbackRangeRemoveButton(rangeIndex)}
             onClick={onRemove}
-            className="bg-color-white ml-auto border border-neutral-300 text-error-700"
+            variant="outline"
+            className="ml-auto text-error-700"
           >
             <Icon name="TrashIcon" className="size-4" />
           </Button>
@@ -230,7 +231,7 @@ const QuizFeedbackSection = ({ form, isStructureLocked, readOnly }: Props) => {
               data-testid={QUIZ_LESSON_FORM_HANDLES.FEEDBACK_ADD_RANGE_BUTTON}
               disabled={!rangesWithAddedRange}
               onClick={() => rangesWithAddedRange && setRanges(rangesWithAddedRange)}
-              className="bg-color-white border border-neutral-300"
+              variant="outline"
             >
               {t("adminCourseView.curriculum.lesson.settings.feedbackRangeAdd")}
             </Button>
@@ -238,7 +239,7 @@ const QuizFeedbackSection = ({ form, isStructureLocked, readOnly }: Props) => {
               <Button
                 type="button"
                 onClick={() => setRanges(defaultQuizFeedbackRanges)}
-                className="bg-color-white border border-neutral-300"
+                variant="outline"
               >
                 {t("adminCourseView.curriculum.lesson.settings.feedbackRangeReset")}
               </Button>
