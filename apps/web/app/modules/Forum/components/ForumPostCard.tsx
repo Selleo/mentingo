@@ -1,6 +1,6 @@
 import { COURSE_CHAT_ALLOWED_REACTIONS } from "@repo/shared";
 import { format } from "date-fns";
-import { Trash2 } from "lucide-react";
+import { MessageSquare, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,11 +14,12 @@ import { FORUM_HANDLES } from "../../../../e2e/data/forum/handles";
 
 import { DeleteForumPostDialog } from "./DeleteForumPostDialog";
 
+import type { ReactNode } from "react";
 import type { MentionableUser } from "~/api/queries/course-chat/courseChatTypes";
 import type { ForumPost } from "~/api/queries/forum/forumTypes";
 
 type ForumPostCardProps = {
-  post: ForumPost;
+  post: Pick<ForumPost, "id" | "content" | "createdAt" | "deletedAt" | "user" | "reactions">;
   mentionableUsers: MentionableUser[];
   canDelete: boolean;
   isDeleting: boolean;
@@ -26,6 +27,8 @@ type ForumPostCardProps = {
   canReact: boolean;
   isReacting: boolean;
   onToggleReaction: (postId: string, reaction: string) => void;
+  onReply?: () => void;
+  children?: ReactNode;
 };
 
 export function ForumPostCard({
@@ -37,6 +40,8 @@ export function ForumPostCard({
   canReact,
   isReacting,
   onToggleReaction,
+  onReply,
+  children,
 }: ForumPostCardProps) {
   const { t } = useTranslation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -96,8 +101,8 @@ export function ForumPostCard({
             ? t("forum.deletedPost")
             : renderMessageContent(post.content, mentionableUsers)}
         </p>
-        {!isDeleted && reactions.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+        {!isDeleted && (reactions.length > 0 || onReply) && (
+          <div className="flex flex-wrap items-center gap-1.5">
             {reactions.map(({ reaction, summary }) => (
               <ReactionButton
                 key={reaction}
@@ -110,8 +115,21 @@ export function ForumPostCard({
                 onClick={() => onToggleReaction(post.id, reaction)}
               />
             ))}
+            {onReply && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto text-neutral-600"
+                onClick={onReply}
+                data-testid={FORUM_HANDLES.postReplyButton(post.id)}
+              >
+                <MessageSquare className="mr-1.5 size-4" aria-hidden />
+                {t("studentCourseView.courseChat.reply")}
+              </Button>
+            )}
           </div>
         )}
+        {children}
       </div>
       {canDelete && (
         <DeleteForumPostDialog

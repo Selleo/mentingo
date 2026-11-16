@@ -9751,10 +9751,15 @@
     "description": "Ask questions and share knowledge with everyone in your organization.",
     "newTopic": "New topic",
     "searchPlaceholder": "Search topics",
-    "filter": {
-      "label": "Show topics",
-      "all": "All topics",
-      "general": "General"
+    "courseDiscussions": {
+      "title": "Course discussions",
+      "heading": "Discussion: {{course}}",
+      "messages_one": "{{count}} message",
+      "messages_other": "{{count}} messages",
+      "viewAll": "All course discussions ({{count}})",
+      "searchPlaceholder": "Search courses",
+      "empty": "None of your courses has a discussion yet.",
+      "noResults": "No course discussions match your search."
     },
     "sort": {
       "label": "Sort topics",
@@ -9779,7 +9784,6 @@
     },
     "topic": {
       "backToForum": "Back to forum",
-      "courseThreadTitle": "Discussion in {{course}}",
       "noReplies": "No replies yet.",
       "replyPlaceholder": "Write a reply",
       "replySubmit": "Reply",
@@ -9798,6 +9802,7 @@
     },
     "errors": {
       "topicNotFound": "This topic doesn't exist or you don't have access to it.",
+      "courseDiscussionNotFound": "This course discussion doesn't exist or you don't have access to it.",
       "postNotFound": "This post no longer exists.",
       "cannotDeletePost": "You can only delete your own posts.",
       "topicDeleted": "Replies are closed because the first post was deleted.",

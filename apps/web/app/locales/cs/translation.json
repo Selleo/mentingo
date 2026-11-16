@@ -9774,10 +9774,17 @@
     "description": "Pokládejte otázky a sdílejte znalosti s celou organizací.",
     "newTopic": "Nové téma",
     "searchPlaceholder": "Hledat témata",
-    "filter": {
-      "label": "Zobrazit témata",
-      "all": "Všechna témata",
-      "general": "Obecné"
+    "courseDiscussions": {
+      "title": "Diskuse v kurzech",
+      "heading": "Diskuse: {{course}}",
+      "messages_one": "{{count}} zpráva",
+      "messages_few": "{{count}} zprávy",
+      "messages_many": "{{count}} zprávy",
+      "messages_other": "{{count}} zpráv",
+      "viewAll": "Všechny diskuse v kurzech ({{count}})",
+      "searchPlaceholder": "Hledat kurzy",
+      "empty": "V žádném z vašich kurzů zatím není diskuse.",
+      "noResults": "Hledání neodpovídá žádná diskuse kurzu."
     },
     "sort": {
       "label": "Seřadit témata",
@@ -9804,7 +9811,6 @@
     },
     "topic": {
       "backToForum": "Zpět na fórum",
-      "courseThreadTitle": "Diskuse v kurzu {{course}}",
       "noReplies": "Zatím žádné odpovědi.",
       "replyPlaceholder": "Napište odpověď",
       "replySubmit": "Odpovědět",
@@ -9823,6 +9829,7 @@
     },
     "errors": {
       "topicNotFound": "Toto téma neexistuje nebo k němu nemáte přístup.",
+      "courseDiscussionNotFound": "Tato diskuse kurzu neexistuje nebo k ní nemáte přístup.",
       "postNotFound": "Tento příspěvek již neexistuje.",
       "cannotDeletePost": "Můžete mazat pouze vlastní příspěvky.",
       "topicDeleted": "Odpovědi jsou uzavřené, protože první příspěvek byl smazán.",

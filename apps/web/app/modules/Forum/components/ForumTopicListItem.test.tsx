@@ -1,5 +1,4 @@
 import { createRemixStub } from "@remix-run/testing";
-import { DISCUSSION_SCOPES } from "@repo/shared";
 import { screen } from "@testing-library/react";
 import { expect, it } from "vitest";
 
@@ -17,9 +16,7 @@ const renderItem = (isDeleted: boolean) => {
         <ForumTopicListItem
           topic={{
             id: "topic-1",
-            scope: DISCUSSION_SCOPES.GENERAL,
             title: "Exam preparation",
-            course: null,
             author: { id: "user-1", firstName: "Ada", lastName: "Author", avatarReference: null },
             replyCount: 2,
             lastActivityAt: "2026-11-01T10:00:00.000Z",

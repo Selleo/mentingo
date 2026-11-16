@@ -28,7 +28,6 @@ import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 import type { PermissionKey } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { CourseChatDeletedMessage } from "src/course-chat/course-chat.types";
 import type {
   CourseChatMessageResponse,
   CourseChatUserResponse,
@@ -268,16 +267,6 @@ export class CourseChatService {
     userId: UUIDType,
     permissions: PermissionKey[],
   ): Promise<BaseResponse<DeleteCourseChatMessageResponse>> {
-    const { payload } = await this.deleteCourseMessage(messageId, userId, permissions);
-
-    return new BaseResponse(payload);
-  }
-
-  async deleteCourseMessage(
-    messageId: UUIDType,
-    userId: UUIDType,
-    permissions: PermissionKey[],
-  ): Promise<CourseChatDeletedMessage> {
     const message = await this.courseChatRepository.getMessageContext(messageId);
     if (!message || message.deletedAt || !message.userId) {
       throw new NotFoundException("courseChat.errors.messageNotFound");
@@ -316,7 +305,7 @@ export class CourseChatService {
       {},
     );
 
-    return { payload, threadRemoved: deletion.threadRemoved };
+    return new BaseResponse(payload);
   }
 
   private async getAccessibleMessage(messageId: UUIDType, userId: UUIDType) {

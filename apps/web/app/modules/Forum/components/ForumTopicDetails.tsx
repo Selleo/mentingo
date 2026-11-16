@@ -7,30 +7,20 @@ import { useTranslation } from "react-i18next";
 import { useCreateForumPost } from "~/api/mutations/useCreateForumPost";
 import { useDeleteForumPost } from "~/api/mutations/useDeleteForumPost";
 import { useToggleForumPostReaction } from "~/api/mutations/useToggleForumPostReaction";
-import { useCourseChatUsers } from "~/api/queries/course-chat/useCourseChatUsers";
 import {
   FORUM_POSTS_PER_PAGE,
   useForumTopicPostsSuspense,
 } from "~/api/queries/forum/useForumTopicPosts";
 import { useForumUsers } from "~/api/queries/forum/useForumUsers";
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
-import { hasAnyPermission } from "~/common/permissions/permission.utils";
+import { hasAnyPermission, hasPermission } from "~/common/permissions/permission.utils";
 import { useClampedPage } from "~/components/DataTable";
 import { Pagination } from "~/components/Pagination/Pagination";
-import { Badge } from "~/components/ui/badge";
 import { useToast } from "~/components/ui/use-toast";
 import { getMentionedUserIds } from "~/modules/Courses/CourseView/CourseChat/courseChatUtils";
-import { useCourseChatSocket } from "~/modules/Courses/CourseView/CourseChat/useCourseChatSocket";
 
 import { FORUM_HANDLES } from "../../../../e2e/data/forum/handles";
-import {
-  canDeleteForumPost,
-  canReactInTopic,
-  canReplyInTopic,
-  getLastPage,
-  getTopicHeading,
-  parsePageParam,
-} from "../forum.utils";
+import { canDeleteForumPost, getLastPage, parsePageParam } from "../forum.utils";
 import { useForumSocket } from "../useForumSocket";
 
 import { ForumPostCard } from "./ForumPostCard";
@@ -50,48 +40,30 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
   const page = parsePageParam(searchParams.get("page"));
   const { data: currentUser } = useCurrentUser();
   const permissions = currentUser?.permissions ?? [];
-  const courseId = topic.course?.id ?? null;
-  const firstPostId = topic.firstPost.id;
 
   const deferredPage = useDeferredValue(page);
   const { data: posts } = useForumTopicPostsSuspense(topic.id, deferredPage);
   const totalReplies = posts.pagination.totalItems;
-  const { mutate: createPost, isPending: isSendingReply } = useCreateForumPost({
-    topicId: topic.id,
-    firstPostId,
-    courseId,
-  });
-  const { mutate: deletePost, isPending: isDeletingPost } = useDeleteForumPost({
-    firstPostId,
-    courseId,
-  });
-
-  const { mutate: toggleReaction, isPending: isReacting } = useToggleForumPostReaction({
-    firstPostId,
-    courseId,
-  });
+  const { mutate: createPost, isPending: isSendingReply } = useCreateForumPost(topic.id);
+  const { mutate: deletePost, isPending: isDeletingPost } = useDeleteForumPost();
+  const { mutate: toggleReaction, isPending: isReacting } = useToggleForumPostReaction();
 
   const isClosed = Boolean(topic.firstPost.deletedAt);
-  const canReply = !isClosed && canReplyInTopic(topic.scope, permissions);
-  const canReact = canReactInTopic(topic.scope, permissions);
+  const canReply = !isClosed && hasPermission(permissions, PERMISSIONS.FORUM_POST_CREATE);
+  const canReact = hasPermission(permissions, PERMISSIONS.FORUM_POST_REACT);
 
-  const { data: forumUsers = [] } = useForumUsers({
-    enabled:
-      !courseId &&
-      hasAnyPermission(permissions, [
-        PERMISSIONS.FORUM_TOPIC_CREATE,
-        PERMISSIONS.FORUM_POST_CREATE,
-      ]),
+  const { data: mentionableUsers = [] } = useForumUsers({
+    enabled: hasAnyPermission(permissions, [
+      PERMISSIONS.FORUM_TOPIC_CREATE,
+      PERMISSIONS.FORUM_POST_CREATE,
+    ]),
   });
-  const { data: courseUsers = [] } = useCourseChatUsers(courseId ?? "");
-  const mentionableUsers = courseId ? courseUsers : forumUsers;
 
   const handleMentioned = useCallback(() => {
     toast({ description: t("forum.toast.mentioned") });
   }, [t, toast]);
 
-  useForumSocket({ topicId: courseId ? undefined : topic.id, onMentioned: handleMentioned });
-  useCourseChatSocket({ courseId: courseId ?? "", enabled: Boolean(courseId) });
+  useForumSocket({ topicId: topic.id, onMentioned: handleMentioned });
 
   const goToPage = (nextPage: number) => {
     setSearchParams(
@@ -119,7 +91,6 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
     canDeleteForumPost({
       authorId: post.userId,
       currentUserId: currentUser?.id,
-      scope: topic.scope,
       permissions,
     });
 
@@ -161,17 +132,8 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
           {t("forum.topic.backToForum")}
         </Link>
         <h1 className="h4 break-words text-neutral-950" data-testid={FORUM_HANDLES.TOPIC_TITLE}>
-          {getTopicHeading(topic, t)}
+          {topic.title}
         </h1>
-        {topic.course && (
-          <Link
-            to={`/course/${topic.course.id}`}
-            className="inline-flex"
-            data-testid={FORUM_HANDLES.TOPIC_COURSE_LINK}
-          >
-            <Badge variant="secondary">{topic.course.title}</Badge>
-          </Link>
-        )}
       </div>
 
       <ForumPostCard

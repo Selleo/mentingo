@@ -6,7 +6,6 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import {
-  DISCUSSION_SCOPES,
   FORUM_SOCKET_EVENTS,
   PERMISSIONS,
   findMentionedUserIds,
@@ -34,16 +33,16 @@ import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { ToggleCourseChatMessageReactionBody } from "src/course-chat/schemas/course-chat.schema";
 import type {
-  ForumPostContext,
   ForumPostRow,
   ForumThreadContext,
   ForumTopicRow,
 } from "src/forum/forum.repository.types";
-import type { ForumPostDeletion, ForumTopicListQuery, ForumViewer } from "src/forum/forum.types";
+import type { ForumCourseDiscussionListQuery, ForumTopicListQuery } from "src/forum/forum.types";
 import type {
   CreateForumPostBody,
   CreateForumTopicBody,
   DeleteForumPostResponse,
+  ForumCourseDiscussionResponse,
   ForumPostReactionsResponse,
   ForumPostResponse,
   ForumTopicListItemResponse,
@@ -66,16 +65,12 @@ export class ForumService {
 
   async getTopics(
     query: ForumTopicListQuery,
-    currentUser: CurrentUserType,
   ): Promise<PaginatedResponse<ForumTopicListItemResponse[]>> {
     const search = query.search?.trim();
-    const { data, totalItems } = await this.forumRepository.findTopics(
-      { ...query, search: search || undefined },
-      {
-        viewerUserId: currentUser.userId,
-        includeCourseThreads: await this.canReadCourseThreads(currentUser),
-      },
-    );
+    const { data, totalItems } = await this.forumRepository.findTopics({
+      ...query,
+      search: search || undefined,
+    });
     const avatarUrlByReference = await this.courseChatMessageMapper.getAvatarUrlByReference(
       data.map((topic) => topic.authorAvatarReference),
     );
@@ -99,11 +94,42 @@ export class ForumService {
   async getTopic(
     topicId: UUIDType,
     currentUser: CurrentUserType,
-    language: SupportedLanguages,
   ): Promise<BaseResponse<ForumTopicResponse>> {
-    await this.getAccessibleThread(topicId, currentUser);
+    await this.getVisibleThread(topicId);
 
-    return new BaseResponse(await this.getTopicResponse(topicId, currentUser.userId, language));
+    return new BaseResponse(await this.getTopicResponse(topicId, currentUser.userId));
+  }
+
+  async getCourseDiscussions(
+    query: ForumCourseDiscussionListQuery,
+    currentUser: CurrentUserType,
+  ): Promise<PaginatedResponse<ForumCourseDiscussionResponse[]>> {
+    const search = query.search?.trim();
+    const { data, totalItems } = (await this.canReadCourseDiscussions(currentUser))
+      ? await this.forumRepository.findCourseDiscussions(currentUser.userId, {
+          ...query,
+          search: search || undefined,
+        })
+      : { data: [], totalItems: 0 };
+
+    return new PaginatedResponse({
+      data,
+      pagination: { totalItems, page: query.page, perPage: query.perPage },
+    });
+  }
+
+  async getCourseDiscussion(
+    courseId: UUIDType,
+    currentUser: CurrentUserType,
+    language: SupportedLanguages,
+  ): Promise<BaseResponse<ForumCourseDiscussionResponse>> {
+    const courseDiscussion = (await this.canReadCourseDiscussions(currentUser))
+      ? await this.forumRepository.findCourseDiscussion(courseId, currentUser.userId, language)
+      : null;
+
+    if (!courseDiscussion) throw new NotFoundException("forum.errors.courseDiscussionNotFound");
+
+    return new BaseResponse(courseDiscussion);
   }
 
   async getTopicPosts(params: {
@@ -112,7 +138,7 @@ export class ForumService {
     page: number;
     perPage: number;
   }): Promise<PaginatedResponse<ForumPostResponse[]>> {
-    const thread = await this.getAccessibleThread(params.topicId, params.currentUser);
+    const thread = await this.getVisibleThread(params.topicId);
     const { data, totalItems } = await this.forumRepository.findReplies(
       thread.firstPostId,
       params.page,
@@ -128,9 +154,8 @@ export class ForumService {
   async createTopic(params: {
     body: CreateForumTopicBody;
     currentUser: CurrentUserType;
-    language: SupportedLanguages;
   }): Promise<BaseResponse<ForumTopicResponse>> {
-    const { body, currentUser, language } = params;
+    const { body, currentUser } = params;
     this.assertHasPermission(currentUser, PERMISSIONS.FORUM_READ);
 
     const title = this.normalizeText(body.title, "forum.errors.emptyTitle");
@@ -159,40 +184,22 @@ export class ForumService {
     this.emitForumChanged(currentUser.tenantId);
     this.emitMentions({ topicId, postId, mentionedUserIds });
 
-    return new BaseResponse(await this.getTopicResponse(topicId, currentUser.userId, language));
+    return new BaseResponse(await this.getTopicResponse(topicId, currentUser.userId));
   }
 
   async createPost(params: {
     topicId: UUIDType;
     body: CreateForumPostBody;
     currentUser: CurrentUserType;
-    tenantId: UUIDType;
   }): Promise<BaseResponse<ForumPostResponse>> {
-    const { topicId, body, currentUser, tenantId } = params;
+    const { topicId, body, currentUser } = params;
     this.assertHasPermission(currentUser, PERMISSIONS.FORUM_READ);
 
-    const thread = await this.getAccessibleThread(topicId, currentUser);
+    const thread = await this.getVisibleThread(topicId);
     const content = this.normalizeText(body.content, "forum.errors.emptyContent");
 
     if (thread.firstPostDeletedAt) {
       throw new BadRequestException("forum.errors.topicDeleted");
-    }
-
-    if (thread.scope === DISCUSSION_SCOPES.COURSE && thread.courseId) {
-      this.assertHasPermission(currentUser, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_CREATE);
-
-      const { data: message } = await this.courseChatService.createMessage(
-        thread.courseId,
-        currentUser,
-        tenantId,
-        {
-          content,
-          parentMessageId: thread.firstPostId,
-          mentionedUserIds: body.mentionedUserIds,
-        },
-      );
-
-      return new BaseResponse(await this.getPostResponse(message.id, currentUser.userId));
     }
 
     const mentionedUserIds = await this.getMentionedUserIds(
@@ -238,7 +245,7 @@ export class ForumService {
     });
 
     this.emitTopicChanged(thread.id);
-    this.emitForumChanged(tenantId);
+    this.emitForumChanged(currentUser.tenantId);
     this.emitMentions({ topicId: thread.id, postId, mentionedUserIds });
 
     return new BaseResponse(await this.getPostResponse(postId, currentUser.userId));
@@ -255,19 +262,7 @@ export class ForumService {
 
     if (!post || post.deletedAt) throw new NotFoundException("forum.errors.postNotFound");
 
-    const thread = await this.getAccessibleThread(post.threadId, currentUser);
-
-    if (thread.scope === DISCUSSION_SCOPES.COURSE) {
-      this.assertHasPermission(currentUser, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_REACT);
-
-      const { data } = await this.courseChatService.toggleMessageReaction(
-        post.id,
-        currentUser.userId,
-        body,
-      );
-
-      return new BaseResponse({ topicId: thread.id, postId: post.id, reactions: data.reactions });
-    }
+    const thread = await this.getVisibleThread(post.threadId);
 
     if (!this.courseChatService.isAllowedReaction(body.reaction)) {
       throw new BadRequestException("forum.errors.invalidReaction");
@@ -310,8 +305,8 @@ export class ForumService {
     );
   }
 
-  async assertTopicAccessible(topicId: UUIDType, viewer: ForumViewer) {
-    await this.getAccessibleThread(topicId, viewer);
+  async assertTopicVisible(topicId: UUIDType) {
+    await this.getVisibleThread(topicId);
   }
 
   async deletePost(
@@ -322,41 +317,7 @@ export class ForumService {
 
     if (!post || post.deletedAt) throw new NotFoundException("forum.errors.postNotFound");
 
-    const thread = await this.getAccessibleThread(post.threadId, currentUser);
-    const deletion =
-      thread.scope === DISCUSSION_SCOPES.COURSE
-        ? await this.deleteCoursePost(post, currentUser)
-        : await this.deleteGeneralPost(post, currentUser);
-
-    this.emitTopicChanged(thread.id);
-
-    if (thread.scope === DISCUSSION_SCOPES.GENERAL) this.emitForumChanged(currentUser.tenantId);
-
-    return new BaseResponse({
-      topicId: thread.id,
-      postId: post.id,
-      isFirstPost: post.parentMessageId === null,
-      ...deletion,
-    });
-  }
-
-  private async deleteCoursePost(
-    post: ForumPostContext,
-    currentUser: CurrentUserType,
-  ): Promise<ForumPostDeletion> {
-    const { payload, threadRemoved } = await this.courseChatService.deleteCourseMessage(
-      post.id,
-      currentUser.userId,
-      currentUser.permissions ?? [],
-    );
-
-    return { removed: payload.removed, deletedAt: payload.deletedAt, topicRemoved: threadRemoved };
-  }
-
-  private async deleteGeneralPost(
-    post: ForumPostContext,
-    currentUser: CurrentUserType,
-  ): Promise<ForumPostDeletion> {
+    const thread = await this.getVisibleThread(post.threadId);
     const canDeleteAnyPost = hasPermission(
       currentUser.permissions ?? [],
       PERMISSIONS.FORUM_POST_DELETE,
@@ -370,43 +331,30 @@ export class ForumService {
 
     if (!deletion) throw new NotFoundException("forum.errors.postNotFound");
 
-    return {
+    this.emitTopicChanged(thread.id);
+    this.emitForumChanged(currentUser.tenantId);
+
+    return new BaseResponse({
+      topicId: thread.id,
+      postId: post.id,
+      isFirstPost: post.parentMessageId === null,
       removed: deletion.removed,
       deletedAt: deletion.deletedAt,
       topicRemoved: deletion.threadRemoved,
-    };
+    });
   }
 
-  /** Inaccessible topics are reported as missing so their existence is not revealed. */
-  private async getAccessibleThread(
-    threadId: UUIDType,
-    currentUser: ForumViewer,
-  ): Promise<ForumThreadContext> {
+  private async getVisibleThread(threadId: UUIDType): Promise<ForumThreadContext> {
     const thread = await this.forumRepository.findThreadContext(threadId);
 
     if (!thread || (thread.firstPostDeletedAt && thread.replyCount === 0)) {
       throw new NotFoundException("forum.errors.topicNotFound");
     }
 
-    if (thread.scope === DISCUSSION_SCOPES.GENERAL) return thread;
-
-    const { courseId } = thread;
-
-    if (!courseId || !(await this.canReadCourseThreads(currentUser))) {
-      throw new NotFoundException("forum.errors.topicNotFound");
-    }
-
-    const isEnrolled = await this.courseChatRepository.isUserEnrolledInCourse(
-      courseId,
-      currentUser.userId,
-    );
-
-    if (!isEnrolled) throw new NotFoundException("forum.errors.topicNotFound");
-
     return thread;
   }
 
-  private async canReadCourseThreads(currentUser: ForumViewer) {
+  private async canReadCourseDiscussions(currentUser: CurrentUserType) {
     if (!hasPermission(currentUser.permissions ?? [], PERMISSIONS.COURSE_DISCUSSION_READ)) {
       return false;
     }
@@ -487,9 +435,8 @@ export class ForumService {
   private async getTopicResponse(
     topicId: UUIDType,
     viewerUserId: UUIDType,
-    language: SupportedLanguages,
   ): Promise<ForumTopicResponse> {
-    const topic = await this.forumRepository.findTopicById(topicId, language);
+    const topic = await this.forumRepository.findTopicById(topicId);
 
     if (!topic) throw new NotFoundException("forum.errors.topicNotFound");
 
@@ -546,9 +493,7 @@ export class ForumService {
   private mapTopicBase(topic: ForumTopicRow, authorAvatarUrl: string | null) {
     return {
       id: topic.id,
-      scope: topic.scope,
       title: topic.title,
-      course: topic.courseId ? { id: topic.courseId, title: topic.courseTitle } : null,
       author: {
         id: topic.firstPostUserId,
         firstName: topic.authorFirstName,

@@ -1,10 +1,7 @@
-import type { DiscussionScope } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
 export type ForumThreadContext = {
   id: UUIDType;
-  scope: DiscussionScope;
-  courseId: UUIDType | null;
   firstPostId: UUIDType;
   firstPostDeletedAt: string | null;
   replyCount: number;
@@ -34,10 +31,7 @@ export type ForumPostRow = {
 
 export type ForumTopicRow = {
   id: UUIDType;
-  scope: DiscussionScope;
-  title: string | null;
-  courseId: UUIDType | null;
-  courseTitle: string;
+  title: string;
   replyCount: number;
   lastActivityAt: string;
   createdAt: string;
@@ -50,4 +44,11 @@ export type ForumTopicRow = {
   authorFirstName: string;
   authorLastName: string;
   authorAvatarReference: string | null;
+};
+
+export type ForumCourseDiscussionRow = {
+  courseId: UUIDType;
+  courseTitle: string;
+  messageCount: number;
+  lastActivityAt: string | null;
 };

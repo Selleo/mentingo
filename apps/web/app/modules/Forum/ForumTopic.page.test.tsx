@@ -1,5 +1,5 @@
 import { createRemixStub } from "@remix-run/testing";
-import { DISCUSSION_SCOPES, FORUM_SOCKET_EVENTS, PERMISSIONS } from "@repo/shared";
+import { FORUM_SOCKET_EVENTS, PERMISSIONS } from "@repo/shared";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { AxiosError } from "axios";
@@ -70,9 +70,7 @@ const reply = buildPost({ id: "reply-1", content: REPLY_CONTENT, isFirstPost: fa
 
 const buildTopic = (firstPostOverrides: Record<string, unknown> = {}) => ({
   id: TOPIC_ID,
-  scope: DISCUSSION_SCOPES.GENERAL,
   title: "Exam preparation",
-  course: null,
   author: { id: CURRENT_USER_ID, firstName: "Ada", lastName: "Author", avatarReference: null },
   replyCount: 1,
   lastActivityAt: "2026-11-01T10:00:00.000Z",

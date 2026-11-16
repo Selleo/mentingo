@@ -15870,6 +15870,98 @@
         "operationId": "ForumController_getTopics",
         "parameters": [
           {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "lastActivity",
+                  "type": "string"
+                },
+                {
+                  "const": "newest",
+                  "type": "string"
+                },
+                {
+                  "const": "mostReplies",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTopicsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "ForumController_createTopic",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTopicBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTopicResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/course-discussions": {
+      "get": {
+        "operationId": "ForumController_getCourseDiscussions",
+        "parameters": [
+          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -15927,27 +16019,6 @@
             }
           },
           {
-            "name": "sort",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "lastActivity",
-                  "type": "string"
-                },
-                {
-                  "const": "newest",
-                  "type": "string"
-                },
-                {
-                  "const": "mostReplies",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
             "name": "search",
             "required": false,
             "in": "query",
@@ -15955,32 +16026,6 @@
               "maxLength": 200,
               "type": "string"
             }
-          },
-          {
-            "name": "scope",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "general",
-                  "type": "string"
-                },
-                {
-                  "const": "course",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "courseId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -15988,71 +16033,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetTopicsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "ForumController_createTopic",
-        "parameters": [
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "en",
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                },
-                {
-                  "const": "es",
-                  "type": "string"
-                },
-                {
-                  "const": "fr",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateTopicBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateTopicResponse"
+                  "$ref": "#/components/schemas/GetCourseDiscussionsResponse"
                 }
               }
             }
@@ -16060,12 +16041,12 @@
         }
       }
     },
-    "/api/forum/topics/{topicId}": {
+    "/api/forum/course-discussions/{courseId}": {
       "get": {
-        "operationId": "ForumController_getTopic",
+        "operationId": "ForumController_getCourseDiscussion",
         "parameters": [
           {
-            "name": "topicId",
+            "name": "courseId",
             "required": true,
             "in": "path",
             "schema": {
@@ -16109,6 +16090,33 @@
                   "type": "string"
                 }
               ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseDiscussionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/topics/{topicId}": {
+      "get": {
+        "operationId": "ForumController_getTopic",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -162351,50 +162359,8 @@
                   "format": "uuid",
                   "type": "string"
                 },
-                "scope": {
-                  "anyOf": [
-                    {
-                      "const": "general",
-                      "type": "string"
-                    },
-                    {
-                      "const": "course",
-                      "type": "string"
-                    }
-                  ]
-                },
                 "title": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "course": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "format": "uuid",
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "title"
-                      ]
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
+                  "type": "string"
                 },
                 "author": {
                   "type": "object",
@@ -162445,9 +162411,7 @@
               },
               "required": [
                 "id",
-                "scope",
                 "title",
-                "course",
                 "author",
                 "replyCount",
                 "lastActivityAt",
@@ -162488,6 +162452,113 @@
           "pagination"
         ]
       },
+      "GetCourseDiscussionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseTitle": {
+                  "type": "string"
+                },
+                "messageCount": {
+                  "type": "number"
+                },
+                "lastActivityAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "courseId",
+                "courseTitle",
+                "messageCount",
+                "lastActivityAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetCourseDiscussionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseTitle": {
+                "type": "string"
+              },
+              "messageCount": {
+                "type": "number"
+              },
+              "lastActivityAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "courseId",
+              "courseTitle",
+              "messageCount",
+              "lastActivityAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "CreateTopicBody": {
         "type": "object",
         "properties": {
@@ -162525,50 +162596,8 @@
                 "format": "uuid",
                 "type": "string"
               },
-              "scope": {
-                "anyOf": [
-                  {
-                    "const": "general",
-                    "type": "string"
-                  },
-                  {
-                    "const": "course",
-                    "type": "string"
-                  }
-                ]
-              },
               "title": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "course": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "title"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "type": "string"
               },
               "author": {
                 "type": "object",
@@ -162717,9 +162746,7 @@
             },
             "required": [
               "id",
-              "scope",
               "title",
-              "course",
               "author",
               "replyCount",
               "lastActivityAt",
@@ -162742,50 +162769,8 @@
                 "format": "uuid",
                 "type": "string"
               },
-              "scope": {
-                "anyOf": [
-                  {
-                    "const": "general",
-                    "type": "string"
-                  },
-                  {
-                    "const": "course",
-                    "type": "string"
-                  }
-                ]
-              },
               "title": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "course": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "title"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "type": "string"
               },
               "author": {
                 "type": "object",
@@ -162934,9 +162919,7 @@
             },
             "required": [
               "id",
-              "scope",
               "title",
-              "course",
               "author",
               "replyCount",
               "lastActivityAt",

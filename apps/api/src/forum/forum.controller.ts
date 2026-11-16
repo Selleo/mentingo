@@ -3,11 +3,9 @@ import {
   FEATURES,
   FORUM_TOPIC_SORTS,
   PERMISSIONS,
-  type DiscussionScope,
   type ForumTopicSort,
   type SupportedLanguages,
 } from "@repo/shared";
-import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -33,6 +31,8 @@ import {
   createForumPostSchema,
   createForumTopicSchema,
   deleteForumPostResponseSchema,
+  forumCourseDiscussionListSchema,
+  forumCourseDiscussionSchema,
   forumPageQuerySchema,
   forumPerPageQuerySchema,
   forumPostListSchema,
@@ -41,12 +41,12 @@ import {
   forumSearchQuerySchema,
   forumTopicListSchema,
   forumTopicSchema,
-  forumTopicScopeQuerySchema,
   forumTopicSortQuerySchema,
   forumUserListSchema,
   type CreateForumPostBody,
   type CreateForumTopicBody,
   type DeleteForumPostResponse,
+  type ForumCourseDiscussionResponse,
   type ForumPostReactionsResponse,
   type ForumPostResponse,
   type ForumTopicListItemResponse,
@@ -67,9 +67,6 @@ export class ForumController {
       { type: "query", name: "perPage", schema: forumPerPageQuerySchema },
       { type: "query", name: "sort", schema: forumTopicSortQuerySchema },
       { type: "query", name: "search", schema: forumSearchQuerySchema },
-      { type: "query", name: "scope", schema: forumTopicScopeQuerySchema },
-      { type: "query", name: "courseId", schema: Type.Optional(UUIDSchema) },
-      { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
     response: paginatedResponse(forumTopicListSchema),
   })
@@ -78,56 +75,77 @@ export class ForumController {
     @Query("perPage") perPage: number | undefined,
     @Query("sort") sort: ForumTopicSort | undefined,
     @Query("search") search: string | undefined,
-    @Query("scope") scope: DiscussionScope | undefined,
-    @Query("courseId") courseId: UUIDType | undefined,
+  ): Promise<PaginatedResponse<ForumTopicListItemResponse[]>> {
+    return this.forumService.getTopics({
+      page: page ?? 1,
+      perPage: perPage ?? DEFAULT_PAGE_SIZE,
+      sort: sort ?? FORUM_TOPIC_SORTS.LAST_ACTIVITY,
+      search,
+    });
+  }
+
+  @Get("course-discussions")
+  @Validate({
+    request: [
+      { type: "query", name: "page", schema: forumPageQuerySchema },
+      { type: "query", name: "perPage", schema: forumPerPageQuerySchema },
+      { type: "query", name: "search", schema: forumSearchQuerySchema },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: paginatedResponse(forumCourseDiscussionListSchema),
+  })
+  async getCourseDiscussions(
+    @Query("page") page: number | undefined,
+    @Query("perPage") perPage: number | undefined,
+    @Query("search") search: string | undefined,
     @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<PaginatedResponse<ForumTopicListItemResponse[]>> {
-    return this.forumService.getTopics(
-      {
-        page: page ?? 1,
-        perPage: perPage ?? DEFAULT_PAGE_SIZE,
-        sort: sort ?? FORUM_TOPIC_SORTS.LAST_ACTIVITY,
-        search,
-        scope,
-        courseId,
-        language,
-      },
+  ): Promise<PaginatedResponse<ForumCourseDiscussionResponse[]>> {
+    return this.forumService.getCourseDiscussions(
+      { page: page ?? 1, perPage: perPage ?? DEFAULT_PAGE_SIZE, search, language },
       currentUser,
     );
+  }
+
+  @Get("course-discussions/:courseId")
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: baseResponse(forumCourseDiscussionSchema),
+  })
+  async getCourseDiscussion(
+    @Param("courseId") courseId: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<ForumCourseDiscussionResponse>> {
+    return this.forumService.getCourseDiscussion(courseId, currentUser, language);
   }
 
   @Post("topics")
   @RequirePermission(PERMISSIONS.FORUM_TOPIC_CREATE)
   @Validate({
-    request: [
-      { type: "body", schema: createForumTopicSchema },
-      { type: "query", name: "language", schema: supportedLanguagesSchema },
-    ],
+    request: [{ type: "body", schema: createForumTopicSchema }],
     response: baseResponse(forumTopicSchema),
   })
   async createTopic(
     @Body() body: CreateForumTopicBody,
-    @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<ForumTopicResponse>> {
-    return this.forumService.createTopic({ body, currentUser, language });
+    return this.forumService.createTopic({ body, currentUser });
   }
 
   @Get("topics/:topicId")
   @Validate({
-    request: [
-      { type: "param", name: "topicId", schema: UUIDSchema },
-      { type: "query", name: "language", schema: supportedLanguagesSchema },
-    ],
+    request: [{ type: "param", name: "topicId", schema: UUIDSchema }],
     response: baseResponse(forumTopicSchema),
   })
   async getTopic(
     @Param("topicId") topicId: UUIDType,
-    @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<ForumTopicResponse>> {
-    return this.forumService.getTopic(topicId, currentUser, language);
+    return this.forumService.getTopic(topicId, currentUser);
   }
 
   /** Replies only; the first post is returned with the topic. */
@@ -167,9 +185,8 @@ export class ForumController {
     @Param("topicId") topicId: UUIDType,
     @Body() body: CreateForumPostBody,
     @CurrentUser() currentUser: CurrentUserType,
-    @CurrentUser("tenantId") tenantId: UUIDType,
   ): Promise<BaseResponse<ForumPostResponse>> {
-    return this.forumService.createPost({ topicId, body, currentUser, tenantId });
+    return this.forumService.createPost({ topicId, body, currentUser });
   }
 
   @Post("posts/:postId/reactions")

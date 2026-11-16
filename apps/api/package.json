@@ -32,6 +32,7 @@
     "db:seed-e2e": "tsx ./src/seed/e2e-seed.ts",
     "db:seed-bulk": "tsx ./src/seed/bulk-users-seed.ts",
     "db:seed-reports": "tsx ./src/seed/reports-seed.ts",
+    "db:seed-forum": "tsx ./src/seed/forum-seed.ts",
     "db:truncate-tables": "tsx ./src/seed/truncateTables.ts",
     "content-marketplace:mock": "tsx ./scripts/contentMarketplaceMock.ts",
     "workflow:build": "node --input-type=module -e \"import { resolve } from 'node:path'; import { NestLocalBuilder } from '@workflow/nest/builder'; await new NestLocalBuilder({ workingDir: process.cwd(), dirs: ['src/assistant/workflow'], outDir: resolve('dist/workflow'), moduleType: 'commonjs', distDir: 'dist/src/assistant/workflow', sourcemap: false }).build();\"",

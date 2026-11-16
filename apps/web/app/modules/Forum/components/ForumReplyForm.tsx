@@ -14,9 +14,19 @@ type ForumReplyFormProps = {
   users: MentionableUser[];
   isSubmitting: boolean;
   onSubmit: (content: string, onSent: () => void) => void;
+  placeholder?: string;
+  submitLabel?: string;
+  testIds?: { input: string; submitButton: string };
 };
 
-export function ForumReplyForm({ users, isSubmitting, onSubmit }: ForumReplyFormProps) {
+export function ForumReplyForm({
+  users,
+  isSubmitting,
+  onSubmit,
+  placeholder,
+  submitLabel,
+  testIds,
+}: ForumReplyFormProps) {
   const { t } = useTranslation();
   const [content, setContent] = useState("");
   const trimmedContent = content.trim();
@@ -35,11 +45,11 @@ export function ForumReplyForm({ users, isSubmitting, onSubmit }: ForumReplyForm
         value={content}
         onChange={setContent}
         users={users}
-        placeholder={t("forum.topic.replyPlaceholder")}
+        placeholder={placeholder ?? t("forum.topic.replyPlaceholder")}
         maxLength={FORUM_POST_MAX_LENGTH}
         className="min-h-24"
         testIds={{
-          input: FORUM_HANDLES.REPLY_INPUT,
+          input: testIds?.input ?? FORUM_HANDLES.REPLY_INPUT,
           mentionList: FORUM_HANDLES.MENTION_LIST,
           mentionOption: FORUM_HANDLES.mentionOption,
         }}
@@ -48,9 +58,9 @@ export function ForumReplyForm({ users, isSubmitting, onSubmit }: ForumReplyForm
         <Button
           type="submit"
           disabled={!trimmedContent || isSubmitting}
-          data-testid={FORUM_HANDLES.REPLY_SUBMIT_BUTTON}
+          data-testid={testIds?.submitButton ?? FORUM_HANDLES.REPLY_SUBMIT_BUTTON}
         >
-          {t("forum.topic.replySubmit")}
+          {submitLabel ?? t("forum.topic.replySubmit")}
         </Button>
       </div>
     </form>

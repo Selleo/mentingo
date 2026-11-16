@@ -9709,10 +9709,15 @@
     "description": "Stellen Sie Fragen und teilen Sie Wissen mit allen in Ihrer Organisation.",
     "newTopic": "Neues Thema",
     "searchPlaceholder": "Themen durchsuchen",
-    "filter": {
-      "label": "Themen anzeigen",
-      "all": "Alle Themen",
-      "general": "Allgemein"
+    "courseDiscussions": {
+      "title": "Kursdiskussionen",
+      "heading": "Diskussion: {{course}}",
+      "messages_one": "{{count}} Nachricht",
+      "messages_other": "{{count}} Nachrichten",
+      "viewAll": "Alle Kursdiskussionen ({{count}})",
+      "searchPlaceholder": "Kurse suchen",
+      "empty": "In keinem Ihrer Kurse gibt es bisher eine Diskussion.",
+      "noResults": "Keine Kursdiskussion entspricht Ihrer Suche."
     },
     "sort": {
       "label": "Themen sortieren",
@@ -9737,7 +9742,6 @@
     },
     "topic": {
       "backToForum": "Zurück zum Forum",
-      "courseThreadTitle": "Diskussion im Kurs {{course}}",
       "noReplies": "Noch keine Antworten.",
       "replyPlaceholder": "Antwort schreiben",
       "replySubmit": "Antworten",
@@ -9756,6 +9760,7 @@
     },
     "errors": {
       "topicNotFound": "Dieses Thema existiert nicht oder Sie haben keinen Zugriff darauf.",
+      "courseDiscussionNotFound": "Diese Kursdiskussion existiert nicht oder Sie haben keinen Zugriff darauf.",
       "postNotFound": "Dieser Beitrag existiert nicht mehr.",
       "cannotDeletePost": "Sie können nur Ihre eigenen Beiträge löschen.",
       "topicDeleted": "Antworten sind geschlossen, weil der erste Beitrag gelöscht wurde.",

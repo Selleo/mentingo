@@ -9858,10 +9858,17 @@
     "description": "Zadawaj pytania i dziel się wiedzą z całą organizacją.",
     "newTopic": "Nowy temat",
     "searchPlaceholder": "Szukaj tematów",
-    "filter": {
-      "label": "Pokaż tematy",
-      "all": "Wszystkie tematy",
-      "general": "Ogólne"
+    "courseDiscussions": {
+      "title": "Dyskusje w kursach",
+      "heading": "Dyskusja: {{course}}",
+      "messages_one": "{{count}} wiadomość",
+      "messages_few": "{{count}} wiadomości",
+      "messages_many": "{{count}} wiadomości",
+      "messages_other": "{{count}} wiadomości",
+      "viewAll": "Wszystkie dyskusje kursów ({{count}})",
+      "searchPlaceholder": "Szukaj kursów",
+      "empty": "W żadnym z Twoich kursów nie ma jeszcze dyskusji.",
+      "noResults": "Żadna dyskusja kursu nie pasuje do wyszukiwania."
     },
     "sort": {
       "label": "Sortuj tematy",
@@ -9888,7 +9895,6 @@
     },
     "topic": {
       "backToForum": "Wróć do forum",
-      "courseThreadTitle": "Dyskusja w kursie {{course}}",
       "noReplies": "Nie ma jeszcze odpowiedzi.",
       "replyPlaceholder": "Napisz odpowiedź",
       "replySubmit": "Odpowiedz",
@@ -9907,6 +9913,7 @@
     },
     "errors": {
       "topicNotFound": "Ten temat nie istnieje albo nie masz do niego dostępu.",
+      "courseDiscussionNotFound": "Ta dyskusja kursu nie istnieje albo nie masz do niej dostępu.",
       "postNotFound": "Ten post już nie istnieje.",
       "cannotDeletePost": "Możesz usuwać tylko własne posty.",
       "topicDeleted": "Odpowiedzi są zamknięte, bo pierwszy post został usunięty.",

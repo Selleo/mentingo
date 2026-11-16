@@ -14,8 +14,6 @@ import {
   type ForumTopicsQuery,
 } from "~/api/queries/forum/useForumTopics";
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
-import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
-import { useStudentCoursesSuspense } from "~/api/queries/useStudentCourses";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { useClampedPage } from "~/components/DataTable";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -32,20 +30,13 @@ import {
 import { useToast } from "~/components/ui/use-toast";
 import { ForumFeatureGuard } from "~/Guards/ForumFeatureGuard";
 import { useUrlTableState } from "~/hooks/useUrlTableState";
-import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { FORUM_HANDLES } from "../../../e2e/data/forum/handles";
 
 import { CreateForumTopicDialog } from "./components/CreateForumTopicDialog";
+import { ForumCourseDiscussions } from "./components/ForumCourseDiscussions";
 import { ForumTopicListItem } from "./components/ForumTopicListItem";
-import {
-  FORUM_FILTERS,
-  FORUM_URL_PARAMS,
-  canReadCourseThreads,
-  isForumTopicFilter,
-  parseSortParam,
-  toTopicFilterQuery,
-} from "./forum.utils";
+import { FORUM_SORT_URL_PARAM, parseSortParam } from "./forum.utils";
 import { useForumSocket } from "./useForumSocket";
 
 const SORT_LABEL_KEYS = {
@@ -54,45 +45,18 @@ const SORT_LABEL_KEYS = {
   [FORUM_TOPIC_SORTS.MOST_REPLIES]: "forum.sort.mostReplies",
 } as const satisfies Record<ForumTopicSort, string>;
 
-const FORUM_TOPICS_FILTER_KEYS = [FORUM_URL_PARAMS.FILTER, FORUM_URL_PARAMS.SORT] as const;
-
-type ForumCourse = { id: string; title: string };
-
-const NO_COURSES: ForumCourse[] = [];
+const FORUM_TOPICS_FILTER_KEYS = [FORUM_SORT_URL_PARAM] as const;
 
 export default function ForumTopicsPage() {
   return (
     <ForumFeatureGuard>
-      <ForumTopicsByCourseAccess />
+      <ForumTopics />
     </ForumFeatureGuard>
   );
 }
 
-function ForumTopicsByCourseAccess() {
-  const { data: globalSettings } = useGlobalSettings();
-  const { data: currentUser } = useCurrentUser();
-  const showCourseThreads = canReadCourseThreads(
-    currentUser?.permissions ?? [],
-    globalSettings?.courseDiscussionsEnabled,
-  );
-
-  return showCourseThreads ? <ForumTopicsWithCourses /> : <ForumTopics courses={NO_COURSES} />;
-}
-
-function ForumTopicsWithCourses() {
-  const language = useLanguageStore((state) => state.language);
-  const { data: courses } = useStudentCoursesSuspense({ language });
-
-  return <ForumTopics courses={courses} />;
-}
-
-type ForumTopicsProps = {
-  courses: ForumCourse[];
-};
-
-function ForumTopics({ courses }: ForumTopicsProps) {
+function ForumTopics() {
   const { t } = useTranslation();
-  const language = useLanguageStore((state) => state.language);
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { data: currentUser } = useCurrentUser();
@@ -110,28 +74,18 @@ function ForumTopics({ courses }: ForumTopicsProps) {
 
   const tableState = useUrlTableState({
     filterKeys: FORUM_TOPICS_FILTER_KEYS,
-    filterValidators: {
-      [FORUM_URL_PARAMS.FILTER]: (value) =>
-        isForumTopicFilter(
-          value,
-          courses.map((course) => course.id),
-        ),
-    },
     defaultPerPage: FORUM_TOPICS_PER_PAGE,
   });
-  const filter = tableState.filters[FORUM_URL_PARAMS.FILTER] ?? FORUM_FILTERS.ALL;
-  const sort = parseSortParam(tableState.filters[FORUM_URL_PARAMS.SORT]);
+  const sort = parseSortParam(tableState.filters[FORUM_SORT_URL_PARAM]);
 
   const topicsQuery = useMemo<ForumTopicsQuery>(
     () => ({
       page: tableState.page,
       perPage: FORUM_TOPICS_PER_PAGE,
       sort,
-      language,
       search: tableState.search || undefined,
-      ...toTopicFilterQuery(filter),
     }),
-    [tableState.page, tableState.search, sort, language, filter],
+    [tableState.page, tableState.search, sort],
   );
 
   const deferredTopicsQuery = useDeferredValue(topicsQuery);
@@ -144,8 +98,6 @@ function ForumTopics({ courses }: ForumTopicsProps) {
     totalItems,
     setPage: tableState.setPage,
   });
-
-  const isFiltered = Boolean(tableState.search) || filter !== FORUM_FILTERS.ALL;
 
   return (
     <PageWrapper breadcrumbs={[{ title: t("forum.title"), href: "/forum" }]}>
@@ -166,6 +118,8 @@ function ForumTopics({ courses }: ForumTopicsProps) {
           )}
         </header>
 
+        <ForumCourseDiscussions />
+
         <div className="flex flex-wrap items-center gap-3">
           <SearchInput
             value={tableState.searchInput}
@@ -176,50 +130,10 @@ function ForumTopics({ courses }: ForumTopicsProps) {
             data-testid={FORUM_HANDLES.SEARCH_INPUT}
           />
           <Select
-            value={filter}
-            onValueChange={(value) =>
-              tableState.setFilter(
-                FORUM_URL_PARAMS.FILTER,
-                value === FORUM_FILTERS.ALL ? undefined : value,
-              )
-            }
-          >
-            <SelectTrigger
-              className="w-full sm:w-60"
-              aria-label={t("forum.filter.label")}
-              data-testid={FORUM_HANDLES.FILTER_SELECT}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                value={FORUM_FILTERS.ALL}
-                data-testid={FORUM_HANDLES.filterOption(FORUM_FILTERS.ALL)}
-              >
-                {t("forum.filter.all")}
-              </SelectItem>
-              <SelectItem
-                value={FORUM_FILTERS.GENERAL}
-                data-testid={FORUM_HANDLES.filterOption(FORUM_FILTERS.GENERAL)}
-              >
-                {t("forum.filter.general")}
-              </SelectItem>
-              {courses.map((course) => (
-                <SelectItem
-                  key={course.id}
-                  value={course.id}
-                  data-testid={FORUM_HANDLES.filterOption(course.id)}
-                >
-                  {course.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
             value={sort}
             onValueChange={(value) =>
               tableState.setFilter(
-                FORUM_URL_PARAMS.SORT,
+                FORUM_SORT_URL_PARAM,
                 value === FORUM_TOPIC_SORTS.LAST_ACTIVITY ? undefined : value,
               )
             }
@@ -247,7 +161,7 @@ function ForumTopics({ courses }: ForumTopicsProps) {
 
         {totalItems === 0 ? (
           <p className="body-sm text-neutral-600" data-testid={FORUM_HANDLES.EMPTY_STATE}>
-            {isFiltered ? t("forum.noResults") : t("forum.empty")}
+            {tableState.search ? t("forum.noResults") : t("forum.empty")}
           </p>
         ) : (
           <div className="flex flex-col gap-3">
