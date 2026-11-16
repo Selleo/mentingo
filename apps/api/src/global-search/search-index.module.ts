@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 
-import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
+import { AiRuntimeModule } from "src/ai/ai-runtime.module";
 import { ChunkService } from "src/ingestion/services/chunk.service";
 import { S3Module } from "src/s3/s3.module";
 
@@ -14,11 +14,10 @@ import { SemanticSearchIndexService } from "./semantic-search-index.service";
 import { SemanticSearchIndexWorker } from "./semantic-search-index.worker";
 
 @Module({
-  imports: [S3Module],
+  imports: [AiRuntimeModule, S3Module],
   providers: [
     SearchIndexService,
     SearchIndexRepository,
-    AiRuntimeService,
     ChunkService,
     SemanticSearchEmbeddingService,
     SemanticSearchIndexRepository,
