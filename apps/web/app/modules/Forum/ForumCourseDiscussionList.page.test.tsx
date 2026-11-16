@@ -1,10 +1,12 @@
 import { createRemixStub } from "@remix-run/testing";
+import { FORUM_SOCKET_EVENTS } from "@repo/shared";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiClient } from "~/api/api-client";
 import { queryClient } from "~/api/queryClient";
+import { fakeSocket } from "~/utils/mocks/socket.mock";
 import { renderWith } from "~/utils/testUtils";
 
 import { FORUM_HANDLES } from "../../../e2e/data/forum/handles";
@@ -19,6 +21,12 @@ vi.mock("~/api/api-client", () => ({
     },
   },
 }));
+
+vi.mock("~/api/socket", async () => {
+  const { fakeSocket } = await import("~/utils/mocks/socket.mock");
+
+  return { acquireSocket: () => fakeSocket, releaseSocket: () => undefined };
+});
 
 type CourseDiscussionsQuery = NonNullable<
   Parameters<typeof ApiClient.api.forumControllerGetCourseDiscussions>[0]
@@ -65,6 +73,7 @@ const lastCourseDiscussionsQuery = () =>
 describe("ForumCourseDiscussionListPage", () => {
   beforeEach(() => {
     queryClient.clear();
+    fakeSocket.reset();
     vi.clearAllMocks();
     vi.mocked(ApiClient.api.settingsControllerGetPublicGlobalSettings).mockResolvedValue({
       data: { data: { forumEnabled: true } },
@@ -106,5 +115,17 @@ describe("ForumCourseDiscussionListPage", () => {
     expect(
       await screen.findByTestId(FORUM_HANDLES.COURSE_DISCUSSIONS_EMPTY_STATE),
     ).toHaveTextContent("No course discussions match your search.");
+  });
+
+  it("reloads the list when a course discussion changes elsewhere", async () => {
+    renderCourseDiscussions("/forum/courses");
+    await screen.findByTestId(FORUM_HANDLES.courseDiscussion(COURSE_ID));
+    vi.mocked(ApiClient.api.forumControllerGetCourseDiscussions).mockClear();
+
+    fakeSocket.receive(FORUM_SOCKET_EVENTS.CHANGED, {});
+
+    await waitFor(() =>
+      expect(ApiClient.api.forumControllerGetCourseDiscussions).toHaveBeenCalled(),
+    );
   });
 });

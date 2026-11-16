@@ -4983,7 +4983,10 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "Brak zapisanych użytkowników.",
-      "mentionedToast": "Ktoś oznaczył Cię w dyskusji kursu."
+      "mentionedToast": "Ktoś oznaczył Cię w dyskusji kursu.",
+      "sendError": "Nie udało się wysłać wiadomości.",
+      "deleteError": "Nie udało się usunąć wiadomości.",
+      "reactionError": "Nie udało się zapisać reakcji."
     }
   },
   "studentChapterView": {

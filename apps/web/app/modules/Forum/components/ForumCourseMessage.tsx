@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useCreateCourseChatMessage } from "~/api/queries/course-chat/useCreateCourseChatMessage";
 import { useInfiniteCourseChatReplies } from "~/api/queries/course-chat/useInfiniteCourseChatReplies";
 import { Button } from "~/components/ui/button";
+import { getMentionedUserIds } from "~/modules/Courses/CourseView/CourseChat/courseChatUtils";
 
 import { FORUM_HANDLES } from "../../../../e2e/data/forum/handles";
 
@@ -17,12 +20,8 @@ type ForumCourseMessageProps = {
   canReply: boolean;
   canReact: boolean;
   canDelete: (authorId: string) => boolean;
-  isReplyFormOpen: boolean;
-  isSendingReply: boolean;
   isDeleting: boolean;
   isReacting: boolean;
-  onToggleReplyForm: () => void;
-  onReply: (content: string, onSent: () => void) => void;
   onDelete: (messageId: string, onDeleted: () => void) => void;
   onToggleReaction: (messageId: string, reaction: string) => void;
 };
@@ -34,16 +33,16 @@ export function ForumCourseMessage({
   canReply,
   canReact,
   canDelete,
-  isReplyFormOpen,
-  isSendingReply,
   isDeleting,
   isReacting,
-  onToggleReplyForm,
-  onReply,
   onDelete,
   onToggleReaction,
 }: ForumCourseMessageProps) {
   const { t } = useTranslation();
+  const [isReplyFormOpen, setIsReplyFormOpen] = useState(false);
+  const { mutate: createReply, isPending: isSendingReply } = useCreateCourseChatMessage(
+    message.courseId,
+  );
   const hasReplies = message.replyCount > 0;
   const {
     data: repliesResponse,
@@ -55,6 +54,22 @@ export function ForumCourseMessage({
   const canReplyToMessage = canReply && !message.deletedAt;
   const showReplyForm = isReplyFormOpen && canReplyToMessage;
 
+  const handleReply = (content: string, onSent: () => void) => {
+    createReply(
+      {
+        content,
+        parentMessageId: message.id,
+        mentionedUserIds: getMentionedUserIds(content, mentionableUsers),
+      },
+      {
+        onSuccess: () => {
+          onSent();
+          setIsReplyFormOpen(false);
+        },
+      },
+    );
+  };
+
   return (
     <ForumPostCard
       post={message}
@@ -65,7 +80,7 @@ export function ForumCourseMessage({
       canReact={canReact}
       isReacting={isReacting}
       onToggleReaction={onToggleReaction}
-      onReply={canReplyToMessage ? onToggleReplyForm : undefined}
+      onReply={canReplyToMessage ? () => setIsReplyFormOpen((isOpen) => !isOpen) : undefined}
     >
       {(replies.length > 0 || showReplyForm) && (
         <div
@@ -100,7 +115,7 @@ export function ForumCourseMessage({
             <ForumReplyForm
               users={mentionableUsers}
               isSubmitting={isSendingReply}
-              onSubmit={onReply}
+              onSubmit={handleReply}
               placeholder={t("studentCourseView.courseChat.replyPlaceholder")}
               testIds={{
                 input: FORUM_HANDLES.postReplyInput(message.id),

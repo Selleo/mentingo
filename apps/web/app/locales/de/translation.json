@@ -4711,7 +4711,10 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "Noch keine eingeschriebenen Benutzer.",
-      "mentionedToast": "Jemand hat Sie in der Kursdiskussion erwähnt."
+      "mentionedToast": "Jemand hat Sie in der Kursdiskussion erwähnt.",
+      "sendError": "Die Nachricht konnte nicht gesendet werden.",
+      "deleteError": "Die Nachricht konnte nicht gelöscht werden.",
+      "reactionError": "Die Reaktion konnte nicht gespeichert werden."
     }
   },
   "studentChapterView": {

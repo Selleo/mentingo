@@ -4720,7 +4720,10 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "Zatím nejsou zapsáni žádní uživatelé.",
-      "mentionedToast": "Někdo vás zmínil v diskuzi kurzu."
+      "mentionedToast": "Někdo vás zmínil v diskuzi kurzu.",
+      "sendError": "Zprávu se nepodařilo odeslat.",
+      "deleteError": "Zprávu se nepodařilo smazat.",
+      "reactionError": "Reakci se nepodařilo uložit."
     }
   },
   "studentChapterView": {

@@ -34,6 +34,9 @@ vi.mock("~/api/socket", async () => {
 });
 
 const currentUserPermissions = vi.hoisted(() => ({ value: [] as string[] }));
+const toast = vi.hoisted(() => vi.fn());
+
+vi.mock("~/components/ui/use-toast", () => ({ useToast: () => ({ toast }) }));
 
 const CURRENT_USER_ID = "user-1";
 
@@ -85,6 +88,17 @@ const mockMessages = (messages: unknown[]) =>
   vi.mocked(ApiClient.api.courseChatControllerGetMessages).mockResolvedValue({
     data: { data: messages, pagination: { totalItems: messages.length, page: 1, perPage: 10 } },
   } as never);
+
+const mockMessagePages = (resolveMessages: (page: number) => unknown[], totalItems: number) =>
+  vi.mocked(ApiClient.api.courseChatControllerGetMessages).mockImplementation((async (
+    _courseId: string,
+    query: { page: number; perPage: number },
+  ) => ({
+    data: {
+      data: resolveMessages(query.page),
+      pagination: { totalItems, page: query.page, perPage: query.perPage },
+    },
+  })) as never);
 
 const renderCourseDiscussion = () => {
   const RemixStub = createRemixStub([
@@ -216,5 +230,84 @@ describe("ForumCourseDiscussionPage", () => {
     );
 
     await waitFor(() => expect(ApiClient.api.courseChatControllerGetMessages).toHaveBeenCalled());
+  });
+
+  it("keeps the text and reports the failure when a message cannot be sent", async () => {
+    vi.mocked(ApiClient.api.courseChatControllerCreateMessage).mockRejectedValue(
+      new AxiosError("Bad request", "400", undefined, undefined, {
+        status: 400,
+        data: { message: "courseChat.errors.invalidParentMessage" },
+      } as never),
+    );
+
+    renderCourseDiscussion();
+
+    const messageInput = await screen.findByTestId(FORUM_HANDLES.MESSAGE_INPUT);
+    fireEvent.change(messageInput, { target: { value: "Is anyone there?" } });
+    fireEvent.click(screen.getByTestId(FORUM_HANDLES.MESSAGE_SUBMIT_BUTTON));
+
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith({
+        variant: "destructive",
+        description: "The message could not be sent.",
+      }),
+    );
+    expect(messageInput).toHaveValue("Is anyone there?");
+  });
+
+  it("keeps a reply draft open while a reply under another message is sent", async () => {
+    renderCourseDiscussion();
+
+    fireEvent.click(await screen.findByTestId(FORUM_HANDLES.postReplyButton(olderMessage.id)));
+    fireEvent.click(screen.getByTestId(FORUM_HANDLES.postReplyButton(newerMessage.id)));
+    fireEvent.change(screen.getByTestId(FORUM_HANDLES.postReplyInput(newerMessage.id)), {
+      target: { value: "Still writing" },
+    });
+    fireEvent.change(screen.getByTestId(FORUM_HANDLES.postReplyInput(olderMessage.id)), {
+      target: { value: "Done" },
+    });
+    fireEvent.click(screen.getByTestId(FORUM_HANDLES.postReplySubmitButton(olderMessage.id)));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId(FORUM_HANDLES.postReplyInput(olderMessage.id)),
+      ).not.toBeInTheDocument(),
+    );
+    expect(screen.getByTestId(FORUM_HANDLES.postReplyInput(newerMessage.id))).toHaveValue(
+      "Still writing",
+    );
+  });
+
+  it("keeps the current messages on screen while another page loads", async () => {
+    mockMessagePages((page) => (page === 1 ? [newerMessage] : [olderMessage]), 20);
+    vi.mocked(ApiClient.api.courseChatControllerGetReplies).mockResolvedValue({
+      data: { data: [], pagination: { totalItems: 0, page: 1, perPage: 100 } },
+    } as never);
+
+    renderCourseDiscussion();
+    await screen.findByText(newerMessage.content);
+
+    fireEvent.click(screen.getByRole("button", { name: "2" }));
+
+    expect(screen.getByText(newerMessage.content)).toBeInTheDocument();
+    expect(await screen.findByText(olderMessage.content)).toBeInTheDocument();
+  });
+
+  it("reloads the messages when someone else reacts, without copying their highlight", async () => {
+    currentUserPermissions.value = [PERMISSIONS.COURSE_DISCUSSION_MESSAGE_REACT];
+    renderCourseDiscussion();
+    await screen.findByText(newerMessage.content);
+    vi.mocked(ApiClient.api.courseChatControllerGetMessages).mockClear();
+
+    fakeSocket.receive(COURSE_CHAT_SOCKET_EVENTS.MESSAGE_REACTIONS_UPDATED, {
+      courseId: COURSE_ID,
+      messageId: newerMessage.id,
+      reactions: [{ reaction: "👍", count: 1, reactedByCurrentUser: true }],
+    });
+
+    await waitFor(() => expect(ApiClient.api.courseChatControllerGetMessages).toHaveBeenCalled());
+    expect(
+      screen.getByTestId(FORUM_HANDLES.postReaction(newerMessage.id, "👍")),
+    ).not.toHaveTextContent("1");
   });
 });

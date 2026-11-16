@@ -241,16 +241,36 @@ export class ForumRepository {
         ),
       );
 
-    const [data, [{ totalItems }]] = await Promise.all([
-      this.db
-        .with(courseDiscussions)
-        .select()
-        .from(courseDiscussions)
-        .orderBy(desc(courseDiscussions.lastActivityAt), desc(courseDiscussions.courseId))
-        .limit(query.perPage)
-        .offset((query.page - 1) * query.perPage),
-      this.db.with(courseDiscussions).select({ totalItems: count() }).from(courseDiscussions),
-    ]);
+    const rows = await this.db
+      .with(courseDiscussions)
+      .select({
+        courseId: courseDiscussions.courseId,
+        courseTitle: courseDiscussions.courseTitle,
+        messageCount: courseDiscussions.messageCount,
+        lastActivityAt: courseDiscussions.lastActivityAt,
+        totalItems: sql<number>`(COUNT(*) OVER())::int`,
+      })
+      .from(courseDiscussions)
+      .orderBy(desc(courseDiscussions.lastActivityAt), desc(courseDiscussions.courseId))
+      .limit(query.perPage)
+      .offset((query.page - 1) * query.perPage);
+
+    const data = rows.map(({ courseId, courseTitle, messageCount, lastActivityAt }) => ({
+      courseId,
+      courseTitle,
+      messageCount,
+      lastActivityAt,
+    }));
+    const [firstRow] = rows;
+
+    if (firstRow) return { data, totalItems: firstRow.totalItems };
+
+    if (query.page === 1) return { data, totalItems: 0 };
+
+    const [{ totalItems }] = await this.db
+      .with(courseDiscussions)
+      .select({ totalItems: count() })
+      .from(courseDiscussions);
 
     return { data, totalItems };
   }
@@ -326,7 +346,12 @@ export class ForumRepository {
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
           filter.courseId ? eq(courses.id, filter.courseId) : undefined,
           filter.search
-            ? sql`${courseTitle} ILIKE ${this.toSearchPattern(filter.search)}`
+            ? this.localizationService.getLocalizedFieldSearchCondition(
+                courses.title,
+                this.toSearchPattern(filter.search),
+                language,
+                { baseTable: courses, fallbackToBaseLanguage: true },
+              )
             : undefined,
         ),
       )

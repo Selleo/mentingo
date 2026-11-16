@@ -67,13 +67,14 @@ if (!connectionString) {
 const INSERT_BATCH_SIZE = 500;
 
 const sqlConnect = postgres(connectionString);
-const db = drizzle(sqlConnect) as DatabasePg;
+const seedDb = drizzle(sqlConnect) as DatabasePg;
 
 /**
  * Adds forum demo data on top of tenants that were already seeded with `pnpm db:seed`:
  * organization-wide topics with replies and reactions, and demo courses whose discussions the
  * seeded student and admin are enrolled in. It also turns the forum and course discussions on.
- * Nothing is deleted; a tenant that already has the data is skipped.
+ * Nothing is deleted; a tenant that already has the data is skipped. Each tenant is seeded in one
+ * transaction, so a failed run leaves nothing behind and can simply be repeated.
  */
 async function seedForum() {
   faker.seed(FORUM_SEED_RANDOM_SEED);
@@ -88,16 +89,21 @@ async function seedForum() {
 }
 
 async function seedTenant(origin: string) {
-  const [tenant] = await db.select().from(tenants).where(eq(tenants.host, origin));
+  const [tenant] = await seedDb.select().from(tenants).where(eq(tenants.host, origin));
   if (!tenant) {
     console.log(`⏭️  ${origin}: tenant not found, run pnpm db:seed first`);
     return;
   }
 
+  await seedDb.transaction((trx) => seedTenantData(trx, origin, tenant.id));
+}
+
+async function seedTenantData(db: DatabasePg, origin: string, tenantId: UUIDType) {
   const emailSuffix = getTenantEmailSuffix(origin);
   const findUserIds = (emails: string[]) =>
     findUserIdsByEmail(
-      tenant.id,
+      db,
+      tenantId,
       emails.map((email) => addEmailSuffix(email, emailSuffix)),
     );
 
@@ -114,24 +120,25 @@ async function seedTenant(origin: string) {
     return;
   }
 
-  const participantIds = await createParticipants(tenant.id, emailSuffix);
+  const participantIds = await createParticipants(db, tenantId, emailSuffix);
   const posterIds = [...viewerIds, ...participantIds];
 
-  await enableDiscussionFeatures(tenant.id);
+  await enableDiscussionFeatures(db, tenantId);
 
-  const courseIds = await createCourses(tenant.id, courseAuthorId);
-  await enrollUsers(tenant.id, courseIds, posterIds);
+  const courseIds = await createCourses(db, tenantId, courseAuthorId);
+  await enrollUsers(db, tenantId, courseIds, posterIds);
 
   const coursePosts = courseIds.flatMap((courseId, courseIndex) =>
-    buildCourseDiscussion(tenant.id, courseId, posterIds, courseIndex === 0),
+    buildCourseDiscussion(tenantId, courseId, posterIds, courseIndex === 0),
   );
   const topics = Array.from({ length: FORUM_SEED_TOPIC_COUNT }, (_, topicIndex) =>
-    buildTopic(tenant.id, posterIds, topicIndex),
+    buildTopic(tenantId, posterIds, topicIndex),
   );
 
-  await insertThreads(tenant.id, DISCUSSION_SCOPES.COURSE, coursePosts);
+  await insertThreads(db, tenantId, DISCUSSION_SCOPES.COURSE, coursePosts);
   await insertThreads(
-    tenant.id,
+    db,
+    tenantId,
     DISCUSSION_SCOPES.GENERAL,
     topics.flatMap((topic) => topic.posts),
     new Map(topics.map((topic) => [topic.threadId, topic.title])),
@@ -139,7 +146,7 @@ async function seedTenant(origin: string) {
 
   const posts = [...coursePosts, ...topics.flatMap((topic) => topic.posts)];
   await insertInBatches(posts, (batch) => db.insert(courseChatMessages).values(batch));
-  await insertInBatches(buildReactions(tenant.id, posts, posterIds), (batch) =>
+  await insertInBatches(buildReactions(tenantId, posts, posterIds), (batch) =>
     db.insert(courseChatMessageReactions).values(batch),
   );
 
@@ -148,7 +155,11 @@ async function seedTenant(origin: string) {
   );
 }
 
-async function findUserIdsByEmail(tenantId: UUIDType, emails: string[]): Promise<UUIDType[]> {
+async function findUserIdsByEmail(
+  db: DatabasePg,
+  tenantId: UUIDType,
+  emails: string[],
+): Promise<UUIDType[]> {
   const foundUsers = await db
     .select({ id: users.id })
     .from(users)
@@ -157,7 +168,11 @@ async function findUserIdsByEmail(tenantId: UUIDType, emails: string[]): Promise
   return foundUsers.map(({ id }) => id);
 }
 
-async function createParticipants(tenantId: UUIDType, emailSuffix: string): Promise<UUIDType[]> {
+async function createParticipants(
+  db: DatabasePg,
+  tenantId: UUIDType,
+  emailSuffix: string,
+): Promise<UUIDType[]> {
   const participantIds: UUIDType[] = [];
 
   for (let index = 1; index <= FORUM_SEED_PARTICIPANT_COUNT; index++) {
@@ -177,7 +192,7 @@ async function createParticipants(tenantId: UUIDType, emailSuffix: string): Prom
   return participantIds;
 }
 
-async function enableDiscussionFeatures(tenantId: UUIDType) {
+async function enableDiscussionFeatures(db: DatabasePg, tenantId: UUIDType) {
   await db
     .update(settings)
     .set({
@@ -186,7 +201,11 @@ async function enableDiscussionFeatures(tenantId: UUIDType) {
     .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
 }
 
-async function createCourses(tenantId: UUIDType, authorId: UUIDType): Promise<UUIDType[]> {
+async function createCourses(
+  db: DatabasePg,
+  tenantId: UUIDType,
+  authorId: UUIDType,
+): Promise<UUIDType[]> {
   const language = SUPPORTED_LANGUAGES.EN;
   const [existingCategory] = await db
     .select({ id: categories.id })
@@ -233,7 +252,12 @@ async function createCourses(tenantId: UUIDType, authorId: UUIDType): Promise<UU
   return seedCourses.map(({ id }) => id);
 }
 
-async function enrollUsers(tenantId: UUIDType, courseIds: UUIDType[], userIds: UUIDType[]) {
+async function enrollUsers(
+  db: DatabasePg,
+  tenantId: UUIDType,
+  courseIds: UUIDType[],
+  userIds: UUIDType[],
+) {
   const enrolledAt = faker.date.recent({ days: FORUM_SEED_ACTIVITY_DAYS_AGO }).toISOString();
   const enrollments = courseIds.flatMap((courseId) =>
     userIds.map((studentId) => ({
@@ -339,6 +363,7 @@ function buildThreadPosts(params: {
 
 /** One thread row per first post; a thread's latest post sets its last activity. */
 async function insertThreads(
+  db: DatabasePg,
   tenantId: UUIDType,
   scope: DiscussionScope,
   posts: ForumSeedPost[],

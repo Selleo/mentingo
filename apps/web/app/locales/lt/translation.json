@@ -4715,7 +4715,10 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "Dar nėra užsiregistravusių vartotojų.",
-      "mentionedToast": "Kažkas paminėjo jus kurso diskusijoje."
+      "mentionedToast": "Kažkas paminėjo jus kurso diskusijoje.",
+      "sendError": "Nepavyko išsiųsti žinutės.",
+      "deleteError": "Nepavyko ištrinti žinutės.",
+      "reactionError": "Nepavyko išsaugoti reakcijos."
     }
   },
   "studentChapterView": {

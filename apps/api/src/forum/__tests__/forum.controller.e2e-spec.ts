@@ -465,6 +465,10 @@ describe("ForumController (e2e)", () => {
       const secondPage = await listCourseDiscussions(cookie, { page: 2, perPage: 2 });
       expect(secondPage.data.map((course) => course.courseId)).toEqual([salesBasics.id]);
 
+      const pagePastTheEnd = await listCourseDiscussions(cookie, { page: 5, perPage: 2 });
+      expect(pagePastTheEnd.data).toEqual([]);
+      expect(pagePastTheEnd.pagination.totalItems).toBe(3);
+
       const salesOnly = await listCourseDiscussions(cookie, { search: " sales " });
       expect(salesOnly.data.map((course) => course.courseId)).toEqual([
         salesAdvanced.id,

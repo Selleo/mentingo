@@ -1,7 +1,7 @@
 import { Link } from "@remix-run/react";
 import { FORUM_SEARCH_MAX_LENGTH } from "@repo/shared";
 import { ArrowLeft } from "lucide-react";
-import { useDeferredValue, useMemo } from "react";
+import { useCallback, useDeferredValue, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -13,6 +13,7 @@ import { useClampedPage } from "~/components/DataTable";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Pagination } from "~/components/Pagination/Pagination";
 import { SearchInput } from "~/components/SearchInput/SearchInput";
+import { useToast } from "~/components/ui/use-toast";
 import { ForumFeatureGuard } from "~/Guards/ForumFeatureGuard";
 import { useUrlTableState } from "~/hooks/useUrlTableState";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -21,6 +22,7 @@ import { FORUM_HANDLES } from "../../../e2e/data/forum/handles";
 
 import { ForumCourseDiscussionListItem } from "./components/ForumCourseDiscussionListItem";
 import { FORUM_COURSE_DISCUSSIONS_PATH } from "./forum.utils";
+import { useForumSocket } from "./useForumSocket";
 
 const NO_FILTER_KEYS = [] as const;
 
@@ -34,7 +36,15 @@ export default function ForumCourseDiscussionListPage() {
 
 function ForumCourseDiscussionList() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const language = useLanguageStore((state) => state.language);
+
+  const handleMentioned = useCallback(() => {
+    toast({ description: t("forum.toast.mentioned") });
+  }, [t, toast]);
+
+  useForumSocket({ onMentioned: handleMentioned });
+
   const tableState = useUrlTableState({
     filterKeys: NO_FILTER_KEYS,
     defaultPerPage: FORUM_COURSE_DISCUSSIONS_PER_PAGE,

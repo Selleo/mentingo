@@ -1,12 +1,12 @@
 import { Link, useSearchParams } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { ArrowLeft } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
   COURSE_CHAT_MESSAGES_PER_PAGE,
-  useCourseChatMessages,
+  useCourseChatMessagesSuspense,
 } from "~/api/queries/course-chat/useCourseChatMessages";
 import { useCourseChatUsers } from "~/api/queries/course-chat/useCourseChatUsers";
 import { useCreateCourseChatMessage } from "~/api/queries/course-chat/useCreateCourseChatMessage";
@@ -40,15 +40,15 @@ export function ForumCourseDiscussionDetails({
   const { courseId } = courseDiscussion;
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parsePageParam(searchParams.get("page"));
-  const [replyFormMessageId, setReplyFormMessageId] = useState<string>();
   const { data: currentUser } = useCurrentUser();
   const permissions = currentUser?.permissions ?? [];
   const canPost = hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_CREATE);
   const canReact = hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_REACT);
 
-  const { data: messagesResponse } = useCourseChatMessages(courseId, page);
-  const totalMessages = messagesResponse?.pagination.totalItems;
-  const messages = messagesResponse?.data ?? [];
+  const deferredPage = useDeferredValue(page);
+  const { data: messagesResponse } = useCourseChatMessagesSuspense(courseId, deferredPage);
+  const messages = messagesResponse.data;
+  const totalMessages = messagesResponse.pagination.totalItems;
 
   const { data: users = [] } = useCourseChatUsers(courseId);
   const mentionableUsers = useMemo(
@@ -56,11 +56,8 @@ export function ForumCourseDiscussionDetails({
     [users, currentUser?.id],
   );
 
-  const {
-    mutate: createMessage,
-    isPending: isSendingMessage,
-    variables: sendingMessage,
-  } = useCreateCourseChatMessage(courseId);
+  const { mutate: createMessage, isPending: isSendingMessage } =
+    useCreateCourseChatMessage(courseId);
   const { mutate: deleteMessage, isPending: isDeletingMessage } = useDeleteCourseChatMessage();
   const { mutate: toggleReaction, isPending: isReacting } = useToggleCourseChatMessageReaction();
 
@@ -71,7 +68,6 @@ export function ForumCourseDiscussionDetails({
   useCourseChatSocket({ courseId, enabled: true, onMentioned: handleMentioned });
 
   const goToPage = (nextPage: number) => {
-    setReplyFormMessageId(undefined);
     setSearchParams(
       (current) => {
         const next = new URLSearchParams(current);
@@ -101,23 +97,8 @@ export function ForumCourseDiscussionDetails({
       {
         onSuccess: () => {
           onSent();
-          goToPage(1);
-        },
-      },
-    );
-  };
 
-  const handleReply = (parentMessageId: string, content: string, onSent: () => void) => {
-    createMessage(
-      {
-        content,
-        parentMessageId,
-        mentionedUserIds: getMentionedUserIds(content, mentionableUsers),
-      },
-      {
-        onSuccess: () => {
-          onSent();
-          setReplyFormMessageId(undefined);
+          if (page !== 1) goToPage(1);
         },
       },
     );
@@ -170,19 +151,13 @@ export function ForumCourseDiscussionDetails({
             canReply={canPost}
             canReact={canReact}
             canDelete={canDelete}
-            isReplyFormOpen={replyFormMessageId === message.id}
-            isSendingReply={isSendingMessage && sendingMessage?.parentMessageId === message.id}
             isDeleting={isDeletingMessage}
             isReacting={isReacting}
-            onToggleReplyForm={() =>
-              setReplyFormMessageId((current) => (current === message.id ? undefined : message.id))
-            }
-            onReply={(content, onSent) => handleReply(message.id, content, onSent)}
             onDelete={handleDelete}
             onToggleReaction={handleToggleReaction}
           />
         ))}
-        {totalMessages !== undefined && totalMessages > COURSE_CHAT_MESSAGES_PER_PAGE && (
+        {totalMessages > COURSE_CHAT_MESSAGES_PER_PAGE && (
           <Pagination
             totalItems={totalMessages}
             itemsPerPage={COURSE_CHAT_MESSAGES_PER_PAGE}
@@ -196,7 +171,7 @@ export function ForumCourseDiscussionDetails({
       {canPost && (
         <ForumReplyForm
           users={mentionableUsers}
-          isSubmitting={isSendingMessage && !sendingMessage?.parentMessageId}
+          isSubmitting={isSendingMessage}
           onSubmit={handleSendMessage}
           placeholder={t("studentCourseView.courseChat.newThreadPlaceholder")}
           submitLabel={t("studentCourseView.courseChat.send")}

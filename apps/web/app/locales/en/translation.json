@@ -4712,7 +4712,10 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "No enrolled users yet.",
-      "mentionedToast": "Someone mentioned you in the course discussion."
+      "mentionedToast": "Someone mentioned you in the course discussion.",
+      "sendError": "The message could not be sent.",
+      "deleteError": "The message could not be deleted.",
+      "reactionError": "The reaction could not be saved."
     }
   },
   "studentChapterView": {

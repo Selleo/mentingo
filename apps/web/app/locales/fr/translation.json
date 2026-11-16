@@ -4454,7 +4454,10 @@
       "online": "En ligne",
       "offline": "Hors ligne",
       "emptyUsers": "Aucun utilisateur inscrit pour l'instant.",
-      "mentionedToast": "Quelqu'un vous a mentionné lors de la discussion sur le cours."
+      "mentionedToast": "Quelqu'un vous a mentionné lors de la discussion sur le cours.",
+      "sendError": "Impossible d'envoyer le message.",
+      "deleteError": "Impossible de supprimer le message.",
+      "reactionError": "La réaction n'a pas pu être enregistrée."
     }
   },
   "studentChapterView": {
@@ -9244,10 +9247,15 @@
     "description": "Posez des questions et partagez vos connaissances avec toute votre organisation.",
     "newTopic": "Nouveau sujet",
     "searchPlaceholder": "Rechercher des sujets",
-    "filter": {
-      "label": "Afficher les sujets",
-      "all": "Tous les sujets",
-      "general": "Général"
+    "courseDiscussions": {
+      "title": "Discussions des cours",
+      "heading": "Discussion : {{course}}",
+      "messages_one": "{{count}} message",
+      "messages_other": "{{count}} messages",
+      "viewAll": "Toutes les discussions des cours ({{count}})",
+      "searchPlaceholder": "Rechercher des cours",
+      "empty": "Aucun de vos cours n'a encore de discussion.",
+      "noResults": "Aucune discussion de cours ne correspond à votre recherche."
     },
     "sort": {
       "label": "Trier les sujets",
@@ -9272,7 +9280,6 @@
     },
     "topic": {
       "backToForum": "Retour au forum",
-      "courseThreadTitle": "Discussion du cours {{course}}",
       "noReplies": "Aucune réponse pour l'instant.",
       "replyPlaceholder": "Écrivez une réponse",
       "replySubmit": "Répondre",
@@ -9291,6 +9298,7 @@
     },
     "errors": {
       "topicNotFound": "Ce sujet n'existe pas ou vous n'y avez pas accès.",
+      "courseDiscussionNotFound": "Cette discussion de cours n'existe pas ou vous n'y avez pas accès.",
       "postNotFound": "Ce message n'existe plus.",
       "cannotDeletePost": "Vous ne pouvez supprimer que vos propres messages.",
       "topicDeleted": "Les réponses sont fermées car le premier message a été supprimé.",
