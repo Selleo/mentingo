@@ -16,6 +16,7 @@ const state = vi.hoisted(() => ({
     permissions: string[];
   } | null,
   mounts: 0,
+  rewardToastMounts: 0,
   renderedPaths: [] as string[],
 }));
 vi.mock("~/api/queries", () => ({ useCurrentUser: () => ({ data: state.user }) }));
@@ -33,6 +34,14 @@ vi.mock("~/modules/Assistant/AssistantDock", () => ({
     return <aside data-testid="persistent-dock">Dock {mount}</aside>;
   },
 }));
+vi.mock("~/modules/Gamification/GamificationRewardToasts", () => ({
+  GamificationRewardToasts: () => {
+    const [mount] = useState(() => ++state.rewardToastMounts);
+
+    return <div data-testid="reward-toasts">Rewards {mount}</div>;
+  },
+}));
+
 function NavigationLinks() {
   const navigate = useNavigate();
   return (
@@ -75,6 +84,7 @@ function renderLayout(path = "/courses") {
 beforeEach(() => {
   state.user = { id: "actor", permissions: Object.values(PERMISSIONS) };
   state.mounts = 0;
+  state.rewardToastMounts = 0;
   state.renderedPaths = [];
 });
 describe("Assistant shared application host", () => {
@@ -111,5 +121,24 @@ describe("Assistant shared application host", () => {
     renderLayout();
     expect(screen.queryByTestId("persistent-dock")).not.toBeInTheDocument();
     expect(screen.getByText("Page content: /courses")).toBeVisible();
+  });
+});
+describe("Gamification reward toasts host", () => {
+  it("stays mounted across dashboard and lesson pages, so lesson rewards are toasted", () => {
+    renderLayout("/settings");
+
+    for (const path of ["/course/course/lesson/lesson", "/settings", "/courses"]) {
+      fireEvent.click(screen.getByRole("button", { name: path }));
+      expect(screen.getAllByTestId("reward-toasts")).toHaveLength(1);
+    }
+
+    expect(state.rewardToastMounts).toBe(1);
+  });
+
+  it("does not poll rewards for anonymous visitors", () => {
+    state.user = null;
+    renderLayout();
+
+    expect(screen.queryByTestId("reward-toasts")).not.toBeInTheDocument();
   });
 });
