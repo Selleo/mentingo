@@ -7,6 +7,7 @@ import {
 } from "@mentingo/luma-sdk";
 import { PERMISSIONS, SUPPORTED_LANGUAGES, VOICE_ACTION, VOICE_SOCKET_EVENT } from "@repo/shared";
 
+import { streamVoiceSentenceMarkup } from "src/ai/utils/voice-delivery";
 import { ExternalAudioSessionStore } from "src/audio/external-audio-session.store";
 import { ExternalAudioService } from "src/audio/external-audio.service";
 
@@ -279,6 +280,86 @@ describe("ExternalAudioService recovery", () => {
 });
 
 describe("ExternalAudioService voice markup streaming", () => {
+  it.each(["complete", "truncated"])(
+    "streams an open sentence to TTS and handles a %s suffix",
+    async (mode) => {
+      const socket = {
+        sendMentorTextDelta: jest.fn(),
+        sendMentorTextEnd: jest.fn(),
+        sendMentorTextError: jest.fn(),
+      };
+      const realtimePublisher = { emitToRoom: jest.fn() };
+      const sessionStore = new ExternalAudioSessionStore();
+      sessionStore.set({
+        sessionId: "session-1",
+        socket: socket as unknown as LumaSocket,
+        currentUser,
+        threadId: "thread-1",
+        lessonId: "lesson-1",
+        interruptedTurnIds: new Set(),
+        audioOutputErrors: new Map(),
+        pendingInterruption: false,
+      } as ExternalAudioSession);
+      const provider = (async function* () {
+        yield '{"elements":[{"cue":"calm","text":"The first words are';
+        // No punctuation or trailing whitespace, and far below the 140-character cap.
+        expect(socket.sendMentorTextDelta).toHaveBeenCalledWith(
+          expect.objectContaining({ text: "⟦cue:calm⟧The first words are" }),
+        );
+        expect(socket.sendMentorTextEnd).not.toHaveBeenCalled();
+        expect(realtimePublisher.emitToRoom).toHaveBeenCalledWith(
+          VOICE_SOCKET_EVENT.MENTOR_RESPONSE_DELTA,
+          "session-1",
+          expect.objectContaining({ text: "The first words are" }),
+        );
+        if (mode === "complete") yield ' still arriving."}]}';
+      })();
+      const streamMessage = jest.fn().mockResolvedValue({
+        source: "core",
+        textStream: streamVoiceSentenceMarkup(provider),
+      });
+      const service = new ExternalAudioService(
+        {} as never,
+        {} as never,
+        { streamMessage } as never,
+        {} as never,
+        {} as never,
+        sessionStore,
+        {
+          runWithTenant: async (_id: string, callback: () => Promise<void>) => callback(),
+        } as never,
+        realtimePublisher as never,
+      );
+      await service["handleLearnerTranscription"]("session-1", {
+        jobId: "turn-1",
+        data: { text: "Question", status: "final" },
+      } as never);
+      if (mode === "truncated") {
+        expect(socket.sendMentorTextError).toHaveBeenCalledWith({
+          type: "mentor.text.error",
+          jobId: "turn-1",
+          code: "MENTOR_RESPONSE_FAILED",
+          message: "Mentor response failed",
+          retryable: false,
+        });
+        expect(socket.sendMentorTextEnd).not.toHaveBeenCalled();
+        expect(streamMessage.mock.calls[0]?.[0]?.abortSignal.aborted).toBe(true);
+        expect(sessionStore.get("session-1")?.activeTurnId).toBeNull();
+        expect(realtimePublisher.emitToRoom).toHaveBeenCalledWith(
+          VOICE_SOCKET_EVENT.MENTOR_RESPONSE_COMPLETED,
+          "session-1",
+          { text: "", jobId: "turn-1", reason: "error" },
+        );
+        return;
+      }
+      expect(socket.sendMentorTextError).not.toHaveBeenCalled();
+      expect(socket.sendMentorTextDelta.mock.calls.map(([payload]) => payload.text).join("")).toBe(
+        "⟦cue:calm⟧The first words are still arriving. ",
+      );
+      expect(socket.sendMentorTextEnd).toHaveBeenCalled();
+    },
+  );
+
   it("uses the Luma welcome turn for audio, alignment, and completion", async () => {
     const socket = { sendTTSTrigger: jest.fn() };
     const session = {

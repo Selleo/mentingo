@@ -893,7 +893,7 @@ export class AiService {
         }),
       });
       const stream = streamVoiceSentenceMarkup(
-        response.elementStream,
+        response.textStream,
         data.abortSignal,
         () => response.output,
       );

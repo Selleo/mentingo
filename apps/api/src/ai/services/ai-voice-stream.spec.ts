@@ -7,7 +7,7 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 const user = { userId: "user-1", tenantId: "tenant-1" } as CurrentUserType;
 
 describe("Voice stream persistence", () => {
-  it.each(["complete", "cancel-before-delta", "cancel-before-persist"])(
+  it.each(["complete", "cancel-before-delta", "cancel-before-persist", "invalid-suffix"])(
     "handles %s without saving a cancelled turn",
     async (mode) => {
       const controller = new AbortController();
@@ -15,6 +15,7 @@ describe("Voice stream persistence", () => {
       const source = (async function* () {
         if (mode === "cancel-before-delta") controller.abort();
         yield "Mentor reply";
+        if (mode === "invalid-suffix") throw new Error("VOICE_DELIVERY_INVALID");
         if (mode === "cancel-before-persist") controller.abort();
       })();
       const service = new AiService(
@@ -56,6 +57,13 @@ describe("Voice stream persistence", () => {
         true,
       );
       const deltas: string[] = [];
+      if (mode === "invalid-suffix") {
+        const iterator = result.textStream[Symbol.asyncIterator]();
+        expect((await iterator.next()).value).toBe("Mentor reply");
+        await expect(iterator.next()).rejects.toThrow("VOICE_DELIVERY_INVALID");
+        expect(createMessages).not.toHaveBeenCalled();
+        return;
+      }
       for await (const delta of result.textStream) deltas.push(delta);
       if (mode === "complete") {
         expect(deltas).toEqual(["Mentor reply"]);

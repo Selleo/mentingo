@@ -28,7 +28,7 @@ export type AiVoiceDeliveryContext = {
 
 export type AiStreamTextResult = ReturnType<typeof streamText>;
 
-/** Native voice streams normalize sentence objects; text retains the UI SDK result. */
+/** Voice streams decode incremental sentence text; text retains the UI SDK result. */
 export type AiCoreMentorStreamResult = {
   textStream: AsyncIterable<string>;
   coreStream?: AiStreamTextResult;

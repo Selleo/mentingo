@@ -1,39 +1,21 @@
-import { Value } from "@sinclair/typebox/value";
+import { VoiceDeliveryParser } from "./voice-delivery-parser";
 
-import { voiceDeliverySentenceSchema } from "src/ai/schemas/voice-delivery.schema";
-
-/** Project complete SDK array elements into existing markup without exposing JSON. */
+/** Stream decoded sentence prefixes after their cue is known; validate completion.
+ * Closing the consumer closes its upstream iterator. A malformed suffix fails the
+ * turn after any delivered text, so callers must not persist it as a completed reply.
+ */
 export async function* streamVoiceSentenceMarkup(
-  source: AsyncIterable<unknown>,
+  source: AsyncIterable<string>,
   abortSignal?: AbortSignal,
   validateCompletion?: () => PromiseLike<unknown>,
 ): AsyncGenerator<string> {
-  let count = 0;
-  for await (const value of source) {
+  const parser = new VoiceDeliveryParser();
+  for await (const fragment of source) {
     if (abortSignal?.aborted) return;
-    if (!Value.Check(voiceDeliverySentenceSchema, value)) {
-      throw new Error("VOICE_DELIVERY_INVALID: invalid sentence object");
-    }
-    const cue = value.cue.trim();
-    const text = value.text.trim();
-    count += 1;
-    if (
-      count > 12 ||
-      !cue ||
-      cue.length > 128 ||
-      /[<>\[\]⟦⟧\r\n]/u.test(cue) ||
-      !text ||
-      text.length > 2048 ||
-      text.includes("⟦cue:") ||
-      text.includes("⟦emotion:")
-    ) {
-      throw new Error("VOICE_DELIVERY_INVALID: invalid sentence bounds or controls");
-    }
-    yield `⟦cue:${cue}⟧${text} `;
+    const delta = parser.feed(fragment);
+    if (delta) yield delta;
   }
   if (abortSignal?.aborted) return;
+  parser.finish();
   await validateCompletion?.();
-  if (count === 0) {
-    throw new Error("VOICE_DELIVERY_INVALID: empty sentence stream");
-  }
 }
