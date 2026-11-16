@@ -1692,20 +1692,6 @@
       "email": "E-Mail ist erforderlich"
     }
   },
-  "ssoEnforcementView": {
-    "header": "SSO-Durchsetzung",
-    "subHeader": "Erzwingen Sie die SSO-Anmeldung für alle Benutzer",
-    "description": "Dieser Schalter erzwingt die Google-/Microsoft-Anmeldung für alle Benutzer. Wenn diese Option deaktiviert ist, können sich Benutzer mit dem herkömmlichen Anmeldeformular anmelden.",
-    "switch": {
-      "enabled": "Ermöglicht",
-      "disabled": "Deaktiviert"
-    },
-    "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "SSO-Erzwingung erfolgreich aktualisiert",
-      "ssoEnforcementUpdateFailed": "Die SSO-Erzwingung konnte nicht aktualisiert werden",
-      "registerRedirect": "Die Registrierung per E-Mail ist deaktiviert, da SSO erzwungen wird."
-    }
-  },
   "userEmailTriggers": {
     "header": "Benutzer-E-Mail-Trigger",
     "subHeader": "Verwalten Sie automatisierte E-Mail-Benachrichtigungen, die an Benutzer gesendet werden",
@@ -4144,7 +4130,6 @@
   "registerView": {
     "header": "Melden Sie sich an",
     "subHeader": "Geben Sie Ihre Daten ein, um ein Konto zu erstellen",
-    "subHeaderSSO": "Melden Sie sich mit Ihrem Google-/Microsoft-Konto an",
     "field": {
       "firstName": "Vorname",
       "lastName": "Nachname",

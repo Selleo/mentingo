@@ -1,6 +1,7 @@
 import { Injectable, Logger, type OnModuleInit } from "@nestjs/common";
 
 import { DefaultAutomationSetupService } from "src/automation-execution/services/default-automation-setup.service";
+import { LegacySSOEnforcementBackfillService } from "src/env/services/legacy-sso-enforcement-backfill.service";
 import { GamificationSetupService } from "src/gamification/gamification-setup.service";
 import { PermissionsBackfillService } from "src/permissions/permissions-backfill.service";
 import { DatabaseMigrationService } from "src/storage/db/database-migration.service";
@@ -14,6 +15,7 @@ export class AppStartupService implements OnModuleInit {
     private readonly permissionsBackfillService: PermissionsBackfillService,
     private readonly defaultAutomationSetupService: DefaultAutomationSetupService,
     private readonly gamificationSetupService: GamificationSetupService,
+    private readonly legacySSOEnforcementBackfillService: LegacySSOEnforcementBackfillService,
   ) {}
 
   async onModuleInit() {
@@ -23,6 +25,7 @@ export class AppStartupService implements OnModuleInit {
     }
 
     await this.databaseMigrationService.runMigrations();
+    await this.legacySSOEnforcementBackfillService.convertLegacySSOEnforcementForAllTenants();
     await this.defaultAutomationSetupService.ensureDefaultAutomationsForAllTenants();
 
     const { insertedCount, tenantCount } =

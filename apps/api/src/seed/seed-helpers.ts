@@ -284,7 +284,7 @@ export async function createNiceCourses(
     let stripeProductId = null;
     let stripePriceId = null;
 
-    const envService = new EnvService(new EnvRepository(db), new ConfigService());
+    const envService = new EnvService(new EnvRepository(db, db), new ConfigService());
 
     const { enabled: isStripeConfigured } = await envService.getStripeConfigured();
 

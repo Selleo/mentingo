@@ -197,7 +197,6 @@ export type UserActivityLogSnapshot = {
 export type SettingsActivityLogSnapshot = {
   id: UUIDType;
   unregisteredUserCoursesAccessibility?: boolean;
-  enforceSSO?: boolean;
   primaryColor?: string | null;
   contrastColor?: string | null;
   backgroundColor?: string | null;

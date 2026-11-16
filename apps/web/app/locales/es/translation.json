@@ -1686,20 +1686,6 @@
       "email": "Se requiere correo electrónico"
     }
   },
-  "ssoEnforcementView": {
-    "header": "SSO Cumplimiento",
-    "subHeader": "Aplicar el inicio de sesión SSO para todos los usuarios",
-    "description": "Este cambio aplicará el inicio de sesión Google/Microsoft para todos los usuarios. Si está deshabilitado, los usuarios podrán iniciar sesión utilizando el formulario de inicio de sesión tradicional.",
-    "switch": {
-      "enabled": "Habilitado",
-      "disabled": "Discapacitado"
-    },
-    "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "La aplicación de SSO se actualizó correctamente",
-      "ssoEnforcementUpdateFailed": "No se pudo actualizar la aplicación de SSO",
-      "registerRedirect": "El registro con correo electrónico está deshabilitado porque se aplica SSO."
-    }
-  },
   "userEmailTriggers": {
     "header": "Activadores de correo electrónico del usuario",
     "subHeader": "Administrar notificaciones automáticas por correo electrónico enviadas a los usuarios",
@@ -4089,7 +4075,6 @@
   "registerView": {
     "header": "Registrarse",
     "subHeader": "Ingresa tus datos para crear una cuenta",
-    "subHeaderSSO": "Regístrese usando su cuenta Google/Microsoft",
     "field": {
       "firstName": "Nombre",
       "lastName": "Apellido",

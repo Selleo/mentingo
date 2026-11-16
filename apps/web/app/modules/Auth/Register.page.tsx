@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import { useRegisterUser } from "~/api/mutations/useRegisterUser";
 import { useGlobalSettings, useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
-import { useLoginMethods } from "~/api/queries/useLoginMethods";
+import { useLoginMethodsSuspense } from "~/api/queries/useLoginMethods";
 import { useRegistrationForm } from "~/api/queries/useRegistrationForm";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { Icon } from "~/components/Icon";
@@ -48,17 +48,17 @@ export default function RegisterPage() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const selectedLanguage = useLanguageStore((state) => state.language);
-  const { data: loginMethods } = useLoginMethods();
+  const { data: loginMethods } = useLoginMethodsSuspense();
   const { data: globalSettings } = useGlobalSettings();
   const { data: registrationForm } = useRegistrationForm(selectedLanguage);
 
-  const isGoogleOAuthEnabled = loginMethods?.google ?? false;
+  const isGoogleOAuthEnabled = loginMethods.google;
 
-  const isMicrosoftOAuthEnabled = loginMethods?.microsoft ?? false;
+  const isMicrosoftOAuthEnabled = loginMethods.microsoft;
 
-  const isSlackOAuthEnabled = loginMethods?.slack ?? false;
+  const isSlackOAuthEnabled = loginMethods.slack;
 
-  const isEntraIdOAuthEnabled = loginMethods?.entraId ?? false;
+  const isEntraIdOAuthEnabled = loginMethods.entraId;
 
   const requiredFieldIds = useMemo(
     () => registrationForm?.fields.filter((field) => field.required).map((field) => field.id) ?? [],
@@ -85,11 +85,7 @@ export default function RegisterPage() {
   });
 
   const {
-    data: {
-      enforceSSO: isSSOEnforced,
-      inviteOnlyRegistration: inviteOnlyRegistration,
-      loginBackgroundImageS3Key,
-    },
+    data: { inviteOnlyRegistration: inviteOnlyRegistration, loginBackgroundImageS3Key },
   } = useGlobalSettingsSuspense();
 
   const {
@@ -132,8 +128,6 @@ export default function RegisterPage() {
   );
 
   const onSubmit = async (data: RegisterFormValues) => {
-    if (isSSOEnforced && isAnyProviderEnabled) return;
-
     /**
      * We need to remove birthday from register data because we don't process personal data
      */
@@ -162,8 +156,6 @@ export default function RegisterPage() {
     );
   }
 
-  if (!loginMethods) return null;
-
   if (!loginMethods.password) {
     return <Navigate to={`/auth/login${location.search}`} replace />;
   }
@@ -190,185 +182,183 @@ export default function RegisterPage() {
                 </div>
                 <CardTitle className="text-xl">{t("registerView.header")}</CardTitle>
                 <CardDescription className="max-w-md text-sm leading-6">
-                  {isSSOEnforced ? t("registerView.subHeaderSSO") : t("registerView.subHeader")}
+                  {t("registerView.subHeader")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {!isSSOEnforced && (
-                  <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="firstName">{t("registerView.field.firstName")}</Label>
-                      <Input
-                        id="firstName"
-                        type="text"
-                        placeholder="John"
-                        data-testid={REGISTER_PAGE_HANDLES.FIRST_NAME}
-                        {...register("firstName")}
-                      />
-                      {errors.firstName?.message && (
-                        <FormValidationError message={errors.firstName.message} />
-                      )}
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="lastName">{t("registerView.field.lastName")}</Label>
-                      <Input
-                        id="lastName"
-                        type="text"
-                        placeholder="Doe"
-                        data-testid={REGISTER_PAGE_HANDLES.LAST_NAME}
-                        {...register("lastName")}
-                      />
-                      {errors.lastName?.message && (
-                        <FormValidationError message={errors.lastName.message} />
-                      )}
-                    </div>
-
-                    {globalSettings?.ageLimit && (
-                      <div className="grid gap-2">
-                        <Label htmlFor="birthday">{t("registerView.field.birthday")}</Label>
-                        <Controller
-                          control={control}
-                          name="birthday"
-                          render={({ field }) => {
-                            const selectedDate = parseBirthday(field.value);
-
-                            return (
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    id="birthday"
-                                    type="button"
-                                    data-testid={REGISTER_PAGE_HANDLES.BIRTHDAY}
-                                    variant="outline"
-                                    className={cn(
-                                      "w-full flex items-center gap-3 font-normal bg-white shadow-sm border-neutral-200",
-                                      selectedDate
-                                        ? "text-neutral-900 hover:text-neutral-900"
-                                        : "text-neutral-500 hover:text-neutral-500",
-                                    )}
-                                  >
-                                    <Icon name="Calendar" className="size-4 text-neutral-500" />
-                                    <span className="grow text-left">
-                                      {selectedDate
-                                        ? format(selectedDate, "PPP", { locale: calendarLocale })
-                                        : t("registerView.field.birthdayPlaceholder")}
-                                    </span>
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-2" align="start">
-                                  <Calendar
-                                    variant="default"
-                                    captionLayout="dropdown-buttons"
-                                    mode="single"
-                                    selected={selectedDate ?? undefined}
-                                    onSelect={(date) => {
-                                      if (!date) return field.onChange("");
-
-                                      field.onChange(format(date, "yyyy-MM-dd"));
-                                    }}
-                                    disabled={(date) => date > maxBirthdayDate}
-                                    fromYear={maxBirthdayDate.getFullYear() - 120}
-                                    toYear={maxBirthdayDate.getFullYear()}
-                                    initialFocus
-                                    weekStartsOn={1}
-                                    locale={calendarLocale}
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                            );
-                          }}
-                        />
-                        {errors.birthday?.message && (
-                          <FormValidationError message={errors.birthday.message} />
-                        )}
-                      </div>
+                <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="firstName">{t("registerView.field.firstName")}</Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="John"
+                      data-testid={REGISTER_PAGE_HANDLES.FIRST_NAME}
+                      {...register("firstName")}
+                    />
+                    {errors.firstName?.message && (
+                      <FormValidationError message={errors.firstName.message} />
                     )}
+                  </div>
 
+                  <div className="grid gap-2">
+                    <Label htmlFor="lastName">{t("registerView.field.lastName")}</Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Doe"
+                      data-testid={REGISTER_PAGE_HANDLES.LAST_NAME}
+                      {...register("lastName")}
+                    />
+                    {errors.lastName?.message && (
+                      <FormValidationError message={errors.lastName.message} />
+                    )}
+                  </div>
+
+                  {globalSettings?.ageLimit && (
                     <div className="grid gap-2">
-                      <Label htmlFor="email">{t("registerView.field.email")}</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="user@example.com"
-                        data-testid={REGISTER_PAGE_HANDLES.EMAIL}
-                        {...register("email")}
-                      />
-                      {errors.email?.message && (
-                        <FormValidationError message={errors.email.message} />
-                      )}
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="password">{t("registerView.field.password")}</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        data-testid={REGISTER_PAGE_HANDLES.PASSWORD}
-                        {...register("password")}
-                      />
-                      <PasswordValidationDisplay fieldName="password" />
-                    </div>
-
-                    {registrationForm?.fields.length && (
-                      <div className="grid gap-2">
-                        {registrationForm.fields.map((field) => {
-                          const fieldError = errors.formAnswers?.[field.id]?.message;
+                      <Label htmlFor="birthday">{t("registerView.field.birthday")}</Label>
+                      <Controller
+                        control={control}
+                        name="birthday"
+                        render={({ field }) => {
+                          const selectedDate = parseBirthday(field.value);
 
                           return (
-                            <div key={field.id} className="space-y-2">
-                              <div className="flex items-start gap-3">
-                                <Controller
-                                  control={control}
-                                  name={`formAnswers.${field.id}`}
-                                  render={({ field: controllerField }) => (
-                                    <div className="flex items-start gap-2">
-                                      <Checkbox
-                                        id={field.id}
-                                        checked={Boolean(controllerField.value)}
-                                        onCheckedChange={(checked) =>
-                                          controllerField.onChange(Boolean(checked))
-                                        }
-                                        className="mt-1.5"
-                                      />
-
-                                      <div className="flex items-center gap-1 text-sm">
-                                        <Viewer
-                                          content={field.label}
-                                          className="text-sm [&_article]:m-0"
-                                        />
-                                      </div>
-                                      {field.required && (
-                                        <span className="font-semibold leading-6 text-destructive">
-                                          *
-                                        </span>
-                                      )}
-                                    </div>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  id="birthday"
+                                  type="button"
+                                  data-testid={REGISTER_PAGE_HANDLES.BIRTHDAY}
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full flex items-center gap-3 font-normal bg-white shadow-sm border-neutral-200",
+                                    selectedDate
+                                      ? "text-neutral-900 hover:text-neutral-900"
+                                      : "text-neutral-500 hover:text-neutral-500",
                                   )}
-                                />
-                              </div>
-                              <FormValidationError message={fieldError} />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                                >
+                                  <Icon name="Calendar" className="size-4 text-neutral-500" />
+                                  <span className="grow text-left">
+                                    {selectedDate
+                                      ? format(selectedDate, "PPP", { locale: calendarLocale })
+                                      : t("registerView.field.birthdayPlaceholder")}
+                                  </span>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-2" align="start">
+                                <Calendar
+                                  variant="default"
+                                  captionLayout="dropdown-buttons"
+                                  mode="single"
+                                  selected={selectedDate ?? undefined}
+                                  onSelect={(date) => {
+                                    if (!date) return field.onChange("");
 
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={!isValid}
-                      data-testid={REGISTER_PAGE_HANDLES.SUBMIT}
-                    >
-                      {t("registerView.button.createAccount")}
-                    </Button>
-                  </form>
-                )}
+                                    field.onChange(format(date, "yyyy-MM-dd"));
+                                  }}
+                                  disabled={(date) => date > maxBirthdayDate}
+                                  fromYear={maxBirthdayDate.getFullYear() - 120}
+                                  toYear={maxBirthdayDate.getFullYear()}
+                                  initialFocus
+                                  weekStartsOn={1}
+                                  locale={calendarLocale}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          );
+                        }}
+                      />
+                      {errors.birthday?.message && (
+                        <FormValidationError message={errors.birthday.message} />
+                      )}
+                    </div>
+                  )}
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">{t("registerView.field.email")}</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="user@example.com"
+                      data-testid={REGISTER_PAGE_HANDLES.EMAIL}
+                      {...register("email")}
+                    />
+                    {errors.email?.message && (
+                      <FormValidationError message={errors.email.message} />
+                    )}
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="password">{t("registerView.field.password")}</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      data-testid={REGISTER_PAGE_HANDLES.PASSWORD}
+                      {...register("password")}
+                    />
+                    <PasswordValidationDisplay fieldName="password" />
+                  </div>
+
+                  {registrationForm?.fields.length && (
+                    <div className="grid gap-2">
+                      {registrationForm.fields.map((field) => {
+                        const fieldError = errors.formAnswers?.[field.id]?.message;
+
+                        return (
+                          <div key={field.id} className="space-y-2">
+                            <div className="flex items-start gap-3">
+                              <Controller
+                                control={control}
+                                name={`formAnswers.${field.id}`}
+                                render={({ field: controllerField }) => (
+                                  <div className="flex items-start gap-2">
+                                    <Checkbox
+                                      id={field.id}
+                                      checked={Boolean(controllerField.value)}
+                                      onCheckedChange={(checked) =>
+                                        controllerField.onChange(Boolean(checked))
+                                      }
+                                      className="mt-1.5"
+                                    />
+
+                                    <div className="flex items-center gap-1 text-sm">
+                                      <Viewer
+                                        content={field.label}
+                                        className="text-sm [&_article]:m-0"
+                                      />
+                                    </div>
+                                    {field.required && (
+                                      <span className="font-semibold leading-6 text-destructive">
+                                        *
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              />
+                            </div>
+                            <FormValidationError message={fieldError} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={!isValid}
+                    data-testid={REGISTER_PAGE_HANDLES.SUBMIT}
+                  >
+                    {t("registerView.button.createAccount")}
+                  </Button>
+                </form>
 
                 {isAnyProviderEnabled && (
                   <SocialLogin
-                    isEmailFormVisible={!isSSOEnforced}
-                    isMagicLinkEnabled={loginMethods?.magicLink ?? false}
+                    isEmailFormVisible
+                    isMagicLinkEnabled={loginMethods.magicLink}
                     isGoogleOAuthEnabled={isGoogleOAuthEnabled}
                     isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
                     isSlackOAuthEnabled={isSlackOAuthEnabled}

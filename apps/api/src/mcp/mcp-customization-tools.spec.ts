@@ -36,7 +36,7 @@ function setup() {
   const service = {
     getGlobalSettings: jest
       .fn()
-      .mockResolvedValue({ calendarEnabled: true, enforceSSO: true, MFAEnforcedRoles: ["admin"] }),
+      .mockResolvedValue({ calendarEnabled: true, MFAEnforcedRoles: ["admin"] }),
     getPlatformLogoUrl: jest.fn().mockResolvedValue(null),
     getPlatformSimpleLogoUrl: jest.fn().mockResolvedValue(null),
     getLoginBackgroundImageUrl: jest.fn().mockResolvedValue(null),

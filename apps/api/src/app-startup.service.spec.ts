@@ -1,6 +1,7 @@
 import { AppStartupService } from "./app-startup.service";
 
 import type { DefaultAutomationSetupService } from "./automation-execution/services/default-automation-setup.service";
+import type { LegacySSOEnforcementBackfillService } from "./env/services/legacy-sso-enforcement-backfill.service";
 import type { GamificationSetupService } from "./gamification/gamification-setup.service";
 import type { PermissionsBackfillService } from "./permissions/permissions-backfill.service";
 import type { DatabaseMigrationService } from "./storage/db/database-migration.service";
@@ -23,11 +24,15 @@ describe("AppStartupService", () => {
   const gamification = {
     ensurePredefinedAchievementsForAllTenants: jest.fn(),
   } as unknown as jest.Mocked<GamificationSetupService>;
+  const legacySSOEnforcementBackfill = {
+    convertLegacySSOEnforcementForAllTenants: jest.fn(),
+  } as unknown as jest.Mocked<LegacySSOEnforcementBackfillService>;
   const service = new AppStartupService(
     databaseMigrationService,
     permissionsBackfillService,
     automations,
     gamification,
+    legacySSOEnforcementBackfill,
   );
 
   beforeEach(() => {
@@ -69,6 +74,11 @@ describe("AppStartupService", () => {
     databaseMigrationService.runMigrations.mockImplementation(async () => {
       calls.push("migrations");
     });
+    legacySSOEnforcementBackfill.convertLegacySSOEnforcementForAllTenants.mockImplementation(
+      async () => {
+        calls.push("legacySSOEnforcement");
+      },
+    );
     automations.ensureDefaultAutomationsForAllTenants.mockImplementation(async () => {
       calls.push("automations");
     });
@@ -84,7 +94,13 @@ describe("AppStartupService", () => {
 
     await service.onModuleInit();
 
-    expect(calls).toEqual(["migrations", "automations", "backfill", "gamification"]);
+    expect(calls).toEqual([
+      "migrations",
+      "legacySSOEnforcement",
+      "automations",
+      "backfill",
+      "gamification",
+    ]);
   });
 
   it("does not run permission backfill when migrations fail", async () => {

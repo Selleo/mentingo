@@ -36,7 +36,6 @@ export const globalSettingsJSONSchema = Type.Object({
   liveTrainingEnabled: Type.Boolean(),
   liveTrainingMaxParallelSessions: Type.Number({ minimum: 1 }),
   trainerRoleUserCount: Type.Optional(Type.Number()),
-  enforceSSO: Type.Boolean(),
   certificateBackgroundImage: Type.Union([Type.String(), Type.Null()]),
   companyInformation: Type.Optional(companyInformationJSONSchema),
   platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),

@@ -1692,20 +1692,6 @@
       "email": "Būtinas el"
     }
   },
-  "ssoEnforcementView": {
-    "header": "SSO vykdymas",
-    "subHeader": "Priverskite SSO prisijungimą visiems vartotojams",
-    "description": "Šis jungiklis privers prisijungti prie „Google“ / „Microsoft“ visiems vartotojams. Jei išjungta, vartotojai galės prisijungti naudodami tradicinę prisijungimo formą.",
-    "switch": {
-      "enabled": "Įjungta",
-      "disabled": "Išjungta"
-    },
-    "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "SSO vykdymas sėkmingai atnaujintas",
-      "ssoEnforcementUpdateFailed": "Nepavyko atnaujinti SSO vykdymo",
-      "registerRedirect": "Registracija naudojant el. paštą išjungta, nes SSO vykdomas."
-    }
-  },
   "userEmailTriggers": {
     "header": "Vartotojo el. pašto aktyvikliai",
     "subHeader": "Tvarkykite automatinius el. pašto pranešimus, siunčiamus vartotojams",
@@ -4146,7 +4132,6 @@
   "registerView": {
     "header": "Registruotis",
     "subHeader": "Įveskite savo informaciją, kad sukurtumėte paskyrą",
-    "subHeaderSSO": "Prisiregistruokite naudodami „Google“ / „Microsoft“ paskyrą",
     "field": {
       "firstName": "Vardas",
       "lastName": "Pavardė",

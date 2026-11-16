@@ -36,7 +36,7 @@ export const MCP_CUSTOMIZATION_TOOL_NAMES = [
 ] as const;
 
 function customizationSettings(settings: GlobalSettingsJSONContentSchema) {
-  const { enforceSSO: _sso, MFAEnforcedRoles: _mfa, ...customization } = settings;
+  const { MFAEnforcedRoles: _mfa, ...customization } = settings;
   return customization;
 }
 
