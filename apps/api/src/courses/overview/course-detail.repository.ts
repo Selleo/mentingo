@@ -226,6 +226,9 @@ export class CourseDetailRepository {
                     WHEN ${quizAwaitingReview(lessons.id, userId)} THEN ${
                       LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW
                     }
+                    WHEN ${studentLessonProgress.completedAt} IS NOT NULL AND ${
+                      studentLessonProgress.isQuizPassed
+                    } IS FALSE THEN ${LEARNER_PROGRESS_STATUSES.FAILED}
                     WHEN ${studentLessonProgress.isStarted} THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
                   END AS status,

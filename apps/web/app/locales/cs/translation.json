@@ -5008,7 +5008,8 @@
     "inProgress": "Probíhá",
     "notStarted": "Nezahájeno",
     "blocked": "Blokováno",
-    "awaitingReview": "Čeká na hodnocení"
+    "awaitingReview": "Čeká na hodnocení",
+    "failed": "Nesplněno"
   },
   "studentCertificateView": {
     "header": "Certifikáty",
@@ -6700,7 +6701,8 @@
         "completed": "Dokončeno",
         "inProgress": "Probíhá",
         "notStarted": "Nezahájeno",
-        "awaitingReview": "Čeká na hodnocení"
+        "awaitingReview": "Čeká na hodnocení",
+        "failed": "Nesplněno"
       },
       "lessonTypes": {
         "content": "Obsah",

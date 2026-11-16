@@ -423,7 +423,14 @@ export const findFirstNotStartedLessonId = (course: GetCourseResponse["data"]) =
 
 export const findFirstInProgressLessonId = (course: GetCourseResponse["data"]) => {
   const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);
-  return find(allLessons, (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS)?.id;
+
+  // A failed quiz can still be retaken, so it resumes like an in-progress lesson.
+  return find(
+    allLessons,
+    (lesson) =>
+      lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS ||
+      lesson.status === LESSON_PROGRESS_STATUSES.FAILED,
+  )?.id;
 };
 
 export const findFirstLessonId = (course: GetCourseResponse["data"]) => {
@@ -509,6 +516,7 @@ export const findFirstNonCompletedLessonId = (course: GetCourseResponse["data"])
     allLessons,
     (lesson) =>
       lesson.status === LESSON_PROGRESS_STATUSES.NOT_STARTED ||
-      lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS,
+      lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS ||
+      lesson.status === LESSON_PROGRESS_STATUSES.FAILED,
   )?.id;
 };

@@ -3375,6 +3375,80 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     });
   });
 
+  describe("GET /api/course - quiz lesson status after a graded attempt", () => {
+    const getCourseLessonStatus = async (
+      cookies: string,
+      courseId: UUIDType,
+      lessonId: UUIDType,
+    ) => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/course?id=${courseId}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      return response.body.data.chapters
+        .flatMap((chapter: { lessons: { id: string; status: string }[] }) => chapter.lessons)
+        .find(({ id }: { id: string }) => id === lessonId)?.status;
+    };
+
+    it("reports failed after a failed attempt and completed once a retake passes", async () => {
+      const category = await categoryFactory.create();
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const cookies = await cookieFor(student, app);
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        settings: { lessonSequenceEnabled: false, quizFeedbackEnabled: true },
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id });
+
+      await enrollStudentToCourse(student.id, course.id);
+
+      const { lesson, question } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
+
+      await resetQuizAttemptState(student.id, lesson.id);
+
+      const [wrongOption] = await db
+        .select({ id: assessmentQuestionChoiceOptions.id })
+        .from(assessmentQuestionChoiceOptions)
+        .where(
+          and(
+            eq(assessmentQuestionChoiceOptions.questionId, question.id),
+            eq(assessmentQuestionChoiceOptions.isCorrect, false),
+          ),
+        )
+        .limit(1);
+
+      const submitAnswers = (questionsAnswers: unknown) =>
+        request(app.getHttpServer())
+          .post("/api/lesson/evaluation-quiz")
+          .set("Cookie", cookies)
+          .send({ lessonId: lesson.id, language: "en", questionsAnswers })
+          .expect(201);
+
+      await submitAnswers([{ questionId: question.id, answers: [{ answerId: wrongOption.id }] }]);
+
+      expect(await getCourseLessonStatus(cookies, course.id, lesson.id)).toBe(
+        LEARNER_PROGRESS_STATUSES.FAILED,
+      );
+
+      await request(app.getHttpServer())
+        .delete(`/api/lesson/delete-student-quiz-answers?lessonId=${lesson.id}`)
+        .set("Cookie", cookies)
+        .expect(200);
+      await submitAnswers(await buildQuizAnswers(lesson.id));
+
+      expect(await getCourseLessonStatus(cookies, course.id, lesson.id)).toBe(
+        LEARNER_PROGRESS_STATUSES.COMPLETED,
+      );
+    });
+  });
+
   describe("POST /api/lesson/evaluation-quiz - open answers awaiting review", () => {
     const setupQuizWithOpenQuestion = async ({ quizFeedbackEnabled = true } = {}) => {
       const category = await categoryFactory.create();

@@ -99,7 +99,7 @@ export const CourseChapter = ({ chapter, isLastChapter = false }: CourseChapterP
 
     const firstInProgressLesson = find(
       accessibleLessons,
-      (lesson) => lesson.status === "in_progress",
+      (lesson) => lesson.status === "in_progress" || lesson.status === "failed",
     )?.id;
 
     const lessonToPlay = firstInProgressLesson ?? firstNotStartedLesson ?? accessibleLessons[0].id;

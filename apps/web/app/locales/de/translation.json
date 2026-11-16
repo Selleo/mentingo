@@ -4999,7 +4999,8 @@
     "inProgress": "Im Gange",
     "notStarted": "Nicht gestartet",
     "blocked": "Blockiert",
-    "awaitingReview": "Wartet auf Bewertung"
+    "awaitingReview": "Wartet auf Bewertung",
+    "failed": "Nicht bestanden"
   },
   "studentCertificateView": {
     "header": "Zertifikate",
@@ -6683,7 +6684,8 @@
         "completed": "Abgeschlossen",
         "inProgress": "In Bearbeitung",
         "notStarted": "Nicht begonnen",
-        "awaitingReview": "Wartet auf Bewertung"
+        "awaitingReview": "Wartet auf Bewertung",
+        "failed": "Nicht bestanden"
       },
       "lessonTypes": {
         "content": "Inhalt",

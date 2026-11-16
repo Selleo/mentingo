@@ -4731,7 +4731,8 @@
     "inProgress": "En cours",
     "notStarted": "Non démarré",
     "blocked": "Bloqué",
-    "awaitingReview": "En attente d'évaluation"
+    "awaitingReview": "En attente d'évaluation",
+    "failed": "Non réussi"
   },
   "studentCertificateView": {
     "header": "Certificats",
@@ -6436,7 +6437,8 @@
         "completed": "Terminé",
         "inProgress": "En cours",
         "notStarted": "Non commencé",
-        "awaitingReview": "En attente d'évaluation"
+        "awaitingReview": "En attente d'évaluation",
+        "failed": "Non réussi"
       },
       "lessonTypes": {
         "content": "Contenu",

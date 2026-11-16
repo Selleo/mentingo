@@ -5003,7 +5003,8 @@
     "inProgress": "Vykdoma",
     "notStarted": "Nepradėtas",
     "blocked": "Užblokuota",
-    "awaitingReview": "Laukia įvertinimo"
+    "awaitingReview": "Laukia įvertinimo",
+    "failed": "Neišlaikyta"
   },
   "studentCertificateView": {
     "header": "Sertifikatai",
@@ -6696,7 +6697,8 @@
         "completed": "Baigta",
         "inProgress": "Vykdoma",
         "notStarted": "Nepradėta",
-        "awaitingReview": "Laukia įvertinimo"
+        "awaitingReview": "Laukia įvertinimo",
+        "failed": "Neišlaikyta"
       },
       "lessonTypes": {
         "content": "Turinys",

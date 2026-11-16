@@ -4937,7 +4937,8 @@
     "inProgress": "En progreso",
     "notStarted": "No iniciado",
     "blocked": "Bloqueado",
-    "awaitingReview": "Pendiente de revisión"
+    "awaitingReview": "Pendiente de revisión",
+    "failed": "No superado"
   },
   "studentCertificateView": {
     "header": "Certificados",
@@ -6641,7 +6642,8 @@
         "completed": "Completado",
         "inProgress": "En curso",
         "notStarted": "No iniciado",
-        "awaitingReview": "Pendiente de revisión"
+        "awaitingReview": "Pendiente de revisión",
+        "failed": "No superado"
       },
       "lessonTypes": {
         "content": "Contenido",

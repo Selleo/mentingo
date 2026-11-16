@@ -2,6 +2,7 @@ import { BookOpen, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
+import { LESSON_PROGRESS_STATUSES } from "~/modules/Courses/Lesson/types";
 import { formatDurationToDisplayBucket } from "~/modules/Courses/utils/formatDuration";
 
 import { CHAPTER_PROGRESS_STATUSES } from "../lessonTypes";
@@ -76,7 +77,8 @@ const getActiveLessonProgressCount = (chapter: Chapter) =>
   chapter.lessons.filter(
     (lesson) =>
       lesson.status === CHAPTER_PROGRESS_STATUSES.COMPLETED ||
-      lesson.status === CHAPTER_PROGRESS_STATUSES.IN_PROGRESS,
+      lesson.status === CHAPTER_PROGRESS_STATUSES.IN_PROGRESS ||
+      lesson.status === LESSON_PROGRESS_STATUSES.FAILED,
   ).length;
 
 export default function ChapterItem({
