@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
-import { ProgressBadge } from "~/components/Badges/ProgressBadge";
+import { LESSON_STATUS_TO_PROGRESS, ProgressBadge } from "~/components/Badges/ProgressBadge";
 import CourseProgress from "~/components/CourseProgress";
 import { Icon } from "~/components/Icon";
 import {
@@ -44,14 +44,6 @@ const progressBadge = {
   not_started: "NotStartedRounded",
   blocked: "Blocked",
   awaiting_review: "InProgress",
-} as const;
-
-const lessonProgressBadgeKey = {
-  completed: "completed",
-  in_progress: "inProgress",
-  not_started: "notStarted",
-  blocked: "blocked",
-  awaiting_review: "awaitingReview",
 } as const;
 
 export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
@@ -192,7 +184,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                               >
                                 {!isPreviewMode && (
                                   <ProgressBadge
-                                    progress={lessonProgressBadgeKey[badgeStatus]}
+                                    progress={LESSON_STATUS_TO_PROGRESS[badgeStatus]}
                                     hideLabel
                                     data-testid={
                                       isBlocked
