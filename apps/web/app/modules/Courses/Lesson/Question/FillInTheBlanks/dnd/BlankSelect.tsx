@@ -21,6 +21,8 @@ type BlankSelectProps = {
   placeholder?: string;
   minWidth?: string;
   wrapText?: boolean;
+  // Plain blank in a sentence: no chevron or placeholder, so it doesn't read as a dropdown.
+  bare?: boolean;
 };
 
 // Radix forbids an empty-string item value, so clearing a blank uses a sentinel.
@@ -35,6 +37,7 @@ export const BlankSelect = ({
   placeholder,
   minWidth,
   wrapText,
+  bare,
 }: BlankSelectProps) => {
   const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: blankId, data: { blankId } });
@@ -62,10 +65,14 @@ export const BlankSelect = ({
           className={cn(
             "h-9 w-full min-w-0 rounded-md px-2 py-1 text-sm",
             wrapText && "h-auto min-h-9",
+            // Without the chevron and text the border alone marks the control; neutral-600 keeps it at 3:1 (WCAG 1.4.11).
+            bare && "border-neutral-600 [&>svg]:hidden",
             isOver && "ring-2 ring-primary-400",
           )}
         >
-          <SelectValue placeholder={placeholder ?? label}>{selectedLabel}</SelectValue>
+          <SelectValue placeholder={bare ? undefined : (placeholder ?? label)}>
+            {selectedLabel}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {selectedKey && (

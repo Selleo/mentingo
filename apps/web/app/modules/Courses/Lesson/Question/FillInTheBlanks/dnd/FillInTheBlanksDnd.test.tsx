@@ -60,6 +60,9 @@ describe("FillInTheBlanksDnd", () => {
     expect(blanks[1]).toHaveAccessibleName(
       i18next.t("studentLessonView.other.blankLabel", { current: 2, total: 2 }),
     );
+    // The label is announced, not shown, so an empty blank doesn't look like a dropdown.
+    expect(blanks[0].textContent).toBe("");
+    expect(blanks[0]).toHaveClass("[&>svg]:hidden");
   });
 
   it("keeps the unplaced words in the answer bank", () => {
