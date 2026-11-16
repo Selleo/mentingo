@@ -202,4 +202,22 @@ export const EMAIL_TEMPLATE_NAMES: Record<
     es: "Formación en directo finalizada",
     fr: "Formation en direct terminée",
   },
+  QUIZ_ATTEMPT_GRADED: {
+    en: "Quiz graded",
+    pl: "Quiz oceniony",
+    de: "Quiz bewertet",
+    lt: "Testas įvertintas",
+    cs: "Kvíz ohodnocen",
+    es: "Cuestionario calificado",
+    fr: "Quiz évalué",
+  },
+  QUIZ_GRADING_DIGEST: {
+    en: "Answers waiting for review",
+    pl: "Odpowiedzi czekające na ocenę",
+    de: "Antworten warten auf Bewertung",
+    lt: "Atsakymai laukia įvertinimo",
+    cs: "Odpovědi čekající na hodnocení",
+    es: "Respuestas pendientes de revisión",
+    fr: "Réponses en attente d’évaluation",
+  },
 };

@@ -7,8 +7,15 @@ export type ScormContentGrant = {
   extractedFilesReference: string;
   launchPath: string;
   parentOrigin: string;
+  /** Set for preview launches, which are authorized by lesson preview access instead of enrollment. */
+  previewLessonId?: string;
   expiresAt: number;
 };
+
+export type ScormContentAccessScope = Pick<
+  ScormContentGrant,
+  "packageId" | "actor" | "previewLessonId"
+>;
 
 export type ScormContentGrantInput = Omit<ScormContentGrant, "expiresAt">;
 

@@ -5,6 +5,8 @@ import { ENTRA_ID_SECRETS } from "src/env/env.config";
 import type { LoginMethod } from "@repo/shared";
 import type { LoginMethodEnvKeys } from "src/env/login-methods.types";
 
+export const LEGACY_SSO_ENFORCEMENT_SETTING = "enforceSSO";
+
 export const LOGIN_METHOD_ENV_KEYS = {
   [LOGIN_METHODS.GOOGLE]: {
     enabledFlag: "GOOGLE_OAUTH_ENABLED",

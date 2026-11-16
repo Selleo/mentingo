@@ -907,23 +907,6 @@
         }
       }
     },
-    "/api/settings/admin/enforce-sso": {
-      "patch": {
-        "operationId": "SettingsController_updateEnforceSSO",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/settings/admin/modern-course-list": {
       "patch": {
         "operationId": "SettingsController_updateModernCourseListEnabled",
@@ -6801,8 +6784,14 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportCourseAsScormResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -6992,6 +6981,309 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/native-archives/tus/init": {
+      "post": {
+        "operationId": "NativeArchiveController_initTusImport",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitTusImportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitTusImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/tus": {
+      "options": {
+        "operationId": "NativeArchiveController_tusOptionsBase",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "NativeArchiveController_createTusUpload",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/native-archives/tus/{id}": {
+      "options": {
+        "operationId": "NativeArchiveController_tusOptionsUpload",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "head": {
+        "operationId": "NativeArchiveController_headTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "NativeArchiveController_patchTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/native-archives/tus/{id}/complete": {
+      "post": {
+        "operationId": "NativeArchiveController_completeTusImport",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompleteTusImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/live-training/{id}/dismiss-review": {
+      "patch": {
+        "operationId": "NativeArchiveController_dismissLiveTrainingReview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/native-archives/courses/{id}/export": {
+      "post": {
+        "operationId": "NativeArchiveController_exportNativeCourse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportNativeCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/learning-paths/{id}/export": {
+      "post": {
+        "operationId": "NativeArchiveController_exportNativeLearningPath",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportNativeLearningPathResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/import": {
+      "post": {
+        "operationId": "NativeArchiveController_importNativeArchive",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportNativeArchiveResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/jobs/{id}": {
+      "get": {
+        "operationId": "NativeArchiveController_getNativeArchiveStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNativeArchiveStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/jobs/{id}/download-url": {
+      "get": {
+        "operationId": "NativeArchiveController_getNativeArchiveDownloadUrl",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNativeArchiveDownloadUrlResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/jobs/{id}/download": {
+      "get": {
+        "operationId": "NativeArchiveController_downloadNativeArchive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
@@ -13101,6 +13393,14 @@
                 {
                   "const": "live_training_ended",
                   "type": "string"
+                },
+                {
+                  "const": "quiz_attempt_graded",
+                  "type": "string"
+                },
+                {
+                  "const": "quiz_grading_digest",
+                  "type": "string"
                 }
               ]
             }
@@ -13243,6 +13543,14 @@
                 },
                 {
                   "const": "live_training_ended",
+                  "type": "string"
+                },
+                {
+                  "const": "quiz_attempt_graded",
+                  "type": "string"
+                },
+                {
+                  "const": "quiz_grading_digest",
                   "type": "string"
                 }
               ]
@@ -14175,6 +14483,14 @@
                 },
                 {
                   "const": "live_training_ended",
+                  "type": "string"
+                },
+                {
+                  "const": "quiz_attempt_graded",
+                  "type": "string"
+                },
+                {
+                  "const": "quiz_grading_digest",
                   "type": "string"
                 }
               ]
@@ -15329,309 +15645,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/native-archives/tus/init": {
-      "post": {
-        "operationId": "NativeArchiveController_initTusImport",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InitTusImportBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InitTusImportResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/tus": {
-      "options": {
-        "operationId": "NativeArchiveController_tusOptionsBase",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "post": {
-        "operationId": "NativeArchiveController_createTusUpload",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/native-archives/tus/{id}": {
-      "options": {
-        "operationId": "NativeArchiveController_tusOptionsUpload",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "head": {
-        "operationId": "NativeArchiveController_headTusUpload",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "NativeArchiveController_patchTusUpload",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/native-archives/tus/{id}/complete": {
-      "post": {
-        "operationId": "NativeArchiveController_completeTusImport",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompleteTusImportResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/live-training/{id}/dismiss-review": {
-      "patch": {
-        "operationId": "NativeArchiveController_dismissLiveTrainingReview",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/native-archives/courses/{id}/export": {
-      "post": {
-        "operationId": "NativeArchiveController_exportNativeCourse",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportNativeCourseResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/learning-paths/{id}/export": {
-      "post": {
-        "operationId": "NativeArchiveController_exportNativeLearningPath",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportNativeLearningPathResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/import": {
-      "post": {
-        "operationId": "NativeArchiveController_importNativeArchive",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "file"
-                ],
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportNativeArchiveResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/jobs/{id}": {
-      "get": {
-        "operationId": "NativeArchiveController_getNativeArchiveStatus",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetNativeArchiveStatusResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/jobs/{id}/download-url": {
-      "get": {
-        "operationId": "NativeArchiveController_getNativeArchiveDownloadUrl",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetNativeArchiveDownloadUrlResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/jobs/{id}/download": {
-      "get": {
-        "operationId": "NativeArchiveController_downloadNativeArchive",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
           }
         }
       }
@@ -20310,6 +20323,80 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LaunchScormAttemptResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scorm/runtime/preview": {
+      "get": {
+        "operationId": "ScormController_launchScormPreview",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "scoId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaunchScormPreviewResponse"
                 }
               }
             }
@@ -28303,9 +28390,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -28495,7 +28579,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -30047,9 +30130,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -30239,290 +30319,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
-              "certificateBackgroundImage",
-              "platformLogoS3Key",
-              "loginBackgroundImageS3Key",
-              "platformSimpleLogoS3Key",
-              "MFAEnforcedRoles",
-              "defaultCourseCurrency",
-              "inviteOnlyRegistration",
-              "primaryColor",
-              "contrastColor",
-              "backgroundColor",
-              "accentColor",
-              "unregisteredUserQAAccessibility",
-              "QAEnabled",
-              "unregisteredUserNewsAccessibility",
-              "newsEnabled",
-              "unregisteredUserArticlesAccessibility",
-              "articlesEnabled",
-              "learningPathsEnabled",
-              "ageLimit",
-              "loginPageFiles"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateEnforceSSOResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "modernCourseListEnabled": {
-                "type": "boolean"
-              },
-              "publicCoursePreviewEnabled": {
-                "type": "boolean"
-              },
-              "featuredCourseId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "courseDiscussionsEnabled": {
-                "type": "boolean"
-              },
-              "forumEnabled": {
-                "type": "boolean"
-              },
-              "gamificationEnabled": {
-                "type": "boolean"
-              },
-              "leaderboardsEnabled": {
-                "type": "boolean"
-              },
-              "leaderboardVisibility": {
-                "anyOf": [
-                  {
-                    "const": "closed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "public",
-                    "type": "string"
-                  }
-                ]
-              },
-              "calendarEnabled": {
-                "type": "boolean"
-              },
-              "liveTrainingEnabled": {
-                "type": "boolean"
-              },
-              "liveTrainingMaxParallelSessions": {
-                "minimum": 1,
-                "type": "number"
-              },
-              "trainerRoleUserCount": {
-                "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "certificateBackgroundImage": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "companyShortName": {
-                    "maxLength": 10,
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "loginBackgroundImageS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "platformSimpleLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "MFAEnforcedRoles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "defaultCourseCurrency": {
-                "anyOf": [
-                  {
-                    "const": "pln",
-                    "type": "string"
-                  },
-                  {
-                    "const": "eur",
-                    "type": "string"
-                  },
-                  {
-                    "const": "gbp",
-                    "type": "string"
-                  },
-                  {
-                    "const": "usd",
-                    "type": "string"
-                  }
-                ]
-              },
-              "inviteOnlyRegistration": {
-                "type": "boolean"
-              },
-              "primaryColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "contrastColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "backgroundColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "accentColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "unregisteredUserQAAccessibility": {
-                "type": "boolean"
-              },
-              "QAEnabled": {
-                "type": "boolean"
-              },
-              "unregisteredUserNewsAccessibility": {
-                "type": "boolean"
-              },
-              "newsEnabled": {
-                "type": "boolean"
-              },
-              "unregisteredUserArticlesAccessibility": {
-                "type": "boolean"
-              },
-              "articlesEnabled": {
-                "type": "boolean"
-              },
-              "learningPathsEnabled": {
-                "type": "boolean"
-              },
-              "ageLimit": {
-                "anyOf": [
-                  {
-                    "const": 13,
-                    "type": "number"
-                  },
-                  {
-                    "const": 16,
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "loginPageFiles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "modernCourseListEnabled",
-              "publicCoursePreviewEnabled",
-              "featuredCourseId",
-              "courseDiscussionsEnabled",
-              "forumEnabled",
-              "gamificationEnabled",
-              "leaderboardsEnabled",
-              "leaderboardVisibility",
-              "calendarEnabled",
-              "liveTrainingEnabled",
-              "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -30613,9 +30409,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -30805,7 +30598,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -30896,9 +30688,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -31088,7 +30877,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -31198,9 +30986,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -31390,7 +31175,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -31481,9 +31265,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -31673,7 +31454,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -31764,9 +31544,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -31956,7 +31733,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -32068,9 +31844,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -32260,7 +32033,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -32351,9 +32123,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -32543,7 +32312,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -32634,9 +32402,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -32826,7 +32591,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -32929,9 +32693,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -33121,7 +32882,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -33212,9 +32972,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -33404,7 +33161,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -33495,9 +33251,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -33687,7 +33440,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -33947,9 +33699,6 @@
               "trainerRoleUserCount": {
                 "type": "number"
               },
-              "enforceSSO": {
-                "type": "boolean"
-              },
               "certificateBackgroundImage": {
                 "anyOf": [
                   {
@@ -34139,7 +33888,6 @@
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -43061,6 +42809,25 @@
           "pagination"
         ]
       },
+      "ExportCourseAsScormResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "TransferCourseOwnershipBody": {
         "type": "object",
         "properties": {
@@ -43466,6 +43233,300 @@
             "required": [
               "currentAuthor",
               "possibleCandidates"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "InitTusImportBody": {
+        "type": "object",
+        "properties": {
+          "sizeBytes": {
+            "minimum": 1,
+            "maximum": 838860800,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sizeBytes"
+        ]
+      },
+      "InitTusImportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "uploadId": {
+                "type": "string"
+              },
+              "tusEndpoint": {
+                "type": "string"
+              },
+              "tusHeaders": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "string"
+                  }
+                }
+              },
+              "expiresAt": {
+                "type": "string"
+              },
+              "partSize": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "uploadId",
+              "tusEndpoint",
+              "tusHeaders",
+              "expiresAt",
+              "partSize"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CompleteTusImportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ExportNativeCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ExportNativeLearningPathResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ImportNativeArchiveResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetNativeArchiveStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "result": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "anyOf": [
+                          {
+                            "const": "course",
+                            "type": "string"
+                          },
+                          {
+                            "const": "learning-path",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "rootId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "alreadyExists": {
+                        "type": "boolean"
+                      },
+                      "createdCourseIds": {
+                        "type": "array",
+                        "items": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      },
+                      "reusedCourseIds": {
+                        "type": "array",
+                        "items": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "rootId"
+                    ]
+                  }
+                ]
+              },
+              "failedReason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "progress": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "stage": {
+                        "anyOf": [
+                          {
+                            "const": "collecting-content",
+                            "type": "string"
+                          },
+                          {
+                            "const": "copying-files",
+                            "type": "string"
+                          },
+                          {
+                            "const": "packaging",
+                            "type": "string"
+                          },
+                          {
+                            "const": "downloading",
+                            "type": "string"
+                          },
+                          {
+                            "const": "verifying",
+                            "type": "string"
+                          },
+                          {
+                            "const": "uploading-files",
+                            "type": "string"
+                          },
+                          {
+                            "const": "indexing",
+                            "type": "string"
+                          },
+                          {
+                            "const": "saving",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "percent": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "stage",
+                      "percent"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "jobId",
+              "state",
+              "result",
+              "failedReason",
+              "progress"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetNativeArchiveDownloadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "expiresInSeconds": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "url",
+              "expiresInSeconds"
             ]
           }
         },
@@ -73630,6 +73691,14 @@
                     {
                       "const": "live_training_ended",
                       "type": "string"
+                    },
+                    {
+                      "const": "quiz_attempt_graded",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading_digest",
+                      "type": "string"
                     }
                   ]
                 },
@@ -77996,6 +78065,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -78122,6 +78199,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -82305,6 +82390,14 @@
                         {
                           "const": "live_training_ended",
                           "type": "string"
+                        },
+                        {
+                          "const": "quiz_attempt_graded",
+                          "type": "string"
+                        },
+                        {
+                          "const": "quiz_grading_digest",
+                          "type": "string"
                         }
                       ]
                     },
@@ -82431,6 +82524,14 @@
                         },
                         {
                           "const": "live_training_ended",
+                          "type": "string"
+                        },
+                        {
+                          "const": "quiz_attempt_graded",
+                          "type": "string"
+                        },
+                        {
+                          "const": "quiz_grading_digest",
                           "type": "string"
                         }
                       ]
@@ -86639,6 +86740,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -86765,6 +86874,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -90946,6 +91063,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -91072,6 +91197,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -95253,6 +95386,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -95379,6 +95520,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -99451,6 +99600,14 @@
               {
                 "const": "live_training_ended",
                 "type": "string"
+              },
+              {
+                "const": "quiz_attempt_graded",
+                "type": "string"
+              },
+              {
+                "const": "quiz_grading_digest",
+                "type": "string"
               }
             ]
           },
@@ -103475,6 +103632,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -103601,6 +103766,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -107675,6 +107848,14 @@
                   {
                     "const": "live_training_ended",
                     "type": "string"
+                  },
+                  {
+                    "const": "quiz_attempt_graded",
+                    "type": "string"
+                  },
+                  {
+                    "const": "quiz_grading_digest",
+                    "type": "string"
                   }
                 ]
               },
@@ -111664,6 +111845,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -111790,6 +111979,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -116013,6 +116210,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -116139,6 +116344,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -120366,6 +120579,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -120492,6 +120713,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -124673,6 +124902,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -124799,6 +125036,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -128991,6 +129236,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -129117,6 +129370,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -133298,6 +133559,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -133424,6 +133693,14 @@
                       },
                       {
                         "const": "live_training_ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
                         "type": "string"
                       }
                     ]
@@ -141320,6 +141597,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -141614,6 +141899,14 @@
                                           {
                                             "const": "live_training_ended",
                                             "type": "string"
+                                          },
+                                          {
+                                            "const": "quiz_attempt_graded",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "quiz_grading_digest",
+                                            "type": "string"
                                           }
                                         ]
                                       },
@@ -141796,6 +142089,14 @@
                                                   },
                                                   {
                                                     "const": "live_training_ended",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "quiz_attempt_graded",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "quiz_grading_digest",
                                                     "type": "string"
                                                   }
                                                 ]
@@ -142265,6 +142566,14 @@
                                                   {
                                                     "const": "live_training_ended",
                                                     "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "quiz_attempt_graded",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "quiz_grading_digest",
+                                                    "type": "string"
                                                   }
                                                 ]
                                               },
@@ -142447,6 +142756,14 @@
                                                           },
                                                           {
                                                             "const": "live_training_ended",
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "const": "quiz_attempt_graded",
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "const": "quiz_grading_digest",
                                                             "type": "string"
                                                           }
                                                         ]
@@ -142888,6 +143205,14 @@
                     {
                       "const": "live_training_ended",
                       "type": "string"
+                    },
+                    {
+                      "const": "quiz_attempt_graded",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading_digest",
+                      "type": "string"
                     }
                   ]
                 },
@@ -143283,6 +143608,14 @@
                             {
                               "const": "live_training_ended",
                               "type": "string"
+                            },
+                            {
+                              "const": "quiz_attempt_graded",
+                              "type": "string"
+                            },
+                            {
+                              "const": "quiz_grading_digest",
+                              "type": "string"
                             }
                           ]
                         }
@@ -143570,6 +143903,14 @@
                     {
                       "const": "live_training_ended",
                       "type": "string"
+                    },
+                    {
+                      "const": "quiz_attempt_graded",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading_digest",
+                      "type": "string"
                     }
                   ]
                 },
@@ -143792,6 +144133,14 @@
                                               {
                                                 "const": "live_training_ended",
                                                 "type": "string"
+                                              },
+                                              {
+                                                "const": "quiz_attempt_graded",
+                                                "type": "string"
+                                              },
+                                              {
+                                                "const": "quiz_grading_digest",
+                                                "type": "string"
                                               }
                                             ]
                                           },
@@ -143974,6 +144323,14 @@
                                                       },
                                                       {
                                                         "const": "live_training_ended",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "quiz_attempt_graded",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "quiz_grading_digest",
                                                         "type": "string"
                                                       }
                                                     ]
@@ -144425,6 +144782,14 @@
                                     {
                                       "const": "live_training_ended",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_attempt_graded",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_grading_digest",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -144607,6 +144972,14 @@
                                             },
                                             {
                                               "const": "live_training_ended",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_attempt_graded",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_grading_digest",
                                               "type": "string"
                                             }
                                           ]
@@ -145319,6 +145692,14 @@
                                 {
                                   "const": "live_training_ended",
                                   "type": "string"
+                                },
+                                {
+                                  "const": "quiz_attempt_graded",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "quiz_grading_digest",
+                                  "type": "string"
                                 }
                               ]
                             }
@@ -145630,6 +146011,14 @@
                                     {
                                       "const": "live_training_ended",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_attempt_graded",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_grading_digest",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -145812,6 +146201,14 @@
                                             },
                                             {
                                               "const": "live_training_ended",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_attempt_graded",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_grading_digest",
                                               "type": "string"
                                             }
                                           ]
@@ -146259,6 +146656,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -146441,6 +146846,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -146910,6 +147323,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -147092,6 +147513,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -147569,6 +147998,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -147751,6 +148188,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -148220,6 +148665,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -148402,6 +148855,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -148879,6 +149340,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -149061,6 +149530,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -149530,6 +150007,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -149712,6 +150197,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -150186,6 +150679,14 @@
                                     {
                                       "const": "live_training_ended",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_attempt_graded",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "quiz_grading_digest",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -150368,6 +150869,14 @@
                                             },
                                             {
                                               "const": "live_training_ended",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_attempt_graded",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "quiz_grading_digest",
                                               "type": "string"
                                             }
                                           ]
@@ -150811,6 +151320,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -150993,6 +151510,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -151462,6 +151987,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -151644,6 +152177,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -152142,6 +152683,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -152324,6 +152873,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -152793,6 +153350,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -152975,6 +153540,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -153453,6 +154026,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -153635,6 +154216,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -154084,6 +154673,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -154266,6 +154863,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -154735,6 +155340,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -154917,6 +155530,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -155394,6 +156015,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -155576,6 +156205,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -156045,6 +156682,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -156227,6 +156872,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -156704,6 +157357,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -156886,6 +157547,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -157355,6 +158024,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -157537,6 +158214,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -158014,6 +158699,14 @@
                                         {
                                           "const": "live_training_ended",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_attempt_graded",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "quiz_grading_digest",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -158196,6 +158889,14 @@
                                                 },
                                                 {
                                                   "const": "live_training_ended",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
                                                   "type": "string"
                                                 }
                                               ]
@@ -158665,6 +159366,14 @@
                                                 {
                                                   "const": "live_training_ended",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_attempt_graded",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "quiz_grading_digest",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -158847,6 +159556,14 @@
                                                         },
                                                         {
                                                           "const": "live_training_ended",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_attempt_graded",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "quiz_grading_digest",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -159294,6 +160011,14 @@
                     {
                       "const": "live_training_ended",
                       "type": "string"
+                    },
+                    {
+                      "const": "quiz_attempt_graded",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz_grading_digest",
+                      "type": "string"
                     }
                   ]
                 },
@@ -159591,6 +160316,14 @@
                       {
                         "const": "live_training_ended",
                         "type": "string"
+                      },
+                      {
+                        "const": "quiz_attempt_graded",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz_grading_digest",
+                        "type": "string"
                       }
                     ]
                   },
@@ -159815,6 +160548,14 @@
                                 },
                                 {
                                   "const": "live_training_ended",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "quiz_attempt_graded",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "quiz_grading_digest",
                                   "type": "string"
                                 }
                               ]
@@ -160513,300 +161254,6 @@
             },
             "required": [
               "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "InitTusImportBody": {
-        "type": "object",
-        "properties": {
-          "sizeBytes": {
-            "minimum": 1,
-            "maximum": 838860800,
-            "type": "integer"
-          }
-        },
-        "required": [
-          "sizeBytes"
-        ]
-      },
-      "InitTusImportResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "uploadId": {
-                "type": "string"
-              },
-              "tusEndpoint": {
-                "type": "string"
-              },
-              "tusHeaders": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "string"
-                  }
-                }
-              },
-              "expiresAt": {
-                "type": "string"
-              },
-              "partSize": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "uploadId",
-              "tusEndpoint",
-              "tusHeaders",
-              "expiresAt",
-              "partSize"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "CompleteTusImportResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "jobId": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "jobId"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "ExportNativeCourseResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "jobId": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "jobId"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "ExportNativeLearningPathResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "jobId": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "jobId"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "ImportNativeArchiveResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "jobId": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "jobId"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetNativeArchiveStatusResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "jobId": {
-                "type": "string"
-              },
-              "state": {
-                "type": "string"
-              },
-              "result": {
-                "anyOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "anyOf": [
-                          {
-                            "const": "course",
-                            "type": "string"
-                          },
-                          {
-                            "const": "learning-path",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "rootId": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "alreadyExists": {
-                        "type": "boolean"
-                      },
-                      "createdCourseIds": {
-                        "type": "array",
-                        "items": {
-                          "format": "uuid",
-                          "type": "string"
-                        }
-                      },
-                      "reusedCourseIds": {
-                        "type": "array",
-                        "items": {
-                          "format": "uuid",
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "rootId"
-                    ]
-                  }
-                ]
-              },
-              "failedReason": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "progress": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "stage": {
-                        "anyOf": [
-                          {
-                            "const": "collecting-content",
-                            "type": "string"
-                          },
-                          {
-                            "const": "copying-files",
-                            "type": "string"
-                          },
-                          {
-                            "const": "packaging",
-                            "type": "string"
-                          },
-                          {
-                            "const": "downloading",
-                            "type": "string"
-                          },
-                          {
-                            "const": "verifying",
-                            "type": "string"
-                          },
-                          {
-                            "const": "uploading-files",
-                            "type": "string"
-                          },
-                          {
-                            "const": "indexing",
-                            "type": "string"
-                          },
-                          {
-                            "const": "saving",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "percent": {
-                        "minimum": 0,
-                        "maximum": 100,
-                        "type": "integer"
-                      }
-                    },
-                    "required": [
-                      "stage",
-                      "percent"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "jobId",
-              "state",
-              "result",
-              "failedReason",
-              "progress"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetNativeArchiveDownloadUrlResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "url": {
-                "type": "string"
-              },
-              "expiresInSeconds": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "url",
-              "expiresInSeconds"
             ]
           }
         },
@@ -175016,6 +175463,90 @@
             },
             "required": [
               "attemptId",
+              "packageId",
+              "scoId",
+              "lessonId",
+              "courseId",
+              "launchUrl",
+              "scoTitle",
+              "navigation",
+              "runtime"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "LaunchScormPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "packageId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "scoId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "lessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "launchUrl": {
+                "type": "string"
+              },
+              "scoTitle": {
+                "type": "string"
+              },
+              "navigation": {
+                "type": "object",
+                "properties": {
+                  "previousScoId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "nextScoId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "previousScoId",
+                  "nextScoId"
+                ]
+              },
+              "runtime": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [
               "packageId",
               "scoId",
               "lessonId",

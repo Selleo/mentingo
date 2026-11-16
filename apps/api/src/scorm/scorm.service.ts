@@ -27,6 +27,7 @@ import { load as loadHtml } from "cheerio";
 import * as unzipper from "unzipper";
 
 import { DatabasePg } from "src/common";
+import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { CourseService } from "src/courses/course.service";
 import { FileService } from "src/file/file.service";
@@ -72,7 +73,7 @@ import {
   SCORM_TUS_VERSION,
 } from "./scorm-tus-upload.constants";
 
-import type { ScormContentGrant } from "./content/scorm-content.types";
+import type { ScormContentAccessScope, ScormContentGrant } from "./content/scorm-content.types";
 import type { InitScormImportBody } from "./schemas/scormImport.schema";
 import type { ScormTusUploadState } from "./scorm-tus-upload.types";
 import type { ScormCompletionStatus, ScormPackageStatus, ScormSuccessStatus } from "@repo/shared";
@@ -839,19 +840,7 @@ export class ScormService {
   }
 
   async launchRuntime({ lessonId, scoId, language, currentUser }: ScormRuntimeLaunchParams) {
-    const launchableSco = await this.scormRepository.findLaunchableSco({
-      lessonId,
-      scoId,
-      language,
-    });
-
-    if (!launchableSco || launchableSco.lessonType !== LESSON_TYPES.SCORM) {
-      throw new NotFoundException("adminScorm.errors.runtime.launchNotFound");
-    }
-
-    if (launchableSco.standard !== SCORM_STANDARD.SCORM_1_2) {
-      throw new BadRequestException("adminScorm.errors.runtime.unsupportedStandard");
-    }
+    const launchableSco = await this.findLaunchableScorm12Sco({ lessonId, scoId, language });
 
     await this.studentLessonProgressService.markLessonAsStarted(
       launchableSco.lessonId,
@@ -897,6 +886,51 @@ export class ScormService {
       navigation,
       runtime: this.buildInitialRuntimeState(runtimeState?.rawCmiJson, !isNewAttempt),
     };
+  }
+
+  /** Launches a lesson for preview: no attempt, progress, or activity is recorded. */
+  async launchPreviewRuntime({ lessonId, scoId, language, currentUser }: ScormRuntimeLaunchParams) {
+    const launchableSco = await this.findLaunchableScorm12Sco({ lessonId, scoId, language });
+
+    await this.assertLessonPreviewAccess(
+      launchableSco.packageId,
+      launchableSco.lessonId,
+      currentUser,
+    );
+
+    const navigation = await this.scormRepository.findScoNavigation({
+      packageId: launchableSco.packageId,
+      lessonId: launchableSco.lessonId,
+      scoId: launchableSco.scoId,
+    });
+
+    return {
+      packageId: launchableSco.packageId,
+      scoId: launchableSco.scoId,
+      lessonId: launchableSco.lessonId,
+      courseId: launchableSco.courseId,
+      contentLaunchPath: this.buildContentLaunchPath(
+        launchableSco.extractedFilesReference,
+        launchableSco.launchPath,
+      ),
+      scoTitle: launchableSco.scoTitle,
+      navigation,
+      runtime: this.buildInitialRuntimeState(null, false),
+    };
+  }
+
+  private async findLaunchableScorm12Sco(params: Omit<ScormRuntimeLaunchParams, "currentUser">) {
+    const launchableSco = await this.scormRepository.findLaunchableSco(params);
+
+    if (!launchableSco || launchableSco.lessonType !== LESSON_TYPES.SCORM) {
+      throw new NotFoundException("adminScorm.errors.runtime.launchNotFound");
+    }
+
+    if (launchableSco.standard !== SCORM_STANDARD.SCORM_1_2) {
+      throw new BadRequestException("adminScorm.errors.runtime.unsupportedStandard");
+    }
+
+    return launchableSco;
   }
 
   async commitRuntime(params: ScormRuntimeCommitParams | ScormRuntimeFinishParams) {
@@ -1036,31 +1070,31 @@ export class ScormService {
     ) {
       throw new NotFoundException("adminScorm.errors.runtime.contentNotFound");
     }
-    await this.assertPackageContentAccess(grant.packageId, grant.actor);
+    await this.assertContentAccess(grant);
   }
 
-  async getContentGrantDetails(packageId: UUIDType, currentUser: CurrentUserType) {
-    await this.assertPackageContentAccess(packageId, currentUser);
-    const scormPackage = await this.scormRepository.findPackageById(packageId);
+  async getContentGrantDetails(scope: ScormContentAccessScope) {
+    await this.assertContentAccess(scope);
+    const scormPackage = await this.scormRepository.findPackageById(scope.packageId);
     if (!scormPackage || scormPackage.status !== SCORM_PACKAGE_STATUS.READY) {
       throw new NotFoundException("adminScorm.errors.runtime.contentNotFound");
     }
     return { extractedFilesReference: scormPackage.extractedFilesReference };
   }
 
-  async getContentFile(params: {
-    packageId: UUIDType;
-    relativePath: string;
-    currentUser: CurrentUserType;
-    range?: string;
-  }) {
+  async getContentFile(
+    params: ScormContentAccessScope & {
+      relativePath: string;
+      range?: string;
+    },
+  ) {
     const scormPackage = await this.scormRepository.findPackageById(params.packageId);
 
     if (!scormPackage || scormPackage.status !== SCORM_PACKAGE_STATUS.READY) {
       throw new NotFoundException("adminScorm.errors.runtime.contentNotFound");
     }
 
-    await this.assertPackageContentAccess(params.packageId, params.currentUser);
+    await this.assertContentAccess(params);
 
     const objectReference = this.buildExtractedObjectReference(
       scormPackage.extractedFilesReference,
@@ -2060,6 +2094,43 @@ export class ScormService {
       default:
         return SCORM_SUCCESS_STATUS.UNKNOWN;
     }
+  }
+
+  private async assertContentAccess({
+    packageId,
+    actor,
+    previewLessonId,
+  }: ScormContentAccessScope) {
+    if (previewLessonId) return this.assertLessonPreviewAccess(packageId, previewLessonId, actor);
+
+    return this.assertPackageContentAccess(packageId, actor);
+  }
+
+  /**
+   * Preview is open to course editors (`COURSE_UPDATE_OWN` only for their own courses), Learn-mode
+   * users, and signed-in users eligible for the public free-course preview.
+   */
+  private async assertLessonPreviewAccess(
+    packageId: UUIDType,
+    lessonId: UUIDType,
+    currentUser: CurrentUserType,
+  ) {
+    const previewLesson = await this.scormRepository.findPackageLessonCourseAuthor(
+      packageId,
+      lessonId,
+    );
+
+    if (!previewLesson) throw new NotFoundException("adminScorm.errors.runtime.contentNotFound");
+
+    if (
+      currentUser.permissions.includes(PERMISSIONS.LEARNING_MODE_USE) ||
+      canUpdateCourseByAuthor(currentUser, previewLesson.authorId) ||
+      (await this.scormRepository.hasPublicCoursePreviewAccess(lessonId, currentUser.userId))
+    ) {
+      return;
+    }
+
+    throw new ForbiddenException("adminScorm.errors.runtime.contentForbidden");
   }
 
   private async assertPackageContentAccess(packageId: UUIDType, currentUser: CurrentUserType) {

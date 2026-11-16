@@ -66,6 +66,23 @@ function arrangeExport({
     copyRememberedExport: jest.fn().mockResolvedValue(hasRememberedExport),
     rememberExport: jest.fn().mockResolvedValue(undefined),
   };
+  const preparedScormExport = {
+    snapshot: { id: COURSE_ID },
+    fingerprint: "scorm-fingerprint",
+    filename: "sales-course-scorm-12.zip",
+  };
+  const scormPackageCleanup = jest.fn().mockResolvedValue(undefined);
+  const courseScormExportService = {
+    prepareExport: jest.fn(async () => {
+      expect(tenantContextActive).toBe(true);
+      return preparedScormExport;
+    }),
+    buildPackage: jest.fn(async () => ({
+      stream: Readable.from(Buffer.from("scorm zip")),
+      estimatedByteLength: 9,
+      cleanup: scormPackageCleanup,
+    })),
+  };
   const service = new NativeArchiveJobFulfillmentService(
     s3Service as never,
     tenantDbRunnerService as never,
@@ -73,6 +90,7 @@ function arrangeExport({
     {} as never,
     nativeArchiveExportReuseService as never,
     { publish } as never,
+    courseScormExportService as never,
   );
 
   const progress = { enterStage: jest.fn(), reportStageWork: jest.fn() };
@@ -87,8 +105,25 @@ function arrangeExport({
       progress,
     );
 
+  const exportScormPackage = () =>
+    service.fulfillArchiveJob(
+      "scorm-export-job",
+      {
+        action: NATIVE_ARCHIVE_JOB_ACTION.EXPORT_COURSE_SCORM,
+        rootId: COURSE_ID,
+        language: "en",
+        tenantOrigin: "https://tenant.local",
+        actor: ACTOR,
+      },
+      progress,
+    );
+
   return {
     exportLearningPath,
+    exportScormPackage,
+    courseScormExportService,
+    preparedScormExport,
+    scormPackageCleanup,
     progress,
     openVideo,
     s3Service,
@@ -100,6 +135,50 @@ function arrangeExport({
 const EXPORT_KEY_PATTERN = new RegExp(`^${ACTOR.tenantId}/native-archive/exports/`);
 
 describe("NativeArchiveJobFulfillmentService", () => {
+  it("builds a SCORM package in the tenant context, uploads it, and remembers it for reuse", async () => {
+    const {
+      exportScormPackage,
+      courseScormExportService,
+      preparedScormExport,
+      scormPackageCleanup,
+      s3Service,
+      nativeArchiveExportReuseService,
+    } = arrangeExport({ hasRememberedExport: false });
+
+    await expect(exportScormPackage()).resolves.toMatchObject({
+      key: expect.stringMatching(EXPORT_KEY_PATTERN),
+      kind: "course",
+      rootId: COURSE_ID,
+      filename: preparedScormExport.filename,
+    });
+
+    expect(courseScormExportService.prepareExport).toHaveBeenCalledWith(COURSE_ID, ACTOR, "en");
+    expect(courseScormExportService.buildPackage).toHaveBeenCalledWith(
+      preparedScormExport,
+      expect.objectContaining({ tenantOrigin: "https://tenant.local" }),
+    );
+    expect(s3Service.uploadStreamMultipart).toHaveBeenCalledTimes(1);
+    expect(scormPackageCleanup).toHaveBeenCalledTimes(1);
+    expect(nativeArchiveExportReuseService.rememberExport).toHaveBeenCalledWith(
+      ACTOR.tenantId,
+      preparedScormExport.fingerprint,
+      expect.stringMatching(EXPORT_KEY_PATTERN),
+    );
+  });
+
+  it("copies a remembered SCORM package instead of building it again", async () => {
+    const { exportScormPackage, courseScormExportService, s3Service } = arrangeExport({
+      hasRememberedExport: true,
+    });
+
+    await expect(exportScormPackage()).resolves.toMatchObject({
+      filename: "sales-course-scorm-12.zip",
+    });
+
+    expect(courseScormExportService.buildPackage).not.toHaveBeenCalled();
+    expect(s3Service.uploadStreamMultipart).not.toHaveBeenCalled();
+  });
+
   it("stages learning path files while the tenant context is active", async () => {
     const { exportLearningPath, openVideo, s3Service, tenantDbRunnerService } = arrangeExport({
       hasRememberedExport: false,
@@ -242,6 +321,7 @@ describe("NativeArchiveJobFulfillmentService", () => {
       {} as never,
       { copyRememberedExport: async () => false, rememberExport: async () => undefined } as never,
       { publish: async () => undefined } as never,
+      {} as never,
     );
 
     await expect(
@@ -264,6 +344,7 @@ describe("NativeArchiveJobFulfillmentService", () => {
       {} as never,
       {} as never,
       outboxPublisher as never,
+      {} as never,
     );
 
     await service

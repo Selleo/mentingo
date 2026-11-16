@@ -54,7 +54,7 @@ describe("legacy organization email switches migrate to automation state (e2e)",
       await db.insert(settings).values({ settings: settingsToJSONBuildObject(legacySettings) });
       await provisioning.ensureTenantDefaultAutomations();
       const defaults = await db.select().from(automations);
-      expect(defaults).toHaveLength(22);
+      expect(defaults).toHaveLength(24);
       expect(defaults.find((item) => item.builtInKey === "user_first_login")?.status).toBe(
         "enabled",
       );
@@ -74,7 +74,7 @@ describe("legacy organization email switches migrate to automation state (e2e)",
         .where(eq(automations.id, firstLogin.id));
       await provisioning.ensureTenantDefaultAutomations();
       const retained = await db.select().from(automations);
-      expect(retained).toHaveLength(22);
+      expect(retained).toHaveLength(24);
       expect(retained.find((item) => item.id === firstLogin.id)?.status).toBe("archived");
     });
   });

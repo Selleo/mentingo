@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useLocation, useSearchParams } from "@remix-run/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -96,15 +96,11 @@ export default function LoginPage() {
   const { mutateAsync: loginUser } = useLoginUser();
 
   const {
-    data: {
-      enforceSSO: isSSOEnforced,
-      inviteOnlyRegistration: inviteOnlyRegistration,
-      loginBackgroundImageS3Key,
-    },
+    data: { inviteOnlyRegistration: inviteOnlyRegistration, loginBackgroundImageS3Key },
     isLoading: isGlobalSettingsLoading,
   } = useGlobalSettingsSuspense();
 
-  const isPasswordLoginVisible = !isSSOEnforced && Boolean(loginMethods?.password);
+  const isPasswordLoginVisible = Boolean(loginMethods?.password);
 
   useEffect(() => {
     if (magicLinkToken && !isGlobalSettingsLoading && !hasTriggeredMagicLink.current) {
@@ -120,19 +116,10 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginBody>({ resolver: zodResolver(loginSchema(t)) });
 
-  const isAnyProviderEnabled = useMemo(
-    () =>
-      isGoogleOAuthEnabled ||
-      isMicrosoftOAuthEnabled ||
-      isSlackOAuthEnabled ||
-      isEntraIdOAuthEnabled,
-    [isGoogleOAuthEnabled, isMicrosoftOAuthEnabled, isSlackOAuthEnabled, isEntraIdOAuthEnabled],
-  );
-
   const loginResources = loginPageFiles?.resources ?? [];
 
   const onSubmit = (data: LoginBody) => {
-    if (isSSOEnforced && isAnyProviderEnabled) return;
+    if (!loginMethods?.password) return;
 
     loginUser({ data });
   };

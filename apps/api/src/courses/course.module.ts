@@ -17,6 +17,7 @@ import { LearningTimeModule } from "src/learning-time/learning-time.module";
 import { LessonModule } from "src/lesson/lesson.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
+import { NativeArchiveModule } from "src/native-archive/native-archive.module";
 import { S3Module } from "src/s3/s3.module";
 import { SettingsModule } from "src/settings/settings.module";
 import { StatisticsModule } from "src/statistics/statistics.module";
@@ -65,10 +66,7 @@ import { CourseDetailRepository } from "./overview/course-detail.repository";
 import { CourseDetailService } from "./overview/course-detail.service";
 import { CourseAuthorRepository } from "./ownership/course-author.repository";
 import { CourseAuthorService } from "./ownership/course-author.service";
-import { CourseScormAssetsService } from "./scorm-export/course-scorm-assets.service";
-import { CourseScormExportService } from "./scorm-export/course-scorm-export.service";
-import { CourseScormSnapshotRepository } from "./scorm-export/course-scorm-snapshot.repository";
-import { CourseScormSnapshotService } from "./scorm-export/course-scorm-snapshot.service";
+import { CourseScormExportModule } from "./scorm-export/course-scorm-export.module";
 import { CourseStatisticsRepository } from "./statistics/course-statistics.repository";
 import { CourseStatisticsService } from "./statistics/course-statistics.service";
 
@@ -76,6 +74,8 @@ import { CourseStatisticsService } from "./statistics/course-statistics.service"
   imports: [
     CourseTransferModule,
     CourseDurationModule,
+    CourseScormExportModule,
+    NativeArchiveModule,
     BunnyStreamModule,
     FileModule,
     StatisticsModule,
@@ -97,10 +97,6 @@ import { CourseStatisticsService } from "./statistics/course-statistics.service"
   controllers: [CourseController],
   providers: [
     CourseService,
-    CourseScormAssetsService,
-    CourseScormExportService,
-    CourseScormSnapshotRepository,
-    CourseScormSnapshotService,
     CourseFeaturePolicyService,
     CourseDuplicationQueueService,
     CourseDuplicationRepository,

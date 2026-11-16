@@ -13,6 +13,10 @@ import { getMagicLinkEmailTranslations } from "./translations/magicLink";
 import { getNewUserEmailTranslations } from "./translations/newUser";
 import { getOverdueCoursesEmailTranslations } from "./translations/overdueCourses";
 import { getPasswordRecoveryEmailTranslations } from "./translations/passwordRecovery";
+import {
+  getQuizAttemptGradedEmailTranslations,
+  getQuizGradingDigestEmailTranslations,
+} from "./translations/quizGrading";
 import { getUserAssignedToCourseEmailTranslations } from "./translations/userAssignedToCourse";
 import { getUserFinishedChapterEmailTranslations } from "./translations/userFinishedChapter";
 import { getUserFinishedCourseEmailTranslations } from "./translations/userFinishedCourse";
@@ -511,6 +515,66 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       buttonText: getLiveTrainingEmailButtonText(language),
     }),
     buttonUrl: "{{ course_link }}",
+  }),
+  createEmailTemplateDefinition({
+    event: EMAIL_TEMPLATE_EVENTS.QUIZ_ATTEMPT_GRADED,
+    name: EMAIL_TEMPLATE_NAMES.QUIZ_ATTEMPT_GRADED,
+    description: "Sent when a reviewer grades a learner's quiz attempt.",
+    sourceTemplate: "QuizAttemptGradedEmail",
+    subject: buildNormalizedLocalizedSubjectTemplates("quizAttemptGradedEmail"),
+    variables: [
+      defineEmailTemplateVariable("course_name", "Course name", "text", "Leadership essentials", {
+        required: true,
+      }),
+      defineEmailTemplateVariable("lesson_name", "Lesson name", "text", "Final quiz", {
+        required: true,
+      }),
+      defineEmailTemplateVariable("score", "Score", "number", 80, { required: true }),
+      defineEmailTemplateVariable(
+        "lesson_link",
+        "Lesson link",
+        "url",
+        "https://example.com/course/leadership/lesson/final-quiz",
+        { required: true },
+      ),
+    ],
+    getContent: (language) =>
+      getQuizAttemptGradedEmailTranslations(
+        language,
+        "{{ lesson_name }}",
+        "{{ course_name }}",
+        "{{ score }}",
+      ),
+    buttonUrl: "{{ lesson_link }}",
+  }),
+  createEmailTemplateDefinition({
+    event: EMAIL_TEMPLATE_EVENTS.QUIZ_GRADING_DIGEST,
+    name: EMAIL_TEMPLATE_NAMES.QUIZ_GRADING_DIGEST,
+    description: "Sent daily to reviewers when new quiz answers are waiting for grading.",
+    sourceTemplate: "QuizGradingDigestEmail",
+    subject: buildNormalizedLocalizedSubjectTemplates("quizGradingDigestEmail"),
+    variables: [
+      defineEmailTemplateVariable("new_answers_count", "New answers", "number", 3, {
+        required: true,
+      }),
+      defineEmailTemplateVariable("pending_answers_count", "Answers waiting", "number", 7, {
+        required: true,
+      }),
+      defineEmailTemplateVariable(
+        "grading_queue_link",
+        "Grading queue link",
+        "url",
+        "https://example.com/quiz-grading",
+        { required: true },
+      ),
+    ],
+    getContent: (language) =>
+      getQuizGradingDigestEmailTranslations(
+        language,
+        "{{ new_answers_count }}",
+        "{{ pending_answers_count }}",
+      ),
+    buttonUrl: "{{ grading_queue_link }}",
   }),
   createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.ANNOUNCEMENT,

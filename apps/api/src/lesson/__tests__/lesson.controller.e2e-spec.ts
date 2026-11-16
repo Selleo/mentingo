@@ -26,7 +26,6 @@ import {
   type AssessmentScoringMode,
   type SupportedLanguages,
 } from "@repo/shared";
-import AdmZip from "adm-zip";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
@@ -79,6 +78,7 @@ import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 import { waitForOutbox } from "../../../test/helpers/wait-for-outbox";
+import { exportCourseAsScormPackage } from "../../courses/__tests__/course-scorm-export.e2e-utils";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
@@ -2317,13 +2317,8 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         thumbnailS3Key: null,
       });
 
-      const response = await request(app.getHttpServer())
-        .post(`/api/course/${courseId}/scorm-export?language=en`)
-        .set("Cookie", await cookieFor(admin, app))
-        .responseType("arraybuffer")
-        .expect(201);
-
-      const courseJson = new AdmZip(response.body).getEntry("data/course.json");
+      const zip = await exportCourseAsScormPackage(app, courseId, await cookieFor(admin, app));
+      const courseJson = zip.getEntry("data/course.json");
       if (!courseJson) throw new Error("SCORM package has no course.json");
 
       const [question] = JSON.parse(courseJson.getData().toString("utf8")).lessons[lesson.id]

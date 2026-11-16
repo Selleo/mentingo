@@ -31,43 +31,6 @@ const expectSwitchState = async (locator: Locator, checked: boolean) => {
   }
 };
 
-test("admin can toggle SSO enforcement when OAuth is enabled and the setting persists", async ({
-  apiClient,
-  cleanup,
-  withWorkerPage,
-}) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const originalSettings = await getGlobalSettings(apiClient);
-
-    cleanup.add(async () => {
-      const currentSettings = await getGlobalSettings(apiClient);
-      if (currentSettings.enforceSSO !== originalSettings.enforceSSO) {
-        await apiClient.api.settingsControllerUpdateEnforceSso();
-      }
-    });
-
-    await openOrganizationSettings(page);
-
-    const card = page.getByTestId(SETTINGS_PAGE_HANDLES.SSO_ENFORCEMENT_CARD);
-    const isSSOCardVisible = await card.isVisible({ timeout: 3_000 }).catch(() => false);
-    test.skip(!isSSOCardVisible, "OAuth is not enabled for this E2E environment.");
-
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.SSO_ENFORCEMENT_SWITCH).click();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.SSO_ENFORCEMENT_SAVE).click();
-
-    await expect
-      .poll(async () => (await getGlobalSettings(apiClient)).enforceSSO)
-      .toBe(!originalSettings.enforceSSO);
-
-    await page.reload();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB).click();
-    await expectSwitchState(
-      page.getByTestId(SETTINGS_PAGE_HANDLES.SSO_ENFORCEMENT_SWITCH),
-      !originalSettings.enforceSSO,
-    );
-  });
-});
-
 test("admin can toggle invite-only registration and the setting persists", async ({
   apiClient,
   cleanup,

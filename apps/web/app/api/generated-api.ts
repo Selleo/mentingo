@@ -487,7 +487,6 @@ export interface GetPublicGlobalSettingsResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -774,56 +773,6 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
-    certificateBackgroundImage: string | null;
-    companyInformation?: {
-      companyName?: string;
-      /** @maxLength 10 */
-      companyShortName?: string;
-      registeredAddress?: string;
-      taxNumber?: string;
-      emailAddress?: string;
-      courtRegisterNumber?: string;
-    };
-    platformLogoS3Key: string | null;
-    loginBackgroundImageS3Key: string | null;
-    platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: string[];
-    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
-    inviteOnlyRegistration: boolean;
-    primaryColor: string | null;
-    contrastColor: string | null;
-    backgroundColor: string | null;
-    accentColor: string | null;
-    unregisteredUserQAAccessibility: boolean;
-    QAEnabled: boolean;
-    unregisteredUserNewsAccessibility: boolean;
-    newsEnabled: boolean;
-    unregisteredUserArticlesAccessibility: boolean;
-    articlesEnabled: boolean;
-    learningPathsEnabled: boolean;
-    ageLimit: 13 | 16 | null;
-    loginPageFiles: string[];
-  };
-}
-
-export interface UpdateEnforceSSOResponse {
-  data: {
-    unregisteredUserCoursesAccessibility: boolean;
-    modernCourseListEnabled: boolean;
-    publicCoursePreviewEnabled: boolean;
-    featuredCourseId: string | null;
-    courseDiscussionsEnabled: boolean;
-    forumEnabled: boolean;
-    gamificationEnabled: boolean;
-    leaderboardsEnabled: boolean;
-    leaderboardVisibility: "closed" | "public";
-    calendarEnabled: boolean;
-    liveTrainingEnabled: boolean;
-    /** @min 1 */
-    liveTrainingMaxParallelSessions: number;
-    trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -872,7 +821,6 @@ export interface UpdateModernCourseListEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -921,7 +869,6 @@ export interface UpdatePublicCoursePreviewEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -974,7 +921,6 @@ export interface UpdateFeaturedCourseResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1023,7 +969,6 @@ export interface UpdateCourseDiscussionsEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1072,7 +1017,6 @@ export interface UpdateForumEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1126,7 +1070,6 @@ export interface UpdateLeaderboardSettingsResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1175,7 +1118,6 @@ export interface UpdateCalendarEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1224,7 +1166,6 @@ export interface UpdateLiveTrainingEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1278,7 +1219,6 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1327,7 +1267,6 @@ export interface UpdateLearningPathsEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1376,7 +1315,6 @@ export interface UpdateGamificationEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1456,7 +1394,6 @@ export interface UpdateColorSchemaResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -3303,6 +3240,12 @@ export interface GetCourseStudentsAiMentorResultsResponse {
   appliedFilters?: object;
 }
 
+export interface ExportCourseAsScormResponse {
+  data: {
+    jobId: string;
+  };
+}
+
 export interface TransferCourseOwnershipBody {
   /** @format uuid */
   courseId: string;
@@ -3396,6 +3339,87 @@ export interface GetCourseOwnershipResponse {
       name: string;
       email: string;
     }[];
+  };
+}
+
+export interface InitTusImportBody {
+  /**
+   * @min 1
+   * @max 838860800
+   */
+  sizeBytes: number;
+}
+
+export interface InitTusImportResponse {
+  data: {
+    uploadId: string;
+    tusEndpoint: string;
+    tusHeaders: object;
+    expiresAt: string;
+    partSize: number;
+  };
+}
+
+export interface CompleteTusImportResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface ExportNativeCourseResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface ExportNativeLearningPathResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface ImportNativeArchiveResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface GetNativeArchiveStatusResponse {
+  data: {
+    jobId: string;
+    state: string;
+    result: null | {
+      kind: "course" | "learning-path";
+      /** @format uuid */
+      rootId: string;
+      alreadyExists?: boolean;
+      createdCourseIds?: string[];
+      reusedCourseIds?: string[];
+    };
+    failedReason: string | null;
+    progress: {
+      stage:
+        | "collecting-content"
+        | "copying-files"
+        | "packaging"
+        | "downloading"
+        | "verifying"
+        | "uploading-files"
+        | "indexing"
+        | "saving";
+      /**
+       * @min 0
+       * @max 100
+       */
+      percent: number;
+    } | null;
+  };
+}
+
+export interface GetNativeArchiveDownloadUrlResponse {
+  data: {
+    url: string;
+    expiresInSeconds: number;
   };
 }
 
@@ -9606,7 +9630,9 @@ export interface ListEmailTemplateEventsResponse {
       | "announcement"
       | "live_training_started"
       | "live_training_reminder"
-      | "live_training_ended";
+      | "live_training_ended"
+      | "quiz_attempt_graded"
+      | "quiz_grading_digest";
     label: string;
     description: string;
     recipientPolicy: string;
@@ -10655,6 +10681,8 @@ export interface DuplicateEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -10688,6 +10716,8 @@ export interface DuplicateEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -11696,6 +11726,8 @@ export interface ListEmailTemplatesResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -11729,6 +11761,8 @@ export interface ListEmailTemplatesResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -12743,6 +12777,8 @@ export interface GetBuiltInEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -12776,6 +12812,8 @@ export interface GetBuiltInEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -13784,6 +13822,8 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -13817,6 +13857,8 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -14825,6 +14867,8 @@ export interface GetEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -14858,6 +14902,8 @@ export interface GetEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -15850,7 +15896,9 @@ export interface CreateEmailTemplateBody {
     | "announcement"
     | "live_training_started"
     | "live_training_reminder"
-    | "live_training_ended";
+    | "live_training_ended"
+    | "quiz_attempt_graded"
+    | "quiz_grading_digest";
   populateEventTags?: boolean;
   /** @maxItems 100 */
   placeholders?: {
@@ -16850,6 +16898,8 @@ export interface CreateEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -16883,6 +16933,8 @@ export interface CreateEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -17877,6 +17929,8 @@ export interface UpdateEmailTemplateBody {
         | "live_training_started"
         | "live_training_reminder"
         | "live_training_ended"
+        | "quiz_attempt_graded"
+        | "quiz_grading_digest"
       )
     | null;
   name?: {
@@ -18875,6 +18929,8 @@ export interface UpdateEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -18908,6 +18964,8 @@ export interface UpdateEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -19921,6 +19979,8 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -19954,6 +20014,8 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -20969,6 +21031,8 @@ export interface PublishEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -21002,6 +21066,8 @@ export interface PublishEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -22010,6 +22076,8 @@ export interface ArchiveEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -22043,6 +22111,8 @@ export interface ArchiveEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -23055,6 +23125,8 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -23088,6 +23160,8 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -24096,6 +24170,8 @@ export interface RestoreEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     event?:
@@ -24129,6 +24205,8 @@ export interface RestoreEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @maxItems 100 */
@@ -26075,6 +26153,8 @@ export interface PreviewEmailTemplateResponse {
           | "live_training_started"
           | "live_training_reminder"
           | "live_training_ended"
+          | "quiz_attempt_graded"
+          | "quiz_grading_digest"
         )
       | null;
     /** @default "en" */
@@ -26156,6 +26236,8 @@ export interface ListAutomationsResponse {
                     | "live_training_started"
                     | "live_training_reminder"
                     | "live_training_ended"
+                    | "quiz_attempt_graded"
+                    | "quiz_grading_digest"
                   )
                 | null;
             };
@@ -26203,7 +26285,9 @@ export interface ListAutomationsResponse {
                           | "announcement"
                           | "live_training_started"
                           | "live_training_reminder"
-                          | "live_training_ended";
+                          | "live_training_ended"
+                          | "quiz_attempt_graded"
+                          | "quiz_grading_digest";
                       }
                     | {
                         type: "custom";
@@ -26314,6 +26398,8 @@ export interface ListAutomationsResponse {
                       | "live_training_started"
                       | "live_training_reminder"
                       | "live_training_ended"
+                      | "quiz_attempt_graded"
+                      | "quiz_grading_digest"
                     )
                   | null;
               };
@@ -26361,7 +26447,9 @@ export interface ListAutomationsResponse {
                             | "announcement"
                             | "live_training_started"
                             | "live_training_reminder"
-                            | "live_training_ended";
+                            | "live_training_ended"
+                            | "quiz_attempt_graded"
+                            | "quiz_grading_digest";
                         }
                       | {
                           type: "custom";
@@ -26450,7 +26538,9 @@ export interface ListAutomationEventsResponse {
       | "announcement"
       | "live_training_started"
       | "live_training_reminder"
-      | "live_training_ended";
+      | "live_training_ended"
+      | "quiz_attempt_graded"
+      | "quiz_grading_digest";
     label: string;
     description: string;
     recipientPolicy: string;
@@ -26517,7 +26607,9 @@ export interface ListAvailableEmailTemplatesResponse {
             | "announcement"
             | "live_training_started"
             | "live_training_reminder"
-            | "live_training_ended";
+            | "live_training_ended"
+            | "quiz_attempt_graded"
+            | "quiz_grading_digest";
         }
       | {
           type: "custom";
@@ -26569,7 +26661,9 @@ export interface ListBuiltInAutomationTemplatesResponse {
       | "announcement"
       | "live_training_started"
       | "live_training_reminder"
-      | "live_training_ended";
+      | "live_training_ended"
+      | "quiz_attempt_graded"
+      | "quiz_grading_digest";
     definition: {
       /**
        * @minLength 1
@@ -26639,6 +26733,8 @@ export interface ListBuiltInAutomationTemplatesResponse {
                       | "live_training_started"
                       | "live_training_reminder"
                       | "live_training_ended"
+                      | "quiz_attempt_graded"
+                      | "quiz_grading_digest"
                     )
                   | null;
               };
@@ -26686,7 +26782,9 @@ export interface ListBuiltInAutomationTemplatesResponse {
                             | "announcement"
                             | "live_training_started"
                             | "live_training_reminder"
-                            | "live_training_ended";
+                            | "live_training_ended"
+                            | "quiz_attempt_graded"
+                            | "quiz_grading_digest";
                         }
                       | {
                           type: "custom";
@@ -26791,6 +26889,8 @@ export interface SimulateAutomationBody {
                   | "live_training_started"
                   | "live_training_reminder"
                   | "live_training_ended"
+                  | "quiz_attempt_graded"
+                  | "quiz_grading_digest"
                 )
               | null;
           };
@@ -26838,7 +26938,9 @@ export interface SimulateAutomationBody {
                         | "announcement"
                         | "live_training_started"
                         | "live_training_reminder"
-                        | "live_training_ended";
+                        | "live_training_ended"
+                        | "quiz_attempt_graded"
+                        | "quiz_grading_digest";
                     }
                   | {
                       type: "custom";
@@ -26981,7 +27083,9 @@ export interface SimulateAutomationResponse {
               | "announcement"
               | "live_training_started"
               | "live_training_reminder"
-              | "live_training_ended";
+              | "live_training_ended"
+              | "quiz_attempt_graded"
+              | "quiz_grading_digest";
           }
         | {
             type: "custom";
@@ -27065,6 +27169,8 @@ export interface CreateAutomationBody {
                   | "live_training_started"
                   | "live_training_reminder"
                   | "live_training_ended"
+                  | "quiz_attempt_graded"
+                  | "quiz_grading_digest"
                 )
               | null;
           };
@@ -27112,7 +27218,9 @@ export interface CreateAutomationBody {
                         | "announcement"
                         | "live_training_started"
                         | "live_training_reminder"
-                        | "live_training_ended";
+                        | "live_training_ended"
+                        | "quiz_attempt_graded"
+                        | "quiz_grading_digest";
                     }
                   | {
                       type: "custom";
@@ -27221,6 +27329,8 @@ export interface CreateAutomationResponse {
                     | "live_training_started"
                     | "live_training_reminder"
                     | "live_training_ended"
+                    | "quiz_attempt_graded"
+                    | "quiz_grading_digest"
                   )
                 | null;
             };
@@ -27268,7 +27378,9 @@ export interface CreateAutomationResponse {
                           | "announcement"
                           | "live_training_started"
                           | "live_training_reminder"
-                          | "live_training_ended";
+                          | "live_training_ended"
+                          | "quiz_attempt_graded"
+                          | "quiz_grading_digest";
                       }
                     | {
                         type: "custom";
@@ -27379,6 +27491,8 @@ export interface CreateAutomationResponse {
                       | "live_training_started"
                       | "live_training_reminder"
                       | "live_training_ended"
+                      | "quiz_attempt_graded"
+                      | "quiz_grading_digest"
                     )
                   | null;
               };
@@ -27426,7 +27540,9 @@ export interface CreateAutomationResponse {
                             | "announcement"
                             | "live_training_started"
                             | "live_training_reminder"
-                            | "live_training_ended";
+                            | "live_training_ended"
+                            | "quiz_attempt_graded"
+                            | "quiz_grading_digest";
                         }
                       | {
                           type: "custom";
@@ -27539,6 +27655,8 @@ export interface CreateAutomationFromTemplateResponse {
                     | "live_training_started"
                     | "live_training_reminder"
                     | "live_training_ended"
+                    | "quiz_attempt_graded"
+                    | "quiz_grading_digest"
                   )
                 | null;
             };
@@ -27586,7 +27704,9 @@ export interface CreateAutomationFromTemplateResponse {
                           | "announcement"
                           | "live_training_started"
                           | "live_training_reminder"
-                          | "live_training_ended";
+                          | "live_training_ended"
+                          | "quiz_attempt_graded"
+                          | "quiz_grading_digest";
                       }
                     | {
                         type: "custom";
@@ -27697,6 +27817,8 @@ export interface CreateAutomationFromTemplateResponse {
                       | "live_training_started"
                       | "live_training_reminder"
                       | "live_training_ended"
+                      | "quiz_attempt_graded"
+                      | "quiz_grading_digest"
                     )
                   | null;
               };
@@ -27744,7 +27866,9 @@ export interface CreateAutomationFromTemplateResponse {
                             | "announcement"
                             | "live_training_started"
                             | "live_training_reminder"
-                            | "live_training_ended";
+                            | "live_training_ended"
+                            | "quiz_attempt_graded"
+                            | "quiz_grading_digest";
                         }
                       | {
                           type: "custom";
@@ -27857,6 +27981,8 @@ export interface GetAutomationResponse {
                     | "live_training_started"
                     | "live_training_reminder"
                     | "live_training_ended"
+                    | "quiz_attempt_graded"
+                    | "quiz_grading_digest"
                   )
                 | null;
             };
@@ -27904,7 +28030,9 @@ export interface GetAutomationResponse {
                           | "announcement"
                           | "live_training_started"
                           | "live_training_reminder"
-                          | "live_training_ended";
+                          | "live_training_ended"
+                          | "quiz_attempt_graded"
+                          | "quiz_grading_digest";
                       }
                     | {
                         type: "custom";
@@ -28015,6 +28143,8 @@ export interface GetAutomationResponse {
                       | "live_training_started"
                       | "live_training_reminder"
                       | "live_training_ended"
+                      | "quiz_attempt_graded"
+                      | "quiz_grading_digest"
                     )
                   | null;
               };
@@ -28062,7 +28192,9 @@ export interface GetAutomationResponse {
                             | "announcement"
                             | "live_training_started"
                             | "live_training_reminder"
-                            | "live_training_ended";
+                            | "live_training_ended"
+                            | "quiz_attempt_graded"
+                            | "quiz_grading_digest";
                         }
                       | {
                           type: "custom";
@@ -28174,6 +28306,8 @@ export interface UpdateAutomationBody {
                   | "live_training_started"
                   | "live_training_reminder"
                   | "live_training_ended"
+                  | "quiz_attempt_graded"
+                  | "quiz_grading_digest"
                 )
               | null;
           };
@@ -28221,7 +28355,9 @@ export interface UpdateAutomationBody {
                         | "announcement"
                         | "live_training_started"
                         | "live_training_reminder"
-                        | "live_training_ended";
+                        | "live_training_ended"
+                        | "quiz_attempt_graded"
+                        | "quiz_grading_digest";
                     }
                   | {
                       type: "custom";
@@ -28330,6 +28466,8 @@ export interface UpdateAutomationResponse {
                     | "live_training_started"
                     | "live_training_reminder"
                     | "live_training_ended"
+                    | "quiz_attempt_graded"
+                    | "quiz_grading_digest"
                   )
                 | null;
             };
@@ -28377,7 +28515,9 @@ export interface UpdateAutomationResponse {
                           | "announcement"
                           | "live_training_started"
                           | "live_training_reminder"
-                          | "live_training_ended";
+                          | "live_training_ended"
+                          | "quiz_attempt_graded"
+                          | "quiz_grading_digest";
                       }
                     | {
                         type: "custom";
@@ -28488,6 +28628,8 @@ export interface UpdateAutomationResponse {
                       | "live_training_started"
                       | "live_training_reminder"
                       | "live_training_ended"
+                      | "quiz_attempt_graded"
+                      | "quiz_grading_digest"
                     )
                   | null;
               };
@@ -28535,7 +28677,9 @@ export interface UpdateAutomationResponse {
                             | "announcement"
                             | "live_training_started"
                             | "live_training_reminder"
-                            | "live_training_ended";
+                            | "live_training_ended"
+                            | "quiz_attempt_graded"
+                            | "quiz_grading_digest";
                         }
                       | {
                           type: "custom";
@@ -28655,6 +28799,8 @@ export interface DuplicateAutomationResponse {
                     | "live_training_started"
                     | "live_training_reminder"
                     | "live_training_ended"
+                    | "quiz_attempt_graded"
+                    | "quiz_grading_digest"
                   )
                 | null;
             };
@@ -28702,7 +28848,9 @@ export interface DuplicateAutomationResponse {
                           | "announcement"
                           | "live_training_started"
                           | "live_training_reminder"
-                          | "live_training_ended";
+                          | "live_training_ended"
+                          | "quiz_attempt_graded"
+                          | "quiz_grading_digest";
                       }
                     | {
                         type: "custom";
@@ -28813,6 +28961,8 @@ export interface DuplicateAutomationResponse {
                       | "live_training_started"
                       | "live_training_reminder"
                       | "live_training_ended"
+                      | "quiz_attempt_graded"
+                      | "quiz_grading_digest"
                     )
                   | null;
               };
@@ -28860,7 +29010,9 @@ export interface DuplicateAutomationResponse {
                             | "announcement"
                             | "live_training_started"
                             | "live_training_reminder"
-                            | "live_training_ended";
+                            | "live_training_ended"
+                            | "quiz_attempt_graded"
+                            | "quiz_grading_digest";
                         }
                       | {
                           type: "custom";
@@ -28973,6 +29125,8 @@ export interface ApplyAutomationBody {
                     | "live_training_started"
                     | "live_training_reminder"
                     | "live_training_ended"
+                    | "quiz_attempt_graded"
+                    | "quiz_grading_digest"
                   )
                 | null;
             };
@@ -29020,7 +29174,9 @@ export interface ApplyAutomationBody {
                           | "announcement"
                           | "live_training_started"
                           | "live_training_reminder"
-                          | "live_training_ended";
+                          | "live_training_ended"
+                          | "quiz_attempt_graded"
+                          | "quiz_grading_digest";
                       }
                     | {
                         type: "custom";
@@ -29130,6 +29286,8 @@ export interface ApplyAutomationResponse {
                     | "live_training_started"
                     | "live_training_reminder"
                     | "live_training_ended"
+                    | "quiz_attempt_graded"
+                    | "quiz_grading_digest"
                   )
                 | null;
             };
@@ -29177,7 +29335,9 @@ export interface ApplyAutomationResponse {
                           | "announcement"
                           | "live_training_started"
                           | "live_training_reminder"
-                          | "live_training_ended";
+                          | "live_training_ended"
+                          | "quiz_attempt_graded"
+                          | "quiz_grading_digest";
                       }
                     | {
                         type: "custom";
@@ -29288,6 +29448,8 @@ export interface ApplyAutomationResponse {
                       | "live_training_started"
                       | "live_training_reminder"
                       | "live_training_ended"
+                      | "quiz_attempt_graded"
+                      | "quiz_grading_digest"
                     )
                   | null;
               };
@@ -29335,7 +29497,9 @@ export interface ApplyAutomationResponse {
                             | "announcement"
                             | "live_training_started"
                             | "live_training_reminder"
-                            | "live_training_ended";
+                            | "live_training_ended"
+                            | "quiz_attempt_graded"
+                            | "quiz_grading_digest";
                         }
                       | {
                           type: "custom";
@@ -29448,6 +29612,8 @@ export interface EnableAutomationResponse {
                     | "live_training_started"
                     | "live_training_reminder"
                     | "live_training_ended"
+                    | "quiz_attempt_graded"
+                    | "quiz_grading_digest"
                   )
                 | null;
             };
@@ -29495,7 +29661,9 @@ export interface EnableAutomationResponse {
                           | "announcement"
                           | "live_training_started"
                           | "live_training_reminder"
-                          | "live_training_ended";
+                          | "live_training_ended"
+                          | "quiz_attempt_graded"
+                          | "quiz_grading_digest";
                       }
                     | {
                         type: "custom";
@@ -29606,6 +29774,8 @@ export interface EnableAutomationResponse {
                       | "live_training_started"
                       | "live_training_reminder"
                       | "live_training_ended"
+                      | "quiz_attempt_graded"
+                      | "quiz_grading_digest"
                     )
                   | null;
               };
@@ -29653,7 +29823,9 @@ export interface EnableAutomationResponse {
                             | "announcement"
                             | "live_training_started"
                             | "live_training_reminder"
-                            | "live_training_ended";
+                            | "live_training_ended"
+                            | "quiz_attempt_graded"
+                            | "quiz_grading_digest";
                         }
                       | {
                           type: "custom";
@@ -29766,6 +29938,8 @@ export interface DisableAutomationResponse {
                     | "live_training_started"
                     | "live_training_reminder"
                     | "live_training_ended"
+                    | "quiz_attempt_graded"
+                    | "quiz_grading_digest"
                   )
                 | null;
             };
@@ -29813,7 +29987,9 @@ export interface DisableAutomationResponse {
                           | "announcement"
                           | "live_training_started"
                           | "live_training_reminder"
-                          | "live_training_ended";
+                          | "live_training_ended"
+                          | "quiz_attempt_graded"
+                          | "quiz_grading_digest";
                       }
                     | {
                         type: "custom";
@@ -29924,6 +30100,8 @@ export interface DisableAutomationResponse {
                       | "live_training_started"
                       | "live_training_reminder"
                       | "live_training_ended"
+                      | "quiz_attempt_graded"
+                      | "quiz_grading_digest"
                     )
                   | null;
               };
@@ -29971,7 +30149,9 @@ export interface DisableAutomationResponse {
                             | "announcement"
                             | "live_training_started"
                             | "live_training_reminder"
-                            | "live_training_ended";
+                            | "live_training_ended"
+                            | "quiz_attempt_graded"
+                            | "quiz_grading_digest";
                         }
                       | {
                           type: "custom";
@@ -30084,6 +30264,8 @@ export interface ArchiveAutomationResponse {
                     | "live_training_started"
                     | "live_training_reminder"
                     | "live_training_ended"
+                    | "quiz_attempt_graded"
+                    | "quiz_grading_digest"
                   )
                 | null;
             };
@@ -30131,7 +30313,9 @@ export interface ArchiveAutomationResponse {
                           | "announcement"
                           | "live_training_started"
                           | "live_training_reminder"
-                          | "live_training_ended";
+                          | "live_training_ended"
+                          | "quiz_attempt_graded"
+                          | "quiz_grading_digest";
                       }
                     | {
                         type: "custom";
@@ -30242,6 +30426,8 @@ export interface ArchiveAutomationResponse {
                       | "live_training_started"
                       | "live_training_reminder"
                       | "live_training_ended"
+                      | "quiz_attempt_graded"
+                      | "quiz_grading_digest"
                     )
                   | null;
               };
@@ -30289,7 +30475,9 @@ export interface ArchiveAutomationResponse {
                             | "announcement"
                             | "live_training_started"
                             | "live_training_reminder"
-                            | "live_training_ended";
+                            | "live_training_ended"
+                            | "quiz_attempt_graded"
+                            | "quiz_grading_digest";
                         }
                       | {
                           type: "custom";
@@ -30380,7 +30568,9 @@ export interface ListAutomationRunsResponse {
       | "announcement"
       | "live_training_started"
       | "live_training_reminder"
-      | "live_training_ended";
+      | "live_training_ended"
+      | "quiz_attempt_graded"
+      | "quiz_grading_digest";
     status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
     createdAt: string;
     completedAt: string | null;
@@ -30445,7 +30635,9 @@ export interface GetAutomationRunResponse {
         | "announcement"
         | "live_training_started"
         | "live_training_reminder"
-        | "live_training_ended";
+        | "live_training_ended"
+        | "quiz_attempt_graded"
+        | "quiz_grading_digest";
       status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
       createdAt: string;
       completedAt: string | null;
@@ -30495,7 +30687,9 @@ export interface GetAutomationRunResponse {
               | "announcement"
               | "live_training_started"
               | "live_training_reminder"
-              | "live_training_ended";
+              | "live_training_ended"
+              | "quiz_attempt_graded"
+              | "quiz_grading_digest";
           }
         | {
             type: "custom";
@@ -30598,87 +30792,6 @@ export type DeleteManyCategoriesBody = string[];
 export interface DeleteManyCategoriesResponse {
   data: {
     message: string;
-  };
-}
-
-export interface InitTusImportBody {
-  /**
-   * @min 1
-   * @max 838860800
-   */
-  sizeBytes: number;
-}
-
-export interface InitTusImportResponse {
-  data: {
-    uploadId: string;
-    tusEndpoint: string;
-    tusHeaders: object;
-    expiresAt: string;
-    partSize: number;
-  };
-}
-
-export interface CompleteTusImportResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface ExportNativeCourseResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface ExportNativeLearningPathResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface ImportNativeArchiveResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface GetNativeArchiveStatusResponse {
-  data: {
-    jobId: string;
-    state: string;
-    result: null | {
-      kind: "course" | "learning-path";
-      /** @format uuid */
-      rootId: string;
-      alreadyExists?: boolean;
-      createdCourseIds?: string[];
-      reusedCourseIds?: string[];
-    };
-    failedReason: string | null;
-    progress: {
-      stage:
-        | "collecting-content"
-        | "copying-files"
-        | "packaging"
-        | "downloading"
-        | "verifying"
-        | "uploading-files"
-        | "indexing"
-        | "saving";
-      /**
-       * @min 0
-       * @max 100
-       */
-      percent: number;
-    } | null;
-  };
-}
-
-export interface GetNativeArchiveDownloadUrlResponse {
-  data: {
-    url: string;
-    expiresInSeconds: number;
   };
 }
 
@@ -33670,6 +33783,26 @@ export interface LaunchScormAttemptResponse {
     learningStateId?: string | null;
     /** @format uuid */
     attemptId: string;
+    /** @format uuid */
+    packageId: string;
+    /** @format uuid */
+    scoId: string;
+    /** @format uuid */
+    lessonId: string;
+    /** @format uuid */
+    courseId: string;
+    launchUrl: string;
+    scoTitle: string;
+    navigation: {
+      previousScoId: string | null;
+      nextScoId: string | null;
+    };
+    runtime: object;
+  };
+}
+
+export interface LaunchScormPreviewResponse {
+  data: {
     /** @format uuid */
     packageId: string;
     /** @format uuid */
@@ -39484,20 +39617,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name SettingsControllerUpdateEnforceSso
-     * @request PATCH:/api/settings/admin/enforce-sso
-     */
-    settingsControllerUpdateEnforceSso: (params: RequestParams = {}) =>
-      this.request<UpdateEnforceSSOResponse, any>({
-        path: `/api/settings/admin/enforce-sso`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name SettingsControllerUpdateModernCourseListEnabled
      * @request PATCH:/api/settings/admin/modern-course-list
      */
@@ -42091,10 +42210,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<void, any>({
+      this.request<ExportCourseAsScormResponse, any>({
         path: `/api/course/${courseId}/scorm-export`,
         method: "POST",
         query: query,
+        format: "json",
         ...params,
       }),
 
@@ -42198,6 +42318,205 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/course-ownership/${courseId}`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerInitTusImport
+     * @request POST:/api/native-archives/tus/init
+     */
+    nativeArchiveControllerInitTusImport: (data: InitTusImportBody, params: RequestParams = {}) =>
+      this.request<InitTusImportResponse, any>({
+        path: `/api/native-archives/tus/init`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerTusOptionsBase
+     * @request OPTIONS:/api/native-archives/tus
+     */
+    nativeArchiveControllerTusOptionsBase: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerCreateTusUpload
+     * @request POST:/api/native-archives/tus
+     */
+    nativeArchiveControllerCreateTusUpload: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerTusOptionsUpload
+     * @request OPTIONS:/api/native-archives/tus/{id}
+     */
+    nativeArchiveControllerTusOptionsUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus/${id}`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerHeadTusUpload
+     * @request HEAD:/api/native-archives/tus/{id}
+     */
+    nativeArchiveControllerHeadTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus/${id}`,
+        method: "HEAD",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerPatchTusUpload
+     * @request PATCH:/api/native-archives/tus/{id}
+     */
+    nativeArchiveControllerPatchTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus/${id}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerCompleteTusImport
+     * @request POST:/api/native-archives/tus/{id}/complete
+     */
+    nativeArchiveControllerCompleteTusImport: (id: string, params: RequestParams = {}) =>
+      this.request<CompleteTusImportResponse, any>({
+        path: `/api/native-archives/tus/${id}/complete`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerDismissLiveTrainingReview
+     * @request PATCH:/api/native-archives/live-training/{id}/dismiss-review
+     */
+    nativeArchiveControllerDismissLiveTrainingReview: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/live-training/${id}/dismiss-review`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerExportNativeCourse
+     * @request POST:/api/native-archives/courses/{id}/export
+     */
+    nativeArchiveControllerExportNativeCourse: (id: string, params: RequestParams = {}) =>
+      this.request<ExportNativeCourseResponse, any>({
+        path: `/api/native-archives/courses/${id}/export`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerExportNativeLearningPath
+     * @request POST:/api/native-archives/learning-paths/{id}/export
+     */
+    nativeArchiveControllerExportNativeLearningPath: (id: string, params: RequestParams = {}) =>
+      this.request<ExportNativeLearningPathResponse, any>({
+        path: `/api/native-archives/learning-paths/${id}/export`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerImportNativeArchive
+     * @request POST:/api/native-archives/import
+     */
+    nativeArchiveControllerImportNativeArchive: (
+      data: {
+        /** @format binary */
+        file: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ImportNativeArchiveResponse, any>({
+        path: `/api/native-archives/import`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerGetNativeArchiveStatus
+     * @request GET:/api/native-archives/jobs/{id}
+     */
+    nativeArchiveControllerGetNativeArchiveStatus: (id: string, params: RequestParams = {}) =>
+      this.request<GetNativeArchiveStatusResponse, any>({
+        path: `/api/native-archives/jobs/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerGetNativeArchiveDownloadUrl
+     * @request GET:/api/native-archives/jobs/{id}/download-url
+     */
+    nativeArchiveControllerGetNativeArchiveDownloadUrl: (id: string, params: RequestParams = {}) =>
+      this.request<GetNativeArchiveDownloadUrlResponse, any>({
+        path: `/api/native-archives/jobs/${id}/download-url`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerDownloadNativeArchive
+     * @request GET:/api/native-archives/jobs/{id}/download
+     */
+    nativeArchiveControllerDownloadNativeArchive: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/jobs/${id}/download`,
+        method: "GET",
         ...params,
       }),
 
@@ -44997,7 +45316,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "announcement"
         | "live_training_started"
         | "live_training_reminder"
-        | "live_training_ended",
+        | "live_training_ended"
+        | "quiz_attempt_graded"
+        | "quiz_grading_digest",
       params: RequestParams = {},
     ) =>
       this.request<GetBuiltInEmailTemplateResponse, any>({
@@ -45043,7 +45364,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "announcement"
         | "live_training_started"
         | "live_training_reminder"
-        | "live_training_ended",
+        | "live_training_ended"
+        | "quiz_attempt_graded"
+        | "quiz_grading_digest",
       params: RequestParams = {},
     ) =>
       this.request<CreateDraftFromBuiltInEmailTemplateResponse, any>({
@@ -45421,7 +45744,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "announcement"
         | "live_training_started"
         | "live_training_reminder"
-        | "live_training_ended",
+        | "live_training_ended"
+        | "quiz_attempt_graded"
+        | "quiz_grading_digest",
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -45873,205 +46198,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerInitTusImport
-     * @request POST:/api/native-archives/tus/init
-     */
-    nativeArchiveControllerInitTusImport: (data: InitTusImportBody, params: RequestParams = {}) =>
-      this.request<InitTusImportResponse, any>({
-        path: `/api/native-archives/tus/init`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerTusOptionsBase
-     * @request OPTIONS:/api/native-archives/tus
-     */
-    nativeArchiveControllerTusOptionsBase: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus`,
-        method: "OPTIONS",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerCreateTusUpload
-     * @request POST:/api/native-archives/tus
-     */
-    nativeArchiveControllerCreateTusUpload: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus`,
-        method: "POST",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerTusOptionsUpload
-     * @request OPTIONS:/api/native-archives/tus/{id}
-     */
-    nativeArchiveControllerTusOptionsUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus/${id}`,
-        method: "OPTIONS",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerHeadTusUpload
-     * @request HEAD:/api/native-archives/tus/{id}
-     */
-    nativeArchiveControllerHeadTusUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus/${id}`,
-        method: "HEAD",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerPatchTusUpload
-     * @request PATCH:/api/native-archives/tus/{id}
-     */
-    nativeArchiveControllerPatchTusUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus/${id}`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerCompleteTusImport
-     * @request POST:/api/native-archives/tus/{id}/complete
-     */
-    nativeArchiveControllerCompleteTusImport: (id: string, params: RequestParams = {}) =>
-      this.request<CompleteTusImportResponse, any>({
-        path: `/api/native-archives/tus/${id}/complete`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerDismissLiveTrainingReview
-     * @request PATCH:/api/native-archives/live-training/{id}/dismiss-review
-     */
-    nativeArchiveControllerDismissLiveTrainingReview: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/live-training/${id}/dismiss-review`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerExportNativeCourse
-     * @request POST:/api/native-archives/courses/{id}/export
-     */
-    nativeArchiveControllerExportNativeCourse: (id: string, params: RequestParams = {}) =>
-      this.request<ExportNativeCourseResponse, any>({
-        path: `/api/native-archives/courses/${id}/export`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerExportNativeLearningPath
-     * @request POST:/api/native-archives/learning-paths/{id}/export
-     */
-    nativeArchiveControllerExportNativeLearningPath: (id: string, params: RequestParams = {}) =>
-      this.request<ExportNativeLearningPathResponse, any>({
-        path: `/api/native-archives/learning-paths/${id}/export`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerImportNativeArchive
-     * @request POST:/api/native-archives/import
-     */
-    nativeArchiveControllerImportNativeArchive: (
-      data: {
-        /** @format binary */
-        file: File;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ImportNativeArchiveResponse, any>({
-        path: `/api/native-archives/import`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerGetNativeArchiveStatus
-     * @request GET:/api/native-archives/jobs/{id}
-     */
-    nativeArchiveControllerGetNativeArchiveStatus: (id: string, params: RequestParams = {}) =>
-      this.request<GetNativeArchiveStatusResponse, any>({
-        path: `/api/native-archives/jobs/${id}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerGetNativeArchiveDownloadUrl
-     * @request GET:/api/native-archives/jobs/{id}/download-url
-     */
-    nativeArchiveControllerGetNativeArchiveDownloadUrl: (id: string, params: RequestParams = {}) =>
-      this.request<GetNativeArchiveDownloadUrlResponse, any>({
-        path: `/api/native-archives/jobs/${id}/download-url`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerDownloadNativeArchive
-     * @request GET:/api/native-archives/jobs/{id}/download
-     */
-    nativeArchiveControllerDownloadNativeArchive: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/jobs/${id}/download`,
-        method: "GET",
         ...params,
       }),
 
@@ -48251,6 +48377,31 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<LaunchScormAttemptResponse, any>({
         path: `/api/scorm/runtime/launch`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerLaunchScormPreview
+     * @request GET:/api/scorm/runtime/preview
+     */
+    scormControllerLaunchScormPreview: (
+      query?: {
+        /** @format uuid */
+        lessonId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @format uuid */
+        scoId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<LaunchScormPreviewResponse, any>({
+        path: `/api/scorm/runtime/preview`,
         method: "GET",
         query: query,
         format: "json",

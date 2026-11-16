@@ -345,7 +345,9 @@
       "announcement": "Paskelbtas pranešimas",
       "live_training_started": "Prasidėjo tiesioginis mokymas",
       "live_training_reminder": "Tiesioginis mokymas prasidės po 15 minučių",
-      "live_training_ended": "Tiesioginis mokymas baigėsi"
+      "live_training_ended": "Tiesioginis mokymas baigėsi",
+      "quiz_attempt_graded": "Testą įvertino vertintojas",
+      "quiz_grading_digest": "Nauji atsakymai laukia įvertinimo (kasdien)"
     },
     "errors": {
       "incompleteButton": "Įveskite mygtuko tekstą ir URL.",
@@ -1689,20 +1691,6 @@
     },
     "validation": {
       "email": "Būtinas el"
-    }
-  },
-  "ssoEnforcementView": {
-    "header": "SSO vykdymas",
-    "subHeader": "Priverskite SSO prisijungimą visiems vartotojams",
-    "description": "Šis jungiklis privers prisijungti prie „Google“ / „Microsoft“ visiems vartotojams. Jei išjungta, vartotojai galės prisijungti naudodami tradicinę prisijungimo formą.",
-    "switch": {
-      "enabled": "Įjungta",
-      "disabled": "Išjungta"
-    },
-    "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "SSO vykdymas sėkmingai atnaujintas",
-      "ssoEnforcementUpdateFailed": "Nepavyko atnaujinti SSO vykdymo",
-      "registerRedirect": "Registracija naudojant el. paštą išjungta, nes SSO vykdomas."
     }
   },
   "userEmailTriggers": {
@@ -4151,7 +4139,6 @@
   "registerView": {
     "header": "Registruotis",
     "subHeader": "Įveskite savo informaciją, kad sukurtumėte paskyrą",
-    "subHeaderSSO": "Prisiregistruokite naudodami „Google“ / „Microsoft“ paskyrą",
     "field": {
       "firstName": "Vardas",
       "lastName": "Pavardė",
@@ -7841,7 +7828,9 @@
         "announcement": "Naudotojai, kuriems skirtas skelbimas.",
         "live_training_started": "Besimokantieji, užsiregistravę į kursus, susietus su prasidėjusiais tiesioginiais mokymais.",
         "live_training_reminder": "Besimokantieji, užsiregistravę į kursus, susietus su artėjančiais tiesioginiais mokymais.",
-        "live_training_ended": "Besimokantieji, užsiregistravę į kursus, susietus su pasibaigusiais tiesioginiais mokymais."
+        "live_training_ended": "Besimokantieji, užsiregistravę į kursus, susietus su pasibaigusiais tiesioginiais mokymais.",
+        "quiz_attempt_graded": "Besimokantysis, kurio testo atsakymai buvo įvertinti.",
+        "quiz_grading_digest": "Naudotojai, galintys vertinti testų atsakymus."
       }
     },
     "mapping": {
@@ -7940,7 +7929,9 @@
       "certificateArchived": "Sertifikatas archyvuotas",
       "announcementPublished": "Skelbimas paskelbtas",
       "courseChatUserMentioned": "Vartotojas paminėtas pokalbyje",
-      "courseDueDateReminder": "Kurso termino priminimas"
+      "courseDueDateReminder": "Kurso termino priminimas",
+      "quizAttemptGraded": "Testas įvertintas",
+      "quizGradingDigest": "Vertinimo eilės suvestinė"
     },
     "canvas": {
       "emptyTitle": "Jūsų automatizavimo drobė tuščia",
@@ -8093,7 +8084,13 @@
       "live_training_title": "Tiesioginių mokymų pavadinimas",
       "live_training_content": "Pranešimas apie tiesioginius mokymus",
       "live_training_link": "Tiesioginių mokymų nuoroda",
-      "create_password_link": "Slaptažodžio sukūrimo nuoroda"
+      "create_password_link": "Slaptažodžio sukūrimo nuoroda",
+      "lessonName": "Pamokos pavadinimas",
+      "quizScore": "Testo rezultatas (%)",
+      "lessonUrl": "Pamokos nuoroda",
+      "newAnswersCount": "Nauji atsakymai",
+      "pendingAnswersCount": "Atsakymai, laukiantys įvertinimo",
+      "gradingQueueUrl": "Vertinimo eilės nuoroda"
     },
     "simulation": {
       "title": "Simuliacijos rezultatas",

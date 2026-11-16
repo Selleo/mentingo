@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
@@ -19,4 +19,8 @@ export const loginMethodsQueryOptions = () =>
 
 export function useLoginMethods() {
   return useQuery(loginMethodsQueryOptions());
+}
+
+export function useLoginMethodsSuspense() {
+  return useSuspenseQuery(loginMethodsQueryOptions());
 }

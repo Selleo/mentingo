@@ -4,6 +4,7 @@ import { AiRuntimeModule } from "src/ai/ai-runtime.module";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { CourseTransferModule } from "src/course-transfer/course-transfer.module";
 import { MasterCourseRepository } from "src/courses/master-course/master-course.repository";
+import { CourseScormExportModule } from "src/courses/scorm-export/course-scorm-export.module";
 import { FileModule } from "src/file/files.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { isQueueSandboxProcess } from "src/queue/queue.constants";
@@ -30,6 +31,7 @@ import { NativeArchiveValidationService } from "./services/native-archive-valida
   imports: [
     AiRuntimeModule,
     CourseTransferModule,
+    CourseScormExportModule,
     FileModule,
     BunnyStreamModule,
     LocalizationModule,

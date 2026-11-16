@@ -8,7 +8,6 @@ export type ActivityHistory = {
 export type GlobalSettings = {
   unregisteredUserCoursesAccessibility: boolean;
   learningPathsEnabled: boolean;
-  enforceSSO: boolean;
   modernCourseListEnabled: boolean;
   calendarEnabled: boolean;
   liveTrainingEnabled: boolean;

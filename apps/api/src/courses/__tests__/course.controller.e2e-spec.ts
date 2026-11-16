@@ -1,3 +1,5 @@
+import { Readable } from "node:stream";
+
 import { faker } from "@faker-js/faker";
 import {
   CALENDAR_EVENT_SOURCE_TYPES,
@@ -15,7 +17,6 @@ import {
   SYSTEM_ROLE_SLUGS,
   type CourseStatus,
 } from "@repo/shared";
-import AdmZip from "adm-zip";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
@@ -65,6 +66,8 @@ import {
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 import { dispatchOutbox, waitForOutbox } from "../../../test/helpers/wait-for-outbox";
 
+import { exportCourseAsScormPackage } from "./course-scorm-export.e2e-utils";
+
 import type { CalendarEventTestResponse } from "./types/calendar-event-test.types";
 import type { CourseTest } from "../../../test/factory/course.factory";
 import type { UserWithCredentials } from "../../../test/factory/user.factory";
@@ -95,6 +98,7 @@ describe("CourseController (e2e)", () => {
     getFileUrl: jest.Mock;
     getResourcesForEntity: jest.Mock;
     getRawFileBuffer: jest.Mock;
+    getFileStream: jest.Mock;
     isBunnyConfigured: jest.Mock;
     uploadFile: jest.Mock;
   };
@@ -138,6 +142,9 @@ describe("CourseController (e2e)", () => {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
       getResourcesForEntity: jest.fn().mockResolvedValue([]),
       getRawFileBuffer: jest.fn().mockResolvedValue(Buffer.from("mock-file-content")),
+      getFileStream: jest.fn(async () => ({
+        stream: Readable.from([Buffer.from("mock-file-content")]),
+      })),
       isBunnyConfigured: jest.fn().mockResolvedValue(false),
       uploadFile: jest.fn(),
     };
@@ -876,9 +883,9 @@ describe("CourseController (e2e)", () => {
       const sharedReference = "exports/shared-image.png";
       const sharedFileBuffer = Buffer.from("shared image bytes");
 
-      mockFileService.getRawFileBuffer.mockImplementation(async (reference: string) => {
-        if (reference === sharedReference) return sharedFileBuffer;
-        return null;
+      mockFileService.getFileStream.mockImplementation(async (reference: string) => {
+        if (reference === sharedReference) return { stream: Readable.from([sharedFileBuffer]) };
+        throw new Error(`Missing test file ${reference}`);
       });
 
       const [firstLesson, secondLesson] = await db
@@ -953,15 +960,7 @@ describe("CourseController (e2e)", () => {
         })
         .where(eq(lessons.id, secondLesson.id));
 
-      const response = await request(app.getHttpServer())
-        .post(`/api/course/${course.id}/scorm-export?language=en`)
-        .set("Cookie", await cookieFor(admin, app))
-        .responseType("arraybuffer")
-        .expect(201);
-
-      expect(response.headers["content-type"]).toContain("application/zip");
-
-      const zip = new AdmZip(response.body);
+      const zip = await exportCourseAsScormPackage(app, course.id, await cookieFor(admin, app));
       const courseJsonEntry = zip.getEntry("data/course.json");
       const manifestEntry = zip.getEntry("imsmanifest.xml");
       expect(courseJsonEntry).toBeDefined();
@@ -1067,17 +1066,11 @@ describe("CourseController (e2e)", () => {
         })
         .where(eq(lessons.id, lesson.id));
 
-      mockFileService.getRawFileBuffer.mockImplementation(async (reference: string) =>
-        Buffer.from(`file:${reference}`),
-      );
+      mockFileService.getFileStream.mockImplementation(async (reference: string) => ({
+        stream: Readable.from([Buffer.from(`file:${reference}`)]),
+      }));
 
-      const response = await request(app.getHttpServer())
-        .post(`/api/course/${course.id}/scorm-export?language=en`)
-        .set("Cookie", await cookieFor(admin, app))
-        .responseType("arraybuffer")
-        .expect(201);
-
-      const zip = new AdmZip(response.body);
+      const zip = await exportCourseAsScormPackage(app, course.id, await cookieFor(admin, app));
       const courseJsonEntry = zip.getEntry("data/course.json");
       expect(courseJsonEntry).toBeDefined();
 

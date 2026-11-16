@@ -466,10 +466,7 @@
           "type": "stringOptions",
           "column": "environment",
           "operator": "none of",
-          "value": [
-            "langfuse-code-eval",
-            "langfuse-evaluation"
-          ]
+          "value": ["langfuse-code-eval", "langfuse-evaluation"]
         }
       ],
       "evaluatorAssignments": [
@@ -501,10 +498,7 @@
           "type": "stringOptions",
           "column": "environment",
           "operator": "none of",
-          "value": [
-            "langfuse-code-eval",
-            "langfuse-evaluation"
-          ]
+          "value": ["langfuse-code-eval", "langfuse-evaluation"]
         }
       ],
       "evaluatorAssignments": [
@@ -569,10 +563,7 @@
           "type": "stringOptions",
           "column": "environment",
           "operator": "none of",
-          "value": [
-            "langfuse-code-eval",
-            "langfuse-evaluation"
-          ]
+          "value": ["langfuse-code-eval", "langfuse-evaluation"]
         }
       ],
       "evaluatorAssignments": [
@@ -600,9 +591,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lma8f0050ad0hjxwnpdll"
-          ]
+          "value": ["cmw0lma8f0050ad0hjxwnpdll"]
         },
         {
           "type": "boolean",
@@ -632,9 +621,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmapa0054ad0hobzwd7u8"
-          ]
+          "value": ["cmw0lmapa0054ad0hobzwd7u8"]
         },
         {
           "type": "boolean",
@@ -664,9 +651,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmb6e0043ad0ma7yln4w0"
-          ]
+          "value": ["cmw0lmb6e0043ad0ma7yln4w0"]
         },
         {
           "type": "boolean",
@@ -696,9 +681,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmbpv0047ad0mvqa06aej"
-          ]
+          "value": ["cmw0lmbpv0047ad0mvqa06aej"]
         },
         {
           "type": "boolean",
@@ -728,9 +711,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmc7j006ead0egkonx6zu"
-          ]
+          "value": ["cmw0lmc7j006ead0egkonx6zu"]
         },
         {
           "type": "boolean",
@@ -760,9 +741,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmclk006vad0d58jpt6m9"
-          ]
+          "value": ["cmw0lmclk006vad0d58jpt6m9"]
         },
         {
           "type": "boolean",
@@ -792,9 +771,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmd0x0067ad0e7lrsek9q"
-          ]
+          "value": ["cmw0lmd0x0067ad0e7lrsek9q"]
         },
         {
           "type": "boolean",
@@ -824,9 +801,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmdio005bad0h04iuheur"
-          ]
+          "value": ["cmw0lmdio005bad0h04iuheur"]
         },
         {
           "type": "boolean",
@@ -856,9 +831,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmdxt006iad0e7u3i5gdc"
-          ]
+          "value": ["cmw0lmdxt006iad0e7u3i5gdc"]
         },
         {
           "type": "boolean",
@@ -888,9 +861,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmec3009iad0ifmiwo0xp"
-          ]
+          "value": ["cmw0lmec3009iad0ifmiwo0xp"]
         },
         {
           "type": "boolean",
@@ -920,9 +891,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmesd002sad0j0ggsvbky"
-          ]
+          "value": ["cmw0lmesd002sad0j0ggsvbky"]
         },
         {
           "type": "boolean",
@@ -952,9 +921,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmf79005fad0h850pbm5p"
-          ]
+          "value": ["cmw0lmf79005fad0h850pbm5p"]
         },
         {
           "type": "boolean",
@@ -984,9 +951,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmfte006ead0en5ikk8ea"
-          ]
+          "value": ["cmw0lmfte006ead0en5ikk8ea"]
         },
         {
           "type": "boolean",
@@ -1016,9 +981,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmge50070ad0dizhh5l88"
-          ]
+          "value": ["cmw0lmge50070ad0dizhh5l88"]
         },
         {
           "type": "boolean",
@@ -1048,9 +1011,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmgz9006nad0ecd0twjg2"
-          ]
+          "value": ["cmw0lmgz9006nad0ecd0twjg2"]
         },
         {
           "type": "boolean",
@@ -1080,9 +1041,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmhl4005lad0htco21ys4"
-          ]
+          "value": ["cmw0lmhl4005lad0htco21ys4"]
         },
         {
           "type": "boolean",
@@ -1112,9 +1071,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmi0q009uad0ite0iltcd"
-          ]
+          "value": ["cmw0lmi0q009uad0ite0iltcd"]
         },
         {
           "type": "boolean",
@@ -1144,9 +1101,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmipm005qad0jvj2dbjmh"
-          ]
+          "value": ["cmw0lmipm005qad0jvj2dbjmh"]
         },
         {
           "type": "boolean",
@@ -1176,9 +1131,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmj51002wad0jarcinhe9"
-          ]
+          "value": ["cmw0lmj51002wad0jarcinhe9"]
         },
         {
           "type": "boolean",
@@ -1208,9 +1161,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmjm00030ad0jt8ld1ur2"
-          ]
+          "value": ["cmw0lmjm00030ad0jt8ld1ur2"]
         },
         {
           "type": "boolean",
@@ -1240,9 +1191,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmk7n006wad0ehxuzy5ib"
-          ]
+          "value": ["cmw0lmk7n006wad0ehxuzy5ib"]
         },
         {
           "type": "boolean",
@@ -1272,9 +1221,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmkln006jad0e8dy2s93b"
-          ]
+          "value": ["cmw0lmkln006jad0e8dy2s93b"]
         },
         {
           "type": "boolean",
@@ -1304,9 +1251,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmkyz0037ad0j1xvmt7sr"
-          ]
+          "value": ["cmw0lmkyz0037ad0j1xvmt7sr"]
         },
         {
           "type": "boolean",
@@ -1336,9 +1281,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmlcx005pad0h90p3gln0"
-          ]
+          "value": ["cmw0lmlcx005pad0h90p3gln0"]
         },
         {
           "type": "boolean",
@@ -1368,9 +1311,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmlqf003cad0jpdvg9zk9"
-          ]
+          "value": ["cmw0lmlqf003cad0jpdvg9zk9"]
         },
         {
           "type": "boolean",
@@ -1400,9 +1341,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmm3q00a4ad0ict36rsv5"
-          ]
+          "value": ["cmw0lmm3q00a4ad0ict36rsv5"]
         },
         {
           "type": "boolean",
@@ -1432,9 +1371,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmmil003gad0jg7f4nbks"
-          ]
+          "value": ["cmw0lmmil003gad0jg7f4nbks"]
         },
         {
           "type": "boolean",
@@ -1464,9 +1401,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmmw10072ad0e5j4rgwxm"
-          ]
+          "value": ["cmw0lmmw10072ad0e5j4rgwxm"]
         },
         {
           "type": "boolean",
@@ -1496,9 +1431,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmnbn005uad0hzn6y4oq7"
-          ]
+          "value": ["cmw0lmnbn005uad0hzn6y4oq7"]
         },
         {
           "type": "boolean",
@@ -1528,9 +1461,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lmnq7003nad0jlcb4y51h"
-          ]
+          "value": ["cmw0lmnq7003nad0jlcb4y51h"]
         },
         {
           "type": "boolean",
@@ -1560,9 +1491,7 @@
           "type": "stringOptions",
           "column": "datasetId",
           "operator": "any of",
-          "value": [
-            "cmw0lnn7f007lad0d3gv7pjfn"
-          ]
+          "value": ["cmw0lnn7f007lad0d3gv7pjfn"]
         },
         {
           "type": "boolean",

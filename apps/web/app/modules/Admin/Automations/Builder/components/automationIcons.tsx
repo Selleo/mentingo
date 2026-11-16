@@ -9,12 +9,14 @@ import {
   CalendarClock,
   CalendarX,
   ClipboardCheck,
+  ClipboardList,
   Clock,
   GraduationCap,
   Hand,
   Hourglass,
   KeyRound,
   Link,
+  ListChecks,
   LockKeyhole,
   LogIn,
   Mail,
@@ -53,6 +55,8 @@ const TRIGGER_ICONS: Record<AutomationEventKind, LucideIcon> = {
   [AUTOMATION_EVENT_KINDS.COURSE_DUE_DATE_REMINDER]: CalendarClock,
   [AUTOMATION_EVENT_KINDS.COURSE_CHAT_MENTION]: AtSign,
   [AUTOMATION_EVENT_KINDS.ANNOUNCEMENT]: Megaphone,
+  [AUTOMATION_EVENT_KINDS.QUIZ_ATTEMPT_GRADED]: ListChecks,
+  [AUTOMATION_EVENT_KINDS.QUIZ_GRADING_DIGEST]: ClipboardList,
 };
 
 export function AutomationNodeIcon({ eventKind }: { eventKind?: AutomationEventKind | null }) {
