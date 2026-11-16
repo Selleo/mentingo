@@ -121,6 +121,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         competenciesConfiguration?.enabled === true && !isCompetenciesConfigurationError,
         areLeaderboardsEnabled(globalSettings),
         globalSettings?.gamificationEnabled === true,
+        globalSettings?.forumEnabled === true,
       ),
     );
   }

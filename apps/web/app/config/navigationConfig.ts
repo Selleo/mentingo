@@ -52,6 +52,7 @@ export const getNavigationConfig = (
   isCompetenciesEnabled = false,
   isLeaderboardsEnabled = false,
   isGamificationEnabled = false,
+  isForumEnabled = false,
 ): NavigationGroups[] => {
   const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
 
@@ -140,6 +141,16 @@ export const getNavigationConfig = (
                 path: "leaderboards",
                 iconName: "Medal",
                 testId: NAVIGATION_HANDLES.LEADERBOARDS_LINK,
+              },
+            ] satisfies NavigationItem[])
+          : []),
+        ...(isForumEnabled
+          ? ([
+              {
+                label: t("navigationSideBar.forum"),
+                path: "forum",
+                iconName: "MessageSquareText",
+                testId: NAVIGATION_HANDLES.FORUM_LINK,
               },
             ] satisfies NavigationItem[])
           : []),

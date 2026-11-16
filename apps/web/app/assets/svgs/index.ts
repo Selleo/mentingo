@@ -32,6 +32,7 @@ export {
   Bot,
   Building,
   MailWarning,
+  MessageSquareText,
   MessagesSquare,
   ShieldCheck,
   ClipboardCheck,

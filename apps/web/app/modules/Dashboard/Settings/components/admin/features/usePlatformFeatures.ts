@@ -11,6 +11,7 @@ import { useChangeArticlesSetting } from "~/api/mutations/admin/useChangeArticle
 import { useChangeNewsSetting } from "~/api/mutations/admin/useChangeNewsSetting";
 import { useChangeQASetting } from "~/api/mutations/admin/useChangeQASetting";
 import { useToggleCourseDiscussions } from "~/api/mutations/admin/useToggleCourseDiscussions";
+import { useToggleForum } from "~/api/mutations/admin/useToggleForum";
 import { useToggleGamificationEnabled } from "~/api/mutations/admin/useToggleGamificationEnabled";
 import { useToggleLearningPathsEnabled } from "~/api/mutations/admin/useToggleLearningPathsEnabled";
 import { useToggleLiveTraining } from "~/api/mutations/admin/useToggleLiveTraining";
@@ -52,6 +53,7 @@ export function usePlatformFeatures(globalSettings: GlobalSettings, canManageEnv
     useUpdateLeaderboardSettings();
   const { mutate: toggleCourseDiscussions, isPending: isCourseDiscussionsPending } =
     useToggleCourseDiscussions();
+  const { mutate: toggleForum, isPending: isForumPending } = useToggleForum();
   const { mutate: toggleLiveTraining, isPending: isLiveTrainingPending } = useToggleLiveTraining();
   const { mutate: toggleCoursesForVisitors, isPending: isCoursesForVisitorsPending } =
     useUnregisteredUserCoursesAccessibility();
@@ -104,6 +106,12 @@ export function usePlatformFeatures(globalSettings: GlobalSettings, canManageEnv
         isPublic: false,
         isPending: isCourseDiscussionsPending,
         toggle: () => toggleCourseDiscussions(),
+      }))
+      .with(PLATFORM_FEATURE_IDS.FORUM, () => ({
+        isEnabled: globalSettings.forumEnabled,
+        isPublic: false,
+        isPending: isForumPending,
+        toggle: () => toggleForum(),
       }))
       .with(PLATFORM_FEATURE_IDS.NEWS, () => ({
         isEnabled: globalSettings.newsEnabled,
