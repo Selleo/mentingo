@@ -4400,7 +4400,6 @@
       "correctMatch": "Correct match:",
       "fillInTheBlanksInstruction": "Click a blank and choose a word.",
       "matchingInstruction": "Click an item and choose its match.",
-      "chooseMatch": "Choose a match",
       "blankLabel": "Blank {{current}} of {{total}}",
       "answerBank": "the answer bank",
       "removeWord": "Remove word",

@@ -110,11 +110,9 @@ describe("Matching", () => {
 
     expect(trigger).toHaveTextContent("Woof");
     expect(trigger).toHaveAccessibleName("Cat, Woof");
-    // Matching keeps the dropdown look, unlike bare fill-in-the-blanks.
-    expect(trigger).not.toHaveClass("[&>svg]:hidden");
-    expect(within(screen.getByTestId("pair-dog")).getByRole("combobox")).toHaveTextContent(
-      i18next.t("studentLessonView.other.chooseMatch"),
-    );
+    // Same plain look as fill-in-the-blanks: the pair name is announced, not shown.
+    expect(trigger).toHaveClass("[&>svg]:hidden");
+    expect(within(screen.getByTestId("pair-dog")).getByRole("combobox").textContent).toBe("");
 
     const bankMatch = within(screen.getByTestId("blank_preset")).getByText("Meow");
 

@@ -4406,7 +4406,6 @@
       "correctMatch": "Správné přiřazení:",
       "fillInTheBlanksInstruction": "Klikněte na mezeru a vyberte slovo.",
       "matchingInstruction": "Klikněte na položku a vyberte její protějšek.",
-      "chooseMatch": "Vyberte protějšek",
       "blankLabel": "Mezera {{current}} z {{total}}",
       "answerBank": "zásobníku odpovědí",
       "removeWord": "Odebrat slovo",

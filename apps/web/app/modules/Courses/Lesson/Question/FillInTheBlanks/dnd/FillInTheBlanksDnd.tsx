@@ -518,7 +518,6 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
                 items={wordItems}
                 onSelect={(wordKey) => handleSelectWord(blankId, wordKey)}
                 minWidth={blankMinWidth}
-                bare
               />
             );
           }}

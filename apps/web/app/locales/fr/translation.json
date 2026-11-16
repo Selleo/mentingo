@@ -4157,7 +4157,6 @@
       "correctMatch": "Bonne correspondance :",
       "fillInTheBlanksInstruction": "Cliquez sur un espace et choisissez un mot.",
       "matchingInstruction": "Cliquez sur un élément et choisissez sa correspondance.",
-      "chooseMatch": "Choisir une correspondance",
       "blankLabel": "Espace {{current}} sur {{total}}",
       "answerBank": "la banque de réponses",
       "removeWord": "Retirer le mot",

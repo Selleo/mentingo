@@ -224,7 +224,6 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
                   <BlankSelect
                     blankId={id}
                     label={optionText ?? ""}
-                    placeholder={t("studentLessonView.other.chooseMatch")}
                     selectedKey={renderedAnswers[id] ?? null}
                     items={targetItems}
                     onSelect={(targetKey) => handleSelectMatch(id, targetKey)}

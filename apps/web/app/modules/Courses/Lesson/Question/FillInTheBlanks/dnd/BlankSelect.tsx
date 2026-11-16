@@ -18,11 +18,8 @@ type BlankSelectProps = {
   selectedKey: string | null;
   items: BlankSelectItem[];
   onSelect: (key: string | null) => void;
-  placeholder?: string;
   minWidth?: string;
   wrapText?: boolean;
-  // Plain blank in a sentence: no chevron or placeholder, so it doesn't read as a dropdown.
-  bare?: boolean;
 };
 
 // Radix forbids an empty-string item value, so clearing a blank uses a sentinel.
@@ -34,10 +31,8 @@ export const BlankSelect = ({
   selectedKey,
   items,
   onSelect,
-  placeholder,
   minWidth,
   wrapText,
-  bare,
 }: BlankSelectProps) => {
   const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: blankId, data: { blankId } });
@@ -63,16 +58,14 @@ export const BlankSelect = ({
         <SelectTrigger
           aria-label={accessibleName}
           className={cn(
-            "h-9 w-full min-w-0 rounded-md px-2 py-1 text-sm",
+            // No chevron or placeholder so it reads as a blank, not a dropdown; the border alone marks the
+            // control, so neutral-600 keeps it at 3:1 (WCAG 1.4.11).
+            "h-9 w-full min-w-0 rounded-md border-neutral-600 px-2 py-1 text-sm [&>svg]:hidden",
             wrapText && "h-auto min-h-9",
-            // Without the chevron and text the border alone marks the control; neutral-600 keeps it at 3:1 (WCAG 1.4.11).
-            bare && "border-neutral-600 [&>svg]:hidden",
             isOver && "ring-2 ring-primary-400",
           )}
         >
-          <SelectValue placeholder={bare ? undefined : (placeholder ?? label)}>
-            {selectedLabel}
-          </SelectValue>
+          <SelectValue>{selectedLabel}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {selectedKey && (

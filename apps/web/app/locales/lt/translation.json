@@ -4401,7 +4401,6 @@
       "correctMatch": "Teisingas atitikmuo:",
       "fillInTheBlanksInstruction": "Spustelėkite tarpą ir pasirinkite žodį.",
       "matchingInstruction": "Spustelėkite elementą ir pasirinkite jo atitikmenį.",
-      "chooseMatch": "Pasirinkite atitikmenį",
       "blankLabel": "Tarpas {{current}} iš {{total}}",
       "answerBank": "atsakymų banką",
       "removeWord": "Pašalinti žodį",

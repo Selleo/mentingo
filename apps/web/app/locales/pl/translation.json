@@ -4669,7 +4669,6 @@
       "correctMatch": "Poprawne dopasowanie:",
       "fillInTheBlanksInstruction": "Kliknij lukę i wybierz słowo.",
       "matchingInstruction": "Kliknij element i wybierz dopasowanie.",
-      "chooseMatch": "Wybierz dopasowanie",
       "blankLabel": "Luka {{current}} z {{total}}",
       "answerBank": "bank odpowiedzi",
       "removeWord": "Usuń słowo",

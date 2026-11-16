@@ -4344,7 +4344,6 @@
       "correctMatch": "Pareja correcta:",
       "fillInTheBlanksInstruction": "Haz clic en un espacio y elige una palabra.",
       "matchingInstruction": "Haz clic en un elemento y elige su correspondencia.",
-      "chooseMatch": "Elige una correspondencia",
       "blankLabel": "Espacio {{current}} de {{total}}",
       "answerBank": "el banco de respuestas",
       "removeWord": "Quitar palabra",
