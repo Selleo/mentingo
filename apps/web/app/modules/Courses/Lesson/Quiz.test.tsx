@@ -344,3 +344,38 @@ describe("author feedback message", () => {
     expect(screen.queryByTestId(LEARNING_HANDLES.QUIZ_FEEDBACK_MESSAGE)).not.toBeInTheDocument();
   });
 });
+
+describe("partial score while awaiting review", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.isPreviewMode = false;
+  });
+
+  const awaitingReviewLesson = (correctAnswerCount: number | null) => {
+    // score_only redacts per-question correctness but still delivers the graded counts.
+    const lesson = buildLesson({
+      timeLimitMinutes: null,
+      isQuizAwaitingReview: true,
+      isQuizFeedbackRedacted: true,
+    });
+
+    if (lesson.quizDetails) {
+      lesson.quizDetails.correctAnswerCount = correctAnswerCount;
+      lesson.quizDetails.wrongAnswerCount = correctAnswerCount === null ? null : 0;
+    }
+
+    return lesson;
+  };
+
+  it("shows the graded count whenever the API delivers it, even with redacted correctness", () => {
+    renderQuiz(awaitingReviewLesson(2));
+
+    expect(screen.getByTestId(LEARNING_HANDLES.QUIZ_PARTIAL_SCORE)).toBeInTheDocument();
+  });
+
+  it("hides the graded count when the API withholds it (master gate off)", () => {
+    renderQuiz(awaitingReviewLesson(null));
+
+    expect(screen.queryByTestId(LEARNING_HANDLES.QUIZ_PARTIAL_SCORE)).not.toBeInTheDocument();
+  });
+});

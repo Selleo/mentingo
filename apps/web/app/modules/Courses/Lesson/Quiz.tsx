@@ -301,7 +301,8 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
                     <span data-testid={LEARNING_HANDLES.QUIZ_AWAITING_REVIEW}>
                       <ProgressBadge progress="awaitingReview" />
                     </span>
-                    {!lesson.isQuizFeedbackRedacted && (
+                    {/* The API sends the counts only when the partial result may be shown. */}
+                    {typeof lesson.quizDetails?.correctAnswerCount === "number" && (
                       <span data-testid={LEARNING_HANDLES.QUIZ_PARTIAL_SCORE}>
                         {t("studentLessonView.other.partialScore", {
                           correct: lesson.quizDetails?.correctAnswerCount ?? 0,

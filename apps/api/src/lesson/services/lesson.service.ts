@@ -467,7 +467,8 @@ export class LessonService {
     }
 
     // Partial result: counts only already graded questions, the rest waits for a reviewer.
-    if (lesson.isQuizAwaitingReview && !isQuizFeedbackRedacted) {
+    // Gated by the master gate only, so score_only still shows the graded count.
+    if (lesson.isQuizAwaitingReview && !isFeedbackMasterGateOff) {
       const quizDetails: QuestionDetails = {
         questions: redactedQuestionList,
         questionCount: redactedQuestionList.length,
