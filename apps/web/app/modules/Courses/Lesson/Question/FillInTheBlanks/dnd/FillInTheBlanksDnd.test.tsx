@@ -6,23 +6,20 @@ import { describe, expect, it } from "vitest";
 import { QuizContextProvider } from "~/modules/Courses/components/QuizContextProvider";
 import i18next from "~/utils/mocks/i18next.mock";
 
+import { makeQuizQuestion, makeQuizQuestionOption } from "../../testFactories";
+
 import { FillInTheBlanksDnd } from "./FillInTheBlanksDnd";
 
-import type { QuizQuestion } from "../../types";
 import type { PropsWithChildren } from "react";
 
-const question = {
-  id: "question-1",
+const question = makeQuizQuestion({
   type: "fill_in_the_blanks_dnd",
-  displayOrder: 1,
-  passQuestion: false,
-  solutionExplanation: null,
   description: "The quick <blank-answer-opt-1> jumps over the lazy <blank-answer-opt-2>.",
   options: [
-    { id: "opt-1", optionText: "brown", displayOrder: 1, isCorrect: true },
-    { id: "opt-2", optionText: "dog", displayOrder: 2, isCorrect: true },
+    makeQuizQuestionOption({ id: "opt-1", optionText: "brown", displayOrder: 1, isCorrect: true }),
+    makeQuizQuestionOption({ id: "opt-2", optionText: "dog", displayOrder: 2, isCorrect: true }),
   ],
-} as unknown as QuizQuestion;
+});
 
 const renderDnd = () => {
   const Wrapper = ({ children }: PropsWithChildren) => {

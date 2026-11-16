@@ -8,29 +8,24 @@ import { getUserAnswers } from "~/modules/Courses/Lesson/utils";
 import i18next from "~/utils/mocks/i18next.mock";
 
 import { Matching, placeMatch } from "./Matching";
+import { makeQuizQuestion, makeQuizQuestionOption } from "./testFactories";
 
-import type { QuizQuestion } from "./types";
 import type { PropsWithChildren } from "react";
 
-const question = {
-  id: "question-1",
+const question = makeQuizQuestion({
   type: "matching",
   title: "Match the animal with its sound",
-  displayOrder: 1,
-  solutionExplanation: null,
-  passQuestion: false,
   matchingTargets: ["Woof", "", "Meow"],
   options: [
-    {
+    makeQuizQuestionOption({
       id: "pair-cat",
       optionText: "Cat",
-      displayOrder: 1,
       isStudentAnswer: true,
       studentAnswer: "Meow",
       isCorrect: true,
       matchedWord: "Meow",
-    },
-    {
+    }),
+    makeQuizQuestionOption({
       id: "pair-dog",
       optionText: "Dog",
       displayOrder: 2,
@@ -38,9 +33,9 @@ const question = {
       studentAnswer: "Meow",
       isCorrect: false,
       matchedWord: "Woof",
-    },
+    }),
   ],
-} as QuizQuestion;
+});
 
 type RenderOptions = { isCompleted: boolean; isQuizFeedbackRedacted?: boolean };
 
