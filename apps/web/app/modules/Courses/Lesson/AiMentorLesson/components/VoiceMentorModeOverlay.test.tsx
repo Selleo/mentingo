@@ -1,4 +1,4 @@
-import { VOICE_MODE_STATE } from "@repo/shared";
+import { createTextUiMessage, VOICE_MODE_STATE } from "@repo/shared";
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -8,6 +8,9 @@ import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 import { renderWith } from "../../../../../utils/testUtils";
 
 import { VoiceMentorModeOverlay } from "./VoiceMentorModeOverlay";
+
+import type { UIMessage } from "@ai-sdk/react";
+import type { MentorSpeechPresentation } from "~/modules/Voice/voice-mentor-presentation.types";
 
 vi.mock("~/api/queries", () => ({
   useCurrentUserSuspense: vi.fn(() => ({
@@ -31,6 +34,8 @@ const renderOverlay = ({
   connectionState = VOICE_CONNECTION_STATE.CONNECTED,
   response = "",
   canJudge = true,
+  messages,
+  mentorSpeech = null,
 }: {
   onJudge?: () => Promise<void>;
   onMicMutedChange?: (muted: boolean) => void;
@@ -39,6 +44,8 @@ const renderOverlay = ({
   connectionState?: (typeof VOICE_CONNECTION_STATE)[keyof typeof VOICE_CONNECTION_STATE];
   response?: string;
   canJudge?: boolean;
+  messages?: UIMessage[];
+  mentorSpeech?: MentorSpeechPresentation | null;
 } = {}) => {
   renderWith().render(
     <VoiceMentorModeOverlay
@@ -48,7 +55,8 @@ const renderOverlay = ({
       mentorVoiceLevel={0}
       learnerTranscript={null}
       response={response}
-      mentorSpeech={null}
+      mentorSpeech={mentorSpeech}
+      messages={messages}
       mentorName="Mentor"
       hasTaskDescription
       taskDescription="Practice the customer conversation."
@@ -68,6 +76,35 @@ const renderOverlay = ({
 };
 
 describe("VoiceMentorModeOverlay", () => {
+  it.each([
+    { text: "Dzień", activeWordIndex: 0, activeWord: "Dzień" },
+    { text: "Dzień dobry.", activeWordIndex: 1, activeWord: "dobry." },
+  ])(
+    "highlights $activeWord in the streamed conversation bubble",
+    ({ text, activeWordIndex, activeWord }) => {
+      renderOverlay({
+        response: text,
+        messages: [
+          createTextUiMessage<UIMessage>({ id: "voice-1", role: "assistant", content: text }),
+        ],
+        mentorSpeech: {
+          turnId: "turn-1",
+          sequence: 2,
+          activeWordIndex,
+          words: [
+            { text: "Dzień", startMs: 0, endMs: 200 },
+            { text: "dobry.", startMs: 200, endMs: 500 },
+          ],
+        },
+      });
+      expect(screen.getByText(activeWord, { selector: "span.rounded" })).toHaveClass(
+        "bg-primary-100",
+        "text-primary-950",
+      );
+      expect(screen.queryByText("[neutral]")).not.toBeInTheDocument();
+    },
+  );
+
   it("disables evaluation on desktop and mobile until the Practice turn is ready", () => {
     const { onJudge } = renderOverlay({ canJudge: false });
     const desktop = screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY_CHECK_BUTTON);
