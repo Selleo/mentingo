@@ -87,7 +87,7 @@ test("enabling invite-only registration shows visitors the invite-only screen", 
 
     await openSettingsPageFlow(page);
     await page.getByTestId(SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB).click();
-    await setInviteOnlyRegistrationFlow(page, true);
+    await setInviteOnlyRegistrationFlow(page, { current: originalValue, enabled: true });
     await expect.poll(getInviteOnlyRegistration).toBe(true);
 
     const visitor = await createWorkspacePage();

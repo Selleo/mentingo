@@ -2,7 +2,6 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
-import { TOAST_HANDLES } from "../../data/common/handles";
 import { USERS_IMPORT_MODAL_HANDLES, USERS_PAGE_HANDLES } from "../../data/users/handles";
 import {
   USERS_IMPORT_FILE_TEMPLATES,
@@ -13,6 +12,7 @@ import { openImportUsersModalFlow } from "../../flows/users/open-import-users-mo
 import { openUsersPageFlow } from "../../flows/users/open-users-page.flow";
 import { submitImportUsersFlow } from "../../flows/users/submit-import-users.flow";
 import { uploadUsersImportFileFlow } from "../../flows/users/upload-users-import-file.flow";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 
 test("admin can import users from csv and assign existing groups", async ({
   cleanup,
@@ -212,7 +212,7 @@ test("admin sees an error when the import file is malformed", async ({
     await uploadUsersImportFileFlow(page, importFile.filePath);
     await submitImportUsersFlow(page);
 
-    await expect(page.getByTestId(TOAST_HANDLES.ROOT)).toBeVisible();
+    await assertToastVariantVisible(page, "destructive");
     await expect(page.getByTestId(USERS_IMPORT_MODAL_HANDLES.RESULT)).toHaveCount(0);
     await expect(page.getByTestId(USERS_IMPORT_MODAL_HANDLES.ROOT)).toBeVisible();
   });
@@ -250,7 +250,7 @@ test("admin sees an error when all imported users reference unknown groups", asy
     await uploadUsersImportFileFlow(page, importFile.filePath);
     await submitImportUsersFlow(page);
 
-    await expect(page.getByTestId(TOAST_HANDLES.ROOT)).toBeVisible();
+    await assertToastVariantVisible(page, "destructive");
     await expect(page.getByTestId(USERS_IMPORT_MODAL_HANDLES.RESULT)).toHaveCount(0);
     await expect(page.getByTestId(USERS_IMPORT_MODAL_HANDLES.ROOT)).toBeVisible();
 

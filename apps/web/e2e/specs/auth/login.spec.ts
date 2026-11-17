@@ -9,7 +9,6 @@ import {
   PASSWORD_RECOVERY_PAGE_HANDLES,
   REGISTER_PAGE_HANDLES,
 } from "../../data/auth/handles";
-import { TOAST_HANDLES } from "../../data/common/handles";
 import { NAVIGATION_HANDLES } from "../../data/navigation/handles";
 import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { USERS_PAGE_HANDLES } from "../../data/users/handles";
@@ -17,6 +16,7 @@ import { expect, test } from "../../fixtures/test.fixture";
 import { fillLoginFormFlow } from "../../flows/auth/fill-login-form.flow";
 import { openLoginPageFlow } from "../../flows/auth/open-login-page.flow";
 import { submitLoginFormFlow } from "../../flows/auth/submit-login-form.flow";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 
 const { version } = versionJson;
 
@@ -112,7 +112,7 @@ test("visitor cannot log in with invalid credentials", async ({ cleanup, createW
   await fillLoginFormFlow(page, `visitor-${Date.now()}@example.com`, "wrong-password");
   await submitLoginFormFlow(page);
 
-  await expect(page.getByTestId(TOAST_HANDLES.ROOT)).toBeVisible();
+  await assertToastVariantVisible(page, "destructive");
   await expect(page).toHaveURL("/auth/login");
   await expect(page.getByTestId(LOGIN_PAGE_HANDLES.PAGE)).toBeVisible();
 });

@@ -3,6 +3,7 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { USER_ROLE } from "~/config/userRoles";
 
 import { LOGIN_PAGE_HANDLES } from "../../data/auth/handles";
+import { getRoleRouteAccess } from "../../data/navigation/route-access.data";
 import { REPORTS_HANDLES } from "../../data/reports/handles";
 import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { authenticateContext } from "../../fixtures/auth.actions";
@@ -11,14 +12,12 @@ import { fillLoginFormFlow } from "../../flows/auth/fill-login-form.flow";
 import { submitLoginFormFlow } from "../../flows/auth/submit-login-form.flow";
 import {
   assertDeniedRoutesFlow,
-  assertReportApiAllowedFlow,
   assertReportApiDeniedFlow,
   assertReportsAccessFlow,
-  canAccessReports,
-  deniedRouteRedirect,
   observeReportRequests,
 } from "../../flows/navigation/assert-route-access.flow";
 import { createFixtureApiClient } from "../../utils/api-client";
+import { enableLiveTraining } from "../../utils/live-training-settings";
 import { protectedRoutes } from "../../utils/protected-routes";
 import { requireOrigin } from "../../utils/tenant-host";
 
@@ -43,40 +42,18 @@ test("anonymous cannot enter any protected route", async ({ cleanup, createWorks
   await assertReportApiDeniedFlow(anonymousClient, 401);
 });
 
-for (const role of [USER_ROLE.student, USER_ROLE.contentCreator] as const) {
-  test(`${role} cannot directly enter routes without permission`, async ({
+for (const role of [USER_ROLE.admin, USER_ROLE.student, USER_ROLE.contentCreator] as const) {
+  test(`${role} route and reports access follows its role on direct entry and reload`, async ({
     apiClient,
     withWorkerPage,
   }) => {
     test.slow();
     await withWorkerPage(role, async ({ page }) => {
-      const requests = observeReportRequests(page);
-      await assertDeniedRoutesFlow(page, role);
-
-      if (canAccessReports(role)) {
-        await assertReportsAccessFlow(page, apiClient, role);
-      } else {
-        await page.goto("/REPORTS/?language=en");
-        await expect(page).toHaveURL(deniedRouteRedirect(role));
-        await page.reload();
-        await expect(page).toHaveURL(deniedRouteRedirect(role));
-        await assertReportApiDeniedFlow(apiClient, 403);
-        expect(requests).toEqual([]);
-      }
+      if (role !== USER_ROLE.admin) await assertDeniedRoutesFlow(page, role);
+      await assertReportsAccessFlow(page, apiClient, role);
     });
   });
 }
-
-test("admin can open and reload reports and its APIs", async ({ apiClient, withWorkerPage }) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    for (const open of [() => page.goto("/reports?language=en"), () => page.reload()]) {
-      await open();
-      await expect(page).toHaveURL(/\/reports\?language=en$/);
-      await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeVisible();
-    }
-    await assertReportApiAllowedFlow(apiClient);
-  });
-});
 
 for (const role of [
   SYSTEM_ROLE_SLUGS.TRAINER,
@@ -95,19 +72,7 @@ for (const role of [
 
     await withWorkerPage(USER_ROLE.admin, async () => {
       // Assigning the trainer role requires the live-training feature; restore it afterwards.
-      const isLiveTrainingEnabled = async () =>
-        (await apiClient.api.settingsControllerGetPublicGlobalSettings()).data.data
-          .liveTrainingEnabled;
-      const originalLiveTraining = await isLiveTrainingEnabled();
-
-      if (role === SYSTEM_ROLE_SLUGS.TRAINER && !originalLiveTraining) {
-        cleanup.add(async () => {
-          if ((await isLiveTrainingEnabled()) !== originalLiveTraining) {
-            await apiClient.api.settingsControllerUpdateLiveTrainingEnabled();
-          }
-        });
-        await apiClient.api.settingsControllerUpdateLiveTrainingEnabled();
-      }
+      if (role === SYSTEM_ROLE_SLUGS.TRAINER) cleanup.add(await enableLiveTraining(apiClient));
 
       const userFactory = factories.createUserFactory();
       const user = await userFactory.register({ password: TEST_PASSWORD });
@@ -156,8 +121,8 @@ for (const role of [SYSTEM_ROLE_SLUGS.ADMIN, SYSTEM_ROLE_SLUGS.STUDENT] as const
 
     const { context, page } = await createWorkspacePage();
     cleanup.add(() => context.close());
-    const allowed = canAccessReports(role);
-    const destination = allowed ? /\/reports\?language=en$/ : deniedRouteRedirect(role);
+    const { canAccessReports: allowed, deniedRedirect } = getRoleRouteAccess(role);
+    const destination = allowed ? /\/reports\?language=en$/ : deniedRedirect;
 
     await page.goto("/reports?language=en");
     await expect(page.getByTestId(LOGIN_PAGE_HANDLES.PAGE)).toBeVisible();

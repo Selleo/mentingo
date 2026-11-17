@@ -2,12 +2,12 @@ import { SYSTEM_ROLE_SLUGS, SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
-import { TOAST_HANDLES } from "../../data/common/handles";
 import { CREATE_USER_PAGE_HANDLES, USER_PAGE_HANDLES } from "../../data/users/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { fillCreateUserFormFlow } from "../../flows/users/fill-create-user-form.flow";
 import { openCreateUserPageFlow } from "../../flows/users/open-create-user-page.flow";
 import { submitCreateUserFormFlow } from "../../flows/users/submit-create-user-form.flow";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 
 test("admin can create a user from the create page", async ({
   cleanup,
@@ -86,6 +86,6 @@ test("admin sees a conflict when creating a duplicate email", async ({
     await submitCreateUserFormFlow(page);
 
     await expect(page).toHaveURL(/\/admin\/users\/new$/);
-    await expect(page.getByTestId(TOAST_HANDLES.ROOT)).toBeVisible();
+    await assertToastVariantVisible(page, "destructive");
   });
 });

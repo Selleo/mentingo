@@ -1,5 +1,6 @@
 import { USER_ROLE } from "~/config/userRoles";
 
+import { getRoleRouteAccess } from "../../data/navigation/route-access.data";
 import { TENANTS_PAGE_HANDLES, TENANT_PAGE_HANDLES } from "../../data/tenants/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { filterTenantsFlow } from "../../flows/tenants/filter-tenants.flow";
@@ -54,6 +55,21 @@ test("managing admin can browse, filter, and open tenant details", async ({
 
       await expect(page).toHaveURL(new RegExp(`/super-admin/tenants/${tenants[0].id}$`));
       await expect(page.getByTestId(TENANT_PAGE_HANDLES.PAGE)).toBeVisible();
+    },
+    { root: true },
+  );
+});
+
+test("student in the managing tenant cannot open tenant administration", async ({
+  withWorkerPage,
+}) => {
+  await withWorkerPage(
+    USER_ROLE.student,
+    async ({ page }) => {
+      await page.goto("/super-admin/tenants");
+
+      await expect(page).toHaveURL(getRoleRouteAccess(USER_ROLE.student).deniedRedirect);
+      await expect(page.getByTestId(TENANTS_PAGE_HANDLES.PAGE)).toHaveCount(0);
     },
     { root: true },
   );

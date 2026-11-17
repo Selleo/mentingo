@@ -1,9 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
-import { matchesRequirement, SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
-import { routeAccessConfig } from "../../../app/config/routeAccessConfig";
+import { getRoleRouteAccess } from "../../data/navigation/route-access.data";
 import { REPORTS_HANDLES } from "../../data/reports/handles";
-import { protectedRoutes } from "../../utils/protected-routes";
+import { protectedRoutes, toRoutePattern } from "../../utils/protected-routes";
 
 import type { FixtureApiClient } from "../../utils/api-client";
 
@@ -25,13 +24,6 @@ export const observeReportRequests = (page: Page) => {
   return requests;
 };
 
-export const canAccessReports = (role: string) =>
-  matchesRequirement(SYSTEM_ROLE_PERMISSIONS[role], routeAccessConfig.reports);
-
-// The reviewer has no dashboard, course, calendar or path access, so it lands on the grading queue.
-export const deniedRouteRedirect = (role: string) =>
-  role === SYSTEM_ROLE_SLUGS.REVIEWER ? /\/quiz-grading$/ : /\/(dashboard|courses)$/;
-
 export const assertReportApiDeniedFlow = async (client: FixtureApiClient, status: number) => {
   for (const request of [
     () => client.api.reportControllerGetReportOptions({ language: "en" }),
@@ -48,35 +40,46 @@ export const assertReportApiAllowedFlow = async (client: FixtureApiClient) => {
   expect((await client.api.reportControllerRunReport(REPORT_QUERY)).status).toBe(201);
 };
 
-/** Visits every protected route the role lacks permission for and expects a redirect. */
+/** Visits every protected route outside the role's hard-coded allow-list and expects a redirect. */
 export const assertDeniedRoutesFlow = async (page: Page, role: string) => {
-  for (const { path, requirement } of protectedRoutes) {
-    if (matchesRequirement(SYSTEM_ROLE_PERMISSIONS[role], requirement)) continue;
+  const { allowedRoutes, deniedRedirect } = getRoleRouteAccess(role);
+  if (!allowedRoutes) throw new Error(`Role "${role}" has no allowed-route expectations`);
+
+  for (const { path } of protectedRoutes) {
+    if (allowedRoutes.includes(toRoutePattern(path))) continue;
     await test.step(path, async () => {
       await page.goto(`${path}?language=en`);
-      await expect(page).toHaveURL(deniedRouteRedirect(role));
+      await expect(page).toHaveURL(deniedRedirect);
       await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toHaveCount(0);
     });
   }
 };
 
-/** Direct entry and reload of /reports follow the role's permission, in the UI and the API. */
+/**
+ * Direct entry and reload of /reports follow the role's permission, in the UI and the API.
+ * Denied roles also try a differently cased path with a trailing slash.
+ */
 export const assertReportsAccessFlow = async (
   page: Page,
   client: FixtureApiClient,
   role: string,
 ) => {
   const requests = observeReportRequests(page);
-  const allowed = canAccessReports(role);
+  const { canAccessReports: allowed, deniedRedirect } = getRoleRouteAccess(role);
+  const entries = allowed
+    ? ["/reports?language=en"]
+    : ["/reports?language=en", "/REPORTS/?language=en"];
 
-  for (const open of [() => page.goto("/reports?language=en"), () => page.reload()]) {
-    await open();
-    if (allowed) {
-      await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeVisible();
-      await expect(page).toHaveURL(/\/reports\?language=en$/);
-    } else {
-      await expect(page).toHaveURL(deniedRouteRedirect(role));
-      await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toHaveCount(0);
+  for (const entry of entries) {
+    for (const open of [() => page.goto(entry), () => page.reload()]) {
+      await open();
+      if (allowed) {
+        await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeVisible();
+        await expect(page).toHaveURL(/\/reports\?language=en$/);
+      } else {
+        await expect(page).toHaveURL(deniedRedirect);
+        await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toHaveCount(0);
+      }
     }
   }
 

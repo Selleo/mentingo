@@ -1,12 +1,12 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { TOAST_HANDLES } from "../../data/common/handles";
 import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { login, logout } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
 import { fillMagicLinkFormFlow } from "../../flows/auth/fill-magic-link-form.flow";
 import { openMagicLinkPageFlow } from "../../flows/auth/open-magic-link-page.flow";
 import { submitMagicLinkFormFlow } from "../../flows/auth/submit-magic-link-form.flow";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 import { extractLinkFromMailhogMessage, waitForMailhogMessage } from "../../utils/mailhog";
 
 test("visitor can log in from the magic link email", async ({
@@ -38,7 +38,7 @@ test("visitor can log in from the magic link email", async ({
   await fillMagicLinkFormFlow(page, email);
   await submitMagicLinkFormFlow(page);
 
-  await expect(page.getByTestId(TOAST_HANDLES.ROOT)).toBeVisible();
+  await assertToastVariantVisible(page, "default");
 
   const message = await waitForMailhogMessage({
     recipient: email,

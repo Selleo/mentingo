@@ -1,5 +1,6 @@
 import { Link } from "@remix-run/react";
 
+import { errorPageActionTestId } from "../../../e2e/data/common/handles";
 import { cn } from "../../lib/utils";
 import { Icon } from "../Icon";
 import { Button } from "../ui/button";
@@ -60,13 +61,17 @@ export default function ErrorPage({
               <Button
                 onClick={onAction}
                 className="gap-2"
-                data-testid={testId && `${testId}-action`}
+                data-testid={testId && errorPageActionTestId(testId)}
               >
                 {actionLabel}
                 {actionIcon && <Icon name={actionIcon} className="size-4" aria-hidden="true" />}
               </Button>
             ) : (
-              <Link to={to ?? "/"} prefetch="intent" data-testid={testId && `${testId}-action`}>
+              <Link
+                to={to ?? "/"}
+                prefetch="intent"
+                data-testid={testId && errorPageActionTestId(testId)}
+              >
                 <Button className="gap-2">
                   {actionLabel}
                   {actionIcon && <Icon name={actionIcon} className="size-4" aria-hidden="true" />}

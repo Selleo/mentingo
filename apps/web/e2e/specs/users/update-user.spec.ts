@@ -67,6 +67,8 @@ test("admin can update a user's details, roles and groups, then archive the user
 
     await openUsersPageFlow(page);
     await filterUsersFlow(page, { keyword: updatedEmail });
+    // The keyword matches only the archived user, so the loaded active list is empty.
+    await expect(page.getByTestId(USERS_PAGE_HANDLES.EMPTY_STATE)).toBeVisible();
     await expect(page.getByTestId(USERS_PAGE_HANDLES.row(user.id))).toHaveCount(0);
     await filterUsersFlow(page, { archivedStatus: "archived" });
     await expect(page.getByTestId(USERS_PAGE_HANDLES.row(user.id))).toBeVisible();

@@ -1,6 +1,5 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { TOAST_HANDLES } from "../../data/common/handles";
 import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { login, logout } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
@@ -9,6 +8,7 @@ import { fillPasswordRecoveryFormFlow } from "../../flows/auth/fill-password-rec
 import { openPasswordRecoveryPageFlow } from "../../flows/auth/open-password-recovery-page.flow";
 import { submitCreateNewPasswordFormFlow } from "../../flows/auth/submit-create-new-password-form.flow";
 import { submitPasswordRecoveryFormFlow } from "../../flows/auth/submit-password-recovery-form.flow";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 import { extractLinkFromMailhogMessage, waitForMailhogMessage } from "../../utils/mailhog";
 
 const UPDATED_PASSWORD = "ChangedPassword123@";
@@ -42,7 +42,7 @@ test("visitor can reset a password from the recovery email", async ({
   await fillPasswordRecoveryFormFlow(page, email);
   await submitPasswordRecoveryFormFlow(page);
 
-  await expect(page.getByTestId(TOAST_HANDLES.ROOT)).toBeVisible();
+  await assertToastVariantVisible(page, "default");
 
   const message = await waitForMailhogMessage({
     recipient: email,
