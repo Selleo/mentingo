@@ -95,7 +95,7 @@ test("student creates a forum topic and replies to it", async ({ createIsolatedW
   );
 });
 
-test("course discussion threads appear in the forum only for enrolled users", async ({
+test("enrolled users read their course discussion in the forum", async ({
   createIsolatedWorkspace,
 }) => {
   const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
@@ -119,20 +119,27 @@ test("course discussion threads appear in the forum only for enrolled users", as
     .enrollUsers(course.id, [enrolledStudent.user.id]);
 
   const threadContent = uniqueLabel("course-thread");
-  await enrolledStudent.apiClient.api.courseChatControllerCreateMessage(course.id, {
+  const message = await enrolledStudent.apiClient.api.courseChatControllerCreateMessage(course.id, {
     content: threadContent,
   });
-  const topicId = await waitForTopicId(enrolledStudent.apiClient, threadContent);
 
   await openForumFlow(enrolledStudent.page, enrolledStudent.origin);
-  await expect(enrolledStudent.page.getByTestId(FORUM_HANDLES.topicItemTitle(topicId))).toHaveText(
-    threadContent,
+  await expect(enrolledStudent.page.getByTestId(FORUM_HANDLES.EMPTY_STATE)).toBeVisible();
+
+  const courseDiscussion = enrolledStudent.page.getByTestId(
+    FORUM_HANDLES.courseDiscussion(course.id),
   );
-  await expect(enrolledStudent.page.getByTestId(FORUM_HANDLES.topicItemCourse(topicId))).toHaveText(
-    courseTitle,
-  );
+  await expect(courseDiscussion).toContainText(courseTitle);
+  await courseDiscussion.click();
+  await expect(enrolledStudent.page).toHaveURL(new RegExp(`/forum/courses/${course.id}$`));
+  await expect(
+    enrolledStudent.page.getByTestId(FORUM_HANDLES.COURSE_DISCUSSION_TITLE),
+  ).toContainText(courseTitle);
+  await expect(
+    enrolledStudent.page.getByTestId(FORUM_HANDLES.postContent(message.data.data.id)),
+  ).toHaveText(threadContent);
 
   await openForumFlow(outsider.page, outsider.origin);
   await expect(outsider.page.getByTestId(FORUM_HANDLES.EMPTY_STATE)).toBeVisible();
-  await expect(outsider.page.getByTestId(FORUM_HANDLES.topicItem(topicId))).toHaveCount(0);
+  await expect(outsider.page.getByTestId(FORUM_HANDLES.COURSE_DISCUSSIONS)).toHaveCount(0);
 });

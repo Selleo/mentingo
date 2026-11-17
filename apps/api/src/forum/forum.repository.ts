@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT, DISCUSSION_SCOPES, FORUM_TOPIC_SORTS, PERMISSIONS } from "@repo/shared";
-import { and, asc, count, desc, eq, exists, ilike, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { match } from "ts-pattern";
 
@@ -15,16 +15,17 @@ import {
   users,
 } from "src/storage/schema";
 
-import type { DiscussionScope, SupportedLanguages } from "@repo/shared";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CourseChatUserProfileRow } from "src/course-chat/course-chat.repository.types";
 import type {
+  ForumCourseDiscussionRow,
   ForumPostContext,
   ForumPostRow,
   ForumThreadContext,
   ForumTopicRow,
 } from "src/forum/forum.repository.types";
-import type { ForumTopicListQuery, ForumTopicVisibility } from "src/forum/forum.types";
+import type { ForumCourseDiscussionListQuery, ForumTopicListQuery } from "src/forum/forum.types";
 
 const firstPosts = alias(courseChatMessages, "forum_first_posts");
 
@@ -37,17 +38,13 @@ export class ForumRepository {
 
   async findTopics(
     query: ForumTopicListQuery,
-    visibility: ForumTopicVisibility,
   ): Promise<{ data: ForumTopicRow[]; totalItems: number }> {
     const visibleTopics = this.db
       .$with("visible_forum_topics")
       .as(
-        this.topicQuery(query.language).where(
+        this.topicQuery().where(
           and(
             this.visibleTopicCondition(),
-            this.topicAccessCondition(visibility),
-            query.scope ? eq(courseChatThreads.scope, query.scope) : undefined,
-            query.courseId ? eq(courseChatThreads.courseId, query.courseId) : undefined,
             query.search ? this.topicSearchCondition(query.search) : undefined,
           ),
         ),
@@ -80,12 +77,9 @@ export class ForumRepository {
     return { data, totalItems };
   }
 
-  async findTopicById(
-    topicId: UUIDType,
-    language: SupportedLanguages,
-  ): Promise<ForumTopicRow | null> {
-    const [topic] = await this.topicQuery(language)
-      .where(and(eq(courseChatThreads.id, topicId), eq(courseChatThreads.archived, false)))
+  async findTopicById(topicId: UUIDType): Promise<ForumTopicRow | null> {
+    const [topic] = await this.topicQuery()
+      .where(and(eq(courseChatThreads.id, topicId), this.forumTopicCondition()))
       .limit(1);
 
     return topic ?? null;
@@ -95,8 +89,6 @@ export class ForumRepository {
     const [thread] = await this.db
       .select({
         id: courseChatThreads.id,
-        scope: courseChatThreads.scope,
-        courseId: courseChatThreads.courseId,
         firstPostId: firstPosts.id,
         firstPostDeletedAt: firstPosts.deletedAt,
         replyCount: this.replyCountExpression(),
@@ -106,7 +98,7 @@ export class ForumRepository {
         firstPosts,
         and(eq(firstPosts.threadId, courseChatThreads.id), isNull(firstPosts.parentMessageId)),
       )
-      .where(and(eq(courseChatThreads.id, threadId), eq(courseChatThreads.archived, false)))
+      .where(and(eq(courseChatThreads.id, threadId), this.forumTopicCondition()))
       .limit(1);
 
     return thread ?? null;
@@ -123,7 +115,7 @@ export class ForumRepository {
       })
       .from(courseChatMessages)
       .innerJoin(courseChatThreads, eq(courseChatThreads.id, courseChatMessages.threadId))
-      .where(and(eq(courseChatMessages.id, postId), eq(courseChatThreads.archived, false)))
+      .where(and(eq(courseChatMessages.id, postId), this.forumTopicCondition()))
       .limit(1);
 
     return post ?? null;
@@ -237,6 +229,64 @@ export class ForumRepository {
       .orderBy(users.firstName, users.lastName);
   }
 
+  async findCourseDiscussions(
+    viewerUserId: UUIDType,
+    query: ForumCourseDiscussionListQuery,
+  ): Promise<{ data: ForumCourseDiscussionRow[]; totalItems: number }> {
+    const courseDiscussions = this.db
+      .$with("forum_course_discussions")
+      .as(
+        this.courseDiscussionQuery(viewerUserId, query.language, { search: query.search }).having(
+          sql`COUNT(${courseChatMessages.id}) > 0`,
+        ),
+      );
+
+    const rows = await this.db
+      .with(courseDiscussions)
+      .select({
+        courseId: courseDiscussions.courseId,
+        courseTitle: courseDiscussions.courseTitle,
+        messageCount: courseDiscussions.messageCount,
+        lastActivityAt: courseDiscussions.lastActivityAt,
+        totalItems: sql<number>`(COUNT(*) OVER())::int`,
+      })
+      .from(courseDiscussions)
+      .orderBy(desc(courseDiscussions.lastActivityAt), desc(courseDiscussions.courseId))
+      .limit(query.perPage)
+      .offset((query.page - 1) * query.perPage);
+
+    const data = rows.map(({ courseId, courseTitle, messageCount, lastActivityAt }) => ({
+      courseId,
+      courseTitle,
+      messageCount,
+      lastActivityAt,
+    }));
+    const [firstRow] = rows;
+
+    if (firstRow) return { data, totalItems: firstRow.totalItems };
+
+    if (query.page === 1) return { data, totalItems: 0 };
+
+    const [{ totalItems }] = await this.db
+      .with(courseDiscussions)
+      .select({ totalItems: count() })
+      .from(courseDiscussions);
+
+    return { data, totalItems };
+  }
+
+  async findCourseDiscussion(
+    courseId: UUIDType,
+    viewerUserId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<ForumCourseDiscussionRow | null> {
+    const [courseDiscussion] = await this.courseDiscussionQuery(viewerUserId, language, {
+      courseId,
+    });
+
+    return courseDiscussion ?? null;
+  }
+
   async findTopicTitle(topicId: UUIDType): Promise<string | null> {
     const [topic] = await this.db
       .select({ title: courseChatThreads.title })
@@ -257,17 +307,62 @@ export class ForumRepository {
     return user ? `${user.firstName} ${user.lastName}` : null;
   }
 
-  private topicQuery(language: SupportedLanguages) {
+  private courseDiscussionQuery(
+    viewerUserId: UUIDType,
+    language: SupportedLanguages,
+    filter: { courseId?: UUIDType; search?: string },
+  ) {
+    const courseTitle = this.localizationService.getLocalizedSqlField(courses.title, language);
+
+    return this.db
+      .select({
+        courseId: courses.id,
+        courseTitle: sql<string>`${courseTitle}`.as("courseTitle"),
+        messageCount: sql<number>`COUNT(${courseChatMessages.id})::int`.as("messageCount"),
+        lastActivityAt: sql<string | null>`MAX(${courseChatMessages.createdAt})`.as(
+          "lastActivityAt",
+        ),
+      })
+      .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
+      .leftJoin(
+        courseChatThreads,
+        and(
+          eq(courseChatThreads.courseId, courses.id),
+          eq(courseChatThreads.scope, DISCUSSION_SCOPES.COURSE),
+          eq(courseChatThreads.archived, false),
+        ),
+      )
+      .leftJoin(
+        courseChatMessages,
+        and(
+          eq(courseChatMessages.threadId, courseChatThreads.id),
+          isNull(courseChatMessages.deletedAt),
+        ),
+      )
+      .where(
+        and(
+          eq(studentCourses.studentId, viewerUserId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          filter.courseId ? eq(courses.id, filter.courseId) : undefined,
+          filter.search
+            ? this.localizationService.getLocalizedFieldSearchCondition(
+                courses.title,
+                this.toSearchPattern(filter.search),
+                language,
+                { baseTable: courses, fallbackToBaseLanguage: true },
+              )
+            : undefined,
+        ),
+      )
+      .groupBy(courses.id);
+  }
+
+  private topicQuery() {
     return this.db
       .select({
         id: sql<UUIDType>`${courseChatThreads.id}`.as("id"),
-        scope: sql<DiscussionScope>`${courseChatThreads.scope}`.as("scope"),
-        title: sql<string | null>`${courseChatThreads.title}`.as("title"),
-        courseId: sql<UUIDType | null>`${courseChatThreads.courseId}`.as("courseId"),
-        courseTitle: sql<string>`${this.localizationService.getLocalizedSqlField(
-          courses.title,
-          language,
-        )}`.as("courseTitle"),
+        title: sql<string>`${courseChatThreads.title}`.as("title"),
         replyCount: sql<number>`${this.replyCountExpression()}`.as("replyCount"),
         lastActivityAt: sql<string>`${courseChatThreads.updatedAt}`.as("lastActivityAt"),
         createdAt: sql<string>`${courseChatThreads.createdAt}`.as("createdAt"),
@@ -288,8 +383,7 @@ export class ForumRepository {
         firstPosts,
         and(eq(firstPosts.threadId, courseChatThreads.id), isNull(firstPosts.parentMessageId)),
       )
-      .innerJoin(users, eq(users.id, firstPosts.userId))
-      .leftJoin(courses, eq(courses.id, courseChatThreads.courseId));
+      .innerJoin(users, eq(users.id, firstPosts.userId));
   }
 
   private postSelect() {
@@ -318,41 +412,27 @@ export class ForumRepository {
     )`;
   }
 
+  private forumTopicCondition() {
+    return and(
+      eq(courseChatThreads.scope, DISCUSSION_SCOPES.GENERAL),
+      eq(courseChatThreads.archived, false),
+    );
+  }
+
   /** A topic whose first post was deleted stays listed only while it still has replies. */
   private visibleTopicCondition() {
     return and(
-      eq(courseChatThreads.archived, false),
+      this.forumTopicCondition(),
       or(isNull(firstPosts.deletedAt), sql<boolean>`${this.replyCountExpression()} > 0`),
     );
   }
 
-  private topicAccessCondition(visibility: ForumTopicVisibility) {
-    const isGeneralTopic = eq(courseChatThreads.scope, DISCUSSION_SCOPES.GENERAL);
-
-    if (!visibility.includeCourseThreads) return isGeneralTopic;
-
-    return or(
-      isGeneralTopic,
-      and(
-        eq(courseChatThreads.scope, DISCUSSION_SCOPES.COURSE),
-        exists(
-          this.db
-            .select({ id: studentCourses.id })
-            .from(studentCourses)
-            .where(
-              and(
-                eq(studentCourses.courseId, courseChatThreads.courseId),
-                eq(studentCourses.studentId, visibility.viewerUserId),
-                eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-              ),
-            ),
-        ),
-      ),
-    );
+  private toSearchPattern(search: string) {
+    return `%${search.replace(/[\\%_]/g, "\\$&")}%`;
   }
 
   private topicSearchCondition(search: string) {
-    const pattern = `%${search.replace(/[\\%_]/g, "\\$&")}%`;
+    const pattern = this.toSearchPattern(search);
 
     return or(
       ilike(courseChatThreads.title, pattern),

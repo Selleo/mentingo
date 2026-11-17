@@ -1,5 +1,4 @@
 import {
-  DISCUSSION_SCOPES,
   FORUM_POST_MAX_LENGTH,
   FORUM_POST_MAX_MENTIONS,
   FORUM_SEARCH_MAX_LENGTH,
@@ -21,11 +20,6 @@ const forumAuthorSchema = Type.Object({
   avatarReference: Type.Union([Type.String(), Type.Null()]),
 });
 
-const forumTopicCourseSchema = Type.Object({
-  id: UUIDSchema,
-  title: Type.String(),
-});
-
 export const forumPostSchema = Type.Object({
   id: UUIDSchema,
   topicId: UUIDSchema,
@@ -41,9 +35,7 @@ export const forumPostSchema = Type.Object({
 
 const forumTopicBaseSchema = Type.Object({
   id: UUIDSchema,
-  scope: Type.Enum(DISCUSSION_SCOPES),
-  title: Type.Union([Type.String(), Type.Null()]),
-  course: Type.Union([forumTopicCourseSchema, Type.Null()]),
+  title: Type.String(),
   author: forumAuthorSchema,
   replyCount: Type.Number(),
   lastActivityAt: Type.String(),
@@ -91,6 +83,15 @@ export const forumPostReactionsSchema = Type.Object({
 
 export const forumUserListSchema = Type.Array(forumAuthorSchema);
 
+export const forumCourseDiscussionSchema = Type.Object({
+  courseId: UUIDSchema,
+  courseTitle: Type.String(),
+  messageCount: Type.Number(),
+  lastActivityAt: Type.Union([Type.String(), Type.Null()]),
+});
+
+export const forumCourseDiscussionListSchema = Type.Array(forumCourseDiscussionSchema);
+
 export const deleteForumPostResponseSchema = Type.Object({
   topicId: UUIDSchema,
   postId: UUIDSchema,
@@ -105,12 +106,12 @@ export const forumPerPageQuerySchema = Type.Optional(
   Type.Number({ minimum: 1, maximum: FORUM_MAX_PAGE_SIZE }),
 );
 export const forumTopicSortQuerySchema = Type.Optional(Type.Enum(FORUM_TOPIC_SORTS));
-export const forumTopicScopeQuerySchema = Type.Optional(Type.Enum(DISCUSSION_SCOPES));
 export const forumSearchQuerySchema = Type.Optional(
   Type.String({ maxLength: FORUM_SEARCH_MAX_LENGTH }),
 );
 
 export type ForumPostResponse = Static<typeof forumPostSchema>;
+export type ForumCourseDiscussionResponse = Static<typeof forumCourseDiscussionSchema>;
 export type ForumPostReactionsResponse = Static<typeof forumPostReactionsSchema>;
 export type ForumUserResponse = Static<typeof forumAuthorSchema>;
 export type ForumTopicListItemResponse = Static<typeof forumTopicListItemSchema>;

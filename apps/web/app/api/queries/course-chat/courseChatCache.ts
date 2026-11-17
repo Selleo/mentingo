@@ -8,8 +8,10 @@ import { getCourseChatUsersQueryKey } from "./useCourseChatUsers";
 import type {
   CourseChatMessage,
   CourseChatMessagePreview,
+  CourseChatRepliesResponse,
   CourseChatUser,
 } from "./courseChatTypes";
+import type { InfiniteData } from "@tanstack/react-query";
 import type {
   DeleteMessageResponse,
   GetMessagesResponse,
@@ -38,11 +40,12 @@ export function invalidateCourseChatMessageCreated(params: {
     invalidateCourseChatReplies(params.parentMessageId);
   }
 
-  invalidateForumCourseThreads();
+  invalidateForumCourseDiscussions();
 }
 
-function invalidateForumCourseThreads() {
-  queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEY });
+function invalidateForumCourseDiscussions() {
+  queryClient.invalidateQueries({ queryKey: [...FORUM_QUERY_KEY, "course-discussions"] });
+  queryClient.invalidateQueries({ queryKey: [...FORUM_QUERY_KEY, "course-discussion"] });
 }
 
 export function updateCourseChatUserPresence(params: {
@@ -79,8 +82,45 @@ export function updateMessageReactionsInCache(payload: ToggleMessageReactionResp
         : current,
   );
 
-  queryClient.invalidateQueries({ queryKey: COURSE_CHAT_REPLIES_QUERY_KEY });
-  invalidateForumCourseThreads();
+  invalidateRepliesHolding(payload.messageId);
+}
+
+export function invalidateMessageReactions(payload: { courseId: string; messageId: string }) {
+  queryClient.invalidateQueries({
+    queryKey: [...COURSE_CHAT_MESSAGES_QUERY_KEY, payload.courseId],
+    predicate: (query) => hasCachedMessage(query.state.data, payload.messageId),
+  });
+  invalidateRepliesHolding(payload.messageId);
+}
+
+function invalidateRepliesHolding(messageId: string) {
+  queryClient.invalidateQueries({
+    queryKey: COURSE_CHAT_REPLIES_QUERY_KEY,
+    predicate: (query) => hasCachedReply(query.state.data, messageId),
+  });
+}
+
+function hasCachedMessage(cachedMessages: unknown, messageId: string) {
+  const messages = cachedMessages as GetMessagesResponse | undefined;
+
+  return Boolean(
+    messages?.data.some(
+      (message) => message.id === messageId || message.latestReply?.id === messageId,
+    ),
+  );
+}
+
+function hasCachedReply(cachedReplies: unknown, messageId: string) {
+  const replies = cachedReplies as
+    | CourseChatRepliesResponse
+    | InfiniteData<CourseChatRepliesResponse>
+    | undefined;
+
+  if (!replies) return false;
+
+  const pages = "pages" in replies ? replies.pages : [replies];
+
+  return pages.some((page) => page.data.some((reply) => reply.id === messageId));
 }
 
 export function updateDeletedMessageInCache(payload: DeleteMessageResponse["data"]) {
@@ -94,5 +134,5 @@ export function updateDeletedMessageInCache(payload: DeleteMessageResponse["data
     });
   }
 
-  invalidateForumCourseThreads();
+  invalidateForumCourseDiscussions();
 }

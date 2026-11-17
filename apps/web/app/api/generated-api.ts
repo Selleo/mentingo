@@ -31133,13 +31133,7 @@ export interface GetTopicsResponse {
   data: {
     /** @format uuid */
     id: string;
-    scope: "general" | "course";
-    title: string | null;
-    course: {
-      /** @format uuid */
-      id: string;
-      title: string;
-    } | null;
+    title: string;
     author: {
       /** @format uuid */
       id: string;
@@ -31161,6 +31155,32 @@ export interface GetTopicsResponse {
   appliedFilters?: object;
 }
 
+export interface GetCourseDiscussionsResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    courseTitle: string;
+    messageCount: number;
+    lastActivityAt: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetCourseDiscussionResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    courseTitle: string;
+    messageCount: number;
+    lastActivityAt: string | null;
+  };
+}
+
 export interface CreateTopicBody {
   /**
    * @minLength 1
@@ -31180,13 +31200,7 @@ export interface CreateTopicResponse {
   data: {
     /** @format uuid */
     id: string;
-    scope: "general" | "course";
-    title: string | null;
-    course: {
-      /** @format uuid */
-      id: string;
-      title: string;
-    } | null;
+    title: string;
     author: {
       /** @format uuid */
       id: string;
@@ -31229,13 +31243,7 @@ export interface GetTopicResponse {
   data: {
     /** @format uuid */
     id: string;
-    scope: "general" | "course";
-    title: string | null;
-    course: {
-      /** @format uuid */
-      id: string;
-      title: string;
-    } | null;
+    title: string;
     author: {
       /** @format uuid */
       id: string;
@@ -46462,8 +46470,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     forumControllerGetTopics: (
       query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         /**
@@ -46474,9 +46480,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         sort?: "lastActivity" | "newest" | "mostReplies";
         /** @maxLength 200 */
         search?: string;
-        scope?: "general" | "course";
-        /** @format uuid */
-        courseId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -46494,20 +46497,64 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name ForumControllerCreateTopic
      * @request POST:/api/forum/topics
      */
-    forumControllerCreateTopic: (
-      data: CreateTopicBody,
+    forumControllerCreateTopic: (data: CreateTopicBody, params: RequestParams = {}) =>
+      this.request<CreateTopicResponse, any>({
+        path: `/api/forum/topics`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetCourseDiscussions
+     * @request GET:/api/forum/course-discussions
+     */
+    forumControllerGetCourseDiscussions: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseDiscussionsResponse, any>({
+        path: `/api/forum/course-discussions`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetCourseDiscussion
+     * @request GET:/api/forum/course-discussions/{courseId}
+     */
+    forumControllerGetCourseDiscussion: (
+      courseId: string,
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
-      this.request<CreateTopicResponse, any>({
-        path: `/api/forum/topics`,
-        method: "POST",
+      this.request<GetCourseDiscussionResponse, any>({
+        path: `/api/forum/course-discussions/${courseId}`,
+        method: "GET",
         query: query,
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -46518,18 +46565,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name ForumControllerGetTopic
      * @request GET:/api/forum/topics/{topicId}
      */
-    forumControllerGetTopic: (
-      topicId: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
+    forumControllerGetTopic: (topicId: string, params: RequestParams = {}) =>
       this.request<GetTopicResponse, any>({
         path: `/api/forum/topics/${topicId}`,
         method: "GET",
-        query: query,
         format: "json",
         ...params,
       }),

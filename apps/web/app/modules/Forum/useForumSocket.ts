@@ -34,6 +34,7 @@ export function useForumSocket({ topicId, onMentioned }: ForumSocketOptions) {
     };
     const refreshForum = () => {
       queryClient.invalidateQueries({ queryKey: [...FORUM_QUERY_KEY, "topics"] });
+      queryClient.invalidateQueries({ queryKey: [...FORUM_QUERY_KEY, "course-discussions"] });
       queryClient.invalidateQueries({
         queryKey: [...FORUM_QUERY_KEY, "topic"],
         refetchType: "none",

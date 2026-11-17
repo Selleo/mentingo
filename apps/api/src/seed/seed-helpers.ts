@@ -578,6 +578,16 @@ export async function ensureSeedTenant(
 
 export { addEmailSuffix, getTenantEmailSuffix } from "@repo/shared";
 
+export function getSeedTenantOrigins(): string[] {
+  const devTenantOrigins = (process.env.DEV_TENANT_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  if (devTenantOrigins.length) return devTenantOrigins;
+
+  return [process.env.CORS_ORIGIN].filter((origin): origin is string => Boolean(origin));
+}
+
 const SYSTEM_ROLE_DISPLAY_NAME: Record<SystemRoleSlug, string> = {
   [SYSTEM_ROLE_SLUGS.ADMIN]: "Admin",
   [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",

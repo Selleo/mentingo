@@ -4789,7 +4789,10 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "Dar nėra užsiregistravusių vartotojų.",
-      "mentionedToast": "Kažkas paminėjo jus kurso diskusijoje."
+      "mentionedToast": "Kažkas paminėjo jus kurso diskusijoje.",
+      "sendError": "Nepavyko išsiųsti žinutės.",
+      "deleteError": "Nepavyko ištrinti žinutės.",
+      "reactionError": "Nepavyko išsaugoti reakcijos."
     }
   },
   "studentChapterView": {
@@ -9851,10 +9854,17 @@
     "description": "Užduokite klausimus ir dalinkitės žiniomis su visa organizacija.",
     "newTopic": "Nauja tema",
     "searchPlaceholder": "Ieškoti temų",
-    "filter": {
-      "label": "Rodyti temas",
-      "all": "Visos temos",
-      "general": "Bendros temos"
+    "courseDiscussions": {
+      "title": "Kursų diskusijos",
+      "heading": "Diskusija: {{course}}",
+      "messages_one": "{{count}} žinutė",
+      "messages_few": "{{count}} žinutės",
+      "messages_many": "{{count}} žinutės",
+      "messages_other": "{{count}} žinučių",
+      "viewAll": "Visos kursų diskusijos ({{count}})",
+      "searchPlaceholder": "Ieškoti kursų",
+      "empty": "Nė viename jūsų kurse dar nėra diskusijos.",
+      "noResults": "Pagal paiešką kursų diskusijų nerasta."
     },
     "sort": {
       "label": "Rūšiuoti temas",
@@ -9881,7 +9891,6 @@
     },
     "topic": {
       "backToForum": "Grįžti į forumą",
-      "courseThreadTitle": "Kurso „{{course}}“ diskusija",
       "noReplies": "Atsakymų dar nėra.",
       "replyPlaceholder": "Parašykite atsakymą",
       "replySubmit": "Atsakyti",
@@ -9900,6 +9909,7 @@
     },
     "errors": {
       "topicNotFound": "Ši tema neegzistuoja arba neturite prieigos prie jos.",
+      "courseDiscussionNotFound": "Ši kurso diskusija neegzistuoja arba neturite prieigos prie jos.",
       "postNotFound": "Šis įrašas nebeegzistuoja.",
       "cannotDeletePost": "Galite ištrinti tik savo įrašus.",
       "topicDeleted": "Atsakymai uždaryti, nes pirmasis įrašas buvo ištrintas.",

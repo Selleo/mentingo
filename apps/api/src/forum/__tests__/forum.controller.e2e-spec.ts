@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker";
 import {
-  DISCUSSION_SCOPES,
   FORUM_POST_MAX_MENTIONS,
   FORUM_SOCKET_EVENTS,
   FORUM_TOPIC_SORTS,
@@ -37,12 +36,10 @@ import type { DatabasePg } from "src/common";
 
 type ForumTopicListItem = {
   id: string;
-  scope: string;
-  title: string | null;
+  title: string;
   excerpt: string;
   isDeleted: boolean;
   replyCount: number;
-  course: { id: string; title: string } | null;
   author: { id: string; firstName: string; lastName: string };
 };
 
@@ -138,7 +135,7 @@ describe("ForumController (e2e)", () => {
   const listTopics = async (cookie: string, query: Record<string, string | number> = {}) => {
     const response = await request(app.getHttpServer())
       .get("/api/forum/topics")
-      .query({ language: "en", ...query })
+      .query(query)
       .set("Cookie", cookie)
       .expect(200);
 
@@ -235,11 +232,8 @@ describe("ForumController (e2e)", () => {
       ]);
 
       const readRequests = [
-        () => request(app.getHttpServer()).get("/api/forum/topics").query({ language: "en" }),
-        () =>
-          request(app.getHttpServer())
-            .get(`/api/forum/topics/${topic.id}`)
-            .query({ language: "en" }),
+        () => request(app.getHttpServer()).get("/api/forum/topics"),
+        () => request(app.getHttpServer()).get(`/api/forum/topics/${topic.id}`),
         () => request(app.getHttpServer()).get(`/api/forum/topics/${topic.id}/posts`),
         () => request(app.getHttpServer()).delete(`/api/forum/posts/${topic.firstPost.id}`),
       ];
@@ -276,7 +270,6 @@ describe("ForumController (e2e)", () => {
 
       const response = await request(app.getHttpServer())
         .get("/api/forum/topics")
-        .query({ language: "en" })
         .set("Cookie", reviewerCookie)
         .expect(403);
       expect(response.body.message).toBe("auth.error.missingPermission");
@@ -298,9 +291,7 @@ describe("ForumController (e2e)", () => {
       });
 
       expect(topic).toMatchObject({
-        scope: DISCUSSION_SCOPES.GENERAL,
         title: "Onboarding tips",
-        course: null,
         replyCount: 0,
         author: { id: contentCreator.id },
         firstPost: {
@@ -322,12 +313,10 @@ describe("ForumController (e2e)", () => {
         excerpt: "What helped you most in your first week?",
         isDeleted: false,
         replyCount: 2,
-        course: null,
       });
 
       const detail = await request(app.getHttpServer())
         .get(`/api/forum/topics/${topic.id}`)
-        .query({ language: "en" })
         .set("Cookie", studentCookie)
         .expect(200);
       expect(detail.body.data).toMatchObject({ id: topic.id, replyCount: 2 });
@@ -386,7 +375,6 @@ describe("ForumController (e2e)", () => {
       expect(await idsFor({ search: "where should" })).toEqual([newest.id]);
       expect(await idsFor({ search: "100%" })).toEqual([newest.id]);
       expect(await idsFor({ search: "%" })).toEqual([newest.id]);
-      expect(await idsFor({ scope: DISCUSSION_SCOPES.COURSE })).toEqual([]);
 
       const secondPage = await listTopics(cookie, {
         sort: FORUM_TOPIC_SORTS.NEWEST,
@@ -398,111 +386,178 @@ describe("ForumController (e2e)", () => {
     });
   });
 
-  describe("course threads", () => {
-    it("lists course threads only for users enrolled in the course", async () => {
-      const { user: enrolledStudent, cookie: enrolledCookie } = await createUserWithCookie(
-        SYSTEM_ROLE_SLUGS.STUDENT,
-      );
-      const { cookie: outsiderCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
-      const course = await courseFactory.create({ authorId: enrolledStudent.id });
-      await enroll(course.id, enrolledStudent);
-
-      const courseThread = await createCourseThread(
-        enrolledCookie,
-        course.id,
-        "Question about chapter two",
-      );
-      const generalTopic = await createTopic(outsiderCookie, {
-        title: "General topic",
-        content: "Visible to everyone",
-      });
-
-      const enrolledList = await listTopics(enrolledCookie);
-      const listedCourseThread = enrolledList.data.find(
-        (topic) => topic.scope === DISCUSSION_SCOPES.COURSE,
-      );
-      expect(enrolledList.pagination.totalItems).toBe(2);
-      expect(listedCourseThread).toMatchObject({
-        title: null,
-        excerpt: "Question about chapter two",
-        course: { id: course.id, title: course.title },
-      });
-
-      const courseFilter = await listTopics(enrolledCookie, { courseId: course.id });
-      expect(courseFilter.data.map((topic) => topic.course?.id)).toEqual([course.id]);
-      const generalFilter = await listTopics(enrolledCookie, { scope: DISCUSSION_SCOPES.GENERAL });
-      expect(generalFilter.data.map((topic) => topic.id)).toEqual([generalTopic.id]);
-
-      const outsiderList = await listTopics(outsiderCookie);
-      expect(outsiderList.data.map((topic) => topic.id)).toEqual([generalTopic.id]);
-
-      const courseTopicId = listedCourseThread?.id;
-      expect(courseTopicId).toBeDefined();
-
-      const outsiderRequests = [
-        () => request(app.getHttpServer()).get(`/api/forum/topics/${courseTopicId}`),
-        () => request(app.getHttpServer()).get(`/api/forum/topics/${courseTopicId}/posts`),
-        () =>
-          request(app.getHttpServer())
-            .post(`/api/forum/topics/${courseTopicId}/posts`)
-            .send({ content: "Let me in" }),
-        () => request(app.getHttpServer()).delete(`/api/forum/posts/${courseThread.id}`),
-      ];
-
-      for (const buildRequest of outsiderRequests) {
-        const response = await buildRequest().set("Cookie", outsiderCookie).expect(404);
-        expect(response.body.message).toBe("forum.errors.topicNotFound");
-      }
-    });
-
-    it("hides course threads when course discussions are disabled", async () => {
-      const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
-      const course = await courseFactory.create({ authorId: student.id });
-      await enroll(course.id, student);
-      await createCourseThread(cookie, course.id, "Course-only thread");
-      const [{ id: courseTopicId }] = (await listTopics(cookie)).data;
-
-      await setGlobalSettings({ courseDiscussionsEnabled: false });
-
-      expect((await listTopics(cookie)).data).toEqual([]);
-      await request(app.getHttpServer())
-        .get(`/api/forum/topics/${courseTopicId}`)
+  describe("course discussions", () => {
+    const listCourseDiscussions = async (
+      cookie: string,
+      query: Record<string, string | number> = {},
+    ) => {
+      const response = await request(app.getHttpServer())
+        .get("/api/forum/course-discussions")
+        .query({ language: "en", ...query })
         .set("Cookie", cookie)
-        .expect(404);
-    });
+        .expect(200);
 
-    it("adds forum replies to course threads in the course discussion", async () => {
+      return response.body as {
+        data: { courseId: string; courseTitle: string; messageCount: number }[];
+        pagination: { totalItems: number; page: number; perPage: number };
+      };
+    };
+
+    const getCourseDiscussions = async (cookie: string) =>
+      (await listCourseDiscussions(cookie)).data;
+
+    it("summarizes each enrolled course's discussion as one entry", async () => {
       const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
       const { user: classmate, cookie: classmateCookie } = await createUserWithCookie(
         SYSTEM_ROLE_SLUGS.STUDENT,
       );
+      const quietCourse = await courseFactory.create({ authorId: student.id });
+      const busyCourse = await courseFactory.create({ authorId: student.id });
+      const otherCourse = await courseFactory.create({ authorId: student.id });
+      await enroll(quietCourse.id, student);
+      await enroll(busyCourse.id, student, classmate);
+      await enroll(otherCourse.id, classmate);
+
+      await createCourseThread(cookie, quietCourse.id, "Quiet question");
+      await createCourseThread(classmateCookie, otherCourse.id, "Not for the student");
+      const busyThread = await createCourseThread(cookie, busyCourse.id, "Busy question");
+      const deletedThread = await createCourseThread(cookie, busyCourse.id, "Posted by mistake");
+      await request(app.getHttpServer())
+        .post(`/api/course-chat/${busyCourse.id}/messages`)
+        .set("Cookie", classmateCookie)
+        .send({ content: "An answer", parentMessageId: busyThread.id })
+        .expect(201);
+      await request(app.getHttpServer())
+        .delete(`/api/course-chat/messages/${deletedThread.id}`)
+        .set("Cookie", cookie)
+        .expect(200);
+
+      expect(await getCourseDiscussions(cookie)).toEqual([
+        expect.objectContaining({
+          courseId: busyCourse.id,
+          courseTitle: busyCourse.title,
+          messageCount: 2,
+        }),
+        expect.objectContaining({ courseId: quietCourse.id, messageCount: 1 }),
+      ]);
+    });
+
+    it("searches and paginates course discussions", async () => {
+      const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const titles = ["Sales basics", "Sales 100% advanced", "Onboarding"];
+      const createdCourses = [];
+
+      for (const title of titles) {
+        const course = await courseFactory.create({ authorId: student.id, title });
+        await enroll(course.id, student);
+        await createCourseThread(cookie, course.id, `Question about ${title}`);
+        createdCourses.push(course);
+      }
+      const [salesBasics, salesAdvanced, onboarding] = createdCourses;
+
+      const firstPage = await listCourseDiscussions(cookie, { page: 1, perPage: 2 });
+      expect(firstPage.data.map((course) => course.courseId)).toEqual([
+        onboarding.id,
+        salesAdvanced.id,
+      ]);
+      expect(firstPage.pagination).toEqual({ totalItems: 3, page: 1, perPage: 2 });
+
+      const secondPage = await listCourseDiscussions(cookie, { page: 2, perPage: 2 });
+      expect(secondPage.data.map((course) => course.courseId)).toEqual([salesBasics.id]);
+
+      const pagePastTheEnd = await listCourseDiscussions(cookie, { page: 5, perPage: 2 });
+      expect(pagePastTheEnd.data).toEqual([]);
+      expect(pagePastTheEnd.pagination.totalItems).toBe(3);
+
+      const salesOnly = await listCourseDiscussions(cookie, { search: " sales " });
+      expect(salesOnly.data.map((course) => course.courseId)).toEqual([
+        salesAdvanced.id,
+        salesBasics.id,
+      ]);
+      expect(salesOnly.pagination.totalItems).toBe(2);
+
+      const literalPercent = await listCourseDiscussions(cookie, { search: "100%" });
+      expect(literalPercent.data.map((course) => course.courseId)).toEqual([salesAdvanced.id]);
+    });
+
+    it("lists no course discussions when they are disabled or the user may not read them", async () => {
+      const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
       const course = await courseFactory.create({ authorId: student.id });
-      await enroll(course.id, student, classmate);
+      await enroll(course.id, student);
+      await createCourseThread(cookie, course.id, "Course question");
+      expect(await getCourseDiscussions(cookie)).toHaveLength(1);
 
-      const courseThread = await createCourseThread(
-        cookie,
-        course.id,
-        "Who wants to study together?",
+      const { user: restricted, cookie: restrictedCookie } = await createUserWithCookie(
+        SYSTEM_ROLE_SLUGS.STUDENT,
+        [PERMISSIONS.COURSE_DISCUSSION_READ],
       );
-      const [{ id: courseTopicId }] = (await listTopics(classmateCookie)).data;
+      await enroll(course.id, restricted);
+      expect(await getCourseDiscussions(restrictedCookie)).toEqual([]);
 
-      const reply = await createReply(classmateCookie, courseTopicId, "Count me in");
+      await setGlobalSettings({ courseDiscussionsEnabled: false });
+      expect(await getCourseDiscussions(cookie)).toEqual([]);
+    });
 
-      const courseMessages = await request(app.getHttpServer())
-        .get(`/api/course-chat/${course.id}/messages`)
-        .set("Cookie", cookie)
-        .expect(200);
-      expect(courseMessages.body.data).toEqual([
-        expect.objectContaining({ id: courseThread.id, replyCount: 1 }),
-      ]);
+    it("describes one course discussion for enrolled users only", async () => {
+      const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const { cookie: outsiderCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const course = await courseFactory.create({ authorId: student.id });
+      await enroll(course.id, student);
+      const getCourseDiscussion = (cookie: string) =>
+        request(app.getHttpServer())
+          .get(`/api/forum/course-discussions/${course.id}`)
+          .query({ language: "en" })
+          .set("Cookie", cookie);
 
-      const courseReplies = await request(app.getHttpServer())
-        .get(`/api/course-chat/messages/${courseThread.id}/replies`)
-        .set("Cookie", cookie)
-        .expect(200);
-      expect(courseReplies.body.data.map((message: { id: string }) => message.id)).toEqual([
-        reply.id,
-      ]);
+      const emptyDiscussion = await getCourseDiscussion(cookie).expect(200);
+      expect(emptyDiscussion.body.data).toEqual({
+        courseId: course.id,
+        courseTitle: course.title,
+        messageCount: 0,
+        lastActivityAt: null,
+      });
+
+      await createCourseThread(cookie, course.id, "Course question");
+      const discussion = await getCourseDiscussion(cookie).expect(200);
+      expect(discussion.body.data).toMatchObject({ courseId: course.id, messageCount: 1 });
+      expect(discussion.body.data.lastActivityAt).toEqual(expect.any(String));
+
+      const notEnrolled = await getCourseDiscussion(outsiderCookie).expect(404);
+      expect(notEnrolled.body.message).toBe("forum.errors.courseDiscussionNotFound");
+
+      await setGlobalSettings({ courseDiscussionsEnabled: false });
+      await getCourseDiscussion(cookie).expect(404);
+    });
+
+    it("keeps course threads out of the forum topics", async () => {
+      const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const course = await courseFactory.create({ authorId: student.id });
+      await enroll(course.id, student);
+      const courseThread = await createCourseThread(cookie, course.id, "Course question");
+      const [{ id: courseThreadId }] = await db
+        .select({ id: courseChatThreads.id })
+        .from(courseChatThreads)
+        .where(eq(courseChatThreads.courseId, course.id));
+
+      expect((await listTopics(cookie)).data).toEqual([]);
+
+      const forumRequests = [
+        () => request(app.getHttpServer()).get(`/api/forum/topics/${courseThreadId}`),
+        () => request(app.getHttpServer()).get(`/api/forum/topics/${courseThreadId}/posts`),
+        () =>
+          request(app.getHttpServer())
+            .post(`/api/forum/topics/${courseThreadId}/posts`)
+            .send({ content: "Reply from the forum" }),
+        () =>
+          request(app.getHttpServer())
+            .post(`/api/forum/posts/${courseThread.id}/reactions`)
+            .send({ reaction: "👍" }),
+        () => request(app.getHttpServer()).delete(`/api/forum/posts/${courseThread.id}`),
+      ];
+
+      for (const buildRequest of forumRequests) {
+        await buildRequest().set("Cookie", cookie).expect(404);
+      }
     });
 
     it("keeps course discussion endpoints away from general forum posts", async () => {
@@ -630,29 +685,6 @@ describe("ForumController (e2e)", () => {
       });
       expect((await listTopics(cookie)).data).toEqual([]);
     });
-
-    it("reports a removed course thread when its only post is deleted from the forum", async () => {
-      const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
-      const course = await courseFactory.create({ authorId: student.id });
-      await enroll(course.id, student);
-      const courseThread = await createCourseThread(
-        cookie,
-        course.id,
-        "Posted in the wrong course",
-      );
-
-      const response = await request(app.getHttpServer())
-        .delete(`/api/forum/posts/${courseThread.id}`)
-        .set("Cookie", cookie)
-        .expect(200);
-
-      expect(response.body.data).toMatchObject({
-        isFirstPost: true,
-        removed: true,
-        topicRemoved: true,
-      });
-      expect((await listTopics(cookie)).data).toEqual([]);
-    });
   });
 
   describe("validation", () => {
@@ -723,7 +755,6 @@ describe("ForumController (e2e)", () => {
 
       const authorView = await request(app.getHttpServer())
         .get(`/api/forum/topics/${topic.id}`)
-        .query({ language: "en" })
         .set("Cookie", authorCookie)
         .expect(200);
       expect(authorView.body.data.firstPost.reactions).toEqual([
@@ -741,27 +772,6 @@ describe("ForumController (e2e)", () => {
       ]);
       const forbidden = await react(noReactCookie, topic.firstPost.id, "👍").expect(403);
       expect(forbidden.body.message).toBe("auth.error.missingPermission");
-    });
-
-    it("applies course discussion rules to reactions on course threads", async () => {
-      const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
-      const { cookie: outsiderCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
-      const course = await courseFactory.create({ authorId: student.id });
-      await enroll(course.id, student);
-      const courseThread = await createCourseThread(cookie, course.id, "Great lesson");
-
-      await react(cookie, courseThread.id, "🎉").expect(201);
-
-      const courseMessages = await request(app.getHttpServer())
-        .get(`/api/course-chat/${course.id}/messages`)
-        .set("Cookie", cookie)
-        .expect(200);
-      expect(courseMessages.body.data[0].reactions).toEqual([
-        { reaction: "🎉", count: 1, reactedByCurrentUser: true },
-      ]);
-
-      const hidden = await react(outsiderCookie, courseThread.id, "🎉").expect(404);
-      expect(hidden.body.message).toBe("forum.errors.topicNotFound");
     });
   });
 
@@ -895,7 +905,7 @@ describe("ForumController (e2e)", () => {
       );
     });
 
-    it("signals the forum when a course discussion thread is started or deleted", async () => {
+    it("signals the forum when a course discussion message is posted or deleted", async () => {
       const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
       const course = await courseFactory.create({ authorId: student.id });
       await enroll(course.id, student);

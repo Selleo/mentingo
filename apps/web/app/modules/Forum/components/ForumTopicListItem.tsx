@@ -3,7 +3,6 @@ import { formatDistanceToNow } from "date-fns";
 import { MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "~/components/ui/badge";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { getDateLocale } from "~/utils/getDateLocale";
@@ -40,22 +39,13 @@ export function ForumTopicListItem({ topic }: ForumTopicListItemProps) {
         />
       )}
       <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <h2
-            className="body-base-md line-clamp-1 break-all text-neutral-950"
-            data-testid={FORUM_HANDLES.topicItemTitle(topic.id)}
-          >
-            {topic.title ?? preview}
-          </h2>
-          {topic.course && (
-            <Badge variant="secondary" data-testid={FORUM_HANDLES.topicItemCourse(topic.id)}>
-              {topic.course.title}
-            </Badge>
-          )}
-        </div>
-        {topic.title && (
-          <p className="body-sm line-clamp-2 break-words text-neutral-600">{preview}</p>
-        )}
+        <h2
+          className="body-base-md line-clamp-1 break-all text-neutral-950"
+          data-testid={FORUM_HANDLES.topicItemTitle(topic.id)}
+        >
+          {topic.title}
+        </h2>
+        <p className="body-sm line-clamp-2 break-words text-neutral-600">{preview}</p>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-600">
           {!topic.isDeleted && <span>{authorName}</span>}
           <span

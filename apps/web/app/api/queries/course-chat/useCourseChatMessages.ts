@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
@@ -14,7 +14,6 @@ export const getCourseChatMessagesQueryKey = (courseId: string, page = 1, perPag
 
 export const courseChatMessagesQueryOptions = (courseId: string, page = 1) =>
   queryOptions({
-    enabled: Boolean(courseId),
     queryKey: getCourseChatMessagesQueryKey(courseId, page, COURSE_CHAT_MESSAGES_PER_PAGE),
     queryFn: async () => {
       const response = await ApiClient.api.courseChatControllerGetMessages(courseId, {
@@ -27,5 +26,12 @@ export const courseChatMessagesQueryOptions = (courseId: string, page = 1) =>
   });
 
 export function useCourseChatMessages(courseId: string, page = 1) {
-  return useQuery(courseChatMessagesQueryOptions(courseId, page));
+  return useQuery({
+    ...courseChatMessagesQueryOptions(courseId, page),
+    enabled: Boolean(courseId),
+  });
+}
+
+export function useCourseChatMessagesSuspense(courseId: string, page = 1) {
+  return useSuspenseQuery(courseChatMessagesQueryOptions(courseId, page));
 }

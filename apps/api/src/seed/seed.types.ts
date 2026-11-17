@@ -22,3 +22,16 @@ export type ReportsSeedCourse = {
   authorId: UUIDType;
   lessons: Array<{ id: UUIDType; chapterId: UUIDType; assessmentId: UUIDType | null }>;
 };
+
+export type ForumSeedPost = {
+  id: UUIDType;
+  threadId: UUIDType;
+  courseId: UUIDType | null;
+  userId: UUIDType;
+  content: string;
+  parentMessageId: UUIDType | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  tenantId: UUIDType;
+};

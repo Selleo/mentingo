@@ -71,7 +71,7 @@ export class ForumGateway {
 
     try {
       await this.tenantDbRunnerService.runWithTenant(user.tenantId, () =>
-        this.forumService.assertTopicAccessible(topicId, user),
+        this.forumService.assertTopicVisible(topicId),
       );
     } catch (error) {
       this.logger.debug(`Forum topic join rejected for user ${user.userId}: ${error}`);

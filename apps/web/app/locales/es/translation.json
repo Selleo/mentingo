@@ -4724,7 +4724,10 @@
       "online": "En línea",
       "offline": "Sin conexión",
       "emptyUsers": "Aún no hay usuarios registrados.",
-      "mentionedToast": "Alguien te mencionó en la discusión del curso."
+      "mentionedToast": "Alguien te mencionó en la discusión del curso.",
+      "sendError": "No se pudo enviar el mensaje.",
+      "deleteError": "No se pudo eliminar el mensaje.",
+      "reactionError": "No se pudo guardar la reacción."
     }
   },
   "studentChapterView": {
@@ -9738,10 +9741,15 @@
     "description": "Haz preguntas y comparte conocimientos con toda tu organización.",
     "newTopic": "Nuevo tema",
     "searchPlaceholder": "Buscar temas",
-    "filter": {
-      "label": "Mostrar temas",
-      "all": "Todos los temas",
-      "general": "General"
+    "courseDiscussions": {
+      "title": "Discusiones de los cursos",
+      "heading": "Discusión: {{course}}",
+      "messages_one": "{{count}} mensaje",
+      "messages_other": "{{count}} mensajes",
+      "viewAll": "Todas las discusiones de los cursos ({{count}})",
+      "searchPlaceholder": "Buscar cursos",
+      "empty": "Ninguno de tus cursos tiene una discusión todavía.",
+      "noResults": "Ninguna discusión de curso coincide con tu búsqueda."
     },
     "sort": {
       "label": "Ordenar temas",
@@ -9766,7 +9774,6 @@
     },
     "topic": {
       "backToForum": "Volver al foro",
-      "courseThreadTitle": "Debate del curso {{course}}",
       "noReplies": "Aún no hay respuestas.",
       "replyPlaceholder": "Escribe una respuesta",
       "replySubmit": "Responder",
@@ -9785,6 +9792,7 @@
     },
     "errors": {
       "topicNotFound": "Este tema no existe o no tienes acceso a él.",
+      "courseDiscussionNotFound": "Esta discusión del curso no existe o no tienes acceso a ella.",
       "postNotFound": "Esta publicación ya no existe.",
       "cannotDeletePost": "Solo puedes eliminar tus propias publicaciones.",
       "topicDeleted": "Las respuestas están cerradas porque se eliminó la primera publicación.",
