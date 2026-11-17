@@ -18,6 +18,7 @@ import {
   DASHBOARD_WIDGET_HANDLES,
 } from "../../data/dashboard/handles";
 import { expect, test } from "../../fixtures/test.fixture";
+import { dragByPointerFlow } from "../../flows/dashboard/drag-by-pointer.flow";
 import {
   createDashboardResponseGate,
   mockDashboardFlow,
@@ -425,28 +426,32 @@ test.describe("admin dashboard utility cards", () => {
         await openDashboardFlow(page, origin);
         const card = page.getByTestId(DASHBOARD_WIDGET_HANDLES.TODO_TASKS);
         const tasks = card.getByTestId(DASHBOARD_TODO_HANDLES.TASK);
-        await card.getByTestId(DASHBOARD_TODO_HANDLES.NEW_TASK_INPUT).fill("Send follow-up");
-        await card.getByTestId(DASHBOARD_TODO_HANDLES.ADD_TASK).click();
-        await expect(tasks.filter({ hasText: "Send follow-up" })).toBeVisible();
-
-        await tasks
-          .filter({ hasText: "Review inbox" })
-          .getByTestId(DASHBOARD_TODO_HANDLES.TASK_REORDER)
-          .dragTo(
-            tasks
-              .filter({ hasText: "Prepare agenda" })
-              .getByTestId(DASHBOARD_TODO_HANDLES.TASK_REORDER),
-          );
+        await dragByPointerFlow(
+          page,
+          tasks
+            .filter({ hasText: "Review inbox" })
+            .getByTestId(DASHBOARD_TODO_HANDLES.TASK_REORDER),
+          tasks
+            .filter({ hasText: "Prepare agenda" })
+            .getByTestId(DASHBOARD_TODO_HANDLES.TASK_REORDER),
+        );
         await expect
           .poll(async () => {
-            const tasks = await taskFactory.list();
-            const agenda = tasks.find((task) => task.id === agendaTask.id);
-            const review = tasks.find((task) => task.id === reviewTask.id);
+            const storedTasks = await taskFactory.list();
+            const agenda = storedTasks.find((task) => task.id === agendaTask.id);
+            const review = storedTasks.find((task) => task.id === reviewTask.id);
             return (
               agenda !== undefined && review !== undefined && agenda.position < review.position
             );
           })
           .toBe(true);
+
+        await card.getByTestId(DASHBOARD_TODO_HANDLES.NEW_TASK_INPUT).fill("Send follow-up");
+        await card.getByTestId(DASHBOARD_TODO_HANDLES.ADD_TASK).click();
+        await expect(tasks.filter({ hasText: "Send follow-up" })).toBeVisible();
+        // Reload so the new task carries its saved id: the UI keeps the optimistic id until a refetch.
+        await page.reload();
+        await expect(tasks.filter({ hasText: "Send follow-up" })).toBeVisible();
 
         await tasks
           .filter({ hasText: "Review inbox" })
