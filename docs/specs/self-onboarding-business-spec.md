@@ -137,3 +137,15 @@ misrepresented as successfully demonstrated or silently removed from the coverag
 Business-spec review can identify additional tasks and requires explicit grouping before generation.
 Local registry/planner tests establish registration consistency; this change has not generated or
 published a video for each newly registered area.
+
+## Videos for pull request review
+
+When a same-repository pull request targeting `staging` or `main` is opened ready for review or leaves draft mode, maintainers receive a narrated demonstration of its visible changed flows at the end of the PR description. Internal refactors and changes with no observable product effect produce a skip decision instead of recording. Backend fixes may qualify when they change an observable browser outcome. The complete PR diff is the primary evidence; the title, overview and existing business specifications provide context rather than instructions or proof by themselves.
+
+The planner selects up to four complete flows and cites actual changed implementation lines. Oversized, ambiguous or failed analysis is reported as a failure, not a claim that nothing changed. Recording uses the pinned PR head, existing Playwright helpers, isolated fictional demo data and the established ElevenLabs narrator pool. A fresh manual dispatch can regenerate a video after further commits; pushes alone do not spend another recording automatically.
+
+This automation is limited to open, non-draft same-repository PRs authored and triggered by users with repository write access. A metadata-only readiness dispatcher runs trusted base-branch workflow code. The recorder has no repository write token, and uses the trusted recording configuration rather than PR overrides. The separate attachment job has no model or narration credentials. It checks the PR/head identity, file sizes and checksums, rechecks the current PR immediately before updating its body, and replaces only its managed section. It leaves release assets and the public help catalog untouched. Concurrent human body edits between that last read and the update remain a GitHub API race; no atomic body-update guarantee is claimed.
+
+The resulting native GitHub media attachment shows the recorded commit. Stale, closed, draft or external PRs are not updated. If GitHub rejects media uploads with the configured token, publication fails while preserving the previous PR section; the verified MP4 remains downloadable from the recording artifact. Production generation still requires its recorder dependencies and allowed `release-film` environment, independently of the fast PR checks.
+
+Source and test evidence: `pr-flow-video.yml`, `pr_video.py`, `pr_video_plan.py`, `pr_video_publish.py`, and deterministic `test_pr_video*.py` cases. Tests cover readiness and fork gates, full-PR evidence, visible fixes and semantic skips, immutable references, trusted recording configuration, cleanup, safe artifact handling, idempotent section updates and stale-head rejection. Live model selection, recording and GitHub attachment permissions have not yet been exercised for this workflow.

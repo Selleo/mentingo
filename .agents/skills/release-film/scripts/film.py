@@ -87,7 +87,7 @@ def base_tag(slug, repo, tag):
 def meta(run):
     """The run's facts, with the project add-on read again (edits between steps count without a new env step)."""
     info = core.load(Path(run) / 'meta.json')
-    if (Path(run) / 'checkout').exists():
+    if (Path(run) / 'checkout').exists() and info.get('recordingMode') != 'pull-request':
         info['addon'] = core.addon(info['repo'], Path(run) / 'checkout')
     if (info or {}).get('recordingMode') == 'self-onboarding':
         # Worker try/queue commands reload the base add-on in separate processes.
