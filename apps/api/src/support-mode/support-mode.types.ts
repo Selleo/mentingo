@@ -30,6 +30,7 @@ export type SupportTenant = {
   name: string;
   host: string;
   status: TenantStatus;
+  accessEndsAt: string | null;
 };
 
 export type SupportUserRole = {

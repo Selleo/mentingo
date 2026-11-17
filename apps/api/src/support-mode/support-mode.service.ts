@@ -7,11 +7,12 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { SUPPORT_SESSION_STATUSES, SUPPORT_USER_SCOPES, TENANT_STATUSES } from "@repo/shared";
+import { SUPPORT_SESSION_STATUSES, SUPPORT_USER_SCOPES } from "@repo/shared";
 import { nanoid } from "nanoid";
 
 import { SessionService } from "src/auth/session/session.service";
 import { processInBatches } from "src/common/utils/processInBatches";
+import { isTenantAccessActive } from "src/common/utils/tenantAccess";
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -100,8 +101,7 @@ export class SupportModeService {
     if (requestingUser.tenantId === targetTenantId)
       throw new BadRequestException("superAdminTenants.error.currentTenantSupportNotAllowed");
 
-    if (targetTenant.status !== TENANT_STATUSES.ACTIVE)
-      throw new ForbiddenException("tenant.error.inactive");
+    if (!isTenantAccessActive(targetTenant)) throw new ForbiddenException("tenant.error.inactive");
 
     if (!targetUser) throw new BadRequestException("supportMode.errors.targetUserRequired");
 
@@ -196,7 +196,7 @@ export class SupportModeService {
     const targetTenant = await this.supportModeRepository.findTenantById(tenantId);
 
     if (!targetTenant) throw new BadRequestException("superAdminTenants.error.notFound");
-    if (targetTenant.status !== TENANT_STATUSES.ACTIVE) {
+    if (!isTenantAccessActive(targetTenant)) {
       throw new ForbiddenException("tenant.error.inactive");
     }
   }

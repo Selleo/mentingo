@@ -119,6 +119,20 @@ export class EnvService {
     }
   }
 
+  /** Removes tenant env values; names that are not set are ignored. */
+  async removeEnvValues(envNames: string[], actor?: CurrentUserType) {
+    await this.envRepository.deleteEnvs(envNames);
+
+    if (actor && this.outboxPublisher) {
+      await this.outboxPublisher.publish(
+        new UpdateEnvEvent({
+          actor,
+          updatedEnvKeys: envNames,
+        }),
+      );
+    }
+  }
+
   async getEnv(envName: string) {
     const env = await this.envRepository.getEnv(envName);
 

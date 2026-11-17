@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Put, UseGuards } from "@nestjs/common";
 import { ApiForbiddenResponse, ApiHeader, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { PERMISSIONS } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
@@ -70,6 +70,32 @@ export class IntegrationContentMarketplaceController {
       await this.integrationContentMarketplaceConnectionService.saveContentMarketplaceConnection(
         tenantId,
         body,
+        actor,
+        keyTenant,
+      ),
+    );
+  }
+
+  @ApiEndpointDocs({
+    summary: "Disconnect a tenant from the content marketplace",
+    description:
+      "Removes the content marketplace plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.",
+  })
+  @Delete("tenants/:tenantId/plugins/content-marketplace")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @Validate({
+    request: [{ type: "param", name: "tenantId", schema: UUIDSchema }],
+    response: baseResponse(integrationPluginConfiguredSchema),
+  })
+  async clearContentMarketplaceConnection(
+    @Param("tenantId") tenantId: UUIDType,
+    @CurrentUser() actor: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationPluginConfigured>> {
+    return new BaseResponse(
+      await this.integrationContentMarketplaceConnectionService.clearContentMarketplaceConnection(
+        tenantId,
         actor,
         keyTenant,
       ),

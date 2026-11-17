@@ -1,0 +1,1 @@
+ALTER TABLE "integration_api_keys" ALTER COLUMN "name" SET NOT NULL;

@@ -5,10 +5,10 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { TENANT_STATUSES } from "@repo/shared";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { isTenantAccessActive } from "src/common/utils/tenantAccess";
 import { tenants } from "src/storage/schema";
 
 import { DB_ADMIN } from "./db.providers";
@@ -60,7 +60,7 @@ export class TenantResolverService {
 
       if (!tenant) throw new NotFoundException("tenant.error.notFound");
 
-      if (tenant.status === TENANT_STATUSES.INACTIVE && !allowInactive) {
+      if (!isTenantAccessActive(tenant) && !allowInactive) {
         throw new ForbiddenException("tenant.error.inactive");
       }
 
@@ -70,14 +70,14 @@ export class TenantResolverService {
     if (!origin) return null;
 
     const [tenant] = await this.dbBase
-      .select({ id: tenants.id, status: tenants.status })
+      .select({ id: tenants.id, status: tenants.status, accessEndsAt: tenants.accessEndsAt })
       .from(tenants)
       .where(eq(tenants.host, origin))
       .limit(1);
 
     if (!tenant) throw new NotFoundException("tenant.error.notFound");
 
-    if (tenant.status === TENANT_STATUSES.INACTIVE && !allowInactive) {
+    if (!isTenantAccessActive(tenant) && !allowInactive) {
       throw new ForbiddenException("tenant.error.inactive");
     }
 

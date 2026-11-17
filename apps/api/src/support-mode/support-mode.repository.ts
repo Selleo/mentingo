@@ -28,7 +28,13 @@ export class SupportModeRepository {
 
   async findTenantById(tenantId: string): Promise<SupportTenant | null> {
     const [tenant] = await this.dbAdmin
-      .select({ id: tenants.id, name: tenants.name, host: tenants.host, status: tenants.status })
+      .select({
+        id: tenants.id,
+        name: tenants.name,
+        host: tenants.host,
+        status: tenants.status,
+        accessEndsAt: tenants.accessEndsAt,
+      })
       .from(tenants)
       .where(eq(tenants.id, tenantId))
       .limit(1);

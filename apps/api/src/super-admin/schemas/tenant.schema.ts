@@ -8,12 +8,18 @@ import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 
+export const tenantAccessEndsAtSchema = Type.Union([
+  Type.String({ format: "date-time" }),
+  Type.Null(),
+]);
+
 export const tenantResponseSchema = Type.Object({
   id: UUIDSchema,
   name: Type.String(),
   host: Type.String(),
   status: Type.Enum(TENANT_STATUSES),
   isManaging: Type.Boolean(),
+  accessEndsAt: tenantAccessEndsAtSchema,
   createdAt: Type.String(),
   updatedAt: Type.String(),
 });
@@ -67,6 +73,7 @@ export const createTenantSchema = Type.Object(
     name: Type.String({ minLength: 1 }),
     host: Type.String({ minLength: 1 }),
     status: Type.Optional(Type.Enum(TENANT_STATUSES)),
+    accessEndsAt: Type.Optional(tenantAccessEndsAtSchema),
     adminEmail: Type.String({ format: "email" }),
     adminFirstName: Type.String({ minLength: 1 }),
     adminLastName: Type.String({ minLength: 1 }),
@@ -80,6 +87,7 @@ export const updateTenantSchema = Type.Object(
     name: Type.Optional(Type.String({ minLength: 1 })),
     host: Type.Optional(Type.String({ minLength: 1 })),
     status: Type.Optional(Type.Enum(TENANT_STATUSES)),
+    accessEndsAt: Type.Optional(tenantAccessEndsAtSchema),
   },
   { additionalProperties: false },
 );

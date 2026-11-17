@@ -1,4 +1,4 @@
-import { IntegrationApiKeyCard } from "./IntegrationApiKeyCard";
+import { IntegrationApiKeysCard } from "./IntegrationApiKeysCard";
 import { MicrosoftCalendarCard } from "./MicrosoftCalendarCard";
 
 interface IntegrationsTabContentProps {
@@ -9,7 +9,7 @@ export function IntegrationsTabContent({ canAccessIntegrationApi }: Integrations
   return (
     <>
       <MicrosoftCalendarCard />
-      {canAccessIntegrationApi && <IntegrationApiKeyCard />}
+      {canAccessIntegrationApi && <IntegrationApiKeysCard />}
     </>
   );
 }

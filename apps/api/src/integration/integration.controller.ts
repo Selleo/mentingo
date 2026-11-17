@@ -49,6 +49,14 @@ import { IntegrationApiKeyGuard } from "src/integration/guards/integration-api-k
 import { IntegrationService } from "src/integration/integration.service";
 import { IntegrationKeyTenantContext } from "src/integration/integration.types";
 import {
+  createIntegrationKeyResponseSchema,
+  createIntegrationKeySchema,
+  integrationKeysResponseSchema,
+  type CreateIntegrationKeyBody,
+  type CreateIntegrationKeyResponse,
+  type IntegrationKeysResponse,
+} from "src/integration/schemas/integration-key.schema";
+import {
   integrationUpdateTenantApiKeysSchema,
   integrationUpdateTenantApiKeysResponseSchema,
   type IntegrationUpdateTenantApiKeysBody,
@@ -177,6 +185,28 @@ export class IntegrationController {
   }
 
   @ApiEndpointDocs({
+    summary: "Disconnect a tenant from the phishing platform",
+    description:
+      "Removes the phishing platform plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.",
+  })
+  @Delete("tenants/:tenantId/plugins/phishing")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @Validate({
+    request: [{ type: "param", name: "tenantId", schema: UUIDSchema }],
+    response: baseResponse(integrationPluginConfiguredSchema),
+  })
+  async clearPhishingConnection(
+    @Param("tenantId") tenantId: UUIDType,
+    @CurrentUser() actor: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationPluginConfigured>> {
+    return new BaseResponse(
+      await this.integrationService.clearPhishingConnection(tenantId, actor, keyTenant),
+    );
+  }
+
+  @ApiEndpointDocs({
     summary: "Verify tenant phishing connectivity",
     description:
       "Checks that Mentingo can authenticate to the configured plugin and reports its enabled state. Requires a managing tenant key with tenant management permission. No credentials are returned.",
@@ -221,6 +251,28 @@ export class IntegrationController {
         actor,
         keyTenant,
       ),
+    );
+  }
+
+  @ApiEndpointDocs({
+    summary: "Disconnect a tenant from the competencies platform",
+    description:
+      "Removes the competencies platform plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.",
+  })
+  @Delete("tenants/:tenantId/plugins/competencies")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @Validate({
+    request: [{ type: "param", name: "tenantId", schema: UUIDSchema }],
+    response: baseResponse(integrationPluginConfiguredSchema),
+  })
+  async clearCompetenciesConnection(
+    @Param("tenantId") tenantId: UUIDType,
+    @CurrentUser() actor: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationPluginConfigured>> {
+    return new BaseResponse(
+      await this.integrationService.clearCompetenciesConnection(tenantId, actor, keyTenant),
     );
   }
 
@@ -294,7 +346,7 @@ export class IntegrationController {
   @ApiEndpointDocs({
     summary: "Create tenant via integration API",
     description:
-      "Creates a new tenant and invites its initial admin user.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+      "Creates a new tenant and invites its initial admin user. Optional accessEndsAt blocks the tenant from that moment, like an inactive status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
     headers: [
       {
         ...API_HEADERS.X_TENANT_ID,
@@ -323,7 +375,7 @@ export class IntegrationController {
   @ApiEndpointDocs({
     summary: "Update tenant via integration API",
     description:
-      "Updates the target tenant's name, host, or status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+      "Updates the target tenant's name, host, status, or access end date. Send accessEndsAt as null to clear it.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
     headers: [
       {
         ...API_HEADERS.X_TENANT_ID,
@@ -390,6 +442,109 @@ export class IntegrationController {
         currentUser,
         keyTenant,
       ),
+    );
+  }
+
+  @Get("tenants/:tenantId/integration-keys")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @ApiEndpointDocs({
+    summary: "List integration API keys of a tenant",
+    description:
+      "Lists active integration API keys of the target tenant without their secret values. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+    headers: [
+      {
+        ...API_HEADERS.X_TENANT_ID,
+        required: false,
+        description: "Not required; the target tenant is in the path.",
+      },
+    ],
+  })
+  @Validate({
+    request: [{ type: "param", name: "tenantId", schema: UUIDSchema }],
+    response: baseResponse(integrationKeysResponseSchema),
+  })
+  async getTenantIntegrationKeys(
+    @Param("tenantId") tenantId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationKeysResponse>> {
+    return new BaseResponse(
+      await this.integrationService.getKeysForManagedTenant(tenantId, currentUser, keyTenant),
+    );
+  }
+
+  @Post("tenants/:tenantId/integration-keys")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @ApiEndpointDocs({
+    summary: "Create an integration API key for a tenant",
+    description:
+      "Creates an integration API key for the target tenant, recorded as created by the calling key's user. The raw key is returned only once, in this response. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+    headers: [
+      {
+        ...API_HEADERS.X_TENANT_ID,
+        required: false,
+        description: "Not required; the target tenant is in the path.",
+      },
+    ],
+  })
+  @Validate({
+    request: [
+      { type: "param", name: "tenantId", schema: UUIDSchema },
+      { type: "body", schema: createIntegrationKeySchema },
+    ],
+    response: baseResponse(createIntegrationKeyResponseSchema),
+  })
+  async createTenantIntegrationKey(
+    @Param("tenantId") tenantId: UUIDType,
+    @Body() body: CreateIntegrationKeyBody,
+    @CurrentUser() currentUser: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<CreateIntegrationKeyResponse>> {
+    return new BaseResponse(
+      await this.integrationService.createKeyForManagedTenant(
+        tenantId,
+        body.name,
+        currentUser,
+        keyTenant,
+      ),
+    );
+  }
+
+  @Delete("tenants/:tenantId/integration-keys/:keyId")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @ApiEndpointDocs({
+    summary: "Revoke an integration API key of a tenant",
+    description:
+      "Revokes an active integration API key of the target tenant. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+    headers: [
+      {
+        ...API_HEADERS.X_TENANT_ID,
+        required: false,
+        description: "Not required; the target tenant is in the path.",
+      },
+    ],
+  })
+  @Validate({
+    request: [
+      { type: "param", name: "tenantId", schema: UUIDSchema },
+      { type: "param", name: "keyId", schema: UUIDSchema },
+    ],
+  })
+  async revokeTenantIntegrationKey(
+    @Param("tenantId") tenantId: UUIDType,
+    @Param("keyId") keyId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<void> {
+    await this.integrationService.revokeKeyForManagedTenant(
+      tenantId,
+      keyId,
+      currentUser,
+      keyTenant,
     );
   }
 

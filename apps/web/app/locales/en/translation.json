@@ -6201,7 +6201,9 @@
     "edit": {
       "title": "Edit Organization",
       "description": "Update organization details and status.",
-      "submit": "Save Changes"
+      "submit": "Save Changes",
+      "accessEndsOn": "Access ends {{date}}",
+      "unlimitedAccess": "Unlimited access"
     },
     "form": {
       "tenantName": "Organization Name",
@@ -6211,7 +6213,15 @@
       "statusPlaceholder": "Select status",
       "adminFirstName": "Admin First Name",
       "adminLastName": "Admin Last Name",
-      "adminEmail": "Admin Email"
+      "adminEmail": "Admin Email",
+      "accessEndsAt": "Access ends",
+      "accessEndsAtHint": "Access lasts until the end of the selected day. Leave empty for unlimited access.",
+      "sections": {
+        "organization": "Organization",
+        "firstAdmin": "First admin"
+      },
+      "accessEndsAtPlaceholder": "Unlimited access",
+      "accessEndsAtClear": "Remove end date"
     },
     "validation": {
       "nameRequired": "Name is required",
@@ -6224,6 +6234,11 @@
       "tenantCreatedSuccessfully": "Organization created successfully",
       "tenantUpdatedSuccessfully": "Organization updated successfully",
       "tenantDeletedSuccessfully": "Organization deleted permanently"
+    },
+    "standing": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "accessEnded": "Access ended"
     }
   },
   "superAdminTenants": {
@@ -6288,42 +6303,55 @@
     "description": "This workspace is currently inactive. If you believe this is a mistake, contact your administrator to restore access."
   },
   "integrationApiKey": {
-    "title": "Integration API key",
-    "description": "Generate a long-lived key for external integrations. Replacing the key immediately revokes the previous one.",
-    "status": "Status",
-    "active": "Active",
-    "inactive": "Not generated",
-    "prefix": "Key prefix",
-    "createdAt": "Created at",
-    "lastUsedAt": "Last used at",
-    "loading": "Loading key metadata...",
-    "generate": "Generate key",
-    "override": "Override key",
+    "title": "Integration API keys",
+    "description": "Keys let external systems call the integration API with admin access. Create a separate key for each integration so you can revoke it on its own.",
+    "loading": "Loading keys...",
     "copy": "Copy key",
     "generated": {
-      "title": "Copy this key now. It will not be shown again."
+      "title": "Copy this key now. It will not be shown again.",
+      "dismiss": "Done"
     },
-    "confirm": {
-      "title": "Override current API key?",
-      "description": "This action revokes the current key immediately. Integrations using it will stop working.",
-      "action": "Override key"
+    "create": {
+      "button": "Create key",
+      "title": "Create integration API key",
+      "description": "Name the key after the system that will use it.",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. CRM sync",
+      "action": "Create key"
+    },
+    "revoke": {
+      "button": "Revoke",
+      "title": "Revoke \"{{name}}\"?",
+      "description": "Integrations using this key stop working immediately. This cannot be undone.",
+      "action": "Revoke key"
+    },
+    "table": {
+      "key": "Key",
+      "created": "Created",
+      "createdBy": "by {{email}}",
+      "lastUsedAt": "Last used",
+      "actions": "Actions",
+      "empty": "No integration API keys yet",
+      "emptyHint": "Create a key for each system that needs access to the integration API."
     },
     "toast": {
-      "fetchSuccess": "Integration API key loaded successfully",
-      "rotateSuccess": "Integration API key updated successfully",
-      "rotateError": "Failed to update integration API key",
+      "createSuccess": "Integration API key created",
+      "createError": "Failed to create integration API key",
+      "revokeSuccess": "Integration API key revoked",
+      "revokeError": "Failed to revoke integration API key",
       "copySuccess": "Integration API key copied",
       "copyError": "Failed to copy integration API key"
     },
     "errors": {
-      "rotateFailed": "Failed to rotate integration API key",
       "invalidApiKey": "Invalid integration API key",
       "ownerInactive": "API key owner is no longer active",
       "ownerNotAdmin": "API key owner no longer has admin permissions",
       "missingApiKeyHeader": "Missing X-API-Key header",
       "missingTenantIdHeader": "Missing X-Tenant-Id header",
       "invalidPluginOrigin": "Use an HTTPS plugin origin without a path (HTTP localhost is allowed in development)",
-      "pluginAddressUnavailable": "Could not verify the plugin address. Try again."
+      "pluginAddressUnavailable": "Could not verify the plugin address. Try again.",
+      "createFailed": "Failed to create integration API key",
+      "notFound": "Integration API key not found"
     }
   },
   "courseDuplication": {

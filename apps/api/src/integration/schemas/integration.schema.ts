@@ -1,3 +1,4 @@
+import { TENANT_STATUSES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -6,6 +7,7 @@ import { createCoursesEnrollmentSchema } from "src/courses/schemas/createCourses
 import { INTEGRATION_TRAINING_RESULTS_SCOPES } from "src/integration/integration.types";
 import {
   createTenantSchema,
+  tenantAccessEndsAtSchema,
   tenantResponseSchema,
   updateTenantSchema,
 } from "src/super-admin/schemas/tenant.schema";
@@ -29,6 +31,8 @@ export const integrationTenantSchema = Type.Object({
   id: UUIDSchema,
   name: Type.String(),
   host: Type.String(),
+  status: Type.Enum(TENANT_STATUSES),
+  accessEndsAt: tenantAccessEndsAtSchema,
 });
 
 export const integrationTenantsSchema = Type.Array(integrationTenantSchema);

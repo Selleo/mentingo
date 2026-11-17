@@ -1,11 +1,11 @@
 import { createHash, randomBytes } from "node:crypto";
 
 import { Inject, Injectable } from "@nestjs/common";
-import { TENANT_STATUSES } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 
 import { SessionService } from "src/auth/session/session.service";
 import { DatabasePg } from "src/common";
+import { isTenantAccessActive } from "src/common/utils/tenantAccess";
 import { REDIS_CLIENT, RedisClient, SessionRevocationService } from "src/redis";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { credentials, tenants, users } from "src/storage/schema";
@@ -103,6 +103,7 @@ export class McpTokenService {
         userId: users.id,
         tenantId: users.tenantId,
         tenantStatus: tenants.status,
+        tenantAccessEndsAt: tenants.accessEndsAt,
         archived: users.archived,
         requiresPasswordChange: credentials.requiresPasswordChange,
       })
@@ -119,7 +120,10 @@ export class McpTokenService {
       !identity ||
       identity.archived ||
       identity.requiresPasswordChange ||
-      identity.tenantStatus !== TENANT_STATUSES.ACTIVE
+      !isTenantAccessActive({
+        status: identity.tenantStatus,
+        accessEndsAt: identity.tenantAccessEndsAt,
+      })
     ) {
       return null;
     }
