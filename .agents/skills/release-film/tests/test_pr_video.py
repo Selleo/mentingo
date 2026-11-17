@@ -56,7 +56,7 @@ class Inputs(unittest.TestCase):
         with patch.object(pr_video, "api", side_effect=[pr, {"permission": "write"}]):
             self.assertEqual(pr_video.current(REPO, 10, "writer")["head"]["sha"], HEAD)
 
-    def test_complete_pr_diff_includes_all_commits_not_only_last_one(self):
+    def test_changed_path_inventory_covers_all_commits_without_loading_code(self):
         with tempfile.TemporaryDirectory() as temp:
             repo = Path(temp) / "repo"
             repo.mkdir()
@@ -109,8 +109,60 @@ class Inputs(unittest.TestCase):
             self.assertEqual(
                 {item["path"] for item in inputs["files"]}, {"screen.tsx", "button.tsx"}
             )
-            self.assertTrue(
-                any("+new status" in item["diff"] for item in inputs["files"])
+            self.assertTrue(all(set(item) == {"path"} for item in inputs["files"]))
+            self.assertNotIn("new status", json.dumps(inputs))
+            self.assertNotIn("old status", json.dumps(inputs))
+
+    def test_business_specs_come_from_pinned_head_and_deleted_specs_are_omitted(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo = Path(temp)
+            registry = (
+                repo
+                / ".agents/skills/release-film/projects/mentingo-self-onboarding.json"
+            )
+            registry.parent.mkdir(parents=True)
+            existing = "docs/specs/course-authoring-business-spec.md"
+            removed = "docs/specs/removed-business-spec.md"
+            core.save(
+                registry,
+                {
+                    "domains": [
+                        {
+                            "watchPaths": ["apps/web/**"],
+                            "specPaths": [existing, removed],
+                        }
+                    ]
+                },
+            )
+
+            def git(repository, *arguments):
+                if arguments[0] == "fetch":
+                    return ""
+                if arguments[0] == "merge-base":
+                    return BASE
+                if arguments[0] == "diff":
+                    self.assertIn("--name-only", arguments)
+                    return "apps/web/screen.tsx\0"
+                if arguments[0] == "ls-tree":
+                    self.assertIn(HEAD, arguments)
+                    return existing + "\0"
+                self.assertEqual(arguments, ("show", HEAD + ":" + existing))
+                return "# Updated PR feature\nUse the newly supported screen."
+
+            with (
+                patch.object(pr_video, "current", return_value=pull()),
+                patch.object(pr_video, "git", side_effect=git),
+            ):
+                pr_video.inspect(REPO, 10, "writer", repo, repo / "run", HEAD)
+            source = core.load(repo / "run/pr-input.json")["inputs"]
+            self.assertEqual(
+                source["business_specs"],
+                [
+                    {
+                        "path": existing,
+                        "content": "# Updated PR feature\nUse the newly supported screen.",
+                    }
+                ],
             )
 
     def test_stale_event_stops_before_fetch_or_paid_planning(self):
