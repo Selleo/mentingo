@@ -7,6 +7,8 @@ import { Icon } from "~/components/Icon";
 import { usePlatformLogo } from "~/hooks/usePlatformLogo";
 import { cn } from "~/lib/utils";
 
+import { PLATFORM_LOGO_HANDLES } from "../../e2e/data/common/handles";
+
 interface PlatformLogoProps {
   className?: string;
   variant?: "full" | "signet";
@@ -26,11 +28,16 @@ export const PlatformLogo = memo(({ className, variant = "full", alt }: Platform
     .with("full", () => customLogoUrl)
     .with("signet", () => (isSimpleLogoLoading ? null : customSimpleLogoUrl))
     .exhaustive();
+  const customLogoTestId = match(variant)
+    .with("full", () => PLATFORM_LOGO_HANDLES.CUSTOM)
+    .with("signet", () => PLATFORM_LOGO_HANDLES.CUSTOM_SIGNET)
+    .exhaustive();
 
   if (customLogoSrc) {
     return (
       <img
         src={customLogoSrc}
+        data-testid={customLogoTestId}
         alt={alt ?? t("a11y.platformLogo")}
         className={cn("object-contain", className)}
         loading="eager"

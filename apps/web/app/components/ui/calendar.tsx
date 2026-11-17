@@ -15,6 +15,8 @@ import type { DayProps } from "react-day-picker";
 export type CalendarProps = ComponentProps<typeof DayPicker> & {
   dates?: string[] | undefined;
   variant?: "default" | "streak";
+  /** Adds a `data-testid` to each day of the default variant. */
+  getDayTestId?: (date: Date) => string;
 };
 type CustomDayContentProps = DayProps & {
   "data-day": string;
@@ -49,6 +51,7 @@ function Calendar({
   showOutsideDays = true,
   dates,
   variant = "streak",
+  getDayTestId,
   ...props
 }: CalendarProps) {
   const baseClassNames = match(variant)
@@ -149,6 +152,11 @@ function Calendar({
   })).otherwise(() => ({
     IconLeft: () => <ChevronLeft className="size-4" />,
     IconRight: () => <ChevronRight className="size-4" />,
+    ...(getDayTestId && {
+      DayContent: ({ date }: { date: Date }) => (
+        <span data-testid={getDayTestId(date)}>{getDate(date)}</span>
+      ),
+    }),
   }));
 
   return (

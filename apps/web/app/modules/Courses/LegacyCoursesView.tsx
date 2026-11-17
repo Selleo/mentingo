@@ -23,6 +23,7 @@ import { COURSES_VIEWS } from "~/modules/Courses/utils/coursesView";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { createSortOptions, type SortOption } from "~/types/sorting";
 
+import { COURSES_PAGE_HANDLES } from "../../../e2e/data/courses/handles";
 import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
 import { studentCoursesSteps } from "../Onboarding/routes/student";
 
@@ -143,7 +144,10 @@ const LegacyCoursesView = () => {
         },
       ]}
     >
-      <div className="flex h-auto flex-1 flex-col gap-y-12">
+      <div
+        className="flex h-auto flex-1 flex-col gap-y-12"
+        data-testid={COURSES_PAGE_HANDLES.LEGACY_VIEW}
+      >
         {canUpdateLearningProgress && <StudentsCurses />}
         <div className="flex flex-col">
           <div className="flex flex-col lg:p-0">
