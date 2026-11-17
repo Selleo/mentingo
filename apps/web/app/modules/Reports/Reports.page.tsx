@@ -633,6 +633,7 @@ export default function ReportsPage() {
                   <TabsTrigger
                     key={view}
                     value={view}
+                    data-testid={REPORTS_HANDLES.viewTab(view)}
                     className="gap-2 rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary-600 data-[state=active]:bg-transparent data-[state=active]:text-primary-700 data-[state=active]:shadow-none"
                   >
                     <ViewIcon className="size-4" aria-hidden="true" />
@@ -653,6 +654,8 @@ export default function ReportsPage() {
                       `reports.subject.choose${subjectType[0].toUpperCase()}${subjectType.slice(1)}`,
                     )}
                     options={subjectItems}
+                    testId={REPORTS_HANDLES.SUBJECT_PICKER}
+                    optionTestId={({ id }) => REPORTS_HANDLES.option(id)}
                     selectedIds={draft.subject ? [draft.subject.id] : []}
                     selectedLabel={draft.subject?.name}
                     className="w-full sm:w-64"
@@ -664,6 +667,8 @@ export default function ReportsPage() {
                   label={t("reports.scope.groupLabel")}
                   placeholder={t("reports.scope.allGroups")}
                   options={options?.groups}
+                  testId={REPORTS_HANDLES.GROUPS_PICKER}
+                  optionTestId={({ id }) => REPORTS_HANDLES.option(id)}
                   selectedIds={draft.groupIds}
                   selectedLabel={groupPickerLabel}
                   multiple
@@ -739,6 +744,7 @@ export default function ReportsPage() {
                   <div
                     key={warning}
                     role="alert"
+                    data-testid={REPORTS_HANDLES.WARNING}
                     className="body-sm flex items-start gap-2 rounded-lg border border-warning-200 bg-warning-50 px-3 py-2 text-warning-900"
                   >
                     <AlertTriangle className="mt-0.5 size-4 shrink-0" />
@@ -767,7 +773,9 @@ export default function ReportsPage() {
           <main className="flex min-w-0 flex-col gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="h6 text-neutral-950">{resultTitle}</h2>
+                <h2 data-testid={REPORTS_HANDLES.RESULT_TITLE} className="h6 text-neutral-950">
+                  {resultTitle}
+                </h2>
                 <Tooltip>
                   <TooltipTrigger
                     type="button"

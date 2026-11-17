@@ -7,6 +7,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
 
+import { REPORTS_HANDLES } from "../../../../e2e/data/reports/handles";
+
 import type { ListReportConfigurationsResponse } from "~/api/generated-api";
 
 type SavedConfiguration = ListReportConfigurationsResponse["data"][number];
@@ -36,7 +38,12 @@ export function ReportSavedConfigurations({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="gap-2"
+          data-testid={REPORTS_HANDLES.SAVED_CONFIGURATIONS}
+        >
           <FolderOpen className="size-4" />
           {t("reports.saved.title")}
           {configurations.length > 0 && (
@@ -70,6 +77,7 @@ export function ReportSavedConfigurations({
                   <button
                     type="button"
                     className="min-w-0 flex-1 px-2 py-2 text-left"
+                    data-testid={REPORTS_HANDLES.savedConfiguration(saved.id)}
                     onClick={() => {
                       onOpen(saved);
                       setIsOpen(false);
@@ -107,6 +115,7 @@ export function ReportSavedConfigurations({
             type="button"
             variant="ghost"
             className="w-full justify-start gap-2"
+            data-testid={REPORTS_HANDLES.SAVE_CONFIGURATION}
             onClick={() => {
               setIsOpen(false);
               onSaveCurrent();
