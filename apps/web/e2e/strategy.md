@@ -1,519 +1,141 @@
 # E2E Strategy
 
-## Purpose
+The playbook for writing and changing Playwright tests in `apps/web/e2e`. Agents and humans follow it the same way. If a rule here conflicts with an existing spec, the rule wins; fix the spec when you touch it.
 
-This document describes how the E2E suite is organized today and how new tests should be added.
+## 1. What a test is
 
-It is based on:
+**One test = one user goal, verified where the user sees the result.**
 
-- the Playwright strategy notes in `playwright-strategy/`
-- the current fixture/setup implementation in `e2e/`
-- the decisions made while stabilizing auth, cleanup, and parallel worker execution
+- A test starts where the user starts (a page, a link, an email) and ends with the outcome the user cares about (the entity is listed, the learner can open the course, the login page hides the form).
+- A step of a flow is not a test. Do not write separate tests for "opens the create page", "form is prefilled", "option is available in the selector", "request email is sent" when another test walks through that step on the way to its goal. Put the step's assertion into that test.
+- Write a separate test only for a separate **rule**: validation, conflict, permission denial, a business variant (bulk vs single only if the UI path differs), an error state.
+- One entity lifecycle (create → update → delete) is one test. Bulk actions on N items get one test, not one per N.
+- A role/permission matrix is one parametrized test (`for (const role of …) test(...)`), not one file per role.
 
-This file is the practical source of truth for writing tests in this repo.
+## 2. Before you write a test
 
-## Goals
+1. Search for an existing test that already walks through the same steps:
+   `rg -l "<flowName>|<HANDLE>" apps/web/e2e/specs`
+2. If one exists, **extend it** with your assertion instead of adding a test.
+3. If none exists, find the domain folder in `specs/<domain>/` and the file that matches the layout in §4.
+4. Reuse flows (`flows/<domain>/`), factories (`factories/`) and handles (`data/<domain>/handles.ts`). Add to them rather than writing helpers in the spec.
 
-The suite is designed to:
+## 3. Assertions
 
-- keep specs short and business-focused
-- isolate mutating tests so they can run in parallel safely
-- use API setup/cleanup instead of fragile UI bootstrapping
-- keep UI actions reusable through flows
-- make failures easier to debug through deterministic structure
+- **Every test asserts a user-visible outcome in the UI.** An API check alone is not enough.
+- Backend state may be checked additionally with `expect.poll(...)` when writes settle asynchronously.
+- **Settings and permissions are verified by their effect**, where the affected user sees it: toggle invite-only registration → the register page shows the invite-only screen; enable Q&A → the Q&A nav entry appears; enroll a group → a group member sees and opens the course. Model: `specs/settings/login-methods.spec.ts`.
+- Upload tests assert the uploaded thing is shown/persisted, not just that the parent entity exists.
+- Use retrying assertions (`await expect(locator)...`, `expect.poll`). Do not write `expect(await locator.textContent())`.
+- Never make an assertion optional (`{ optional: true }` on toasts or similar). If it may not appear, it is not an assertion.
+- Prefer existing assertion flows (e.g. `assertQuizLessonProgressFlow`, `assertCourseLessonProgressFlow`) over inline API polls.
 
-## Current Setup Model
-
-The Playwright setup chain is:
-
-1. `db.setup.ts`
-2. `auth.setup.ts`
-3. browser test projects
-
-### `db.setup.ts`
-
-Responsibilities:
-
-- start local infra when needed
-- run migrations
-- seed baseline data
-
-### `auth.setup.ts`
-
-Responsibilities:
-
-- log in as admin once
-- ensure shared readonly accounts exist
-- write readonly storage states
-
-Readonly accounts are created in setup because they are shared and cheap to reuse.
-
-Worker accounts are not created in `auth.setup.ts`.
-
-## Auth State Model
-
-There are two account types:
-
-### Readonly accounts
-
-- shared across tests
-- created in `auth.setup.ts`
-- storage states live in `e2e/.auth/readonly-<role>.json`
-
-Use readonly accounts for:
-
-- non-mutating flows
-- visibility checks
-- browsing/assertion flows that do not change backend state
-
-### Worker accounts
-
-- created lazily once per worker
-- isolated by Playwright `project.name` and `workerIndex`
-- storage states live in `e2e/.auth/worker-<project>-<workerIndex>-<role>.json`
-
-Use worker accounts for:
-
-- mutating flows
-- create/update/delete flows
-- tests that should not collide across workers or browsers
-
-### Why worker accounts include project name
-
-`chromium` worker `0` and `firefox` worker `0` are different execution lanes.
-
-If they shared the same account/state, cross-browser parallel runs would collide.
-
-So worker identity is keyed by:
-
-- Playwright project name
-- worker index
-- role
-
-### Isolated workspaces
-
-- opt-in per test or per worker
-- create a fresh tenant and enter it through support mode
-- return a workspace handle with its own page, API client, factories, and tenant metadata
-- in E2E runtime, outbox-driven side effects should publish immediately so setup does not wait on background dispatch
-
-Use isolated workspaces for:
-
-- tests that must prove a change stays within one tenant
-- tests that compare tenant-local data against the shared baseline
-- scenarios that need a dedicated tenant without changing the rest of the suite
-
-### Worker-owned tenant workspaces
-
-- provision one tenant per Playwright worker
-- reuse that tenant for the lifetime of the worker
-- create fresh user sessions inside that tenant when a test needs a different role
-- prefer this for flows that need stable tenant identity across multiple pages in the same worker
-
-## Fixture Model
-
-The suite uses layered fixtures.
-
-### `api.fixture.ts`
-
-Provides the API client used for:
-
-- setup
-- cleanup
-- preconditions
-- factories
-
-This is not for normal UI assertions inside specs.
-
-### `cleanup.fixture.ts`
-
-Provides:
-
-- `cleanup.add(() => Promise<void>)`
-
-Cleanup tasks run in reverse order after the test body.
-
-Cleanup errors are rethrown with the underlying messages so failures are debuggable.
-
-### `page.fixture.ts`
-
-Provides low-level page/context helpers:
-
-- `withReadonlyPage`
-- `withWorkerPage`
-
-These select the correct storage state and create a new browser context for the test run block.
-
-### `factory.fixture.ts`
-
-Provides factories built on top of the shared `apiClient`.
-
-Prefer factories for setup when the test only needs the final entity state.
-
-### `test.fixture.ts`
-
-Composes the final public test surface.
-
-It currently does three important things:
-
-1. composes page, factory, and cleanup fixtures
-2. lazily provisions worker accounts once per worker through `_workerAuthReady`
-3. syncs browser cookies into the API client inside `withReadonlyPage` and `withWorkerPage`
-
-That cookie sync is what allows factories and cleanup to act as the same authenticated user as the browser context.
-
-## Directory Structure
-
-Current structure:
+## 4. File layout per domain
 
 ```txt
-e2e/
-  .auth/
-  data/
-    auth/
-    categories/
-    navigation/
-    test-data/
-  factories/
-  fixtures/
-  flows/
-    categories/
-  specs/
-    categories/
-  utils/
-  auth.setup.ts
-  db.setup.ts
-  playwright.constants.ts
-  strategy.md
+specs/<domain>/
+  <entity>-lifecycle.spec.ts    create → update → delete through the UI
+  <entity>-validation.spec.ts   invalid input, conflicts
+  <entity>-access.spec.ts       role matrix and public/anonymous access
+  <entity>-<variant>.spec.ts    separate business rules (bulk, import, archive, ...)
+  <domain>.fixture.ts           optional domain fixture (see §7)
 ```
 
-What each layer means:
+Tests that check test infrastructure (fixtures, helpers) do not live in `specs/<domain>/`.
 
-- `data/`: constants and static test data
-- `factories/`: API-backed entity creation helpers
-- `fixtures/`: dependency wiring and auth/session handling
-- `flows/`: reusable UI action sequences
-- `specs/`: business intent + assertions
+## 5. Tenants, sessions and fixtures
 
-## Data Conventions
+Each Playwright worker gets its own tenant (`_getWorkerTenantWorkspace`). Tests inside one worker run one after another; workers run in parallel on different tenants.
 
-Keep static values in `e2e/data/`.
+| Need                                                                             | Use                                                                                                  |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Signed-in user of a role in the worker tenant                                    | `withWorkerPage(role, async ({ page }) => …)`                                                        |
+| Anonymous visitor (login, register, password recovery, magic link, public pages) | `createWorkspacePage()` — a fresh context with no session                                            |
+| A dedicated tenant for one test (tenant scoping, settings you cannot restore)    | `createIsolatedWorkspace()` / `withIsolatedWorkerPage()`                                             |
+| The default root tenant                                                          | `{ root: true }` option of `withWorkerPage` / `createWorkspacePage` — only when the feature needs it |
 
-Examples:
+Rules:
 
-- selector handles
-- static labels
-- default test-data prefixes
+- Run visitor flows as a visitor. Do not run them inside an admin session.
+- Never log out or change the password of the worker's shared role accounts; create a dedicated user with a factory instead.
+- Tenant-level settings changed by a test must be restored to their **original** value in `cleanup` (read it first). If restoring is not possible, use an isolated workspace.
+- Never change settings in the root tenant (`root: true`); it is shared by all workers.
+- `apiClient` and factories act as the user of the most recent `withWorkerPage` context. Switching roles re-syncs them; keep setup for a role inside that role's block.
 
-Current pattern:
+## 6. Setup and cleanup
 
-- handles live in objects like `LOGIN_PAGE_HANDLES`
-- test-data values live in objects like `TEST_DATA`
+- Arrange data through factories (API), not through the UI, unless the UI step is what the test verifies.
+- Register cleanup **immediately after** creating an entity, before any UI step or assertion that can fail.
+- Prefer factory helpers that register their own cleanup (model: `createEmailTemplate` in `specs/email-templates/email-template.fixture.ts`).
+- Use `cleanup.add`, never `try/finally`. Do not swallow cleanup errors with empty `catch`.
+- Use unique values (`${prefix}-${Date.now()}`) for anything that must be unique.
+- Shared constants (passwords, default names) live in `data/test-data/`, not in specs.
 
-Do not hardcode repeated values across specs when they can live in a small shared object.
+## 7. Where code lives
 
-## Factory Conventions
+| Code                                    | Place                                                             |
+| --------------------------------------- | ----------------------------------------------------------------- |
+| Selectors                               | `data/<domain>/handles.ts` (`data-testid` values)                 |
+| Static test data                        | `data/test-data/`                                                 |
+| API setup/teardown                      | `factories/<entity>.factory.ts`                                   |
+| Reusable UI action sequences            | `flows/<domain>/<action>.flow.ts`                                 |
+| Reusable assertion sequences            | `flows/<domain>/assert-<thing>.flow.ts`                           |
+| Network mocks                           | `flows/<domain>/mock-<thing>.flow.ts` (one harness per domain)    |
+| Composite arrange used by several specs | domain fixture (`specs/<domain>/<domain>.fixture.ts`) or `utils/` |
+| Business intent and assertions          | `specs/`                                                          |
 
-Factories are API-first helpers for deterministic setup.
+Specs contain no helper functions, types or API wrappers. If you need one, put it in the right place above.
 
-Current example:
+Flows perform UI actions with plain inputs. They do not create data, register cleanup or decide what the test asserts (assertion flows are the exception and are named `assert-*`).
 
-- `CategoryFactory`
+## 8. Selectors and copy
 
-Factory rules:
+- Use `page.getByTestId(HANDLES.X)`. Add a `data-testid` to the component and a handle to `data/<domain>/handles.ts` when one is missing.
+- Do not use `getByText`, CSS/class/attribute locators, or `getByRole` with an English `name`. They break on copy changes and other locales.
+- Do not pass string literals to `getByTestId`; use a handle (dynamic handles are functions: `HANDLES.item(id)`).
+- Tests are locale-independent. Only `specs/i18n/` asserts translated copy.
+- Exception: accessibility-focused assertions may use roles without names.
 
-- create entities through API
-- expose small, intention-revealing methods
-- allow explicit input when the test cares about the value
-- provide a sensible default when the test does not care
+## 9. Mocks
 
-Example:
+Real backend by default. `page.route` is allowed only for:
 
-```ts
-const category = await categoryFactory.create();
-const namedCategory = await categoryFactory.create("Original Category");
-```
+- external providers that are not available in the test environment (LLM, Luma, LiveKit, Stripe),
+- states that cannot be reached through the API (provider errors, slow responses),
+- UI-contract suites (dashboard cards, reports UI) — each such happy path must also have **one real-data test**.
 
-Factories should not embed browser logic.
+Mocks go through the domain's mock flow; specs do not call `page.route` directly. A spec that depends on real external credentials skips conditionally with a reason (`test.skip(!isConfigured, "requires OpenAI")`).
 
-## Flow Conventions
+## 10. Skips and timeouts
 
-Flows hold reusable UI interaction sequences.
+- No unconditional `test.skip` / `test.fixme`. A broken test is fixed, deleted, or skipped with a linked issue in the reason string.
+- No `waitForTimeout` and no waits that are sleeps in disguise (e.g. waiting for a TOTP window). Wait for a condition.
+- `test.slow()` / `test.setTimeout` only for genuinely long flows, with a one-line comment why.
 
-Current example:
+## 11. Lint
 
-- `flows/categories/update-category.flow.ts`
+`apps/web/.eslintrc.cjs` has an override for `e2e/specs/**` that flags `getByText`, literal `getByTestId`, `getByRole` with `name`, direct `page.route` and unconditional `test.skip`/`test.fixme`. The rules are warnings while the existing suite is migrated; new and changed specs must have **zero** warnings.
 
-Flow rules:
+## 12. Running
 
-- accept plain input data
-- perform UI actions only
-- do not contain test setup
-- do not contain cleanup
-- keep assertions in the spec unless the assertion is reusable by many specs
+- All: `pnpm --filter=web test:e2e`
+- One spec: `pnpm --filter=web test:e2e e2e/specs/<domain>/<file>.spec.ts --project=chromium`
+- Run every spec you add or change before committing; when you merge or delete tests, run the spec that absorbed them.
 
-Example split:
+## 13. Checklist before a PR
 
-- flow: open category page, fill title, click save
-- spec: create category, call flow, assert title changed, assert backend state changed
+- [ ] I searched for an existing test with the same steps (§2) and extended it where possible.
+- [ ] Each new test is a user goal or a separate rule, not a step (§1).
+- [ ] Each test asserts a UI outcome; settings/permissions are verified by their effect (§3).
+- [ ] Right session: worker page, visitor page, or isolated workspace; nothing changes the root tenant (§5).
+- [ ] Cleanup is registered right after creation; changed settings are restored to original values (§6).
+- [ ] No helpers in specs; selectors are handles; no copy; no direct mocks (§7–9).
+- [ ] No unconditional skip, no sleeps (§10); zero lint warnings in changed specs (§11).
+- [ ] Changed specs pass locally (§12).
 
-## Spec Conventions
+## Reference
 
-Specs should be short and capability-focused.
-
-A good spec should mostly read like:
-
-1. arrange test data with factories
-2. register cleanup
-3. open the correct auth page context
-4. call a flow or do one clear interaction path
-5. assert UI outcome
-6. assert backend outcome when relevant
-
-Current example:
-
-- `specs/categories/update-category.spec.ts`
-
-## Practical Rules
-
-### When to use readonly vs worker
-
-- use `withReadonlyPage` for read-only checks
-- use `withWorkerPage` for create/update/delete flows
-
-Do not use readonly state in mutating specs.
-
-### Cleanup
-
-- always register cleanup for created entities unless the test intentionally verifies persistence
-- prefer cleanup through factories/API, not UI
-
-### Assertions
-
-- UI assertions belong in specs
-- backend verification through `expect.poll(...)` is preferred when writes may settle asynchronously
-
-Example:
-
-```ts
-await expect
-  .poll(async () => {
-    const updatedCategory = await categoryFactory.getById(category.id);
-    return updatedCategory.title;
-  })
-  .toBe(updatedTitle);
-```
-
-`expect.poll(...).toBe(...)` means Playwright will keep retrying the callback until the value matches or the timeout is reached.
-
-### Parallel Safety
-
-- readonly tests are safe because the account/state is shared but non-mutating
-- write tests are safe because worker accounts are isolated by project and worker index
-
-## Timeouts
-
-The current timeout budgets are:
-
-- test: `90s`
-- expect: `10s`
-- action: `15s`
-- navigation: `30s`
-- `_workerAuthReady` worker fixture: `90s`
-
-These are budgets, not excuses to add sleeps.
-
-## Capability Ownership
-
-Based on `playwright-strategy/03-capability-coverage.md`:
-
-### Its-Gabo
-
-- Auth -- DONE
-  - login success/failure
-  - register
-  - password recovery/reset
-  - magic-link
-  - MFA
-  - logout
-- Navigation -- DONE
-  - public visibility
-  - authenticated visibility
-  - manage/super-admin visibility
-  - invalid-route redirects
-- Learning -- DONE
-  - lesson open
-  - next lesson progression
-  - mark complete
-  - sequence enforcement
-  - quiz submit/retake
-  - AI mentor interaction entry
-  - blocked/unblocked access
-  - SCORM single-SCO launch
-  - SCORM multi-SCO section navigation
-  - SCORM fullscreen enter/exit
-  - SCORM runtime commit/finish
-  - SCORM first launch and resume state
-  - SCORM package alert/confirm dialog bridge
-  - SCORM content serving through backend
-  - SCORM multi-SCO completion
-  - SCORM enrolled/unenrolled/freemium access
-  - SCORM admin/content creator learning-mode access
-- Announcements -- DONE
-  - create/list
-  - unread count
-  - mark read
-  - feed visibility
-- News -- DONE
-  - list/open/create/update/delete
-  - draft/preview
-  - language variant add/delete
-  - resource upload
-- Articles -- DONE
-  - list/open/create/update/delete
-  - sections + section languages
-  - preview
-  - TOC
-- Settings
-  - user settings
-  - org/company info
-  - branding assets
-  - login page files
-  - registration form
-  - global toggles
-  - MFA-related settings
-  - default currency
-  - feature toggles
-- Certificates
-  - view/download/share link/share render
-- Onboarding -- SKIP
-  - progression/completion/reset
-- Support Mode -- DONE
-  - entry/exit
-  - visibility/badge behavior
-- i18n -- DONE
-  - language switch
-  - localized navigation
-  - localized validation/copy
-  - business tests remain locale-independent
-
-### Japrolol
-
-- Courses -- DONE
-  - browse list
-  - open details
-  - create/update
-  - create course type selection
-  - create SCORM course
-  - invalid SCORM course upload
-  - SCORM course type badges
-  - SCORM course feature restrictions
-  - update pricing
-  - update status
-  - toggle student mode
-  - toggle certificate
-  - archive/delete
-  - delete many
-  - transfer ownership
-  - language add/remove
-- Curriculum -- DONE
-  - generate missing translations
-  - chapter create/update/delete/reorder/freemium
-  - lesson create/update/delete/reorder
-  - lesson types: content/quiz/AI mentor/embed
-  - SCORM lesson type card
-  - create SCORM lesson
-  - SCORM lesson package locked state
-  - SCORM lesson delete
-  - SCORM course generated chapters
-  - resource upload
-  - initialize lesson context
-- Enrollment -- DONE
-  - self-enroll
-  - bulk user enroll
-  - bulk group enroll
-  - group unenroll
-  - enrolled users/groups verification
-- Users -- DONE
-  - create/update/archive
-  - bulk archive/delete
-  - bulk assign groups/update attributes
-  - import users
-- Groups -- DONE
-  - create/edit/delete
-  - bulk delete
-  - membership assignment/verification
-- Categories -- DONE
-  - create/update/delete/delete-many
-  - list/search
-- QA -- DONE
-  - list/open/create/update/delete
-  - language variant create/update/delete
-- Environment -- DONE
-  - env values load
-  - env toggles update
-  - frontend env availability checks
-- Statistics
-  - learner progress
-  - admin analytics
-  - course stats widgets
-  - learning time
-  - quiz results
-- Tenants -- DONE
-  - list/create/edit
-- Voice / AI
-  - voice entry points
-  - AI chat/thread entry points
-  - AI course generation availability check
-
-### Skipped For Now
-
-- Promotion Codes
-- Stripe / Payments
-
-## How To Add A New Test
-
-Use this order:
-
-1. add or reuse selector handles in `e2e/data/...`
-2. add or reuse static test-data in `e2e/data/test-data/...`
-3. add or extend a factory if the test needs API setup
-4. add a flow if the UI interaction is reusable
-5. write the spec using `fixtures/test.fixture`
-
-Checklist for a mutating spec:
-
-1. use `withWorkerPage`
-2. create test data with a factory
-3. register cleanup
-4. call a flow or one clear UI sequence
-5. assert UI result
-6. assert backend result if appropriate
-
-Checklist for a readonly spec:
-
-1. use `withReadonlyPage`
-2. avoid backend mutations
-3. assert UI behavior only unless backend reads are needed for verification
-
-## What We Are Explicitly Not Doing
-
-At the moment we are not investing heavily in:
-
-- a large tag system or tag-driven config complexity
-- `env.setup.ts`
-- over-abstracted naming systems with run/test metadata
-
-Those may be added later if the suite grows enough to justify them.
-
-## Summary
-
-The current model is:
-
-- shared readonly auth in setup
-- lazy worker auth per worker
-- factories for API setup/cleanup
-- flows for reusable UI actions
-- short specs with business assertions
-
-That is the baseline every new E2E test should follow.
+- Setup chain: `db.setup.ts` (migrations, seed) → `auth.setup.ts` (admin login, onboarding) → browser projects.
+- Fixtures: `fixtures/test.fixture.ts` (public surface), `cleanup.fixture.ts`, `factory.fixture.ts`, `api.fixture.ts`.
+- Timeouts: test 90s, expect 10s, action 15s, navigation 30s.
+- Good examples: `settings/login-methods` (setting → visible effect), `gamification/leaderboards`, `curriculum/content-lesson-audio`, `curriculum/quiz-matching-questions` (asserts persisted type, scoring and pairs), `email-templates/*` (self-cleaning domain fixture), `learning-paths/learning-paths-test-helpers.ts` (`arrangeLearningPath`).
