@@ -95,7 +95,11 @@ const makeLesson = (overrides: Partial<Lesson> = {}): Lesson => ({
   ...overrides,
 });
 
-const renderLessonElement = (overrides: Partial<Lesson> = {}, hideControls = false, editorPreview = false) => (
+const renderLessonElement = (
+  overrides: Partial<Lesson> = {},
+  hideControls = false,
+  editorPreview = false,
+) => (
   <MemoryRouter>
     <AiMentorLesson
       lesson={makeLesson(overrides)}
@@ -106,8 +110,11 @@ const renderLessonElement = (overrides: Partial<Lesson> = {}, hideControls = fal
   </MemoryRouter>
 );
 
-const renderLesson = (overrides: Partial<Lesson> = {}, hideControls = false, editorPreview = false) =>
-  renderWith().render(renderLessonElement(overrides, hideControls, editorPreview));
+const renderLesson = (
+  overrides: Partial<Lesson> = {},
+  hideControls = false,
+  editorPreview = false,
+) => renderWith().render(renderLessonElement(overrides, hideControls, editorPreview));
 
 const mentorReply = (text: string) => ({
   id: "reply-1",

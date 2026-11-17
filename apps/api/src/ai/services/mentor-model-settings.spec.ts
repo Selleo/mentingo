@@ -113,15 +113,18 @@ describe("Core Mentor model settings", () => {
       const abort = new AbortController();
       const createMessages = jest.fn();
       streamText.mockReturnValueOnce({
-        elementStream: (async function* () {
-          yield { cue: "frustrated", text: "Still waiting." };
+        textStream: (async function* () {
+          yield '{"elements":[{"cue":"frustrated","text":"Still waiting."}';
           if (mode === "cancel") abort.abort();
-          yield { cue: "frustrated", text: "Who can help?" };
+          yield ',{"cue":"frustrated","text":"Who can help?"}]}';
         })(),
         get output() {
           return mode === "invalid-tail"
             ? Promise.reject(new Error("invalid tail"))
-            : Promise.resolve([]);
+            : Promise.resolve([
+                { cue: "frustrated", text: "Still waiting." },
+                { cue: "frustrated", text: "Who can help?" },
+              ]);
         },
       } as never);
       const service = new AiService(
