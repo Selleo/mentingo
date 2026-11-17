@@ -21,6 +21,8 @@ export const LEARNING_HANDLES = {
   QUIZ_TIMER_MESSAGE: "learning-quiz-timer-message",
   FILL_IN_THE_BLANKS_CORRECT_SENTENCE: "learning-fill-in-the-blanks-correct-sentence",
   FILL_IN_THE_BLANKS_DND_CORRECT_SENTENCE: "learning-fill-in-the-blanks-dnd-correct-sentence",
+  BLANK_SELECT_TRIGGER: "learning-blank-select-trigger",
+  blankSelectOption: (label: string) => `learning-blank-select-option-${label}`,
   AI_MENTOR_TASK_DESCRIPTION: "learning-ai-mentor-task-description",
   AI_MENTOR_TASK_DESCRIPTION_DIALOG: "learning-ai-mentor-task-description-dialog",
   AI_MENTOR_MESSAGES: "learning-ai-mentor-messages",

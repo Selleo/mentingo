@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { FormProvider, useForm } from "react-hook-form";
 import { I18nextProvider } from "react-i18next";
 import { describe, expect, it } from "vitest";
@@ -117,6 +118,21 @@ describe("Matching", () => {
     const bankMatch = within(screen.getByTestId("blank_preset")).getByText("Meow");
 
     expect(bankMatch).toHaveClass("w-auto", "text-left");
+  });
+
+  it("keeps a placed match draggable and opens its list only on click", async () => {
+    const user = userEvent.setup();
+
+    renderMatching({ isCompleted: false });
+
+    const trigger = within(screen.getByTestId("pair-cat")).getByRole("combobox");
+
+    // A mouse press may start a drag, so the list waits for the release.
+    await user.pointer({ keys: "[MouseLeft>]", target: trigger });
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+
+    await user.pointer({ keys: "[/MouseLeft]", target: trigger });
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
   });
 
   it("shows the click-to-choose instruction while answering", () => {

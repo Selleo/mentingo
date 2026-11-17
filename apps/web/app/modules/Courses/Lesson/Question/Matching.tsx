@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 
 import { DndBlank, DraggableWord } from "./FillInTheBlanks/dnd";
-import { BlankSelect } from "./FillInTheBlanks/dnd/BlankSelect";
+import { BlankSelect, DRAG_ACTIVATION_DISTANCE } from "./FillInTheBlanks/dnd/BlankSelect";
 import { buildDndAccessibility } from "./FillInTheBlanks/dnd/dndAnnouncements";
 import { WordBank } from "./FillInTheBlanks/dnd/WordBank";
 import { QuestionCard } from "./QuestionCard";
@@ -87,7 +87,9 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
   const [previewDropId, setPreviewDropId] = useState<string | null>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: isCompleted ? Infinity : 0 } }),
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: isCompleted ? Infinity : DRAG_ACTIVATION_DISTANCE },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
       keyboardCodes: { start: isCompleted ? [] : ["Space"], cancel: ["Escape"], end: ["Space"] },
@@ -147,15 +149,10 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
   const handleSelectMatch = (pairId: string, targetKey: string | null) => {
     if (isCompleted) return;
 
-    if (targetKey) {
-      field.onChange(placeMatch(answers, targetKey, pairId));
+    // No target means "remove word": send the pair's current match back to the bank.
+    const movedTarget = targetKey ?? answers[pairId];
 
-      return;
-    }
-
-    const currentTarget = answers[pairId];
-
-    if (currentTarget) field.onChange(placeMatch(answers, currentTarget, null));
+    if (movedTarget) field.onChange(placeMatch(answers, movedTarget, targetKey ? pairId : null));
   };
 
   const targetItems = targets.map((target) => ({ key: target, label: target }));
@@ -227,6 +224,7 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
                     selectedKey={renderedAnswers[id] ?? null}
                     items={targetItems}
                     onSelect={(targetKey) => handleSelectMatch(id, targetKey)}
+                    dragId={answer ? wordId : undefined}
                     wrapText
                   />
                 )}

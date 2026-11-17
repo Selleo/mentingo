@@ -26,6 +26,11 @@ const dragWithMouse = async (page: Page, source: Locator, target: Locator) => {
   await page.mouse.up();
 };
 
+const chooseInBlank = async (page: Page, blank: Locator, answer: string) => {
+  await blank.getByTestId(LEARNING_HANDLES.BLANK_SELECT_TRIGGER).click();
+  await page.getByTestId(LEARNING_HANDLES.blankSelectOption(answer)).click();
+};
+
 export const answerAllRenderedQuizQuestionTypesFlow = async (
   page: Page,
   {
@@ -47,16 +52,23 @@ export const answerAllRenderedQuizQuestionTypesFlow = async (
 
   const quizForm = page.getByTestId(LEARNING_HANDLES.QUIZ_FORM);
   const dndBlank = quizForm.getByTestId(`blank:${dndBlankAnswerId}`);
-  await dragWithMouse(page, quizForm.getByRole("button", { name: dndBlankAnswer }), dndBlank);
+  await chooseInBlank(page, dndBlank, dndBlankAnswer);
   await expect(dndBlank).toContainText(dndBlankAnswer);
 
-  for (const { prompt, match } of matchingPairs) {
+  // The first pair is dragged and the rest are chosen from the list, so both input paths stay covered.
+  for (const [pairIndex, { prompt, match }] of matchingPairs.entries()) {
     const pairSlot = quizForm
       .locator('[data-testid^="matching-pair-"]')
       .filter({ hasText: prompt })
-      .locator("[data-testid]");
+      .locator("[data-testid]")
+      .first();
 
-    await dragWithMouse(page, quizForm.getByRole("button", { name: match }), pairSlot);
+    if (pairIndex === 0) {
+      await dragWithMouse(page, quizForm.getByRole("button", { name: match }), pairSlot);
+    } else {
+      await chooseInBlank(page, pairSlot, match);
+    }
+
     await expect(pairSlot).toContainText(match);
   }
 

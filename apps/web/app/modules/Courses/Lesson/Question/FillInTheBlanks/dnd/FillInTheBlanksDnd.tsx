@@ -25,7 +25,7 @@ import { getBlankAnswerIds, getBlankCount } from "~/utils/blankAnswerMarkers";
 import { LEARNING_HANDLES } from "../../../../../../../e2e/data/learning/handles";
 import { getCorrectSentence } from "../correctSentence";
 
-import { BlankSelect } from "./BlankSelect";
+import { BlankSelect, DRAG_ACTIVATION_DISTANCE } from "./BlankSelect";
 import { buildDndAccessibility } from "./dndAnnouncements";
 import { DndBlank } from "./DndBlank";
 import { DraggableWord } from "./DraggableWord";
@@ -197,7 +197,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: isCompleted ? Infinity : 0,
+        distance: isCompleted ? Infinity : DRAG_ACTIVATION_DISTANCE,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -517,6 +517,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
                 selectedKey={wordsInBlank[0]?.id ?? null}
                 items={wordItems}
                 onSelect={(wordKey) => handleSelectWord(blankId, wordKey)}
+                dragId={wordsInBlank[0]?.id}
                 minWidth={blankMinWidth}
               />
             );
