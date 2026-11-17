@@ -5,8 +5,8 @@ on:
       pr_number:
         description: Same-repository PR to demonstrate through a trusted caller
         required: true
-        type: number
-  pull_request_target:
+        type: string
+  pull_request:
     types: [opened, ready_for_review]
     branches: [staging, main]
   workflow_dispatch:
@@ -30,9 +30,9 @@ concurrency:
   queue: max
 jobs:
   dispatch:
-    # Metadata only. Never check out or execute PR code in a pull_request_target job.
+    # Metadata only. The PR merge workflow dispatches a recorder on its trusted base branch.
     if: >-
-      github.event_name == 'pull_request_target' && !github.event.pull_request.draft &&
+      github.event_name == 'pull_request' && !github.event.pull_request.draft &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
     runs-on: ubuntu-24.04
@@ -53,8 +53,8 @@ jobs:
           [[ "$NUMBER" =~ ^[1-9][0-9]*$ ]]
           [[ "$HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$BASE_REF" == staging || "$BASE_REF" == main ]]
-          gh workflow run pr-flow-video.yml --repo "$REPOSITORY" --ref "$BASE_REF" \
-            -f "pr_number=$NUMBER" -f "expected_head=$HEAD_SHA" -f "requested_by=$REQUESTED_BY"
+          gh workflow run release-film.yml --repo "$REPOSITORY" --ref "$BASE_REF" \
+            -f "pr_number=$NUMBER" -f "expected_head=$HEAD_SHA" -f "requested_by=$REQUESTED_BY" -f publish=false
 
   film:
     if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main')

@@ -390,39 +390,37 @@ changes to this skill.
 
 ## Pull request flow videos
 
-`pr-flow-video.yml` dispatches a trusted base-branch recording when an internal PR is
-opened ready or marked ready for review. It uses the complete merge-base-to-head
-diff, with PR prose and business specs as untrusted context, to select visible
-changed flows. No visible effect means no recording. See `pr_video_plan.py` for
-bounded semantic evidence checks; uncertainty is an error, never a silent skip.
+`pr-flow-video.yml` listens to `pull_request` when an internal PR is opened ready
+or marked ready for review, like the Slack notification workflow. Its metadata-only
+job has no checkout or provider credentials. It dispatches the already-registered
+`release-film.yml` on the PR's base branch with the PR number, exact head SHA,
+original actor and `publish=false`. This works for staging PRs before the new
+workflow exists on main. Do not execute PR code in this dispatch job.
 
-The metadata-only dispatcher never runs PR code. Only same-repository writer PRs
-are eligible; the recording job has read-only repository permissions and uses the
-existing protected `release-film` environment. Internal PR code still executes
-build and browser setup, so this is not a sandbox for hostile contributions.
-Never loosen the fork/writer gates or give the recorder a write token. No GitHub
-admin settings or environment rules are changed by this workflow.
-
-After recording, a separate job validates `pr-video.json` and attaches the video
-at the end of the current PR description. It preserves the author's body and
-replaces only its managed section. Changed PR heads are skipped. No release or
-Helpdesk publication is performed. To retry after new commits, manually dispatch
-`pr-flow-video.yml` from `staging` or `main` with `pr_number`. The workflow must
-first be present on that trusted branch. Narration uses the existing four-voice
-ElevenLabs pool. Native upload permission failures retain the downloadable video
-artifact and the previous PR section; never label an artifact link as a player.
-
-
-Before the new workflow is registered on the default branch, use the existing
-Release film workflow from staging with a positive `pr_number`. This calls the
-same PR pipeline and skips both release recording and release publication,
-regardless of the `publish` input. With zero/omitted `pr_number`, release behavior
-is unchanged. Example after this entry point reaches staging:
+Release film's optional positive `pr_number` calls the same reusable PR pipeline
+and skips release recording/publication regardless of `publish`. The PR number
+crosses the reusable-workflow boundary as explicitly formatted text, avoiding
+GitHub's numeric dispatch-forwarding failure. Zero/omitted `pr_number` preserves
+normal release behavior. To test or retry after commits:
 
 ```sh
 gh workflow run release-film.yml --ref staging -f pr_number=2258 -f publish=false
 ```
 
-This manual staging entry point does not test the ready-for-review dispatcher;
-that dispatcher still needs registration on the default branch. No environment
-branch policies or repository admin settings need to be changed.
+The recording uses the full merge-base-to-head diff, PR prose and existing business
+specs to select up to four visible changed flows. No visible effect means no film;
+uncertainty is reported, never silently skipped. Inputs are evidence, never tools
+or instructions. Only same-repository PRs authored and triggered by repository
+writers are eligible. The PR merge workflow is writer-controlled metadata dispatch;
+the recording/publishing control code is pinned to the selected trusted staging/main
+commit. Recording has read-only repository permissions and uses the existing
+protected `release-film` environment and four-voice ElevenLabs pool. Internal PR
+build/browser code still executes with recording credentials on the same runner,
+so this is not a sandbox for hostile contributions. Never loosen fork/writer gates.
+
+A separate job without provider credentials validates `pr-video.json` and attaches
+the native video at the end of the PR description, preserving the author's body
+and replacing only its managed section. Changed heads are rejected. No release or
+Helpdesk publication is performed. Native-upload permission failures preserve the
+previous section and downloadable MP4 artifact; never call an artifact link a player.
+No repository admin settings or environment policies are changed by these workflows.

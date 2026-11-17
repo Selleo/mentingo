@@ -17,10 +17,11 @@ class Workflow(unittest.TestCase):
     def test_readiness_dispatch_is_metadata_only_and_forks_are_excluded(self):
         events = self.workflow.get("on", self.workflow.get(True))
         self.assertEqual(
-            events["pull_request_target"]["types"], ["opened", "ready_for_review"]
+            events["pull_request"]["types"], ["opened", "ready_for_review"]
         )
         self.assertIn("workflow_dispatch", events)
-        self.assertNotIn("synchronize", events["pull_request_target"]["types"])
+        self.assertNotIn("pull_request_target", events)
+        self.assertNotIn("synchronize", events["pull_request"]["types"])
         dispatch = self.workflow["jobs"]["dispatch"]
         self.assertIn("!github.event.pull_request.draft", dispatch["if"])
         self.assertIn("head.repo.full_name == github.repository", dispatch["if"])
@@ -29,6 +30,12 @@ class Workflow(unittest.TestCase):
             any("checkout" in step.get("uses", "") for step in dispatch["steps"])
         )
         self.assertNotIn("secrets.", str(dispatch))
+        command = dispatch["steps"][0]["run"]
+        self.assertIn("gh workflow run release-film.yml", command)
+        self.assertIn('-f "expected_head=$HEAD_SHA"', command)
+        self.assertIn('-f "requested_by=$REQUESTED_BY"', command)
+        self.assertIn("-f publish=false", command)
+        self.assertNotIn("gh workflow run pr-flow-video.yml", command)
 
     def test_recorder_runs_trusted_control_code_and_has_no_write_token(self):
         job = self.workflow["jobs"]["film"]
@@ -71,12 +78,20 @@ class Workflow(unittest.TestCase):
         caller = release["jobs"]["pr_video"]
         self.assertEqual(caller["uses"], "./.github/workflows/pr-flow-video.yml")
         self.assertIn("inputs.pr_number > 0", caller["if"])
-        self.assertIn("refs/heads/staging", caller["if"])
-        self.assertEqual(caller["with"], {"pr_number": "${{ inputs.pr_number }}"})
+        self.assertNotIn("runs-on", caller)
+        self.assertIn("refs/heads/staging", self.workflow["jobs"]["film"]["if"])
+        self.assertIn("refs/heads/main", self.workflow["jobs"]["film"]["if"])
+        self.assertEqual(
+            caller["with"], {"pr_number": "${{ format('{0}', inputs.pr_number) }}"}
+        )
         self.assertNotIn("secrets", caller)
+        for field in ("expected_head", "requested_by"):
+            self.assertEqual(
+                events["workflow_dispatch"]["inputs"][field]["type"], "string"
+            )
         self.assertIn("!inputs.pr_number", release["jobs"]["film"]["if"])
         self.assertIn("!inputs.pr_number", release["jobs"]["publish"]["if"])
         called_events = self.workflow.get("on", self.workflow.get(True))
         self.assertEqual(
-            called_events["workflow_call"]["inputs"]["pr_number"]["type"], "number"
+            called_events["workflow_call"]["inputs"]["pr_number"]["type"], "string"
         )
