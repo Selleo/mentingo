@@ -226,6 +226,27 @@ export const assessmentQuestionScaleOptions = pgTable(
   })),
 );
 
+export const assessmentFeedbackRanges = pgTable(
+  "assessment_feedback_ranges",
+  {
+    ...id,
+    assessmentId: uuid("assessment_id")
+      .references(() => assessments.id, { onDelete: "cascade" })
+      .notNull(),
+    minPercent: integer("min_percent").notNull(),
+    maxPercent: integer("max_percent").notNull(),
+    displayOrder: integer("display_order").notNull(),
+    message: jsonb("message").$type<LocalizedText>().notNull().default({}),
+    ...timestamps,
+    tenantId,
+  },
+  withTenantIdIndex("assessment_feedback_ranges", (table) => ({
+    assessmentDisplayOrderUniqueIdx: uniqueIndex(
+      "assessment_feedback_ranges_tenant_assessment_display_order_idx",
+    ).on(table.tenantId, table.assessmentId, table.displayOrder),
+  })),
+);
+
 export const assessmentQuestionOpenTextSettings = pgTable(
   "assessment_question_open_text_settings",
   {

@@ -48660,6 +48660,52 @@
                   }
                 ]
               },
+              "feedbackMode": {
+                "anyOf": [
+                  {
+                    "const": "full",
+                    "type": "string"
+                  },
+                  {
+                    "const": "score_only",
+                    "type": "string"
+                  },
+                  {
+                    "const": "none",
+                    "type": "string"
+                  }
+                ]
+              },
+              "feedbackRanges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "minPercent": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "maxPercent": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "minPercent",
+                    "maxPercent",
+                    "message"
+                  ]
+                }
+              },
               "questions": {
                 "type": "array",
                 "items": {
@@ -49012,6 +49058,52 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "feedbackMode": {
+                    "anyOf": [
+                      {
+                        "const": "full",
+                        "type": "string"
+                      },
+                      {
+                        "const": "score_only",
+                        "type": "string"
+                      },
+                      {
+                        "const": "none",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "feedbackRanges": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "minPercent": {
+                          "minimum": 0,
+                          "maximum": 100,
+                          "type": "integer"
+                        },
+                        "maxPercent": {
+                          "minimum": 0,
+                          "maximum": 100,
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "minPercent",
+                        "maxPercent",
+                        "message"
+                      ]
+                    }
                   },
                   "questions": {
                     "type": "array",

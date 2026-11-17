@@ -4334,6 +4334,22 @@ export type BetaCreateQuizLessonBody = {
   attemptsLimit: number | null;
   quizCooldownInHours: number | null;
   timeLimitMinutes?: number | null;
+  feedbackMode?: "full" | "score_only" | "none";
+  feedbackRanges?: {
+    /** @format uuid */
+    id?: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    minPercent: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxPercent: number;
+    message: string;
+  }[];
   questions?: {
     /** @format uuid */
     id?: string;
@@ -4399,6 +4415,22 @@ export type BetaUpdateQuizLessonBody = ({
   attemptsLimit?: number | null;
   quizCooldownInHours?: number | null;
   timeLimitMinutes?: number | null;
+  feedbackMode?: "full" | "score_only" | "none";
+  feedbackRanges?: {
+    /** @format uuid */
+    id?: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    minPercent: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxPercent: number;
+    message: string;
+  }[];
   questions?: {
     /** @format uuid */
     id?: string;

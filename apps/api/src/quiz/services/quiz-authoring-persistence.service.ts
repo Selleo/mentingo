@@ -8,12 +8,18 @@ import {
 import { QuizAuthoringRepository } from "../repositories/quiz-authoring.repository";
 
 import type {
+  QuizAuthoringFeedbackRange,
   QuizAuthoringQuestion,
   QuizLessonCreateData,
   QuizLessonUpdateData,
 } from "../types/quiz-authoring.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
+
+const sortFeedbackRangesByMin = (
+  ranges: QuizAuthoringFeedbackRange[],
+): QuizAuthoringFeedbackRange[] =>
+  [...ranges].sort((first, second) => first.minPercent - second.minPercent);
 
 @Injectable()
 export class QuizAuthoringPersistenceService {
@@ -34,12 +40,25 @@ export class QuizAuthoringPersistenceService {
 
       await this.insertAssessmentQuestions(assessment.id, data.questions, data.language, trx);
 
+      await this.quizAuthoringRepository.insertFeedbackRanges(
+        assessment.id,
+        sortFeedbackRangesByMin(data.feedbackRanges),
+        data.language,
+        trx,
+      );
+
       return lesson;
     }, db);
   }
 
   async updateQuizLesson(
-    { lesson, lessonId, assessment: assessmentData, questions }: QuizLessonUpdateData,
+    {
+      lesson,
+      lessonId,
+      assessment: assessmentData,
+      feedbackRanges,
+      questions,
+    }: QuizLessonUpdateData,
     db?: DatabasePg,
   ) {
     return this.quizAuthoringRepository.withTransaction(async (trx) => {
@@ -53,8 +72,52 @@ export class QuizAuthoringPersistenceService {
       if (questions)
         await this.syncAssessmentQuestions(assessment.id, questions, lesson.language, trx);
 
+      if (feedbackRanges)
+        await this.syncFeedbackRanges(assessment.id, feedbackRanges, lesson.language, trx);
+
       return assessment;
     }, db);
+  }
+
+  private async syncFeedbackRanges(
+    assessmentId: UUIDType,
+    incomingRanges: QuizAuthoringFeedbackRange[],
+    language: SupportedLanguages,
+    trx: DatabasePg,
+  ) {
+    const existingRows = await this.quizAuthoringRepository.findFeedbackRangeRows(
+      assessmentId,
+      trx,
+    );
+    const unmatchedExistingIds = new Set(existingRows.map(({ id }) => id));
+    const ranges = sortFeedbackRangesByMin(incomingRanges).map((range) => {
+      // Ids from another assessment or repeated in the payload are treated as new bands.
+      if (!range.id || !unmatchedExistingIds.delete(range.id)) return { ...range, id: undefined };
+      return range;
+    });
+
+    await this.quizAuthoringRepository.deleteFeedbackRanges([...unmatchedExistingIds], trx);
+    await this.quizAuthoringRepository.parkFeedbackRanges(assessmentId, trx);
+
+    for (const [displayOrder, range] of ranges.entries()) {
+      if (range.id) {
+        await this.quizAuthoringRepository.updateFeedbackRange(
+          range.id,
+          range,
+          displayOrder,
+          language,
+          trx,
+        );
+      } else {
+        await this.quizAuthoringRepository.insertFeedbackRanges(
+          assessmentId,
+          [range],
+          language,
+          trx,
+          displayOrder,
+        );
+      }
+    }
   }
 
   private async insertAssessmentQuestions(

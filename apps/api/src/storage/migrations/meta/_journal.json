@@ -1737,6 +1737,20 @@
       "when": 1794842477276,
       "tag": "0247_enable_lesson_audio_progress_tenant_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 248,
+      "version": "7",
+      "when": 1794847265920,
+      "tag": "0248_add_assessment_feedback_ranges",
+      "breakpoints": true
+    },
+    {
+      "idx": 249,
+      "version": "7",
+      "when": 1794847269217,
+      "tag": "0249_enable_assessment_feedback_ranges_rls",
+      "breakpoints": true
     }
   ]
 }
