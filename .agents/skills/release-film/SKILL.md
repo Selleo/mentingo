@@ -447,3 +447,14 @@ does not bypass its protection. Adding a temporary environment branch policy is
 an admin-level change requiring explicit user authorization. Remove that exact
 temporary policy after the test. Normal readiness runs omit the flag and continue
 on staging/main. Test mode never starts release recording/publication.
+
+
+A PR video is one MP4 with one chapter per selected flow (up to four). All these
+chapters may cite the same single PR; release films retain their one-PR-per-chapter
+rule. The PR publisher refuses a reviewed story that silently drops or duplicates
+one of the selected flow chapters. Recording logs phase transitions and preserves
+`pr-video-recording-report.json` even when recording/review fails. It contains
+bounded results and worker/keeper log tails redacted against the recording step's
+credential values; raw authentication state, checkout and worker logs are never
+uploaded. A generic wrapper error alone is not sufficient evidence of why a run
+failed: inspect this report before attributing a recording failure.

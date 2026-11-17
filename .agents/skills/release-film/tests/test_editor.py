@@ -129,6 +129,23 @@ class Checks(unittest.TestCase):
         story['chapters'][0]['prs'] = [1, 2]
         self.assertIn('#2 is named in chapters [1, 2]', ' '.join(editor.check(story, self.keys, self.sources, {})))
 
+    def test_pr_demo_keeps_four_flows_of_the_same_pr_in_one_film(self):
+        story = self.story([0, 2, 4, None])
+        for chapter in story['chapters']:
+            chapter['prs'] = [1]
+        source = dict(self.sources, mode='pull-request', prs=[self.sources['prs'][0]])
+        self.assertEqual(editor.check(story, self.keys, source, {}), [])
+        story['chapters'][0]['prs'] = [1, 1]
+        self.assertIn('#1 is named in chapters', ' '.join(editor.check(story, self.keys, source, {})))
+
+    def test_pr_demo_still_requires_real_screen_proofs(self):
+        story = self.story([0, 2, 4, None])
+        for chapter in story['chapters']:
+            chapter['prs'] = [1]
+        story['chapters'][2]['proofs'] = ['An invented result']
+        source = dict(self.sources, mode='pull-request', prs=[self.sources['prs'][0]])
+        self.assertIn('is not in film F1', ' '.join(editor.check(story, self.keys, source, {})))
+
     def test_other_scripts_than_polish_are_sent_back(self):
         story = self.story([0, 2, 4, None])
         story['not_shown'] = [{'prs': [1], 'reason': 'Drobne улучшения.'}]

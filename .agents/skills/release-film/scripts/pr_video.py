@@ -16,6 +16,7 @@ import film
 import gaps
 import harness
 import pr_video_plan
+import pr_video_report
 import sources
 
 SHA = re.compile(r"[a-f0-9]{40}")
@@ -226,29 +227,66 @@ def prepare(run, repo):
 def record(run, repo, bundle):
     run, bundle = Path(run), Path(bundle)
     os.environ["RELEASE_FILM_RUN"] = str(run)
-    info = prepare(run, repo)
     args = SimpleNamespace(run=str(run), jobs=2, learn="off", provider="cli")
+    phase, prepared = "prepare", False
     try:
+        pr_video_report.checkpoint(run, phase)
+        info = prepare(run, repo)
+        prepared = True
+        phase = "setup"
+        pr_video_report.checkpoint(run, phase)
+        print("PR video: preparing the demo environment", flush=True)
         harness.setup(run, info["addon"]["harness"])
-        # Bring up auth/demo data before workers attempt their browser takes.
+        phase = "capture"
+        pr_video_report.checkpoint(run, phase)
         film.capture(args)
+        phase = "scene-workers"
+        pr_video_report.checkpoint(run, phase)
         selected = film.gap_scenes(args)
         if not selected.get("ok") or not selected.get("workers"):
-            raise RuntimeError("PR scene workers did not start")
+            pr_video_report.checkpoint(run, phase, selected)
+            raise RuntimeError(
+                "PR scene workers did not start: " + pr_video_report.reason(selected)
+            )
+        phase = "narration"
+        pr_video_report.checkpoint(run, phase)
+        print("PR video: recording and narrating the selected flows", flush=True)
         film.write(args)
+        phase = "finish"
+        pr_video_report.checkpoint(run, phase)
+        print("PR video: reviewing and assembling one film", flush=True)
         finished = film.finish(args)
+        pr_video_report.checkpoint(run, phase, finished)
         if not finished.get("ok") or finished.get("degraded"):
-            raise RuntimeError("PR film did not finish a reviewed recording")
+            raise RuntimeError(
+                "PR recording review failed: " + pr_video_report.reason(finished)
+            )
+        count = len(core.load(run / "pr-video-plan.json")["flows"])
         passed = [
             scene
             for scene in finished.get("scenes", [])
             if scene.get("filmed") and scene.get("narrated")
         ]
-        if len(passed) != len(core.load(run / "pr-video-plan.json")["flows"]):
+        if len(passed) != count:
             raise RuntimeError("Not every selected PR flow was recorded and narrated")
+        # Four flows must survive review as four chapters of the one final film.
+        # Successful worker takes alone do not prove the review kept those chapters.
+        chapters = (core.load(run / "story.json") or {}).get("chapters", [])
+        actual = [chapter.get("source", {}).get("file") for chapter in chapters]
+        expected = [f"gaps/pr-flow-{index}/story.txt" for index in range(1, count + 1)]
+        if len(actual) != count or set(actual) != set(expected):
+            raise RuntimeError(
+                "The reviewed film does not contain every selected flow exactly once"
+            )
+        phase = "stage"
+        pr_video_report.checkpoint(run, phase)
         return stage(run, bundle)
+    except BaseException as error:
+        pr_video_report.checkpoint(run, phase, error=error)
+        raise
     finally:
-        film.stop(args)
+        if prepared:
+            film.stop(args)
 
 
 def stage(run, bundle):

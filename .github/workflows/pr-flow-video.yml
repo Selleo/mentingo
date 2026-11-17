@@ -165,6 +165,14 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
         run: python3 "$S/pr_video.py" record --run "$RUNNER_TEMP/pr-video" --bundle "$RUNNER_TEMP/pr-video-bundle"
+      - name: Preserve the redacted recording report
+        if: always() && steps.plan.outputs.record == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pr-flow-video-report-${{ github.run_id }}
+          path: ${{ runner.temp }}/pr-video/pr-video-recording-report.json
+          if-no-files-found: warn
+          retention-days: 14
       - name: Preserve only the verified PR video bundle
         if: steps.plan.outputs.record == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

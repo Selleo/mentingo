@@ -1,6 +1,7 @@
 """No network or providers: immutable PR inputs and the trusted recorder seam."""
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -14,6 +15,7 @@ import core
 import film
 import gaps
 import pr_video
+import pr_video_report
 
 REPO = "Selleo/mentingo"
 HEAD = "a" * 40
@@ -297,3 +299,110 @@ class Recorder(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "did not start"):
                 pr_video.record(temp, temp, Path(temp) / "bundle")
             stop.assert_called_once()
+
+
+class CompleteFilm(unittest.TestCase):
+    def record_with_finish(self, finished, chapter_ids):
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        run = Path(folder.name)
+        core.save(
+            run / "pr-video-plan.json",
+            {"flows": [{"id": f"flow-{index}"} for index in range(1, 5)]},
+        )
+        core.save(
+            run / "story.json",
+            {
+                "chapters": [
+                    {"source": {"file": f"gaps/pr-flow-{index}/story.txt"}}
+                    for index in chapter_ids
+                ]
+            },
+        )
+        patches = [
+            patch.object(pr_video, "prepare", return_value={"addon": {"harness": {}}}),
+            patch.object(pr_video.harness, "setup"),
+            patch.object(pr_video.film, "capture"),
+            patch.object(
+                pr_video.film, "gap_scenes", return_value={"ok": True, "workers": True}
+            ),
+            patch.object(pr_video.film, "write"),
+            patch.object(pr_video.film, "finish", return_value=finished),
+            patch.object(pr_video.film, "stop"),
+        ]
+        for item in patches:
+            item.start()
+            self.addCleanup(item.stop)
+        return run
+
+    def test_four_flow_chapters_produce_one_staged_video(self):
+        finished = {
+            "ok": True,
+            "scenes": [
+                {"id": f"pr-flow-{index}", "filmed": True, "narrated": True}
+                for index in range(1, 5)
+            ],
+        }
+        run = self.record_with_finish(finished, [1, 2, 3, 4])
+        with patch.object(
+            pr_video, "stage", return_value={"video": "single.mp4"}
+        ) as stage:
+            result = pr_video.record(run, run, run / "bundle")
+        self.assertEqual(result, {"video": "single.mp4"})
+        stage.assert_called_once_with(run, run / "bundle")
+
+    def test_review_cannot_drop_or_duplicate_a_selected_flow(self):
+        finished = {
+            "ok": True,
+            "scenes": [
+                {"id": f"pr-flow-{index}", "filmed": True, "narrated": True}
+                for index in range(1, 5)
+            ],
+        }
+        for chapter_ids in ([1, 2, 3], [1, 2, 3, 3]):
+            with self.subTest(chapters=chapter_ids):
+                run = self.record_with_finish(finished, chapter_ids)
+                with (
+                    patch.object(pr_video, "stage") as stage,
+                    self.assertRaisesRegex(
+                        RuntimeError, "every selected flow exactly once"
+                    ),
+                ):
+                    pr_video.record(run, run, run / "bundle")
+                stage.assert_not_called()
+
+    def test_review_rejection_retains_real_problems_without_secrets(self):
+        secret = "test-secret-longer-than-eight"
+        finished = {
+            "ok": False,
+            "problems": ["chapter 2 has no screen proof " + secret],
+            "scenes": [],
+        }
+        run = self.record_with_finish(finished, [])
+        logs = run / "gaps/pr-flow-2"
+        logs.mkdir(parents=True)
+        (logs / "worker.log").write_text("Scene failed with credential " + secret)
+        with (
+            patch.dict(os.environ, {"CLAUDE_CODE_OAUTH_TOKEN": secret}),
+            self.assertRaisesRegex(
+                RuntimeError, "chapter 2 has no screen proof"
+            ) as error,
+        ):
+            pr_video.record(run, run, run / "bundle")
+        report = (run / pr_video_report.NAME).read_text()
+        self.assertNotIn(secret, report)
+        self.assertNotIn(secret, str(error.exception))
+        self.assertIn("chapter 2 has no screen proof", report)
+        self.assertIn("Scene failed with credential ***", report)
+        self.assertEqual(json.loads(report)["phase"], "finish")
+
+    def test_report_does_not_read_logs_outside_the_run(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            run = root / "run"
+            run.mkdir()
+            outside = root / "private.log"
+            outside.write_text("private material")
+            (run / "keeper.log").symlink_to(outside)
+            report = pr_video_report.checkpoint(run, "capture")
+            self.assertEqual(report["logs"], {})

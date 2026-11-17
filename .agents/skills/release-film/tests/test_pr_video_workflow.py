@@ -58,11 +58,29 @@ class Workflow(unittest.TestCase):
         )
         self.assertIn("steps.plan.outputs.record == 'true'", installer["if"])
         artifact = next(
-            step for step in job["steps"] if "upload-artifact" in step.get("uses", "")
+            step
+            for step in job["steps"]
+            if step.get("name") == "Preserve only the verified PR video bundle"
         )
         self.assertEqual(artifact["with"]["path"].count("\n"), 2)
         self.assertNotIn("checkout", artifact["with"]["path"])
         self.assertNotIn("pr-input.json", artifact["with"]["path"])
+
+    def test_failed_recordings_preserve_only_the_redacted_report(self):
+        steps = self.workflow["jobs"]["film"]["steps"]
+        report = next(
+            step
+            for step in steps
+            if step.get("name") == "Preserve the redacted recording report"
+        )
+        self.assertIn("always()", report["if"])
+        self.assertEqual(
+            report["with"]["path"],
+            "${{ runner.temp }}/pr-video/pr-video-recording-report.json",
+        )
+        self.assertNotIn("checkout", report["with"]["path"])
+        self.assertNotIn("worker.log", report["with"]["path"])
+        self.assertNotIn("keeper.env", report["with"]["path"])
 
     def test_only_separate_publisher_can_modify_the_pr(self):
         job = self.workflow["jobs"]["attach"]

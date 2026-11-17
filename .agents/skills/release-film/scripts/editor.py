@@ -790,7 +790,11 @@ def check(story, keys, sources, films_by_folder):
         for number in chapter.get('prs') or []:
             homes.setdefault(number, []).append(index)
     for number, where in sorted(homes.items()):
-        if len(where) > 1:
+        # A PR demo contains several user flows of one PR in one film. Release
+        # films still assign a PR to one chapter; duplicate IDs inside a chapter
+        # remain invalid in either mode.
+        separate_pr_flows = sources.get('mode') == 'pull-request' and len(numbers) == 1 and len(set(where)) == len(where)
+        if len(where) > 1 and not separate_pr_flows:
             problems.append(f'pull request #{number} is named in chapters {where}: name it in the one chapter that shows it')
     for index, chapter in enumerate(chapters, 1):
         problems += chapter_problems(chapter, index, keys, numbers, said=said)
