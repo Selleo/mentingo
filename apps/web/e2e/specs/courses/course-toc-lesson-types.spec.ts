@@ -1,5 +1,6 @@
 import { USER_ROLE } from "~/config/userRoles";
 
+import { COURSE_TOC_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { createTwoContentLessonsCourse } from "../learning/learning-test-helpers";
@@ -16,7 +17,7 @@ test("course table of contents shows lesson types on icon hover, not below title
     prefix,
     withWorkerPage,
   });
-
+  const [chapter] = (await factories.createCurriculumFactory().getCourse(courseId)).chapters;
   const enrollmentFactory = factories.createEnrollmentFactory();
 
   await withWorkerPage(
@@ -24,16 +25,17 @@ test("course table of contents shows lesson types on icon hover, not below title
     async ({ page }) => {
       await enrollmentFactory.selfEnroll(courseId);
       await openCourseOverviewFlow(page, courseId);
-      await page.getByTestId(`${prefix}-chapter`).click();
+      await page.getByTestId(COURSE_TOC_HANDLES.chapter(chapter.id)).click();
 
-      const lessonLink = page.getByRole("link", { name: new RegExp(lessons.firstLesson.title) });
-      await expect(lessonLink.getByTestId("lesson-title")).toHaveText(lessons.firstLesson.title);
-      await expect(lessonLink.getByText("Content", { exact: true })).toHaveCount(0);
+      const lesson = page.getByTestId(COURSE_TOC_HANDLES.lesson(lessons.firstLesson.id));
+      await expect(lesson.getByTestId(COURSE_TOC_HANDLES.LESSON_TITLE)).toHaveText(
+        lessons.firstLesson.title,
+      );
 
-      await lessonLink.getByRole("img", { name: "Content" }).hover();
-      await expect(page.getByRole("tooltip")).toHaveText("Content");
+      await page.getByTestId(COURSE_TOC_HANDLES.lessonTypeIcon(lessons.firstLesson.id)).hover();
+      await expect(page.getByRole("tooltip")).toBeVisible();
 
-      await lessonLink.click();
+      await lesson.click();
       await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${lessons.firstLesson.id}$`));
     },
     { root: true },

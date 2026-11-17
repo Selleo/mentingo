@@ -48,5 +48,8 @@ test("admin can update course settings", async ({ cleanup, factories, withWorker
         categoryId: updatedCategory.id,
         description: `<p>${updatedDescription}</p>`,
       });
+
+    await page.reload();
+    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.HERO_TITLE)).toHaveText(updatedTitle);
   });
 });

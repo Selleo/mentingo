@@ -3,32 +3,29 @@ import { USER_ROLE } from "~/config/userRoles";
 import {
   COURSE_OVERVIEW_HANDLES,
   COURSE_SETTINGS_HANDLES,
+  COURSE_TAB_VALUES,
   COURSES_PAGE_HANDLES,
 } from "../../data/courses/handles";
+import { LEARNING_HANDLES } from "../../data/learning/handles";
 import { expect, test } from "../../fixtures/test.fixture";
+import {
+  cancelCourseArchiveDialogFlow,
+  confirmCourseArchiveDialogFlow,
+} from "../../flows/courses/confirm-course-archive-dialog.flow";
 import { filterCoursesFlow } from "../../flows/courses/filter-courses.flow";
+import { openCourseArchiveDialogFlow } from "../../flows/courses/open-course-archive-dialog.flow";
+import {
+  openCourseOverviewSettingsFlow,
+  selectCourseOverviewSettingsTabFlow,
+} from "../../flows/courses/open-course-overview-settings.flow";
 import { openCoursesPageFlow } from "../../flows/courses/open-courses-page.flow";
 import { selectCoursesFlow } from "../../flows/courses/select-courses.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
-
-import type { FixtureApiClient } from "../../utils/api-client";
-
-const getArchivedState = async (apiClient: FixtureApiClient, courseId: string) => {
-  const response = await apiClient.api.courseControllerGetAllCourses({
-    language: "en",
-    isArchived: "all",
-    page: 1,
-    perPage: 100,
-  });
-
-  return response.data.data.find((course) => course.id === courseId)?.isArchived;
-};
 
 test("admin can archive and restore courses from bulk actions", async ({
   cleanup,
   factories,
   withWorkerPage,
-  workerTenantApiClient,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const categoryFactory = factories.createCategoryFactory();
@@ -40,61 +37,42 @@ test("admin can archive and restore courses from bulk actions", async ({
       categoryId: category.id,
       status: "draft",
     }));
+    const courseIds = courses.map((course) => course.id);
+    const [firstCourse, secondCourse] = courses;
 
     cleanup.add(async () => {
-      await courseFactory.deleteMany(courses.map((course) => course.id));
+      await courseFactory.deleteMany(courseIds);
       await categoryFactory.delete(category.id);
     });
 
     await openCoursesPageFlow(page);
     await filterCoursesFlow(page, { title: prefix });
-    await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(courses[0].id))).toBeVisible();
-    await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(courses[1].id))).toBeVisible();
-    await selectCoursesFlow(
-      page,
-      courses.map((course) => course.id),
-    );
-    await page.getByTestId(COURSES_PAGE_HANDLES.BULK_EDIT_TRIGGER).click();
-    const archiveAction = page.getByTestId(COURSES_PAGE_HANDLES.BULK_EDIT_ARCHIVE_ACTION);
-    await expect(archiveAction).not.toHaveClass(/text-error-700/);
-    await archiveAction.click();
-    await expect(page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG)).toBeVisible();
-    await page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG_CANCEL_BUTTON).click();
-    await expect(page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG)).toBeHidden();
-    await expect.poll(() => getArchivedState(workerTenantApiClient, courses[0].id)).toBe(false);
+    await selectCoursesFlow(page, courseIds);
 
-    await page.getByTestId(COURSES_PAGE_HANDLES.BULK_EDIT_TRIGGER).click();
-    await page.getByTestId(COURSES_PAGE_HANDLES.BULK_EDIT_ARCHIVE_ACTION).click();
-    const archiveConfirmButton = page.getByTestId(
-      COURSES_PAGE_HANDLES.ARCHIVE_DIALOG_CONFIRM_BUTTON,
-    );
-    await expect(archiveConfirmButton).toHaveClass(/bg-error-500/);
-    await archiveConfirmButton.click();
+    await openCourseArchiveDialogFlow(page, { action: "archive" });
+    await cancelCourseArchiveDialogFlow(page);
+    await expect(page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG)).toBeHidden();
+    await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(firstCourse.id))).toBeVisible();
+    await expect.poll(() => courseFactory.isArchived(firstCourse.id)).toBe(false);
+
+    await openCourseArchiveDialogFlow(page, { action: "archive" });
+    await confirmCourseArchiveDialogFlow(page);
 
     for (const course of courses) {
       await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(course.id))).toBeHidden();
     }
     await expect
-      .poll(async () =>
-        Promise.all(courses.map(({ id }) => getArchivedState(workerTenantApiClient, id))),
-      )
+      .poll(() => Promise.all(courseIds.map((id) => courseFactory.isArchived(id))))
       .toEqual([true, true]);
 
     await filterCoursesFlow(page, { archivedStatus: "archived" });
     for (const course of courses) {
       await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(course.id))).toBeVisible();
     }
-    await expect(
-      page.getByTestId(COURSES_PAGE_HANDLES.TABLE_BODY).locator("tr[data-course-id]"),
-    ).toHaveCount(2);
 
-    await selectCoursesFlow(
-      page,
-      courses.map((course) => course.id),
-    );
-    await page.getByTestId(COURSES_PAGE_HANDLES.BULK_EDIT_TRIGGER).click();
-    await page.getByTestId(COURSES_PAGE_HANDLES.BULK_EDIT_RESTORE_ACTION).click();
-    await page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG_CONFIRM_BUTTON).click();
+    await selectCoursesFlow(page, courseIds);
+    await openCourseArchiveDialogFlow(page, { action: "restore" });
+    await confirmCourseArchiveDialogFlow(page);
 
     for (const course of courses) {
       await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(course.id))).toBeHidden();
@@ -104,21 +82,17 @@ test("admin can archive and restore courses from bulk actions", async ({
       await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(course.id))).toBeVisible();
     }
 
-    await page.getByTestId(COURSES_PAGE_HANDLES.rowActionsTrigger(courses[0].id)).click();
-    await page.getByTestId(COURSES_PAGE_HANDLES.BULK_EDIT_ARCHIVE_ACTION).click();
-    await page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG_CONFIRM_BUTTON).click();
-    await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(courses[0].id))).toBeHidden();
+    await openCourseArchiveDialogFlow(page, { action: "archive", rowCourseId: firstCourse.id });
+    await confirmCourseArchiveDialogFlow(page);
+    await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(firstCourse.id))).toBeHidden();
 
     await filterCoursesFlow(page, { archivedStatus: "archived" });
-    await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(courses[1].id))).toBeHidden();
-    await expect(
-      page.getByTestId(COURSES_PAGE_HANDLES.TABLE_BODY).locator("tr[data-course-id]"),
-    ).toHaveCount(1);
-    await page.getByTestId(COURSES_PAGE_HANDLES.rowActionsTrigger(courses[0].id)).click();
-    await page.getByTestId(COURSES_PAGE_HANDLES.BULK_EDIT_RESTORE_ACTION).click();
-    await expect(page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG)).toBeVisible();
-    await page.getByTestId(COURSES_PAGE_HANDLES.ARCHIVE_DIALOG_CONFIRM_BUTTON).click();
-    await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(courses[0].id))).toBeHidden();
+    await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(firstCourse.id))).toBeVisible();
+    await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(secondCourse.id))).toBeHidden();
+
+    await openCourseArchiveDialogFlow(page, { action: "restore", rowCourseId: firstCourse.id });
+    await confirmCourseArchiveDialogFlow(page);
+    await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(firstCourse.id))).toBeHidden();
   });
 });
 
@@ -126,61 +100,72 @@ test("admin can archive and restore a course from its settings, and enrolled lea
   cleanup,
   factories,
   withWorkerPage,
-  workerTenantApiClient,
 }) => {
   const categoryFactory = factories.createCategoryFactory();
   const courseFactory = factories.createCourseFactory();
+  const curriculumFactory = factories.createCurriculumFactory();
+  const prefix = `archive-learner-course-${Date.now()}`;
   let courseId = "";
+  let lessonTitle = "";
 
   await withWorkerPage(USER_ROLE.admin, async () => {
     const category = await categoryFactory.create(`Archive Learner Category ${Date.now()}`);
     const course = await courseFactory.create({
-      title: `archive-learner-course-${Date.now()}`,
+      title: prefix,
       categoryId: category.id,
-      status: "published",
+      status: "draft",
     });
     courseId = course.id;
 
     cleanup.add(async () => {
-      await courseFactory.delete(course.id);
-      await categoryFactory.delete(category.id);
+      await withWorkerPage(USER_ROLE.admin, async () => {
+        await courseFactory.delete(course.id);
+        await categoryFactory.delete(category.id);
+      });
     });
+
+    const chapter = await curriculumFactory.createChapter({
+      courseId: course.id,
+      title: `${prefix}-chapter`,
+    });
+    const lesson = await curriculumFactory.createContentLesson(course.id, {
+      chapterId: chapter.id,
+      title: `${prefix}-lesson`,
+    });
+    lessonTitle = lesson.title;
+    await courseFactory.update(course.id, { status: "published", language: "en" });
   });
 
   await withWorkerPage(USER_ROLE.student, async () => {
-    const enrollmentFactory = factories.createEnrollmentFactory();
-    await enrollmentFactory.selfEnroll(courseId);
+    await factories.createEnrollmentFactory().selfEnroll(courseId);
   });
 
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await openCourseOverviewFlow(page, courseId);
-    await page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON).click();
-    await page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_DRAWER).waitFor();
-    await page.getByTestId(COURSE_OVERVIEW_HANDLES.settingsTab("status")).click();
+    await openCourseOverviewSettingsFlow(page, courseId);
+    await selectCourseOverviewSettingsTabFlow(page, COURSE_TAB_VALUES.STATUS);
 
     const archiveButton = page.getByTestId(COURSE_SETTINGS_HANDLES.ARCHIVE_ACTION_BUTTON);
     await archiveButton.click();
     await expect(page.getByTestId(COURSE_SETTINGS_HANDLES.ARCHIVE_CONFIRM_DIALOG)).toBeVisible();
     await page.getByTestId(COURSE_SETTINGS_HANDLES.ARCHIVE_CANCEL_BUTTON).click();
     await expect(page.getByTestId(COURSE_SETTINGS_HANDLES.ARCHIVE_CONFIRM_DIALOG)).toBeHidden();
-    await expect.poll(() => getArchivedState(workerTenantApiClient, courseId)).toBe(false);
+    await expect.poll(() => courseFactory.isArchived(courseId)).toBe(false);
 
     await archiveButton.click();
     await page.getByTestId(COURSE_SETTINGS_HANDLES.ARCHIVE_CONFIRM_BUTTON).click();
-    await expect.poll(() => getArchivedState(workerTenantApiClient, courseId)).toBe(true);
+    await expect.poll(() => courseFactory.isArchived(courseId)).toBe(true);
   });
 
   await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     await openCourseOverviewFlow(page, courseId);
-    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.HERO)).toBeVisible();
+    await page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON).click();
+    await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(lessonTitle);
   });
 
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await openCourseOverviewFlow(page, courseId);
-    await page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON).click();
-    await page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_DRAWER).waitFor();
-    await page.getByTestId(COURSE_OVERVIEW_HANDLES.settingsTab("status")).click();
+    await openCourseOverviewSettingsFlow(page, courseId);
+    await selectCourseOverviewSettingsTabFlow(page, COURSE_TAB_VALUES.STATUS);
     await page.getByTestId(COURSE_SETTINGS_HANDLES.ARCHIVE_ACTION_BUTTON).click();
-    await expect.poll(() => getArchivedState(workerTenantApiClient, courseId)).toBe(false);
+    await expect.poll(() => courseFactory.isArchived(courseId)).toBe(false);
   });
 });

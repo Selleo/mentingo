@@ -1,5 +1,6 @@
 import { USER_ROLE } from "~/config/userRoles";
 
+import { COURSES_PAGE_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { confirmBulkCourseCategoryFlow } from "../../flows/courses/confirm-bulk-course-category.flow";
 import { filterCoursesFlow } from "../../flows/courses/filter-courses.flow";
@@ -37,6 +38,11 @@ test("admin can bulk update course category from the courses list", async ({
     );
     await openBulkCourseCategoryDialogFlow(page, targetCategory.id);
     await confirmBulkCourseCategoryFlow(page);
+
+    await filterCoursesFlow(page, { categoryTitle: targetCategory.title });
+    for (const course of courses) {
+      await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(course.id))).toBeVisible();
+    }
 
     await expect
       .poll(async () => {

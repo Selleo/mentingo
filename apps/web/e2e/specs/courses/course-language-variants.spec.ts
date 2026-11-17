@@ -1,10 +1,12 @@
 import { USER_ROLE } from "~/config/userRoles";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { createCourseLanguageFlow } from "../../flows/courses/create-course-language.flow";
 import { deleteCourseLanguageFlow } from "../../flows/courses/delete-course-language.flow";
-import { openEditCoursePageFlow } from "../../flows/courses/open-edit-course-page.flow";
+import { fillCourseSettingsFlow } from "../../flows/courses/fill-course-settings.flow";
 import { selectCourseLanguageFlow } from "../../flows/courses/select-course-language.flow";
+import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 
 test("admin can create, update, and delete a course language variant", async ({
   cleanup,
@@ -22,53 +24,40 @@ test("admin can create, update, and delete a course language variant", async ({
       language: "en",
     });
     const translatedTitle = `German ${baseTitle}`;
-    const translatedDescription = `German description ${Date.now()}`;
+    const heroTitle = page.getByTestId(COURSE_OVERVIEW_HANDLES.HERO_TITLE);
 
     cleanup.add(async () => {
       await courseFactory.delete(course.id);
       await categoryFactory.delete(category.id);
     });
 
-    await openEditCoursePageFlow(page, course.id);
+    await openCourseOverviewFlow(page, course.id);
     await createCourseLanguageFlow(page, "de");
-    await courseFactory.update(course.id, {
-      language: "de",
-      title: translatedTitle,
-      description: `<p>${translatedDescription}</p>`,
-    });
+    await fillCourseSettingsFlow(page, { title: translatedTitle });
 
     await expect
       .poll(async () => {
         const translatedCourse = await courseFactory.getById(course.id, "de");
         return {
           title: translatedCourse.title,
-          description: translatedCourse.description,
           hasGermanLocale: translatedCourse.availableLocales.includes("de"),
         };
       })
-      .toEqual({
-        title: translatedTitle,
-        description: `<p>${translatedDescription}</p>`,
-        hasGermanLocale: true,
-      });
+      .toEqual({ title: translatedTitle, hasGermanLocale: true });
 
+    await expect(heroTitle).toHaveText(translatedTitle);
     await selectCourseLanguageFlow(page, "en");
+    await expect(heroTitle).toHaveText(baseTitle);
 
-    await expect
-      .poll(async () => {
-        const baseCourse = await courseFactory.getById(course.id, "en");
-        return baseCourse.title;
-      })
-      .toBe(baseTitle);
-
+    // The cached "en" course keeps its pre-creation language list until refetched; reload so the selector lists "de".
+    await page.reload();
     await selectCourseLanguageFlow(page, "de");
+    await expect(heroTitle).toHaveText(translatedTitle);
     await deleteCourseLanguageFlow(page);
 
+    await expect(heroTitle).toHaveText(baseTitle);
     await expect
-      .poll(async () => {
-        const baseCourse = await courseFactory.getById(course.id, "en");
-        return baseCourse.availableLocales.includes("de");
-      })
-      .toBe(false);
+      .poll(async () => (await courseFactory.getById(course.id, "en")).availableLocales)
+      .not.toContain("de");
   });
 });

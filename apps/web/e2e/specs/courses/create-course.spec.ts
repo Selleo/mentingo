@@ -3,10 +3,12 @@ import { USER_ROLE } from "~/config/userRoles";
 import { CREATE_COURSE_PAGE_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { fillCreateCourseFormFlow } from "../../flows/courses/fill-create-course-form.flow";
+import { openCoursesPageFlow } from "../../flows/courses/open-courses-page.flow";
+import { openCreateCourseFromListFlow } from "../../flows/courses/open-create-course-from-list.flow";
 import { openCreateCoursePageFlow } from "../../flows/courses/open-create-course-page.flow";
 import { submitCreateCourseFormFlow } from "../../flows/courses/submit-create-course-form.flow";
 
-test("admin can create a course from the create page", async ({
+test("admin can create a course from the course list", async ({
   cleanup,
   factories,
   withWorkerPage,
@@ -25,7 +27,9 @@ test("admin can create a course from the create page", async ({
       await categoryFactory.delete(category.id);
     });
 
-    await openCreateCoursePageFlow(page);
+    await openCoursesPageFlow(page);
+    await openCreateCourseFromListFlow(page);
+    await expect(page).toHaveURL(/\/admin\/beta-courses\/new\/standard$/);
     await fillCreateCourseFormFlow(page, {
       title,
       categoryTitle: category.title,
