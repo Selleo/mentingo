@@ -53,15 +53,32 @@ import type { DatabasePg } from "src/common";
 // The first PDF render launches the shared headless browser, which can exceed the default timeout on CI.
 const FIRST_PDF_RENDER_TIMEOUT_MS = 90_000;
 
+// Chromium writes non-ASCII titles as UTF-16BE hex strings with a byte order mark,
+// and may write plain ASCII titles as literal strings.
+const readPdfTitle = (source: string) => {
+  const hexTitle = /\/Title\s*<FEFF([0-9A-F]*)>/i.exec(source)?.[1];
+
+  if (typeof hexTitle === "string") {
+    // Each UTF-16 code unit is four hex digits.
+    if (!/^(?:[0-9A-F]{4})*$/i.test(hexTitle)) {
+      throw new Error(`Malformed UTF-16 PDF title: ${hexTitle}`);
+    }
+
+    return Buffer.from(hexTitle, "hex").swap16().toString("utf16le");
+  }
+
+  const literalTitle = /\/Title\s*\(((?:\\.|[^\\)])*)\)/.exec(source)?.[1];
+
+  return literalTitle?.replace(/\\(.)/g, "$1");
+};
+
 // Chromium writes the catalog and info dictionaries uncompressed, so the raw bytes can be searched.
 const readPdfDocumentMetadata = (pdf: Buffer) => {
   const source = pdf.toString("latin1");
-  // Chromium encodes non-ASCII titles as UTF-16BE hex strings with a byte order mark.
-  const hexTitle = /\/Title\s*<FEFF([0-9A-F]*)>/i.exec(source)?.[1] ?? "";
 
   return {
     lang: /\/Lang\s*\(([^)]*)\)/.exec(source)?.[1],
-    title: Buffer.from(hexTitle, "hex").swap16().toString("utf16le"),
+    title: readPdfTitle(source),
     displaysDocTitle: /\/DisplayDocTitle\s+true/.test(source),
     isMarked: /\/MarkInfo\s*<<[^>]*\/Marked\s+true/.test(source),
     hasStructTreeRoot: /\/StructTreeRoot\b/.test(source),
@@ -1792,7 +1809,7 @@ describe("CertificatesController (e2e)", () => {
 
         expect(response.headers["content-type"]).toBe("application/pdf");
         expect(response.headers["content-disposition"]).toBe(
-          `attachment; filename="Certyfikat - Python Basics - ukasz Zokiewski.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+          `attachment; filename="Certyfikat - Python Basics - Lukasz Zolkiewski.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}`,
         );
         expect(response.body instanceof Buffer).toBe(true);
         expect(readPdfDocumentMetadata(response.body)).toEqual({

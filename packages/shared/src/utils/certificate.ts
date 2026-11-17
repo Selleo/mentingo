@@ -316,8 +316,11 @@ export type CertificateDocumentOptions = {
   studentName?: string;
 };
 
-// Long enough for real names, well under the 255-byte file name limit even in multi-byte UTF-8.
-const MAX_CERTIFICATE_FILENAME_LENGTH = 120;
+// File systems cap names at 255 UTF-8 bytes; the slack leaves room for a browser " (1)" suffix.
+const MAX_CERTIFICATE_FILENAME_BYTES = 200;
+const CERTIFICATE_FILENAME_SEPARATOR = " - ";
+const CERTIFICATE_FILENAME_EXTENSION = ".pdf";
+const FALLBACK_CERTIFICATE_FILENAME = "certificate.pdf";
 
 export function buildCertificateDocumentTitle({
   lang = "en",
@@ -331,25 +334,103 @@ export function buildCertificateDocumentTitle({
 
 const sanitizeFilenamePart = (part: string) =>
   part
+    // Bidi controls are invisible and can make a name display a fake extension.
+    .replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "")
     .replace(/[<>:"/\\|?*\u0000-\u001F\u007F]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+
+const utf8ByteLength = (text: string) => new TextEncoder().encode(text).length;
+
+const truncateFilenamePart = (part: string, maxBytes: number) => {
+  let truncatedPart = "";
+  let byteLength = 0;
+
+  for (const codePoint of part) {
+    byteLength += utf8ByteLength(codePoint);
+    if (byteLength > maxBytes) break;
+    truncatedPart += codePoint;
+  }
+
+  return truncatedPart.replace(/[\s.\-–]+$/, "");
+};
+
+const joinFilenameParts = (parts: string[]) =>
+  parts.filter(Boolean).join(CERTIFICATE_FILENAME_SEPARATOR);
 
 export function buildCertificatePdfFilename({
   lang = "en",
   courseName = "",
   studentName = "",
 }: CertificateDocumentOptions = {}): string {
-  const baseName = [certificateTranslations[lang].fileName, courseName, studentName]
-    .map(sanitizeFilenamePart)
-    .filter(Boolean)
-    .join(" - ");
-  const truncatedBaseName = Array.from(baseName)
-    .slice(0, MAX_CERTIFICATE_FILENAME_LENGTH)
-    .join("")
-    .trimEnd();
+  const translatedWord = sanitizeFilenamePart(certificateTranslations[lang].fileName);
+  const learnerName = sanitizeFilenamePart(studentName);
+  // Only the course name is shortened, so the translated word and the learner name always survive.
+  const courseBudget =
+    MAX_CERTIFICATE_FILENAME_BYTES -
+    utf8ByteLength(
+      `${joinFilenameParts([translatedWord, learnerName])}${CERTIFICATE_FILENAME_SEPARATOR}${CERTIFICATE_FILENAME_EXTENSION}`,
+    );
+  const coursePart = truncateFilenamePart(sanitizeFilenamePart(courseName), courseBudget);
+  // Safety net for a learner name that alone exceeds the limit.
+  const baseName = truncateFilenamePart(
+    joinFilenameParts([translatedWord, coursePart, learnerName]),
+    MAX_CERTIFICATE_FILENAME_BYTES - utf8ByteLength(CERTIFICATE_FILENAME_EXTENSION),
+  );
 
-  return `${truncatedBaseName}.pdf`;
+  return `${baseName}${CERTIFICATE_FILENAME_EXTENSION}`;
+}
+
+// Letters that NFD does not split into an ASCII base letter plus a combining mark.
+const NON_DECOMPOSING_LETTERS: Record<string, string> = {
+  Ł: "L",
+  ł: "l",
+  ß: "ss",
+  Ø: "O",
+  ø: "o",
+  Đ: "D",
+  đ: "d",
+  Æ: "AE",
+  æ: "ae",
+  Œ: "OE",
+  œ: "oe",
+};
+const NON_DECOMPOSING_LETTER_PATTERN = new RegExp(
+  `[${Object.keys(NON_DECOMPOSING_LETTERS).join("")}]`,
+  "g",
+);
+
+const toAsciiFilenamePart = (part: string) =>
+  part
+    .normalize("NFD")
+    .replace(NON_DECOMPOSING_LETTER_PATTERN, (letter) => NON_DECOMPOSING_LETTERS[letter] ?? "")
+    .replace(/[^\x20-\x7E]/g, "")
+    .replace(/["\\]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const toAsciiCertificateFilename = (filename: string) => {
+  const asciiBaseName = filename
+    .replace(/\.pdf$/i, "")
+    .split(CERTIFICATE_FILENAME_SEPARATOR)
+    .map(toAsciiFilenamePart)
+    .filter(Boolean)
+    .join(CERTIFICATE_FILENAME_SEPARATOR);
+
+  return /[a-z0-9]/i.test(asciiBaseName)
+    ? `${asciiBaseName}${CERTIFICATE_FILENAME_EXTENSION}`
+    : FALLBACK_CERTIFICATE_FILENAME;
+};
+
+// RFC 5987 attr-char excludes the sub-delims that encodeURIComponent leaves unescaped.
+const encodeRfc5987Value = (value: string) =>
+  encodeURIComponent(value).replace(
+    /['()*!]/g,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+
+export function buildCertificateContentDisposition(filename: string): string {
+  return `attachment; filename="${toAsciiCertificateFilename(filename)}"; filename*=UTF-8''${encodeRfc5987Value(filename)}`;
 }
 
 export function buildCertificateHtmlDocument(
