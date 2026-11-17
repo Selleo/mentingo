@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
-import { PDF_VIEWER_ACTION } from "./constants";
+import { PDF_VIEWER_ACTION, PDF_WORKER_CACHE_VERSION } from "./constants";
 import { initialPdfViewerState, pdfViewerReducer } from "./reducer";
 
 import type { PdfPreviewViewerProps, ReactPdfModule } from "./types";
@@ -41,7 +41,7 @@ export const PdfPreviewViewer = ({ src, loadingMessage, errorMessage }: PdfPrevi
       .then((module) => {
         if (!isMounted) return;
 
-        module.pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+        module.pdfjs.GlobalWorkerOptions.workerSrc = `${pdfWorkerUrl}?v=${PDF_WORKER_CACHE_VERSION}`;
 
         setReactPdf(module);
       })
