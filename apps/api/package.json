@@ -61,7 +61,7 @@
     "@langfuse/tracing": "5.10.1",
     "@langfuse/vercel-ai-sdk": "5.10.1",
     "@mentingo/competencies-sdk": "0.1.0",
-    "@mentingo/content-marketplace-sdk": "0.1.0",
+    "@mentingo/content-marketplace-sdk": "0.2.0",
     "@mentingo/guide-sdk": "0.2.0",
     "@mentingo/luma-sdk": "0.4.0",
     "@mentingo/phishing-simulation-sdk": "0.2.0",

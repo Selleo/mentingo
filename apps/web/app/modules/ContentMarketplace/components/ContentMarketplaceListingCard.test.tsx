@@ -13,6 +13,9 @@ vi.mock("./ContentMarketplaceThumbnail", () => ({
   ContentMarketplaceThumbnail: () => <div data-testid="thumbnail" />,
 }));
 vi.mock("./CopyListingPanel", () => ({ CopyListingPanel: () => <button>Add course</button> }));
+vi.mock("./ContentMarketplaceListingPreview", () => ({
+  ContentMarketplaceListingPreview: () => <button>Preview content</button>,
+}));
 
 const listing = {
   id: "course",

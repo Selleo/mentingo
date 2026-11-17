@@ -6,6 +6,7 @@ import { Card } from "~/components/ui/card";
 import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 import { formatLocalizedDate } from "~/utils/formatLocalizedDate";
 
+import { ContentMarketplaceListingPreview } from "./ContentMarketplaceListingPreview";
 import { ContentMarketplaceThumbnail } from "./ContentMarketplaceThumbnail";
 import { CopyListingPanel } from "./CopyListingPanel";
 
@@ -64,8 +65,9 @@ export function ContentMarketplaceListingCard({ listing }: ContentMarketplaceLis
           </p>
         </div>
       </div>
-      <div className="flex border-t border-neutral-100 px-5 py-4 empty:hidden">
+      <div className="flex flex-col gap-2 border-t border-neutral-100 px-5 py-4">
         <CopyListingPanel listing={listing} />
+        <ContentMarketplaceListingPreview listing={listing} />
       </div>
     </Card>
   );
