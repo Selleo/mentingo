@@ -9,3 +9,8 @@
 **/.env
 **/.env.*
 !**/.env.example
+**/.turbo
+**/.swc
+**/coverage
+**/test-results
+**/playwright-report

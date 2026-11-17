@@ -54,11 +54,8 @@ test("managing admin can create a tenant from the create page", async ({
   );
 });
 
-test("managing admin cannot submit invalid tenant data", async ({
-  factories,
-  withReadonlyPage,
-}) => {
-  await withReadonlyPage(
+test("managing admin cannot submit invalid tenant data", async ({ factories, withWorkerPage }) => {
+  await withWorkerPage(
     USER_ROLE.admin,
     async ({ page }) => {
       const tenantFactory = factories.createTenantFactory();

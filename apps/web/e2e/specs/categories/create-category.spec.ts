@@ -39,8 +39,8 @@ test("admin can create a category from the create page", async ({
   });
 });
 
-test("admin cannot submit invalid category data", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin cannot submit invalid category data", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openCreateCategoryPageFlow(page);
 
     await expect(page.getByTestId(CREATE_CATEGORY_PAGE_HANDLES.SUBMIT_BUTTON)).toBeDisabled();

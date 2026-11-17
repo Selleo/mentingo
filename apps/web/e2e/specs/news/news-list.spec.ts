@@ -5,8 +5,8 @@ import { openNewsPageFlow } from "../../flows/news/open-news-page.flow";
 
 import { expect, test } from "./news-test.fixture";
 
-test("admin can browse news list", async ({ cleanup, factories, withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin can browse news list", async ({ cleanup, factories, withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const newsFactory = factories.createNewsFactory();
     const prefix = `news-list-${Date.now()}`;
     const firstNews = await newsFactory.create({

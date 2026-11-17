@@ -33,9 +33,9 @@ const expectAdjacentOrder = (indexes: number[], expectedDirection: "asc" | "desc
 test("admin can browse, sort, and open group details from the groups list", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const groupFactory = factories.createGroupFactory();
     const prefix = `groups-list-${Date.now()}`;
     const nameOrder = ["00", "11", "22"] as const;

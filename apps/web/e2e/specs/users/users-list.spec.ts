@@ -12,9 +12,9 @@ import { selectUsersFlow } from "../../flows/users/select-users.flow";
 test("admin can browse, filter, sort, paginate, select, and open user details", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const userFactory = factories.createUserFactory();
     const groupFactory = factories.createGroupFactory();
     const prefix = `users-list-${Date.now()}`;

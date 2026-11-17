@@ -8,9 +8,9 @@ import { expect, test } from "./qa-test.fixture";
 test("admin can browse Q&A list and open an answer", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const qaFactory = factories.createQAFactory();
     const qa = await qaFactory.create({
       title: `qa-list-question-${Date.now()}`,

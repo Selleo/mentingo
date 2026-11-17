@@ -41,8 +41,8 @@ const openManageMenu = async (page: Page) => {
 };
 
 for (const { role, title, canSeeManage } of ROLE_NAVIGATION_EXPECTATIONS) {
-  test(`${title} can navigate the sidebar`, async ({ withReadonlyPage }) => {
-    await withReadonlyPage(role, async ({ page }) => {
+  test(`${title} can navigate the sidebar`, async ({ withWorkerPage }) => {
+    await withWorkerPage(role, async ({ page }) => {
       await prepareNavigationPageFlow(page);
       await clickHandleAndExpectUrlFlow(page, NAVIGATION_HANDLES.COURSES_LINK, "/courses");
 
@@ -73,8 +73,8 @@ for (const { role, title, canSeeManage } of ROLE_NAVIGATION_EXPECTATIONS) {
     });
   });
 
-  test(`${title} can use the profile menu`, async ({ apiClient, withReadonlyPage }) => {
-    await withReadonlyPage(role, async ({ page }) => {
+  test(`${title} can use the profile menu`, async ({ apiClient, withWorkerPage }) => {
+    await withWorkerPage(role, async ({ page }) => {
       const currentUser = await apiClient.api.authControllerCurrentUser();
 
       await prepareNavigationPageFlow(page);

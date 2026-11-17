@@ -37,8 +37,8 @@ const openMockedReportsPage = async (page: Page) => {
   return { reportsApi, lastSubmittedQuery };
 };
 
-test("reports render learner results", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("reports render learner results", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openMockedReportsPage(page);
 
     const learnerRow = page.getByRole("row").filter({ hasText: "Mina Shah" });
@@ -50,8 +50,8 @@ test("reports render learner results", async ({ withReadonlyPage }) => {
   });
 });
 
-test("reports filter by learner condition and nested groups", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("reports filter by learner condition and nested groups", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const { lastSubmittedQuery } = await openMockedReportsPage(page);
 
     await openReportFiltersFlow(page);
@@ -107,9 +107,9 @@ test("reports filter by learner condition and nested groups", async ({ withReado
 });
 
 test("reports switch between course, development path and learner subjects", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const { lastSubmittedQuery } = await openMockedReportsPage(page);
 
     await selectReportSubjectFlow(page, {
@@ -143,8 +143,8 @@ test("reports switch between course, development path and learner subjects", asy
   });
 });
 
-test("reports save a configuration and download the spreadsheet", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("reports save a configuration and download the spreadsheet", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const { reportsApi } = await openMockedReportsPage(page);
     await selectReportSubjectFlow(page, LEARNER_SUBJECT);
 
@@ -167,8 +167,8 @@ test("reports save a configuration and download the spreadsheet", async ({ withR
   });
 });
 
-test("reports reset filters while keeping the selected subject", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("reports reset filters while keeping the selected subject", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const { lastSubmittedQuery } = await openMockedReportsPage(page);
     await selectReportSubjectFlow(page, LEARNER_SUBJECT);
     await openReportFiltersFlow(page);
@@ -204,9 +204,9 @@ test("reports reset filters while keeping the selected subject", async ({ withRe
 });
 
 test("reports recover from a saved configuration with inaccessible references", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const { reportsApi, lastSubmittedQuery } = await openMockedReportsPage(page);
     reportsApi.savedConfigurations.push(REPORTS_INACCESSIBLE_CONFIGURATION);
     await page.reload();
