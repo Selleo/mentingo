@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { USER_ROLE } from "~/config/userRoles";
+import { AUTOMATION_WORKSPACE_TABS } from "~/modules/Admin/Automations/Workspace/workspace.constants";
 
 import { EMAIL_TEMPLATES_HANDLES } from "../../data/email-templates/handles";
 import {
@@ -49,8 +50,8 @@ test("copying a default creates an editable draft whose changes survive reopenin
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.BLOCK).nth(textIndex)).toContainText(
       "A personal invitation to learn",
     );
-    expect((await factory.getById(copy.id!)).status).toBe("draft");
-    expect(await factory.getDefault()).toEqual(original);
+    await expect.poll(async () => (await factory.getById(copy.id!)).status).toBe("draft");
+    await expect.poll(() => factory.getDefault()).toEqual(original);
   });
 });
 
@@ -74,8 +75,8 @@ test("duplicating a published template creates an independent draft", async ({
     await expect
       .poll(async () => (await factory.getById(copy.id!)).content.en)
       .toMatchObject(emailTemplateDocument("Only the copy changes"));
-    expect((await factory.getById(copy.id!)).status).toBe("draft");
-    expect(await factory.getById(template.id!)).toEqual(original);
+    await expect.poll(async () => (await factory.getById(copy.id!)).status).toBe("draft");
+    await expect.poll(() => factory.getById(template.id!)).toEqual(original);
   });
 });
 
@@ -99,7 +100,9 @@ test("leaving an unsaved editor can be cancelled or confirmed without saving", a
     );
     await returnToEmailCatalogFlow(page);
     await page.getByTestId(EMAIL_TEMPLATES_HANDLES.LEAVE).click();
-    await page.getByRole("tab", { name: "Email templates", exact: true }).click();
+    await page
+      .getByTestId(EMAIL_TEMPLATES_HANDLES.WORKSPACE_TAB(AUTOMATION_WORKSPACE_TABS.EMAIL_TEMPLATES))
+      .click();
     await expect(page).toHaveURL(new URL(EMAIL_TEMPLATE_DATA.catalogPath, page.url()).toString());
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
     await openEmailTemplateFlow(page, template.id!);

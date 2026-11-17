@@ -7,7 +7,10 @@ import {
   openEmailTemplateFlow,
   confirmEmailActionFlow,
 } from "../../flows/email-templates/editor.flow";
-import { saveEmailDraftFlow } from "../../flows/email-templates/template-actions.flow";
+import {
+  deleteEmailTemplateFlow,
+  saveEmailDraftFlow,
+} from "../../flows/email-templates/template-actions.flow";
 
 import { expect, test } from "./email-template.fixture";
 
@@ -109,44 +112,55 @@ test("archived templates become read-only and can be restored to editable drafts
   });
 });
 
-for (const entry of ["editor", "list"] as const) {
-  test(`deletion from the ${entry} requires confirmation and removes the saved template`, async ({
-    withWorkerPage,
-    emailTemplateFactory: factory,
-    createEmailTemplate,
-  }) => {
-    await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-      const template = await createEmailTemplate();
-      await openEmailTemplateFlow(page, template.id!);
-      if (entry === "editor") {
-        await editEmailTemplateFlow(page, { subject: "Unsaved change" });
-        await page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS).click();
-        await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.DELETE)).toBeDisabled();
-        await page.keyboard.press("Escape");
-        await saveEmailDraftFlow(page);
-        await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
-      } else {
-        await page.goto(EMAIL_TEMPLATE_DATA.listPath);
-      }
-      const actionsMenu =
-        entry === "editor"
-          ? page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS)
-          : page
-              .getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(template.id!))
-              .getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS);
-      const deleteButton = page.getByTestId(EMAIL_TEMPLATES_HANDLES.DELETE);
-      await actionsMenu.click();
-      await deleteButton.click();
-      await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CANCEL).click();
-      await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM)).toBeHidden();
-      expect(await factory.exists(template.id!)).toBe(true);
-      await actionsMenu.click();
-      await deleteButton.click();
-      await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM).click();
-      await expect(page).toHaveURL(new URL(EMAIL_TEMPLATE_DATA.catalogPath, page.url()).toString());
-      await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
-      await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(template.id!))).toHaveCount(0);
-      await expect.poll(() => factory.exists(template.id!)).toBe(false);
+test("deleting from the editor needs a saved draft and a confirmation", async ({
+  withWorkerPage,
+  emailTemplateFactory: factory,
+  createEmailTemplate,
+}) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+    const template = await createEmailTemplate();
+    await openEmailTemplateFlow(page, template.id!);
+    await editEmailTemplateFlow(page, { subject: "Unsaved change" });
+    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS).click();
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.DELETE)).toBeDisabled();
+    await page.keyboard.press("Escape");
+    await saveEmailDraftFlow(page);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
+
+    await deleteEmailTemplateFlow(page, page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS), {
+      confirm: false,
     });
+    await expect.poll(() => factory.exists(template.id!)).toBe(true);
+    await deleteEmailTemplateFlow(page, page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS), {
+      confirm: true,
+    });
+
+    await expect(page).toHaveURL(new URL(EMAIL_TEMPLATE_DATA.catalogPath, page.url()).toString());
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(template.id!))).toHaveCount(0);
+    await expect.poll(() => factory.exists(template.id!)).toBe(false);
   });
-}
+});
+
+test("deleting from the list needs a confirmation", async ({
+  withWorkerPage,
+  emailTemplateFactory: factory,
+  createEmailTemplate,
+}) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+    const template = await createEmailTemplate();
+    await page.goto(EMAIL_TEMPLATE_DATA.listPath);
+    const rowActions = page
+      .getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(template.id!))
+      .getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS);
+
+    await deleteEmailTemplateFlow(page, rowActions, { confirm: false });
+    await expect.poll(() => factory.exists(template.id!)).toBe(true);
+    await deleteEmailTemplateFlow(page, rowActions, { confirm: true });
+
+    await expect(page).toHaveURL(new URL(EMAIL_TEMPLATE_DATA.catalogPath, page.url()).toString());
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(template.id!))).toHaveCount(0);
+    await expect.poll(() => factory.exists(template.id!)).toBe(false);
+  });
+});

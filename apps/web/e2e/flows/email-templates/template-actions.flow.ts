@@ -1,7 +1,8 @@
+import { expect, type Locator, type Page } from "@playwright/test";
+
 import { EMAIL_TEMPLATES_HANDLES } from "../../data/email-templates/handles";
 import { NAVIGATION_HANDLES } from "../../data/navigation/handles";
 
-import type { Page } from "@playwright/test";
 import type { GetEmailTemplateResponse } from "~/api/generated-api";
 
 export const openEmailCatalogFromNavigationFlow = async (page: Page) => {
@@ -57,4 +58,22 @@ export const saveEmailDraftFlow = async (page: Page) => {
   const saveItem = page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE);
   await saveItem.click();
   await saveItem.waitFor({ state: "detached" });
+};
+
+/** Opens the given actions menu, picks delete and either confirms or cancels the dialog. */
+export const deleteEmailTemplateFlow = async (
+  page: Page,
+  actionsMenu: Locator,
+  { confirm }: { confirm: boolean },
+) => {
+  await actionsMenu.click();
+  await page.getByTestId(EMAIL_TEMPLATES_HANDLES.DELETE).click();
+
+  if (confirm) {
+    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM).click();
+    return;
+  }
+
+  await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CANCEL).click();
+  await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM)).toBeHidden();
 };
