@@ -47,8 +47,14 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
               },
             )}
           >
-            <div className="w-full">{optionText}</div>
-            <div className="flex gap-x-4">
+            <div id={`true-or-false-statement-${id}`} className="w-full">
+              {optionText}
+            </div>
+            <div
+              role="radiogroup"
+              aria-labelledby={`true-or-false-statement-${id}`}
+              className="flex gap-x-4"
+            >
               <label className="flex items-center gap-x-1">
                 <Input
                   className={cn("size-4", {
