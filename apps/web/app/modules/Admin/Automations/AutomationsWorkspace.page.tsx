@@ -8,6 +8,7 @@ import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
+import { EMAIL_TEMPLATES_HANDLES } from "../../../../e2e/data/email-templates/handles";
 import { EmailTemplatesContent } from "../EmailTemplates/EmailTemplates.page";
 
 import AutomationLogsContent from "./AutomationLogs.page";
@@ -72,6 +73,7 @@ export default function AutomationsWorkspacePage() {
               <TabsTrigger
                 key={value}
                 value={value}
+                data-testid={EMAIL_TEMPLATES_HANDLES.WORKSPACE_TAB(value)}
                 className="gap-2 rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary-600 data-[state=active]:bg-transparent data-[state=active]:text-primary-700 data-[state=active]:shadow-none"
               >
                 <Icon className="size-4" aria-hidden="true" />

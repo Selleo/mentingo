@@ -11,6 +11,7 @@ export const NEWS_PAGE_HANDLES = {
 
 export const NEWS_DETAILS_PAGE_HANDLES = {
   PAGE: "news-details-page",
+  NOT_FOUND: "news-details-not-found",
   TITLE: "news-details-title",
   SUMMARY: "news-details-summary",
   EDIT_BUTTON: "news-details-edit-button",

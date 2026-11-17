@@ -23,6 +23,7 @@ const HREF_ATTRIBUTE_PATTERN = /\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))
 type SafeAnnouncementContentProps = {
   html: string;
   className?: string;
+  testId?: string;
 };
 
 type ParsedNode = {
@@ -31,11 +32,14 @@ type ParsedNode = {
   children: Array<ParsedNode | string>;
 };
 
-export function SafeAnnouncementContent({ html, className }: SafeAnnouncementContentProps) {
+export function SafeAnnouncementContent({ html, className, testId }: SafeAnnouncementContentProps) {
   const nodes = parseSafeHtml(html);
 
   return (
-    <div className={cn("line-clamp-2 text-sm leading-5 text-neutral-700", className)}>
+    <div
+      className={cn("line-clamp-2 text-sm leading-5 text-neutral-700", className)}
+      data-testid={testId}
+    >
       {renderNodes(nodes)}
     </div>
   );

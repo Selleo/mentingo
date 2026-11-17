@@ -66,8 +66,16 @@ export function NotificationAnnouncementItem({
       </div>
 
       <div className="min-w-0 space-y-1">
-        <p className="text-sm font-semibold leading-5 text-neutral-950">{announcement.title}</p>
-        <SafeAnnouncementContent html={announcement.content} />
+        <p
+          className="text-sm font-semibold leading-5 text-neutral-950"
+          data-testid={NOTIFICATIONS_HANDLES.CARD_TITLE}
+        >
+          {announcement.title}
+        </p>
+        <SafeAnnouncementContent
+          html={announcement.content}
+          testId={NOTIFICATIONS_HANDLES.CARD_CONTENT}
+        />
         <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-neutral-600">
           {isUnread && (
             <span className="rounded-full bg-primary-100 px-2 py-0.5 font-medium text-primary-800">
