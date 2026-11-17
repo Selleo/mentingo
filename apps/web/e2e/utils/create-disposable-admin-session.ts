@@ -16,10 +16,13 @@ export const createDisposableAdminSession = async ({
   cleanup,
   userFactory,
   email,
+  roleSlug = SYSTEM_ROLE_SLUGS.ADMIN,
 }: {
   cleanup: CleanupHandle;
   createWorkspacePage: CreateWorkspacePage;
   email: string;
+  /** Any system role; the session is still disposable (user deleted in cleanup). */
+  roleSlug?: (typeof SYSTEM_ROLE_SLUGS)[keyof typeof SYSTEM_ROLE_SLUGS];
   userFactory: UserFactory;
 }): Promise<{ context: BrowserContext; page: Page; user: UserFactoryRecord }> => {
   const registeredUser = await userFactory.register({
@@ -30,7 +33,7 @@ export const createDisposableAdminSession = async ({
   });
 
   const adminUser = await userFactory.update(registeredUser.id, {
-    roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+    roleSlugs: [roleSlug],
   });
 
   cleanup.add(async () => {

@@ -1,26 +1,28 @@
 import { randomUUID } from "node:crypto";
 
+import { expect } from "@playwright/test";
+
 import { USER_ROLE } from "~/config/userRoles";
+
+import { SCORM_TEST_DATA } from "../../data/scorm/scorm.data";
+import { fillCreateScormCourseFormFlow } from "../../flows/courses/fill-create-scorm-course-form.flow";
+import { openCreateScormCoursePageFlow } from "../../flows/courses/open-create-scorm-course-page.flow";
+import { submitCreateScormCourseFormFlow } from "../../flows/courses/submit-create-scorm-course-form.flow";
+import { fillScormLessonFormFlow } from "../../flows/curriculum/fill-scorm-lesson-form.flow";
+import { openCurriculumPageFlow } from "../../flows/curriculum/open-curriculum-page.flow";
+import { openNewLessonFormFlow } from "../../flows/curriculum/open-new-lesson-form.flow";
+import { saveScormLessonFormFlow } from "../../flows/curriculum/save-scorm-lesson-form.flow";
 
 import type { FixtureFactories } from "../../factories";
 import type { CurriculumCourseLessonRecord } from "../../factories/curriculum.factory";
-import type { PageHandle } from "../../fixtures/types";
+import type { Cleanup, PageHandle, WithWorkerPage } from "../../fixtures/types";
+import type { AnswerAllRenderedQuizQuestionTypesFlowInput } from "../../flows/learning/answer-all-rendered-quiz-question-types.flow";
 import type { UpdateCourseSettingsBody } from "~/api/generated-api";
-import type { UserRole } from "~/config/userRoles";
-
-type Cleanup = {
-  add: (task: () => Promise<void> | void) => void;
-};
-
-type WithWorkerPage = (
-  role: UserRole,
-  run: (handle: PageHandle) => Promise<void>,
-  options?: { root?: boolean },
-) => Promise<void>;
 
 type LearningCourseBuilderContext = {
   chapterId: string;
   courseId: string;
+  page: PageHandle["page"];
   prefix: string;
   curriculumFactory: ReturnType<FixtureFactories["createCurriculumFactory"]>;
 };
@@ -30,11 +32,19 @@ type CreatePublishedLearningCourseInput<TLessons> = {
   cleanup: Cleanup;
   factories: FixtureFactories;
   prefix: string;
+  // shortcut: defaults to the shared root tenant for specs outside learning/ai/live-training/statistics
+  // that still run there (courses, curriculum, course-enrollment); flip the default once they drop it
+  root?: boolean;
   settings?: UpdateCourseSettingsBody;
   shouldKeepCourseAfterTest?: () => boolean;
   withWorkerPage: WithWorkerPage;
   buildLessons: (context: LearningCourseBuilderContext) => Promise<TLessons>;
 };
+
+type LearningCourseInput<TLessons> = Omit<
+  CreatePublishedLearningCourseInput<TLessons>,
+  "buildLessons"
+>;
 
 export type PublishedLearningCourse<TLessons> = {
   categoryId: string;
@@ -48,6 +58,7 @@ export const createPublishedLearningCourse = async <TLessons>({
   cleanup,
   factories,
   prefix,
+  root = true,
   settings,
   shouldKeepCourseAfterTest,
   withWorkerPage,
@@ -64,7 +75,7 @@ export const createPublishedLearningCourse = async <TLessons>({
 
   await withWorkerPage(
     USER_ROLE.admin,
-    async () => {
+    async ({ page }) => {
       const category = await categoryFactory.create(categoryTitle(prefix));
       const course = await courseFactory.create({
         title: `${prefix}-course`,
@@ -72,6 +83,22 @@ export const createPublishedLearningCourse = async <TLessons>({
         language: "en",
         status: "draft",
       });
+
+      cleanup.add(async () => {
+        await withWorkerPage(
+          USER_ROLE.admin,
+          async () => {
+            await courseFactory.update(course.id, { status: "draft", language: "en" });
+            // Courses with learner attempts cannot be deleted, so they are only unpublished.
+            if (shouldKeepCourseAfterTest?.()) return;
+
+            await courseFactory.delete(course.id);
+            await categoryFactory.delete(category.id);
+          },
+          { root },
+        );
+      });
+
       const chapter = await curriculumFactory.createChapter({
         courseId: course.id,
         title: `${prefix}-chapter`,
@@ -84,6 +111,7 @@ export const createPublishedLearningCourse = async <TLessons>({
         chapterId: chapter.id,
         courseId: course.id,
         curriculumFactory,
+        page,
         prefix,
       });
 
@@ -92,22 +120,8 @@ export const createPublishedLearningCourse = async <TLessons>({
       }
 
       await courseFactory.update(course.id, { status: "published", language: "en" });
-
-      cleanup.add(async () => {
-        await withWorkerPage(
-          USER_ROLE.admin,
-          async () => {
-            await courseFactory.update(course.id, { status: "draft", language: "en" });
-            if (shouldKeepCourseAfterTest?.()) return;
-
-            await courseFactory.delete(course.id);
-            await categoryFactory.delete(category.id);
-          },
-          { root: true },
-        );
-      });
     },
-    { root: true },
+    { root },
   );
 
   if (!lessons) {
@@ -118,13 +132,10 @@ export const createPublishedLearningCourse = async <TLessons>({
 };
 
 export const createTwoContentLessonsCourse = async (
-  input: Omit<
-    CreatePublishedLearningCourseInput<{
-      firstLesson: CurriculumCourseLessonRecord;
-      secondLesson: CurriculumCourseLessonRecord;
-    }>,
-    "buildLessons"
-  >,
+  input: LearningCourseInput<{
+    firstLesson: CurriculumCourseLessonRecord;
+    secondLesson: CurriculumCourseLessonRecord;
+  }>,
 ) =>
   createPublishedLearningCourse({
     ...input,
@@ -145,13 +156,10 @@ export const createTwoContentLessonsCourse = async (
   });
 
 export const createThreeContentLessonsCourse = async (
-  input: Omit<
-    CreatePublishedLearningCourseInput<{
-      firstLesson: CurriculumCourseLessonRecord;
-      thirdLesson: CurriculumCourseLessonRecord;
-    }>,
-    "buildLessons"
-  >,
+  input: LearningCourseInput<{
+    firstLesson: CurriculumCourseLessonRecord;
+    thirdLesson: CurriculumCourseLessonRecord;
+  }>,
 ) =>
   createPublishedLearningCourse({
     ...input,
@@ -179,112 +187,84 @@ export const createThreeContentLessonsCourse = async (
 
 type QuizAnswerOrder = "correct-first" | "wrong-first";
 
+type SingleChoiceQuizInput = {
+  answerOrder?: QuizAnswerOrder;
+  thresholdScore?: number;
+};
+
+type SingleChoiceQuizLessons = {
+  correctOptionId: string;
+  quizLesson: CurriculumCourseLessonRecord;
+  wrongOptionId: string;
+};
+
+const createSingleChoiceQuizLesson = async (
+  { chapterId, courseId, curriculumFactory, prefix }: LearningCourseBuilderContext,
+  { answerOrder, thresholdScore = 50 }: SingleChoiceQuizInput,
+): Promise<SingleChoiceQuizLessons> => {
+  const isWrongFirst = answerOrder === "wrong-first";
+  const correctAnswer = {
+    id: randomUUID(),
+    optionText: `${prefix}-correct-answer`,
+    displayOrder: isWrongFirst ? 2 : 1,
+    isCorrect: true,
+  };
+  const wrongAnswer = {
+    id: randomUUID(),
+    optionText: `${prefix}-wrong-answer`,
+    displayOrder: isWrongFirst ? 1 : 2,
+    isCorrect: false,
+  };
+  const quizLesson = await curriculumFactory.createQuizLesson(courseId, {
+    chapterId,
+    title: `${prefix}-quiz-lesson`,
+    displayOrder: 1,
+    thresholdScore,
+    questions: [
+      {
+        type: "single_choice",
+        title: `${prefix}-quiz-question`,
+        displayOrder: 1,
+        options: isWrongFirst ? [wrongAnswer, correctAnswer] : [correctAnswer, wrongAnswer],
+      },
+    ],
+  });
+
+  return { correctOptionId: correctAnswer.id, quizLesson, wrongOptionId: wrongAnswer.id };
+};
+
 export const createSingleChoiceQuizLessonCourse = async (
-  input: Omit<
-    CreatePublishedLearningCourseInput<{
-      quizLesson: CurriculumCourseLessonRecord;
-    }>,
-    "buildLessons"
-  > & {
-    answerOrder?: QuizAnswerOrder;
-    thresholdScore?: number;
-  },
+  input: LearningCourseInput<SingleChoiceQuizLessons> & SingleChoiceQuizInput,
 ) =>
   createPublishedLearningCourse({
     ...input,
-    buildLessons: async ({ courseId, chapterId, curriculumFactory, prefix }) => {
-      const correctAnswer = {
-        optionText: `${prefix}-correct-answer`,
-        displayOrder: input.answerOrder === "wrong-first" ? 2 : 1,
-        isCorrect: true,
-      };
-      const wrongAnswer = {
-        optionText: `${prefix}-wrong-answer`,
-        displayOrder: input.answerOrder === "wrong-first" ? 1 : 2,
-        isCorrect: false,
-      };
-      const quizLesson = await curriculumFactory.createQuizLesson(courseId, {
-        chapterId,
-        title: `${prefix}-quiz-lesson`,
-        displayOrder: 1,
-        thresholdScore: input.thresholdScore ?? 50,
-        questions: [
-          {
-            type: "single_choice",
-            title: `${prefix}-quiz-question`,
-            displayOrder: 1,
-            options:
-              input.answerOrder === "wrong-first"
-                ? [wrongAnswer, correctAnswer]
-                : [correctAnswer, wrongAnswer],
-          },
-        ],
-      });
-
-      return { quizLesson };
-    },
+    buildLessons: (context) => createSingleChoiceQuizLesson(context, input),
   });
 
 export const createSequencedQuizAndContentCourse = async (
   input: Omit<
-    CreatePublishedLearningCourseInput<{
-      blockedLesson: CurriculumCourseLessonRecord;
-      quizLesson: CurriculumCourseLessonRecord;
-    }>,
-    "buildLessons" | "settings"
-  > & {
-    answerOrder?: QuizAnswerOrder;
-    thresholdScore?: number;
-  },
+    LearningCourseInput<SingleChoiceQuizLessons & { blockedLesson: CurriculumCourseLessonRecord }>,
+    "settings"
+  > &
+    SingleChoiceQuizInput,
 ) =>
   createPublishedLearningCourse({
     ...input,
     settings: { lessonSequenceEnabled: true },
-    buildLessons: async ({ courseId, chapterId, curriculumFactory, prefix }) => {
-      const correctAnswer = {
-        optionText: `${prefix}-correct-answer`,
-        displayOrder: input.answerOrder === "wrong-first" ? 2 : 1,
-        isCorrect: true,
-      };
-      const wrongAnswer = {
-        optionText: `${prefix}-wrong-answer`,
-        displayOrder: input.answerOrder === "wrong-first" ? 1 : 2,
-        isCorrect: false,
-      };
-      const quizLesson = await curriculumFactory.createQuizLesson(courseId, {
-        chapterId,
-        title: `${prefix}-quiz-lesson`,
-        displayOrder: 1,
-        thresholdScore: input.thresholdScore ?? 50,
-        questions: [
-          {
-            type: "single_choice",
-            title: `${prefix}-quiz-question`,
-            displayOrder: 1,
-            options:
-              input.answerOrder === "wrong-first"
-                ? [wrongAnswer, correctAnswer]
-                : [correctAnswer, wrongAnswer],
-          },
-        ],
-      });
-      const blockedLesson = await curriculumFactory.createContentLesson(courseId, {
-        chapterId,
-        title: `${prefix}-blocked-lesson`,
+    buildLessons: async (context) => {
+      const quiz = await createSingleChoiceQuizLesson(context, input);
+      const blockedLesson = await context.curriculumFactory.createContentLesson(context.courseId, {
+        chapterId: context.chapterId,
+        title: `${context.prefix}-blocked-lesson`,
         displayOrder: 2,
       });
 
-      return { quizLesson, blockedLesson };
+      return { ...quiz, blockedLesson };
     },
   });
 
 export const createEmbedLessonCourse = async (
-  input: Omit<
-    CreatePublishedLearningCourseInput<{
-      embedLesson: CurriculumCourseLessonRecord;
-    }>,
-    "buildLessons"
-  >,
+  input: LearningCourseInput<{ embedLesson: CurriculumCourseLessonRecord }>,
 ) =>
   createPublishedLearningCourse({
     ...input,
@@ -302,12 +282,7 @@ export const createEmbedLessonCourse = async (
   });
 
 export const createAiMentorLessonCourse = async (
-  input: Omit<
-    CreatePublishedLearningCourseInput<{
-      aiMentorLesson: CurriculumCourseLessonRecord;
-    }>,
-    "buildLessons"
-  >,
+  input: LearningCourseInput<{ aiMentorLesson: CurriculumCourseLessonRecord }>,
 ) =>
   createPublishedLearningCourse({
     ...input,
@@ -324,19 +299,28 @@ export const createAiMentorLessonCourse = async (
     },
   });
 
+const choiceOptions = (prefix: string, correctCount: number, wrongCount: number) =>
+  [
+    ...Array.from({ length: correctCount }, (_, index) => ({
+      optionText: `${prefix}-correct-${index + 1}`,
+      isCorrect: true,
+    })),
+    ...Array.from({ length: wrongCount }, (_, index) => ({
+      optionText: `${prefix}-wrong-${index + 1}`,
+      isCorrect: false,
+    })),
+  ].map((option, index) => ({ ...option, id: randomUUID(), displayOrder: index + 1 }));
+
+const correctOptionIds = (options: ReturnType<typeof choiceOptions>) =>
+  options.filter((option) => option.isCorrect).map((option) => option.id);
+
 export const createAllRenderedQuestionTypesQuizCourse = async ({
   openQuestionsRequireReview = false,
   ...input
-}: Omit<
-  CreatePublishedLearningCourseInput<{
-    dndBlankAnswer: string;
-    dndBlankAnswerId: string;
-    matchingPairs: { prompt: string; match: string }[];
-    quizLesson: CurriculumCourseLessonRecord;
-    textBlankAnswer: string;
-  }>,
-  "buildLessons"
-> & { openQuestionsRequireReview?: boolean }) =>
+}: LearningCourseInput<{
+  answers: AnswerAllRenderedQuizQuestionTypesFlowInput;
+  quizLesson: CurriculumCourseLessonRecord;
+}> & { openQuestionsRequireReview?: boolean }) =>
   createPublishedLearningCourse({
     ...input,
     categoryTitle: (prefix) => `Learning All Quiz Types Category ${prefix}`,
@@ -345,10 +329,17 @@ export const createAllRenderedQuestionTypesQuizCourse = async ({
       const textBlankAnswerId = randomUUID();
       const dndBlankAnswer = `${prefix}-dnd-answer`;
       const dndBlankAnswerId = randomUUID();
-      const matchingPairs = [
-        { prompt: `${prefix}-matching-prompt-1`, match: `${prefix}-matching-match-1` },
-        { prompt: `${prefix}-matching-prompt-2`, match: `${prefix}-matching-match-2` },
-      ];
+      const singleChoice = choiceOptions(`${prefix}-single`, 1, 1);
+      const multipleChoice = choiceOptions(`${prefix}-multi`, 2, 1);
+      const trueOrFalse = choiceOptions(`${prefix}-statement`, 1, 1);
+      const photoSingleChoice = choiceOptions(`${prefix}-photo-single`, 1, 1);
+      const photoMultipleChoice = choiceOptions(`${prefix}-photo-multi`, 2, 1);
+      const matchingPairs = [1, 2].map((pairNumber) => ({
+        optionId: randomUUID(),
+        prompt: `${prefix}-matching-prompt-${pairNumber}`,
+        match: `${prefix}-matching-match-${pairNumber}`,
+      }));
+
       const quizLesson = await curriculumFactory.createQuizLesson(courseId, {
         chapterId,
         title: `${prefix}-quiz-lesson`,
@@ -359,50 +350,33 @@ export const createAllRenderedQuestionTypesQuizCourse = async ({
             type: "single_choice",
             title: `${prefix}-single-choice`,
             displayOrder: 1,
-            options: [
-              { optionText: `${prefix}-single-correct`, displayOrder: 1, isCorrect: true },
-              { optionText: `${prefix}-single-wrong`, displayOrder: 2, isCorrect: false },
-            ],
+            options: singleChoice,
           },
           {
             type: "multiple_choice",
             title: `${prefix}-multiple-choice`,
             displayOrder: 2,
-            options: [
-              { optionText: `${prefix}-multi-correct-1`, displayOrder: 1, isCorrect: true },
-              { optionText: `${prefix}-multi-correct-2`, displayOrder: 2, isCorrect: true },
-              { optionText: `${prefix}-multi-wrong`, displayOrder: 3, isCorrect: false },
-            ],
+            options: multipleChoice,
           },
           {
             type: "true_or_false",
             title: `${prefix}-true-or-false`,
             displayOrder: 3,
-            options: [
-              { optionText: `${prefix}-true-statement`, displayOrder: 1, isCorrect: true },
-              { optionText: `${prefix}-false-statement`, displayOrder: 2, isCorrect: false },
-            ],
+            options: trueOrFalse,
           },
           {
             type: "photo_question_single_choice",
             title: `${prefix}-photo-single-choice`,
             displayOrder: 4,
             photoS3Key: null,
-            options: [
-              { optionText: `${prefix}-photo-single-correct`, displayOrder: 1, isCorrect: true },
-              { optionText: `${prefix}-photo-single-wrong`, displayOrder: 2, isCorrect: false },
-            ],
+            options: photoSingleChoice,
           },
           {
             type: "photo_question_multiple_choice",
             title: `${prefix}-photo-multiple-choice`,
             displayOrder: 5,
             photoS3Key: null,
-            options: [
-              { optionText: `${prefix}-photo-multi-correct-1`, displayOrder: 1, isCorrect: true },
-              { optionText: `${prefix}-photo-multi-correct-2`, displayOrder: 2, isCorrect: true },
-              { optionText: `${prefix}-photo-multi-wrong`, displayOrder: 3, isCorrect: false },
-            ],
+            options: photoMultipleChoice,
           },
           {
             type: "fill_in_the_blanks_text",
@@ -448,7 +422,8 @@ export const createAllRenderedQuestionTypesQuizCourse = async ({
             type: "matching",
             title: `${prefix}-matching`,
             displayOrder: 10,
-            options: matchingPairs.map(({ prompt, match }, index) => ({
+            options: matchingPairs.map(({ optionId, prompt, match }, index) => ({
+              id: optionId,
               optionText: prompt,
               matchedWord: match,
               displayOrder: index + 1,
@@ -458,19 +433,33 @@ export const createAllRenderedQuestionTypesQuizCourse = async ({
         ],
       });
 
-      return { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId, matchingPairs };
+      const answers: AnswerAllRenderedQuizQuestionTypesFlowInput = {
+        singleChoiceOptionIds: correctOptionIds(singleChoice),
+        multipleChoiceOptionIds: correctOptionIds(multipleChoice),
+        trueOrFalseAnswers: trueOrFalse.map((option) => ({
+          optionId: option.id,
+          value: option.isCorrect ? "true" : "false",
+        })),
+        photoSingleChoiceOptionIds: correctOptionIds(photoSingleChoice),
+        photoMultipleChoiceOptionIds: correctOptionIds(photoMultipleChoice),
+        textBlankAnswer,
+        dndBlankAnswer,
+        dndBlankAnswerId,
+        briefResponse: `${prefix}-brief-answer`,
+        detailedResponse: `${prefix}-detailed-answer`,
+        matchingPairs: matchingPairs.map(({ optionId, match }) => ({ optionId, match })),
+      };
+
+      return { answers, quizLesson };
     },
   });
 
 export const createTextGapFillQuizCourse = async (
-  input: Omit<
-    CreatePublishedLearningCourseInput<{
-      quizLesson: CurriculumCourseLessonRecord;
-      textBlankAnswer: string;
-      wrongTextBlankAnswer: string;
-    }>,
-    "buildLessons"
-  >,
+  input: LearningCourseInput<{
+    quizLesson: CurriculumCourseLessonRecord;
+    textBlankAnswer: string;
+    wrongTextBlankAnswer: string;
+  }>,
 ) =>
   createPublishedLearningCourse({
     ...input,
@@ -505,3 +494,101 @@ export const createTextGapFillQuizCourse = async (
       return { quizLesson, textBlankAnswer, wrongTextBlankAnswer };
     },
   });
+
+/** Adds a multi-SCO SCORM lesson through the curriculum UI (packages are uploaded with tus). */
+export const createMultiScoScormLessonCourse = async (
+  input: LearningCourseInput<{ lessonId: string }>,
+) =>
+  createPublishedLearningCourse({
+    ...input,
+    buildLessons: async ({ chapterId, courseId, page, prefix }) => {
+      const courseFactory = input.factories.createCourseFactory();
+      const findScormLessonId = async () => {
+        const course = await courseFactory.getById(courseId);
+        return course.chapters[0]?.lessons?.find((lesson) => lesson.type === "scorm")?.id ?? null;
+      };
+
+      await openCurriculumPageFlow(page, courseId);
+      await openNewLessonFormFlow(page, chapterId, "scorm");
+      await fillScormLessonFormFlow(page, {
+        title: `${prefix}-multi-sco-lesson`,
+        packagePath: SCORM_TEST_DATA.files.multiScoPackage,
+      });
+      await saveScormLessonFormFlow(page);
+
+      await expect.poll(findScormLessonId, { timeout: 30_000 }).not.toBeNull();
+      const lessonId = await findScormLessonId();
+      if (!lessonId) throw new Error(`SCORM lesson was not created for course ${courseId}`);
+
+      return { lessonId };
+    },
+  });
+
+/** Imports a single-SCO SCORM package as a new published course through the UI. */
+export const createScormPackageCourse = async ({
+  cleanup,
+  factories,
+  prefix,
+  root = true,
+  withWorkerPage,
+}: Pick<
+  CreatePublishedLearningCourseInput<unknown>,
+  "cleanup" | "factories" | "prefix" | "root" | "withWorkerPage"
+>) => {
+  const categoryFactory = factories.createCategoryFactory();
+  const courseFactory = factories.createCourseFactory();
+  const title = `${prefix}-course`;
+  let courseId = "";
+  let lessonId = "";
+
+  await withWorkerPage(
+    USER_ROLE.admin,
+    async ({ page }) => {
+      const category = await categoryFactory.create(`${prefix}-category`);
+
+      cleanup.add(async () => {
+        await withWorkerPage(
+          USER_ROLE.admin,
+          async () => {
+            const createdCourse = await courseFactory.findByTitle(title);
+            if (createdCourse) {
+              await courseFactory.update(createdCourse.id, { status: "draft", language: "en" });
+              await courseFactory.delete(createdCourse.id);
+            }
+            await categoryFactory.delete(category.id);
+          },
+          { root },
+        );
+      });
+
+      await openCreateScormCoursePageFlow(page);
+      await fillCreateScormCourseFormFlow(page, {
+        title,
+        categoryTitle: category.title,
+        language: "en",
+        description: `Description for ${title}`,
+        packagePath: SCORM_TEST_DATA.files.singleScoPackage,
+      });
+      await submitCreateScormCourseFormFlow(page);
+
+      await expect
+        .poll(async () => (await courseFactory.findByTitle(title))?.id ?? null, {
+          timeout: 30_000,
+        })
+        .not.toBeNull();
+      const createdCourse = await courseFactory.findByTitle(title);
+      if (!createdCourse) throw new Error(`SCORM course ${title} was not created`);
+
+      await courseFactory.update(createdCourse.id, { status: "published", language: "en" });
+
+      const course = await courseFactory.getById(createdCourse.id);
+      courseId = course.id;
+      lessonId = course.chapters[0]?.lessons?.[0]?.id ?? "";
+    },
+    { root },
+  );
+
+  if (!lessonId) throw new Error(`SCORM course ${title} has no lesson`);
+
+  return { courseId, lessonId };
+};

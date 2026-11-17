@@ -2,11 +2,18 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 import { LEARNING_HANDLES } from "../../data/learning/handles";
 
-type AnswerAllRenderedQuizQuestionTypesFlowInput = {
+export type AnswerAllRenderedQuizQuestionTypesFlowInput = {
+  singleChoiceOptionIds: string[];
+  multipleChoiceOptionIds: string[];
+  trueOrFalseAnswers: { optionId: string; value: "true" | "false" }[];
+  photoSingleChoiceOptionIds: string[];
+  photoMultipleChoiceOptionIds: string[];
+  textBlankAnswer: string;
   dndBlankAnswer: string;
   dndBlankAnswerId: string;
-  matchingPairs: { prompt: string; match: string }[];
-  textBlankAnswer: string;
+  briefResponse: string;
+  detailedResponse: string;
+  matchingPairs: { optionId: string; match: string }[];
 };
 
 const dragWithMouse = async (page: Page, source: Locator, target: Locator) => {
@@ -33,35 +40,34 @@ const chooseInBlank = async (page: Page, blank: Locator, answer: string) => {
 
 export const answerAllRenderedQuizQuestionTypesFlow = async (
   page: Page,
-  {
-    dndBlankAnswer,
-    dndBlankAnswerId,
-    matchingPairs,
-    textBlankAnswer,
-  }: AnswerAllRenderedQuizQuestionTypesFlowInput,
+  answers: AnswerAllRenderedQuizQuestionTypesFlowInput,
 ) => {
-  await page.locator('input[name^="singleAnswerQuestions."]').first().click();
-  await page.locator('input[name^="multiAnswerQuestions."]').nth(0).click();
-  await page.locator('input[name^="multiAnswerQuestions."]').nth(1).click();
-  await page.locator('input[name^="trueOrFalseQuestions."][value="true"]').first().click();
-  await page.locator('input[name^="trueOrFalseQuestions."][value="false"]').nth(1).click();
-  await page.locator('input[name^="photoQuestionSingleChoice."]').first().click();
-  await page.locator('input[name^="photoQuestionMultipleChoice."]').nth(0).click();
-  await page.locator('input[name^="photoQuestionMultipleChoice."]').nth(1).click();
-  await page.getByTestId("text-blank-1").fill(textBlankAnswer);
+  const optionIds = [
+    ...answers.singleChoiceOptionIds,
+    ...answers.multipleChoiceOptionIds,
+    ...answers.photoSingleChoiceOptionIds,
+    ...answers.photoMultipleChoiceOptionIds,
+  ];
 
+  for (const optionId of optionIds) {
+    await page.getByTestId(LEARNING_HANDLES.quizOption(optionId)).click();
+  }
+
+  for (const { optionId, value } of answers.trueOrFalseAnswers) {
+    await page.getByTestId(LEARNING_HANDLES.trueOrFalseOption(optionId, value)).click();
+  }
+
+  await page.getByTestId(LEARNING_HANDLES.textBlank(1)).fill(answers.textBlankAnswer);
+
+  // Draggable words are found by the word itself (test data), not by copy.
   const quizForm = page.getByTestId(LEARNING_HANDLES.QUIZ_FORM);
-  const dndBlank = quizForm.getByTestId(`blank:${dndBlankAnswerId}`);
-  await chooseInBlank(page, dndBlank, dndBlankAnswer);
-  await expect(dndBlank).toContainText(dndBlankAnswer);
+  const dndBlank = quizForm.getByTestId(LEARNING_HANDLES.dndBlank(answers.dndBlankAnswerId));
+  await chooseInBlank(page, dndBlank, answers.dndBlankAnswer);
+  await expect(dndBlank).toContainText(answers.dndBlankAnswer);
 
   // The first pair is dragged and the rest are chosen from the list, so both input paths stay covered.
-  for (const [pairIndex, { prompt, match }] of matchingPairs.entries()) {
-    const pairSlot = quizForm
-      .locator('[data-testid^="matching-pair-"]')
-      .filter({ hasText: prompt })
-      .locator("[data-testid]")
-      .first();
+  for (const [pairIndex, { optionId, match }] of answers.matchingPairs.entries()) {
+    const pairSlot = quizForm.getByTestId(LEARNING_HANDLES.matchingSlot(optionId));
 
     if (pairIndex === 0) {
       await dragWithMouse(page, quizForm.getByRole("button", { name: match }), pairSlot);
@@ -72,6 +78,6 @@ export const answerAllRenderedQuizQuestionTypesFlow = async (
     await expect(pairSlot).toContainText(match);
   }
 
-  await page.getByTestId("brief-response").fill("Brief answer");
-  await page.getByTestId("detailed-response").fill("Detailed answer");
+  await page.getByTestId(LEARNING_HANDLES.BRIEF_RESPONSE_INPUT).fill(answers.briefResponse);
+  await page.getByTestId(LEARNING_HANDLES.DETAILED_RESPONSE_INPUT).fill(answers.detailedResponse);
 };
