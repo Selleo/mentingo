@@ -12,6 +12,7 @@ export const LEARNING_HANDLES = {
   REVIEWER_FEEDBACK_POINTS: "learning-reviewer-feedback-points",
   REVIEWER_FEEDBACK_COMMENT: "learning-reviewer-feedback-comment",
   QUIZ_PASSING_THRESHOLD: "learning-quiz-passing-threshold",
+  QUIZ_FEEDBACK_MESSAGE: "learning-quiz-feedback-message",
   QUIZ_SUBMIT_BUTTON: "learning-quiz-submit-button",
   QUIZ_RETAKE_BUTTON: "learning-quiz-retake-button",
   QUIZ_TIME_LIMIT_INFO: "learning-quiz-time-limit-info",

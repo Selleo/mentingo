@@ -267,6 +267,7 @@ export const questionDetails = Type.Object({
   correctAnswerCount: Type.Union([Type.Number(), Type.Null()]),
   wrongAnswerCount: Type.Union([Type.Number(), Type.Null()]),
   score: Type.Union([Type.Number(), Type.Null()]),
+  feedbackMessage: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
 export const onlyAnswerIdSAnswerSchema = Type.Object({

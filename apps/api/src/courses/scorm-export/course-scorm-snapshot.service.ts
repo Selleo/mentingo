@@ -1,5 +1,6 @@
 import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import {
+  ASSESSMENT_FEEDBACK_MODES,
   ASSESSMENT_QUESTION_TYPES,
   ENTITY_TYPES,
   SCORM_PACKAGE_ENTITY_TYPE,
@@ -208,8 +209,10 @@ export class CourseScormSnapshotService {
         type: sql<string>`${lessons.type}`,
         displayOrder: lessons.displayOrder,
         thresholdScore: lessons.thresholdScore,
+        feedbackMode: assessments.feedbackMode,
       })
       .from(lessons)
+      .leftJoin(assessments, eq(assessments.lessonId, lessons.id))
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(chapters.courseId, courseId))
@@ -576,6 +579,7 @@ export class CourseScormSnapshotService {
           type: LESSON_TYPES.QUIZ,
           displayOrder: lesson.displayOrder,
           passingScorePercent: lesson.thresholdScore,
+          feedbackMode: lesson.feedbackMode ?? ASSESSMENT_FEEDBACK_MODES.FULL,
           questions: (questionsByLessonId[lesson.id] ?? [])
             .filter((question) => question.type !== ASSESSMENT_QUESTION_TYPES.SCALE_1_5)
             .map((question) => ({

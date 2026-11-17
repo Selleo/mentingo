@@ -17,6 +17,7 @@ import {
   assessmentAttemptScaleSelections,
   assessmentAttemptStatementAnswers,
   assessments,
+  users,
 } from "src/storage/schema";
 
 import type {
@@ -281,6 +282,16 @@ export class QuizRuntimeRepository {
       .limit(1);
 
     return attempt ?? null;
+  }
+
+  async findLearnerFirstName(learnerId: UUIDType, db: DatabasePg = this.db) {
+    const [learner] = await db
+      .select({ firstName: users.firstName })
+      .from(users)
+      .where(eq(users.id, learnerId))
+      .limit(1);
+
+    return learner?.firstName ?? "";
   }
 
   async findQuestionAnswers(attemptId: UUIDType, db: DatabasePg = this.db) {

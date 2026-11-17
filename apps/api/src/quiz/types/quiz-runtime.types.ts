@@ -3,6 +3,7 @@ import type {
   AssessmentAnswerGradingStatus,
   AssessmentAttemptGradingStatus,
   AssessmentAttemptResult,
+  AssessmentFeedbackMode,
   SupportedLanguages,
 } from "@repo/shared";
 import type { UUIDType } from "src/common";
@@ -11,6 +12,9 @@ import type { AnswerQuestionBody, QuestionBody } from "src/lesson/lesson.schema"
 export type QuizDelivery = {
   assessmentId: UUIDType;
   timeLimitMinutes: number | null;
+  feedbackMode: AssessmentFeedbackMode;
+  /** Author's score-band message for the attempt, localized and interpolated; null when not shown. */
+  feedbackMessage: string | null;
   questions: QuestionBody[];
 };
 

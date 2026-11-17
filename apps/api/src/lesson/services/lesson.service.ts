@@ -10,6 +10,7 @@ import {
 } from "@nestjs/common";
 import {
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
+  ASSESSMENT_FEEDBACK_MODES,
   ASSESSMENT_TIMED_ATTEMPT_SUBMIT_GRACE_SECONDS,
   COURSE_ENROLLMENT,
   COURSE_STATUSES,
@@ -403,7 +404,17 @@ export class LessonService {
       quizAttempt: openQuizAttempt ? mapQuizOpenAttemptToState(openQuizAttempt) : null,
     };
 
-    const isQuizFeedbackRedacted = isPublicCoursePreview || !lesson.quizFeedbackEnabled;
+    const feedbackMode = quizDelivery?.feedbackMode ?? ASSESSMENT_FEEDBACK_MODES.FULL;
+    // Master gate (preview / course toggle) hides everything; only the full mode keeps per-question
+    // correctness, so score_only and none reuse the same redaction as a disabled master gate.
+    const isFeedbackMasterGateOff = isPublicCoursePreview || !lesson.quizFeedbackEnabled;
+    const isQuizFeedbackRedacted =
+      isFeedbackMasterGateOff || feedbackMode !== ASSESSMENT_FEEDBACK_MODES.FULL;
+    // The score-band message is withheld only by the master gate and the none mode (and, server-side
+    // in delivery, until the attempt is fully graded); score_only still shows it.
+    const feedbackMessage = isFeedbackMasterGateOff
+      ? null
+      : (quizDelivery?.feedbackMessage ?? null);
 
     const questionListWithUrls: QuestionBody[] = await Promise.all(
       questionList.map(async (question) => {
@@ -449,13 +460,15 @@ export class LessonService {
         score: lesson.quizScore,
         correctAnswerCount,
         wrongAnswerCount,
+        feedbackMessage,
       };
 
       return { ...lesson, ...timedQuizState, quizDetails, isQuizFeedbackRedacted };
     }
 
     // Partial result: counts only already graded questions, the rest waits for a reviewer.
-    if (lesson.isQuizAwaitingReview && !isQuizFeedbackRedacted) {
+    // Gated by the master gate only, so score_only still shows the graded count.
+    if (lesson.isQuizAwaitingReview && !isFeedbackMasterGateOff) {
       const quizDetails: QuestionDetails = {
         questions: redactedQuestionList,
         questionCount: redactedQuestionList.length,
@@ -464,6 +477,7 @@ export class LessonService {
           .length,
         wrongAnswerCount: questionListWithUrls.filter(({ passQuestion }) => passQuestion === false)
           .length,
+        feedbackMessage,
       };
 
       return { ...lesson, quizDetails, isQuizFeedbackRedacted };
@@ -475,6 +489,7 @@ export class LessonService {
       score: null,
       correctAnswerCount: null,
       wrongAnswerCount: null,
+      feedbackMessage,
     };
 
     return { ...lesson, ...timedQuizState, quizDetails, isQuizFeedbackRedacted };
