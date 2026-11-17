@@ -128,6 +128,24 @@ def classify(run):
     return pr_video_plan.plan(data["inputs"], run)
 
 
+def prepare_pr_helpers(checkout, repo):
+    """Copy only the trusted PR setup helper into the isolated app version."""
+    checkout, repo = Path(checkout).resolve(), Path(repo).resolve()
+    name = "apps/web/e2e/utils/pr-video-data.ts"
+    source, target = repo / name, checkout / name
+    if (
+        checkout == repo
+        or not source.is_file()
+        or source.is_symlink()
+        or not source.resolve().is_relative_to(repo)
+        or target.is_symlink()
+        or not target.resolve().is_relative_to(checkout)
+    ):
+        raise ValueError("Invalid trusted PR helper path")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, target)
+
+
 def prepare(run, repo):
     run, repo = Path(run), Path(repo)
     metadata, plan = (
@@ -151,6 +169,7 @@ def prepare(run, repo):
     import self_onboarding_recording
 
     self_onboarding_recording.prepare_demo_checkout(checkout, repo)
+    prepare_pr_helpers(checkout, repo)
     info = {
         "repo": metadata["repository"],
         "tag": f"pr-{metadata['number']}-{metadata['headSha'][:12]}",
@@ -211,6 +230,11 @@ def prepare(run, repo):
                         "This flow was selected only from the PR overview and cited business specs. "
                         "Inspect only the relevant implementation and existing browser helpers to verify this flow. "
                         "Do not derive additional flows from code or expand into a product tour. "
+                        "For off-camera course setup, use createPrVideoCourse from "
+                        "e2e/utils/pr-video-data.ts inside withWorkerPage(USER_ROLE.admin, ...). "
+                        "It reuses seeded categories, uploads a tenant-owned cover and registers cleanup "
+                        "immediately. Pass apiClient, factories, cleanup, withWorkerPage, categoryTitle "
+                        "and title. Never invent an image key or recreate an existing category. "
                         "Prove the described visible outcome on screen; report a scene failure if it is unsupported."
                     ),
                 ),

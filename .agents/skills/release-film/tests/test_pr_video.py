@@ -227,6 +227,35 @@ class DispatchIdentity(unittest.TestCase):
 
 
 class Recorder(unittest.TestCase):
+    def test_pr_helper_is_copied_from_control_checkout_only(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            repo, checkout = root / "control", root / "checkout"
+            name = "apps/web/e2e/utils/pr-video-data.ts"
+            source = repo / name
+            source.parent.mkdir(parents=True)
+            source.write_text("trusted setup")
+            checkout.mkdir()
+            pr_video.prepare_pr_helpers(checkout, repo)
+            self.assertEqual((checkout / name).read_text(), "trusted setup")
+            with self.assertRaisesRegex(ValueError, "Invalid trusted"):
+                pr_video.prepare_pr_helpers(repo, repo)
+
+    def test_pr_helper_rejects_checkout_path_escaping_through_symlink(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            repo, checkout, outside = root / "control", root / "checkout", root / "outside"
+            name = "apps/web/e2e/utils/pr-video-data.ts"
+            source = repo / name
+            source.parent.mkdir(parents=True)
+            source.write_text("trusted setup")
+            checkout.mkdir()
+            outside.mkdir()
+            (checkout / "apps").symlink_to(outside, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "Invalid trusted"):
+                pr_video.prepare_pr_helpers(checkout, repo)
+            self.assertEqual(list(outside.iterdir()), [])
+
     def test_multiple_pr_flows_keep_distinct_scene_ids_and_trusted_recipe(self):
         with tempfile.TemporaryDirectory() as temp:
             run = Path(temp)
@@ -261,6 +290,7 @@ class Recorder(unittest.TestCase):
                 patch.object(pr_video.harness, "checkout", return_value=checkout),
                 patch.object(pr_video.core, "addon", return_value=addon) as trusted,
                 patch("self_onboarding_recording.prepare_demo_checkout"),
+                patch.object(pr_video, "prepare_pr_helpers"),
                 patch.object(pr_video.harness, "test_roots", return_value=["e2e"]),
                 patch.object(
                     pr_video.editor,

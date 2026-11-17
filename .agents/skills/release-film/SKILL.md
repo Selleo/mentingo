@@ -435,8 +435,9 @@ No repository admin settings or environment policies are changed by these workfl
 
 
 The Release film caller forwards only the existing `CLAUDE_CODE_OAUTH_TOKEN` and
-`ELEVENLABS_API_KEY` repository secrets into the reusable PR workflow; reusable
-workflows do not inherit these automatically. Missing values fail before planning.
+`ELEVENLABS_API_KEY` secret declarations into the reusable PR workflow. The recording
+job uses the protected `release-film` environment, where these secrets are configured.
+Missing values fail before planning.
 No provider credentials enter the metadata dispatcher or attachment job.
 
 To test the complete pipeline before merging, manually dispatch Release film on
@@ -458,3 +459,10 @@ bounded results and worker/keeper log tails redacted against the recording step'
 credential values; raw authentication state, checkout and worker logs are never
 uploaded. A generic wrapper error alone is not sufficient evidence of why a run
 failed: inspect this report before attributing a recording failure.
+
+PR course setup uses the trusted `createPrVideoCourse` helper copied into the isolated
+checkout. It reuses seeded categories, uploads a real tenant-owned SVG cover through
+the generated API, and registers owned cleanup immediately with an admin session.
+Existing categories are never deleted. Do not fabricate cover keys or recreate seed
+categories. AI Mentor/Judge/voice flows additionally require the app AI providers;
+Claude narration credentials alone do not configure those services.
