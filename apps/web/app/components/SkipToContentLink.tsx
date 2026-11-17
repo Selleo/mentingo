@@ -5,15 +5,18 @@ import type { MouseEvent } from "react";
 export function SkipToContentLink() {
   const { t } = useTranslation();
 
-  // Each layout renders its own <main>, so focus the first one instead of relying on a shared id.
+  // Layouts render their own <main> without a shared id, so focus the first <main> in the document.
   const focusMainContent = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+
     const main = document.querySelector("main");
 
     if (!main) return;
 
-    event.preventDefault();
     main.tabIndex = -1;
     main.focus();
+    // Drop it again so later mouse clicks inside <main> don't move focus to <main> itself.
+    main.addEventListener("blur", () => main.removeAttribute("tabindex"), { once: true });
   };
 
   return (

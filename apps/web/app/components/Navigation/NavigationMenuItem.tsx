@@ -30,6 +30,7 @@ export function NavigationMenuItem({
     <li key={item.label} className={className}>
       <Tooltip>
         <TooltipTrigger asChild>
+          {/* A wrapper, not asChild on NavLink: Slot can't merge NavLink's function className. */}
           <div className="w-full">
             <NavLink
               data-testid={item.testId}

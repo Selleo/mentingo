@@ -1,16 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+
+import { renderWith } from "~/utils/testUtils";
 
 import { SkipToContentLink } from "./SkipToContentLink";
-
-vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 
 describe("SkipToContentLink", () => {
   it("is the first Tab stop and moves focus to the main content", async () => {
     const user = userEvent.setup();
 
-    render(
+    renderWith().render(
       <>
         <SkipToContentLink />
         <nav>
@@ -23,14 +23,27 @@ describe("SkipToContentLink", () => {
     );
 
     await user.tab();
-    const skipLink = screen.getByRole("link", { name: "navigationSideBar.skipToContent" });
 
-    expect(skipLink).toHaveFocus();
+    expect(screen.getByRole("link", { name: "Skip to content" })).toHaveFocus();
 
     await user.keyboard("{Enter}");
-    expect(screen.getByRole("main")).toHaveFocus();
+
+    const main = screen.getByRole("main");
+
+    expect(main).toHaveFocus();
 
     await user.tab();
+
     expect(screen.getByRole("button", { name: "Next" })).toHaveFocus();
+    expect(main).not.toHaveAttribute("tabindex");
+  });
+
+  it("does not follow the link when the page has no main content", () => {
+    renderWith().render(<SkipToContentLink />);
+
+    const isFollowed = fireEvent.click(screen.getByRole("link", { name: "Skip to content" }));
+
+    expect(isFollowed).toBe(false);
+    expect(window.location.hash).toBe("");
   });
 });
