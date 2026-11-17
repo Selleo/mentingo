@@ -1104,6 +1104,7 @@
     "notifications": "Benachrichtigungen",
     "promotionCodes": "Aktionscodes",
     "manage": "Verwalten",
+    "skipToContent": "Zum Inhalt springen",
     "ariaLabels": {
       "goToAvailableCourses": "Gehen Sie zu den verfügbaren Kursen",
       "collapseSidebar": "Seitenleiste einklappen",

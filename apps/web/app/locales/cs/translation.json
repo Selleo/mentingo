@@ -1110,6 +1110,7 @@
     "notifications": "Notifikace",
     "promotionCodes": "Propagační kódy",
     "manage": "Spravovat",
+    "skipToContent": "Přejít na obsah",
     "ariaLabels": {
       "goToAvailableCourses": "Přejděte na dostupné kurzy",
       "collapseSidebar": "Sbalit postranní panel",

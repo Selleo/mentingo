@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { companyInformationQueryOptions } from "~/api/queries/useCompanyInformation";
 import { useCompanyInformationSuspense } from "~/api/queries/useCompanyInformationSuspense";
 import { queryClient } from "~/api/queryClient";
+import { SkipToContentLink } from "~/components/SkipToContentLink";
 
 export const meta: MetaFunction = () => {
   const companyShortName = queryClient.getQueryData(companyInformationQueryOptions.queryKey)?.data
@@ -42,5 +43,10 @@ export default function Layout() {
       pageTitle === "Mentingo" ? companyShortName : `${companyShortName} - ${pageTitle}`;
   }, [companyShortName, pathname, i18n.language]);
 
-  return <Outlet />;
+  return (
+    <>
+      <SkipToContentLink />
+      <Outlet />
+    </>
+  );
 }

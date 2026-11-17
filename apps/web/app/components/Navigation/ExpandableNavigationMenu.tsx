@@ -89,7 +89,7 @@ export const ExpandableNavigationMenu = ({
 
   return (
     <DropdownMenu open={isExpanded} defaultOpen={isExpanded} onOpenChange={handleExpandChange}>
-      <DropdownMenuTrigger className="w-full">
+      <DropdownMenuTrigger asChild>
         <button
           type="button"
           data-testid={testId}

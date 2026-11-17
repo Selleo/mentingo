@@ -1107,6 +1107,7 @@
     "notifications": "Notificaciones",
     "promotionCodes": "Códigos de promoción",
     "manage": "Administrar",
+    "skipToContent": "Saltar al contenido",
     "ariaLabels": {
       "goToAvailableCourses": "Ir a cursos disponibles",
       "collapseSidebar": "Contraer barra lateral",

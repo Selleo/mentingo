@@ -1,6 +1,6 @@
 import { useLocation } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useRef, useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCurrentUser } from "~/api/queries";
@@ -81,6 +81,25 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
   const { isSidebarCollapsed, toggleSidebarCollapsed } = useNavigationStore();
 
+  const navRef = useRef<HTMLElement>(null);
+  const menuToggleRef = useRef<HTMLButtonElement>(null);
+  const wasMobileNavOpen = useRef(isMobileNavOpen);
+
+  useEffect(() => {
+    const wasOpen = wasMobileNavOpen.current;
+
+    wasMobileNavOpen.current = isMobileNavOpen;
+
+    if (!wasOpen || isMobileNavOpen) return;
+
+    // Only reclaim focus lost with the closing menu, not focus another surface (e.g. helpdesk) took.
+    const focused = document.activeElement;
+
+    if (focused === document.body || navRef.current?.contains(focused)) {
+      menuToggleRef.current?.focus();
+    }
+  }, [isMobileNavOpen]);
+
   const isLearningPathsEnabled = globalSettings?.learningPathsEnabled !== false;
 
   const { data: studentLearningPaths } = useLearningPaths(
@@ -150,6 +169,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
               className="gap-2 py-2.5"
               variant="outline"
               size="icon"
+              aria-expanded={!isSidebarCollapsed}
               aria-label={t(
                 isSidebarCollapsed
                   ? "navigationSideBar.ariaLabels.expandSidebar"
@@ -171,6 +191,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
           is2xlBreakpoint={is2xlBreakpoint}
           hasConfigurationIssues={hasConfigurationIssues}
           isSidebarCollapsed={isSidebarCollapsed}
+          menuToggleRef={menuToggleRef}
         />
 
         {/* Mount one search per breakpoint: a CSS-hidden copy still registers ⌘K and opens a
@@ -184,6 +205,10 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
         <Separator className="sr-only bg-neutral-200 2xl:not-sr-only 2xl:h-px" />
         <nav
+          ref={navRef}
+          // React 18 has no `inert` prop typing; an empty string renders the attribute.
+          // Below 2xl a closed menu is only visually hidden, so keep it out of focus and AT.
+          {...(!isMobileNavOpen && !is2xlBreakpoint && { inert: "" })}
           className={cn("2xl:flex 2xl:h-full 2xl:min-h-0 2xl:flex-col 2xl:justify-between", {
             "flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden bg-primary-50 px-4 pb-4 pt-7 2xl:bg-transparent 2xl:p-0 2xl:overflow-hidden":
               isMobileNavOpen,

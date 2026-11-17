@@ -1104,6 +1104,7 @@
     "notifications": "Notifications",
     "promotionCodes": "Promotion Codes",
     "manage": "Manage",
+    "skipToContent": "Skip to content",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses",
       "collapseSidebar": "Collapse sidebar",
