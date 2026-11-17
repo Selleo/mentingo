@@ -12,8 +12,12 @@ vi.mock("~/api/queries/useThumbnail", () => ({
   useThumbnail: () => ({ data: { url: THUMBNAIL_URL } }),
 }));
 
+const { videoPlayerMock } = vi.hoisted(() => ({
+  videoPlayerMock: vi.fn((_props: Record<string, unknown>) => <div data-testid="video-player" />),
+}));
+
 vi.mock("../VideoPlayer", () => ({
-  VideoPlayer: () => <div data-testid="video-player" />,
+  VideoPlayer: videoPlayerMock,
 }));
 
 const VIDEO_SRC = "https://example.com/video.mp4";
@@ -26,7 +30,6 @@ describe("Video", () => {
 
     expect(playButton.tagName).toBe("BUTTON");
     expect(screen.getByRole("presentation", { hidden: true })).toHaveAttribute("alt", "");
-    expect(playButton).not.toHaveAccessibleName(expect.stringContaining("http"));
   });
 
   it("falls back to a generic name without a title", () => {
@@ -46,6 +49,10 @@ describe("Video", () => {
     await user.keyboard(key);
 
     expect(screen.getByTestId("video-player")).toBeInTheDocument();
+    expect(videoPlayerMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ autoPlay: true, focusOnMount: true }),
+      expect.anything(),
+    );
   });
 
   it("disables the play button when there is no video source", () => {

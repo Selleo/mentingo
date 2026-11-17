@@ -137,6 +137,10 @@ export function Video({
     [aspectRatioStyle, isVerticalVideo],
   );
 
+  const playLabel = title
+    ? t("richText.video.ariaLabel.playWithTitle", { title })
+    : t("richText.video.ariaLabel.play");
+
   return (
     <div ref={containerRef} className="w-full">
       <div className="relative w-full overflow-hidden rounded-none bg-black" style={wrapperStyle}>
@@ -158,14 +162,10 @@ export function Video({
         ) : (
           <button
             type="button"
-            className="relative block size-full cursor-pointer overflow-hidden rounded-none bg-black"
+            className="relative block size-full cursor-pointer overflow-hidden rounded-none bg-black disabled:cursor-default"
             onClick={handleActivate}
             disabled={!resolvedUrl}
-            aria-label={
-              title
-                ? t("richText.video.ariaLabel.playWithTitle", { title })
-                : t("richText.video.ariaLabel.play")
-            }
+            aria-label={playLabel}
           >
             <div className="absolute inset-0 z-10 grid place-items-center bg-gray-600/40">
               <span className="text-white h1">
