@@ -352,6 +352,7 @@ export function WidgetStudentAiMentorPractice({
           data ? (
             <Link
               to={`/ai-mentor/practice/${data.id}`}
+              data-testid={AI_MENTOR_PRACTICE_HANDLES.CONTINUE_LINK}
               className="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 transition-[color,transform] duration-75 hover:text-neutral-700 active:scale-95 active:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1 motion-reduce:transition-none"
               aria-label={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
               title={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}

@@ -108,7 +108,11 @@ export function ConversationReader({
             <div className="shrink-0 border-b border-neutral-200 px-5 py-3 sm:px-7">
               <TabsList aria-label={t("aiConversations.conversation")}>
                 <TabsTrigger value="conversation">{t("aiConversations.conversation")}</TabsTrigger>
-                <TabsTrigger value="details" disabled={!thread}>
+                <TabsTrigger
+                  value="details"
+                  disabled={!thread}
+                  data-testid={AI_CONVERSATIONS_HANDLES.DETAILS_TAB}
+                >
                   {t("aiConversations.details")}
                 </TabsTrigger>
               </TabsList>
@@ -198,6 +202,7 @@ export function ConversationReader({
             </TabsContent>
             <TabsContent
               value="details"
+              data-testid={AI_CONVERSATIONS_HANDLES.DETAILS_PANEL}
               className="mt-0 min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-7"
             >
               {thread && <ConversationDetails thread={thread} onEvaluation={showEvaluation} />}
