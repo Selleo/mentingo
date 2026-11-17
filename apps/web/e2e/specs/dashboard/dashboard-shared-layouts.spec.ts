@@ -1,14 +1,9 @@
-import {
-  DASHBOARD_DEFAULT_LAYOUTS,
-  DASHBOARD_WIDGET_SIZES,
-  DASHBOARD_WIDGET_TYPES,
-  SYSTEM_ROLE_SLUGS,
-} from "@repo/shared";
+import { DASHBOARD_WIDGET_SIZES, DASHBOARD_WIDGET_TYPES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
 import { AI_MENTOR_PRACTICE_HANDLES } from "../../data/ai-mentor-practice/handles";
-import { dashboardWidget } from "../../data/dashboard/dashboard.data";
+import { dashboardWidget, defaultDashboardLayout } from "../../data/dashboard/dashboard.data";
 import {
   DASHBOARD_CALENDAR_HANDLES,
   DASHBOARD_EDIT_HANDLES,
@@ -26,12 +21,8 @@ import { mockDashboardFlow } from "../../flows/dashboard/mock-dashboard.flow";
 import { openDashboardFlow } from "../../flows/dashboard/open-dashboard.flow";
 import { setDashboardWidgets } from "../../utils/dashboard-settings";
 
+import type { DashboardWidgetType } from "@repo/shared";
 import type { UserRole } from "~/config/userRoles";
-
-const W = DASHBOARD_WIDGET_TYPES;
-
-const defaultLayoutOf = (role: keyof typeof DASHBOARD_DEFAULT_LAYOUTS) =>
-  DASHBOARD_DEFAULT_LAYOUTS[role].map(({ type, size }) => dashboardWidget(type, size));
 
 const WORKER_ROLES = [USER_ROLE.admin, USER_ROLE.contentCreator, USER_ROLE.student];
 
@@ -42,7 +33,7 @@ test.describe("role-specific dashboard default layouts", () => {
   for (const role of WORKER_ROLES) {
     test(`${role} restores its default profile and persists it`, async ({ withWorkerPage }) => {
       await withWorkerPage(role, async ({ page }) => {
-        const expectedWidgets = defaultLayoutOf(role);
+        const expectedWidgets = defaultDashboardLayout(role);
         const state = await mockDashboardFlow(page, {
           widgets: [...expectedWidgets].reverse(),
           resetWidgets: expectedWidgets,
@@ -77,7 +68,7 @@ test.describe("role-specific dashboard default layouts", () => {
       await workspace.apiClient.api.settingsControllerUpdateLiveTrainingEnabled();
       // shortcut: the fixture types roles as worker roles only; widen UserRole when more roles get worker accounts
       const user = await workspace.createTenantUserWithPasswordAndRole({ role: role as UserRole });
-      const expectedWidgets = defaultLayoutOf(role);
+      const expectedWidgets = defaultDashboardLayout(role);
       const state = await mockDashboardFlow(user.page, {
         widgets: [...expectedWidgets].reverse(),
         resetWidgets: expectedWidgets,
@@ -104,14 +95,19 @@ test("admin hides a widget, keeps it hidden after reload and restores the defaul
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     cleanup.add(
       await setDashboardWidgets(apiClient, [
-        { type: W.EVENT_CALENDAR, size: DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO },
-        { type: W.TRAINING_COMPLETION, size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO },
+        { type: DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR, size: DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO },
+        {
+          type: DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION,
+          size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
+        },
       ]),
     );
 
     await openDashboardFlow(page);
     await openWidgetPickerFlow(page);
-    await page.getByTestId(DASHBOARD_EDIT_HANDLES.widgetToggle(W.TRAINING_COMPLETION)).click();
+    await page
+      .getByTestId(DASHBOARD_EDIT_HANDLES.widgetToggle(DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION))
+      .click();
     await closeWidgetPickerFlow(page);
     await page.reload();
 
@@ -132,12 +128,60 @@ test("admin hides a widget, keeps it hidden after reload and restores the defaul
   });
 });
 
+test("a student restores a default layout without AI Mentor when AI is unavailable", async ({
+  apiClient,
+  cleanup,
+  withWorkerPage,
+}) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
+    const aiConfig = await apiClient.api.envControllerGetAiConfigured();
+    test.skip(aiConfig.data.data.enabled, "requires an environment without OpenAI configured");
+    cleanup.add(
+      await setDashboardWidgets(apiClient, [
+        {
+          type: DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING,
+          size: DASHBOARD_WIDGET_SIZES.TWO_BY_ONE,
+        },
+      ]),
+    );
+
+    await openDashboardFlow(page);
+    await openWidgetPickerFlow(page);
+    await expect(
+      page.getByTestId(
+        DASHBOARD_EDIT_HANDLES.widgetToggle(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING),
+      ),
+    ).toBeVisible();
+    await expect(
+      page.getByTestId(
+        DASHBOARD_EDIT_HANDLES.widgetToggle(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE),
+      ),
+    ).toHaveCount(0);
+    await restoreDashboardDefaultFlow(page);
+    await closeWidgetPickerFlow(page);
+
+    let savedTypes: DashboardWidgetType[] = [];
+    await expect
+      .poll(async () => {
+        const { layout } = (await apiClient.api.settingsControllerGetDashboardSettings()).data.data;
+        savedTypes = layout.widgets.filter((widget) => widget.visible).map((widget) => widget.type);
+        return savedTypes.length;
+      })
+      .toBeGreaterThan(1);
+    expect(savedTypes).not.toContain(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE);
+
+    await page.reload();
+    await assertDashboardWidgetOrderFlow(page, savedTypes);
+    await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET)).toHaveCount(0);
+  });
+});
+
 test("a multi-role admin and student restores the management profile", async ({
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const managementDefaults = defaultLayoutOf(SYSTEM_ROLE_SLUGS.ADMIN);
-    const studentDefaults = defaultLayoutOf(SYSTEM_ROLE_SLUGS.STUDENT);
+    const managementDefaults = defaultDashboardLayout(SYSTEM_ROLE_SLUGS.ADMIN);
+    const studentDefaults = defaultDashboardLayout(SYSTEM_ROLE_SLUGS.STUDENT);
     const state = await mockDashboardFlow(page, {
       widgets: [...studentDefaults].reverse(),
       resetWidgets: managementDefaults,
@@ -162,8 +206,11 @@ test("uses catalog sizes for alignment and does not offer an invalid span", asyn
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const state = await mockDashboardFlow(page, {
       widgets: [
-        dashboardWidget(W.EVENT_CALENDAR, DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO),
-        dashboardWidget(W.TRAINING_COMPLETION, DASHBOARD_WIDGET_SIZES.ONE_BY_ONE),
+        dashboardWidget(DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR, DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO),
+        dashboardWidget(
+          DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION,
+          DASHBOARD_WIDGET_SIZES.ONE_BY_ONE,
+        ),
       ],
     });
 
@@ -183,7 +230,9 @@ test("uses catalog sizes for alignment and does not offer an invalid span", asyn
     await expect(completion).toHaveAttribute("style", /grid-row: span 1/);
 
     await page.getByTestId(DASHBOARD_EDIT_HANDLES.CUSTOMIZE).click();
-    await page.getByTestId(DASHBOARD_EDIT_HANDLES.sizeTrigger(W.EVENT_CALENDAR)).click();
+    await page
+      .getByTestId(DASHBOARD_EDIT_HANDLES.sizeTrigger(DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR))
+      .click();
     await expect(page.getByTestId(DASHBOARD_EDIT_HANDLES.sizeOption("4x2"))).toBeVisible();
     await expect(page.getByTestId(DASHBOARD_EDIT_HANDLES.sizeOption("2x2"))).toHaveCount(0);
     await page.getByTestId(DASHBOARD_EDIT_HANDLES.sizeOption("4x3")).click();
@@ -202,8 +251,11 @@ test("clamps persisted wide spans on mobile and restores them at md", async ({
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const state = await mockDashboardFlow(page, {
       widgets: [
-        dashboardWidget(W.AI_MENTOR_PRACTICE, DASHBOARD_WIDGET_SIZES.THREE_BY_TWO),
-        dashboardWidget(W.EVENT_CALENDAR, DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO),
+        dashboardWidget(
+          DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+          DASHBOARD_WIDGET_SIZES.THREE_BY_TWO,
+        ),
+        dashboardWidget(DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR, DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO),
       ],
     });
 
@@ -232,37 +284,54 @@ test("autosaves resize and reorder without a global save", async ({ withWorkerPa
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const state = await mockDashboardFlow(page, {
       widgets: [
-        dashboardWidget(W.EVENT_CALENDAR, DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO),
-        dashboardWidget(W.TRAINING_COMPLETION, DASHBOARD_WIDGET_SIZES.ONE_BY_ONE),
+        dashboardWidget(DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR, DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO),
+        dashboardWidget(
+          DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION,
+          DASHBOARD_WIDGET_SIZES.ONE_BY_ONE,
+        ),
       ],
     });
 
     await openDashboardFlow(page);
     await page.getByTestId(DASHBOARD_EDIT_HANDLES.CUSTOMIZE).click();
 
-    await page.getByTestId(DASHBOARD_EDIT_HANDLES.sizeTrigger(W.TRAINING_COMPLETION)).click();
+    await page
+      .getByTestId(DASHBOARD_EDIT_HANDLES.sizeTrigger(DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION))
+      .click();
     await page.getByTestId(DASHBOARD_EDIT_HANDLES.sizeOption("2x2")).click();
     await expect
-      .poll(() => state.getWidgets().find((widget) => widget.type === W.TRAINING_COMPLETION)?.size)
+      .poll(
+        () =>
+          state
+            .getWidgets()
+            .find((widget) => widget.type === DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION)?.size,
+      )
       .toBe("2x2");
 
     const calendarDragHandle = page.getByTestId(
-      DASHBOARD_EDIT_HANDLES.dragHandle(W.EVENT_CALENDAR),
+      DASHBOARD_EDIT_HANDLES.dragHandle(DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR),
     );
     await calendarDragHandle.focus();
     await calendarDragHandle.press("Space");
     await calendarDragHandle.press("ArrowDown");
     await calendarDragHandle.press("Space");
-    await expect.poll(() => state.getWidgets()[0]?.type).toBe(W.TRAINING_COMPLETION);
+    await expect
+      .poll(() => state.getWidgets()[0]?.type)
+      .toBe(DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION);
 
     await page.getByTestId(DASHBOARD_EDIT_HANDLES.OPEN_WIDGET_PICKER).click();
-    const calendarToggle = page.getByTestId(DASHBOARD_EDIT_HANDLES.widgetToggle(W.EVENT_CALENDAR));
+    const calendarToggle = page.getByTestId(
+      DASHBOARD_EDIT_HANDLES.widgetToggle(DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR),
+    );
     await expect(calendarToggle).toBeChecked();
     await expect(calendarToggle).toBeDisabled();
     await closeWidgetPickerFlow(page);
 
     await page.reload();
-    await assertDashboardWidgetOrderFlow(page, [W.TRAINING_COMPLETION, W.EVENT_CALENDAR]);
+    await assertDashboardWidgetOrderFlow(page, [
+      DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION,
+      DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR,
+    ]);
     await expect(
       page
         .getByTestId(DASHBOARD_WIDGET_HANDLES.SLOT)
@@ -276,7 +345,9 @@ test("removes Calendar from the sidebar while keeping the card CTA route", async
 }) => {
   await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     await mockDashboardFlow(page, {
-      widgets: [dashboardWidget(W.EVENT_CALENDAR, DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO)],
+      widgets: [
+        dashboardWidget(DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR, DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO),
+      ],
     });
 
     await openDashboardFlow(page);
@@ -295,10 +366,15 @@ test("keeps learner widgets opt-in for admins while exposing eligible catalog en
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await mockDashboardFlow(page, {
       widgets: [
-        dashboardWidget(W.TODO_LIST, DASHBOARD_WIDGET_SIZES.TWO_BY_TWO),
-        dashboardWidget(W.DEADLINE_RISKS, DASHBOARD_WIDGET_SIZES.TWO_BY_ONE),
+        dashboardWidget(DASHBOARD_WIDGET_TYPES.TODO_LIST, DASHBOARD_WIDGET_SIZES.TWO_BY_TWO),
+        dashboardWidget(DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS, DASHBOARD_WIDGET_SIZES.TWO_BY_ONE),
       ],
-      catalog: [W.DEADLINE_RISKS, W.CONTINUE_LEARNING, W.CERTIFICATES, W.TODO_LIST],
+      catalog: [
+        DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS,
+        DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING,
+        DASHBOARD_WIDGET_TYPES.CERTIFICATES,
+        DASHBOARD_WIDGET_TYPES.TODO_LIST,
+      ],
     });
 
     await openDashboardFlow(page);
@@ -308,11 +384,15 @@ test("keeps learner widgets opt-in for admins while exposing eligible catalog en
     await openWidgetPickerFlow(page);
 
     await expect(
-      page.getByTestId(DASHBOARD_EDIT_HANDLES.widgetToggle(W.CONTINUE_LEARNING)),
+      page.getByTestId(
+        DASHBOARD_EDIT_HANDLES.widgetToggle(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING),
+      ),
     ).not.toBeChecked();
     await expect(
-      page.getByTestId(DASHBOARD_EDIT_HANDLES.widgetToggle(W.CERTIFICATES)),
+      page.getByTestId(DASHBOARD_EDIT_HANDLES.widgetToggle(DASHBOARD_WIDGET_TYPES.CERTIFICATES)),
     ).not.toBeChecked();
-    await expect(page.getByTestId(DASHBOARD_EDIT_HANDLES.widgetToggle(W.TODO_LIST))).toBeChecked();
+    await expect(
+      page.getByTestId(DASHBOARD_EDIT_HANDLES.widgetToggle(DASHBOARD_WIDGET_TYPES.TODO_LIST)),
+    ).toBeChecked();
   });
 });

@@ -97,7 +97,10 @@ test("reports filter by learner condition and nested groups", async ({ withWorke
       nestedGroup.getByTestId(REPORTS_HANDLES.MATCHING),
       REPORTS_HANDLES.matchingOption("or"),
     );
-    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveText(/2.*30/);
+    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveAttribute(
+      "data-count",
+      "2",
+    );
     await applyReportFlow(page);
     await expect.poll(reportsApi.lastSubmittedQuery).toMatchObject({
       filter: {
@@ -183,7 +186,10 @@ test("reports reset filters while keeping the selected subject", async ({ withWo
       .toMatchObject({ filter: { match: "all", rules: [{ field: "status", operator: "eq" }] } });
 
     await resetReportFlow(page);
-    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveText(/0.*30/);
+    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveAttribute(
+      "data-count",
+      "0",
+    );
     await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeDisabled();
     await expect
       .poll(() => {
@@ -225,7 +231,10 @@ test("reports recover from a saved configuration with inaccessible references", 
     );
     await expect(page.getByTestId(REPORTS_HANDLES.GROUPS_PICKER)).not.toContainText("Product team");
     await removeReportConditionFlow(page);
-    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveText(/0.*30/);
+    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveAttribute(
+      "data-count",
+      "0",
+    );
     await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeEnabled();
     await applyReportFlow(page);
     await expect

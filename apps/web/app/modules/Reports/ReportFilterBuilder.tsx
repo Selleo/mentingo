@@ -390,7 +390,11 @@ export function ReportFilterBuilder({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-2">
           <p className="body-sm-md text-neutral-950">{t("reports.filters.title")}</p>
-          <p data-testid={REPORTS_HANDLES.CONDITION_COUNT} className="details text-neutral-500">
+          <p
+            data-testid={REPORTS_HANDLES.CONDITION_COUNT}
+            data-count={countConditions(value)}
+            className="details text-neutral-500"
+          >
             {t("reports.filters.description", {
               count: countConditions(value),
               max: MAX_REPORT_CONDITIONS,

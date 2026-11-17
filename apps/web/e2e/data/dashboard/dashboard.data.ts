@@ -1,4 +1,4 @@
-import { DASHBOARD_WIDGET_TYPES } from "@repo/shared";
+import { DASHBOARD_DEFAULT_LAYOUTS, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
 
 import { AI_MENTOR_PRACTICE_HANDLES } from "../ai-mentor-practice/handles";
 
@@ -66,10 +66,63 @@ export const deadlineRiskGroup = (
   students: [learner],
 });
 
+export const DEADLINE_RISK_COURSES_PATH = "/api/statistics/dashboard/deadline-risks/courses";
+
+export const deadlineRiskGroupsPath = (courseId: string) =>
+  `${DEADLINE_RISK_COURSES_PATH}/${courseId}/groups`;
+
+/** Page size the deadline-risk widget requests. */
+export const DEADLINE_RISK_PAGE_SIZE = 20;
+
 export const deadlineRiskPage = <Item>(data: Item[], page: number, totalItems: number) => ({
   data,
-  pagination: { totalItems, page, perPage: 20 },
+  pagination: { totalItems, page, perPage: DEADLINE_RISK_PAGE_SIZE },
 });
+
+/** Answers a deadline-risk list request with the requested page of `items`. */
+export const deadlineRiskPageFor = <Item>(items: Item[], url: URL) => {
+  const page = Number(url.searchParams.get("page") ?? 1);
+  const start = (page - 1) * DEADLINE_RISK_PAGE_SIZE;
+
+  return deadlineRiskPage(items.slice(start, start + DEADLINE_RISK_PAGE_SIZE), page, items.length);
+};
+
+/** Answers a groups request like the API: filtered by urgency and name search, then paged. */
+export const deadlineRiskGroupsPageFor = (
+  groups: ReturnType<typeof deadlineRiskGroup>[],
+  url: URL,
+) => {
+  const urgency = url.searchParams.get("urgency");
+  const search = (url.searchParams.get("search") ?? "").toLowerCase();
+  const matching = groups.filter(
+    (group) => (!urgency || group.urgency === urgency) && group.name.toLowerCase().includes(search),
+  );
+
+  return deadlineRiskPageFor(matching, url);
+};
+
+/** Distinct overdue groups that fill pages; group and learner ids end with the index. */
+export const overdueDeadlineRiskGroups = (namePrefix: string, count: number) =>
+  Array.from({ length: count }, (_, index) => {
+    const suffix = String(index).padStart(12, "0");
+    return deadlineRiskGroup(`77777777-7777-4777-8777-${suffix}`, `${namePrefix} ${index + 1}`, {
+      id: `88888888-8888-4888-8888-${suffix}`,
+      name: `Learner ${index + 1}`,
+    });
+  });
+
+/** Distinct overdue courses that fill pages; ids end with the index. */
+export const overdueDeadlineRiskCourses = (count: number) =>
+  Array.from({ length: count }, (_, index) =>
+    deadlineRiskCourse(
+      `66666666-6666-4666-8666-${String(index).padStart(12, "0")}`,
+      `Overdue course ${index + 1}`,
+    ),
+  );
+
+/** The role's default layout from the shared catalog, as dashboard layout widgets. */
+export const defaultDashboardLayout = (role: keyof typeof DASHBOARD_DEFAULT_LAYOUTS) =>
+  DASHBOARD_DEFAULT_LAYOUTS[role].map(({ type, size }) => dashboardWidget(type, size));
 
 export const learnerDashboardSummary = (overrides: Record<string, unknown> = {}) => ({
   data: {

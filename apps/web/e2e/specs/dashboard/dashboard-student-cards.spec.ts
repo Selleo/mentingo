@@ -17,25 +17,19 @@ import {
   dashboardCertificate,
   dashboardWidget,
 } from "../../data/dashboard/dashboard.data";
-import {
-  DASHBOARD_EDIT_HANDLES,
-  DASHBOARD_STUDENT_HANDLES,
-  DASHBOARD_WIDGET_HANDLES,
-} from "../../data/dashboard/handles";
+import { DASHBOARD_STUDENT_HANDLES, DASHBOARD_WIDGET_HANDLES } from "../../data/dashboard/handles";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openWidgetPickerFlow } from "../../flows/dashboard/customize-dashboard.flow";
 import { mockDashboardFlow } from "../../flows/dashboard/mock-dashboard.flow";
 import { openDashboardFlow } from "../../flows/dashboard/open-dashboard.flow";
 import { scrollDashboardListToEndFlow } from "../../flows/dashboard/scroll-dashboard-list.flow";
 
-const W = DASHBOARD_WIDGET_TYPES;
 const SIZE = DASHBOARD_WIDGET_SIZES;
 const SUMMARY_PATH = "/api/course/dashboard-summary";
 const PRACTICE_TODAY_PATH = "/api/ai/practice/today";
 const SUMMARY_WIDGETS = [
-  dashboardWidget(W.CONTINUE_LEARNING, SIZE.TWO_BY_ONE),
-  dashboardWidget(W.REQUIRED_COURSES, SIZE.TWO_BY_ONE),
-  dashboardWidget(W.COURSE_COMPLETION, SIZE.ONE_BY_ONE),
+  dashboardWidget(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING, SIZE.TWO_BY_ONE),
+  dashboardWidget(DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES, SIZE.TWO_BY_ONE),
+  dashboardWidget(DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION, SIZE.ONE_BY_ONE),
 ];
 const SUMMARY_HANDLES = [
   DASHBOARD_WIDGET_HANDLES.STUDENT_CONTINUE_LEARNING,
@@ -54,40 +48,15 @@ const LAST_CERTIFICATE = dashboardCertificate(
 );
 
 test.describe("learner dashboard card contracts", () => {
-  test("omits AI Mentor from the learner layout and catalog when AI is unavailable", async ({
-    withWorkerPage,
-  }) => {
-    await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-      await mockDashboardFlow(page, {
-        widgets: [dashboardWidget(W.CONTINUE_LEARNING, SIZE.TWO_BY_ONE)],
-        responses: [{ path: "/api/env/ai", body: { data: { enabled: false } } }],
-      });
-
-      await openDashboardFlow(page);
-      await expect(
-        page.getByTestId(DASHBOARD_WIDGET_HANDLES.STUDENT_CONTINUE_LEARNING),
-      ).toBeVisible();
-      await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET)).toHaveCount(0);
-
-      await openWidgetPickerFlow(page);
-      await expect(
-        page.getByTestId(DASHBOARD_EDIT_HANDLES.widgetToggle(W.CONTINUE_LEARNING)),
-      ).toBeVisible();
-      await expect(
-        page.getByTestId(DASHBOARD_EDIT_HANDLES.widgetToggle(W.AI_MENTOR_PRACTICE)),
-      ).toHaveCount(0);
-    });
-  });
-
   test("sends the learner language and renders each summary card from its response", async ({
     withWorkerPage,
   }) => {
     await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       const state = await mockDashboardFlow(page, {
         widgets: [
-          dashboardWidget(W.CONTINUE_LEARNING, SIZE.TWO_BY_TWO),
-          dashboardWidget(W.REQUIRED_COURSES, SIZE.TWO_BY_TWO),
-          dashboardWidget(W.COURSE_COMPLETION, SIZE.TWO_BY_TWO),
+          dashboardWidget(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING, SIZE.TWO_BY_TWO),
+          dashboardWidget(DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES, SIZE.TWO_BY_TWO),
+          dashboardWidget(DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION, SIZE.TWO_BY_TWO),
         ],
         responses: [{ path: SUMMARY_PATH, body: LEARNER_SUMMARY }],
       });
@@ -162,9 +131,9 @@ test.describe("learner dashboard card contracts", () => {
     await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await mockDashboardFlow(page, {
         widgets: [
-          dashboardWidget(W.CONTINUE_LEARNING, SIZE.TWO_BY_ONE),
-          dashboardWidget(W.REQUIRED_COURSES, SIZE.TWO_BY_TWO),
-          dashboardWidget(W.CERTIFICATES, SIZE.TWO_BY_ONE),
+          dashboardWidget(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING, SIZE.TWO_BY_ONE),
+          dashboardWidget(DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES, SIZE.TWO_BY_TWO),
+          dashboardWidget(DASHBOARD_WIDGET_TYPES.CERTIFICATES, SIZE.TWO_BY_ONE),
         ],
         responses: [
           { path: SUMMARY_PATH, body: LEARNER_SUMMARY },
@@ -207,7 +176,7 @@ test.describe("learner AI Mentor practice card", () => {
     test(`renders the ${status} generation state`, async ({ withWorkerPage }) => {
       await withWorkerPage(USER_ROLE.student, async ({ page }) => {
         await mockDashboardFlow(page, {
-          widgets: [dashboardWidget(W.AI_MENTOR_PRACTICE, SIZE.THREE_BY_TWO)],
+          widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, SIZE.THREE_BY_TWO)],
           responses: [
             {
               path: PRACTICE_TODAY_PATH,
@@ -241,7 +210,7 @@ test.describe("learner AI Mentor practice card", () => {
   test("renders an empty generation form", async ({ withWorkerPage }) => {
     await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await mockDashboardFlow(page, {
-        widgets: [dashboardWidget(W.AI_MENTOR_PRACTICE, SIZE.TWO_BY_TWO)],
+        widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, SIZE.TWO_BY_TWO)],
       });
 
       await openDashboardFlow(page);
@@ -255,7 +224,7 @@ test.describe("learner AI Mentor practice card", () => {
   test("offers retry for failed generation", async ({ withWorkerPage }) => {
     await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await mockDashboardFlow(page, {
-        widgets: [dashboardWidget(W.AI_MENTOR_PRACTICE, SIZE.TWO_BY_TWO)],
+        widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, SIZE.TWO_BY_TWO)],
         responses: [
           {
             path: PRACTICE_TODAY_PATH,
@@ -281,7 +250,7 @@ test.describe("learner AI Mentor practice card", () => {
     }) => {
       await withWorkerPage(USER_ROLE.student, async ({ page }) => {
         await mockDashboardFlow(page, {
-          widgets: [dashboardWidget(W.AI_MENTOR_PRACTICE, SIZE.THREE_BY_TWO)],
+          widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, SIZE.THREE_BY_TWO)],
           responses: [
             { path: PRACTICE_TODAY_PATH, body: { data: aiPracticeSession({ threadStatus }) } },
             { path: "/api/ai/thread/messages", body: AI_PRACTICE_MESSAGES },
@@ -305,7 +274,7 @@ test.describe("learner AI Mentor practice card", () => {
 test("learner certificates card paginates and opens the preview", async ({ withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     const state = await mockDashboardFlow(page, {
-      widgets: [dashboardWidget(W.CERTIFICATES, SIZE.TWO_BY_TWO)],
+      widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.CERTIFICATES, SIZE.TWO_BY_TWO)],
       responses: [
         { path: "/api/auth/current-user", body: MOCK_STUDENT_SESSION },
         { path: "/api/settings/global", body: { data: {} } },

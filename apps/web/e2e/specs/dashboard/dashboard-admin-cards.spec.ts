@@ -7,10 +7,16 @@ import {
 import { USER_ROLE } from "~/config/userRoles";
 
 import {
+  DEADLINE_RISK_COURSES_PATH,
   dashboardWidget,
   deadlineRiskCourse,
   deadlineRiskGroup,
+  deadlineRiskGroupsPageFor,
+  deadlineRiskGroupsPath,
   deadlineRiskPage,
+  deadlineRiskPageFor,
+  overdueDeadlineRiskCourses,
+  overdueDeadlineRiskGroups,
 } from "../../data/dashboard/dashboard.data";
 import {
   DASHBOARD_DEADLINE_RISK_HANDLES,
@@ -34,8 +40,6 @@ import { setDashboardWidgets } from "../../utils/dashboard-settings";
 const COURSE_ONE = "66666666-6666-4666-8666-666666666666";
 const COURSE_TWO = "66666666-6666-4666-8666-666666666667";
 const COURSE_THREE = "66666666-6666-4666-8666-666666666668";
-const COURSES_PATH = "/api/statistics/dashboard/deadline-risks/courses";
-const groupsPath = (courseId: string) => `${COURSES_PATH}/${courseId}/groups`;
 const SALES = deadlineRiskGroup("77777777-7777-4777-8777-777777777777", "Sales", {
   id: "88888888-8888-4888-8888-888888888888",
   name: "Alex Learner",
@@ -46,6 +50,16 @@ const SUPPORT = deadlineRiskGroup(
   { id: "88888888-8888-4888-8888-888888888889", name: "Morgan Learner" },
   "dueSoon",
 );
+// One full page of courses plus COURSE_THREE on the second page.
+const DEADLINE_RISK_COURSES = [
+  deadlineRiskCourse(COURSE_ONE, "Overdue course"),
+  deadlineRiskCourse(COURSE_TWO, "Due soon course", "dueSoon"),
+  ...overdueDeadlineRiskCourses(18),
+  deadlineRiskCourse(COURSE_THREE, "Another overdue course"),
+];
+// Overdue "Sales" matches fill one page and spill one group onto the next.
+const SALES_REGIONS = overdueDeadlineRiskGroups("Sales region", 20);
+const LAST_SALES_REGION = SALES_REGIONS[SALES_REGIONS.length - 1];
 const deadlineRisksWidget = dashboardWidget(
   DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS,
   DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
@@ -64,38 +78,21 @@ test.describe("admin dashboard utility cards", () => {
         widgets: [deadlineRisksWidget],
         responses: [
           {
-            path: COURSES_PATH,
-            respond: ({ url }) => {
-              if (url.searchParams.get("urgencyOrder") === "leastUrgent") {
-                return deadlineRiskPage(
-                  [deadlineRiskCourse(COURSE_TWO, "Due soon course", "dueSoon")],
-                  1,
-                  1,
-                );
-              }
-              if (url.searchParams.get("page") === "2") {
-                return deadlineRiskPage(
-                  [deadlineRiskCourse(COURSE_THREE, "Another overdue course")],
-                  2,
-                  21,
-                );
-              }
-              return deadlineRiskPage(
-                [
-                  deadlineRiskCourse(COURSE_ONE, "Overdue course"),
-                  deadlineRiskCourse(COURSE_TWO, "Due soon course", "dueSoon"),
-                ],
-                1,
-                21,
-              );
-            },
+            path: DEADLINE_RISK_COURSES_PATH,
+            respond: ({ url }) =>
+              url.searchParams.get("urgencyOrder") ===
+              DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.LEAST_URGENT
+                ? deadlineRiskPage(
+                    [deadlineRiskCourse(COURSE_TWO, "Due soon course", "dueSoon")],
+                    1,
+                    1,
+                  )
+                : deadlineRiskPageFor(DEADLINE_RISK_COURSES, url),
           },
           {
-            path: groupsPath(COURSE_ONE),
+            path: deadlineRiskGroupsPath(COURSE_ONE),
             respond: ({ url }) =>
-              url.searchParams.get("page") === "2"
-                ? deadlineRiskPage([SUPPORT], 2, 21)
-                : deadlineRiskPage([SALES], 1, 21),
+              deadlineRiskGroupsPageFor([SALES, SUPPORT, ...SALES_REGIONS], url),
           },
         ],
       });
@@ -121,7 +118,7 @@ test.describe("admin dashboard utility cards", () => {
       await expect
         .poll(() =>
           state
-            .requestsTo(groupsPath(COURSE_ONE))
+            .requestsTo(deadlineRiskGroupsPath(COURSE_ONE))
             .some(
               (url) =>
                 url.searchParams.get("urgency") === "overdue" &&
@@ -145,12 +142,17 @@ test.describe("admin dashboard utility cards", () => {
       await scrollDashboardListToEndFlow(
         dialog.getByTestId(DASHBOARD_DEADLINE_RISK_HANDLES.GROUP_LIST),
       );
-      await expandDeadlineRiskGroupFlow(page, SUPPORT.id);
+      await expandDeadlineRiskGroupFlow(page, LAST_SALES_REGION.id);
       await expect(
-        dialog.getByTestId(DASHBOARD_DEADLINE_RISK_HANDLES.learner(SUPPORT.students[0].id)),
+        dialog.getByTestId(
+          DASHBOARD_DEADLINE_RISK_HANDLES.learner(LAST_SALES_REGION.students[0].id),
+        ),
       ).toBeVisible();
+      await expect(
+        dialog.getByTestId(DASHBOARD_DEADLINE_RISK_HANDLES.group(SUPPORT.id)),
+      ).toHaveCount(0);
       const nextGroupsPage = state
-        .requestsTo(groupsPath(COURSE_ONE))
+        .requestsTo(deadlineRiskGroupsPath(COURSE_ONE))
         .find((url) => url.searchParams.get("page") === "2");
       expect(nextGroupsPage?.searchParams.get("language")).toBe("en");
       expect(nextGroupsPage?.searchParams.get("perPage")).toBe("20");
@@ -191,11 +193,11 @@ test.describe("admin dashboard utility cards", () => {
         widgets: [deadlineRisksWidget],
         responses: [
           {
-            path: COURSES_PATH,
+            path: DEADLINE_RISK_COURSES_PATH,
             body: deadlineRiskPage([deadlineRiskCourse(COURSE_ONE, "Security onboarding")], 1, 1),
           },
           {
-            path: groupsPath(COURSE_ONE),
+            path: deadlineRiskGroupsPath(COURSE_ONE),
             respond: async ({ url }) => {
               if (url.searchParams.get("sortBy") !== "name")
                 return deadlineRiskPage([initial], 1, 1);
@@ -248,7 +250,7 @@ test.describe("admin dashboard utility cards", () => {
         widgets: [deadlineRisksWidget],
         responses: [
           {
-            path: COURSES_PATH,
+            path: DEADLINE_RISK_COURSES_PATH,
             body: deadlineRiskPage(
               [
                 deadlineRiskCourse(COURSE_ONE, "Course one"),
@@ -258,9 +260,9 @@ test.describe("admin dashboard utility cards", () => {
               2,
             ),
           },
-          { path: groupsPath(COURSE_ONE), body: deadlineRiskPage([oneGroup], 1, 1) },
+          { path: deadlineRiskGroupsPath(COURSE_ONE), body: deadlineRiskPage([oneGroup], 1, 1) },
           {
-            path: groupsPath(COURSE_TWO),
+            path: deadlineRiskGroupsPath(COURSE_TWO),
             respond: async () => {
               await courseTwoGroups.released;
               return deadlineRiskPage([twoGroup], 1, 1);
@@ -308,6 +310,8 @@ test.describe("admin dashboard utility cards", () => {
         .getByTestId(DASHBOARD_WIDGET_HANDLES.CHART);
       await expect(chart).toContainText("57%");
       await expect(chart).toContainText("4/7");
+      // Screen readers get the totals from the chart's image label; recharts 2 shows no pie tooltip on keyboard focus.
+      await expect(chart).toHaveRole("img");
     });
   });
 
@@ -449,7 +453,17 @@ test.describe("admin dashboard utility cards", () => {
         await card.getByTestId(DASHBOARD_TODO_HANDLES.NEW_TASK_INPUT).fill("Send follow-up");
         await card.getByTestId(DASHBOARD_TODO_HANDLES.ADD_TASK).click();
         await expect(tasks.filter({ hasText: "Send follow-up" })).toBeVisible();
-        // Reload so the new task carries its saved id: the UI keeps the optimistic id until a refetch.
+        await expect
+          .poll(async () =>
+            (await taskFactory.list()).some((task) => task.title === "Send follow-up"),
+          )
+          .toBe(true);
+        const followUpTask = (await taskFactory.list()).find(
+          (task) => task.title === "Send follow-up",
+        );
+        if (!followUpTask) throw new Error("The created to-do task was not saved");
+        cleanup.add(() => taskFactory.delete(followUpTask.id));
+        // Workaround for #2275: a new task keeps its optimistic id until a refetch, so reload first.
         await page.reload();
         await expect(tasks.filter({ hasText: "Send follow-up" })).toBeVisible();
 
