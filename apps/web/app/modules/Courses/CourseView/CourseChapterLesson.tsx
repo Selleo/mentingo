@@ -8,6 +8,7 @@ import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessP
 import { LessonTypeIcon } from "~/modules/Courses/CourseView/LessonTypeIcon";
 import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lessonTypes";
 
+import { COURSE_TOC_HANDLES } from "../../../../e2e/data/courses/handles";
 import { LESSON_PROGRESS_STATUSES } from "../Lesson/types";
 
 import type { Lesson } from "./CourseChapter";
@@ -47,6 +48,7 @@ export const CourseChapterLesson = ({
 
   const lessonElement = (
     <div
+      data-testid={COURSE_TOC_HANDLES.lesson(lesson.id)}
       className={cn("flex w-full gap-x-2 p-2", {
         "opacity-30": !hasAccess,
       })}
@@ -54,7 +56,12 @@ export const CourseChapterLesson = ({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="size-6 shrink-0" role="img" aria-label={lessonTypeLabel}>
+            <span
+              className="size-6 shrink-0"
+              role="img"
+              aria-label={lessonTypeLabel}
+              data-testid={COURSE_TOC_HANDLES.lessonTypeIcon(lesson.id)}
+            >
               <LessonTypeIcon type={lesson.type} className="size-6 text-accent-foreground" />
             </span>
           </TooltipTrigger>
@@ -64,7 +71,7 @@ export const CourseChapterLesson = ({
       <div className="flex w-full flex-col justify-center">
         <p
           className="body-sm-md text-neutral-950 break-all overflow-x-hidden text-left"
-          data-testid="lesson-title"
+          data-testid={COURSE_TOC_HANDLES.LESSON_TITLE}
         >
           {lesson.title}{" "}
           <span className="text-neutral-800">

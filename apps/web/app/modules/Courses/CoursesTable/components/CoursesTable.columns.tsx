@@ -90,6 +90,7 @@ const buildCourseTypeColumn = (t: TFunction): ColumnDef<CoursesTableCourse> => (
         <span
           className="text-neutral-500"
           data-testid={COURSES_PAGE_HANDLES.rowTypeBadge(row.original.id)}
+          data-course-type={courseType}
         >
           -
         </span>
@@ -99,6 +100,7 @@ const buildCourseTypeColumn = (t: TFunction): ColumnDef<CoursesTableCourse> => (
     return (
       <Badge
         data-testid={COURSES_PAGE_HANDLES.rowTypeBadge(row.original.id)}
+        data-course-type={courseType}
         variant="success"
         className="w-max"
       >

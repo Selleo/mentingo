@@ -90,6 +90,7 @@ export const ConfigurationChoiceCards = <TValue extends string>({
                     </span>
                     <RadioGroupItem
                       id={choiceId}
+                      data-testid={`curriculum-ai-mentor-configuration-${name}-${choice.value}`}
                       value={choice.value}
                       className="ml-auto mt-0.5 shrink-0"
                     />

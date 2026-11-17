@@ -9,6 +9,7 @@ type UploadFileCardProps = {
   compact?: boolean;
   removeDisabled?: boolean;
   showRemove?: boolean;
+  testId?: string;
 };
 
 export function UploadFileCard({
@@ -19,9 +20,11 @@ export function UploadFileCard({
   compact = false,
   removeDisabled = false,
   showRemove = true,
+  testId,
 }: UploadFileCardProps) {
   return (
     <div
+      data-testid={testId}
       className={cn(
         "relative flex w-full min-w-0 items-center gap-3 rounded-lg border border-neutral-200 bg-white shadow-sm",
         {

@@ -79,7 +79,13 @@ export const AiMentorConfigurationDialogFooter = ({
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-      <Button type="button" variant="outline" disabled={isSaving} onClick={onCancel}>
+      <Button
+        type="button"
+        variant="outline"
+        data-testid="curriculum-ai-mentor-configuration-cancel-button"
+        disabled={isSaving}
+        onClick={onCancel}
+      >
         {t("common.button.cancel")}
       </Button>
       <Button

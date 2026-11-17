@@ -18,6 +18,7 @@ import type {
   CreateEmbedLessonBody,
   GetBetaCourseByIdResponse,
   GetChapterWithLessonResponse,
+  UpdateAiMentorConfigurationTranslationsBody,
   UpdateChapterBody,
   UpdateEmbedLessonBody,
 } from "~/api/generated-api";
@@ -226,6 +227,35 @@ export class CurriculumFactory {
 
   async deleteLesson(id: string) {
     await this.apiClient.api.lessonControllerRemoveLesson({ lessonId: id });
+  }
+
+  async findCourseLessonByTitle(courseId: string, title: string) {
+    const course = await this.getCourse(courseId);
+
+    return (
+      course.chapters
+        .flatMap((chapter) => chapter.lessons ?? [])
+        .find((lesson) => lesson.title === title) ?? null
+    );
+  }
+
+  async getAiMentorLessonFiles(lessonId: string) {
+    const response =
+      await this.apiClient.api.ingestionControllerGetAllAssignedDocumentsForLesson(lessonId);
+
+    return response.data.data;
+  }
+
+  async updateAiMentorConfigurationTranslations(
+    lessonId: string,
+    language: SupportedLanguages,
+    data: UpdateAiMentorConfigurationTranslationsBody,
+  ) {
+    await this.apiClient.api.aiMentorConfigurationControllerUpdateAiMentorConfigurationTranslations(
+      lessonId,
+      language,
+      data,
+    );
   }
 
   async initializeLessonContext() {

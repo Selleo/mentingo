@@ -1,5 +1,6 @@
 import { ArticleFactory } from "./article.factory";
 import { CategoryFactory } from "./category.factory";
+import { CourseDiscussionFactory } from "./course-discussion.factory";
 import { CourseFactory } from "./course.factory";
 import { CurriculumFactory } from "./curriculum.factory";
 import { EmailTemplateFactory } from "./email-template.factory";
@@ -20,6 +21,7 @@ export type FixtureFactories = {
   createArticleFactory: () => ArticleFactory;
   createCategoryFactory: () => CategoryFactory;
   createCourseFactory: () => CourseFactory;
+  createCourseDiscussionFactory: () => CourseDiscussionFactory;
   createCurriculumFactory: () => CurriculumFactory;
   createEnrollmentFactory: () => EnrollmentFactory;
   createGroupFactory: () => GroupFactory;
@@ -37,6 +39,7 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
   let articleFactory: ArticleFactory | undefined;
   let categoryFactory: CategoryFactory | undefined;
   let courseFactory: CourseFactory | undefined;
+  let courseDiscussionFactory: CourseDiscussionFactory | undefined;
   let curriculumFactory: CurriculumFactory | undefined;
   let enrollmentFactory: EnrollmentFactory | undefined;
   let groupFactory: GroupFactory | undefined;
@@ -64,6 +67,10 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
     createCourseFactory: () => {
       courseFactory ??= new CourseFactory(apiClient);
       return courseFactory;
+    },
+    createCourseDiscussionFactory: () => {
+      courseDiscussionFactory ??= new CourseDiscussionFactory(apiClient);
+      return courseDiscussionFactory;
     },
     createCurriculumFactory: () => {
       curriculumFactory ??= new CurriculumFactory(apiClient);
@@ -110,6 +117,7 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
 
 export { ArticleFactory } from "./article.factory";
 export { CategoryFactory } from "./category.factory";
+export { CourseDiscussionFactory } from "./course-discussion.factory";
 export { CourseFactory } from "./course.factory";
 export { CurriculumFactory } from "./curriculum.factory";
 export { EnrollmentFactory } from "./enrollment.factory";

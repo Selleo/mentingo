@@ -155,7 +155,10 @@ export const CourseLanguageSelector = ({
             <SelectValue>
               <span className="flex min-w-0 items-center gap-2">
                 <Icon name={selectedLanguage.iconName} className="size-4 shrink-0" />
-                <span className="hidden truncate font-semibold sm:inline">
+                <span
+                  data-testid={EDIT_COURSE_PAGE_HANDLES.LANGUAGE_SELECT_LABEL}
+                  className="hidden truncate font-semibold sm:inline"
+                >
                   {t(selectedLanguage.translationKey)}
                 </span>
                 {course?.baseLanguage === selectedLanguage.key && (

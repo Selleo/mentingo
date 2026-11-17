@@ -141,10 +141,22 @@ const MatchingQuestion = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING}>
+                <SelectItem
+                  value={ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING}
+                  data-testid={QUIZ_LESSON_FORM_HANDLES.matchingScoringOption(
+                    questionIndex,
+                    ASSESSMENT_SCORING_MODES.ALL_OR_NOTHING,
+                  )}
+                >
                   {t("adminCourseView.curriculum.lesson.other.matchingScoringAllOrNothing")}
                 </SelectItem>
-                <SelectItem value={ASSESSMENT_SCORING_MODES.PARTIAL}>
+                <SelectItem
+                  value={ASSESSMENT_SCORING_MODES.PARTIAL}
+                  data-testid={QUIZ_LESSON_FORM_HANDLES.matchingScoringOption(
+                    questionIndex,
+                    ASSESSMENT_SCORING_MODES.PARTIAL,
+                  )}
+                >
                   {t("adminCourseView.curriculum.lesson.other.matchingScoringPartial")}
                 </SelectItem>
               </SelectContent>

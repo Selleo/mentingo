@@ -275,6 +275,7 @@ const ContentLessonForm = ({
         onClose={onCloseModal}
         onDelete={onDelete}
         contentType={DeleteContentType.CONTENT}
+        testIds={{ confirmButton: CONTENT_LESSON_FORM_HANDLES.DELETE_CONFIRM_BUTTON }}
       />
       <LeaveConfirmationModal
         open={isLeaveModalOpen || false}

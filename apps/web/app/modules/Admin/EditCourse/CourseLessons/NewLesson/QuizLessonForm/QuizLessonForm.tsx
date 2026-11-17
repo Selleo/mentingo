@@ -437,6 +437,7 @@ const QuizLessonForm = ({
         onClose={onCloseModal}
         onDelete={onDelete}
         contentType={DeleteContentType.QUIZ}
+        testIds={{ confirmButton: QUIZ_LESSON_FORM_HANDLES.DELETE_CONFIRM_BUTTON }}
       />
       <LeaveConfirmationModal
         open={isLeaveModalOpen || false}
