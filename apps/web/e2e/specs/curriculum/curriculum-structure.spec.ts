@@ -7,7 +7,7 @@ import { deleteChapterFlow } from "../../flows/curriculum/delete-chapter.flow";
 import { openCurriculumPageFlow } from "../../flows/curriculum/open-curriculum-page.flow";
 import { updateChapterFlow } from "../../flows/curriculum/update-chapter.flow";
 
-import { createCurriculumCourse } from "./curriculum-test-helpers";
+import { arrangeCurriculumCourse } from "./curriculum-test-helpers";
 
 test("admin can create, update, and delete a chapter", async ({
   cleanup,
@@ -15,17 +15,13 @@ test("admin can create, update, and delete a chapter", async ({
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { category, course, categoryFactory, courseFactory } = await createCurriculumCourse(
+    const { course, courseFactory } = await arrangeCurriculumCourse({
+      cleanup,
       factories,
-      `curriculum-structure-${Date.now()}`,
-    );
+      title: `curriculum-structure-${Date.now()}`,
+    });
     const chapterTitle = `chapter-${Date.now()}`;
     const updatedChapterTitle = `updated-chapter-${Date.now()}`;
-
-    cleanup.add(async () => {
-      await courseFactory.delete(course.id);
-      await categoryFactory.delete(category.id);
-    });
 
     await openCurriculumPageFlow(page, course.id);
     await createChapterFlow(page, chapterTitle);
@@ -38,7 +34,8 @@ test("admin can create, update, and delete a chapter", async ({
       .not.toBeNull();
 
     const createdCourse = await courseFactory.getById(course.id);
-    const chapterId = createdCourse.chapters.find((chapter) => chapter.title === chapterTitle)!.id;
+    const chapterId =
+      createdCourse.chapters.find((chapter) => chapter.title === chapterTitle)?.id ?? "";
 
     await updateChapterFlow(page, chapterId, updatedChapterTitle);
     await expect
@@ -60,10 +57,11 @@ test("admin can create, update, and delete a chapter", async ({
 
 test("admin can reorder chapters", async ({ cleanup, factories, withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { category, course, categoryFactory, courseFactory } = await createCurriculumCourse(
+    const { course, courseFactory } = await arrangeCurriculumCourse({
+      cleanup,
       factories,
-      `curriculum-reorder-chapters-${Date.now()}`,
-    );
+      title: `curriculum-reorder-chapters-${Date.now()}`,
+    });
     const curriculumFactory = factories.createCurriculumFactory();
     const firstChapter = await curriculumFactory.createChapter({
       courseId: course.id,
@@ -72,11 +70,6 @@ test("admin can reorder chapters", async ({ cleanup, factories, withWorkerPage }
     const secondChapter = await curriculumFactory.createChapter({
       courseId: course.id,
       title: `second-chapter-${Date.now()}`,
-    });
-
-    cleanup.add(async () => {
-      await courseFactory.delete(course.id);
-      await categoryFactory.delete(category.id);
     });
 
     await openCurriculumPageFlow(page, course.id);
