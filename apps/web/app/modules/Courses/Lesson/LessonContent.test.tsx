@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
@@ -77,5 +78,66 @@ describe("lesson navigation controls", () => {
 
     expect(screen.getByRole("button", { name: "Previous lesson" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Next lesson" })).toBeInTheDocument();
+  });
+
+  it("moves to the previous and next lesson when the arrows are clicked", async () => {
+    const user = userEvent.setup();
+    const handlePrevious = vi.fn();
+    const handleNext = vi.fn();
+
+    renderWith({ withQuery: true }).render(
+      <LessonContent
+        lesson={makeLesson()}
+        course={makeCourse()}
+        handlePrevious={handlePrevious}
+        handleNext={handleNext}
+        isFirstLesson={false}
+        isLastLesson={false}
+        lessonLoading={false}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Previous lesson" }));
+    expect(handlePrevious).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole("button", { name: "Next lesson" }));
+    expect(handleNext).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables the previous lesson arrow on the first lesson", () => {
+    renderWith({ withQuery: true }).render(
+      <LessonContent
+        lesson={makeLesson()}
+        course={makeCourse()}
+        handlePrevious={vi.fn()}
+        handleNext={vi.fn()}
+        isFirstLesson
+        isLastLesson={false}
+        lessonLoading={false}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Previous lesson" })).toBeDisabled();
+  });
+
+  it("shows the arrow name in a tooltip on keyboard focus", async () => {
+    const user = userEvent.setup();
+
+    renderWith({ withQuery: true }).render(
+      <LessonContent
+        lesson={makeLesson()}
+        course={makeCourse()}
+        handlePrevious={vi.fn()}
+        handleNext={vi.fn()}
+        isFirstLesson
+        isLastLesson={false}
+        lessonLoading={false}
+      />,
+    );
+
+    await user.tab();
+
+    expect(screen.getByRole("button", { name: "Next lesson" })).toHaveFocus();
+    expect(await screen.findByRole("tooltip", { name: "Next lesson" })).toBeInTheDocument();
   });
 });
