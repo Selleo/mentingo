@@ -1,9 +1,14 @@
 import { USER_ROLE } from "~/config/userRoles";
 
+import { TOAST_HANDLES } from "../../data/common/handles";
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
+import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { login } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
+import { createFixtureApiClient } from "../../utils/api-client";
+import { markAllOnboardingComplete } from "../../utils/onboarding";
+import { requireOrigin } from "../../utils/tenant-host";
 
 test("admin can update profile details", async ({ apiClient, cleanup, withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
@@ -58,6 +63,17 @@ test("admin can update profile details", async ({ apiClient, cleanup, withWorker
         contactPhone: updatedDetails.contactPhoneNumber,
         jobTitle: updatedDetails.jobTitle,
       });
+
+    await page.reload();
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.USER_DETAILS_DESCRIPTION)).toHaveValue(
+      updatedDetails.description,
+    );
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.USER_DETAILS_CONTACT_PHONE)).toHaveValue(
+      updatedDetails.contactPhoneNumber,
+    );
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.USER_DETAILS_JOB_TITLE)).toHaveValue(
+      updatedDetails.jobTitle,
+    );
   });
 });
 
@@ -80,46 +96,42 @@ test("admin profile details form blocks invalid contact email", async ({
 
     const unchangedDetails = await apiClient.api.userControllerGetUserDetails({ userId });
 
-    await expect(unchangedDetails.data.data.contactEmail).toBe(
-      originalDetails.data.data.contactEmail,
-    );
+    expect(unchangedDetails.data.data.contactEmail).toBe(originalDetails.data.data.contactEmail);
   });
 });
 
 test("user can change password with valid current password and matching new password", async ({
-  apiClient,
   cleanup,
+  createWorkspacePage,
+  factories,
   withWorkerPage,
 }) => {
-  const originalPassword = "Password123@";
-  const newPassword = `ChangedPassword123@${Date.now()}`;
+  const newPassword = `Changed${TEST_PASSWORD}${Date.now()}`;
+  let email = "";
 
-  await withWorkerPage(USER_ROLE.student, async ({ origin, page }) => {
-    if (!origin) {
-      throw new Error("Expected worker page origin to be available.");
-    }
-
-    const currentUser = await apiClient.api.authControllerCurrentUser();
-
-    cleanup.add(async () => {
-      await apiClient.api.userControllerChangePassword(
-        { id: currentUser.data.data.id },
-        {
-          oldPassword: newPassword,
-          newPassword: originalPassword,
-          confirmPassword: originalPassword,
-        },
-      );
-    });
-
-    await openSettingsPageFlow(page);
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_OLD).fill(originalPassword);
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_NEW).fill(newPassword);
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_CONFIRM).fill(newPassword);
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_SAVE).click();
-
-    await login(page, currentUser.data.data.email, newPassword, { origin });
-    await expect(page).toHaveURL(`${origin}/dashboard`);
-    await apiClient.syncFromContext(page.context(), origin);
+  await withWorkerPage(USER_ROLE.admin, async () => {
+    const userFactory = factories.createUserFactory();
+    const user = await userFactory.register({ password: TEST_PASSWORD });
+    email = user.email;
+    cleanup.add(() => userFactory.delete(user.id));
   });
+
+  const { context, origin, page } = await createWorkspacePage();
+  cleanup.add(() => context.close());
+
+  await login(page, email, TEST_PASSWORD);
+  const userApiClient = createFixtureApiClient();
+  cleanup.add(() => userApiClient.clearCookies());
+  await userApiClient.syncFromContext(context, requireOrigin(origin));
+  await markAllOnboardingComplete(userApiClient);
+
+  await openSettingsPageFlow(page);
+  await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_OLD).fill(TEST_PASSWORD);
+  await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_NEW).fill(newPassword);
+  await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_CONFIRM).fill(newPassword);
+  await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_SAVE).click();
+  await expect(page.getByTestId(TOAST_HANDLES.ROOT)).toBeVisible();
+
+  await login(page, email, newPassword);
+  await expect(page).toHaveURL("/dashboard");
 });
