@@ -38,12 +38,20 @@ const getFutureDateOnScheduleStep = (minutesFromNow: number) => {
 export class LiveTrainingFactory {
   constructor(private readonly apiClient: FixtureApiClient) {}
 
+  /** Enables Live Training and returns a task that restores the original setting. */
   async ensureLiveTrainingEnabled() {
     const response = await this.apiClient.api.settingsControllerGetPublicGlobalSettings();
+    const wasEnabled = response.data.data.liveTrainingEnabled;
 
-    if (!response.data.data.liveTrainingEnabled) {
+    if (!wasEnabled) {
       await this.apiClient.api.settingsControllerUpdateLiveTrainingEnabled();
     }
+
+    return async () => {
+      if (wasEnabled) return;
+      // The endpoint toggles the setting.
+      await this.apiClient.api.settingsControllerUpdateLiveTrainingEnabled();
+    };
   }
 
   async createOffline(
