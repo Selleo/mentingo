@@ -3,14 +3,13 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { USER_ROLE } from "~/config/userRoles";
 
 import { MFA_PAGE_HANDLES } from "../../data/auth/handles";
+import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { login, logout } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
 import { readMfaSetupSecretFlow } from "../../flows/auth/read-mfa-setup-secret.flow";
 import { verifyMfaCodeFlow } from "../../flows/auth/verify-mfa-code.flow";
 import { openPathAtOriginFlow } from "../../flows/navigation/open-path-at-origin.flow";
 import { generateTotpToken } from "../../utils/totp";
-
-const INITIAL_PASSWORD = "Password123@";
 
 test("user can enroll in enforced MFA and verify it on login", async ({
   cleanup,
@@ -24,7 +23,7 @@ test("user can enroll in enforced MFA and verify it on login", async ({
     email,
     firstName: "MFA",
     lastName: "User",
-    password: INITIAL_PASSWORD,
+    password: TEST_PASSWORD,
     role: USER_ROLE.student,
   });
   const { page, origin } = learner;
@@ -44,7 +43,7 @@ test("user can enroll in enforced MFA and verify it on login", async ({
   });
 
   await logout(page, { origin });
-  await login(page, email, INITIAL_PASSWORD, { origin });
+  await login(page, email, TEST_PASSWORD, { origin });
   await expect(page).toHaveURL(`${origin}/auth/mfa`);
   await expect(page.getByTestId(MFA_PAGE_HANDLES.PAGE)).toBeVisible();
 
@@ -53,6 +52,7 @@ test("user can enroll in enforced MFA and verify it on login", async ({
   await page.reload();
   await expect(page.getByTestId(MFA_PAGE_HANDLES.SECRET)).toHaveText(secret);
 
+  // A forged client-side "verified" flag must not bypass the server-side MFA challenge.
   await page.evaluate(() => {
     localStorage.setItem(
       "current-user-storage",
@@ -68,10 +68,12 @@ test("user can enroll in enforced MFA and verify it on login", async ({
   await expect(page).toHaveURL(`${origin}/courses`);
 
   await logout(page, { origin });
-  await login(page, email, INITIAL_PASSWORD, { origin });
+  await login(page, email, TEST_PASSWORD, { origin });
   await expect(page).toHaveURL(`${origin}/auth/mfa`);
   await expect(page.getByTestId(MFA_PAGE_HANDLES.PAGE)).toBeVisible();
 
+  // The API checks TOTP with window 0 and rejects a second code from the same 30 s step for this
+  // user, so the login code can only be verified once the step after enrollment has started.
   await expect.poll(() => generateTotpToken(secret), { timeout: 35_000 }).not.toBe(enrollmentCode);
   await verifyMfaCodeFlow(page, generateTotpToken(secret));
 
