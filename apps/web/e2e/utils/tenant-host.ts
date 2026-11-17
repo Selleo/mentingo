@@ -4,3 +4,11 @@ export const buildLmsLocalhostTenantHost = (baseURL: string, subdomain: string) 
 
   return `${baseUrl.protocol}//${subdomain}.lms.localhost${port}`;
 };
+
+export const requireOrigin = (origin?: string) => {
+  if (!origin) {
+    throw new Error("Expected authenticated page fixture to provide an origin");
+  }
+
+  return origin;
+};

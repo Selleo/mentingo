@@ -1,12 +1,11 @@
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
+import { TEST_PASSWORD } from "../data/test-data/credentials.data";
 import { login } from "../fixtures/auth.actions";
 
 import type { UserFactory, UserFactoryRecord } from "../factories/user.factory";
 import type { CreateWorkspacePage } from "../fixtures/test.fixture";
 import type { BrowserContext, Page } from "@playwright/test";
-
-const DISPOSABLE_ADMIN_PASSWORD = "Password123@";
 
 type CleanupHandle = {
   add: (task: () => Promise<void> | void) => void;
@@ -27,7 +26,7 @@ export const createDisposableAdminSession = async ({
     email,
     firstName: "Disposable",
     lastName: "Admin",
-    password: DISPOSABLE_ADMIN_PASSWORD,
+    password: TEST_PASSWORD,
   });
 
   const adminUser = await userFactory.update(registeredUser.id, {
@@ -44,7 +43,7 @@ export const createDisposableAdminSession = async ({
     await context.close();
   });
 
-  await login(page, adminUser.email, DISPOSABLE_ADMIN_PASSWORD);
+  await login(page, adminUser.email, TEST_PASSWORD);
 
   return { context, page, user: adminUser };
 };
