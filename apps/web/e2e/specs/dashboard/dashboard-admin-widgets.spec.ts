@@ -2,7 +2,10 @@ import { DASHBOARD_WIDGET_SIZES, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
-import { DASHBOARD_WIDGET_HANDLES } from "../../data/dashboard/handles";
+import {
+  DASHBOARD_DEADLINE_RISK_HANDLES,
+  DASHBOARD_WIDGET_HANDLES,
+} from "../../data/dashboard/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openDashboardFlow } from "../../flows/dashboard/open-dashboard.flow";
 import {
@@ -10,6 +13,8 @@ import {
   openDeadlineRiskCourseFlow,
 } from "../../flows/dashboard/open-deadline-risk-course.flow";
 import { setDashboardWidgets } from "../../utils/dashboard-settings";
+
+const HOUR_MS = 60 * 60 * 1000;
 
 test.describe("admin dashboard widgets", () => {
   test("shows a live-training event in the real calendar response", async ({
@@ -20,29 +25,23 @@ test.describe("admin dashboard widgets", () => {
   }) => {
     await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
       const liveTrainingFactory = factories.createLiveTrainingFactory();
-      const startsAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-      const endsAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
       const title = `Dashboard event ${Date.now()}`;
       await liveTrainingFactory.createOffline(cleanup, {
         title,
-        startsAt,
-        endsAt,
+        startsAt: new Date(Date.now() + HOUR_MS).toISOString(),
+        endsAt: new Date(Date.now() + 2 * HOUR_MS).toISOString(),
         allDay: true,
       });
 
-      await setDashboardWidgets(apiClient, [
-        {
-          type: DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR,
-          size: DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO,
-        },
-      ]);
+      cleanup.add(
+        await setDashboardWidgets(apiClient, [
+          { type: DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR, size: DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO },
+        ]),
+      );
 
       await openDashboardFlow(page);
 
-      const widget = page.getByTestId(DASHBOARD_WIDGET_HANDLES.EVENT_CALENDAR);
-      await expect(widget).toBeVisible();
-      await expect(widget.getByRole("heading", { name: "Event calendar" })).toBeVisible();
-      await expect(widget.getByText(title)).toBeVisible();
+      await expect(page.getByTestId(DASHBOARD_WIDGET_HANDLES.EVENT_CALENDAR)).toContainText(title);
     });
   });
 
@@ -57,36 +56,39 @@ test.describe("admin dashboard widgets", () => {
       const courseFactory = factories.createCourseFactory();
       const groupFactory = factories.createGroupFactory();
       const userFactory = factories.createUserFactory();
-      const enrollmentFactory = factories.createEnrollmentFactory();
       const prefix = `dashboard-training-${Date.now()}`;
       const category = await categoryFactory.create(`${prefix}-category`);
+      cleanup.add(() => categoryFactory.delete(category.id));
       const course = await courseFactory.create({
         title: `${prefix}-course`,
         categoryId: category.id,
       });
-      const group = await groupFactory.create({ name: `${prefix}-group` });
-      const student = await userFactory.create({ email: `${prefix}@example.com` });
-
-      cleanup.add(() => categoryFactory.delete(category.id));
-      cleanup.add(() => groupFactory.delete(group.id));
       cleanup.add(() => courseFactory.delete(course.id));
+      const group = await groupFactory.create({ name: `${prefix}-group` });
+      cleanup.add(() => groupFactory.delete(group.id));
+      const student = await userFactory.create({ email: `${prefix}@example.com` });
       cleanup.add(() => userFactory.delete(student.id));
 
       await userFactory.update(student.id, { groups: [group.id] });
-      await enrollmentFactory.enrollGroups(course.id, [{ id: group.id, isMandatory: false }]);
-      await setDashboardWidgets(apiClient, [
-        {
-          type: DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION,
-          size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
-        },
-      ]);
+      await factories
+        .createEnrollmentFactory()
+        .enrollGroups(course.id, [{ id: group.id, isMandatory: false }]);
+      cleanup.add(
+        await setDashboardWidgets(apiClient, [
+          {
+            type: DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION,
+            size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
+          },
+        ]),
+      );
 
       await openDashboardFlow(page);
 
-      const widget = page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION);
-      await expect(widget).toBeVisible();
-      await expect(widget.getByRole("img", { name: /of 1 enrollments completed/ })).toBeVisible();
-      await expect(widget.getByText("0%", { exact: true })).toBeVisible();
+      const chart = page
+        .getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION)
+        .getByTestId(DASHBOARD_WIDGET_HANDLES.CHART);
+      await expect(chart).toContainText("0%");
+      await expect(chart).toContainText("0/1");
     });
   });
 
@@ -101,52 +103,42 @@ test.describe("admin dashboard widgets", () => {
       const courseFactory = factories.createCourseFactory();
       const groupFactory = factories.createGroupFactory();
       const userFactory = factories.createUserFactory();
-      const enrollmentFactory = factories.createEnrollmentFactory();
       const prefix = `dashboard-deadline-${Date.now()}`;
       const category = await categoryFactory.create(`${prefix}-category`);
+      cleanup.add(() => categoryFactory.delete(category.id));
       const course = await courseFactory.create({
         title: `${prefix}-course`,
         categoryId: category.id,
       });
-      const group = await groupFactory.create({ name: `${prefix}-group` });
-      const student = await userFactory.create({
-        email: `${prefix}@example.com`,
-        firstName: "Deadline",
-        lastName: "Learner",
-      });
-
-      cleanup.add(() => categoryFactory.delete(category.id));
-      cleanup.add(() => groupFactory.delete(group.id));
       cleanup.add(() => courseFactory.delete(course.id));
+      const group = await groupFactory.create({ name: `${prefix}-group` });
+      cleanup.add(() => groupFactory.delete(group.id));
+      const student = await userFactory.create({ email: `${prefix}@example.com` });
       cleanup.add(() => userFactory.delete(student.id));
 
       await userFactory.update(student.id, { groups: [group.id] });
-      await enrollmentFactory.enrollGroups(course.id, [
+      await factories.createEnrollmentFactory().enrollGroups(course.id, [
         {
           id: group.id,
           isMandatory: true,
-          dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+          dueDate: new Date(Date.now() + 48 * HOUR_MS).toISOString(),
         },
       ]);
-      await setDashboardWidgets(apiClient, [
-        {
-          type: DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS,
-          size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
-        },
-      ]);
+      cleanup.add(
+        await setDashboardWidgets(apiClient, [
+          { type: DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS, size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO },
+        ]),
+      );
 
       await openDashboardFlow(page);
+      await openDeadlineRiskCourseFlow(page, course.id);
+      await expandDeadlineRiskGroupFlow(page, group.id);
 
-      const widget = page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_DEADLINE_RISKS);
       await expect(
-        widget.getByRole("button", { name: new RegExp(`${prefix}-course`) }),
+        page
+          .getByTestId(DASHBOARD_DEADLINE_RISK_HANDLES.DIALOG)
+          .getByTestId(DASHBOARD_DEADLINE_RISK_HANDLES.learner(student.id)),
       ).toBeVisible();
-      await openDeadlineRiskCourseFlow(page, `${prefix}-course`);
-
-      const dialog = page.getByRole("dialog");
-      await expect(dialog.getByText(`${prefix}-group`)).toBeVisible();
-      await expandDeadlineRiskGroupFlow(page, `${prefix}-group`);
-      await expect(dialog.getByText("Deadline Learner")).toBeVisible();
     });
   });
 });

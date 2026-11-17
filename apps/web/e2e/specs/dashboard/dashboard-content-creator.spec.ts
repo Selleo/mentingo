@@ -2,12 +2,17 @@ import { DASHBOARD_WIDGET_SIZES, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
-import { DASHBOARD_WIDGET_HANDLES } from "../../data/dashboard/handles";
+import {
+  DASHBOARD_DEADLINE_RISK_HANDLES,
+  DASHBOARD_WIDGET_HANDLES,
+} from "../../data/dashboard/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openDashboardFlow } from "../../flows/dashboard/open-dashboard.flow";
 import { setDashboardWidgets } from "../../utils/dashboard-settings";
 
-test("content creator sees scoped management data from real course records", async ({
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+test("content creator sees deadline risks of their own courses only", async ({
   apiClient,
   cleanup,
   factories,
@@ -19,68 +24,92 @@ test("content creator sees scoped management data from real course records", asy
   const userFactory = factories.createUserFactory();
   const enrollmentFactory = factories.createEnrollmentFactory();
   const prefix = `dashboard-creator-${Date.now()}`;
+  const dueDate = new Date(Date.now() + 2 * DAY_MS).toISOString();
+  let categoryId = "";
+  let groupId = "";
+  let ownCourseId = "";
+  let otherCourseId = "";
 
-  let category!: Awaited<ReturnType<typeof categoryFactory.create>>;
   await withWorkerPage(USER_ROLE.admin, async () => {
-    category = await categoryFactory.create(`${prefix}-category`);
-  });
+    const category = await categoryFactory.create(`${prefix}-category`);
+    categoryId = category.id;
+    cleanup.add(() =>
+      withWorkerPage(USER_ROLE.admin, async () => {
+        await categoryFactory.delete(category.id);
+      }),
+    );
+    const group = await groupFactory.create({ name: `${prefix}-group` });
+    groupId = group.id;
+    cleanup.add(() =>
+      withWorkerPage(USER_ROLE.admin, async () => {
+        await groupFactory.delete(group.id);
+      }),
+    );
+    const student = await userFactory.create({ email: `${prefix}@example.com` });
+    cleanup.add(() =>
+      withWorkerPage(USER_ROLE.admin, async () => {
+        await userFactory.delete(student.id);
+      }),
+    );
+    await userFactory.update(student.id, { groups: [group.id] });
 
-  let course!: Awaited<ReturnType<typeof courseFactory.create>>;
-  await withWorkerPage(USER_ROLE.contentCreator, async () => {
-    const createdCourse = await courseFactory.create({
-      title: `${prefix}-course`,
+    const otherCourse = await courseFactory.create({
+      title: `${prefix}-admin-course`,
       categoryId: category.id,
     });
-    await courseFactory.update(createdCourse.id, { status: "published", language: "en" });
-    course = await courseFactory.getById(createdCourse.id);
-  });
-
-  let groupId!: string;
-  let studentId!: string;
-  await withWorkerPage(USER_ROLE.admin, async () => {
-    const group = await groupFactory.create({ name: `${prefix}-group` });
-    const student = await userFactory.create({ email: `${prefix}@example.com` });
-    groupId = group.id;
-    studentId = student.id;
-
-    await userFactory.update(student.id, { groups: [group.id] });
-    await enrollmentFactory.enrollGroups(course.id, [
-      {
-        id: group.id,
-        isMandatory: true,
-        dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-      },
+    otherCourseId = otherCourse.id;
+    cleanup.add(() =>
+      withWorkerPage(USER_ROLE.admin, async () => {
+        await courseFactory.delete(otherCourse.id);
+      }),
+    );
+    await courseFactory.update(otherCourse.id, { status: "published", language: "en" });
+    await enrollmentFactory.enrollGroups(otherCourse.id, [
+      { id: group.id, isMandatory: true, dueDate },
     ]);
   });
 
-  cleanup.add(async () => {
-    await withWorkerPage(USER_ROLE.admin, async () => {
-      await userFactory.delete(studentId);
-      await courseFactory.delete(course.id);
-      await groupFactory.delete(groupId);
-      await categoryFactory.delete(category.id);
-    });
+  await withWorkerPage(USER_ROLE.contentCreator, async () => {
+    const ownCourse = await courseFactory.create({ title: `${prefix}-course`, categoryId });
+    ownCourseId = ownCourse.id;
+    cleanup.add(() =>
+      withWorkerPage(USER_ROLE.admin, async () => {
+        await courseFactory.delete(ownCourse.id);
+      }),
+    );
+    await courseFactory.update(ownCourse.id, { status: "published", language: "en" });
+  });
+
+  await withWorkerPage(USER_ROLE.admin, async () => {
+    await enrollmentFactory.enrollGroups(ownCourseId, [
+      { id: groupId, isMandatory: true, dueDate },
+    ]);
   });
 
   await withWorkerPage(USER_ROLE.contentCreator, async ({ page }) => {
-    await setDashboardWidgets(apiClient, [
-      {
-        type: DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS,
-        size: DASHBOARD_WIDGET_SIZES.THREE_BY_TWO,
-      },
-      {
-        type: DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION,
-        size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
-      },
-    ]);
+    cleanup.add(
+      await setDashboardWidgets(apiClient, [
+        { type: DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS, size: DASHBOARD_WIDGET_SIZES.THREE_BY_TWO },
+        {
+          type: DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION,
+          size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
+        },
+      ]),
+    );
 
     await openDashboardFlow(page);
 
-    await expect(page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_DEADLINE_RISKS)).toContainText(
-      `${prefix}-course`,
-    );
+    const deadlineRisks = page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_DEADLINE_RISKS);
     await expect(
-      page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION),
-    ).toContainText("Training completion");
+      deadlineRisks.getByTestId(DASHBOARD_DEADLINE_RISK_HANDLES.course(ownCourseId)),
+    ).toBeVisible();
+    await expect(
+      deadlineRisks.getByTestId(DASHBOARD_DEADLINE_RISK_HANDLES.course(otherCourseId)),
+    ).toHaveCount(0);
+    await expect(
+      page
+        .getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION)
+        .getByTestId(DASHBOARD_WIDGET_HANDLES.CHART),
+    ).toBeVisible();
   });
 });
