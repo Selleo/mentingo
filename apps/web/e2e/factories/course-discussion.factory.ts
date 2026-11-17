@@ -40,6 +40,12 @@ export class CourseDiscussionFactory {
     );
   }
 
+  async getReactionCount(courseId: string, messageId: string, reaction: string) {
+    const message = await this.findThread(courseId, { id: messageId });
+
+    return message?.reactions.find((entry) => entry.reaction === reaction)?.count ?? 0;
+  }
+
   async findReply(messageId: string, content: string) {
     const response = await this.apiClient.api.courseChatControllerGetReplies(messageId, {
       page: 1,

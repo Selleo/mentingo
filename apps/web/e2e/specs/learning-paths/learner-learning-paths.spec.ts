@@ -109,7 +109,7 @@ test.describe("learner development paths", () => {
     await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await openLearningPathsPageFlow(page, prefix);
 
-      await page.getByTestId(LEARNING_PATH_TRAIL_HANDLES.stopThumbnail(firstCourse.id)).hover();
+      await page.getByTestId(LEARNING_PATH_TRAIL_HANDLES.thumbnail(firstCourse.id)).hover();
 
       const preview = page.getByTestId(LEARNING_PATH_TRAIL_HANDLES.COURSE_PREVIEW);
 

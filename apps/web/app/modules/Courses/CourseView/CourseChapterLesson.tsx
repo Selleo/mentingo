@@ -65,7 +65,12 @@ export const CourseChapterLesson = ({
               <LessonTypeIcon type={lesson.type} className="size-6 text-accent-foreground" />
             </span>
           </TooltipTrigger>
-          <TooltipContent>{lessonTypeLabel}</TooltipContent>
+          <TooltipContent
+            data-testid={COURSE_TOC_HANDLES.lessonTypeTooltip(lesson.id)}
+            data-lesson-type={lesson.type}
+          >
+            {lessonTypeLabel}
+          </TooltipContent>
         </Tooltip>
       </TooltipProvider>
       <div className="flex w-full flex-col justify-center">

@@ -49,7 +49,7 @@ test("admin can create, update, and delete a course language variant", async ({
     await selectCourseLanguageFlow(page, "en");
     await expect(heroTitle).toHaveText(baseTitle);
 
-    // The cached "en" course keeps its pre-creation language list until refetched; reload so the selector lists "de".
+    // Workaround for #2273: the cached "en" course keeps a stale language list after creating a variant.
     await page.reload();
     await selectCourseLanguageFlow(page, "de");
     await expect(heroTitle).toHaveText(translatedTitle);

@@ -131,6 +131,7 @@ export function MultiFileUploadForm({ lessonId }: { lessonId: string }) {
               files.map((item, idx) => (
                 <UploadFileCard
                   testId={AI_MENTOR_LESSON_FORM_HANDLES.resourceFileCard(item.name)}
+                  uploadState={"id" in item && item.id ? "uploaded" : "pending"}
                   name={item.name}
                   meta={AI_MENTOR_FILE_TYPES_MAP[item.type] ?? item.type ?? "File"}
                   key={`${item.name} - ${item.type} - ${item.size}`}

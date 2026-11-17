@@ -203,9 +203,14 @@ test("admin can complete AI Judge translations and refresh course translation st
     });
     expect(await courseFactory.hasMissingTranslations(course.id, "de")).toBe(true);
 
-    await selectCourseLanguageFlow(page, "en");
+    // Translations were written through the API; reload so the cached "de" course is not the pre-translation one.
+    await page.reload();
     await selectCourseLanguageFlow(page, "de");
     await openExistingLessonFlow(page, chapter.id, lesson.id);
+    const missingTranslationsAlert = page.getByTestId(
+      AI_MENTOR_LESSON_FORM_HANDLES.MISSING_TRANSLATIONS_ALERT,
+    );
+    await expect(missingTranslationsAlert).toBeVisible();
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.JUDGE_CONFIGURE_BUTTON).click();
 
     // Translations may change copy only; structure stays locked to the base language.
@@ -234,6 +239,7 @@ test("admin can complete AI Judge translations and refresh course translation st
     await translationStatusRefetch;
 
     await expect.poll(() => courseFactory.hasMissingTranslations(course.id, "de")).toBe(false);
+    await expect(missingTranslationsAlert).toBeHidden();
 
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.JUDGE_CONFIGURE_BUTTON).click();
     await assertAiJudgeConfigurationFlow(page, GERMAN_AI_JUDGE_CONFIGURATION);
@@ -241,11 +247,16 @@ test("admin can complete AI Judge translations and refresh course translation st
 });
 
 test("admin can upload an AI mentor resource file", async ({
+  apiClient,
   cleanup,
   factories,
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+    const aiConfig = await apiClient.api.envControllerGetAiConfigured();
+    // The upload request waits for document ingestion, which embeds the file through OpenAI.
+    test.skip(!aiConfig.data.data.enabled, "requires OpenAI for document ingestion");
+
     const prefix = `curriculum-ai-resource-${Date.now()}`;
     const { course, chapter } = await arrangeCurriculumChapter({
       cleanup,
@@ -260,13 +271,17 @@ test("admin can upload an AI mentor resource file", async ({
 
     await openCurriculumPageFlow(page, course.id);
     await openExistingLessonFlow(page, chapter.id, lesson.id);
+    const uploadResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" && response.url().includes("/api/ingestion/ingest"),
+    );
     await page
       .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.RESOURCE_FILE_INPUT)
       .setInputFiles(CURRICULUM_TEST_DATA.files.aiMentorResource);
 
-    // Server-side persistence needs document ingestion (OpenAI embeddings), which E2E does not run.
+    expect((await uploadResponse).ok()).toBe(true);
     await expect(
       page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.resourceFileCard(resourceFileName)),
-    ).toBeVisible();
+    ).toHaveAttribute("data-state", "uploaded");
   });
 });

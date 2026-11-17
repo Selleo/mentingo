@@ -68,7 +68,13 @@ export function CourseChatTab({
     useCreateCourseChatMessage(courseId);
 
   const handleMentioned = useCallback(() => {
-    toast({ description: t("studentCourseView.courseChat.mentionedToast") });
+    toast({
+      description: (
+        <span data-testid={COURSE_DISCUSSION_HANDLES.MENTION_TOAST}>
+          {t("studentCourseView.courseChat.mentionedToast")}
+        </span>
+      ),
+    });
   }, [t, toast]);
 
   useCourseChatSocket({ courseId, enabled: Boolean(courseId), onMentioned: handleMentioned });

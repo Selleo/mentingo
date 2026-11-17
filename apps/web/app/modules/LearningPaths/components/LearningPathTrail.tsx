@@ -462,7 +462,7 @@ function TrailCourseStop({
         )}
       >
         <img
-          data-testid={LEARNING_PATH_TRAIL_HANDLES.stopThumbnail(course.courseId)}
+          data-testid={LEARNING_PATH_TRAIL_HANDLES.thumbnail(course.courseId)}
           src={course.thumbnailUrl || DefaultPhotoCourse}
           alt={title}
           className={cn("size-full object-cover", { "opacity-50 grayscale": isLocked })}

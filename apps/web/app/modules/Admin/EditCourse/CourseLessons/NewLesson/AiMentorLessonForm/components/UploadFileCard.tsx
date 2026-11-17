@@ -10,6 +10,7 @@ type UploadFileCardProps = {
   removeDisabled?: boolean;
   showRemove?: boolean;
   testId?: string;
+  uploadState?: "pending" | "uploaded";
 };
 
 export function UploadFileCard({
@@ -21,10 +22,12 @@ export function UploadFileCard({
   removeDisabled = false,
   showRemove = true,
   testId,
+  uploadState,
 }: UploadFileCardProps) {
   return (
     <div
       data-testid={testId}
+      data-state={uploadState}
       className={cn(
         "relative flex w-full min-w-0 items-center gap-3 rounded-lg border border-neutral-200 bg-white shadow-sm",
         {

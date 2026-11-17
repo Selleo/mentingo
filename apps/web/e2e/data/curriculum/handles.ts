@@ -175,6 +175,7 @@ export const AI_MENTOR_LESSON_FORM_HANDLES = {
   PREVIEW_BUTTON: "curriculum-ai-mentor-lesson-preview-button",
   RESOURCE_FILE_INPUT: "curriculum-ai-mentor-lesson-resource-file-input",
   resourceFileCard: (fileName: string) => `curriculum-ai-mentor-lesson-resource-file-${fileName}`,
+  MISSING_TRANSLATIONS_ALERT: "curriculum-ai-mentor-lesson-missing-translations-alert",
   AVATAR_FILE_INPUT: "curriculum-ai-mentor-lesson-avatar-file-input",
   JUDGE_CONFIGURE_BUTTON: "curriculum-ai-mentor-judge-configure-button",
   JUDGE_DIALOG: "curriculum-ai-mentor-judge-dialog",

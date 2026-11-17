@@ -217,6 +217,7 @@ export const COURSE_TOC_HANDLES = {
   chapter: (chapterId: string) => `course-toc-chapter-${chapterId}`,
   lesson: (lessonId: string) => `course-toc-lesson-${lessonId}`,
   lessonTypeIcon: (lessonId: string) => `course-toc-lesson-type-icon-${lessonId}`,
+  lessonTypeTooltip: (lessonId: string) => `course-toc-lesson-type-tooltip-${lessonId}`,
   LESSON_TITLE: "lesson-title",
 } as const;
 
@@ -230,6 +231,7 @@ export const COURSE_DISCUSSION_HANDLES = {
   THREAD_INPUT: "course-discussion-thread-input",
   THREAD_SEND_BUTTON: "course-discussion-thread-send-button",
   THREAD_MENTION_LIST: "course-discussion-thread-mention-list",
+  MENTION_TOAST: "course-discussion-mention-toast",
   threadMentionOption: (userId: string) => `course-discussion-thread-mention-option-${userId}`,
   thread: (messageId: string) => `course-discussion-thread-${messageId}`,
   message: (messageId: string) => `course-discussion-message-${messageId}`,

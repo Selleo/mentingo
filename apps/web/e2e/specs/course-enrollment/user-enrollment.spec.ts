@@ -1,4 +1,4 @@
-import { COURSE_ENROLLMENT, type CourseEnrollment } from "@repo/shared";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
@@ -36,8 +36,6 @@ test("admin bulk enrolls and unenrolls selected users, and the learner gains and
       lastName: prefix,
     });
     cleanup.add(() => userFactory.delete(unselectedUser.id));
-    const statusBadge = (userId: string, status: CourseEnrollment) =>
-      page.getByTestId(COURSE_ENROLLED_HANDLES.statusBadge(userId, status));
 
     const learnerPage = await openLearnerPage({
       cleanup,
@@ -48,13 +46,23 @@ test("admin bulk enrolls and unenrolls selected users, and the learner gains and
 
     await openCourseEnrolledTabFlow(page, course.id);
     await filterEnrolledUsersFlow(page, { keyword: prefix });
-    await expect(statusBadge(learner.id, COURSE_ENROLLMENT.NOT_ENROLLED)).toBeVisible();
+    await expect(
+      page.getByTestId(
+        COURSE_ENROLLED_HANDLES.statusBadge(learner.id, COURSE_ENROLLMENT.NOT_ENROLLED),
+      ),
+    ).toBeVisible();
 
     await selectEnrolledUsersFlow(page, [learner.id]);
     await confirmEnrollSelectedUsersFlow(page);
 
-    await expect(statusBadge(learner.id, COURSE_ENROLLMENT.ENROLLED)).toBeVisible();
-    await expect(statusBadge(unselectedUser.id, COURSE_ENROLLMENT.NOT_ENROLLED)).toBeVisible();
+    await expect(
+      page.getByTestId(COURSE_ENROLLED_HANDLES.statusBadge(learner.id, COURSE_ENROLLMENT.ENROLLED)),
+    ).toBeVisible();
+    await expect(
+      page.getByTestId(
+        COURSE_ENROLLED_HANDLES.statusBadge(unselectedUser.id, COURSE_ENROLLMENT.NOT_ENROLLED),
+      ),
+    ).toBeVisible();
     await expect
       .poll(async () =>
         Boolean((await enrollmentFactory.getUser(course.id, learner.id))?.enrolledAt),
@@ -71,7 +79,11 @@ test("admin bulk enrolls and unenrolls selected users, and the learner gains and
     await selectEnrolledUsersFlow(page, [learner.id]);
     await confirmUnenrollSelectedUsersFlow(page);
 
-    await expect(statusBadge(learner.id, COURSE_ENROLLMENT.NOT_ENROLLED)).toBeVisible();
+    await expect(
+      page.getByTestId(
+        COURSE_ENROLLED_HANDLES.statusBadge(learner.id, COURSE_ENROLLMENT.NOT_ENROLLED),
+      ),
+    ).toBeVisible();
     await expect
       .poll(async () => (await enrollmentFactory.getUser(course.id, learner.id))?.enrolledAt)
       .toBeNull();

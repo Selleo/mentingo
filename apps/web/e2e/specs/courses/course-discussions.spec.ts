@@ -1,6 +1,5 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { TOAST_HANDLES } from "../../data/common/handles";
 import { COURSE_DISCUSSION_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { deleteCourseDiscussionMessageFlow } from "../../flows/courses/delete-course-discussion-message.flow";
@@ -103,13 +102,6 @@ test.describe("reactions", () => {
     const thread = await student.discussions.createMessage(courseId, {
       content: uniqueDiscussionLabel("discussion-thread-for-reaction"),
     });
-    const reactionCount = async () => {
-      const message = await student.discussions.findThread(courseId, { id: thread.id });
-
-      return (
-        message?.reactions.find((reaction) => reaction.reaction === DISCUSSION_REACTION)?.count ?? 0
-      );
-    };
     const reactionSummary = page.getByTestId(
       COURSE_DISCUSSION_HANDLES.messageReactionSummary(thread.id, DISCUSSION_REACTION),
     );
@@ -118,12 +110,16 @@ test.describe("reactions", () => {
     await reactToCourseDiscussionMessageFlow(page, thread.id, DISCUSSION_REACTION);
 
     await expect(reactionSummary).toContainText("1");
-    await expect.poll(reactionCount).toBe(1);
+    await expect
+      .poll(() => student.discussions.getReactionCount(courseId, thread.id, DISCUSSION_REACTION))
+      .toBe(1);
 
     await reactionSummary.click();
 
     await expect(reactionSummary).toBeHidden();
-    await expect.poll(reactionCount).toBe(0);
+    await expect
+      .poll(() => student.discussions.getReactionCount(courseId, thread.id, DISCUSSION_REACTION))
+      .toBe(0);
   });
 });
 
@@ -245,37 +241,45 @@ test.describe("realtime collaboration", () => {
     await openCourseDiscussionFlow(secondPage, courseId);
 
     const { firstName, lastName, id: firstStudentId } = firstStudent.session.user;
-    const threadContent = `@${firstName} ${lastName} ${uniqueDiscussionLabel("realtime-thread")}`;
-    const thread = await secondStudent.discussions.createMessage(courseId, {
-      content: threadContent,
-      mentionedUserIds: [firstStudentId],
-    });
+    const mentionLabel = `@${firstName} ${lastName}`;
+    const threadContent = `${mentionLabel} ${uniqueDiscussionLabel("realtime-thread")}`;
+    await selectCourseDiscussionMentionFlow(secondPage, firstName, firstStudentId);
+    await expect(secondPage.getByTestId(COURSE_DISCUSSION_HANDLES.THREAD_INPUT)).toHaveValue(
+      `${mentionLabel} `,
+    );
+    await submitCourseDiscussionThreadFlow(secondPage, threadContent);
+
+    await expect
+      .poll(() => secondStudent.discussions.findThread(courseId, { content: threadContent }))
+      .not.toBeNull();
+    const thread = await secondStudent.discussions.findThread(courseId, { content: threadContent });
+    const threadId = thread?.id ?? "";
 
     await expect(
-      firstPage.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(thread.id)),
+      firstPage.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(threadId)),
     ).toContainText(threadContent);
-    await expect(firstPage.getByTestId(TOAST_HANDLES.DESCRIPTION)).toBeVisible();
+    await expect(firstPage.getByTestId(COURSE_DISCUSSION_HANDLES.MENTION_TOAST)).toBeVisible();
     await expect(
-      firstPage.getByTestId(COURSE_DISCUSSION_HANDLES.messageAuthorPresence(thread.id)),
+      firstPage.getByTestId(COURSE_DISCUSSION_HANDLES.messageAuthorPresence(threadId)),
     ).toHaveAttribute("data-online", "true");
 
-    await openCourseDiscussionRepliesFlow(secondPage, thread.id);
+    await openCourseDiscussionRepliesFlow(secondPage, threadId);
     const replyContent = uniqueDiscussionLabel("realtime-reply");
     const reply = await firstStudent.discussions.createMessage(courseId, {
       content: replyContent,
-      parentMessageId: thread.id,
+      parentMessageId: threadId,
     });
 
     await expect(
       secondPage.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(reply.id)),
     ).toContainText(replyContent);
     await expect(
-      secondPage.getByTestId(COURSE_DISCUSSION_HANDLES.repliesToggle(thread.id)),
+      secondPage.getByTestId(COURSE_DISCUSSION_HANDLES.repliesToggle(threadId)),
     ).toContainText("1");
 
     await secondStudent.session.context.close();
     await expect(
-      firstPage.getByTestId(COURSE_DISCUSSION_HANDLES.messageAuthorPresence(thread.id)),
+      firstPage.getByTestId(COURSE_DISCUSSION_HANDLES.messageAuthorPresence(threadId)),
     ).toHaveAttribute("data-online", "false");
   });
 
