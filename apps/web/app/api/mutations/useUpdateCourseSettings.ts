@@ -18,6 +18,7 @@ type UpdateCourseSettingsBody = {
   lessonSequenceEnabled?: boolean;
   quizFeedbackEnabled?: boolean;
   videoCompletionTrackingEnabled?: boolean;
+  audioCompletionTrackingEnabled?: boolean;
   removeCertificateSignature?: boolean;
   certificateSignature?: File;
   certificateFontColor?: string;
@@ -59,6 +60,9 @@ export function useUpdateCourseSettings() {
         .with(["videoCompletionTrackingEnabled"], () =>
           t("lessons.videoCompletionTrackingUpdatedSuccessfully"),
         )
+        .with(["audioCompletionTrackingEnabled"], () =>
+          t("lessons.audioCompletionTrackingUpdatedSuccessfully"),
+        )
         .with(["certificateSignature"], () =>
           t("adminCourseView.toast.certificateUpdatedSuccessfully"),
         )
@@ -90,6 +94,9 @@ export function useUpdateCourseSettings() {
         .with(["quizFeedbackEnabled"], () => t("lessons.quizFeedbackUpdateFailed"))
         .with(["videoCompletionTrackingEnabled"], () =>
           t("lessons.videoCompletionTrackingUpdateFailed"),
+        )
+        .with(["audioCompletionTrackingEnabled"], () =>
+          t("lessons.audioCompletionTrackingUpdateFailed"),
         )
         .with(["certificateSignature"], () => t("adminCourseView.toast.certificateUpdateError"))
         .with(["removeCertificateSignature"], () =>

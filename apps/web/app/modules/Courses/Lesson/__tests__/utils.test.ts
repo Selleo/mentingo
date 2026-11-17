@@ -2,11 +2,13 @@ import { expect, describe, it } from "vitest";
 
 import i18next from "~/utils/mocks/i18next.mock";
 
+import { makeChapter, makeCourse, makeLesson } from "../courseTestFactories";
 import {
   getAnswers as getFillInTheBlanksDndAnswers,
   getCompletedAnswers as getCompletedFillInTheBlanksDndAnswers,
 } from "../Question/FillInTheBlanks/dnd/FillInTheBlanksDnd";
 import { QuizFormSchema } from "../schemas";
+import { LESSON_PROGRESS_STATUSES } from "../types";
 import {
   findFirstInProgressLessonId,
   findFirstLessonIdForCompletedCourse,
@@ -18,6 +20,7 @@ import {
   getUserAnswers,
   isNextBlocked,
   isPreviousBlocked,
+  isResumableLessonStatus,
   parseQuizFormData,
 } from "../utils";
 
@@ -126,6 +129,38 @@ describe("findFirstInProgressLessonId", () => {
     } as unknown as GetCourseResponse["data"];
     const firstLessonId = findFirstInProgressLessonId(courseData);
     expect(firstLessonId).toBe(undefined);
+  });
+});
+
+describe("failed quiz lessons", () => {
+  const course = makeCourse({
+    chapters: [
+      makeChapter({
+        lessons: [
+          makeLesson({ id: "passed", status: "completed" }),
+          makeLesson({ id: "failed", type: "quiz", status: "failed" }),
+          makeLesson({ id: "next", status: "not_started" }),
+        ],
+      }),
+    ],
+  });
+
+  it("resumes a failed quiz like an in-progress lesson", () => {
+    expect(findFirstInProgressLessonId(course)).toBe("failed");
+    expect(findFirstNonCompletedLessonId(course)).toBe("failed");
+  });
+
+  it("does not treat a failed quiz as completed", () => {
+    expect(findFirstLessonIdForCompletedCourse(course)).toBeUndefined();
+  });
+  it("resumes only in-progress and failed lessons", () => {
+    const resumableStatuses =
+      Object.values(LESSON_PROGRESS_STATUSES).filter(isResumableLessonStatus);
+
+    expect(resumableStatuses).toEqual([
+      LESSON_PROGRESS_STATUSES.IN_PROGRESS,
+      LESSON_PROGRESS_STATUSES.FAILED,
+    ]);
   });
 });
 

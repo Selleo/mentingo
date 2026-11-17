@@ -10,7 +10,8 @@ export type ProgressBadgeKey =
   | "inProgress"
   | "notStarted"
   | "blocked"
-  | "awaitingReview";
+  | "awaitingReview"
+  | "failed";
 
 // Shared mapping from the lesson `status` union (snake_case) to the ProgressBadge `progress` key,
 // used by both the lesson sidebar and the course overview so the status stays in sync across them.
@@ -20,6 +21,7 @@ export const LESSON_STATUS_TO_PROGRESS = {
   not_started: "notStarted",
   blocked: "blocked",
   awaiting_review: "awaitingReview",
+  failed: "failed",
 } as const satisfies Record<string, ProgressBadgeKey>;
 
 type ProgressBadgeProps = HTMLAttributes<HTMLDivElement> & {
@@ -30,7 +32,12 @@ type ProgressBadgeProps = HTMLAttributes<HTMLDivElement> & {
 
 type ProgressConfig = {
   [key in ProgressBadgeKey]: {
-    variant: "successFilled" | "inProgressFilled" | "notStartedFilled" | "blockedFilled";
+    variant:
+      | "successFilled"
+      | "inProgressFilled"
+      | "notStartedFilled"
+      | "blockedFilled"
+      | "failedFilled";
     icon: IconName;
     label: string;
   };
@@ -69,6 +76,11 @@ export const ProgressBadge = ({
       variant: "inProgressFilled",
       icon: "InProgress",
       label: t("progressBadge.awaitingReview"),
+    },
+    failed: {
+      variant: "failedFilled",
+      icon: "InputRoundedMarkerError",
+      label: t("progressBadge.failed"),
     },
   };
 

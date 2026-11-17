@@ -157,7 +157,6 @@ export function CoursePickerDialog({
                       trailerUrl={course.trailerUrl}
                       estimatedDurationMinutes={course.estimatedDurationMinutes}
                       lessonCount={course.lessonCount}
-                      category={course.category}
                       className="max-w-none"
                       variant="picker"
                       mediaState={getMediaState(course.id)}

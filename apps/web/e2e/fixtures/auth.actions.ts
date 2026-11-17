@@ -66,4 +66,4 @@ export async function logout(page: Page, options?: { origin?: string }) {
   await expect(page).toHaveURL(options?.origin ? `${options.origin}${LOGIN_URL}` : LOGIN_URL);
 }
 
-export { getAuthEmail, getReadonlyAuthEmail, getWorkerAuthEmail } from "../utils/auth-email";
+export { getWorkerAuthEmail } from "../utils/auth-email";

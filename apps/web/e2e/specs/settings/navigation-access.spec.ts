@@ -5,9 +5,9 @@ import { expect, test } from "../../fixtures/test.fixture";
 import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
 
 test("user can open settings from the profile menu and lands on account tab", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     await openSettingsPageFlow(page);
 
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.ACCOUNT_TAB)).toHaveAttribute(
@@ -19,9 +19,9 @@ test("user can open settings from the profile menu and lands on account tab", as
 });
 
 test("user without settings management permission sees only account settings", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     await openSettingsPageFlow(page);
 
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.ACCOUNT_TAB)).toBeVisible();
@@ -31,9 +31,9 @@ test("user without settings management permission sees only account settings", a
 });
 
 test("admin with settings management permission sees all settings tabs", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openSettingsPageFlow(page);
 
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.ACCOUNT_TAB)).toBeVisible();
@@ -43,9 +43,9 @@ test("admin with settings management permission sees all settings tabs", async (
 });
 
 test("organization tab shows warning indicator when configuration issues are not dismissed", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await page.route("**/api/env/config/setup", async (route) => {
       await route.fulfill({
         status: 200,

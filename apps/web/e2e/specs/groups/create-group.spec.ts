@@ -41,8 +41,8 @@ test("admin can create a group from the create page", async ({
   });
 });
 
-test("admin cannot submit invalid group data", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin cannot submit invalid group data", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openCreateGroupPageFlow(page);
     await fillGroupFormFlow(page, {
       name: "A",
@@ -59,9 +59,9 @@ test("admin cannot submit invalid group data", async ({ withReadonlyPage }) => {
 
 test("admin can cancel group creation without persisting data", async ({
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const groupFactory = factories.createGroupFactory();
     const name = `cancel-create-group-${Date.now()}`;
 

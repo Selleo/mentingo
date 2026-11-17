@@ -39,10 +39,8 @@ const createScormCourseFromUi = async (
   await submitCreateScormCourseFormFlow(page);
 };
 
-test("admin can choose between standard and SCORM course creation", async ({
-  withReadonlyPage,
-}) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin can choose between standard and SCORM course creation", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openCreateCourseTypeSelectorFlow(page);
 
     await expect(page.getByTestId(COURSE_TYPE_SELECTOR_HANDLES.STANDARD_CARD)).toBeVisible();

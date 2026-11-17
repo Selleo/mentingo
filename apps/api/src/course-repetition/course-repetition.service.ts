@@ -19,6 +19,7 @@ import {
   courseLearningStates,
   courses,
   lessons,
+  lessonAudioProgress,
   lessonVideoProgress,
   scormAttempts,
   studentChapterProgress,
@@ -159,6 +160,16 @@ export class CourseRepetitionService {
           inArray(lessonVideoProgress.lessonId, courseLessonIds),
           eq(lessonVideoProgress.studentId, studentId),
           isNull(lessonVideoProgress.learningStateId),
+        ),
+      );
+    await db
+      .update(lessonAudioProgress)
+      .set({ learningStateId: stateId })
+      .where(
+        and(
+          inArray(lessonAudioProgress.lessonId, courseLessonIds),
+          eq(lessonAudioProgress.studentId, studentId),
+          isNull(lessonAudioProgress.learningStateId),
         ),
       );
     await db

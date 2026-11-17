@@ -85,6 +85,8 @@ export const MultiSelect = ({
         })}
         id={answerId}
         readOnly
+        // pointer-events-none only stops the mouse; disabled also stops arrow keys and Space.
+        disabled={isFieldDisabled}
         type="checkbox"
         value={answerId}
         {...register(`${optionFieldId}.${questionId}.${answerId}`)}

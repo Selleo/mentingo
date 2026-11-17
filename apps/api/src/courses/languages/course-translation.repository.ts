@@ -15,6 +15,7 @@ import {
   aiMentorLessons,
   aiMentorRoleplayConfigurations,
   aiMentorTeacherConfigurations,
+  assessmentFeedbackRanges,
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionBlanks,
   assessmentQuestionChoiceOptions,
@@ -84,6 +85,29 @@ export class CourseTranslationRepository {
 
     const questionIds = questions.map(({ id }) => id);
 
+    const feedbackRanges = await db
+      .select({
+        id: assessmentFeedbackRanges.id,
+        assessmentId: assessmentFeedbackRanges.assessmentId,
+        baseMessage: this.localizationService.getFieldByLanguage(
+          assessmentFeedbackRanges.message,
+          baseLanguage,
+        ),
+        translatedMessage: this.localizationService.getFieldByLanguage(
+          assessmentFeedbackRanges.message,
+          language,
+        ),
+        lessonTitle: this.localizationService.getFieldByLanguage(lessons.title, baseLanguage),
+        chapterTitle: this.localizationService.getFieldByLanguage(chapters.title, baseLanguage),
+        courseTitle: this.localizationService.getFieldByLanguage(courses.title, baseLanguage),
+      })
+      .from(assessmentFeedbackRanges)
+      .innerJoin(assessments, eq(assessments.id, assessmentFeedbackRanges.assessmentId))
+      .innerJoin(lessons, eq(lessons.id, assessments.lessonId))
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .where(eq(courses.id, courseId));
+
     if (!questionIds.length) {
       return {
         questions,
@@ -93,6 +117,7 @@ export class CourseTranslationRepository {
         dragAndDropOptions: [],
         answerSets: [],
         matchingPairs: [],
+        feedbackRanges,
       };
     }
 
@@ -183,6 +208,7 @@ export class CourseTranslationRepository {
       dragAndDropOptions,
       answerSets,
       matchingPairs,
+      feedbackRanges,
     };
   }
 
@@ -292,6 +318,16 @@ export class CourseTranslationRepository {
           label: setJsonbField(assessmentQuestionScaleOptions.label, language, "", true, true),
         })
         .where(inArray(assessmentQuestionScaleOptions.id, scaleOptionIds));
+    }
+
+    const feedbackRangeIds = snapshot.feedbackRanges.map(({ id }) => id);
+    if (feedbackRangeIds.length) {
+      await db
+        .update(assessmentFeedbackRanges)
+        .set({
+          message: setJsonbField(assessmentFeedbackRanges.message, language, "", true, true),
+        })
+        .where(inArray(assessmentFeedbackRanges.id, feedbackRangeIds));
     }
 
     const quizLessonIds = await db

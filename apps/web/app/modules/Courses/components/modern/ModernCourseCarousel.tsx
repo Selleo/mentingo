@@ -209,7 +209,6 @@ const ModernCourseCarousel = ({
                     estimatedDurationMinutes={course.estimatedDurationMinutes}
                     lessonCount={course.lessonCount}
                     progressPercent={progressByCourseId[course.id]}
-                    category={course.category}
                     className="w-[320px] max-w-none md:w-[380px] lg:w-[400px]"
                     enrolled={"enrolled" in course ? course.enrolled : false}
                     hasFreeChapters={course.hasFreeChapters}

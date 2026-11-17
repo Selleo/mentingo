@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import i18next from "~/utils/mocks/i18next.mock";
 import { renderWith } from "~/utils/testUtils";
 
 import { AiMentorPracticeMessages } from "./AiMentorPracticeMessages";
@@ -63,5 +64,20 @@ describe("AiMentorPracticeMessages", () => {
       expect(screen.getAllByText("Adam")).toHaveLength(1);
       expect(screen.getByText(text)).toBeInTheDocument();
     }
+  });
+
+  it("exposes the conversation as a named log that is not read live", () => {
+    renderWith().render(
+      <AiMentorPracticeMessages
+        messages={[]}
+        isMessagesLoading={false}
+        showChatLoader={false}
+        aiMentorName="Adam"
+        messagesContainerRef={createRef<HTMLDivElement>()}
+      />,
+    );
+    const name = i18next.t("studentCourseView.lesson.aiMentorLesson.conversationLabel");
+
+    expect(screen.getByRole("log", { name })).toHaveAttribute("aria-live", "off");
   });
 });

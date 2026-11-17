@@ -14,9 +14,9 @@ import { createCurriculumCourse } from "./curriculum-test-helpers";
 test("scale question type is available in the question selector", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const { category, course, categoryFactory, courseFactory } = await createCurriculumCourse(
       factories,
       `curriculum-quiz-scale-selector-${Date.now()}`,

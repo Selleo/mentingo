@@ -278,6 +278,18 @@ describe("VideoPlayer keyboard shortcuts", () => {
     expect(player.play).not.toHaveBeenCalled();
     expect(player.pause).not.toHaveBeenCalled();
   });
+
+  it("moves focus into the player when mounted with focusOnMount", async () => {
+    const view = renderWith({ withQuery: true }).render(
+      <VideoPlayer
+        provider={VIDEO_EMBED_PROVIDERS.SELF}
+        url="https://example.com/video.mp4"
+        focusOnMount
+      />,
+    );
+
+    await waitFor(() => expect(view.container.querySelector("[data-vjs-player]")).toHaveFocus());
+  });
 });
 
 describe("VideoPlayer chapter controls", () => {

@@ -117,12 +117,11 @@ Frontend-specific instructions for `apps/web`. Preserve generated API usage, rou
 - E2E selectors live in `e2e/data/*/handles.ts`; use `data-testid` from those files instead of brittle text/CSS selectors.
 - E2E setup uses `e2e/fixtures`, `e2e/factories`, and `e2e/flows`.
 - E2E API setup uses `e2e/utils/api-client.ts`, which wraps the generated API.
-- Prefer readonly fixtures for assertions and worker/isolated fixtures for mutations.
-- Keep to the conventions in `e2e/strategy.md`:
-  - use `withReadonlyPage` for non-mutating specs;
-  - use `withWorkerPage` for mutating specs;
-  - register cleanup for created entities unless test purpose is persistence validation;
-  - keep UI assertions in specs and backend consistency checks through `expect.poll(...)`.
+- E2E tests must follow `e2e/strategy.md` (playbook; run the checklist in §13 before a PR). Key rules:
+  - one test = one user goal, verified in the UI; steps of a flow are not separate tests;
+  - settings and permissions are verified by their visible effect, not only through the API;
+  - select by `data-testid` handles, not copy (`getByText`, `getByRole` with `name`);
+  - register cleanup right after creating an entity.
 
 ## Safety Boundaries
 

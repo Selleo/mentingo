@@ -11,15 +11,15 @@ const BLOCKED_ROLES = [
 
 test.setTimeout(180 * 1000);
 
-test("admin can access environment management", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin can access environment management", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openEnvironmentPageFlow(page);
   });
 });
 
 for (const { role, title } of BLOCKED_ROLES) {
-  test(`${title} cannot access environment management`, async ({ withReadonlyPage }) => {
-    await withReadonlyPage(role, async ({ page }) => {
+  test(`${title} cannot access environment management`, async ({ withWorkerPage }) => {
+    await withWorkerPage(role, async ({ page }) => {
       await page.goto("/admin/envs");
 
       await expect(page).not.toHaveURL(/\/admin\/envs$/);

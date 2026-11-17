@@ -10,6 +10,7 @@ export const RICH_TEXT_HANDLES = {
   CONTENT: "rich-text-editor-content",
   AUDIO_PLAY_BUTTON: "rich-text-audio-play-button",
   AUDIO_PLAYBACK_SPEED_BUTTON: "rich-text-audio-playback-speed-button",
+  AUDIO_COVERAGE_MARKERS: "rich-text-audio-coverage-markers",
   ASSET_LIBRARY_BUTTON: "rich-text-editor-asset-library-button",
   TABLE_MENU_BUTTON: "rich-text-editor-table-menu-button",
   TABLE_INSERT_BUTTON: "rich-text-editor-table-insert-button",

@@ -150,10 +150,16 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
               className="gap-2 py-2.5"
               variant="outline"
               size="icon"
+              aria-label={t(
+                isSidebarCollapsed
+                  ? "navigationSideBar.ariaLabels.expandSidebar"
+                  : "navigationSideBar.ariaLabels.collapseSidebar",
+              )}
             >
               <Icon
                 name={isSidebarCollapsed ? "PanelLeftOpen" : "PanelLeftClose"}
                 className="size-5"
+                aria-hidden="true"
               />
             </Button>
           </div>

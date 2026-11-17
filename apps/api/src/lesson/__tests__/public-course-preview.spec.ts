@@ -78,6 +78,7 @@ describe("public course lesson preview", () => {
       score: null,
       correctAnswerCount: null,
       wrongAnswerCount: null,
+      feedbackMessage: null,
     });
     expect(result.isQuizFeedbackRedacted).toBe(true);
     expect(result.lessonCompleted).toBe(false);

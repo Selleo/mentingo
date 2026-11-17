@@ -65,9 +65,9 @@ test("admin can toggle invite-only registration and the setting persists", async
 });
 
 test("organization settings no longer expose email trigger switches", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openOrganizationSettings(page);
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.USER_EMAIL_TRIGGERS_CARD)).toHaveCount(0);
   });

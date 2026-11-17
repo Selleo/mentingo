@@ -130,6 +130,52 @@ module.exports = {
       },
     },
 
+    // E2E specs: see e2e/strategy.md. Warnings until the existing suite is migrated.
+    {
+      files: ["e2e/specs/**/*.ts"],
+      rules: {
+        "no-restricted-syntax": [
+          "warn",
+          {
+            selector: "CallExpression[callee.property.name='getByText']",
+            message: "Do not select by copy; use getByTestId with a handle (e2e/strategy.md §8).",
+          },
+          {
+            selector:
+              "CallExpression[callee.property.name='getByTestId'][arguments.0.type=/^(Literal|TemplateLiteral)$/]",
+            message:
+              "Do not pass a string to getByTestId; use a handle from data/<domain>/handles.ts (e2e/strategy.md §8).",
+          },
+          {
+            selector:
+              "CallExpression[callee.property.name='getByRole'] > ObjectExpression.arguments > Property[key.name='name']",
+            message:
+              "Do not select by role name (copy); use getByTestId with a handle (e2e/strategy.md §8).",
+          },
+          {
+            selector:
+              "CallExpression[callee.object.name='test'][callee.property.name=/^(skip|fixme)$/]:matches([arguments.length=0], [arguments.0.type=/^(Literal|TemplateLiteral)$/])",
+            message:
+              "No unconditional test.skip/test.fixme; fix or delete the test, or skip conditionally with a reason (e2e/strategy.md §10).",
+          },
+          {
+            selector:
+              "CallExpression[callee.object.property.name='describe'][callee.property.name=/^(skip|fixme)$/]",
+            message:
+              "No unconditional test.describe.skip/fixme; fix or delete the tests (e2e/strategy.md §10).",
+          },
+        ],
+        "no-restricted-properties": [
+          "warn",
+          {
+            object: "page",
+            property: "route",
+            message: "Do not mock in specs; use the domain mock flow (e2e/strategy.md §9).",
+          },
+        ],
+      },
+    },
+
     // Node
     {
       files: [".eslintrc.cjs", "server.js"],

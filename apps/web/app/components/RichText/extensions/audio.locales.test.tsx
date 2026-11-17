@@ -7,10 +7,23 @@ import { describe, expect, it } from "vitest";
 
 import { contentViewerPlugins } from "../plugins";
 
-const locales = import.meta.glob<{ default: { richText: { audio?: Record<string, string> } } }>(
-  "../../../locales/*/translation.json",
-  { eager: true },
-);
+const locales = import.meta.glob<{
+  default: {
+    richText: {
+      audio?: Record<string, string>;
+      video?: { ariaLabel?: Record<string, string> };
+    };
+  };
+}>("../../../locales/*/translation.json", { eager: true });
+
+describe("video translations", () => {
+  it.each(Object.entries(locales))("provides play button names in %s", (_path, locale) => {
+    const ariaLabel = locale.default.richText.video?.ariaLabel;
+
+    expect(ariaLabel?.play).toBeTruthy();
+    expect(ariaLabel?.playWithTitle).toContain("{{title}}");
+  });
+});
 
 describe("audio translations", () => {
   it.each(Object.entries(locales))(

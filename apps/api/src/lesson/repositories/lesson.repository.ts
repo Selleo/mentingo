@@ -168,6 +168,9 @@ export class LessonRepository {
         videoCompletionTrackingEnabled: coursesSettingsHelpers.select(
           "videoCompletionTrackingEnabled",
         ),
+        audioCompletionTrackingEnabled: coursesSettingsHelpers.select(
+          "audioCompletionTrackingEnabled",
+        ),
         aiMentorDetails: sql<AiMentorEvaluationDetails | null>`
           CASE
             WHEN ${aiMentorJudgements.id} IS NULL
@@ -326,6 +329,9 @@ export class LessonRepository {
         quizFeedbackEnabled: coursesSettingsHelpers.select("quizFeedbackEnabled"),
         videoCompletionTrackingEnabled: coursesSettingsHelpers.select(
           "videoCompletionTrackingEnabled",
+        ),
+        audioCompletionTrackingEnabled: coursesSettingsHelpers.select(
+          "audioCompletionTrackingEnabled",
         ),
         aiMentorDetails: sql<null>`NULL`,
         aiMentor: sql<null>`NULL`,

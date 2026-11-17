@@ -10,9 +10,9 @@ import { openTenantsPageFlow } from "../../flows/tenants/open-tenants-page.flow"
 test("managing admin can browse, filter, and open tenant details", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(
+  await withWorkerPage(
     USER_ROLE.admin,
     async ({ page }) => {
       const tenantFactory = factories.createTenantFactory();
@@ -64,9 +64,9 @@ test("managing admin can browse, filter, and open tenant details", async ({
 });
 
 test("managing admin can open create tenant page from the tenant list", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(
+  await withWorkerPage(
     USER_ROLE.admin,
     async ({ page }) => {
       await openTenantsPageFlow(page);
@@ -109,8 +109,8 @@ test("managing admin can permanently delete another organization", async ({
   );
 });
 
-test("non-managing user cannot access tenant administration", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(
+test("non-managing user cannot access tenant administration", async ({ withWorkerPage }) => {
+  await withWorkerPage(
     USER_ROLE.student,
     async ({ page }) => {
       await page.goto("/super-admin/tenants");

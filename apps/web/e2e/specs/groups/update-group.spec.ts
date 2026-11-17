@@ -48,9 +48,9 @@ test("admin can update a group", async ({ cleanup, factories, withWorkerPage }) 
 test("admin sees existing group values prefilled on the edit page", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const groupFactory = factories.createGroupFactory();
     const group = await groupFactory.create({
       name: `prefilled-group-${Date.now()}`,
@@ -73,9 +73,9 @@ test("admin sees existing group values prefilled on the edit page", async ({
 test("admin can cancel group editing without persisting changes", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const groupFactory = factories.createGroupFactory();
     const group = await groupFactory.create({
       name: `cancel-edit-group-${Date.now()}`,

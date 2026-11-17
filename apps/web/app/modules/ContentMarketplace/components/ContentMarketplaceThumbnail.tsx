@@ -1,8 +1,8 @@
 import { Store } from "lucide-react";
-import { useEffect, useState } from "react";
 
-import { useContentMarketplaceThumbnail } from "~/api/queries/useContentMarketplaceThumbnail";
 import { cn } from "~/lib/utils";
+
+import { useContentMarketplaceThumbnailUrl } from "../hooks/useContentMarketplaceThumbnailUrl";
 
 type ContentMarketplaceThumbnailProps = {
   listingId: string;
@@ -19,17 +19,7 @@ export function ContentMarketplaceThumbnail({
   title,
   className,
 }: ContentMarketplaceThumbnailProps) {
-  const { data: thumbnail } = useContentMarketplaceThumbnail(listingId, versionId, hasThumbnail);
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!thumbnail) return;
-
-    const objectUrl = URL.createObjectURL(thumbnail);
-    setThumbnailUrl(objectUrl);
-
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [thumbnail]);
+  const thumbnailUrl = useContentMarketplaceThumbnailUrl(listingId, versionId, hasThumbnail);
 
   return (
     <div

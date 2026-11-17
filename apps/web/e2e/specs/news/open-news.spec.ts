@@ -9,9 +9,9 @@ import { expect, test } from "./news-test.fixture";
 test("admin can open news details from news list", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const newsFactory = factories.createNewsFactory();
     const title = `open-news-${Date.now()}`;
     const summary = `open-news-summary-${Date.now()}`;

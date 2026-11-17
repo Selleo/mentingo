@@ -1,0 +1,38 @@
+{
+    admin :2020
+    auto_https disable_redirects
+    skip_install_trust
+}
+
+# Same routing as Caddyfile.e2e, but the web app is served by the web image's nginx container.
+https://localhost:5173, https://*.lms.localhost:5173 {
+    tls internal
+    handle /api/* {
+        reverse_proxy http://localhost:3000
+    }
+
+    handle {
+        reverse_proxy http://localhost:8080
+    }
+}
+
+https://scorm.localhost:5443 {
+    tls internal
+
+    @content {
+        path /api/scorm/delivery/*
+        method GET HEAD
+    }
+
+    handle @content {
+        reverse_proxy localhost:3000 {
+            header_up -Cookie
+            header_up -Authorization
+            header_down -Set-Cookie
+        }
+    }
+
+    handle {
+        respond 404
+    }
+}

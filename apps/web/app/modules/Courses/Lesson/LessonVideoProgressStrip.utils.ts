@@ -2,7 +2,10 @@ import { mergeVideoCoverageRanges, type VideoCoverageRange } from "@repo/shared"
 import { clamp } from "lodash-es";
 import { createStore } from "zustand/vanilla";
 
+import { getAudioCoverageAttrsFromElement } from "~/components/RichText/extensions/utils/audio";
 import { getVideoEmbedAttrsFromElement } from "~/components/RichText/extensions/utils/video";
+
+import { LESSON_PROGRESS_MEDIA_KIND } from "./LessonVideoProgressStrip.types";
 
 import type {
   LessonVideoProgressSegment,
@@ -35,11 +38,38 @@ export const parseLessonVideoProgressSegments = (
 
       return {
         id: attrs.resourceEntityId ?? attrs.src ?? `video-${index}`,
+        mediaKind: LESSON_PROGRESS_MEDIA_KIND.VIDEO,
         resourceEntityId: attrs.resourceEntityId,
         coveragePercent: clampVideoProgress(attrs.videoCoveragePercent),
         isWatched: attrs.videoIsWatched,
         watchedRanges: mergeVideoCoverageRanges(attrs.videoWatchedRanges),
         durationSeconds: attrs.videoDurationSeconds,
+      };
+    })
+    .filter((segment): segment is LessonVideoProgressSegment => Boolean(segment));
+};
+
+export const parseLessonAudioProgressSegments = (
+  description: string | null,
+): LessonVideoProgressSegment[] => {
+  if (!description || typeof DOMParser === "undefined") return [];
+
+  const doc = new DOMParser().parseFromString(description, "text/html");
+
+  return Array.from(doc.querySelectorAll<HTMLElement>('[data-node-type="audio"]'))
+    .map((element): LessonVideoProgressSegment | null => {
+      const attrs = getAudioCoverageAttrsFromElement(element);
+
+      if (!attrs.resourceEntityId) return null;
+
+      return {
+        id: attrs.resourceEntityId,
+        mediaKind: LESSON_PROGRESS_MEDIA_KIND.AUDIO,
+        resourceEntityId: attrs.resourceEntityId,
+        coveragePercent: clampVideoProgress(attrs.audioCoveragePercent),
+        isWatched: attrs.audioIsListened,
+        watchedRanges: mergeVideoCoverageRanges(attrs.audioListenedRanges),
+        durationSeconds: attrs.audioDurationSeconds,
       };
     })
     .filter((segment): segment is LessonVideoProgressSegment => Boolean(segment));
