@@ -4413,7 +4413,17 @@
       "scale_1_5": "Frage vom Typ Skala 1 bis 5.",
       "matching": "Ordne jedes Element seinem Paar zu.",
       "noMatchesAvailable": "Für diese Frage sind noch keine Zuordnungen verfügbar.",
-      "correctMatch": "Richtige Zuordnung:"
+      "correctMatch": "Richtige Zuordnung:",
+      "fillInTheBlanksInstruction": "Klicke auf eine Lücke und wähle ein Wort.",
+      "matchingInstruction": "Klicke auf ein Element und wähle die passende Zuordnung.",
+      "blankLabel": "Lücke {{current}} von {{total}}",
+      "answerBank": "dem Antwortbereich",
+      "removeWord": "Wort entfernen",
+      "dndInstructions": "Zum Aufnehmen eines Wortes Leertaste oder Enter drücken. Mit den Pfeiltasten zwischen den Lücken bewegen. Zum Ablegen erneut Leertaste oder Enter drücken, zum Abbrechen Escape.",
+      "dndOnStart": "Wort {{word}} aufgenommen.",
+      "dndOnOver": "Wort {{word}} befindet sich über {{blank}}.",
+      "dndOnEnd": "Wort {{word}} wurde in {{blank}} platziert.",
+      "dndOnCancel": "Ziehen abgebrochen. Wort {{word}} ist an seine vorherige Position zurückgekehrt."
     },
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",

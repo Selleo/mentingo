@@ -4171,7 +4171,17 @@
       "scale_1_5": "Question sur l'échelle (1-5)",
       "matching": "Associez chaque élément à sa paire.",
       "noMatchesAvailable": "Aucune correspondance n’est encore disponible pour cette question.",
-      "correctMatch": "Bonne correspondance :"
+      "correctMatch": "Bonne correspondance :",
+      "fillInTheBlanksInstruction": "Cliquez sur un espace et choisissez un mot.",
+      "matchingInstruction": "Cliquez sur un élément et choisissez sa correspondance.",
+      "blankLabel": "Espace {{current}} sur {{total}}",
+      "answerBank": "la banque de réponses",
+      "removeWord": "Retirer le mot",
+      "dndInstructions": "Pour saisir un mot, appuyez sur espace ou entrée. Utilisez les touches fléchées pour le déplacer entre les espaces. Appuyez de nouveau sur espace ou entrée pour le déposer, ou échap pour annuler.",
+      "dndOnStart": "Mot {{word}} saisi.",
+      "dndOnOver": "Le mot {{word}} est sur {{blank}}.",
+      "dndOnEnd": "Le mot {{word}} a été placé dans {{blank}}.",
+      "dndOnCancel": "Déplacement annulé. Le mot {{word}} est revenu à sa position précédente."
     },
     "aiMentor": {
       "title": "Session avec l'AI Mentor",
