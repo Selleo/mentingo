@@ -74,9 +74,9 @@ test("student can review practice feedback and start the practice again", async 
     await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RESULT_CLOSE_BUTTON).click();
 
     await page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.PRACTICE_AGAIN_BUTTON).click();
-    await expect(page.getByRole("status")).toBeVisible();
+    await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.REPLAY_LOADER)).toBeVisible();
     releaseReplay();
-    await expect(page.getByRole("status")).toBeHidden();
+    await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.REPLAY_LOADER)).toBeHidden();
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.CONVERSATION)).toBeVisible();
     await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT)).toBeVisible();
   });
