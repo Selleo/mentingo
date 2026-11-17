@@ -1,0 +1,159 @@
+name: PR flow video
+on:
+  pull_request_target:
+    types: [opened, ready_for_review]
+    branches: [staging, main]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Same-repository PR to demonstrate
+        required: true
+        type: number
+      requested_by:
+        description: Original readiness actor (set by the trusted dispatcher)
+        required: false
+        type: string
+      expected_head:
+        description: Expected PR head SHA (automatic dispatch pins the readiness event)
+        required: false
+        type: string
+permissions: {}
+concurrency:
+  group: pr-flow-video-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: false
+  queue: max
+jobs:
+  dispatch:
+    # Metadata only. Never check out or execute PR code in a pull_request_target job.
+    if: >-
+      github.event_name == 'pull_request_target' && !github.event.pull_request.draft &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions:
+      actions: write
+    steps:
+      - name: Dispatch the trusted base-branch recorder
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REQUESTED_BY: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          [[ "$NUMBER" =~ ^[1-9][0-9]*$ ]]
+          [[ "$HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$BASE_REF" == staging || "$BASE_REF" == main ]]
+          gh workflow run pr-flow-video.yml --repo "$REPOSITORY" --ref "$BASE_REF" \
+            -f "pr_number=$NUMBER" -f "expected_head=$HEAD_SHA" -f "requested_by=$REQUESTED_BY"
+
+  film:
+    if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main')
+    name: Analyze and record visible PR flows
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    environment: release-film
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      number: ${{ steps.inspect.outputs.number }}
+      head: ${{ steps.inspect.outputs.head }}
+      record: ${{ steps.plan.outputs.record }}
+    env:
+      S: .agents/skills/release-film/scripts
+      RELEASE_FILM_HOME: /mnt/pr-flow-video
+      RELEASE_FILM_CI: '1'
+      RELEASE_FILM_CI_WORKERS: '1'
+      RELEASE_FILM_LLM: cli
+      RELEASE_FILM_VOICE: elevenlabs
+      GH_TOKEN: ${{ github.token }}
+      ELEVENLABS_VOICE_ID_FEMALE_1: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_1 }}
+      ELEVENLABS_VOICE_ID_FEMALE_2: ${{ vars.ELEVENLABS_VOICE_ID_FEMALE_2 }}
+      ELEVENLABS_VOICE_ID_MALE_1: ${{ vars.ELEVENLABS_VOICE_ID_MALE_1 }}
+      ELEVENLABS_VOICE_ID_MALE_2: ${{ vars.ELEVENLABS_VOICE_ID_MALE_2 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.15.0
+      - name: Validate PR identity and collect its complete diff
+        id: inspect
+        run: python3 "$S/pr_video.py" inspect --run "$RUNNER_TEMP/pr-video"
+      - name: Install the pinned semantic planner
+        if: steps.inspect.outputs.eligible == 'true'
+        working-directory: ${{ runner.temp }}
+        run: npm install --global '@anthropic-ai/claude-code@2.1.283'
+      - name: Select only visible changed flows
+        id: plan
+        if: steps.inspect.outputs.eligible == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: python3 "$S/pr_video.py" plan --run "$RUNNER_TEMP/pr-video"
+      - name: Report the semantic decision
+        if: steps.inspect.outputs.eligible == 'true'
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          result = json.loads((Path(os.environ['RUNNER_TEMP'])/'pr-video/pr-video-plan.json').read_text())
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as report:
+              report.write('PR video decision: ' + result['decision'] + '.\n')
+              report.write('Selected flows: ' + str(len(result['flows'])) + '.\n')
+          PY
+      - name: Install the recorder tools only for visible changes
+        if: steps.plan.outputs.record == 'true'
+        run: |
+          bash .agents/skills/release-film/ci/install-tools.sh
+          sudo install -d -o "$(id -u)" -g "$(id -g)" "$RELEASE_FILM_HOME"
+      - name: Record the immutable PR head with demo data
+        if: steps.plan.outputs.record == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: python3 "$S/pr_video.py" record --run "$RUNNER_TEMP/pr-video" --bundle "$RUNNER_TEMP/pr-video-bundle"
+      - name: Preserve only the verified PR video bundle
+        if: steps.plan.outputs.record == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pr-flow-video-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/pr-video-bundle/video.mp4
+            ${{ runner.temp }}/pr-video-bundle/pr-video.json
+          if-no-files-found: error
+          retention-days: 14
+  attach:
+    name: Attach the matching PR video
+    needs: film
+    if: github.event_name == 'workflow_dispatch' && needs.film.outputs.record == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: pr-flow-video-${{ github.run_id }}
+          path: ${{ runner.temp }}/pr-video-bundle
+      - name: Append or replace the generated video section
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ needs.film.outputs.number }}
+          HEAD_SHA: ${{ needs.film.outputs.head }}
+        run: |
+          python3 .agents/skills/release-film/ci/pr_video_publish.py \
+            --bundle "$RUNNER_TEMP/pr-video-bundle" --repository "$GITHUB_REPOSITORY" \
+            --number "$NUMBER" --head-sha "$HEAD_SHA" --run-id "$GITHUB_RUN_ID"

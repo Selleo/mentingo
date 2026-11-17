@@ -387,3 +387,27 @@ Do not publish releases, push, edit GitHub records or share previews publicly.
 Never print tokens or passwords. Preserve reference films, other processes
 and user changes. Explicit user instructions govern development commits and
 changes to this skill.
+
+## Pull request flow videos
+
+`pr-flow-video.yml` dispatches a trusted base-branch recording when an internal PR is
+opened ready or marked ready for review. It uses the complete merge-base-to-head
+diff, with PR prose and business specs as untrusted context, to select visible
+changed flows. No visible effect means no recording. See `pr_video_plan.py` for
+bounded semantic evidence checks; uncertainty is an error, never a silent skip.
+
+The metadata-only dispatcher never runs PR code. Only same-repository writer PRs
+are eligible; the recording job has read-only repository permissions and uses the
+existing protected `release-film` environment. Internal PR code still executes
+build and browser setup, so this is not a sandbox for hostile contributions.
+Never loosen the fork/writer gates or give the recorder a write token. No GitHub
+admin settings or environment rules are changed by this workflow.
+
+After recording, a separate job validates `pr-video.json` and attaches the video
+at the end of the current PR description. It preserves the author's body and
+replaces only its managed section. Changed PR heads are skipped. No release or
+Helpdesk publication is performed. To retry after new commits, manually dispatch
+`pr-flow-video.yml` from `staging` or `main` with `pr_number`. The workflow must
+first be present on that trusted branch. Narration uses the existing four-voice
+ElevenLabs pool. Native upload permission failures retain the downloadable video
+artifact and the previous PR section; never label an artifact link as a player.

@@ -520,12 +520,55 @@ class RegistryTests(unittest.TestCase):
         flow = next(f for f in domain['flows'] if f['id'] == 'retry-practice-generation')
         self.assertIn('same daily practice', flow['outcomes'][0])
 
+    def test_forum_registers_general_course_and_moderation_flows(self):
+        repo = Path(__file__).resolve().parents[4]
+        loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
+        domain = next(domain for domain in loaded['domains'] if domain['domain'] == 'forum')
+        flows = {flow['id']: flow for flow in domain['flows']}
+        self.assertEqual(set(flows), {'enable-forum', 'browse-forum', 'create-forum-topic',
+                                     'reply-forum-topic', 'follow-course-forum-thread',
+                                     'delete-own-forum-post', 'moderate-forum-posts'})
+        self.assertEqual(domain['specPaths'], ['docs/specs/forum-business-spec.md'])
+        self.assertEqual(flows['enable-forum']['featureRequirements'], [])
+        self.assertTrue(all(flow['featureRequirements'] == ['forum'] for identifier, flow in flows.items()
+                            if identifier != 'enable-forum'))
+        bridge = flows['follow-course-forum-thread']
+        self.assertTrue(any('enrollment' in value for value in bridge['preconditions']))
+        self.assertTrue(any('Discussion tab' in value for value in bridge['actions']))
+        self.assertTrue(any('placeholder' in value for value in flows['delete-own-forum-post']['outcomes']))
+        self.assertEqual(len(catalog.validate_video_groups(domain)), 4)
+
+    def test_reviewer_quiz_journey_has_distinct_author_learner_and_reviewer_contracts(self):
+        repo = Path(__file__).resolve().parents[4]
+        loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
+        domains = {domain['domain']: domain for domain in loaded['domains']}
+        reviewer = domains['quiz-grading']
+        self.assertEqual({flow['id'] for flow in reviewer['flows']},
+                         {'browse-grading-queue', 'grade-open-answer', 'navigate-next-answer', 'regrade-open-answer'})
+        for flow in reviewer['flows']:
+            self.assertEqual(flow['audiences'], ['reviewer'])
+            self.assertEqual(flow['pageKeys'], ['quiz-grading'])
+            self.assertEqual(flow['specPaths'], ['docs/specs/quiz-assessment-engine-business-spec.md'])
+        self.assertEqual(len(catalog.validate_video_groups(reviewer)), 2)
+        author = next(flow for flow in domains['course-authoring']['flows']
+                      if flow['id'] == 'configure-reviewer-grading')
+        learner = next(flow for flow in domains['course-learning']['flows']
+                       if flow['id'] == 'submit-reviewer-graded-quiz')
+        result = next(flow for flow in domains['course-learning']['flows']
+                      if flow['id'] == 'read-reviewed-quiz-result')
+        self.assertEqual(author['pageKeys'], ['admin.course.curriculum'])
+        self.assertEqual(learner['pageKeys'], ['student.course'])
+        self.assertTrue(any('cannot be resubmitted' in value for value in learner['outcomes']))
+        self.assertTrue(any('feedback disabled' in value for value in result['actions']))
+        for area in ('course-authoring', 'course-learning'):
+            catalog.validate_video_groups(domains[area])
+
     def test_app_coverage_audit_requires_every_area_spec_and_real_source(self):
         repo = Path(__file__).resolve().parents[4]
         loaded = catalog.load_catalog(repo / '.agents/skills/release-film/projects/mentingo-self-onboarding.json')
         public = json.loads((repo / 'packages/shared/src/constants/self-onboarding-areas.json').read_text())
         report = catalog.validate_app_coverage(loaded, public, repo)
-        self.assertEqual(report, {'areas': 31, 'specs': 60, 'flows': 232, 'videos': 96})
+        self.assertEqual(report, {'areas': 33, 'specs': 61, 'flows': 246, 'videos': 104})
         original_glob = Path.glob
         def python312_glob(path, pattern):
             found = original_glob(path, pattern)

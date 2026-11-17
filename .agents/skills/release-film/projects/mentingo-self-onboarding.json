@@ -2089,6 +2089,38 @@
           "outcomes": [
             "The table shows accumulated learner engagement time for the selected course audience."
           ]
+        },
+        {
+          "id": "configure-reviewer-grading",
+          "title": "Require reviewer grading for open quiz questions",
+          "description": "Require reviewer grading for open quiz questions in Mentingo.",
+          "audiences": [
+            "course-author"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "admin.course.curriculum"
+          ],
+          "specPaths": [
+            "docs/specs/quiz-assessment-engine-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/**",
+            "apps/api/src/quiz/**"
+          ],
+          "goal": "Require reviewer grading for open quiz questions.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "The author can edit a disposable course and quiz in its base language; no learner answers are modified."
+          ],
+          "actions": [
+            "Open a base-language quiz containing a brief or detailed response question.",
+            "Enable Graded by reviewer for that open question.",
+            "Save and reopen the quiz to inspect the retained review setting."
+          ],
+          "outcomes": [
+            "Only opted-in open questions wait for reviewer grading; questions without the setting retain their automatic behavior."
+          ]
         }
       ],
       "videos": [
@@ -2213,6 +2245,14 @@
           "description": "Review course learner engagement time in Mentingo.",
           "flowIds": [
             "inspect-learning-time"
+          ]
+        },
+        {
+          "key": "course-authoring.reviewer-assessment",
+          "title": "Configure reviewer-graded open quiz questions",
+          "description": "Configure reviewer-graded open quiz questions in Mentingo.",
+          "flowIds": [
+            "configure-reviewer-grading"
           ]
         }
       ]
@@ -2790,6 +2830,71 @@
           "outcomes": [
             "Remaining time excludes completed lessons; a completed course shows its completion message."
           ]
+        },
+        {
+          "id": "submit-reviewer-graded-quiz",
+          "title": "Submit an answer that needs reviewer grading",
+          "description": "Submit an answer that needs reviewer grading in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/quiz-assessment-engine-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/Lesson/**",
+            "apps/api/src/quiz/**",
+            "apps/api/src/quiz-grading/**"
+          ],
+          "goal": "Submit an answer that needs reviewer grading.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "The learner has access to a published synthetic quiz with an opted-in reviewer question and quiz feedback enabled."
+          ],
+          "actions": [
+            "Open a staged quiz with automatically graded questions and an open question marked Graded by reviewer.",
+            "Complete its required responses and submit.",
+            "Inspect Waiting for review in the result and course outline, including the available partial automatic feedback and unavailable retake."
+          ],
+          "outcomes": [
+            "The attempt awaits review without a final score or lesson completion; it cannot be resubmitted or retaken while pending."
+          ]
+        },
+        {
+          "id": "read-reviewed-quiz-result",
+          "title": "Read a reviewed quiz result and feedback",
+          "description": "Read a reviewed quiz result and feedback in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "student.course"
+          ],
+          "specPaths": [
+            "docs/specs/quiz-assessment-engine-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Courses/Lesson/**",
+            "apps/api/src/quiz-grading/**"
+          ],
+          "goal": "Read a reviewed quiz result and feedback.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "A separate reviewer has already finalized a synthetic latest attempt; both enabled/disabled feedback examples and in-app notifications are prepared off camera."
+          ],
+          "actions": [
+            "Open a staged Quiz graded notification and follow its lesson link.",
+            "Inspect the finalized quiz score, per-question result and reviewer comment where feedback is enabled.",
+            "Compare a staged course with quiz feedback disabled to inspect its score without hidden answer-level details."
+          ],
+          "outcomes": [
+            "The learner receives the final result; passing completes the lesson and feedback visibility follows course settings."
+          ]
         }
       ],
       "videos": [
@@ -2849,6 +2954,15 @@
           "description": "Plan a learning session with duration estimates in Mentingo.",
           "flowIds": [
             "plan-remaining-learning-time"
+          ]
+        },
+        {
+          "key": "course-learning.reviewed-assessment",
+          "title": "Submit and inspect reviewer-graded quizzes",
+          "description": "Submit and inspect reviewer-graded quizzes in Mentingo.",
+          "flowIds": [
+            "submit-reviewer-graded-quiz",
+            "read-reviewed-quiz-result"
           ]
         }
       ]
@@ -9491,6 +9605,473 @@
           "flowIds": [
             "review-achievements",
             "create-achievement"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "forum.guide",
+      "domain": "forum",
+      "title": "Forum",
+      "description": "Learn to use forum.",
+      "specPaths": [
+        "docs/specs/forum-business-spec.md"
+      ],
+      "watchPaths": [
+        "apps/web/app/modules/Forum/**",
+        "apps/api/src/forum/**",
+        "apps/api/src/course-chat/**",
+        "apps/web/e2e/specs/forum/**"
+      ],
+      "flows": [
+        {
+          "id": "enable-forum",
+          "title": "Enable the organization forum",
+          "description": "Enable the organization forum in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "forum"
+          ],
+          "specPaths": [
+            "docs/specs/forum-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Forum/**",
+            "apps/api/src/forum/**",
+            "apps/api/src/course-chat/**",
+            "apps/web/e2e/specs/forum/**"
+          ],
+          "goal": "Enable the organization forum.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "The administrator may edit platform settings; the demo tenant starts with Forum disabled."
+          ],
+          "actions": [
+            "Open platform settings and inspect the disabled Forum setting.",
+            "Enable Forum, save and open its new navigation entry.",
+            "Switch the disposable tenant setting off again and inspect the removed entry, then restore it for subsequent recordings."
+          ],
+          "outcomes": [
+            "Forum appears in navigation only while the organization setting is enabled."
+          ]
+        },
+        {
+          "id": "browse-forum",
+          "title": "Find a forum conversation",
+          "description": "Find a forum conversation in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [
+            "forum"
+          ],
+          "pageKeys": [
+            "forum"
+          ],
+          "specPaths": [
+            "docs/specs/forum-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Forum/**",
+            "apps/api/src/forum/**",
+            "apps/api/src/course-chat/**",
+            "apps/web/e2e/specs/forum/**"
+          ],
+          "goal": "Find a forum conversation.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "Forum is enabled; the viewer has forum.read and staged general/enrolled-course topics exist."
+          ],
+          "actions": [
+            "Open Forum and search for a staged topic by its title or message.",
+            "Switch between General and an enrolled course filter.",
+            "Choose latest activity, newest and most replies ordering, then open the matching topic."
+          ],
+          "outcomes": [
+            "Search, scope and ordering identify an accessible conversation; unavailable course threads are absent."
+          ]
+        },
+        {
+          "id": "create-forum-topic",
+          "title": "Start an organization-wide topic",
+          "description": "Start an organization-wide topic in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [
+            "forum"
+          ],
+          "pageKeys": [
+            "forum"
+          ],
+          "specPaths": [
+            "docs/specs/forum-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Forum/**",
+            "apps/api/src/forum/**",
+            "apps/api/src/course-chat/**",
+            "apps/web/e2e/specs/forum/**"
+          ],
+          "goal": "Start an organization-wide topic.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "Forum is enabled; the account has forum.read and forum.topic.create."
+          ],
+          "actions": [
+            "Open Forum and choose New topic.",
+            "Enter a meaningful localized title and first message, then create the topic.",
+            "Return to General topics and open the newly listed conversation."
+          ],
+          "outcomes": [
+            "The general topic retains its title and first message and is visible to permitted signed-in colleagues."
+          ]
+        },
+        {
+          "id": "reply-forum-topic",
+          "title": "Reply and read forum conversations",
+          "description": "Reply and read forum conversations in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [
+            "forum"
+          ],
+          "pageKeys": [
+            "forum"
+          ],
+          "specPaths": [
+            "docs/specs/forum-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Forum/**",
+            "apps/api/src/forum/**",
+            "apps/api/src/course-chat/**",
+            "apps/web/e2e/specs/forum/**"
+          ],
+          "goal": "Reply and read forum conversations.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "Forum is enabled; the account has forum.read and forum.post.create; a paginated demo topic exists."
+          ],
+          "actions": [
+            "Open a synthetic general topic with enough replies for pagination.",
+            "Read its replies and move between reply pages.",
+            "Write a relevant response and submit, then inspect the new reply and topic reply count."
+          ],
+          "outcomes": [
+            "The response is retained in the topic and the reply count updates."
+          ]
+        },
+        {
+          "id": "follow-course-forum-thread",
+          "title": "Continue a course discussion from the forum",
+          "description": "Continue a course discussion from the forum in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [
+            "forum"
+          ],
+          "pageKeys": [
+            "forum"
+          ],
+          "specPaths": [
+            "docs/specs/forum-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Forum/**",
+            "apps/api/src/forum/**",
+            "apps/api/src/course-chat/**",
+            "apps/web/e2e/specs/forum/**"
+          ],
+          "goal": "Continue a course discussion from the forum.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "Forum and course discussions are enabled; a published course, enrollment, course thread and course discussion permissions are prepared."
+          ],
+          "actions": [
+            "Open Forum and select a course in which the learner is enrolled.",
+            "Open its staged course thread and reply.",
+            "Navigate through the app to that course Discussion tab and inspect the same thread and reply."
+          ],
+          "outcomes": [
+            "Forum and the course Discussion tab expose the same accessible course conversation."
+          ]
+        },
+        {
+          "id": "delete-own-forum-post",
+          "title": "Remove your own forum posts",
+          "description": "Remove your own forum posts in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [
+            "forum"
+          ],
+          "pageKeys": [
+            "forum"
+          ],
+          "specPaths": [
+            "docs/specs/forum-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Forum/**",
+            "apps/api/src/forum/**",
+            "apps/api/src/course-chat/**",
+            "apps/web/e2e/specs/forum/**"
+          ],
+          "goal": "Remove your own forum posts.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "Forum is enabled; the learner owns disposable demo posts, including one topic with replies and one without."
+          ],
+          "actions": [
+            "Open a disposable topic authored by the learner and delete its first post while replies remain.",
+            "Inspect the deleted placeholder and closed reply action.",
+            "Open another disposable own topic without replies and delete its only post."
+          ],
+          "outcomes": [
+            "A topic with replies retains a deleted placeholder and closes new replies; an empty topic disappears."
+          ]
+        },
+        {
+          "id": "moderate-forum-posts",
+          "title": "Moderate organization forum posts",
+          "description": "Moderate organization forum posts in Mentingo.",
+          "audiences": [
+            "administrator"
+          ],
+          "featureRequirements": [
+            "forum"
+          ],
+          "pageKeys": [
+            "forum"
+          ],
+          "specPaths": [
+            "docs/specs/forum-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Forum/**",
+            "apps/api/src/forum/**",
+            "apps/api/src/course-chat/**",
+            "apps/web/e2e/specs/forum/**"
+          ],
+          "goal": "Moderate organization forum posts.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "Forum is enabled; the moderator has forum.read and forum.post.delete; only synthetic posts may be removed."
+          ],
+          "actions": [
+            "Open a staged organization-wide topic posted by another synthetic person.",
+            "Choose Delete on an inappropriate disposable reply and confirm.",
+            "Reopen the topic and inspect the remaining discussion."
+          ],
+          "outcomes": [
+            "The authorized moderator can remove another person's general post while unrelated discussion stays available."
+          ]
+        }
+      ],
+      "videos": [
+        {
+          "key": "forum.availability-discovery",
+          "title": "Enable Forum and find discussions",
+          "description": "Enable Forum and find discussions in Mentingo.",
+          "flowIds": [
+            "enable-forum",
+            "browse-forum"
+          ]
+        },
+        {
+          "key": "forum.topics-replies",
+          "title": "Start a topic and join the discussion",
+          "description": "Start a topic and join the discussion in Mentingo.",
+          "flowIds": [
+            "create-forum-topic",
+            "reply-forum-topic"
+          ]
+        },
+        {
+          "key": "forum.course-discussions",
+          "title": "Continue course discussions through Forum",
+          "description": "Continue course discussions through Forum in Mentingo.",
+          "flowIds": [
+            "follow-course-forum-thread"
+          ]
+        },
+        {
+          "key": "forum.moderation",
+          "title": "Remove and moderate forum posts",
+          "description": "Remove and moderate forum posts in Mentingo.",
+          "flowIds": [
+            "delete-own-forum-post",
+            "moderate-forum-posts"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "quiz-grading.guide",
+      "domain": "quiz-grading",
+      "title": "Grading open quiz answers",
+      "description": "Learn to use grading open quiz answers.",
+      "specPaths": [
+        "docs/specs/quiz-assessment-engine-business-spec.md"
+      ],
+      "watchPaths": [
+        "apps/web/app/modules/QuizGrading/**",
+        "apps/api/src/quiz-grading/**"
+      ],
+      "flows": [
+        {
+          "id": "browse-grading-queue",
+          "title": "Find open answers to grade",
+          "description": "Find open answers to grade in Mentingo.",
+          "audiences": [
+            "reviewer"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "quiz-grading"
+          ],
+          "specPaths": [
+            "docs/specs/quiz-assessment-engine-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/QuizGrading/**",
+            "apps/api/src/quiz-grading/**"
+          ],
+          "goal": "Find open answers to grade.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "The reviewer has quiz_grading.read; published demo courses have current-run submitted open answers from other people."
+          ],
+          "actions": [
+            "Open To grade and inspect the pending counter and oldest-first queue.",
+            "Filter by course, lesson, learner and pending or graded status; paginate the results.",
+            "Open an accessible answer belonging to another synthetic learner."
+          ],
+          "outcomes": [
+            "The queue resolves the selected filters and opens a permitted answer; reviewers do not see their own answers."
+          ]
+        },
+        {
+          "id": "grade-open-answer",
+          "title": "Grade an open quiz answer",
+          "description": "Grade an open quiz answer in Mentingo.",
+          "audiences": [
+            "reviewer"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "quiz-grading"
+          ],
+          "specPaths": [
+            "docs/specs/quiz-assessment-engine-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/QuizGrading/**",
+            "apps/api/src/quiz-grading/**"
+          ],
+          "goal": "Grade an open quiz answer.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "The reviewer has quiz_grading.read and quiz_grading.grade; a published current-run answer from another learner is pending; no model provider is needed."
+          ],
+          "actions": [
+            "Open a pending answer and read the question, learner response and any author reviewer instructions.",
+            "Choose Pass or Fail, add a useful localized comment and save.",
+            "Inspect the saved grade or queue destination; for a staged final pending answer, inspect the attempt's finalized result through the existing learner flow."
+          ],
+          "outcomes": [
+            "The review saves pass/fail points and optional comment; the attempt finalizes only after its last pending answer is graded."
+          ]
+        },
+        {
+          "id": "navigate-next-answer",
+          "title": "Move through pending grading work",
+          "description": "Move through pending grading work in Mentingo.",
+          "audiences": [
+            "reviewer"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "quiz-grading"
+          ],
+          "specPaths": [
+            "docs/specs/quiz-assessment-engine-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/QuizGrading/**",
+            "apps/api/src/quiz-grading/**"
+          ],
+          "goal": "Move through pending grading work.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "The reviewer has quiz_grading.read; at least two accessible pending answers from other synthetic learners exist."
+          ],
+          "actions": [
+            "Open an answer with another pending answer available.",
+            "Choose Next answer and inspect the next response without grading the current one.",
+            "Return to the queue to find the still-pending original answer."
+          ],
+          "outcomes": [
+            "Navigation advances to the next pending answer without silently assigning a grade."
+          ]
+        },
+        {
+          "id": "regrade-open-answer",
+          "title": "Revise a grade and inspect review history",
+          "description": "Revise a grade and inspect review history in Mentingo.",
+          "audiences": [
+            "reviewer"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "quiz-grading"
+          ],
+          "specPaths": [
+            "docs/specs/quiz-assessment-engine-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/QuizGrading/**",
+            "apps/api/src/quiz-grading/**"
+          ],
+          "goal": "Revise a grade and inspect review history.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "The reviewer has quiz_grading.read and quiz_grading.grade; a current-run answer from another learner has a saved grade; use a disposable attempt."
+          ],
+          "actions": [
+            "Set the queue status to Graded and open a synthetic previously graded answer.",
+            "Inspect its existing history, choose a different pass/fail verdict and add an explanatory comment.",
+            "Save and reopen the answer to compare both stored review revisions."
+          ],
+          "outcomes": [
+            "Re-grading retains review history and recalculates the attempt; it does not reopen an already completed lesson."
+          ]
+        }
+      ],
+      "videos": [
+        {
+          "key": "quiz-grading.queue-navigation",
+          "title": "Find answers and move through the grading queue",
+          "description": "Find answers and move through the grading queue in Mentingo.",
+          "flowIds": [
+            "browse-grading-queue",
+            "navigate-next-answer"
+          ]
+        },
+        {
+          "key": "quiz-grading.grading-history",
+          "title": "Grade and revise open answers",
+          "description": "Grade and revise open answers in Mentingo.",
+          "flowIds": [
+            "grade-open-answer",
+            "regrade-open-answer"
           ]
         }
       ]
