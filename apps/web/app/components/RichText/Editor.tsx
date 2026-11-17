@@ -69,6 +69,7 @@ type EditorProps = {
   acceptedFileTypes?: readonly string[];
   assetLibrary?: AssetLibraryConfig;
   variant?: RichTextEditorVariant;
+  compactToolbar?: boolean;
 };
 
 const EMPTY_EDITOR_MIN_HEIGHT_CLASS = "min-h-[240px]";
@@ -102,6 +103,7 @@ const Editor = ({
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
   assetLibrary,
   variant = RICH_TEXT_EDITOR_VARIANT.CONTENT,
+  compactToolbar = false,
 }: EditorProps) => {
   const { t } = useTranslation();
   const mediaPolicy = useRichTextContentPolicy();
@@ -284,6 +286,7 @@ const Editor = ({
           assetLibrary={assetLibrary}
           showTableControls={variant === RICH_TEXT_EDITOR_VARIANT.CONTENT}
           limitedFormatting={variant === RICH_TEXT_EDITOR_VARIANT.BOLD_BULLET}
+          compact={compactToolbar}
         />
       )}
       <EditorContent

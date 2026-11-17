@@ -22,8 +22,12 @@ import {
 import { StringifiedIcons } from "~/utils/stringifiedIcons";
 
 import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "../components/constants";
-import { defaultQuizLessonValues } from "../defaults/defaultQuizLessonValues";
+import {
+  defaultQuizFeedbackRanges,
+  defaultQuizLessonValues,
+} from "../defaults/defaultQuizLessonValues";
 import { QuestionType } from "../QuizLessonForm.types";
+import { toFormFeedbackRanges } from "../utils/feedbackRanges";
 import { quizLessonFormSchema } from "../validators/quizLessonFormSchema";
 
 import type { Question, QuestionOption } from "../QuizLessonForm.types";
@@ -72,6 +76,8 @@ export const useQuizLessonForm = ({
       attemptsLimit: null,
       quizCooldownInHours: null,
       timeLimitMinutes: null,
+      feedbackMode: defaultQuizLessonValues.feedbackMode,
+      feedbackRanges: defaultQuizFeedbackRanges,
       questions: [],
     },
   });
@@ -86,6 +92,8 @@ export const useQuizLessonForm = ({
         attemptsLimit: null,
         quizCooldownInHours: null,
         timeLimitMinutes: lessonToEdit.timeLimitMinutes ?? null,
+        feedbackMode: lessonToEdit.feedbackMode ?? defaultQuizLessonValues.feedbackMode,
+        feedbackRanges: toFormFeedbackRanges(lessonToEdit.feedbackRanges),
         questions:
           lessonToEdit.questions?.map((question: Question) => {
             let processedDescription = question.description || "";

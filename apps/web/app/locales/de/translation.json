@@ -3194,14 +3194,27 @@
           "quizCooldownInHours": "Zeitsperre nach Fehlversuchen (in Stunden)",
           "numberOfQuestions": "{{count1}} von {{count2}} Fragen",
           "noQuestions": "Keine Fragen",
-          "timeLimitMinutes": "Zeitlimit (hh:mm)"
+          "timeLimitMinutes": "Zeitlimit (hh:mm)",
+          "feedbackMode": "Sichtbarkeit des Feedbacks",
+          "feedbackModeFull": "Ergebnis und Nachrichten",
+          "feedbackModeScoreOnly": "Nur Ergebnis",
+          "feedbackModeNone": "Kein Feedback",
+          "feedbackRanges": "Nachrichten für Ergebnisbereiche",
+          "feedbackVariablesHint": "Du kannst {{firstNameVar}} für den Vornamen des Lernenden und {{scoreVar}} für sein Ergebnis verwenden.",
+          "feedbackRangeMin": "Von (%)",
+          "feedbackRangeMax": "Bis (%)",
+          "feedbackRangeMessage": "Nachricht",
+          "feedbackRangeAdd": "Bereich hinzufügen",
+          "feedbackRangeReset": "Standardbereiche wiederherstellen"
         },
         "tooltip": {
           "switch": "Wenn diese Option aktiviert ist, hat der Schüler eine begrenzte Anzahl von Quizversuchen.",
           "passingThreshold": "Der prozentuale Schwellenwert für das Bestehen des Quiz. Erreicht ein Schüler diese Punktzahl, gilt das Quiz als bestanden.",
           "attemptsLimit": "Anzahl der erlaubten Quizversuche, bevor die Zeitsperre ausgelöst wird.",
           "quizCooldownInHours": "Dauer der Quizsperre nach Ausschöpfung aller Versuche.",
-          "timeLimitMinutes": "Optional. Wenn festgelegt, starten Lernende das Quiz ausdrücklich und ihre Antworten werden nach Ablauf der Zeit automatisch abgegeben. Leer lassen für kein Zeitlimit."
+          "timeLimitMinutes": "Optional. Wenn festgelegt, starten Lernende das Quiz ausdrücklich und ihre Antworten werden nach Ablauf der Zeit automatisch abgegeben. Leer lassen für kein Zeitlimit.",
+          "feedbackMode": "Legt fest, was Lernende nach dem Absenden sehen: Ergebnis und Nachrichten, nur das Ergebnis oder nichts.",
+          "feedbackRanges": "Geordnete Ergebnisbereiche, die Lernenden angezeigt werden. Bereiche müssen 0-100% lückenlos und ohne Überschneidung abdecken."
         },
         "validation": {
           "optionTextRequired": "Optionstext ist erforderlich",
@@ -3231,7 +3244,13 @@
           "matchingPairsRequired": "Füge mindestens 2 Paare hinzu und fülle beide Seiten jedes Paares aus",
           "matchingMatchRequired": "Gib die Zuordnung für dieses Paar ein",
           "matchingPairsUnique": "Jedes Paar braucht eine eindeutige Zuordnung",
-          "timeLimitMinutes": "Gib ein Zeitlimit zwischen {{min}} und {{max}} ein."
+          "timeLimitMinutes": "Gib ein Zeitlimit zwischen {{min}} und {{max}} ein.",
+          "feedbackRangeNotInteger": "Bereichsgrenzen müssen ganze Zahlen sein.",
+          "feedbackRangeOutOfBounds": "Bereichsgrenzen müssen zwischen 0 und 100 liegen.",
+          "feedbackRangeBoundsReversed": "Der Beginn eines Bereichs darf nicht größer als sein Ende sein.",
+          "feedbackRangesMustStartAtZero": "Bereiche müssen bei 0% beginnen.",
+          "feedbackRangesMustEndAtHundred": "Bereiche müssen bei 100% enden.",
+          "feedbackRangesGapOrOverlap": "Bereiche müssen 0-100% lückenlos und ohne Überschneidung abdecken."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Die Anzeigereihenfolge der Lektionen wurde erfolgreich aktualisiert",

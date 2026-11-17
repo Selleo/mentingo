@@ -3200,14 +3200,27 @@
           "quizCooldownInHours": "Časový zámek po neúspěšných pokusech (v hodinách)",
           "numberOfQuestions": "{{count1}} z {{count2}} otázek",
           "noQuestions": "Žádné otázky",
-          "timeLimitMinutes": "Časový limit (hh:mm)"
+          "timeLimitMinutes": "Časový limit (hh:mm)",
+          "feedbackMode": "Viditelnost zpětné vazby",
+          "feedbackModeFull": "Výsledek a zprávy",
+          "feedbackModeScoreOnly": "Pouze výsledek",
+          "feedbackModeNone": "Bez zpětné vazby",
+          "feedbackRanges": "Zprávy pro rozsahy výsledku",
+          "feedbackVariablesHint": "Můžete použít {{firstNameVar}} pro jméno studenta a {{scoreVar}} pro jeho výsledek.",
+          "feedbackRangeMin": "Od (%)",
+          "feedbackRangeMax": "Do (%)",
+          "feedbackRangeMessage": "Zpráva",
+          "feedbackRangeAdd": "Přidat rozsah",
+          "feedbackRangeReset": "Obnovit výchozí rozsahy"
         },
         "tooltip": {
           "switch": "Pokud je povoleno, má student omezený počet pokusů o kvíz.",
           "passingThreshold": "Procentuální hranice pro absolvování kvízu. Pokud student dosáhne tohoto skóre, bude kvíz považován za úspěšný.",
           "attemptsLimit": "Počet povolených pokusů o kvíz před spuštěním časového zámku.",
           "quizCooldownInHours": "Doba trvání zámku kvízu po použití všech pokusů.",
-          "timeLimitMinutes": "Volitelné. Pokud je nastaveno, studenti kvíz výslovně spustí a jejich odpovědi se po uplynutí času odešlou automaticky. Ponechte prázdné bez časového limitu."
+          "timeLimitMinutes": "Volitelné. Pokud je nastaveno, studenti kvíz výslovně spustí a jejich odpovědi se po uplynutí času odešlou automaticky. Ponechte prázdné bez časového limitu.",
+          "feedbackMode": "Určuje, co student po odeslání uvidí: výsledek a zprávy, pouze výsledek, nebo nic.",
+          "feedbackRanges": "Seřazené rozsahy výsledku zobrazené studentům. Rozsahy musí pokrývat 0-100 % bez mezer a překryvů."
         },
         "validation": {
           "optionTextRequired": "Text možnosti je povinný",
@@ -3237,7 +3250,13 @@
           "matchingPairsRequired": "Přidejte alespoň 2 dvojice a vyplňte obě strany každé dvojice",
           "matchingMatchRequired": "Vyplňte přiřazení v této dvojici",
           "matchingPairsUnique": "Každá dvojice musí mít jedinečné přiřazení",
-          "timeLimitMinutes": "Zadejte časový limit od {{min}} do {{max}}."
+          "timeLimitMinutes": "Zadejte časový limit od {{min}} do {{max}}.",
+          "feedbackRangeNotInteger": "Hranice rozsahu musí být celá čísla.",
+          "feedbackRangeOutOfBounds": "Hranice rozsahu musí být mezi 0 a 100.",
+          "feedbackRangeBoundsReversed": "Začátek rozsahu nesmí být větší než jeho konec.",
+          "feedbackRangesMustStartAtZero": "Rozsahy musí začínat na 0 %.",
+          "feedbackRangesMustEndAtHundred": "Rozsahy musí končit na 100 %.",
+          "feedbackRangesGapOrOverlap": "Rozsahy musí pokrývat 0-100 % bez mezer a překryvů."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pořadí zobrazení lekce bylo úspěšně aktualizováno",

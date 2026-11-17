@@ -3447,14 +3447,27 @@
           "quizCooldownInHours": "Blokada czasowa po niezdaniu (w godzinach)",
           "numberOfQuestions": "{{count1}} z {{count2}} pytań",
           "noQuestions": "Brak pytań",
-          "timeLimitMinutes": "Limit czasu (gg:mm)"
+          "timeLimitMinutes": "Limit czasu (gg:mm)",
+          "feedbackMode": "Widoczność informacji zwrotnej",
+          "feedbackModeFull": "Wynik i komunikaty",
+          "feedbackModeScoreOnly": "Tylko wynik",
+          "feedbackModeNone": "Brak informacji zwrotnej",
+          "feedbackRanges": "Komunikaty dla zakresów wyniku",
+          "feedbackVariablesHint": "Możesz użyć {{firstNameVar}} dla imienia uczestnika oraz {{scoreVar}} dla jego wyniku.",
+          "feedbackRangeMin": "Od (%)",
+          "feedbackRangeMax": "Do (%)",
+          "feedbackRangeMessage": "Komunikat",
+          "feedbackRangeAdd": "Dodaj zakres",
+          "feedbackRangeReset": "Przywróć domyślne zakresy"
         },
         "tooltip": {
           "switch": "Jeśli włączone, student ma ograniczoną liczbę podejść do quizu.",
           "passingThreshold": "Procentowy próg zaliczenia quizu. Jeśli student osiągnie ten wynik, quiz zostanie uznany za zaliczony.",
           "attemptsLimit": "Liczba podejść do quizu przed uruchomieniem blokady czasowej.",
           "quizCooldownInHours": "Czas trwania blokady quizu po wykorzystaniu wszystkich prób.",
-          "timeLimitMinutes": "Opcjonalne. Po ustawieniu kursant rozpoczyna quiz samodzielnie, a jego odpowiedzi są wysyłane automatycznie po upływie czasu. Pozostaw puste, aby nie ograniczać czasu."
+          "timeLimitMinutes": "Opcjonalne. Po ustawieniu kursant rozpoczyna quiz samodzielnie, a jego odpowiedzi są wysyłane automatycznie po upływie czasu. Pozostaw puste, aby nie ograniczać czasu.",
+          "feedbackMode": "Określa, co uczestnik widzi po przesłaniu: wynik i komunikaty, tylko wynik albo nic.",
+          "feedbackRanges": "Uporządkowane przedziały wyniku pokazywane uczestnikom. Przedziały muszą pokrywać 0-100% bez luk i nakładania się."
         },
         "validation": {
           "optionTextRequired": "Tekst opcji jest wymagany",
@@ -3486,7 +3499,13 @@
           "matchingPairsRequired": "Dodaj co najmniej 2 pary i uzupełnij obie strony każdej pary",
           "matchingMatchRequired": "Uzupełnij dopasowanie w tej parze",
           "matchingPairsUnique": "Każda para musi mieć unikalne dopasowanie",
-          "timeLimitMinutes": "Podaj limit czasu od {{min}} do {{max}}."
+          "timeLimitMinutes": "Podaj limit czasu od {{min}} do {{max}}.",
+          "feedbackRangeNotInteger": "Granice zakresu muszą być liczbami całkowitymi.",
+          "feedbackRangeOutOfBounds": "Granice zakresu muszą mieścić się w przedziale od 0 do 100.",
+          "feedbackRangeBoundsReversed": "Początek zakresu nie może być większy niż jego koniec.",
+          "feedbackRangesMustStartAtZero": "Zakresy muszą zaczynać się od 0%.",
+          "feedbackRangesMustEndAtHundred": "Zakresy muszą kończyć się na 100%.",
+          "feedbackRangesGapOrOverlap": "Zakresy muszą pokrywać 0-100% bez luk i nakładania się."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",

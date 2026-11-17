@@ -38,6 +38,7 @@ type EditorToolbarProps = {
   assetLibrary?: AssetLibraryConfig;
   showTableControls?: boolean;
   limitedFormatting?: boolean;
+  compact?: boolean;
 };
 
 type ToolbarButtonProps = {
@@ -89,8 +90,11 @@ const EditorToolbar = ({
   assetLibrary,
   showTableControls = false,
   limitedFormatting = false,
+  compact = false,
 }: EditorToolbarProps) => {
   const { t } = useTranslation();
+  // compact keeps inline formatting and lists only, so the toolbar fits one row in narrow editors
+  const showBlockFormatting = !limitedFormatting && !compact;
 
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [isAssetLibraryOpen, setIsAssetLibraryOpen] = useState(false);
@@ -114,12 +118,12 @@ const EditorToolbar = ({
 
   return (
     <Toolbar
-      className="m-0 flex w-full max-w-full items-center justify-between overflow-x-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="m-0 flex w-full max-w-full flex-wrap items-center justify-between gap-y-2 p-2"
       aria-label="Formatting options"
     >
       <TooltipProvider>
-        <ToggleGroup className="flex shrink-0 flex-row items-center gap-x-2" type="multiple">
-          {!limitedFormatting && (
+        <ToggleGroup className="flex flex-row flex-wrap items-center gap-2" type="multiple">
+          {showBlockFormatting && (
             <ToolbarSection>
               <FormatType editor={editor} />
             </ToolbarSection>
@@ -171,17 +175,19 @@ const EditorToolbar = ({
                   isActive={editor.isActive("orderedList")}
                   onClick={handleToggle(() => editor.chain().focus().toggleOrderedList().run())}
                 />
-                <ToolbarIconButton
-                  icon={CheckSquare}
-                  tooltip={t("richTextEditor.toolbar.taskList.tooltip")}
-                  isActive={editor.isActive("taskList")}
-                  onClick={handleToggle(() => editor.chain().focus().toggleTaskList().run())}
-                />
+                {!compact && (
+                  <ToolbarIconButton
+                    icon={CheckSquare}
+                    tooltip={t("richTextEditor.toolbar.taskList.tooltip")}
+                    isActive={editor.isActive("taskList")}
+                    onClick={handleToggle(() => editor.chain().focus().toggleTaskList().run())}
+                  />
+                )}
               </>
             )}
           </ToolbarSection>
 
-          {!limitedFormatting && (
+          {showBlockFormatting && (
             <ToolbarSection>
               <ToolbarIconButton
                 icon={Quote}
@@ -220,7 +226,7 @@ const EditorToolbar = ({
             </ToolbarSection>
           )}
         </ToggleGroup>
-        {!limitedFormatting && (
+        {showBlockFormatting && (
           <ToggleGroup
             className="hidden shrink-0 flex-row items-center gap-x-2 sm:flex"
             type="multiple"
