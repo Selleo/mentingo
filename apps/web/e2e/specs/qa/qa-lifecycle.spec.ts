@@ -50,6 +50,6 @@ test("admin can create, update and delete a Q&A entry", async ({
     await deleteQAFlow(page, qaId);
 
     await expect(page.getByTestId(QA_PAGE_HANDLES.item(qaId))).toHaveCount(0);
-    await expect.poll(() => qaFactory.safeGetById(qaId)).toBeNull();
+    await expect.poll(() => qaFactory.exists(qaId)).toBe(false);
   });
 });

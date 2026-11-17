@@ -11,6 +11,7 @@ import {
   deleteEmailTemplateFlow,
   saveEmailDraftFlow,
 } from "../../flows/email-templates/template-actions.flow";
+import { requireId } from "../../utils/require-id";
 
 import { expect, test } from "./email-template.fixture";
 
@@ -21,24 +22,26 @@ test("publishing saves current edits while other templates remain independently 
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const previous = await createEmailTemplate();
-    await factory.publish(previous.id!);
+    const previousId = requireId(previous, "previous email template");
+    await factory.publish(previousId);
     const template = await createEmailTemplate();
-    await openEmailTemplateFlow(page, template.id!);
+    const templateId = requireId(template, "email template");
+    await openEmailTemplateFlow(page, templateId);
     await editEmailTemplateFlow(page, { subject: "Published directly from unsaved edits" });
     await page.getByTestId(EMAIL_TEMPLATES_HANDLES.PUBLISH).click();
     await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CANCEL).click();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM)).toBeHidden();
-    expect((await factory.getById(template.id!)).status).toBe("draft");
-    expect((await factory.getById(previous.id!)).status).toBe("published");
+    expect((await factory.getById(templateId)).status).toBe("draft");
+    expect((await factory.getById(previousId)).status).toBe("published");
     await confirmEmailActionFlow(page, EMAIL_TEMPLATES_HANDLES.PUBLISH);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PUBLISH)).toBeDisabled();
     await expect
       .poll(async () => {
-        const saved = await factory.getById(template.id!);
+        const saved = await factory.getById(templateId);
         return {
           status: saved.status,
           subject: saved.subject.en,
-          previous: (await factory.getById(previous.id!)).status,
+          previous: (await factory.getById(previousId)).status,
         };
       })
       .toEqual({
@@ -51,13 +54,13 @@ test("publishing saves current edits while other templates remain independently 
       "Published directly from unsaved edits",
     );
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PUBLISH)).toBeDisabled();
-    const publicationVersion = (await factory.getById(template.id!)).publicationVersion;
+    const publicationVersion = (await factory.getById(templateId)).publicationVersion;
     await editEmailTemplateFlow(page, { subject: "Draft after publication" });
     await saveEmailDraftFlow(page);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
     await expect
       .poll(async () => {
-        const saved = await factory.getById(template.id!);
+        const saved = await factory.getById(templateId);
         return {
           status: saved.status,
           publicationVersion: saved.publicationVersion,
@@ -73,14 +76,14 @@ test("publishing saves current edits while other templates remain independently 
     await confirmEmailActionFlow(page, EMAIL_TEMPLATES_HANDLES.PUBLISH);
     await expect
       .poll(async () => {
-        const saved = await factory.getById(template.id!);
+        const saved = await factory.getById(templateId);
         return {
           hasUnpublishedChanges: saved.hasUnpublishedChanges,
           publicationVersion: saved.publicationVersion,
         };
       })
       .toEqual({ hasUnpublishedChanges: false, publicationVersion: publicationVersion! + 1 });
-    expect((await factory.getById(previous.id!)).status).toBe("published");
+    expect((await factory.getById(previousId)).status).toBe("published");
   });
 });
 
@@ -91,11 +94,12 @@ test("archived templates become read-only and can be restored to editable drafts
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const template = await createEmailTemplate();
-    await factory.publish(template.id!);
-    await openEmailTemplateFlow(page, template.id!);
+    const templateId = requireId(template, "email template");
+    await factory.publish(templateId);
+    await openEmailTemplateFlow(page, templateId);
     await confirmEmailActionFlow(page, EMAIL_TEMPLATES_HANDLES.ARCHIVE);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toBeDisabled();
-    await expect.poll(async () => (await factory.getById(template.id!)).status).toBe("archived");
+    await expect.poll(async () => (await factory.getById(templateId)).status).toBe("archived");
     await page.reload();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PALETTE_BLOCK("text"))).toBeDisabled();
     await page.getByTestId(EMAIL_TEMPLATES_HANDLES.RESTORE).click();
@@ -105,7 +109,7 @@ test("archived templates become read-only and can be restored to editable drafts
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
     await expect
       .poll(async () => {
-        const saved = await factory.getById(template.id!);
+        const saved = await factory.getById(templateId);
         return { status: saved.status, subject: saved.subject.en };
       })
       .toEqual({ status: "draft", subject: "Restored content" });
@@ -119,7 +123,8 @@ test("deleting from the editor needs a saved draft and a confirmation", async ({
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const template = await createEmailTemplate();
-    await openEmailTemplateFlow(page, template.id!);
+    const templateId = requireId(template, "email template");
+    await openEmailTemplateFlow(page, templateId);
     await editEmailTemplateFlow(page, { subject: "Unsaved change" });
     await page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS).click();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.DELETE)).toBeDisabled();
@@ -130,15 +135,15 @@ test("deleting from the editor needs a saved draft and a confirmation", async ({
     await deleteEmailTemplateFlow(page, page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS), {
       confirm: false,
     });
-    await expect.poll(() => factory.exists(template.id!)).toBe(true);
+    await expect.poll(() => factory.exists(templateId)).toBe(true);
     await deleteEmailTemplateFlow(page, page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS), {
       confirm: true,
     });
 
     await expect(page).toHaveURL(new URL(EMAIL_TEMPLATE_DATA.catalogPath, page.url()).toString());
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(template.id!))).toHaveCount(0);
-    await expect.poll(() => factory.exists(template.id!)).toBe(false);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(templateId))).toHaveCount(0);
+    await expect.poll(() => factory.exists(templateId)).toBe(false);
   });
 });
 
@@ -149,18 +154,19 @@ test("deleting from the list needs a confirmation", async ({
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const template = await createEmailTemplate();
+    const templateId = requireId(template, "email template");
     await page.goto(EMAIL_TEMPLATE_DATA.listPath);
     const rowActions = page
-      .getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(template.id!))
+      .getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(templateId))
       .getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS);
 
     await deleteEmailTemplateFlow(page, rowActions, { confirm: false });
-    await expect.poll(() => factory.exists(template.id!)).toBe(true);
+    await expect.poll(() => factory.exists(templateId)).toBe(true);
     await deleteEmailTemplateFlow(page, rowActions, { confirm: true });
 
     await expect(page).toHaveURL(new URL(EMAIL_TEMPLATE_DATA.catalogPath, page.url()).toString());
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(template.id!))).toHaveCount(0);
-    await expect.poll(() => factory.exists(template.id!)).toBe(false);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(templateId))).toHaveCount(0);
+    await expect.poll(() => factory.exists(templateId)).toBe(false);
   });
 });

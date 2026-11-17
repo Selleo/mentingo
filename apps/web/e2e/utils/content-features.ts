@@ -64,36 +64,28 @@ const toggleContentModuleField = async (
   );
 };
 
-const setContentModuleField = async (
-  apiClient: FixtureApiClient,
-  module: ContentModule,
-  field: ContentModuleField,
-  value: boolean,
-) => {
-  const current = await readContentModuleState(apiClient, module);
-
-  if (current[field] !== value) {
-    await toggleContentModuleField(apiClient, module, field);
-  }
-};
-
 /** Public access can only change while the module is enabled, so enable first and disable last. */
 export const setContentModuleState = async (
   apiClient: FixtureApiClient,
   module: ContentModule,
   desired: Partial<ContentModuleState>,
+  current?: ContentModuleState,
 ) => {
-  if (desired.enabled === true || desired.public !== undefined) {
-    await setContentModuleField(apiClient, module, "enabled", true);
-  }
+  // Settings endpoints only toggle, so track the state locally instead of re-reading it per field.
+  const state = { ...(current ?? (await readContentModuleState(apiClient, module))) };
 
-  if (desired.public !== undefined) {
-    await setContentModuleField(apiClient, module, "public", desired.public);
-  }
+  const setField = async (field: ContentModuleField, value: boolean) => {
+    if (state[field] === value) return;
 
-  if (desired.enabled === false) {
-    await setContentModuleField(apiClient, module, "enabled", false);
-  }
+    await toggleContentModuleField(apiClient, module, field);
+    state[field] = value;
+  };
+
+  if (desired.enabled === true || desired.public !== undefined) await setField("enabled", true);
+  if (desired.public !== undefined) await setField("public", desired.public);
+  if (desired.enabled === false) await setField("enabled", false);
+
+  return state;
 };
 
 /** Applies the state and returns a cleanup that restores the original module and public access. */
@@ -103,17 +95,10 @@ export const overrideContentModuleState = async (
   desired: Partial<ContentModuleState>,
 ) => {
   const original = await readContentModuleState(apiClient, module);
+  await setContentModuleState(apiClient, module, desired, original);
 
-  await setContentModuleState(apiClient, module, desired);
-
-  return () => setContentModuleState(apiClient, module, original);
-};
-
-export const enableContentModules = async (
-  apiClient: FixtureApiClient,
-  modules: readonly ContentModule[],
-) => {
-  for (const module of modules) {
-    await setContentModuleState(apiClient, module, { enabled: true });
-  }
+  // Re-read on restore: the test may have changed the state in between.
+  return async () => {
+    await setContentModuleState(apiClient, module, original);
+  };
 };

@@ -8,6 +8,8 @@ import { clickVisibleTestIdFlow } from "../../flows/click-visible-testid.flow";
 
 import { expect, test } from "./articles.fixture";
 
+import type { CreateArticleResponse } from "~/api/generated-api";
+
 test("admin can create a section and article from the TOC, update it and delete it", async ({
   cleanup,
   factories,
@@ -39,17 +41,21 @@ test("admin can create a section and article from the TOC, update it and delete 
       .not.toBe("");
     cleanup.add(() => articleFactory.safeDeleteSection(sectionId));
 
+    // The page already shows the seed article, so take the new id from the create response, not the URL.
+    const created = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/api/articles/article" &&
+        response.request().method() === "POST",
+    );
     await page
       .getByTestId(ARTICLES_TOC_HANDLES.section(sectionId))
       .getByTestId(ARTICLES_TOC_HANDLES.CREATE_ARTICLE_ACTION)
       .click();
-
-    await expect(page).toHaveURL(/\/articles\/[a-f0-9]{8}-[a-f0-9-]+$/);
-    const articleId = /\/articles\/([a-f0-9]{8}-[a-f0-9-]+)$/.exec(page.url())?.[1];
-
-    if (!articleId) throw new Error("Expected created article id in URL");
-
+    const createdArticle: CreateArticleResponse = await (await created).json();
+    const articleId = createdArticle.data.id;
     cleanup.add(() => articleFactory.safeDelete(articleId));
+
+    await expect(page).toHaveURL(new RegExp(`/articles/${articleId}$`));
     await expect(page.getByTestId(ARTICLES_TOC_HANDLES.article(articleId))).toBeVisible();
 
     await updateArticleFlow(page, { articleId, title: updatedTitle, summary: updatedSummary });

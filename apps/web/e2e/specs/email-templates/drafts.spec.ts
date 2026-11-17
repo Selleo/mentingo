@@ -16,6 +16,7 @@ import {
   duplicateEmailTemplateFlow,
   returnToEmailCatalogFlow,
 } from "../../flows/email-templates/template-actions.flow";
+import { requireId } from "../../utils/require-id";
 
 import { expect, test } from "./email-template.fixture";
 
@@ -30,8 +31,9 @@ test("copying a default creates an editable draft whose changes survive reopenin
     const copy = await copyEmailTemplateFlow(page, {
       templateKey: EMAIL_TEMPLATE_DATA.builtInTemplateKey,
     });
-    cleanup.add(() => factory.delete(copy.id!));
-    await expect(page).toHaveURL(new RegExp(`/${copy.id}$`));
+    const copyId = requireId(copy, "copied email template");
+    cleanup.add(() => factory.delete(copyId));
+    await expect(page).toHaveURL(new RegExp(`/${copyId}$`));
     const title = `${EMAIL_TEMPLATE_DATA.namePrefix} ${randomUUID()}`;
     await editEmailTemplateFlow(page, { name: title, subject: title });
     // The default starts with branding; edit its first textual block.
@@ -42,7 +44,7 @@ test("copying a default creates an editable draft whose changes survive reopenin
     await saveEmailDraftFlow(page);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
     await expect
-      .poll(async () => (await factory.getById(copy.id!)).subject[original.baseLanguage])
+      .poll(async () => (await factory.getById(copyId)).subject[original.baseLanguage])
       .toBe(title);
     await page.reload();
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.NAME)).toHaveValue(title);
@@ -50,7 +52,7 @@ test("copying a default creates an editable draft whose changes survive reopenin
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.BLOCK).nth(textIndex)).toContainText(
       "A personal invitation to learn",
     );
-    await expect.poll(async () => (await factory.getById(copy.id!)).status).toBe("draft");
+    await expect.poll(async () => (await factory.getById(copyId)).status).toBe("draft");
     await expect.poll(() => factory.getDefault()).toEqual(original);
   });
 });
@@ -63,20 +65,22 @@ test("duplicating a published template creates an independent draft", async ({
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const template = await createEmailTemplate();
-    const original = await factory.publish(template.id!);
-    await openEmailTemplateFlow(page, template.id!);
-    const copy = await duplicateEmailTemplateFlow(page, { id: template.id! });
-    cleanup.add(() => factory.delete(copy.id!));
-    await expect(page).toHaveURL(new RegExp(`/${copy.id}$`));
+    const templateId = requireId(template, "email template");
+    const original = await factory.publish(templateId);
+    await openEmailTemplateFlow(page, templateId);
+    const copy = await duplicateEmailTemplateFlow(page, { id: templateId });
+    const copyId = requireId(copy, "copied email template");
+    cleanup.add(() => factory.delete(copyId));
+    await expect(page).toHaveURL(new RegExp(`/${copyId}$`));
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PUBLISH)).toBeVisible();
     await editEmailTextFlow(page, 0, "Only the copy changes");
     await saveEmailDraftFlow(page);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
     await expect
-      .poll(async () => (await factory.getById(copy.id!)).content.en)
+      .poll(async () => (await factory.getById(copyId)).content.en)
       .toMatchObject(emailTemplateDocument("Only the copy changes"));
-    await expect.poll(async () => (await factory.getById(copy.id!)).status).toBe("draft");
-    await expect.poll(() => factory.getById(template.id!)).toEqual(original);
+    await expect.poll(async () => (await factory.getById(copyId)).status).toBe("draft");
+    await expect.poll(() => factory.getById(templateId)).toEqual(original);
   });
 });
 
@@ -87,9 +91,10 @@ test("leaving an unsaved editor can be cancelled or confirmed without saving", a
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const template = await createEmailTemplate();
+    const templateId = requireId(template, "email template");
     await page.goto(EMAIL_TEMPLATE_DATA.listPath);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
-    await openEmailTemplateFlow(page, template.id!);
+    await openEmailTemplateFlow(page, templateId);
     await editEmailTemplateFlow(page, { subject: "Changes to discard" });
     await returnToEmailCatalogFlow(page);
     await page.getByTestId(EMAIL_TEMPLATES_HANDLES.STAY).click();
@@ -105,10 +110,10 @@ test("leaving an unsaved editor can be cancelled or confirmed without saving", a
       .click();
     await expect(page).toHaveURL(new URL(EMAIL_TEMPLATE_DATA.catalogPath, page.url()).toString());
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
-    await openEmailTemplateFlow(page, template.id!);
+    await openEmailTemplateFlow(page, templateId);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toHaveValue(
       template.subject.en!,
     );
-    expect((await factory.getById(template.id!)).subject).toEqual(template.subject);
+    expect((await factory.getById(templateId)).subject).toEqual(template.subject);
   });
 });
