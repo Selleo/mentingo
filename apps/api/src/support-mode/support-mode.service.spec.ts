@@ -26,12 +26,14 @@ describe("SupportModeService", () => {
     name: "Source",
     host: "https://source.localhost",
     status: TENANT_STATUSES.ACTIVE,
+    accessEndsAt: null,
   };
   const targetTenant = {
     id: "target-tenant-id",
     name: "Target",
     host: "https://target.localhost",
     status: TENANT_STATUSES.ACTIVE,
+    accessEndsAt: null,
   };
   const currentUser = {
     userId: "source-user-id",

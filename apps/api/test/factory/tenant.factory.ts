@@ -24,6 +24,7 @@ export const createTenantFactory = (dbAdmin: DatabasePg) => {
       host: `https://${faker.string.alphanumeric(12).toLowerCase()}.tenant.local`,
       status: TENANT_STATUSES.ACTIVE,
       isManaging: false,
+      accessEndsAt: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

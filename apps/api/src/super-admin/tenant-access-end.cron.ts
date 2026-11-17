@@ -9,7 +9,7 @@ export class TenantAccessEndCron {
 
   constructor(private readonly tenantsService: TenantsService) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async deactivateTenantsWithEndedAccess() {
     const deactivatedCount = await this.tenantsService.deactivateTenantsWithEndedAccess();
 
