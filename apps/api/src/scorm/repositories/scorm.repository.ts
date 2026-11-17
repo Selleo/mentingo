@@ -23,6 +23,7 @@ import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { activeLearningState } from "src/course-repetition/course-learning-state.sql";
 import { activeLearningStateId } from "src/course-repetition/course-repetition.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { hasPublicCoursePreviewAccess } from "src/lesson/repositories/public-course-preview-access";
 import {
   chapters,
   courses,
@@ -506,6 +507,23 @@ export class ScormRepository {
       .limit(1);
 
     return access;
+  }
+
+  async findPackageLessonCourseAuthor(packageId: string, lessonId: string) {
+    const [lesson] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(scormScos)
+      .innerJoin(lessons, eq(lessons.id, scormScos.lessonId))
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .where(and(eq(scormScos.packageId, packageId), eq(scormScos.lessonId, lessonId)))
+      .limit(1);
+
+    return lesson;
+  }
+
+  async hasPublicCoursePreviewAccess(lessonId: string, userId: string) {
+    return hasPublicCoursePreviewAccess(this.db, lessonId, userId);
   }
 
   async deleteImportedCourse(courseId: string) {

@@ -1,9 +1,13 @@
 import {
+  buildCertificateDocumentTitle,
   buildCertificateHtmlDocument,
+  buildCertificateContentDisposition,
   buildCertificateMarkup,
+  buildCertificatePdfFilename,
   CERTIFICATE_KIND,
   CERTIFICATE_STYLES,
   defaultCertificateRenderTheme,
+  PERMISSIONS,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { unescape } from "lodash";
@@ -13,6 +17,7 @@ import { LearningPathCertificateService } from "src/learning-path/services/learn
 import { CertificatesService } from "../certificates.service";
 
 import type { SupportedLanguages } from "@repo/shared";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 const classes = [CertificatesService, LearningPathCertificateService];
 
@@ -103,6 +108,7 @@ describe("certificate markup security", () => {
           expiryDate: "2027-01-01",
           isDownload: true,
         }),
+        { lang, courseName: "Course" },
       );
       expect(document).not.toContain("<script");
       expect(document).not.toContain("<base");
@@ -112,6 +118,200 @@ describe("certificate markup security", () => {
       expect(document).toContain("297mm");
     },
   );
+});
+
+describe("certificate PDF document metadata", () => {
+  it.each(Object.values(SUPPORTED_LANGUAGES))(
+    "sets the document language and translated title in %s",
+    (lang) => {
+      const document = buildCertificateHtmlDocument("<p>Certificate</p>", {
+        lang,
+        courseName: "Kurs <b>BHP</b>",
+      });
+      const title = buildCertificateDocumentTitle({ lang, courseName: "Kurs <b>BHP</b>" });
+
+      expect(document).toContain(`<html lang="${lang}">`);
+      expect(title).toMatch(/ – Kurs <b>BHP<\/b>$/);
+      expect(document).toContain("<title>");
+      expect(document).toContain(" – Kurs &lt;b&gt;BHP&lt;/b&gt;</title>");
+    },
+  );
+
+  it("translates the document title", () => {
+    expect(buildCertificateDocumentTitle({ lang: "pl", courseName: "Pierwsza pomoc" })).toBe(
+      "Certyfikat ukończenia – Pierwsza pomoc",
+    );
+    expect(buildCertificateDocumentTitle({ lang: "en", courseName: "First aid" })).toBe(
+      "Certificate of completion – First aid",
+    );
+    expect(buildCertificateDocumentTitle({ lang: "de", courseName: " " })).toBe(
+      "Abschlusszertifikat",
+    );
+  });
+
+  it("names the file with the translated word, course and learner", () => {
+    expect(
+      buildCertificatePdfFilename({
+        lang: "pl",
+        courseName: "Pierwsza pomoc",
+        studentName: "Łukasz Żółkiewski",
+      }),
+    ).toBe("Certyfikat - Pierwsza pomoc - Łukasz Żółkiewski.pdf");
+  });
+
+  it("removes characters that are illegal in file names", () => {
+    expect(
+      buildCertificatePdfFilename({
+        lang: "en",
+        courseName: 'AI/ML: "Basics" <v2>\\?*|',
+        studentName: "Jane\u0000 Doe\u007F",
+      }),
+    ).toBe("Certificate - AI ML Basics v2 - Jane Doe.pdf");
+  });
+
+  it("removes bidi control characters", () => {
+    expect(
+      buildCertificatePdfFilename({
+        lang: "en",
+        courseName: "\u202Bfdp.exe\u202C \u2066Kurs\u2069",
+        studentName: "\u200EJane\u200F \u202ADoe\u202E",
+      }),
+    ).toBe("Certificate - fdp.exe Kurs - Jane Doe.pdf");
+  });
+
+  it("skips empty parts", () => {
+    expect(buildCertificatePdfFilename({ lang: "fr", courseName: "", studentName: " " })).toBe(
+      "Certificat.pdf",
+    );
+  });
+
+  it.each([
+    ["a long latin course name", "Ż".repeat(300)],
+    ["a long CJK course name", "日本語".repeat(100)],
+    ["a long emoji course name", "🎓".repeat(100)],
+    ["a course name cut at a separator", `${"A".repeat(155)} - . ${"B".repeat(50)}`],
+  ])("keeps the learner name and stays within 200 bytes for %s", (_case, courseName) => {
+    const filename = buildCertificatePdfFilename({
+      lang: "en",
+      courseName,
+      studentName: "Łukasz Żółkiewski",
+    });
+
+    expect(new TextEncoder().encode(filename).length).toBeLessThanOrEqual(200);
+    expect(filename).toMatch(/^Certificate - \S.*\S - Łukasz Żółkiewski\.pdf$/u);
+    expect(filename).not.toContain("\uFFFD");
+  });
+
+  it("drops the course name when the learner name leaves no room for it", () => {
+    expect(
+      buildCertificatePdfFilename({
+        lang: "en",
+        courseName: "Course",
+        studentName: "Ż".repeat(100),
+      }),
+    ).toBe(`Certificate - ${"Ż".repeat(91)}.pdf`);
+  });
+});
+
+describe("certificate Content-Disposition header", () => {
+  it.each([
+    [
+      "Certificate - Python Basics - Jan Kowalski.pdf",
+      "Certificate - Python Basics - Jan Kowalski.pdf",
+    ],
+    [
+      "Certyfikat - Python Basics - Łukasz Żółkiewski.pdf",
+      "Certyfikat - Python Basics - Lukasz Zolkiewski.pdf",
+    ],
+    ["Zertifikat - Straße - Søren Ødegård.pdf", "Zertifikat - Strasse - Soren Odegard.pdf"],
+    [
+      "Certificate - Đorđe Æsir Œuvre æ œ đ ø.pdf",
+      "Certificate - Dorde AEsir OEuvre ae oe d o.pdf",
+    ],
+    ["Certificate - Курс - Иван Петров.pdf", "Certificate.pdf"],
+    ["Сертификат - Курс - Иван.pdf", "certificate.pdf"],
+    ["Certificate - Kurs 日本 語 - Jan.pdf", "Certificate - Kurs - Jan.pdf"],
+    ['Certificate - "Quoted" \\ name.pdf', "Certificate - Quoted name.pdf"],
+  ])("uses an ASCII fallback for %s", (filename, asciiFilename) => {
+    expect(buildCertificateContentDisposition(filename)).toContain(
+      `attachment; filename="${asciiFilename}"; filename*=UTF-8''`,
+    );
+  });
+
+  it("encodes filename* strictly per RFC 5987", () => {
+    expect(
+      buildCertificateContentDisposition("Certificate - C (basics)* - Seán O'Brien!.pdf"),
+    ).toBe(
+      "attachment; filename=\"Certificate - C (basics)* - Sean O'Brien!.pdf\"; filename*=UTF-8''Certificate%20-%20C%20%28basics%29%2A%20-%20Se%C3%A1n%20O%27Brien%21.pdf",
+    );
+  });
+});
+
+describe("certificate download wiring", () => {
+  const stubDownloadDependencies = (service: {
+    settingsService?: unknown;
+    getImageDataUriFromS3Key?: unknown;
+    renderPdfFromHtml?: unknown;
+  }) => {
+    service.settingsService = {
+      getImageS3KeysByTenantId: jest.fn().mockResolvedValue({}),
+    };
+    service.getImageDataUriFromS3Key = jest.fn().mockResolvedValue(null);
+    const renderPdfFromHtml = jest.fn().mockResolvedValue(Buffer.from("%PDF"));
+
+    service.renderPdfFromHtml = renderPdfFromHtml;
+
+    return renderPdfFromHtml;
+  };
+
+  it("passes the language and path title to the learning path PDF", async () => {
+    const service = Object.create(LearningPathCertificateService.prototype);
+    const renderPdfFromHtml = stubDownloadDependencies(service);
+
+    service.learningPathRepository = {
+      findLearningPathCertificateByIdForRender: jest.fn().mockResolvedValue({
+        tenantId: "tenant-a",
+        pathTitle: "Ścieżka",
+        fullName: "Łukasz Żółkiewski",
+      }),
+    };
+
+    const result = await service.downloadLearningPathCertificate("user", "cert", "pl");
+
+    const html = renderPdfFromHtml.mock.calls[0][0];
+
+    expect(html).toContain('<html lang="pl">');
+    expect(html).toContain("<title>Certyfikat ukończenia – Ścieżka</title>");
+    expect(result.filename).toBe("Certyfikat - Ścieżka - Łukasz Żółkiewski.pdf");
+  });
+
+  it("passes the language and course title to the course PDF", async () => {
+    const service = Object.create(CertificatesService.prototype);
+    const renderPdfFromHtml = stubDownloadDependencies(service);
+
+    service.certificateRepository = {
+      findCertificateByIdForRender: jest.fn().mockResolvedValue({
+        tenantId: "tenant-a",
+        courseTitle: "Pierwsza pomoc",
+        fullName: "Łukasz Żółkiewski",
+      }),
+    };
+    const currentUser: CurrentUserType = {
+      userId: "00000000-0000-0000-0000-000000000001",
+      tenantId: "00000000-0000-0000-0000-000000000001",
+      email: "student@example.test",
+      roleSlugs: ["student"],
+      permissions: [PERMISSIONS.CERTIFICATE_RENDER],
+    };
+
+    const result = await service.downloadCertificate(currentUser, "cert", "pl");
+
+    const html = renderPdfFromHtml.mock.calls[0][0];
+
+    expect(html).toContain('<html lang="pl">');
+    expect(html).toContain("<title>Certyfikat ukończenia – Pierwsza pomoc</title>");
+    expect(result.filename).toBe("Certyfikat - Pierwsza pomoc - Łukasz Żółkiewski.pdf");
+  });
 });
 
 describe.each(classes)("%p rendering", (Service) => {

@@ -724,7 +724,7 @@
       "back": "Zadní",
       "proceed": "Pokračovat",
       "add": "Přidat",
-      "close": "Blízko",
+      "close": "Zavřít",
       "goToDashboard": "Přejděte na řídicí panel",
       "goBack": "Vraťte se",
       "ignore": "Ignorovat",
@@ -845,7 +845,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "Možnost „Sledování dokončení videa“ byla úspěšně aktualizována",
     "videoCompletionTrackingUpdateFailed": "Aktualizace možnosti „Sledování dokončení videa“ se nezdařila",
     "settingsUpdatedSuccessfully": "Nastavení byla úspěšně aktualizována",
-    "settingsUpdateFailed": "Aktualizace nastavení se nezdařila"
+    "settingsUpdateFailed": "Aktualizace nastavení se nezdařila",
+    "audioCompletionTrackingUpdatedSuccessfully": "Možnost „Sledování dokončení zvuku“ byla úspěšně aktualizována",
+    "audioCompletionTrackingUpdateFailed": "Aktualizace možnosti „Sledování dokončení zvuku“ se nezdařila"
   },
   "uploadFile": {
     "header": "Kliknutím nahrajete",
@@ -1109,13 +1111,16 @@
     "promotionCodes": "Propagační kódy",
     "manage": "Spravovat",
     "ariaLabels": {
-      "goToAvailableCourses": "Přejděte na dostupné kurzy"
+      "goToAvailableCourses": "Přejděte na dostupné kurzy",
+      "collapseSidebar": "Sbalit postranní panel",
+      "expandSidebar": "Rozbalit postranní panel"
     },
     "qa": "Otázky a odpovědi",
     "tenants": "Organizace",
     "reports": "Přehledy",
     "leaderboards": "Žebříčky",
-    "gamification": "Gamifikace"
+    "gamification": "Gamifikace",
+    "forum": "Fórum"
   },
   "microsoftCalendar": {
     "title": "Kalendář Microsoft",
@@ -1696,20 +1701,6 @@
     },
     "validation": {
       "email": "E-mail je povinný"
-    }
-  },
-  "ssoEnforcementView": {
-    "header": "Vynucení jednotného přihlášení",
-    "subHeader": "Vynutit přihlášení SSO pro všechny uživatele",
-    "description": "Tento přepínač vynutí přihlášení Google/Microsoft pro všechny uživatele. Pokud je zakázáno, uživatelé se budou moci přihlásit pomocí tradičního přihlašovacího formuláře.",
-    "switch": {
-      "enabled": "Povoleno",
-      "disabled": "Zakázáno"
-    },
-    "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "Vynucení jednotného přihlášení bylo úspěšně aktualizováno",
-      "ssoEnforcementUpdateFailed": "Aktualizace vynucení jednotného přihlášení se nezdařila",
-      "registerRedirect": "Registrace pomocí e-mailu je zakázána, protože je vynuceno jednotné přihlášení."
     }
   },
   "userEmailTriggers": {
@@ -2360,7 +2351,8 @@
         "email_template": "e-mailové šablony",
         "managed_group_results": "výsledky spravovaných skupin",
         "phishing": "phishingové simulace",
-        "todo_task": "úkoly"
+        "todo_task": "úkoly",
+        "forum": "fórum"
       },
       "descriptions": {
         "phishing_manage": "Může vytvářet a spravovat phishingové simulace.",
@@ -2461,7 +2453,11 @@
         "gamification_leaderboard_read_all": "Zobrazit žebříček organizace a žebříčky všech skupin.",
         "gamification_manage": "Konfigurovat úspěchy a nastavení gamifikace.",
         "quiz_grading_read": "Zobrazit frontu otevřených odpovědí čekajících na hodnocení.",
-        "quiz_grading_grade": "Hodnotit otevřené odpovědi a psát komentáře pro studenty."
+        "quiz_grading_grade": "Hodnotit otevřené odpovědi a psát komentáře pro studenty.",
+        "forum_read": "Může zobrazit fórum.",
+        "forum_topic_create": "Může vytvářet témata ve fóru.",
+        "forum_post_create": "Může odpovídat v tématech fóra.",
+        "forum_post_delete": "Může mazat jakékoli příspěvky ve fóru."
       }
     },
     "dropdown": {
@@ -2905,7 +2901,8 @@
         "curriculum": "Úprava osnovy není pro kurzy SCORM dostupná.",
         "lessonSequence": "Vynucení pořadí lekcí není pro kurzy SCORM dostupné.",
         "quizFeedback": "Nastavení zpětné vazby kvízu není pro kurzy SCORM dostupné.",
-        "videoCompletionTracking": "Sledování dokončení videa není pro kurzy SCORM dostupné."
+        "videoCompletionTracking": "Sledování dokončení videa není pro kurzy SCORM dostupné.",
+        "audioCompletionTracking": "Sledování dokončení zvuku není pro kurzy SCORM dostupné."
       },
       "notFound": {
         "course": "Kurz nenalezen.",
@@ -3096,7 +3093,9 @@
         "courseAvailabilityTitle": "Dostupnost kurzu",
         "fallbackLanguageWarningTitle": "Poznámka: chybějící překlady",
         "fallbackLanguageWarningDescription": "Některá pole v této jazykové verzi jsou prázdná. Na těchto místech studenti uvidí obsah z výchozího jazyka, dokud nepřidáte překlady.",
-        "baseLanguageTooltip": "Tento jazyk nemůžete změnit ani odebrat. Je výchozí a bude vždy součástí kurzu."
+        "baseLanguageTooltip": "Tento jazyk nemůžete změnit ani odebrat. Je výchozí a bude vždy součástí kurzu.",
+        "enableAudioCompletionTracking": "Sledování dokončení zvuku",
+        "enableAudioCompletionTrackingDescription": "Účastník musí poslechnout alespoň 90 % každé zvukové nahrávky v lekci, aby byla lekce označena jako dokončená."
       },
       "validation": {
         "titleMinLength": "Název musí mít alespoň 2 znaky.",
@@ -3201,14 +3200,27 @@
           "quizCooldownInHours": "Časový zámek po neúspěšných pokusech (v hodinách)",
           "numberOfQuestions": "{{count1}} z {{count2}} otázek",
           "noQuestions": "Žádné otázky",
-          "timeLimitMinutes": "Časový limit (hh:mm)"
+          "timeLimitMinutes": "Časový limit (hh:mm)",
+          "feedbackMode": "Viditelnost zpětné vazby",
+          "feedbackModeFull": "Výsledek a zprávy",
+          "feedbackModeScoreOnly": "Pouze výsledek",
+          "feedbackModeNone": "Bez zpětné vazby",
+          "feedbackRanges": "Zprávy pro rozsahy výsledku",
+          "feedbackVariablesHint": "Můžete použít {{firstNameVar}} pro jméno studenta a {{scoreVar}} pro jeho výsledek.",
+          "feedbackRangeMin": "Od (%)",
+          "feedbackRangeMax": "Do (%)",
+          "feedbackRangeMessage": "Zpráva",
+          "feedbackRangeAdd": "Přidat rozsah",
+          "feedbackRangeReset": "Obnovit výchozí rozsahy"
         },
         "tooltip": {
           "switch": "Pokud je povoleno, má student omezený počet pokusů o kvíz.",
           "passingThreshold": "Procentuální hranice pro absolvování kvízu. Pokud student dosáhne tohoto skóre, bude kvíz považován za úspěšný.",
           "attemptsLimit": "Počet povolených pokusů o kvíz před spuštěním časového zámku.",
           "quizCooldownInHours": "Doba trvání zámku kvízu po použití všech pokusů.",
-          "timeLimitMinutes": "Volitelné. Pokud je nastaveno, studenti kvíz výslovně spustí a jejich odpovědi se po uplynutí času odešlou automaticky. Ponechte prázdné bez časového limitu."
+          "timeLimitMinutes": "Volitelné. Pokud je nastaveno, studenti kvíz výslovně spustí a jejich odpovědi se po uplynutí času odešlou automaticky. Ponechte prázdné bez časového limitu.",
+          "feedbackMode": "Určuje, co student po odeslání uvidí: výsledek a zprávy, pouze výsledek, nebo nic.",
+          "feedbackRanges": "Seřazené rozsahy výsledku zobrazené studentům. Rozsahy musí pokrývat 0-100 % bez mezer a překryvů."
         },
         "validation": {
           "optionTextRequired": "Text možnosti je povinný",
@@ -3238,7 +3250,13 @@
           "matchingPairsRequired": "Přidejte alespoň 2 dvojice a vyplňte obě strany každé dvojice",
           "matchingMatchRequired": "Vyplňte přiřazení v této dvojici",
           "matchingPairsUnique": "Každá dvojice musí mít jedinečné přiřazení",
-          "timeLimitMinutes": "Zadejte časový limit od {{min}} do {{max}}."
+          "timeLimitMinutes": "Zadejte časový limit od {{min}} do {{max}}.",
+          "feedbackRangeNotInteger": "Hranice rozsahu musí být celá čísla.",
+          "feedbackRangeOutOfBounds": "Hranice rozsahu musí být mezi 0 a 100.",
+          "feedbackRangeBoundsReversed": "Začátek rozsahu nesmí být větší než jeho konec.",
+          "feedbackRangesMustStartAtZero": "Rozsahy musí začínat na 0 %.",
+          "feedbackRangesMustEndAtHundred": "Rozsahy musí končit na 100 %.",
+          "feedbackRangesGapOrOverlap": "Rozsahy musí pokrývat 0-100 % bez mezer a překryvů."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pořadí zobrazení lekce bylo úspěšně aktualizováno",
@@ -4151,7 +4169,6 @@
   "registerView": {
     "header": "Zaregistrujte se",
     "subHeader": "Chcete-li vytvořit účet, zadejte své údaje",
-    "subHeaderSSO": "Zaregistrujte se pomocí svého účtu Google/Microsoft",
     "field": {
       "firstName": "Křestní jméno",
       "lastName": "Příjmení",
@@ -4546,6 +4563,42 @@
       "timeLeft": "Zbývající čas: {{time}}",
       "warning": "Zbývá méně než minuta. Odpovědi se po uplynutí času odešlou automaticky.",
       "timeUp": "Čas vypršel. Vaše odpovědi se odesílají."
+    },
+    "audioProgress": {
+      "label": "Průběh poslechu",
+      "completedSummary": "Dokončeno {{completed}} z {{total}}",
+      "overviewAriaLabel": "Průběh poslechu zvukových nahrávek lekce",
+      "segmentAriaLabel": "Průběh nahrávky {{index}}: poslechnuto {{progress}} %",
+      "requirementSingle": "Pro dokončení lekce poslechněte celou zvukovou nahrávku.",
+      "requirementMultiple": "Pro dokončení lekce poslechněte všechny zvukové nahrávky.",
+      "errors": {
+        "resourceNotFound": "Průběh poslechu pro tuto lekci se nepodařilo uložit.",
+        "unsupportedLessonType": "Průběh poslechu je dostupný pouze pro obsahové lekce.",
+        "unsupportedBucketSize": "Průběh poslechu používá nepodporovaný interval sledování.",
+        "invalidResourceType": "Tento zdroj nelze sledovat jako zvukovou nahrávku lekce.",
+        "accessDenied": "Nemáte oprávnění aktualizovat průběh poslechu v této lekci."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Dokončit poslech před odchodem?",
+      "descriptionSingle": "Tato lekce vyžaduje poslech celé zvukové nahrávky, aby mohla být dokončena.",
+      "descriptionMultiple": "Tato lekce vyžaduje poslech všech zvukových nahrávek, aby mohla být dokončena.",
+      "continueListening": "Pokračovat v poslechu"
+    },
+    "requiredMediaLeave": {
+      "title": "Dokončit média lekce před odchodem?",
+      "description": "Tato lekce vyžaduje zhlédnutí všech videí a poslech všech zvukových nahrávek, aby mohla být dokončena.",
+      "continue": "Pokračovat"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Pro dokončení lekce zhlédněte video a poslechněte zvukovou nahrávku.",
+      "requirementMultiple": "Pro dokončení lekce zhlédněte všechna videa a poslechněte všechny zvukové nahrávky.",
+      "label": "Průběh lekce",
+      "overviewAriaLabel": "Průběh médií lekce"
+    },
+    "navigation": {
+      "previousLesson": "Předchozí lekce",
+      "nextLesson": "Další lekce"
     }
   },
   "studentCourseView": {
@@ -4570,6 +4623,8 @@
       "threeOrFiveWordSentence": "Napište podrobnou odpověď (3-5 vět).",
       "aiMentorLesson": {
         "sendMessage": "Napište zprávu...",
+        "messageLabel": "Vaše zpráva",
+        "conversationLabel": "Konverzace",
         "check": "Kontrola",
         "aiMentorName": "AI mentor",
         "retake": "Znovudobytí",
@@ -4844,7 +4899,9 @@
       "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",
       "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy",
       "publicCoursePreview": "Náhled lekcí před zápisem do kurzu",
-      "publicCoursePreviewDescription": "Umožňuje přihlášeným uživatelům otevírat lekce bezplatných kurzů před zápisem. Kvízy a sledování postupu stále vyžadují zápis."
+      "publicCoursePreviewDescription": "Umožňuje přihlášeným uživatelům otevírat lekce bezplatných kurzů před zápisem. Kvízy a sledování postupu stále vyžadují zápis.",
+      "forum": "Povolit fórum",
+      "forumDescription": "Umožnit všem v organizaci zakládat témata a odpovídat. Zapsaní uživatelé zde uvidí i diskuse ze svých kurzů"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Předvolby upozornění pro nové uživatele byly úspěšně aktualizovány",
@@ -4858,7 +4915,8 @@
       "finishedCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o dokončeném kurzu se nezdařila",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o zpoždění kurzu byly úspěšně aktualizovány",
       "overdueCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o zpožděném kurzu se nezdařila",
-      "publicCoursePreviewPreferenceChangeSuccess": "Nastavení náhledu kurzů aktualizováno"
+      "publicCoursePreviewPreferenceChangeSuccess": "Nastavení náhledu kurzů aktualizováno",
+      "forumPreferenceChangeSuccess": "Předvolba fóra byla úspěšně aktualizována"
     }
   },
   "registrationFormBuilder": {
@@ -4974,7 +5032,7 @@
       "courseCompletionRequired": "Před vygenerováním certifikátu musíte kurz dokončit."
     },
     "button": {
-      "download": "Stáhnout",
+      "download": "Stáhnout certifikát (PDF)",
       "preview": "Náhled",
       "shareLinkedIn": "Sdílet na LinkedIn"
     },
@@ -5417,7 +5475,9 @@
       },
       "ariaLabel": {
         "drag": "Přetáhněte vložení videa",
-        "remove": "Odebrat vložení videa"
+        "remove": "Odebrat vložení videa",
+        "play": "Přehrát video",
+        "playWithTitle": "Přehrát video: {{title}}"
       }
     },
     "presentation": {
@@ -8587,7 +8647,16 @@
       "unavailable": "Tržiště obsahu není pro tuto organizaci dostupné.",
       "listingNotFound": "Tento kurz z tržiště nebyl nalezen.",
       "thumbnailNotFound": "Tento kurz z tržiště nemá náhled.",
-      "serviceError": "Tržiště obsahu nemohlo dokončit požadavek. Zkuste to později."
+      "serviceError": "Tržiště obsahu nemohlo dokončit požadavek. Zkuste to později.",
+      "outlineNotFound": "Náhled obsahu tohoto kurzu zatím není k dispozici."
+    },
+    "preview": {
+      "open": "Náhled obsahu",
+      "noChapters": "Tento kurz zatím nemá žádné kapitoly.",
+      "chaptersCount_one": "{{count}} kapitola",
+      "chaptersCount_few": "{{count}} kapitoly",
+      "chaptersCount_many": "{{count}} kapitol",
+      "chaptersCount_other": "{{count}} kapitol"
     }
   },
   "aiJudgeConfiguration": {
@@ -9783,5 +9852,64 @@
       }
     },
     "requiresGamification": "Nejprve zapněte gamifikaci."
+  },
+  "forum": {
+    "title": "Fórum",
+    "description": "Pokládejte otázky a sdílejte znalosti s celou organizací.",
+    "newTopic": "Nové téma",
+    "searchPlaceholder": "Hledat témata",
+    "filter": {
+      "label": "Zobrazit témata",
+      "all": "Všechna témata",
+      "general": "Obecné"
+    },
+    "sort": {
+      "label": "Seřadit témata",
+      "lastActivity": "Poslední aktivita",
+      "newest": "Nejnovější",
+      "mostReplies": "Nejvíce odpovědí"
+    },
+    "empty": "Zatím zde nejsou žádná témata. Založte první.",
+    "noResults": "Filtrům neodpovídají žádná témata.",
+    "replies_one": "{{count}} odpověď",
+    "replies_few": "{{count}} odpovědi",
+    "replies_many": "{{count}} odpovědí",
+    "replies_other": "{{count}} odpovědí",
+    "lastActivity": "Poslední aktivita {{time}}",
+    "deletedPost": "Tento příspěvek byl smazán.",
+    "deletePost": "Smazat příspěvek",
+    "createDialog": {
+      "title": "Nové téma",
+      "titleLabel": "Název",
+      "titlePlaceholder": "O čem je vaše téma?",
+      "contentLabel": "Zpráva",
+      "contentPlaceholder": "Napište první příspěvek",
+      "submit": "Založit téma"
+    },
+    "topic": {
+      "backToForum": "Zpět na fórum",
+      "courseThreadTitle": "Diskuse v kurzu {{course}}",
+      "noReplies": "Zatím žádné odpovědi.",
+      "replyPlaceholder": "Napište odpověď",
+      "replySubmit": "Odpovědět",
+      "closed": "Odpovědi jsou uzavřené, protože první příspěvek byl smazán."
+    },
+    "deleteDialog": {
+      "title": "Smazat tento příspěvek?",
+      "description": "Příspěvek bude odstraněn pro všechny. Tuto akci nelze vrátit."
+    },
+    "toast": {
+      "createTopicError": "Téma se nepodařilo založit.",
+      "createPostError": "Odpověď se nepodařilo odeslat.",
+      "deletePostError": "Příspěvek se nepodařilo smazat."
+    },
+    "errors": {
+      "topicNotFound": "Toto téma neexistuje nebo k němu nemáte přístup.",
+      "postNotFound": "Tento příspěvek již neexistuje.",
+      "cannotDeletePost": "Můžete mazat pouze vlastní příspěvky.",
+      "topicDeleted": "Odpovědi jsou uzavřené, protože první příspěvek byl smazán.",
+      "emptyTitle": "Zadejte název.",
+      "emptyContent": "Zadejte zprávu."
+    }
   }
 }

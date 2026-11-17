@@ -1709,6 +1709,48 @@
       "when": 1794506153338,
       "tag": "0243_add_grading_method_to_answer_reviews",
       "breakpoints": true
+    },
+    {
+      "idx": 244,
+      "version": "7",
+      "when": 1794582388864,
+      "tag": "0244_add_forum_scope_to_course_chat",
+      "breakpoints": true
+    },
+    {
+      "idx": 245,
+      "version": "7",
+      "when": 1794582392630,
+      "tag": "0245_add_course_chat_scope_check_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 246,
+      "version": "7",
+      "when": 1794842474417,
+      "tag": "0246_add_lesson_audio_progress",
+      "breakpoints": true
+    },
+    {
+      "idx": 247,
+      "version": "7",
+      "when": 1794842477276,
+      "tag": "0247_enable_lesson_audio_progress_tenant_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 248,
+      "version": "7",
+      "when": 1794847265920,
+      "tag": "0248_add_assessment_feedback_ranges",
+      "breakpoints": true
+    },
+    {
+      "idx": 249,
+      "version": "7",
+      "when": 1794847269217,
+      "tag": "0249_enable_assessment_feedback_ranges_rls",
+      "breakpoints": true
     }
   ]
 }

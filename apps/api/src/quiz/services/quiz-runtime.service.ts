@@ -5,6 +5,7 @@ import {
   ASSESSMENT_ANSWER_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_GRADING_STATUSES,
   ASSESSMENT_ATTEMPT_RESULTS,
+  ASSESSMENT_FEEDBACK_MODES,
   ASSESSMENT_GRADING_MODES,
   ASSESSMENT_QUESTION_TYPES,
   ASSESSMENT_SCORING_MODES,
@@ -23,6 +24,7 @@ import {
 } from "../mappers/quiz-runtime.mapper";
 import { QuizRuntimeRepository } from "../repositories/quiz-runtime.repository";
 import { isAttemptNumberConflict } from "../utils/quiz-attempt-conflict";
+import { resolveQuizFeedbackRangeMessage } from "../utils/quiz-feedback-message";
 
 import { QuizAttemptService } from "./quiz-attempt.service";
 import { QuizAuthoringService } from "./quiz-authoring.service";
@@ -67,21 +69,55 @@ export class QuizRuntimeService {
 
     if (!quizDefinition) throw new NotFoundException("common.toast.notFound");
 
-    const attemptFeedback =
-      includeFeedback && learnerId
-        ? await this.quizAttemptService.findLatestAttemptFeedback(
-            quizDefinition.assessment.id,
-            learnerId,
-          )
-        : null;
+    const { feedbackMode } = quizDefinition.assessment;
+
+    let attemptFeedback: QuizAttemptFeedback | null = null;
+    let feedbackMessage: string | null = null;
+
+    if (includeFeedback && learnerId) {
+      attemptFeedback = await this.quizAttemptService.findLatestAttemptFeedback(
+        quizDefinition.assessment.id,
+        learnerId,
+      );
+
+      if (attemptFeedback && feedbackMode !== ASSESSMENT_FEEDBACK_MODES.NONE)
+        feedbackMessage = await this.resolveFeedbackRangeMessage(
+          quizDefinition,
+          attemptFeedback,
+          learnerId,
+        );
+    }
 
     return {
       assessmentId: quizDefinition.assessment.id,
       timeLimitMinutes: quizDefinition.assessment.timeLimitMinutes,
+      feedbackMode,
+      feedbackMessage,
       questions: quizDefinition.questions.map((question) =>
         this.mapQuestionForDelivery(question, attemptFeedback),
       ),
     };
+  }
+
+  private async resolveFeedbackRangeMessage(
+    quizDefinition: QuizAuthoringLocalizedReadModel,
+    attemptFeedback: QuizAttemptFeedback,
+    learnerId: UUIDType,
+  ): Promise<string | null> {
+    const { gradingStatus, scorePercentage } = attemptFeedback.attempt;
+
+    // The learner's name is only needed when a message will actually be shown.
+    if (gradingStatus !== ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED || scorePercentage === null)
+      return null;
+
+    const firstName = await this.quizRuntimeRepository.findLearnerFirstName(learnerId);
+
+    return resolveQuizFeedbackRangeMessage({
+      ranges: quizDefinition.feedbackRanges,
+      scorePercentage,
+      gradingStatus,
+      firstName,
+    });
   }
 
   async submitQuiz(

@@ -50,8 +50,51 @@ on:
       - staging
 
 jobs:
+  build-images:
+    name: Build app images
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: api.Dockerfile
+          tags: mentingo-e2e-api
+          outputs: type=docker,dest=${{ runner.temp }}/e2e-api.tar
+          cache-from: type=gha,scope=e2e-api
+          cache-to: type=gha,mode=max,scope=e2e-api
+
+      - name: Build web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: web.Dockerfile
+          tags: mentingo-e2e-web
+          build-args: |
+            VITE_TEST=true
+          outputs: type=docker,dest=${{ runner.temp }}/e2e-web.tar
+          cache-from: type=gha,scope=e2e-web
+          cache-to: type=gha,mode=max,scope=e2e-web
+
+      - name: Upload images
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-images
+          path: |
+            ${{ runner.temp }}/e2e-api.tar
+            ${{ runner.temp }}/e2e-web.tar
+          if-no-files-found: error
+          retention-days: 1
+
   playwright:
     name: Playwright Tests (shard ${{ matrix.shard }}/7)
+    needs: build-images
     runs-on: ubuntu-latest
     environment:
       name: e2e
@@ -102,10 +145,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Caddy and ffmpeg
+      - name: Install Caddy
         run: |
           sudo apt-get update
-          sudo apt-get install -y caddy ffmpeg
+          sudo apt-get install -y caddy
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -197,6 +240,65 @@ jobs:
             -v "$PWD/create-rustfs-bucket.sh:/create-rustfs-bucket.sh:ro" \
             amazon/aws-cli:latest /create-rustfs-bucket.sh
 
+      - name: Download app images
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-images
+          path: ${{ runner.temp }}
+
+      - name: Load app images
+        run: |
+          docker load -i "$RUNNER_TEMP/e2e-api.tar"
+          docker load -i "$RUNNER_TEMP/e2e-web.tar"
+
+      - name: Start app
+        shell: bash
+        env:
+          NODE_ENV: test
+          MODE: test
+          E2E: "true"
+          LMS_DATABASE_URL: postgresql://lms_app_user:replace_with_strong_password@localhost:54321/test_db
+          SCORM_CONTENT_ORIGIN: https://scorm.localhost:5443
+          DISABLE_RATE_LIMITING: "true"
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          MASTER_KEY: ${{ secrets.MASTER_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LUMA_API_KEY: ${{ secrets.LUMA_API_KEY }}
+          LUMA_BASE_URL: ${{ secrets.LUMA_BASE_URL }}
+        run: |
+          set -euo pipefail
+
+          api_env=()
+          for name in NODE_ENV MODE E2E CI GITHUB_ACTIONS \
+            DATABASE_URL LMS_DATABASE_URL REDIS_URL \
+            JWT_SECRET JWT_REFRESH_SECRET JWT_EXPIRATION_TIME \
+            CORS_ORIGIN SCORM_CONTENT_ORIGIN DISABLE_RATE_LIMITING SEED_MANAGE_DB_ROLE \
+            EMAIL_ADAPTER SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD SMTP_EMAIL_FROM \
+            AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_BUCKET_NAME AWS_ENDPOINT_URL \
+            STRIPE_SECRET_KEY STRIPE_PUBLISHABLE_KEY STRIPE_WEBHOOK_SECRET \
+            MASTER_KEY OPENAI_API_KEY LUMA_API_KEY LUMA_BASE_URL; do
+            api_env+=(-e "$name")
+          done
+
+          docker run --rm --network host "${api_env[@]}" mentingo-e2e-api migrate
+          pnpm --filter api db:seed-e2e
+          docker run -d --name e2e-api --network host "${api_env[@]}" mentingo-e2e-api server
+          docker run -d --name e2e-web -p 8080:8080 mentingo-e2e-web
+          caddy start --config apps/web/Caddyfile.e2e-images
+
+          for i in {1..120}; do
+            curl -fsS http://localhost:3000/api/healthcheck >/dev/null && break
+            if [ "$(docker inspect -f '{{.State.Running}}' e2e-api)" != "true" ]; then
+              docker logs e2e-api
+              exit 1
+            fi
+            sleep 2
+          done
+          curl -fsS http://localhost:3000/api/healthcheck >/dev/null || { docker logs e2e-api; exit 1; }
+          curl -fsSk https://localhost:5173/ >/dev/null || { docker logs e2e-web; exit 1; }
+
       - name: Run tests
         shell: bash
         run: |
@@ -221,14 +323,15 @@ jobs:
           DATABASE_URL: postgresql://test_user:test_password@localhost:54321/test_db
           REDIS_URL: "redis://localhost:6380"
           NODE_ENV: test
+          E2E_APP_IMAGES: "true"
           API_URL: http://localhost:3000
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
-          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          MASTER_KEY: ${{ secrets.MASTER_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          LUMA_API_KEY: ${{ secrets.LUMA_API_KEY }}
-          LUMA_BASE_URL: ${{ secrets.LUMA_BASE_URL }}
+
+      - name: Collect app logs
+        if: failure()
+        run: |
+          mkdir -p app-logs
+          docker logs e2e-api > app-logs/api.log 2>&1 || true
+          docker logs e2e-web > app-logs/web.log 2>&1 || true
 
       - name: Upload artifacts on failure
         if: failure()
@@ -238,9 +341,10 @@ jobs:
           path: |
             playwright-report
             test-results
+            app-logs
             **/*.zip
           retention-days: 3
 
-      - name: Stop RustFS
+      - name: Stop containers
         if: always()
-        run: docker rm -f rustfs || true
+        run: docker rm -f rustfs e2e-api e2e-web || true

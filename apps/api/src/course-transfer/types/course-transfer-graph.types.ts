@@ -30,6 +30,7 @@ import type {
   aiMentorLessons,
   aiMentorRoleplayConfigurations,
   aiMentorTeacherConfigurations,
+  assessmentFeedbackRanges,
   assessmentQuestionBlankAnswerSets,
   assessmentQuestionBlanks,
   assessmentQuestionDragAndDropOptions,
@@ -281,6 +282,17 @@ export type AssessmentQuestionOpenTextSettingsSelect = InferSelectModel<
   typeof assessmentQuestionOpenTextSettings
 >;
 
+export type AssessmentFeedbackRangeSelect = InferSelectModel<typeof assessmentFeedbackRanges>;
+
+export type UpsertTargetFeedbackRangeValues = {
+  id: UUIDType;
+  assessmentId: UUIDType;
+  minPercent: number;
+  maxPercent: number;
+  displayOrder: number;
+  message: LocalizedText;
+};
+
 export type AssessmentQuestionOpenTextSettingsValues = {
   questionId: UUIDType;
   minimumCharacters: number | null;
@@ -387,6 +399,12 @@ export type DuplicateOptionsParams = {
 export type SyncAssessmentQuestionDetailsParams = {
   sourceSnapshot: SourceSnapshot;
   questionMap: Map<UUIDType, UUIDType>;
+  targetCourseId: UUIDType;
+};
+
+export type SyncAssessmentFeedbackRangesParams = {
+  sourceSnapshot: SourceSnapshot;
+  lessonMap: Map<UUIDType, UUIDType>;
   targetCourseId: UUIDType;
 };
 
@@ -571,6 +589,7 @@ export type SourceSnapshot = {
   assessmentQuestionMatchingPairs: Array<AssessmentQuestionMatchingPairSelect>;
   assessmentQuestionScaleOptions: Array<AssessmentQuestionScaleOptionSelect>;
   assessmentQuestionTrueFalseStatements: Array<AssessmentQuestionTrueFalseStatementSelect>;
+  assessmentFeedbackRanges: Array<AssessmentFeedbackRangeSelect>;
   questionResources: Array<ResourceWithRelation>;
   assessmentQuestionOpenTextSettings: Array<AssessmentQuestionOpenTextSettingsSelect>;
   assessments: Array<AssessmentSelect>;

@@ -48,6 +48,7 @@ export const customizationFlagInputSchema = Type.Object(
           "unregisteredUserCoursesAccessibility",
           "modernCourseListEnabled",
           "courseDiscussionsEnabled",
+          "forumEnabled",
           "calendarEnabled",
           "liveTrainingEnabled",
           "learningPathsEnabled",

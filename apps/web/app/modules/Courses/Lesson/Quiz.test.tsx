@@ -54,6 +54,11 @@ vi.mock("./Questions", () => ({
     );
   },
 }));
+vi.mock("~/components/RichText/Viever", () => ({
+  default: ({ content }: { content: string }) => (
+    <div dangerouslySetInnerHTML={{ __html: content }} />
+  ),
+}));
 
 const NOW = new Date("2026-01-01T10:00:00.000Z");
 const SELECTED_ANSWER = [{ questionId: "question-1", answers: [{ answerId: "option-1" }] }];
@@ -301,5 +306,76 @@ describe("timed quiz", () => {
     expect(screen.getByTestId("answer")).toBeInTheDocument();
     expect(screen.queryByTestId(LEARNING_HANDLES.QUIZ_START_BUTTON)).not.toBeInTheDocument();
     expect(screen.queryByTestId(LEARNING_HANDLES.QUIZ_TIMER)).not.toBeInTheDocument();
+  });
+});
+
+describe("author feedback message", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.isPreviewMode = false;
+  });
+
+  const completedLesson = (feedbackMessage: string | null) => {
+    const lesson = buildLesson({ timeLimitMinutes: null, lessonCompleted: true });
+
+    if (lesson.quizDetails) lesson.quizDetails.feedbackMessage = feedbackMessage;
+
+    return lesson;
+  };
+
+  it("renders the delivered range message on the result screen", () => {
+    renderQuiz(completedLesson("<p>Great job, Ada!</p>"));
+
+    expect(screen.getByTestId(LEARNING_HANDLES.QUIZ_FEEDBACK_MESSAGE)).toHaveTextContent(
+      "Great job, Ada!",
+    );
+  });
+
+  it("shows nothing when no message was delivered (none mode / master gate off)", () => {
+    renderQuiz(completedLesson(null));
+
+    expect(screen.queryByTestId(LEARNING_HANDLES.QUIZ_FEEDBACK_MESSAGE)).not.toBeInTheDocument();
+  });
+
+  it("hides the message in preview mode", () => {
+    mocks.isPreviewMode = true;
+    renderQuiz(completedLesson("<p>Great job, Ada!</p>"));
+
+    expect(screen.queryByTestId(LEARNING_HANDLES.QUIZ_FEEDBACK_MESSAGE)).not.toBeInTheDocument();
+  });
+});
+
+describe("partial score while awaiting review", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.isPreviewMode = false;
+  });
+
+  const awaitingReviewLesson = (correctAnswerCount: number | null) => {
+    // score_only redacts per-question correctness but still delivers the graded counts.
+    const lesson = buildLesson({
+      timeLimitMinutes: null,
+      isQuizAwaitingReview: true,
+      isQuizFeedbackRedacted: true,
+    });
+
+    if (lesson.quizDetails) {
+      lesson.quizDetails.correctAnswerCount = correctAnswerCount;
+      lesson.quizDetails.wrongAnswerCount = correctAnswerCount === null ? null : 0;
+    }
+
+    return lesson;
+  };
+
+  it("shows the graded count whenever the API delivers it, even with redacted correctness", () => {
+    renderQuiz(awaitingReviewLesson(2));
+
+    expect(screen.getByTestId(LEARNING_HANDLES.QUIZ_PARTIAL_SCORE)).toBeInTheDocument();
+  });
+
+  it("hides the graded count when the API withholds it (master gate off)", () => {
+    renderQuiz(awaitingReviewLesson(null));
+
+    expect(screen.queryByTestId(LEARNING_HANDLES.QUIZ_PARTIAL_SCORE)).not.toBeInTheDocument();
   });
 });

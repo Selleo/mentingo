@@ -16,6 +16,7 @@ import {
   aiMentorLessons,
   aiMentorRoleplayConfigurations,
   aiMentorTeacherConfigurations,
+  assessmentFeedbackRanges,
   categories,
   chapters,
   courses,
@@ -151,6 +152,14 @@ export class CourseTransferSnapshotRepository {
       .select(getTableColumns(assessments))
       .from(assessments)
       .where(inArray(assessments.lessonId, lessonIds));
+  }
+
+  async getSourceFeedbackRanges(assessmentIds: UUIDType[]) {
+    if (!assessmentIds.length) return [];
+    return this.db
+      .select(getTableColumns(assessmentFeedbackRanges))
+      .from(assessmentFeedbackRanges)
+      .where(inArray(assessmentFeedbackRanges.assessmentId, assessmentIds));
   }
 
   async getSourceOpenTextSettings(questionIds: UUIDType[]) {

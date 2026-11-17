@@ -13,6 +13,19 @@ name: Release film
 on:
   workflow_dispatch:
     inputs:
+      pr_number:
+        description: PR video test (0 records a release as usual; positive PR number records only that PR)
+        required: false
+        type: number
+        default: 0
+      expected_head:
+        description: Expected PR commit for a readiness-triggered recording (optional)
+        required: false
+        type: string
+      requested_by:
+        description: Original readiness actor (used only for GitHub Actions bot dispatch)
+        required: false
+        type: string
       tag:
         description: Release tag to film, such as v4.15.0 (default the latest published release)
         required: false
@@ -46,7 +59,21 @@ concurrency:
   queue: max # a recording waiting for the one filming is never cancelled by the next dispatch
 
 jobs:
+  pr_video:
+    name: Test the PR video from the selected trusted branch
+    # The reusable recorder itself restricts execution to staging/main. Other refs
+    # can validate the call graph without starting recording or accessing its environment.
+    if: inputs.pr_number > 0
+    permissions:
+      actions: write # reusable workflow contains a metadata dispatcher; skipped for this call
+      contents: read
+      pull-requests: write # only the called attachment job receives this permission
+    uses: ./.github/workflows/pr-flow-video.yml
+    with:
+      pr_number: ${{ format('{0}', inputs.pr_number) }}
+
   film:
+    if: ${{ !inputs.pr_number }}
     name: Record the release film
     runs-on: ubuntu-24.04
     timeout-minutes: 150
@@ -297,7 +324,7 @@ jobs:
   publish:
     name: Publish the film
     needs: film
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.pr_number && inputs.publish }}
     permissions:
       actions: read
       contents: write

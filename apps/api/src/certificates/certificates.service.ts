@@ -12,6 +12,7 @@ import {
   COURSE_LEARNING_STATE_KINDS,
   buildCertificateHtmlDocument as buildSharedCertificateHtmlDocument,
   buildCertificateMarkup,
+  buildCertificatePdfFilename,
   CERTIFICATE_STYLES,
   CERTIFICATE_CONTENT_SECURITY_POLICY,
   CERTIFICATE_ARCHIVE_REASONS,
@@ -746,12 +747,17 @@ export class CertificatesService implements OnModuleDestroy {
       },
     });
 
-    const completeHtml = buildSharedCertificateHtmlDocument(html);
+    const documentOptions = {
+      lang: shareLanguage,
+      courseName: certificate.courseTitle ?? "",
+      studentName: certificate.fullName ?? "",
+    };
+    const completeHtml = buildSharedCertificateHtmlDocument(html, documentOptions);
     const pdfBuffer = await this.renderPdfFromHtml(completeHtml);
 
     return {
       pdfBuffer,
-      filename: this.buildPdfFilename(certificate.courseTitle),
+      filename: buildCertificatePdfFilename(documentOptions),
     };
   }
 
@@ -1058,18 +1064,6 @@ export class CertificatesService implements OnModuleDestroy {
 
   private normalizeLanguage(language?: string): SupportedLanguages {
     return language && isSupportedLanguage(language) ? language : SUPPORTED_LANGUAGES.EN;
-  }
-
-  private buildPdfFilename(courseTitle?: string | null): string {
-    const sanitizedTitle = (courseTitle || "")
-      .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "")
-      .replace(/\.+$/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    const safeTitle = sanitizedTitle || "certificate";
-
-    return `${safeTitle}.pdf`;
   }
 
   private formatDate(inputDate?: string | null): string {

@@ -48,8 +48,8 @@ test("admin can create a user from the create page", async ({
   });
 });
 
-test("admin cannot submit invalid user data", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin cannot submit invalid user data", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openCreateUserPageFlow(page);
 
     await expect(page.getByTestId(CREATE_USER_PAGE_HANDLES.SUBMIT_BUTTON)).toBeDisabled();

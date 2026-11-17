@@ -20,6 +20,7 @@ import { invalidateLearningPathProgressionData } from "~/api/utils/invalidateLea
 import { isClosedQuizAttemptError } from "~/api/utils/refetchLessonOnClosedQuizAttempt";
 import { ProgressBadge } from "~/components/Badges/ProgressBadge";
 import { Icon } from "~/components/Icon";
+import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import {
   Tooltip,
@@ -81,6 +82,9 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
     (Boolean(lesson.lessonCompleted) || isAwaitingReview) && !isRetakingQuiz;
   const isTimedQuiz = Boolean(lesson.timeLimitMinutes) && !isPreviewMode;
   const quizAttempt = isTimedQuiz && !isUserSubmittedAnswer ? lesson.quizAttempt : null;
+  // Author's score-band message, already localized and interpolated server-side; empty when hidden.
+  const feedbackMessage =
+    isUserSubmittedAnswer && !isPreviewMode ? (lesson.quizDetails?.feedbackMessage ?? null) : null;
   const quizAttemptId = quizAttempt?.attemptId;
 
   const getInitialAnswers = () => {
@@ -297,7 +301,8 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
                     <span data-testid={LEARNING_HANDLES.QUIZ_AWAITING_REVIEW}>
                       <ProgressBadge progress="awaitingReview" />
                     </span>
-                    {!lesson.isQuizFeedbackRedacted && (
+                    {/* The API sends the counts only when the partial result may be shown. */}
+                    {typeof lesson.quizDetails?.correctAnswerCount === "number" && (
                       <span data-testid={LEARNING_HANDLES.QUIZ_PARTIAL_SCORE}>
                         {t("studentLessonView.other.partialScore", {
                           correct: lesson.quizDetails?.correctAnswerCount ?? 0,
@@ -325,6 +330,15 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
                   questionsNumber: questions.length,
                 })}
               </span>
+            </div>
+          )}
+
+          {feedbackMessage && (
+            <div
+              data-testid={LEARNING_HANDLES.QUIZ_FEEDBACK_MESSAGE}
+              className="rounded-lg border border-neutral-200 bg-neutral-50 p-4"
+            >
+              <Viewer content={feedbackMessage} style="prose" />
             </div>
           )}
 

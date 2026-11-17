@@ -11,12 +11,15 @@ import type { UIMessage } from "@ai-sdk/react";
 import type { ComponentProps, ReactNode } from "react";
 
 const mounts = vi.hoisted(() => ({ mount: vi.fn(), unmount: vi.fn() }));
+const chat = vi.hoisted(() => ({ status: "ready" }));
+
 vi.mock("@ai-sdk/react", async () => {
   const { useState } = await import("react");
   return {
     useChat: () => {
       const [messages, setMessages] = useState<UIMessage[]>([]);
-      return { messages, setMessages, sendMessage: vi.fn(), status: "ready" };
+
+      return { messages, setMessages, sendMessage: vi.fn(), status: chat.status };
     },
   };
 });
@@ -85,6 +88,7 @@ const setHistory = (messages: Array<{ id: string; role: string; content: string 
 
 beforeEach(() => {
   vi.clearAllMocks();
+  chat.status = "ready";
   setHistory([{ id: "welcome", role: "assistant", content: "Welcome" }]);
 });
 
@@ -113,5 +117,26 @@ describe("Practice voice history", () => {
     expect(mounts.unmount).toHaveBeenCalledWith("attempt-1");
     expect(mounts.mount).toHaveBeenCalledWith("attempt-2");
     expect(screen.queryByText("Welcome")).not.toBeInTheDocument();
+  });
+});
+
+describe("Practice reply announcement", () => {
+  it("keeps the announcer empty while streaming and announces the reply after", async () => {
+    setHistory([
+      { id: "welcome", role: "assistant", content: "Welcome" },
+      { id: "mentor-reply", role: "assistant", content: "Finished reply" },
+    ]);
+    const { rerender } = renderWith().render(<AiMentorPracticeConversation {...props} />);
+
+    await waitFor(() => expect(screen.getByText("Finished reply")).toBeInTheDocument());
+    const announcer = screen.getByRole("status");
+
+    chat.status = "streaming";
+    rerender(<AiMentorPracticeConversation {...props} />);
+    expect(announcer).toBeEmptyDOMElement();
+
+    chat.status = "ready";
+    rerender(<AiMentorPracticeConversation {...props} />);
+    await waitFor(() => expect(announcer).toHaveTextContent("Finished reply"));
   });
 });

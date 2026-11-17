@@ -15,7 +15,7 @@ import { EmailLayout } from "./components/EmailLayout";
 
 import type { RenderEmailTemplateInput, RenderedEmailTemplate } from "./template-renderer.types";
 
-const replaceVariables = (
+export const replaceVariables = (
   value: string,
   variables: Readonly<Record<string, EmailTemplateVariableValue>>,
 ) =>

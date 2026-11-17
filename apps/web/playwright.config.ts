@@ -92,7 +92,7 @@ const config: PlaywrightTestConfig = {
   ],
 };
 
-if (process.env.CI) {
+if (process.env.CI && process.env.E2E_APP_IMAGES !== "true") {
   config.webServer = [
     {
       command:

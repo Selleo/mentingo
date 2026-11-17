@@ -10,6 +10,7 @@ export const NATIVE_ARCHIVE_KIND = {
 export const NATIVE_ARCHIVE_JOB_ACTION = {
   EXPORT_COURSE: "export-course",
   EXPORT_LEARNING_PATH: "export-learning-path",
+  EXPORT_COURSE_SCORM: "export-course-scorm",
   IMPORT: "import",
 } as const;
 
@@ -64,6 +65,7 @@ export const NATIVE_ARCHIVE_COURSE_ARRAY_FIELDS = [
   "assessmentQuestionBlankAnswerSets",
   "assessmentQuestionDragAndDropOptions",
   "assessmentQuestionMatchingPairs",
+  "assessmentFeedbackRanges",
   "assessmentQuestionScaleOptions",
   "assessmentQuestionTrueFalseStatements",
   "questionResources",

@@ -10,6 +10,7 @@ import {
 } from "@nestjs/common";
 import {
   ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
+  ASSESSMENT_FEEDBACK_MODES,
   ASSESSMENT_TIMED_ATTEMPT_SUBMIT_GRACE_SECONDS,
   COURSE_ENROLLMENT,
   COURSE_STATUSES,
@@ -42,6 +43,7 @@ import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { getVideoProviderFromReference } from "src/file/utils/videoProvider";
+import { LessonAudioProgressService } from "src/lesson-audio-progress/lesson-audio-progress.service";
 import { LessonVideoProgressService } from "src/lesson-video-progress/lesson-video-progress.service";
 import { LiveTrainingService } from "src/live-training/live-training.service";
 import { LocalizationService } from "src/localization/localization.service";
@@ -121,6 +123,7 @@ export class LessonService {
     private readonly permissionsService: PermissionsService,
     private readonly liveTrainingService: LiveTrainingService,
     private readonly lessonVideoProgressService: LessonVideoProgressService,
+    private readonly lessonAudioProgressService: LessonAudioProgressService,
     private readonly resourceLibraryService: ResourceLibraryService,
     private readonly quizRuntimeService: QuizRuntimeService,
     private readonly hostedVideoStatusService: HostedVideoStatusService,
@@ -401,7 +404,17 @@ export class LessonService {
       quizAttempt: openQuizAttempt ? mapQuizOpenAttemptToState(openQuizAttempt) : null,
     };
 
-    const isQuizFeedbackRedacted = isPublicCoursePreview || !lesson.quizFeedbackEnabled;
+    const feedbackMode = quizDelivery?.feedbackMode ?? ASSESSMENT_FEEDBACK_MODES.FULL;
+    // Master gate (preview / course toggle) hides everything; only the full mode keeps per-question
+    // correctness, so score_only and none reuse the same redaction as a disabled master gate.
+    const isFeedbackMasterGateOff = isPublicCoursePreview || !lesson.quizFeedbackEnabled;
+    const isQuizFeedbackRedacted =
+      isFeedbackMasterGateOff || feedbackMode !== ASSESSMENT_FEEDBACK_MODES.FULL;
+    // The score-band message is withheld only by the master gate and the none mode (and, server-side
+    // in delivery, until the attempt is fully graded); score_only still shows it.
+    const feedbackMessage = isFeedbackMasterGateOff
+      ? null
+      : (quizDelivery?.feedbackMessage ?? null);
 
     const questionListWithUrls: QuestionBody[] = await Promise.all(
       questionList.map(async (question) => {
@@ -447,13 +460,15 @@ export class LessonService {
         score: lesson.quizScore,
         correctAnswerCount,
         wrongAnswerCount,
+        feedbackMessage,
       };
 
       return { ...lesson, ...timedQuizState, quizDetails, isQuizFeedbackRedacted };
     }
 
     // Partial result: counts only already graded questions, the rest waits for a reviewer.
-    if (lesson.isQuizAwaitingReview && !isQuizFeedbackRedacted) {
+    // Gated by the master gate only, so score_only still shows the graded count.
+    if (lesson.isQuizAwaitingReview && !isFeedbackMasterGateOff) {
       const quizDetails: QuestionDetails = {
         questions: redactedQuestionList,
         questionCount: redactedQuestionList.length,
@@ -462,6 +477,7 @@ export class LessonService {
           .length,
         wrongAnswerCount: questionListWithUrls.filter(({ passQuestion }) => passQuestion === false)
           .length,
+        feedbackMessage,
       };
 
       return { ...lesson, quizDetails, isQuizFeedbackRedacted };
@@ -473,6 +489,7 @@ export class LessonService {
       score: null,
       correctAnswerCount: null,
       wrongAnswerCount: null,
+      feedbackMessage,
     };
 
     return { ...lesson, ...timedQuizState, quizDetails, isQuizFeedbackRedacted };
@@ -1255,6 +1272,23 @@ export class LessonService {
       videoProgressRows.map((progress) => [progress.resourceEntityId, progress]),
     );
 
+    const audioResourceEntityIds = lessonResources
+      .filter((resource) => resource.contentType?.startsWith("audio/") && resource.resourceEntityId)
+      .map((resource) => resource.resourceEntityId);
+
+    const audioProgressRows =
+      userId && audioResourceEntityIds.length > 0
+        ? await this.lessonAudioProgressService.getProgressForResources({
+            lessonId: id,
+            studentId: userId,
+            resourceEntityIds: audioResourceEntityIds,
+          })
+        : [];
+
+    const audioProgressByResourceEntityId = new Map(
+      audioProgressRows.map((progress) => [progress.resourceEntityId, progress]),
+    );
+
     const videoProcessingStatusByReference =
       await this.hostedVideoStatusService.findProcessingStatusesInCurrentTenant(
         lessonResources
@@ -1277,6 +1311,9 @@ export class LessonService {
       videoProgress: resource.resourceEntityId
         ? videoProgressByResourceEntityId.get(resource.resourceEntityId)
         : undefined,
+      audioProgress: resource.resourceEntityId
+        ? audioProgressByResourceEntityId.get(resource.resourceEntityId)
+        : undefined,
     }));
 
     const {
@@ -1298,6 +1335,7 @@ export class LessonService {
       hasOnlyVideo: hasVideo,
       hasVideo: contentCount.video > 0,
       hasTrackedVideo: videoResourceEntityIds.length > 0,
+      hasTrackedAudio: audioResourceEntityIds.length > 0,
       hasAutoplayTrigger,
       videos,
     };

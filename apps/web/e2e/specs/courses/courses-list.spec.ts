@@ -10,9 +10,9 @@ import { openCreateCourseFromListFlow } from "../../flows/courses/open-create-co
 test("admin can browse, filter, and open course details", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const categoryFactory = factories.createCategoryFactory();
     const courseFactory = factories.createCourseFactory();
     const category = await categoryFactory.create(`Course List Category ${Date.now()}`);
@@ -49,8 +49,8 @@ test("admin can browse, filter, and open course details", async ({
   });
 });
 
-test("admin can open create course page from course list", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin can open create course page from course list", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openCoursesPageFlow(page);
     await openCreateCourseFromListFlow(page);
 

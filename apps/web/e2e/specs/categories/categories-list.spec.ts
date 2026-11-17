@@ -10,9 +10,9 @@ import { selectCategoriesFlow } from "../../flows/categories/select-categories.f
 test("admin can browse, filter, sort, select, and open category details", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const categoryFactory = factories.createCategoryFactory();
     const prefix = `categories-list-${Date.now()}`;
     const titles = ["Alpha", "Beta", "Gamma"] as const;

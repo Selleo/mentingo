@@ -1,5 +1,6 @@
 import { VIDEO_EMBED_PROVIDERS } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useThumbnail } from "~/api/queries/useThumbnail";
 import { Icon } from "~/components/Icon";
@@ -13,7 +14,7 @@ import {
 import { VideoPlayer } from "./VideoPlayer";
 
 import type { VideoCoverageTrackingOptions } from "./videoCoverage.types";
-import type { CSSProperties, KeyboardEvent, SyntheticEvent } from "react";
+import type { CSSProperties, SyntheticEvent } from "react";
 import type { VideoProvider } from "~/components/RichText/extensions/utils/video";
 
 type Props = {
@@ -23,6 +24,7 @@ type Props = {
   index?: number | null;
   onEnded?: (index: number | null) => void;
   coverageTracking?: VideoCoverageTrackingOptions;
+  title?: string | null;
 };
 
 const VIDEO_PAUSE_EVENT = "mentingo:lesson-videos-pause";
@@ -50,7 +52,16 @@ export const resumeLessonVideo = (resourceEntityId: string) => {
   );
 };
 
-export function Video({ src, url, provider, index = null, onEnded, coverageTracking }: Props) {
+export function Video({
+  src,
+  url,
+  provider,
+  index = null,
+  onEnded,
+  coverageTracking,
+  title,
+}: Props) {
+  const { t } = useTranslation();
   const [isActive, setIsActive] = useState(false);
   const [pauseRequestId, setPauseRequestId] = useState<number>();
   const [resumeRequestId, setResumeRequestId] = useState<number>();
@@ -109,15 +120,6 @@ export function Video({ src, url, provider, index = null, onEnded, coverageTrack
     onEnded?.(index);
   }, [index, onEnded]);
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      event.preventDefault();
-      handleActivate();
-    },
-    [handleActivate],
-  );
-
   const aspectRatioStyle = useMemo(
     () =>
       ({
@@ -134,6 +136,10 @@ export function Video({ src, url, provider, index = null, onEnded, coverageTrack
       }) satisfies CSSProperties,
     [aspectRatioStyle, isVerticalVideo],
   );
+
+  const playLabel = title
+    ? t("richText.video.ariaLabel.playWithTitle", { title })
+    : t("richText.video.ariaLabel.play");
 
   return (
     <div ref={containerRef} className="w-full">
@@ -154,13 +160,12 @@ export function Video({ src, url, provider, index = null, onEnded, coverageTrack
             />
           </div>
         ) : (
-          <div
-            className="relative size-full cursor-pointer overflow-hidden rounded-none bg-black"
+          <button
+            type="button"
+            className="relative block size-full cursor-pointer overflow-hidden rounded-none bg-black disabled:cursor-default"
             onClick={handleActivate}
-            onKeyDown={handleKeyDown}
-            role="button"
-            tabIndex={resolvedUrl ? 0 : -1}
-            aria-pressed={isActive}
+            disabled={!resolvedUrl}
+            aria-label={playLabel}
           >
             <div className="absolute inset-0 z-10 grid place-items-center bg-gray-600/40">
               <span className="text-white h1">
@@ -171,12 +176,12 @@ export function Video({ src, url, provider, index = null, onEnded, coverageTrack
             {thumbnailUrl?.url && (
               <img
                 src={thumbnailUrl.url}
-                alt={thumbnailUrl.url}
+                alt=""
                 onLoad={handleThumbnailLoad}
                 className="absolute inset-0 size-full object-contain"
               />
             )}
-          </div>
+          </button>
         )}
       </div>
     </div>

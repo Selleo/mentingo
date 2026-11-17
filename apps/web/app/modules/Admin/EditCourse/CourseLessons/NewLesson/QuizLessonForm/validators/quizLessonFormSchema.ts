@@ -1,8 +1,14 @@
-import { ASSESSMENT_SCORING_MODES, ASSESSMENT_TIME_LIMIT_MINUTES } from "@repo/shared";
+import {
+  ASSESSMENT_FEEDBACK_MODES,
+  ASSESSMENT_SCORING_MODES,
+  ASSESSMENT_TIME_LIMIT_MINUTES,
+} from "@repo/shared";
 import { z } from "zod";
 
 import { QuestionType } from "../QuizLessonForm.types";
 import { minutesToTimeValue } from "../utils/timeLimitTime";
+
+import { collectFeedbackRangeIssues, FEEDBACK_RANGE_VALIDATION_KEYS } from "./feedbackRanges";
 
 export const quizLessonFormSchema = (
   t: (key: string, options?: Record<string, unknown>) => string,
@@ -30,6 +36,24 @@ export const quizLessonFormSchema = (
         z.null(),
       ])
       .optional(),
+    feedbackMode: z.nativeEnum(ASSESSMENT_FEEDBACK_MODES),
+    feedbackRanges: z
+      .array(
+        z.object({
+          id: z.string().optional(),
+          minPercent: z.number(),
+          maxPercent: z.number(),
+          message: z.string(),
+        }),
+      )
+      .superRefine((ranges, context) => {
+        collectFeedbackRangeIssues(ranges).forEach((issue) => {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t(FEEDBACK_RANGE_VALIDATION_KEYS[issue]),
+          });
+        });
+      }),
     questions: z
       .array(
         z.object({

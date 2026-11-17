@@ -4,7 +4,7 @@ import { courseLearningHeaders } from "~/api/utils/courseLearningHeaders";
 
 import { ApiClient } from "../api-client";
 
-import type { LaunchScormAttemptResponse } from "../generated-api";
+import type { LaunchScormPreviewResponse } from "../generated-api";
 import type { SupportedLanguages } from "@repo/shared";
 
 type ScormLaunchParams = {
@@ -12,6 +12,12 @@ type ScormLaunchParams = {
   lessonId: string;
   scoId?: string | null;
   language: SupportedLanguages;
+  isPreview?: boolean;
+};
+
+export type ScormLaunch = LaunchScormPreviewResponse["data"] & {
+  attemptId: string | null;
+  learningStateId?: string | null;
 };
 
 export const scormLaunchQueryOptions = ({
@@ -19,26 +25,37 @@ export const scormLaunchQueryOptions = ({
   scoId,
   language,
   learningStateId,
+  isPreview = false,
 }: ScormLaunchParams) =>
   queryOptions({
     enabled: Boolean(lessonId),
     gcTime: 0,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    queryKey: ["scorm", "launch", lessonId, scoId ?? null, language, learningStateId ?? null],
-    queryFn: async () => {
+    queryKey: [
+      "scorm",
+      "launch",
+      lessonId,
+      scoId ?? null,
+      language,
+      learningStateId ?? null,
+      isPreview,
+    ],
+    queryFn: async (): Promise<ScormLaunch> => {
+      const query = { lessonId, scoId: scoId ?? undefined, language };
+
+      if (isPreview) {
+        const response = await ApiClient.api.scormControllerLaunchScormPreview(query);
+        return { ...response.data.data, attemptId: null };
+      }
+
       const response = await ApiClient.api.scormControllerLaunchScormAttempt(
-        {
-          lessonId,
-          scoId: scoId ?? undefined,
-          language,
-        },
+        query,
         courseLearningHeaders(learningStateId),
       );
 
-      return response.data;
+      return response.data.data;
     },
-    select: (data: LaunchScormAttemptResponse) => data.data,
   });
 
 export function useScormLaunch(params: ScormLaunchParams) {

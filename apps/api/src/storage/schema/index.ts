@@ -8,6 +8,7 @@ import {
 } from "@repo/email-templates";
 import {
   COURSE_TYPE,
+  DISCUSSION_SCOPES,
   AUTOMATION_NODE_KINDS,
   AUTOMATION_STATUSES,
   AUTOMATION_RUN_STATUSES,
@@ -80,6 +81,7 @@ import {
   type AnnouncementSourceType,
   type AnnouncementStatus,
   type CourseGenerationSyncStatus,
+  type DiscussionScope,
   type LiveTrainingDeliveryType,
   type LiveTrainingLinkEntityType,
   type LiveTrainingMemberRole,
@@ -1325,9 +1327,9 @@ export const courseChatThreads = pgTable(
   {
     ...id,
     ...timestamps,
-    courseId: uuid("course_id")
-      .references(() => courses.id, { onDelete: "cascade" })
-      .notNull(),
+    scope: text("scope").$type<DiscussionScope>().notNull().default(DISCUSSION_SCOPES.COURSE),
+    title: text("title"),
+    courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }),
     createdByUserId: uuid("created_by_user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
@@ -1343,6 +1345,23 @@ export const courseChatThreads = pgTable(
       table.courseId,
       table.updatedAt,
     ),
+    scopeUpdatedAtIdx: index("course_chat_threads_tenant_id_scope_updated_at_idx").on(
+      table.tenantId,
+      table.scope,
+      table.updatedAt,
+    ),
+    scopeCheck: check(
+      "course_chat_threads_scope_check",
+      sql`${table.scope} IN ('general', 'course')`,
+    ),
+    scopeCourseCheck: check(
+      "course_chat_threads_scope_course_check",
+      sql`(${table.scope} = 'course') = (${table.courseId} IS NOT NULL)`,
+    ),
+    generalTitleCheck: check(
+      "course_chat_threads_general_title_check",
+      sql`${table.scope} <> 'general' OR ${table.title} IS NOT NULL`,
+    ),
   })),
 );
 
@@ -1354,9 +1373,7 @@ export const courseChatMessages = pgTable(
     threadId: uuid("thread_id")
       .references(() => courseChatThreads.id, { onDelete: "cascade" })
       .notNull(),
-    courseId: uuid("course_id")
-      .references(() => courses.id, { onDelete: "cascade" })
-      .notNull(),
+    courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }),
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
@@ -1396,9 +1413,7 @@ export const courseChatMessageReactions = pgTable(
     messageId: uuid("message_id")
       .references(() => courseChatMessages.id, { onDelete: "cascade" })
       .notNull(),
-    courseId: uuid("course_id")
-      .references(() => courses.id, { onDelete: "cascade" })
-      .notNull(),
+    courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }),
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
@@ -2554,6 +2569,56 @@ export const lessonVideoProgress = pgTable(
   withTenantIdIndex("lesson_video_progress", (table) => ({
     lessonIdx: index("lesson_video_progress_lesson_idx").on(table.lessonId),
     resourceEntityIdx: index("lesson_video_progress_resource_entity_idx").on(
+      table.resourceEntityId,
+    ),
+    unq: unique()
+      .on(table.studentId, table.lessonId, table.resourceEntityId, table.learningStateId)
+      .nullsNotDistinct(),
+  })),
+);
+
+export const lessonAudioProgress = pgTable(
+  "lesson_audio_progress",
+  {
+    ...id,
+    learningStateId: uuid("learning_state_id").references(() => courseLearningStates.id, {
+      onDelete: "cascade",
+    }),
+    ...timestamps,
+    studentId: uuid("student_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id, { onDelete: "cascade" })
+      .notNull(),
+    resourceEntityId: uuid("resource_entity_id")
+      .references(() => resourceEntity.id, { onDelete: "cascade" })
+      .notNull(),
+    durationSeconds: integer("duration_seconds").notNull(),
+    bucketSizeSeconds: integer("bucket_size_seconds").default(1).notNull(),
+    listenedRanges: int4multirange("listened_ranges")
+      .default(sql`'{}'::int4multirange`)
+      .notNull(),
+    coveredBucketCount: integer("covered_bucket_count").default(0).notNull(),
+    coveragePercent: numeric("coverage_percent", { precision: 5, scale: 4 })
+      .$type<number>()
+      .default(0)
+      .notNull(),
+    activeListenSeconds: numeric("active_listen_seconds", { precision: 10, scale: 2 })
+      .$type<number>()
+      .default(0)
+      .notNull(),
+    isListened: boolean("is_listened").default(false).notNull(),
+    listenedAt: timestamp("listened_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("lesson_audio_progress", (table) => ({
+    lessonIdx: index("lesson_audio_progress_lesson_idx").on(table.lessonId),
+    resourceEntityIdx: index("lesson_audio_progress_resource_entity_idx").on(
       table.resourceEntityId,
     ),
     unq: unique()

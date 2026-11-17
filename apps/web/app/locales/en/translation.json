@@ -839,7 +839,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "\"Video completion tracking\" option updated successfully",
     "videoCompletionTrackingUpdateFailed": "Failed to update \"Video completion tracking\" option",
     "settingsUpdatedSuccessfully": "Settings updated successfully",
-    "settingsUpdateFailed": "Failed to update settings"
+    "settingsUpdateFailed": "Failed to update settings",
+    "audioCompletionTrackingUpdatedSuccessfully": "\"Audio completion tracking\" option updated successfully",
+    "audioCompletionTrackingUpdateFailed": "Failed to update \"Audio completion tracking\" option"
   },
   "uploadFile": {
     "header": "Click to upload",
@@ -1103,14 +1105,17 @@
     "promotionCodes": "Promotion Codes",
     "manage": "Manage",
     "ariaLabels": {
-      "goToAvailableCourses": "Go to available courses"
+      "goToAvailableCourses": "Go to available courses",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar"
     },
     "qa": "Q&A",
     "tenants": "Organizations",
     "activityLogs": "Activity Logs",
     "reports": "Reports",
     "leaderboards": "Leaderboards",
-    "gamification": "Gamification"
+    "gamification": "Gamification",
+    "forum": "Forum"
   },
   "microsoftCalendar": {
     "title": "Microsoft Calendar",
@@ -1691,20 +1696,6 @@
     },
     "validation": {
       "email": "Email is required"
-    }
-  },
-  "ssoEnforcementView": {
-    "header": "SSO Enforcement",
-    "subHeader": "Enforce SSO login for all users",
-    "description": "This switch will enforce Google/Microsoft login for all users. If disabled, users will be able to log in using the traditional login form.",
-    "switch": {
-      "enabled": "Enabled",
-      "disabled": "Disabled"
-    },
-    "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "SSO enforcement updated successfully",
-      "ssoEnforcementUpdateFailed": "Failed to update SSO enforcement",
-      "registerRedirect": "Registration with email is disabled because SSO is enforced."
     }
   },
   "userEmailTriggers": {
@@ -2355,7 +2346,8 @@
         "email_template": "email templates",
         "managed_group_results": "managed group results",
         "phishing": "phishing simulations",
-        "todo_task": "tasks"
+        "todo_task": "tasks",
+        "forum": "forum"
       },
       "descriptions": {
         "phishing_manage": "Create and manage phishing simulations.",
@@ -2456,7 +2448,11 @@
         "gamification_leaderboard_read_all": "View the organization leaderboard and every group leaderboard.",
         "gamification_manage": "Configure achievements and gamification settings.",
         "quiz_grading_read": "View the queue of open answers waiting for grading.",
-        "quiz_grading_grade": "Grade open answers and write comments for students."
+        "quiz_grading_grade": "Grade open answers and write comments for students.",
+        "forum_read": "View the forum.",
+        "forum_topic_create": "Create forum topics.",
+        "forum_post_create": "Reply in forum topics.",
+        "forum_post_delete": "Delete any forum post."
       }
     },
     "dropdown": {
@@ -2900,7 +2896,8 @@
         "curriculum": "Curriculum editing is not available for SCORM courses.",
         "lessonSequence": "Lesson sequence enforcement is not available for SCORM courses.",
         "quizFeedback": "Quiz feedback settings are not available for SCORM courses.",
-        "videoCompletionTracking": "Video completion tracking is not available for SCORM courses."
+        "videoCompletionTracking": "Video completion tracking is not available for SCORM courses.",
+        "audioCompletionTracking": "Audio completion tracking is not available for SCORM courses."
       },
       "notFound": {
         "course": "Course not found.",
@@ -3091,7 +3088,9 @@
         "courseAvailabilityTitle": "Course availability",
         "fallbackLanguageWarningTitle": "Note: missing translations",
         "fallbackLanguageWarningDescription": "Some fields in this language version are empty. In those places, students will see content from the default language until you add translations.",
-        "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course."
+        "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course.",
+        "enableAudioCompletionTracking": "Audio completion tracking",
+        "enableAudioCompletionTrackingDescription": "Require learners to listen to at least 90% of each audio recording in a lesson before it is marked as completed."
       },
       "validation": {
         "titleMinLength": "Title must be at least 2 characters.",
@@ -3196,14 +3195,27 @@
           "quizCooldownInHours": "Time lock after failed attempts (in hours)",
           "numberOfQuestions": "{{count1}} of {{count2}} questions",
           "noQuestions": "No questions",
-          "timeLimitMinutes": "Time limit (hh:mm)"
+          "timeLimitMinutes": "Time limit (hh:mm)",
+          "feedbackMode": "Feedback visibility",
+          "feedbackModeFull": "Score and messages",
+          "feedbackModeScoreOnly": "Score only",
+          "feedbackModeNone": "No feedback",
+          "feedbackRanges": "Score-range messages",
+          "feedbackVariablesHint": "You can use {{firstNameVar}} for the learner's first name and {{scoreVar}} for their score.",
+          "feedbackRangeMin": "From (%)",
+          "feedbackRangeMax": "To (%)",
+          "feedbackRangeMessage": "Message",
+          "feedbackRangeAdd": "Add range",
+          "feedbackRangeReset": "Restore default ranges"
         },
         "tooltip": {
           "switch": "If enabled, the student has a limited number of quiz attempts.",
           "passingThreshold": "The percentage threshold for passing the quiz. If a student reaches this score, the quiz will be considered passed.",
           "attemptsLimit": "Number of quiz attempts allowed before time lock is triggered.",
           "quizCooldownInHours": "Duration of the quiz lock after all attempts are used.",
-          "timeLimitMinutes": "Optional. When set, learners start the quiz explicitly and their answers are submitted automatically when time runs out. Leave empty for no time limit."
+          "timeLimitMinutes": "Optional. When set, learners start the quiz explicitly and their answers are submitted automatically when time runs out. Leave empty for no time limit.",
+          "feedbackMode": "Controls what learners see after submitting: the score and messages, only the score, or nothing.",
+          "feedbackRanges": "Ordered score bands shown to learners. Bands must cover 0-100% with no gaps or overlaps."
         },
         "validation": {
           "optionTextRequired": "Option text is required",
@@ -3233,7 +3245,13 @@
           "matchingPairsRequired": "Add at least 2 pairs and fill in both sides of each pair",
           "matchingMatchRequired": "Fill in the match for this pair",
           "matchingPairsUnique": "Each pair needs a unique match",
-          "timeLimitMinutes": "Enter a time limit between {{min}} and {{max}}."
+          "timeLimitMinutes": "Enter a time limit between {{min}} and {{max}}.",
+          "feedbackRangeNotInteger": "Range bounds must be whole numbers.",
+          "feedbackRangeOutOfBounds": "Range bounds must be between 0 and 100.",
+          "feedbackRangeBoundsReversed": "A range's start cannot be greater than its end.",
+          "feedbackRangesMustStartAtZero": "Ranges must start at 0%.",
+          "feedbackRangesMustEndAtHundred": "Ranges must end at 100%.",
+          "feedbackRangesGapOrOverlap": "Ranges must cover 0-100% with no gaps or overlaps."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",
@@ -4145,7 +4163,6 @@
   "registerView": {
     "header": "Sign Up",
     "subHeader": "Enter your information to create an account",
-    "subHeaderSSO": "Sign up using your Google/Microsoft account",
     "field": {
       "firstName": "First name",
       "lastName": "Last name",
@@ -4540,6 +4557,42 @@
       "timeLeft": "Time left: {{time}}",
       "warning": "Less than a minute left. Your answers will be submitted automatically when time runs out.",
       "timeUp": "Time is up. Your answers are being submitted."
+    },
+    "audioProgress": {
+      "label": "Audio progress",
+      "completedSummary": "{{completed}} of {{total}} completed",
+      "overviewAriaLabel": "Lesson audio progress",
+      "segmentAriaLabel": "Audio {{index}} progress: {{progress}}% listened",
+      "requirementSingle": "Listen to the entire audio recording to complete this lesson.",
+      "requirementMultiple": "Listen to all audio recordings to complete this lesson.",
+      "errors": {
+        "resourceNotFound": "Audio progress could not be saved for this lesson.",
+        "unsupportedLessonType": "Audio progress is only available for content lessons.",
+        "unsupportedBucketSize": "Audio progress uses an unsupported tracking interval.",
+        "invalidResourceType": "This resource cannot be tracked as a lesson audio recording.",
+        "accessDenied": "You do not have access to update audio progress for this lesson."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Finish listening before leaving?",
+      "descriptionSingle": "This lesson requires the entire audio recording to be listened to before it can be completed.",
+      "descriptionMultiple": "This lesson requires all audio recordings to be listened to before it can be completed.",
+      "continueListening": "Continue listening"
+    },
+    "requiredMediaLeave": {
+      "title": "Finish the lesson media before leaving?",
+      "description": "This lesson requires all videos to be watched and all audio recordings to be listened to before it can be completed.",
+      "continue": "Continue"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Watch the video and listen to the audio recording to complete this lesson.",
+      "requirementMultiple": "Watch all videos and listen to all audio recordings to complete this lesson.",
+      "label": "Lesson progress",
+      "overviewAriaLabel": "Lesson media progress"
+    },
+    "navigation": {
+      "previousLesson": "Previous lesson",
+      "nextLesson": "Next lesson"
     }
   },
   "studentCourseView": {
@@ -4564,6 +4617,8 @@
       "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences).",
       "aiMentorLesson": {
         "sendMessage": "Write a message...",
+        "messageLabel": "Your message",
+        "conversationLabel": "Conversation",
         "check": "Check",
         "aiMentorName": "AI Mentor",
         "retake": "Retake",
@@ -4836,7 +4891,9 @@
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
       "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses",
       "publicCoursePreview": "View lessons before enrolling in a course",
-      "publicCoursePreviewDescription": "Lets signed-in users open lessons of free courses before they enroll. Quizzes and progress tracking still require enrolling."
+      "publicCoursePreviewDescription": "Lets signed-in users open lessons of free courses before they enroll. Quizzes and progress tracking still require enrolling.",
+      "forum": "Enable forum",
+      "forumDescription": "Let everyone in the organization start topics and reply. Enrolled users also see their course discussions there"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
@@ -4850,7 +4907,8 @@
       "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Overdue course notification preferences have been successfully updated",
       "overdueCourseNotificationsPreferenceChangeError": "Failed to update overdue course notification preferences",
-      "publicCoursePreviewPreferenceChangeSuccess": "Course preview preference updated"
+      "publicCoursePreviewPreferenceChangeSuccess": "Course preview preference updated",
+      "forumPreferenceChangeSuccess": "Forum preference has been updated successfully"
     }
   },
   "registrationFormBuilder": {
@@ -4966,7 +5024,7 @@
       "courseCompletionRequired": "You must complete the course before generating a certificate."
     },
     "button": {
-      "download": "Download",
+      "download": "Download certificate (PDF)",
       "preview": "Preview",
       "shareLinkedIn": "Share on LinkedIn"
     },
@@ -5428,7 +5486,9 @@
       },
       "ariaLabel": {
         "drag": "Drag video embed",
-        "remove": "Remove video embed"
+        "remove": "Remove video embed",
+        "play": "Play video",
+        "playWithTitle": "Play video: {{title}}"
       }
     },
     "presentation": {
@@ -8610,7 +8670,14 @@
       "unavailable": "The content marketplace is not available for this organization.",
       "listingNotFound": "This marketplace course was not found.",
       "thumbnailNotFound": "This marketplace course has no thumbnail.",
-      "serviceError": "The content marketplace could not complete the request. Try again later."
+      "serviceError": "The content marketplace could not complete the request. Try again later.",
+      "outlineNotFound": "A preview of this course's content is not available yet."
+    },
+    "preview": {
+      "open": "Preview content",
+      "noChapters": "This course has no chapters yet.",
+      "chaptersCount_one": "{{count}} chapter",
+      "chaptersCount_other": "{{count}} chapters"
     }
   },
   "aiJudgeConfiguration": {
@@ -9760,5 +9827,62 @@
       }
     },
     "requiresGamification": "Turn on Gamification first."
+  },
+  "forum": {
+    "title": "Forum",
+    "description": "Ask questions and share knowledge with everyone in your organization.",
+    "newTopic": "New topic",
+    "searchPlaceholder": "Search topics",
+    "filter": {
+      "label": "Show topics",
+      "all": "All topics",
+      "general": "General"
+    },
+    "sort": {
+      "label": "Sort topics",
+      "lastActivity": "Latest activity",
+      "newest": "Newest",
+      "mostReplies": "Most replies"
+    },
+    "empty": "No topics yet. Start the first one.",
+    "noResults": "No topics match your filters.",
+    "replies_one": "{{count}} reply",
+    "replies_other": "{{count}} replies",
+    "lastActivity": "Last activity {{time}}",
+    "deletedPost": "This post was deleted.",
+    "deletePost": "Delete post",
+    "createDialog": {
+      "title": "New topic",
+      "titleLabel": "Title",
+      "titlePlaceholder": "What is your topic about?",
+      "contentLabel": "Message",
+      "contentPlaceholder": "Write the first post",
+      "submit": "Create topic"
+    },
+    "topic": {
+      "backToForum": "Back to forum",
+      "courseThreadTitle": "Discussion in {{course}}",
+      "noReplies": "No replies yet.",
+      "replyPlaceholder": "Write a reply",
+      "replySubmit": "Reply",
+      "closed": "Replies are closed because the first post was deleted."
+    },
+    "deleteDialog": {
+      "title": "Delete this post?",
+      "description": "The post will be removed for everyone. This can't be undone."
+    },
+    "toast": {
+      "createTopicError": "The topic could not be created.",
+      "createPostError": "The reply could not be sent.",
+      "deletePostError": "The post could not be deleted."
+    },
+    "errors": {
+      "topicNotFound": "This topic doesn't exist or you don't have access to it.",
+      "postNotFound": "This post no longer exists.",
+      "cannotDeletePost": "You can only delete your own posts.",
+      "topicDeleted": "Replies are closed because the first post was deleted.",
+      "emptyTitle": "Enter a title.",
+      "emptyContent": "Enter a message."
+    }
   }
 }

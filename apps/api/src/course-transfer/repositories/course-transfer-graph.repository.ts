@@ -41,6 +41,7 @@ import {
   aiMentorLessons,
   aiMentorRoleplayConfigurations,
   aiMentorTeacherConfigurations,
+  assessmentFeedbackRanges,
   categories,
   chapters,
   courses,
@@ -114,6 +115,7 @@ import type {
   UpsertTargetBlankAnswerSetValues,
   UpsertTargetBlankValues,
   UpsertTargetDragAndDropOptionValues,
+  UpsertTargetFeedbackRangeValues,
   UpsertTargetMatchingPairValues,
   UpsertTargetScaleOptionValues,
   UpsertTargetTrueFalseStatementValues,
@@ -497,6 +499,15 @@ export class CourseTransferGraphRepository {
     return assessment?.id;
   }
 
+  async findAssessmentIdsByLessonIds(lessonIds: UUIDType[]) {
+    if (!lessonIds.length) return [];
+
+    return this.db
+      .select({ lessonId: assessments.lessonId, id: assessments.id })
+      .from(assessments)
+      .where(inArray(assessments.lessonId, lessonIds));
+  }
+
   async createTargetQuestion(
     assessmentId: UUIDType,
     values: QuestionJsonbInsert,
@@ -667,6 +678,50 @@ export class CourseTransferGraphRepository {
           label: buildJsonbFieldWithMultipleEntries(values.label),
         },
       });
+  }
+
+  // Moves display orders out of the way so re-ordered upserts cannot collide on the unique index.
+  async parkTargetFeedbackRanges(assessmentIds: UUIDType[]) {
+    if (!assessmentIds.length) return;
+
+    await this.db
+      .update(assessmentFeedbackRanges)
+      .set({ displayOrder: sql`-ABS(${assessmentFeedbackRanges.displayOrder}) - 1` })
+      .where(inArray(assessmentFeedbackRanges.assessmentId, assessmentIds));
+  }
+
+  async upsertTargetFeedbackRange(values: UpsertTargetFeedbackRangeValues) {
+    await this.db
+      .insert(assessmentFeedbackRanges)
+      .values({
+        ...values,
+        message: buildJsonbFieldWithMultipleEntries(values.message),
+      })
+      .onConflictDoUpdate({
+        target: assessmentFeedbackRanges.id,
+        set: {
+          assessmentId: values.assessmentId,
+          minPercent: values.minPercent,
+          maxPercent: values.maxPercent,
+          displayOrder: values.displayOrder,
+          message: buildJsonbFieldWithMultipleEntries(values.message),
+        },
+      });
+  }
+
+  async deleteStaleTargetFeedbackRanges(assessmentIds: UUIDType[], retainedIds: UUIDType[]) {
+    if (!assessmentIds.length) return;
+
+    await this.db
+      .delete(assessmentFeedbackRanges)
+      .where(
+        retainedIds.length
+          ? and(
+              inArray(assessmentFeedbackRanges.assessmentId, assessmentIds),
+              notInArray(assessmentFeedbackRanges.id, retainedIds),
+            )
+          : inArray(assessmentFeedbackRanges.assessmentId, assessmentIds),
+      );
   }
 
   async upsertTargetTrueFalseStatement(values: UpsertTargetTrueFalseStatementValues) {

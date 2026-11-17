@@ -1,24 +1,46 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { LEGACY_SSO_ENFORCEMENT_SETTING } from "src/env/login-methods.constants";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import { secrets, settings } from "src/storage/schema";
 
-import type { GlobalSettings } from "src/common/types";
 import type { EncryptedEnvBody } from "src/env/env.schema";
 
 @Injectable()
 export class EnvRepository {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
+  ) {}
 
-  async findGlobalSettingsForUpdate() {
+  async lockGlobalSettings() {
     const [globalSettings] = await this.db
       .select({ settings: settings.settings })
       .from(settings)
       .where(isNull(settings.userId))
       .for("update");
 
-    return globalSettings?.settings as GlobalSettings | undefined;
+    return globalSettings?.settings as Record<string, unknown> | undefined;
+  }
+
+  async findTenantIdsWithLegacySSOEnforcementSetting() {
+    const tenantSettings = await this.dbAdmin
+      .select({ tenantId: settings.tenantId })
+      .from(settings)
+      .where(
+        and(isNull(settings.userId), sql`${settings.settings} ? ${LEGACY_SSO_ENFORCEMENT_SETTING}`),
+      );
+
+    return tenantSettings.map(({ tenantId }) => tenantId);
+  }
+
+  async removeLegacySSOEnforcementSetting() {
+    await this.db
+      .update(settings)
+      .set({ settings: sql`${settings.settings} - ${LEGACY_SSO_ENFORCEMENT_SETTING}::text` })
+      .where(isNull(settings.userId));
   }
 
   async bulkUpsertEnv(data: EncryptedEnvBody[]) {

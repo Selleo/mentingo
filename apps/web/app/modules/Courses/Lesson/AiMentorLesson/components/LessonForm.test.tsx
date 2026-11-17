@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useLumaConfigured } from "~/api/queries/useLumaConfigured";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { useVoiceMentor } from "~/modules/Voice/hooks/useVoiceMentor";
+import i18next from "~/utils/mocks/i18next.mock";
 import { renderWith } from "~/utils/testUtils";
 
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
@@ -105,5 +106,32 @@ describe("preview voice composer", () => {
     expect(
       screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_ACTION_BUTTON),
     ).not.toHaveAttribute("data-mode", "voice");
+  });
+});
+
+describe("message input", () => {
+  it("names the message field without adding a visible label", () => {
+    const label = i18next.t("studentCourseView.lesson.aiMentorLesson.messageLabel");
+
+    renderForm();
+    expect(screen.getByRole("textbox", { name: label })).toBe(
+      screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT),
+    );
+    expect(screen.queryByText(label)).not.toBeInTheDocument();
+  });
+
+  it("sends once on Enter and not on Shift+Enter", () => {
+    renderWith().render(
+      <TooltipProvider>
+        <LessonForm {...props} textReadOnly={false} input="Hello" />
+      </TooltipProvider>,
+    );
+    const textbox = screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT);
+
+    fireEvent.keyDown(textbox, { key: "Enter", shiftKey: true });
+    expect(props.handleSubmit).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(textbox, { key: "Enter" });
+    expect(props.handleSubmit).toHaveBeenCalledOnce();
   });
 });

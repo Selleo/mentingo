@@ -134,18 +134,19 @@ const CertificateControls = ({
       )}
 
       {showDownloadButton && (
-        <button
-          className={buttonClasses}
+        <Button
+          size="lg"
+          className="gap-2 px-4"
           onClick={handleDownload}
           disabled={isPreparingDownload}
-          aria-label={t("studentCertificateView.button.download")}
         >
           {isPreparingDownload ? (
-            <Loader2 className="size-5 animate-spin" />
+            <Loader2 className="size-5 animate-spin" aria-hidden="true" />
           ) : (
-            <Download className="size-5" />
+            <Download className="size-5" aria-hidden="true" />
           )}
-        </button>
+          {t("studentCertificateView.button.download")}
+        </Button>
       )}
       {showShareButton && (
         <button
@@ -162,8 +163,8 @@ const CertificateControls = ({
         </button>
       )}
       {onClose && (
-        <button className={buttonClasses} onClick={onClose}>
-          <X className="size-5" />
+        <button className={buttonClasses} onClick={onClose} aria-label={t("common.button.close")}>
+          <X className="size-5" aria-hidden="true" />
         </button>
       )}
     </div>

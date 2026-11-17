@@ -11,9 +11,9 @@ test("visitor can access published news list and details when public news access
   createWorkspacePage,
   factories,
   apiClient,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async () => {
+  await withWorkerPage(USER_ROLE.admin, async () => {
     const restoreContentFeatures = await ensureContentFeaturesEnabled(apiClient, {
       publicNews: true,
     });
@@ -56,9 +56,9 @@ test("visitor cannot see private news when public news access is enabled", async
   createWorkspacePage,
   factories,
   apiClient,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async () => {
+  await withWorkerPage(USER_ROLE.admin, async () => {
     const restoreContentFeatures = await ensureContentFeaturesEnabled(apiClient, {
       publicNews: true,
     });

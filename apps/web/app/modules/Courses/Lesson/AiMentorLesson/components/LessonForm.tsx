@@ -347,6 +347,7 @@ export const LessonForm = ({
               compact={compact}
               input={input}
               placeholder={t("studentCourseView.lesson.aiMentorLesson.sendMessage")}
+              ariaLabel={t("studentCourseView.lesson.aiMentorLesson.messageLabel")}
               voiceLevel={voiceLevel}
               onInputChange={handleInputChange as (e: ChangeEvent<HTMLTextAreaElement>) => void}
               onSubmit={handleSubmit}

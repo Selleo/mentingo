@@ -42,6 +42,7 @@ type EmbedLesson = BaseLesson & {
 type QuizLesson = BaseLesson & {
   type: "quiz";
   passingScorePercent?: number | null;
+  feedbackMode: "full" | "score_only" | "none";
   questions: QuizQuestion[];
 };
 
@@ -571,6 +572,7 @@ function renderQuizLesson(
 ) {
   const savedAnswers = runtime.lessonState.answers ?? {};
   const labels = getRuntimeLabels(courseJson.course.language);
+  const showCorrections = courseJson.settings.quizFeedbackEnabled && lesson.feedbackMode === "full";
   let submitted = Boolean(runtime.lessonState.submitted);
   const form = element("form", "quiz-form") as HTMLFormElement;
   const feedback = element("div", "quiz-feedback");
@@ -585,13 +587,7 @@ function renderQuizLesson(
   form.append(renderTitle(lesson.title), renderPassingThreshold(lesson, labels));
   lesson.questions.forEach((question) => {
     form.append(
-      renderQuestion(
-        question,
-        savedAnswers[question.id],
-        submitted,
-        courseJson.settings.quizFeedbackEnabled,
-        labels,
-      ),
+      renderQuestion(question, savedAnswers[question.id], submitted, showCorrections, labels),
     );
   });
   actions.append(retake, submit);
@@ -613,7 +609,7 @@ function renderQuizLesson(
       .forEach((input) => {
         input.disabled = true;
       });
-    if (courseJson.settings.quizFeedbackEnabled) {
+    if (showCorrections) {
       lesson.questions.forEach((question) => {
         const card = form.querySelector<HTMLElement>(
           `.question-card[data-question-id="${question.id}"]`,

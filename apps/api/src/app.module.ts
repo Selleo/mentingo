@@ -54,6 +54,7 @@ import { DevToolsModule, isDevToolsEnabled } from "./dev-tools/dev-tools.module"
 import { EmailTemplateModule } from "./email-templates/email-template.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
+import { ForumModule } from "./forum/forum.module";
 import { GamificationModule } from "./gamification/gamification.module";
 import { GlobalSearchModule } from "./global-search/global-search.module";
 import { GroupModule } from "./group/group.module";
@@ -61,6 +62,7 @@ import { HealthModule } from "./health/health.module";
 import { IngestionModule } from "./ingestion/ingestion.module";
 import { IntegrationModule } from "./integration/integration.module";
 import { LessonModule } from "./lesson/lesson.module";
+import { LessonAudioProgressModule } from "./lesson-audio-progress/lesson-audio-progress.module";
 import { LessonVideoProgressModule } from "./lesson-video-progress/lesson-video-progress.module";
 import { LiveTrainingModule } from "./live-training/live-training.module";
 import { LocalizationModule } from "./localization/localization.module";
@@ -138,11 +140,13 @@ import type { RedisClient } from "src/redis";
     CourseRepetitionModule,
     NativeArchiveModule,
     CourseChatModule,
+    ForumModule,
     LearningPathModule,
     GroupModule,
     GlobalSearchModule,
     LessonModule,
     LessonVideoProgressModule,
+    LessonAudioProgressModule,
     QuizModule,
     QuizGradingModule,
     StudentLessonProgressModule,

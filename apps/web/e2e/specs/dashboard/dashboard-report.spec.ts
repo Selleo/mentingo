@@ -4,8 +4,8 @@ import { DASHBOARD_REPORT_HANDLES } from "../../data/dashboard/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openDashboardFlow } from "../../flows/dashboard/open-dashboard.flow";
 
-test("admin can download the summary report as an XLSX file", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin can download the summary report as an XLSX file", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     let reportRequestUrl = "";
 
     await page.route("**/api/report/summary*", async (route) => {

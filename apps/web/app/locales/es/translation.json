@@ -842,7 +842,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "La opción \"Seguimiento de finalización de vídeo\" se actualizó correctamente",
     "videoCompletionTrackingUpdateFailed": "No se pudo actualizar la opción \"Seguimiento de finalización de video\"",
     "settingsUpdatedSuccessfully": "Ajustes actualizados correctamente",
-    "settingsUpdateFailed": "No se pudo actualizar la configuración"
+    "settingsUpdateFailed": "No se pudo actualizar la configuración",
+    "audioCompletionTrackingUpdatedSuccessfully": "La opción \"Seguimiento de finalización de audio\" se actualizó correctamente",
+    "audioCompletionTrackingUpdateFailed": "No se pudo actualizar la opción \"Seguimiento de finalización de audio\""
   },
   "uploadFile": {
     "header": "Haz clic para subir",
@@ -1106,14 +1108,17 @@
     "promotionCodes": "Códigos de promoción",
     "manage": "Administrar",
     "ariaLabels": {
-      "goToAvailableCourses": "Ir a cursos disponibles"
+      "goToAvailableCourses": "Ir a cursos disponibles",
+      "collapseSidebar": "Contraer barra lateral",
+      "expandSidebar": "Expandir barra lateral"
     },
     "qa": "Preguntas y respuestas",
     "tenants": "Organizaciones",
     "activityLogs": "Registros de actividad",
     "reports": "Informes",
     "leaderboards": "Clasificaciones",
-    "gamification": "Gamificación"
+    "gamification": "Gamificación",
+    "forum": "Foro"
   },
   "microsoftCalendar": {
     "title": "Calendario de Microsoft",
@@ -1684,20 +1689,6 @@
     },
     "validation": {
       "email": "Se requiere correo electrónico"
-    }
-  },
-  "ssoEnforcementView": {
-    "header": "SSO Cumplimiento",
-    "subHeader": "Aplicar el inicio de sesión SSO para todos los usuarios",
-    "description": "Este cambio aplicará el inicio de sesión Google/Microsoft para todos los usuarios. Si está deshabilitado, los usuarios podrán iniciar sesión utilizando el formulario de inicio de sesión tradicional.",
-    "switch": {
-      "enabled": "Habilitado",
-      "disabled": "Discapacitado"
-    },
-    "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "La aplicación de SSO se actualizó correctamente",
-      "ssoEnforcementUpdateFailed": "No se pudo actualizar la aplicación de SSO",
-      "registerRedirect": "El registro con correo electrónico está deshabilitado porque se aplica SSO."
     }
   },
   "userEmailTriggers": {
@@ -2347,7 +2338,8 @@
         "email_template": "plantillas de correo",
         "managed_group_results": "resultados de grupos gestionados",
         "phishing": "simulaciones de phishing",
-        "todo_task": "tareas"
+        "todo_task": "tareas",
+        "forum": "foro"
       },
       "descriptions": {
         "phishing_manage": "Crear y gestionar simulaciones de phishing.",
@@ -2448,7 +2440,11 @@
         "gamification_leaderboard_read_all": "Ver la clasificación de la organización y las de todos los grupos.",
         "gamification_manage": "Configurar logros y ajustes de gamificación.",
         "quiz_grading_read": "Ver la cola de respuestas abiertas pendientes de calificación.",
-        "quiz_grading_grade": "Calificar respuestas abiertas y escribir comentarios para los estudiantes."
+        "quiz_grading_grade": "Calificar respuestas abiertas y escribir comentarios para los estudiantes.",
+        "forum_read": "Ver el foro.",
+        "forum_topic_create": "Crear temas en el foro.",
+        "forum_post_create": "Responder en los temas del foro.",
+        "forum_post_delete": "Eliminar cualquier publicación del foro."
       }
     },
     "dropdown": {
@@ -2892,7 +2888,8 @@
         "curriculum": "La edición del plan de estudios no está disponible para los cursos SCORM.",
         "lessonSequence": "La aplicación de la secuencia de lecciones no está disponible para los cursos SCORM.",
         "quizFeedback": "La configuración de comentarios de las pruebas no está disponible para los cursos SCORM.",
-        "videoCompletionTracking": "El seguimiento de finalización de videos no está disponible para los cursos SCORM."
+        "videoCompletionTracking": "El seguimiento de finalización de videos no está disponible para los cursos SCORM.",
+        "audioCompletionTracking": "El seguimiento de finalización de audio no está disponible para los cursos SCORM."
       },
       "notFound": {
         "course": "Curso no encontrado.",
@@ -3083,7 +3080,9 @@
         "courseAvailabilityTitle": "Disponibilidad del curso",
         "fallbackLanguageWarningTitle": "Nota: faltan traducciones",
         "fallbackLanguageWarningDescription": "Algunos campos en esta versión de idioma están vacíos. En esos lugares, los estudiantes verán el contenido del idioma predeterminado hasta que usted agregue traducciones.",
-        "baseLanguageTooltip": "No puede cambiar ni eliminar este idioma. Es el valor predeterminado y siempre será parte del curso."
+        "baseLanguageTooltip": "No puede cambiar ni eliminar este idioma. Es el valor predeterminado y siempre será parte del curso.",
+        "enableAudioCompletionTracking": "Seguimiento de finalización de audio",
+        "enableAudioCompletionTrackingDescription": "Exija que los alumnos escuchen al menos el 90 % de cada grabación de audio de una lección antes de que se marque como completada."
       },
       "validation": {
         "titleMinLength": "El título debe tener al menos 2 caracteres.",
@@ -3188,14 +3187,27 @@
           "quizCooldownInHours": "Bloqueo de tiempo después de intentos fallidos (en horas)",
           "numberOfQuestions": "{{count1}} de preguntas {{count2}}",
           "noQuestions": "Sin preguntas",
-          "timeLimitMinutes": "Límite de tiempo (hh:mm)"
+          "timeLimitMinutes": "Límite de tiempo (hh:mm)",
+          "feedbackMode": "Visibilidad de los comentarios",
+          "feedbackModeFull": "Puntuación y mensajes",
+          "feedbackModeScoreOnly": "Solo puntuación",
+          "feedbackModeNone": "Sin comentarios",
+          "feedbackRanges": "Mensajes por rango de puntuación",
+          "feedbackVariablesHint": "Puedes usar {{firstNameVar}} para el nombre del estudiante y {{scoreVar}} para su puntuación.",
+          "feedbackRangeMin": "Desde (%)",
+          "feedbackRangeMax": "Hasta (%)",
+          "feedbackRangeMessage": "Mensaje",
+          "feedbackRangeAdd": "Añadir rango",
+          "feedbackRangeReset": "Restaurar rangos predeterminados"
         },
         "tooltip": {
           "switch": "Si está habilitado, el estudiante tiene un número limitado de intentos de prueba.",
           "passingThreshold": "El umbral porcentual para aprobar el cuestionario. Si un estudiante alcanza esta puntuación, la prueba se considerará aprobada.",
           "attemptsLimit": "Número de intentos de prueba permitidos antes de que se active el bloqueo de tiempo.",
           "quizCooldownInHours": "Duración del bloqueo del cuestionario después de utilizar todos los intentos.",
-          "timeLimitMinutes": "Opcional. Si se define, los alumnos inician el cuestionario de forma explícita y sus respuestas se envían automáticamente cuando se acaba el tiempo. Déjalo vacío para no limitar el tiempo."
+          "timeLimitMinutes": "Opcional. Si se define, los alumnos inician el cuestionario de forma explícita y sus respuestas se envían automáticamente cuando se acaba el tiempo. Déjalo vacío para no limitar el tiempo.",
+          "feedbackMode": "Controla lo que ven los estudiantes tras enviar: la puntuación y los mensajes, solo la puntuación o nada.",
+          "feedbackRanges": "Rangos de puntuación ordenados que se muestran a los estudiantes. Deben cubrir del 0 al 100% sin huecos ni solapamientos."
         },
         "validation": {
           "optionTextRequired": "El texto de la opción es obligatorio",
@@ -3225,7 +3237,13 @@
           "matchingPairsRequired": "Añade al menos 2 pares y completa ambos lados de cada par",
           "matchingMatchRequired": "Completa la pareja de este elemento",
           "matchingPairsUnique": "Cada par necesita una pareja única",
-          "timeLimitMinutes": "Introduce un límite de tiempo entre {{min}} y {{max}}."
+          "timeLimitMinutes": "Introduce un límite de tiempo entre {{min}} y {{max}}.",
+          "feedbackRangeNotInteger": "Los límites del rango deben ser números enteros.",
+          "feedbackRangeOutOfBounds": "Los límites del rango deben estar entre 0 y 100.",
+          "feedbackRangeBoundsReversed": "El inicio de un rango no puede ser mayor que su fin.",
+          "feedbackRangesMustStartAtZero": "Los rangos deben empezar en 0%.",
+          "feedbackRangesMustEndAtHundred": "Los rangos deben terminar en 100%.",
+          "feedbackRangesGapOrOverlap": "Los rangos deben cubrir del 0 al 100% sin huecos ni solapamientos."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Orden de visualización de lecciones actualizado correctamente",
@@ -4089,7 +4107,6 @@
   "registerView": {
     "header": "Registrarse",
     "subHeader": "Ingresa tus datos para crear una cuenta",
-    "subHeaderSSO": "Regístrese usando su cuenta Google/Microsoft",
     "field": {
       "firstName": "Nombre",
       "lastName": "Apellido",
@@ -4484,6 +4501,42 @@
       "timeLeft": "Tiempo restante: {{time}}",
       "warning": "Queda menos de un minuto. Tus respuestas se enviarán automáticamente cuando se acabe el tiempo.",
       "timeUp": "Se acabó el tiempo. Estamos enviando tus respuestas."
+    },
+    "audioProgress": {
+      "label": "Progreso de audio",
+      "completedSummary": "{{completed}} de {{total}} completados",
+      "overviewAriaLabel": "Progreso de audio de la lección",
+      "segmentAriaLabel": "Progreso del audio {{index}}: {{progress}} % escuchado",
+      "requirementSingle": "Escuche la grabación de audio completa para completar esta lección.",
+      "requirementMultiple": "Escuche todas las grabaciones de audio para completar esta lección.",
+      "errors": {
+        "resourceNotFound": "No se pudo guardar el progreso de audio de esta lección.",
+        "unsupportedLessonType": "El progreso de audio solo está disponible para lecciones de contenido.",
+        "unsupportedBucketSize": "El progreso de audio usa un intervalo de seguimiento no compatible.",
+        "invalidResourceType": "Este recurso no se puede seguir como grabación de audio de la lección.",
+        "accessDenied": "No tiene acceso para actualizar el progreso de audio de esta lección."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "¿Terminar de escuchar antes de salir?",
+      "descriptionSingle": "Esta lección requiere escuchar la grabación de audio completa antes de poder completarse.",
+      "descriptionMultiple": "Esta lección requiere escuchar todas las grabaciones de audio antes de poder completarse.",
+      "continueListening": "Seguir escuchando"
+    },
+    "requiredMediaLeave": {
+      "title": "¿Terminar los medios de la lección antes de salir?",
+      "description": "Esta lección requiere ver todos los vídeos y escuchar todas las grabaciones de audio antes de poder completarse.",
+      "continue": "Continuar"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Vea el vídeo y escuche la grabación de audio para completar esta lección.",
+      "requirementMultiple": "Vea todos los vídeos y escuche todas las grabaciones de audio para completar esta lección.",
+      "label": "Progreso de la lección",
+      "overviewAriaLabel": "Progreso de los medios de la lección"
+    },
+    "navigation": {
+      "previousLesson": "Lección anterior",
+      "nextLesson": "Siguiente lección"
     }
   },
   "studentCourseView": {
@@ -4508,6 +4561,8 @@
       "threeOrFiveWordSentence": "Escriba una respuesta detallada (3-5 oraciones).",
       "aiMentorLesson": {
         "sendMessage": "Escribe un mensaje...",
+        "messageLabel": "Tu mensaje",
+        "conversationLabel": "Conversación",
         "check": "Comprobar",
         "aiMentorName": "AI Mentor",
         "retake": "Retomar",
@@ -4774,7 +4829,9 @@
       "studentsWithOverdueCourseNotification": "Estudiantes con notificaciones de cursos vencidos",
       "studentsWithOverdueCourseNotificationDescription": "Recibir notificaciones cuando los estudiantes tengan cursos atrasados",
       "publicCoursePreview": "Ver lecciones antes de inscribirse en un curso",
-      "publicCoursePreviewDescription": "Permite a los usuarios con sesión iniciada abrir lecciones de cursos gratuitos antes de inscribirse. Los cuestionarios y el seguimiento del progreso siguen requiriendo inscripción."
+      "publicCoursePreviewDescription": "Permite a los usuarios con sesión iniciada abrir lecciones de cursos gratuitos antes de inscribirse. Los cuestionarios y el seguimiento del progreso siguen requiriendo inscripción.",
+      "forum": "Habilitar foro",
+      "forumDescription": "Permitir que todos en la organización creen temas y respondan. Los usuarios inscritos también ven allí los debates de sus cursos."
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de nuevos usuarios se han actualizado correctamente.",
@@ -4788,7 +4845,8 @@
       "finishedCourseNotificationsPreferenceChangeError": "No se pudieron actualizar las preferencias de notificación del curso terminado",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Las preferencias de notificación de cursos vencidos se han actualizado correctamente",
       "overdueCourseNotificationsPreferenceChangeError": "No se pudieron actualizar las preferencias de notificación de cursos vencidos",
-      "publicCoursePreviewPreferenceChangeSuccess": "Preferencia de vista previa actualizada"
+      "publicCoursePreviewPreferenceChangeSuccess": "Preferencia de vista previa actualizada",
+      "forumPreferenceChangeSuccess": "La preferencia del foro se ha actualizado correctamente."
     }
   },
   "registrationFormBuilder": {
@@ -4903,7 +4961,7 @@
       "courseCompletionRequired": "Debes completar el curso antes de generar un certificado."
     },
     "button": {
-      "download": "Descargar",
+      "download": "Descargar certificado (PDF)",
       "preview": "Vista previa",
       "shareLinkedIn": "Compartir en LinkedIn"
     },
@@ -5365,7 +5423,9 @@
       },
       "ariaLabel": {
         "drag": "Arrastrar vídeo para insertar",
-        "remove": "Quitar inserción de vídeo"
+        "remove": "Quitar inserción de vídeo",
+        "play": "Reproducir vídeo",
+        "playWithTitle": "Reproducir vídeo: {{title}}"
       }
     },
     "presentation": {
@@ -8520,7 +8580,15 @@
       "unavailable": "El marketplace de contenidos no está disponible para esta organización.",
       "listingNotFound": "No se encontró este curso del marketplace.",
       "thumbnailNotFound": "Este curso del marketplace no tiene miniatura.",
-      "serviceError": "El marketplace de contenidos no pudo completar la solicitud. Inténtalo de nuevo más tarde."
+      "serviceError": "El marketplace de contenidos no pudo completar la solicitud. Inténtalo de nuevo más tarde.",
+      "outlineNotFound": "La vista previa del contenido de este curso aún no está disponible."
+    },
+    "preview": {
+      "open": "Ver contenido",
+      "noChapters": "Este curso aún no tiene capítulos.",
+      "chaptersCount_one": "{{count}} capítulo",
+      "chaptersCount_many": "{{count}} capítulos",
+      "chaptersCount_other": "{{count}} capítulos"
     }
   },
   "aiJudgeConfiguration": {
@@ -9668,5 +9736,62 @@
       }
     },
     "requiresGamification": "Activa primero la gamificación."
+  },
+  "forum": {
+    "title": "Foro",
+    "description": "Haz preguntas y comparte conocimientos con toda tu organización.",
+    "newTopic": "Nuevo tema",
+    "searchPlaceholder": "Buscar temas",
+    "filter": {
+      "label": "Mostrar temas",
+      "all": "Todos los temas",
+      "general": "General"
+    },
+    "sort": {
+      "label": "Ordenar temas",
+      "lastActivity": "Actividad reciente",
+      "newest": "Más recientes",
+      "mostReplies": "Más respuestas"
+    },
+    "empty": "Aún no hay temas. Crea el primero.",
+    "noResults": "Ningún tema coincide con tus filtros.",
+    "replies_one": "{{count}} respuesta",
+    "replies_other": "{{count}} respuestas",
+    "lastActivity": "Última actividad {{time}}",
+    "deletedPost": "Esta publicación fue eliminada.",
+    "deletePost": "Eliminar publicación",
+    "createDialog": {
+      "title": "Nuevo tema",
+      "titleLabel": "Título",
+      "titlePlaceholder": "¿De qué trata tu tema?",
+      "contentLabel": "Mensaje",
+      "contentPlaceholder": "Escribe la primera publicación",
+      "submit": "Crear tema"
+    },
+    "topic": {
+      "backToForum": "Volver al foro",
+      "courseThreadTitle": "Debate del curso {{course}}",
+      "noReplies": "Aún no hay respuestas.",
+      "replyPlaceholder": "Escribe una respuesta",
+      "replySubmit": "Responder",
+      "closed": "Las respuestas están cerradas porque se eliminó la primera publicación."
+    },
+    "deleteDialog": {
+      "title": "¿Eliminar esta publicación?",
+      "description": "La publicación se eliminará para todos. Esta acción no se puede deshacer."
+    },
+    "toast": {
+      "createTopicError": "No se pudo crear el tema.",
+      "createPostError": "No se pudo enviar la respuesta.",
+      "deletePostError": "No se pudo eliminar la publicación."
+    },
+    "errors": {
+      "topicNotFound": "Este tema no existe o no tienes acceso a él.",
+      "postNotFound": "Esta publicación ya no existe.",
+      "cannotDeletePost": "Solo puedes eliminar tus propias publicaciones.",
+      "topicDeleted": "Las respuestas están cerradas porque se eliminó la primera publicación.",
+      "emptyTitle": "Escribe un título.",
+      "emptyContent": "Escribe un mensaje."
+    }
   }
 }

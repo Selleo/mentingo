@@ -36,7 +36,7 @@ export const MCP_CUSTOMIZATION_TOOL_NAMES = [
 ] as const;
 
 function customizationSettings(settings: GlobalSettingsJSONContentSchema) {
-  const { enforceSSO: _sso, MFAEnforcedRoles: _mfa, ...customization } = settings;
+  const { MFAEnforcedRoles: _mfa, ...customization } = settings;
   return customization;
 }
 
@@ -52,6 +52,8 @@ async function toggleFlag(
       return service.updateGlobalModernCourseListEnabled(actor);
     case "courseDiscussionsEnabled":
       return service.updateGlobalCourseDiscussionsEnabled(actor);
+    case "forumEnabled":
+      return service.updateGlobalForumEnabled(actor);
     case "calendarEnabled":
       return service.updateGlobalCalendarEnabled(actor);
     case "liveTrainingEnabled":

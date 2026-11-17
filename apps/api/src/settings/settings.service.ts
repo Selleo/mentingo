@@ -1152,41 +1152,6 @@ export class SettingsService {
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
-  public async updateGlobalEnforceSSO(
-    actor?: CurrentUserType,
-  ): Promise<GlobalSettingsJSONContentSchema> {
-    const previousRecord = await this.getGlobalSettingsRecord();
-
-    const enforceSSO = previousRecord.settings.enforceSSO;
-
-    const [{ settings: updatedGlobalSettings }] = await this.db
-      .update(settings)
-      .set({
-        settings: sql`
-          jsonb_set(
-            settings.settings,
-            '{enforceSSO}',
-            to_jsonb(${!enforceSSO}::boolean),
-            true
-          )
-        `,
-      })
-      .where(isNull(settings.userId))
-      .returning({
-        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
-      });
-
-    const updatedRecord = await this.getGlobalSettingsRecord();
-
-    await this.recordSettingsUpdate({
-      actor,
-      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
-      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
-    });
-
-    return this.parseGlobalSettings(updatedGlobalSettings);
-  }
-
   public async updateGlobalModernCourseListEnabled(
     actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
@@ -1323,6 +1288,34 @@ export class SettingsService {
       .update(settings)
       .set({
         settings: setJsonbField(settings.settings, "courseDiscussionsEnabled", !current),
+      })
+      .where(isNull(settings.userId))
+      .returning({
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings} - 'userEmailTriggers'`,
+      });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
+  public async updateGlobalForumEnabled(
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const current = previousRecord.settings.forumEnabled ?? DEFAULT_GLOBAL_SETTINGS.forumEnabled;
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: setJsonbField(settings.settings, "forumEnabled", !current),
       })
       .where(isNull(settings.userId))
       .returning({
@@ -2500,6 +2493,7 @@ export class SettingsService {
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
       courseDiscussionsEnabled:
         settings.courseDiscussionsEnabled ?? DEFAULT_GLOBAL_SETTINGS.courseDiscussionsEnabled,
+      forumEnabled: settings.forumEnabled ?? DEFAULT_GLOBAL_SETTINGS.forumEnabled,
       gamificationEnabled:
         settings.gamificationEnabled ?? DEFAULT_GLOBAL_SETTINGS.gamificationEnabled,
       leaderboardsEnabled:

@@ -3,6 +3,13 @@ on:
   pull_request:
     paths:
       - .github/workflows/self-onboarding.yml
+      - .github/workflows/pr-flow-video.yml
+      - .agents/skills/release-film/ci/pr_video_publish.py
+      - .agents/skills/release-film/tests/test_pr_video*.py
+      - packages/shared/src/constants/self-onboarding-areas.json
+      - docs/specs/**
+      - apps/web/app/routes.ts
+      - apps/web/app/config/routeAccessConfig.ts
       - .github/workflows/self-onboarding-on-version.yml
       - .github/workflows/pr-self-onboarding-ci.yml
       - .agents/skills/release-film/assets/**

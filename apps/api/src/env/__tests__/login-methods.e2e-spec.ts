@@ -4,6 +4,7 @@ import request from "supertest";
 import { match } from "ts-pattern";
 
 import { EnvService } from "src/env/services/env.service";
+import { LegacySSOEnforcementBackfillService } from "src/env/services/legacy-sso-enforcement-backfill.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { settings } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -18,6 +19,7 @@ import {
   ACCEPTED_LOGIN_METHOD_UPDATES,
   ADMIN_PASSWORD,
   AUTH_REQUEST_KINDS,
+  LEGACY_SSO_ENFORCEMENT_BACKFILLS,
   LOGIN_METHOD_FLAGS,
   NO_OAUTH_PROVIDER_SECRETS,
   REJECTED_LOGIN_METHOD_UPDATES,
@@ -45,7 +47,7 @@ describe("Organization login methods (e2e)", () => {
       ),
     );
 
-  const enforceSSO = () =>
+  const storeLegacySSOEnforcement = (enforceSSO: boolean) =>
     inTenant(async () => {
       const [globalSettings] = await db
         .select({ settings: settings.settings })
@@ -57,7 +59,7 @@ describe("Organization login methods (e2e)", () => {
         .set({
           settings: settingsToJSONBuildObject({
             ...(globalSettings.settings as GlobalSettings),
-            enforceSSO: true,
+            enforceSSO,
           }),
         })
         .where(isNull(settings.userId));
@@ -202,13 +204,26 @@ describe("Organization login methods (e2e)", () => {
     });
   });
 
+  describe("legacy SSO enforcement backfill", () => {
+    it.each(LEGACY_SSO_ENFORCEMENT_BACKFILLS)("$title", async ({ enforceSSO, expectedMethods }) => {
+      await storeLegacySSOEnforcement(enforceSSO);
+
+      await app.get(LegacySSOEnforcementBackfillService).convertLegacySSOEnforcementForAllTenants();
+
+      expect(await getPublicLoginMethods()).toMatchObject(expectedMethods);
+      const [globalSettings] = await inTenant(() =>
+        db.select({ settings: settings.settings }).from(settings).where(isNull(settings.userId)),
+      );
+      expect(globalSettings.settings).not.toHaveProperty("enforceSSO");
+    });
+  });
+
   describe("POST /api/env/login-methods", () => {
     it.each(REJECTED_LOGIN_METHOD_UPDATES)(
       "rejects $title without saving anything",
-      async ({ storedSecrets, enforceSSO: isSSOEnforced, update, expectedError }) => {
+      async ({ storedSecrets, update, expectedError }) => {
         await storeSecrets(storedSecrets);
         const cookie = await arrangeAdminCookie();
-        if (isSSOEnforced) await enforceSSO();
         const loginMethodsBefore = await getPublicLoginMethods();
 
         const response = await request(app.getHttpServer())

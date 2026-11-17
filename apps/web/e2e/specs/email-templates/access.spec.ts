@@ -8,9 +8,9 @@ import { openEmailCatalogFromNavigationFlow } from "../../flows/email-templates/
 import { expect, test } from "./email-template.fixture";
 
 test("admin opens the system catalog from Manage and cannot edit defaults", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openEmailCatalogFromNavigationFlow(page);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
     await page
@@ -33,8 +33,8 @@ test("admin opens the system catalog from Manage and cannot edit defaults", asyn
 });
 
 for (const role of [USER_ROLE.student, USER_ROLE.contentCreator]) {
-  test(`${role} cannot access template management`, async ({ withReadonlyPage }) => {
-    await withReadonlyPage(role, async ({ page }) => {
+  test(`${role} cannot access template management`, async ({ withWorkerPage }) => {
+    await withWorkerPage(role, async ({ page }) => {
       for (const route of [
         EMAIL_TEMPLATE_DATA.listPath,
         `${EMAIL_TEMPLATE_DATA.listPath}/defaults/${EMAIL_TEMPLATE_DATA.builtInTemplateKey}`,

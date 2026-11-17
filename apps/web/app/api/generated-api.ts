@@ -300,6 +300,10 @@ export interface CurrentUserResponse {
       | "quiz_grading.grade"
       | "gamification.leaderboard_read"
       | "gamification.leaderboard_read_all"
+      | "forum.read"
+      | "forum.topic.create"
+      | "forum.post.create"
+      | "forum.post.delete"
     )[];
     shouldVerifyMFA: boolean;
     requiresPasswordChange: boolean;
@@ -473,6 +477,7 @@ export interface GetPublicGlobalSettingsResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -481,7 +486,6 @@ export interface GetPublicGlobalSettingsResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -759,6 +763,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -767,55 +772,6 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
-    certificateBackgroundImage: string | null;
-    companyInformation?: {
-      companyName?: string;
-      /** @maxLength 10 */
-      companyShortName?: string;
-      registeredAddress?: string;
-      taxNumber?: string;
-      emailAddress?: string;
-      courtRegisterNumber?: string;
-    };
-    platformLogoS3Key: string | null;
-    loginBackgroundImageS3Key: string | null;
-    platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: string[];
-    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
-    inviteOnlyRegistration: boolean;
-    primaryColor: string | null;
-    contrastColor: string | null;
-    backgroundColor: string | null;
-    accentColor: string | null;
-    unregisteredUserQAAccessibility: boolean;
-    QAEnabled: boolean;
-    unregisteredUserNewsAccessibility: boolean;
-    newsEnabled: boolean;
-    unregisteredUserArticlesAccessibility: boolean;
-    articlesEnabled: boolean;
-    learningPathsEnabled: boolean;
-    ageLimit: 13 | 16 | null;
-    loginPageFiles: string[];
-  };
-}
-
-export interface UpdateEnforceSSOResponse {
-  data: {
-    unregisteredUserCoursesAccessibility: boolean;
-    modernCourseListEnabled: boolean;
-    publicCoursePreviewEnabled: boolean;
-    featuredCourseId: string | null;
-    courseDiscussionsEnabled: boolean;
-    gamificationEnabled: boolean;
-    leaderboardsEnabled: boolean;
-    leaderboardVisibility: "closed" | "public";
-    calendarEnabled: boolean;
-    liveTrainingEnabled: boolean;
-    /** @min 1 */
-    liveTrainingMaxParallelSessions: number;
-    trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -855,6 +811,7 @@ export interface UpdateModernCourseListEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -863,7 +820,6 @@ export interface UpdateModernCourseListEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -903,6 +859,7 @@ export interface UpdatePublicCoursePreviewEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -911,7 +868,6 @@ export interface UpdatePublicCoursePreviewEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -955,6 +911,7 @@ export interface UpdateFeaturedCourseResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -963,7 +920,6 @@ export interface UpdateFeaturedCourseResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1003,6 +959,7 @@ export interface UpdateCourseDiscussionsEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1011,7 +968,54 @@ export interface UpdateCourseDiscussionsEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    primaryColor: string | null;
+    contrastColor: string | null;
+    backgroundColor: string | null;
+    accentColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateForumEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    publicCoursePreviewEnabled: boolean;
+    featuredCourseId: string | null;
+    courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
+    gamificationEnabled: boolean;
+    leaderboardsEnabled: boolean;
+    leaderboardVisibility: "closed" | "public";
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
+    trainerRoleUserCount?: number;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1056,6 +1060,7 @@ export interface UpdateLeaderboardSettingsResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1064,7 +1069,6 @@ export interface UpdateLeaderboardSettingsResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1104,6 +1108,7 @@ export interface UpdateCalendarEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1112,7 +1117,6 @@ export interface UpdateCalendarEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1152,6 +1156,7 @@ export interface UpdateLiveTrainingEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1160,7 +1165,6 @@ export interface UpdateLiveTrainingEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1205,6 +1209,7 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1213,7 +1218,6 @@ export interface UpdateLiveTrainingMaxParallelSessionsResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1253,6 +1257,7 @@ export interface UpdateLearningPathsEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1261,7 +1266,6 @@ export interface UpdateLearningPathsEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1301,6 +1305,7 @@ export interface UpdateGamificationEnabledResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1309,7 +1314,6 @@ export interface UpdateGamificationEnabledResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -1380,6 +1384,7 @@ export interface UpdateColorSchemaResponse {
     publicCoursePreviewEnabled: boolean;
     featuredCourseId: string | null;
     courseDiscussionsEnabled: boolean;
+    forumEnabled: boolean;
     gamificationEnabled: boolean;
     leaderboardsEnabled: boolean;
     leaderboardVisibility: "closed" | "public";
@@ -1388,7 +1393,6 @@ export interface UpdateColorSchemaResponse {
     /** @min 1 */
     liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
-    enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
@@ -2973,6 +2977,7 @@ export interface UpdateCourseSettingsBody {
   lessonSequenceEnabled?: boolean;
   quizFeedbackEnabled?: boolean;
   videoCompletionTrackingEnabled?: boolean;
+  audioCompletionTrackingEnabled?: boolean;
   certificateFontColor?: string;
   certificateValidity?:
     | (
@@ -3011,6 +3016,8 @@ export interface GetCourseSettingsResponse {
     quizFeedbackEnabled: boolean;
     /** @default true */
     videoCompletionTrackingEnabled?: boolean;
+    /** @default false */
+    audioCompletionTrackingEnabled?: boolean;
     /** @default null */
     certificateSignature: string | null;
     /** @default "#000000" */
@@ -3235,6 +3242,12 @@ export interface GetCourseStudentsAiMentorResultsResponse {
   appliedFilters?: object;
 }
 
+export interface ExportCourseAsScormResponse {
+  data: {
+    jobId: string;
+  };
+}
+
 export interface TransferCourseOwnershipBody {
   /** @format uuid */
   courseId: string;
@@ -3328,6 +3341,87 @@ export interface GetCourseOwnershipResponse {
       name: string;
       email: string;
     }[];
+  };
+}
+
+export interface InitTusImportBody {
+  /**
+   * @min 1
+   * @max 838860800
+   */
+  sizeBytes: number;
+}
+
+export interface InitTusImportResponse {
+  data: {
+    uploadId: string;
+    tusEndpoint: string;
+    tusHeaders: object;
+    expiresAt: string;
+    partSize: number;
+  };
+}
+
+export interface CompleteTusImportResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface ExportNativeCourseResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface ExportNativeLearningPathResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface ImportNativeArchiveResponse {
+  data: {
+    jobId: string;
+  };
+}
+
+export interface GetNativeArchiveStatusResponse {
+  data: {
+    jobId: string;
+    state: string;
+    result: null | {
+      kind: "course" | "learning-path";
+      /** @format uuid */
+      rootId: string;
+      alreadyExists?: boolean;
+      createdCourseIds?: string[];
+      reusedCourseIds?: string[];
+    };
+    failedReason: string | null;
+    progress: {
+      stage:
+        | "collecting-content"
+        | "copying-files"
+        | "packaging"
+        | "downloading"
+        | "verifying"
+        | "uploading-files"
+        | "indexing"
+        | "saving";
+      /**
+       * @min 0
+       * @max 100
+       */
+      percent: number;
+    } | null;
+  };
+}
+
+export interface GetNativeArchiveDownloadUrlResponse {
+  data: {
+    url: string;
+    expiresInSeconds: number;
   };
 }
 
@@ -3654,6 +3748,7 @@ export interface GetLessonByIdResponse {
       correctAnswerCount: number | null;
       wrongAnswerCount: number | null;
       score: number | null;
+      feedbackMessage?: string | null;
     };
     lessonCompleted?: boolean;
     thresholdScore: number | null;
@@ -3712,6 +3807,8 @@ export interface GetLessonByIdResponse {
     hasVideo?: boolean;
     hasTrackedVideo?: boolean;
     videoCompletionTrackingEnabled?: boolean;
+    hasTrackedAudio?: boolean;
+    audioCompletionTrackingEnabled?: boolean;
     hasAutoplayTrigger?: boolean;
     videos?: string[];
     isQuizFeedbackRedacted?: boolean;
@@ -4238,6 +4335,22 @@ export type BetaCreateQuizLessonBody = {
   attemptsLimit: number | null;
   quizCooldownInHours: number | null;
   timeLimitMinutes?: number | null;
+  feedbackMode?: "full" | "score_only" | "none";
+  feedbackRanges?: {
+    /** @format uuid */
+    id?: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    minPercent: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxPercent: number;
+    message: string;
+  }[];
   questions?: {
     /** @format uuid */
     id?: string;
@@ -4303,6 +4416,22 @@ export type BetaUpdateQuizLessonBody = ({
   attemptsLimit?: number | null;
   quizCooldownInHours?: number | null;
   timeLimitMinutes?: number | null;
+  feedbackMode?: "full" | "score_only" | "none";
+  feedbackRanges?: {
+    /** @format uuid */
+    id?: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    minPercent: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxPercent: number;
+    message: string;
+  }[];
   questions?: {
     /** @format uuid */
     id?: string;
@@ -9185,6 +9314,45 @@ export interface UpsertProgressResponse {
     watchedRanges: [number, number][];
     isWatched: boolean;
     watchedAt: string | null;
+    lessonCompleted: boolean;
+  };
+}
+
+export interface UpsertLessonAudioProgressBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  resourceEntityId: string;
+  /** @min 1 */
+  durationSeconds: number;
+  /**
+   * @min 1
+   * @default 1
+   */
+  bucketSize?: number;
+  listenedRanges: [number, number][];
+  /**
+   * @min 0
+   * @default 0
+   */
+  activeListenSecondsDelta?: number;
+  /** @default "en" */
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface UpsertLessonAudioProgressResponse {
+  data: {
+    /** @format uuid */
+    lessonId: string;
+    /** @format uuid */
+    resourceEntityId: string;
+    durationSeconds: number;
+    bucketSizeSeconds: number;
+    coveredBucketCount: number;
+    coveragePercent: number;
+    listenedRanges: [number, number][];
+    isListened: boolean;
+    listenedAt: string | null;
     lessonCompleted: boolean;
   };
 }
@@ -30703,87 +30871,6 @@ export interface DeleteManyCategoriesResponse {
   };
 }
 
-export interface InitTusImportBody {
-  /**
-   * @min 1
-   * @max 838860800
-   */
-  sizeBytes: number;
-}
-
-export interface InitTusImportResponse {
-  data: {
-    uploadId: string;
-    tusEndpoint: string;
-    tusHeaders: object;
-    expiresAt: string;
-    partSize: number;
-  };
-}
-
-export interface CompleteTusImportResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface ExportNativeCourseResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface ExportNativeLearningPathResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface ImportNativeArchiveResponse {
-  data: {
-    jobId: string;
-  };
-}
-
-export interface GetNativeArchiveStatusResponse {
-  data: {
-    jobId: string;
-    state: string;
-    result: null | {
-      kind: "course" | "learning-path";
-      /** @format uuid */
-      rootId: string;
-      alreadyExists?: boolean;
-      createdCourseIds?: string[];
-      reusedCourseIds?: string[];
-    };
-    failedReason: string | null;
-    progress: {
-      stage:
-        | "collecting-content"
-        | "copying-files"
-        | "packaging"
-        | "downloading"
-        | "verifying"
-        | "uploading-files"
-        | "indexing"
-        | "saving";
-      /**
-       * @min 0
-       * @max 100
-       */
-      percent: number;
-    } | null;
-  };
-}
-
-export interface GetNativeArchiveDownloadUrlResponse {
-  data: {
-    url: string;
-    expiresInSeconds: number;
-  };
-}
-
 export interface GetMessagesResponse {
   data: {
     /** @format uuid */
@@ -31032,6 +31119,232 @@ export interface DeleteMessageResponse {
     parentMessageId: string | null;
     removed: boolean;
     deletedAt: string | null;
+  };
+}
+
+export interface GetTopicsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    scope: "general" | "course";
+    title: string | null;
+    course: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    } | null;
+    author: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    replyCount: number;
+    lastActivityAt: string;
+    createdAt: string;
+    excerpt: string;
+    isDeleted: boolean;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreateTopicBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  title: string;
+  /**
+   * @minLength 1
+   * @maxLength 5000
+   */
+  content: string;
+}
+
+export interface CreateTopicResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    scope: "general" | "course";
+    title: string | null;
+    course: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    } | null;
+    author: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    replyCount: number;
+    lastActivityAt: string;
+    createdAt: string;
+    firstPost: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      topicId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      isFirstPost: boolean;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+      reactions: {
+        reaction: string;
+        count: number;
+        reactedByCurrentUser: boolean;
+      }[];
+    };
+  };
+}
+
+export interface GetTopicResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    scope: "general" | "course";
+    title: string | null;
+    course: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    } | null;
+    author: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    replyCount: number;
+    lastActivityAt: string;
+    createdAt: string;
+    firstPost: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      topicId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      isFirstPost: boolean;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+      reactions: {
+        reaction: string;
+        count: number;
+        reactedByCurrentUser: boolean;
+      }[];
+    };
+  };
+}
+
+export interface GetTopicPostsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    topicId: string;
+    /** @format uuid */
+    userId: string;
+    content: string;
+    isFirstPost: boolean;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreatePostBody {
+  /**
+   * @minLength 1
+   * @maxLength 5000
+   */
+  content: string;
+}
+
+export interface CreatePostResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    topicId: string;
+    /** @format uuid */
+    userId: string;
+    content: string;
+    isFirstPost: boolean;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+  };
+}
+
+export interface DeletePostResponse {
+  data: {
+    /** @format uuid */
+    topicId: string;
+    /** @format uuid */
+    postId: string;
+    isFirstPost: boolean;
+    removed: boolean;
+    deletedAt: string | null;
+    topicRemoved: boolean;
   };
 }
 
@@ -33528,6 +33841,26 @@ export interface LaunchScormAttemptResponse {
   };
 }
 
+export interface LaunchScormPreviewResponse {
+  data: {
+    /** @format uuid */
+    packageId: string;
+    /** @format uuid */
+    scoId: string;
+    /** @format uuid */
+    lessonId: string;
+    /** @format uuid */
+    courseId: string;
+    launchUrl: string;
+    scoTitle: string;
+    navigation: {
+      previousScoId: string | null;
+      nextScoId: string | null;
+    };
+    runtime: object;
+  };
+}
+
 export interface RenewScormContentBody {
   /**
    * @minLength 64
@@ -34003,6 +34336,25 @@ export interface GetTenantCoursesResponse {
     perPage: number;
   };
   appliedFilters?: object;
+}
+
+export interface GetTenantCourseOutlineResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    learningOutcomes: string[];
+    chapters: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      lessons: {
+        /** @format uuid */
+        id: string;
+        title: string;
+        type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
+      }[];
+    }[];
+  };
 }
 
 export interface StartCourseArchiveExportResponse {
@@ -35077,6 +35429,20 @@ export interface GetContentMarketplaceListingResponse {
       id: string;
       isOutdated: boolean;
     } | null;
+  };
+}
+
+export interface GetContentMarketplaceListingOutlineResponse {
+  data: {
+    language: string;
+    learningOutcomes: string[];
+    chapters: {
+      title: string;
+      lessons: {
+        title: string;
+        type: string;
+      }[];
+    }[];
   };
 }
 
@@ -36953,6 +37319,8 @@ export interface GetAuthoringCourseContextResponse {
         quizFeedbackEnabled: boolean;
         /** @default true */
         videoCompletionTrackingEnabled?: boolean;
+        /** @default false */
+        audioCompletionTrackingEnabled?: boolean;
         /** @default "#000000" */
         certificateFontColor: string | null;
         /** @default null */
@@ -39324,20 +39692,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name SettingsControllerUpdateEnforceSso
-     * @request PATCH:/api/settings/admin/enforce-sso
-     */
-    settingsControllerUpdateEnforceSso: (params: RequestParams = {}) =>
-      this.request<UpdateEnforceSSOResponse, any>({
-        path: `/api/settings/admin/enforce-sso`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name SettingsControllerUpdateModernCourseListEnabled
      * @request PATCH:/api/settings/admin/modern-course-list
      */
@@ -39391,6 +39745,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateCourseDiscussionsEnabled: (params: RequestParams = {}) =>
       this.request<UpdateCourseDiscussionsEnabledResponse, any>({
         path: `/api/settings/admin/course-discussions`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateForumEnabled
+     * @request PATCH:/api/settings/admin/forum
+     */
+    settingsControllerUpdateForumEnabled: (params: RequestParams = {}) =>
+      this.request<UpdateForumEnabledResponse, any>({
+        path: `/api/settings/admin/forum`,
         method: "PATCH",
         format: "json",
         ...params,
@@ -41917,10 +42285,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<void, any>({
+      this.request<ExportCourseAsScormResponse, any>({
         path: `/api/course/${courseId}/scorm-export`,
         method: "POST",
         query: query,
+        format: "json",
         ...params,
       }),
 
@@ -42024,6 +42393,205 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/course-ownership/${courseId}`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerInitTusImport
+     * @request POST:/api/native-archives/tus/init
+     */
+    nativeArchiveControllerInitTusImport: (data: InitTusImportBody, params: RequestParams = {}) =>
+      this.request<InitTusImportResponse, any>({
+        path: `/api/native-archives/tus/init`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerTusOptionsBase
+     * @request OPTIONS:/api/native-archives/tus
+     */
+    nativeArchiveControllerTusOptionsBase: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerCreateTusUpload
+     * @request POST:/api/native-archives/tus
+     */
+    nativeArchiveControllerCreateTusUpload: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerTusOptionsUpload
+     * @request OPTIONS:/api/native-archives/tus/{id}
+     */
+    nativeArchiveControllerTusOptionsUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus/${id}`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerHeadTusUpload
+     * @request HEAD:/api/native-archives/tus/{id}
+     */
+    nativeArchiveControllerHeadTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus/${id}`,
+        method: "HEAD",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerPatchTusUpload
+     * @request PATCH:/api/native-archives/tus/{id}
+     */
+    nativeArchiveControllerPatchTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/tus/${id}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerCompleteTusImport
+     * @request POST:/api/native-archives/tus/{id}/complete
+     */
+    nativeArchiveControllerCompleteTusImport: (id: string, params: RequestParams = {}) =>
+      this.request<CompleteTusImportResponse, any>({
+        path: `/api/native-archives/tus/${id}/complete`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerDismissLiveTrainingReview
+     * @request PATCH:/api/native-archives/live-training/{id}/dismiss-review
+     */
+    nativeArchiveControllerDismissLiveTrainingReview: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/live-training/${id}/dismiss-review`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerExportNativeCourse
+     * @request POST:/api/native-archives/courses/{id}/export
+     */
+    nativeArchiveControllerExportNativeCourse: (id: string, params: RequestParams = {}) =>
+      this.request<ExportNativeCourseResponse, any>({
+        path: `/api/native-archives/courses/${id}/export`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerExportNativeLearningPath
+     * @request POST:/api/native-archives/learning-paths/{id}/export
+     */
+    nativeArchiveControllerExportNativeLearningPath: (id: string, params: RequestParams = {}) =>
+      this.request<ExportNativeLearningPathResponse, any>({
+        path: `/api/native-archives/learning-paths/${id}/export`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerImportNativeArchive
+     * @request POST:/api/native-archives/import
+     */
+    nativeArchiveControllerImportNativeArchive: (
+      data: {
+        /** @format binary */
+        file: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ImportNativeArchiveResponse, any>({
+        path: `/api/native-archives/import`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerGetNativeArchiveStatus
+     * @request GET:/api/native-archives/jobs/{id}
+     */
+    nativeArchiveControllerGetNativeArchiveStatus: (id: string, params: RequestParams = {}) =>
+      this.request<GetNativeArchiveStatusResponse, any>({
+        path: `/api/native-archives/jobs/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerGetNativeArchiveDownloadUrl
+     * @request GET:/api/native-archives/jobs/{id}/download-url
+     */
+    nativeArchiveControllerGetNativeArchiveDownloadUrl: (id: string, params: RequestParams = {}) =>
+      this.request<GetNativeArchiveDownloadUrlResponse, any>({
+        path: `/api/native-archives/jobs/${id}/download-url`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NativeArchiveControllerDownloadNativeArchive
+     * @request GET:/api/native-archives/jobs/{id}/download
+     */
+    nativeArchiveControllerDownloadNativeArchive: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/native-archives/jobs/${id}/download`,
+        method: "GET",
         ...params,
       }),
 
@@ -44379,6 +44947,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LessonAudioProgressControllerUpsertLessonAudioProgress
+     * @request POST:/api/lesson-audio-progress
+     */
+    lessonAudioProgressControllerUpsertLessonAudioProgress: (
+      data: UpsertLessonAudioProgressBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpsertLessonAudioProgressResponse, any>({
+        path: `/api/lesson-audio-progress`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name StripeControllerCreatePaymentIntent
      * @request POST:/api/stripe
      */
@@ -45711,205 +46298,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name NativeArchiveControllerInitTusImport
-     * @request POST:/api/native-archives/tus/init
-     */
-    nativeArchiveControllerInitTusImport: (data: InitTusImportBody, params: RequestParams = {}) =>
-      this.request<InitTusImportResponse, any>({
-        path: `/api/native-archives/tus/init`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerTusOptionsBase
-     * @request OPTIONS:/api/native-archives/tus
-     */
-    nativeArchiveControllerTusOptionsBase: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus`,
-        method: "OPTIONS",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerCreateTusUpload
-     * @request POST:/api/native-archives/tus
-     */
-    nativeArchiveControllerCreateTusUpload: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus`,
-        method: "POST",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerTusOptionsUpload
-     * @request OPTIONS:/api/native-archives/tus/{id}
-     */
-    nativeArchiveControllerTusOptionsUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus/${id}`,
-        method: "OPTIONS",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerHeadTusUpload
-     * @request HEAD:/api/native-archives/tus/{id}
-     */
-    nativeArchiveControllerHeadTusUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus/${id}`,
-        method: "HEAD",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerPatchTusUpload
-     * @request PATCH:/api/native-archives/tus/{id}
-     */
-    nativeArchiveControllerPatchTusUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/tus/${id}`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerCompleteTusImport
-     * @request POST:/api/native-archives/tus/{id}/complete
-     */
-    nativeArchiveControllerCompleteTusImport: (id: string, params: RequestParams = {}) =>
-      this.request<CompleteTusImportResponse, any>({
-        path: `/api/native-archives/tus/${id}/complete`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerDismissLiveTrainingReview
-     * @request PATCH:/api/native-archives/live-training/{id}/dismiss-review
-     */
-    nativeArchiveControllerDismissLiveTrainingReview: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/live-training/${id}/dismiss-review`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerExportNativeCourse
-     * @request POST:/api/native-archives/courses/{id}/export
-     */
-    nativeArchiveControllerExportNativeCourse: (id: string, params: RequestParams = {}) =>
-      this.request<ExportNativeCourseResponse, any>({
-        path: `/api/native-archives/courses/${id}/export`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerExportNativeLearningPath
-     * @request POST:/api/native-archives/learning-paths/{id}/export
-     */
-    nativeArchiveControllerExportNativeLearningPath: (id: string, params: RequestParams = {}) =>
-      this.request<ExportNativeLearningPathResponse, any>({
-        path: `/api/native-archives/learning-paths/${id}/export`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerImportNativeArchive
-     * @request POST:/api/native-archives/import
-     */
-    nativeArchiveControllerImportNativeArchive: (
-      data: {
-        /** @format binary */
-        file: File;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ImportNativeArchiveResponse, any>({
-        path: `/api/native-archives/import`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerGetNativeArchiveStatus
-     * @request GET:/api/native-archives/jobs/{id}
-     */
-    nativeArchiveControllerGetNativeArchiveStatus: (id: string, params: RequestParams = {}) =>
-      this.request<GetNativeArchiveStatusResponse, any>({
-        path: `/api/native-archives/jobs/${id}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerGetNativeArchiveDownloadUrl
-     * @request GET:/api/native-archives/jobs/{id}/download-url
-     */
-    nativeArchiveControllerGetNativeArchiveDownloadUrl: (id: string, params: RequestParams = {}) =>
-      this.request<GetNativeArchiveDownloadUrlResponse, any>({
-        path: `/api/native-archives/jobs/${id}/download-url`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name NativeArchiveControllerDownloadNativeArchive
-     * @request GET:/api/native-archives/jobs/{id}/download
-     */
-    nativeArchiveControllerDownloadNativeArchive: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/native-archives/jobs/${id}/download`,
-        method: "GET",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name CourseChatControllerGetMessages
      * @request GET:/api/course-chat/{courseId}/messages
      */
@@ -46018,6 +46406,147 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseChatControllerDeleteMessage: (messageId: string, params: RequestParams = {}) =>
       this.request<DeleteMessageResponse, any>({
         path: `/api/course-chat/messages/${messageId}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetTopics
+     * @request GET:/api/forum/topics
+     */
+    forumControllerGetTopics: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        sort?: "lastActivity" | "newest" | "mostReplies";
+        /** @maxLength 200 */
+        search?: string;
+        scope?: "general" | "course";
+        /** @format uuid */
+        courseId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTopicsResponse, any>({
+        path: `/api/forum/topics`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerCreateTopic
+     * @request POST:/api/forum/topics
+     */
+    forumControllerCreateTopic: (
+      data: CreateTopicBody,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateTopicResponse, any>({
+        path: `/api/forum/topics`,
+        method: "POST",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetTopic
+     * @request GET:/api/forum/topics/{topicId}
+     */
+    forumControllerGetTopic: (
+      topicId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTopicResponse, any>({
+        path: `/api/forum/topics/${topicId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetTopicPosts
+     * @request GET:/api/forum/topics/{topicId}/posts
+     */
+    forumControllerGetTopicPosts: (
+      topicId: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTopicPostsResponse, any>({
+        path: `/api/forum/topics/${topicId}/posts`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerCreatePost
+     * @request POST:/api/forum/topics/{topicId}/posts
+     */
+    forumControllerCreatePost: (
+      topicId: string,
+      data: CreatePostBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreatePostResponse, any>({
+        path: `/api/forum/topics/${topicId}/posts`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerDeletePost
+     * @request DELETE:/api/forum/posts/{postId}
+     */
+    forumControllerDeletePost: (postId: string, params: RequestParams = {}) =>
+      this.request<DeletePostResponse, any>({
+        path: `/api/forum/posts/${postId}`,
         method: "DELETE",
         format: "json",
         ...params,
@@ -47917,6 +48446,31 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name ScormControllerLaunchScormPreview
+     * @request GET:/api/scorm/runtime/preview
+     */
+    scormControllerLaunchScormPreview: (
+      query?: {
+        /** @format uuid */
+        lessonId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @format uuid */
+        scoId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<LaunchScormPreviewResponse, any>({
+        path: `/api/scorm/runtime/preview`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ScormControllerRenewScormContent
      * @request POST:/api/scorm/runtime/content/renew
      */
@@ -48511,6 +49065,30 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Returns the chapters and lessons of a non-archived course of the tenant selected by X-Tenant-Id, in course order, with its learning outcomes. Lesson content is not included. Requires a managing tenant key whose owner has the course export permission. Titles and learning outcomes use the given language and fall back to the course's base language.
+     *
+     * @tags Integration
+     * @name IntegrationCoursesControllerGetTenantCourseOutline
+     * @summary Get a course outline for an external catalog
+     * @request GET:/api/integration/courses/{courseId}/outline
+     */
+    integrationCoursesControllerGetTenantCourseOutline: (
+      courseId: string,
+      query: {
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTenantCourseOutlineResponse, void>({
+        path: `/api/integration/courses/${courseId}/outline`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Queues a native archive (mentingo-package zip) export of a course in the tenant selected by X-Tenant-Id and returns the job id. Poll GET /integration/native-archive/jobs/:jobId until the job completes, then download the archive. Requires a managing tenant key whose owner has the course export permission.
      *
      * @tags Integration
@@ -49067,6 +49645,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetContentMarketplaceListingResponse, any>({
         path: `/api/content-marketplace/listings/${listingId}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns the chapters, lessons and learning outcomes of the listing's current version, the one a copy would get. They are in the given language when the listing has it, otherwise in the course's base language. Lesson content is not included.
+     *
+     * @name ContentMarketplaceControllerGetContentMarketplaceListingOutline
+     * @summary Preview a content marketplace course's content
+     * @request GET:/api/content-marketplace/listings/{listingId}/outline
+     */
+    contentMarketplaceControllerGetContentMarketplaceListingOutline: (
+      listingId: string,
+      query: {
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetContentMarketplaceListingOutlineResponse, any>({
+        path: `/api/content-marketplace/listings/${listingId}/outline`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

@@ -73,7 +73,7 @@ test("student can submit and retake a quiz lesson", async ({
       await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(quizLesson.title);
       await expect(
         page.getByTestId(LEARNING_HANDLES.lessonSidebarLessonItem(quizLesson.id)),
-      ).toHaveText(quizLesson.title);
+      ).toContainText(quizLesson.title);
       await page.getByTestId(LEARNING_HANDLES.lessonSidebarTypeIcon(quizLesson.id)).hover();
       await expect(page.getByRole("tooltip")).toHaveText("Quiz");
       await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_FORM)).toBeVisible();

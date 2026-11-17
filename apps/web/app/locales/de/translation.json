@@ -839,7 +839,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "Die Option „Video-Abschlussverfolgung“ wurde erfolgreich aktualisiert",
     "videoCompletionTrackingUpdateFailed": "Die Option „Video-Abschlussverfolgung“ konnte nicht aktualisiert werden",
     "settingsUpdatedSuccessfully": "Einstellungen erfolgreich aktualisiert",
-    "settingsUpdateFailed": "Die Einstellungen konnten nicht aktualisiert werden"
+    "settingsUpdateFailed": "Die Einstellungen konnten nicht aktualisiert werden",
+    "audioCompletionTrackingUpdatedSuccessfully": "Die Option „Audio-Abschlussverfolgung“ wurde erfolgreich aktualisiert",
+    "audioCompletionTrackingUpdateFailed": "Die Option „Audio-Abschlussverfolgung“ konnte nicht aktualisiert werden"
   },
   "uploadFile": {
     "header": "Klicken Sie zum Hochladen",
@@ -1103,13 +1105,16 @@
     "promotionCodes": "Aktionscodes",
     "manage": "Verwalten",
     "ariaLabels": {
-      "goToAvailableCourses": "Gehen Sie zu den verfügbaren Kursen"
+      "goToAvailableCourses": "Gehen Sie zu den verfügbaren Kursen",
+      "collapseSidebar": "Seitenleiste einklappen",
+      "expandSidebar": "Seitenleiste ausklappen"
     },
     "qa": "Fragen und Antworten",
     "tenants": "Organisationen",
     "reports": "Berichte",
     "leaderboards": "Bestenlisten",
-    "gamification": "Gamification"
+    "gamification": "Gamification",
+    "forum": "Forum"
   },
   "microsoftCalendar": {
     "title": "Microsoft-Kalender",
@@ -1690,20 +1695,6 @@
     },
     "validation": {
       "email": "E-Mail ist erforderlich"
-    }
-  },
-  "ssoEnforcementView": {
-    "header": "SSO-Durchsetzung",
-    "subHeader": "Erzwingen Sie die SSO-Anmeldung für alle Benutzer",
-    "description": "Dieser Schalter erzwingt die Google-/Microsoft-Anmeldung für alle Benutzer. Wenn diese Option deaktiviert ist, können sich Benutzer mit dem herkömmlichen Anmeldeformular anmelden.",
-    "switch": {
-      "enabled": "Ermöglicht",
-      "disabled": "Deaktiviert"
-    },
-    "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "SSO-Erzwingung erfolgreich aktualisiert",
-      "ssoEnforcementUpdateFailed": "Die SSO-Erzwingung konnte nicht aktualisiert werden",
-      "registerRedirect": "Die Registrierung per E-Mail ist deaktiviert, da SSO erzwungen wird."
     }
   },
   "userEmailTriggers": {
@@ -2354,7 +2345,8 @@
         "email_template": "E-Mail-Vorlagen",
         "managed_group_results": "Ergebnisse verwalteter Gruppen",
         "phishing": "Phishing-Simulationen",
-        "todo_task": "Aufgaben"
+        "todo_task": "Aufgaben",
+        "forum": "Forum"
       },
       "descriptions": {
         "phishing_manage": "Phishing-Simulationen erstellen und verwalten.",
@@ -2455,7 +2447,11 @@
         "gamification_leaderboard_read_all": "Die Bestenliste der Organisation und alle Gruppenbestenlisten ansehen.",
         "gamification_manage": "Erfolge und Gamification-Einstellungen konfigurieren.",
         "quiz_grading_read": "Warteschlange offener Antworten anzeigen, die auf Bewertung warten.",
-        "quiz_grading_grade": "Offene Antworten bewerten und Kommentare für Lernende schreiben."
+        "quiz_grading_grade": "Offene Antworten bewerten und Kommentare für Lernende schreiben.",
+        "forum_read": "Kann das Forum anzeigen.",
+        "forum_topic_create": "Kann Forenthemen erstellen.",
+        "forum_post_create": "Kann in Forenthemen antworten.",
+        "forum_post_delete": "Kann beliebige Forenbeiträge löschen."
       }
     },
     "dropdown": {
@@ -2899,7 +2895,8 @@
         "curriculum": "Die Bearbeitung des Lehrplans ist für SCORM-Kurse nicht verfügbar.",
         "lessonSequence": "Die erzwungene Lektionenreihenfolge ist für SCORM-Kurse nicht verfügbar.",
         "quizFeedback": "Quiz-Feedback-Einstellungen sind für SCORM-Kurse nicht verfügbar.",
-        "videoCompletionTracking": "Video-Abschlussverfolgung ist für SCORM-Kurse nicht verfügbar."
+        "videoCompletionTracking": "Video-Abschlussverfolgung ist für SCORM-Kurse nicht verfügbar.",
+        "audioCompletionTracking": "Audio-Abschlussverfolgung ist für SCORM-Kurse nicht verfügbar."
       },
       "notFound": {
         "course": "Kurs nicht gefunden.",
@@ -3090,7 +3087,9 @@
         "courseAvailabilityTitle": "Kursverfügbarkeit",
         "fallbackLanguageWarningTitle": "Hinweis: fehlende Übersetzungen",
         "fallbackLanguageWarningDescription": "Einige Felder in dieser Sprachversion sind leer. An diesen Stellen sehen die Schüler Inhalte in der Standardsprache, bis Sie Übersetzungen hinzufügen.",
-        "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil des Kurses sein."
+        "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil des Kurses sein.",
+        "enableAudioCompletionTracking": "Audio-Abschlussverfolgung",
+        "enableAudioCompletionTrackingDescription": "Lernende müssen mindestens 90% jeder Audioaufnahme in einer Lektion anhören, bevor sie als abgeschlossen markiert wird."
       },
       "validation": {
         "titleMinLength": "Der Titel muss mindestens 2 Zeichen lang sein.",
@@ -3195,14 +3194,27 @@
           "quizCooldownInHours": "Zeitsperre nach Fehlversuchen (in Stunden)",
           "numberOfQuestions": "{{count1}} von {{count2}} Fragen",
           "noQuestions": "Keine Fragen",
-          "timeLimitMinutes": "Zeitlimit (hh:mm)"
+          "timeLimitMinutes": "Zeitlimit (hh:mm)",
+          "feedbackMode": "Sichtbarkeit des Feedbacks",
+          "feedbackModeFull": "Ergebnis und Nachrichten",
+          "feedbackModeScoreOnly": "Nur Ergebnis",
+          "feedbackModeNone": "Kein Feedback",
+          "feedbackRanges": "Nachrichten für Ergebnisbereiche",
+          "feedbackVariablesHint": "Du kannst {{firstNameVar}} für den Vornamen des Lernenden und {{scoreVar}} für sein Ergebnis verwenden.",
+          "feedbackRangeMin": "Von (%)",
+          "feedbackRangeMax": "Bis (%)",
+          "feedbackRangeMessage": "Nachricht",
+          "feedbackRangeAdd": "Bereich hinzufügen",
+          "feedbackRangeReset": "Standardbereiche wiederherstellen"
         },
         "tooltip": {
           "switch": "Wenn diese Option aktiviert ist, hat der Schüler eine begrenzte Anzahl von Quizversuchen.",
           "passingThreshold": "Der prozentuale Schwellenwert für das Bestehen des Quiz. Erreicht ein Schüler diese Punktzahl, gilt das Quiz als bestanden.",
           "attemptsLimit": "Anzahl der erlaubten Quizversuche, bevor die Zeitsperre ausgelöst wird.",
           "quizCooldownInHours": "Dauer der Quizsperre nach Ausschöpfung aller Versuche.",
-          "timeLimitMinutes": "Optional. Wenn festgelegt, starten Lernende das Quiz ausdrücklich und ihre Antworten werden nach Ablauf der Zeit automatisch abgegeben. Leer lassen für kein Zeitlimit."
+          "timeLimitMinutes": "Optional. Wenn festgelegt, starten Lernende das Quiz ausdrücklich und ihre Antworten werden nach Ablauf der Zeit automatisch abgegeben. Leer lassen für kein Zeitlimit.",
+          "feedbackMode": "Legt fest, was Lernende nach dem Absenden sehen: Ergebnis und Nachrichten, nur das Ergebnis oder nichts.",
+          "feedbackRanges": "Geordnete Ergebnisbereiche, die Lernenden angezeigt werden. Bereiche müssen 0-100% lückenlos und ohne Überschneidung abdecken."
         },
         "validation": {
           "optionTextRequired": "Optionstext ist erforderlich",
@@ -3232,7 +3244,13 @@
           "matchingPairsRequired": "Füge mindestens 2 Paare hinzu und fülle beide Seiten jedes Paares aus",
           "matchingMatchRequired": "Gib die Zuordnung für dieses Paar ein",
           "matchingPairsUnique": "Jedes Paar braucht eine eindeutige Zuordnung",
-          "timeLimitMinutes": "Gib ein Zeitlimit zwischen {{min}} und {{max}} ein."
+          "timeLimitMinutes": "Gib ein Zeitlimit zwischen {{min}} und {{max}} ein.",
+          "feedbackRangeNotInteger": "Bereichsgrenzen müssen ganze Zahlen sein.",
+          "feedbackRangeOutOfBounds": "Bereichsgrenzen müssen zwischen 0 und 100 liegen.",
+          "feedbackRangeBoundsReversed": "Der Beginn eines Bereichs darf nicht größer als sein Ende sein.",
+          "feedbackRangesMustStartAtZero": "Bereiche müssen bei 0% beginnen.",
+          "feedbackRangesMustEndAtHundred": "Bereiche müssen bei 100% enden.",
+          "feedbackRangesGapOrOverlap": "Bereiche müssen 0-100% lückenlos und ohne Überschneidung abdecken."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Die Anzeigereihenfolge der Lektionen wurde erfolgreich aktualisiert",
@@ -4144,7 +4162,6 @@
   "registerView": {
     "header": "Melden Sie sich an",
     "subHeader": "Geben Sie Ihre Daten ein, um ein Konto zu erstellen",
-    "subHeaderSSO": "Melden Sie sich mit Ihrem Google-/Microsoft-Konto an",
     "field": {
       "firstName": "Vorname",
       "lastName": "Nachname",
@@ -4539,6 +4556,42 @@
       "timeLeft": "Verbleibende Zeit: {{time}}",
       "warning": "Weniger als eine Minute übrig. Deine Antworten werden nach Ablauf der Zeit automatisch abgegeben.",
       "timeUp": "Die Zeit ist abgelaufen. Deine Antworten werden abgegeben."
+    },
+    "audioProgress": {
+      "label": "Audio-Fortschritt",
+      "completedSummary": "{{completed}} von {{total}} abgeschlossen",
+      "overviewAriaLabel": "Audio-Fortschritt der Lektion",
+      "segmentAriaLabel": "Fortschritt von Audio {{index}}: {{progress}}% angehört",
+      "requirementSingle": "Hören Sie die gesamte Audioaufnahme an, um diese Lektion abzuschließen.",
+      "requirementMultiple": "Hören Sie alle Audioaufnahmen an, um diese Lektion abzuschließen.",
+      "errors": {
+        "resourceNotFound": "Der Audio-Fortschritt konnte für diese Lektion nicht gespeichert werden.",
+        "unsupportedLessonType": "Audio-Fortschritt ist nur für Inhaltslektionen verfügbar.",
+        "unsupportedBucketSize": "Der Audio-Fortschritt verwendet ein nicht unterstütztes Erfassungsintervall.",
+        "invalidResourceType": "Diese Ressource kann nicht als Audioaufnahme der Lektion verfolgt werden.",
+        "accessDenied": "Sie haben keine Berechtigung, den Audio-Fortschritt dieser Lektion zu aktualisieren."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Vor dem Verlassen fertig anhören?",
+      "descriptionSingle": "Für den Abschluss dieser Lektion muss die gesamte Audioaufnahme angehört werden.",
+      "descriptionMultiple": "Für den Abschluss dieser Lektion müssen alle Audioaufnahmen angehört werden.",
+      "continueListening": "Weiter anhören"
+    },
+    "requiredMediaLeave": {
+      "title": "Lektionsmedien vor dem Verlassen abschließen?",
+      "description": "Für den Abschluss dieser Lektion müssen alle Videos angesehen und alle Audioaufnahmen angehört werden.",
+      "continue": "Fortfahren"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Sehen Sie sich das Video an und hören Sie die Audioaufnahme an, um diese Lektion abzuschließen.",
+      "requirementMultiple": "Sehen Sie sich alle Videos an und hören Sie alle Audioaufnahmen an, um diese Lektion abzuschließen.",
+      "label": "Lektionsfortschritt",
+      "overviewAriaLabel": "Fortschritt der Lektionsmedien"
+    },
+    "navigation": {
+      "previousLesson": "Vorherige Lektion",
+      "nextLesson": "Nächste Lektion"
     }
   },
   "studentCourseView": {
@@ -4563,6 +4616,8 @@
       "threeOrFiveWordSentence": "Schreiben Sie eine ausführliche Antwort (3-5 Sätze).",
       "aiMentorLesson": {
         "sendMessage": "Nachricht schreiben...",
+        "messageLabel": "Ihre Nachricht",
+        "conversationLabel": "Unterhaltung",
         "check": "Überprüfen",
         "aiMentorName": "KI-Mentor",
         "retake": "Wiederholung",
@@ -4835,7 +4890,9 @@
       "studentsWithOverdueCourseNotification": "Studierende mit Benachrichtigungen über überfällige Kurse",
       "studentsWithOverdueCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn Studierende Kurse überfällig haben",
       "publicCoursePreview": "Lektionen vor der Kurseinschreibung ansehen",
-      "publicCoursePreviewDescription": "Erlaubt angemeldeten Nutzern, Lektionen kostenloser Kurse vor der Einschreibung zu öffnen. Quizze und Fortschrittsverfolgung erfordern weiterhin eine Einschreibung."
+      "publicCoursePreviewDescription": "Erlaubt angemeldeten Nutzern, Lektionen kostenloser Kurse vor der Einschreibung zu öffnen. Quizze und Fortschrittsverfolgung erfordern weiterhin eine Einschreibung.",
+      "forum": "Forum aktivieren",
+      "forumDescription": "Allen in der Organisation erlauben, Themen zu erstellen und zu antworten. Eingeschriebene Benutzer sehen dort auch die Diskussionen ihrer Kurse"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für neue Benutzer wurden erfolgreich aktualisiert",
@@ -4849,7 +4906,8 @@
       "finishedCourseNotificationsPreferenceChangeError": "Die Benachrichtigungseinstellungen für abgeschlossene Kurse konnten nicht aktualisiert werden",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für überfällige Kurse wurden erfolgreich aktualisiert",
       "overdueCourseNotificationsPreferenceChangeError": "Die Benachrichtigungseinstellungen für überfällige Kurse konnten nicht aktualisiert werden",
-      "publicCoursePreviewPreferenceChangeSuccess": "Einstellung zur Kursvorschau aktualisiert"
+      "publicCoursePreviewPreferenceChangeSuccess": "Einstellung zur Kursvorschau aktualisiert",
+      "forumPreferenceChangeSuccess": "Die Einstellung für das Forum wurde erfolgreich aktualisiert"
     }
   },
   "registrationFormBuilder": {
@@ -4965,7 +5023,7 @@
       "courseCompletionRequired": "Sie müssen den Kurs abschließen, bevor Sie ein Zertifikat erstellen können."
     },
     "button": {
-      "download": "Herunterladen",
+      "download": "Zertifikat herunterladen (PDF)",
       "preview": "Vorschau",
       "shareLinkedIn": "Auf LinkedIn teilen"
     },
@@ -5408,7 +5466,9 @@
       },
       "ariaLabel": {
         "drag": "Video per Drag & Drop einbetten",
-        "remove": "Videoeinbettung entfernen"
+        "remove": "Videoeinbettung entfernen",
+        "play": "Video abspielen",
+        "playWithTitle": "Video abspielen: {{title}}"
       }
     },
     "presentation": {
@@ -8568,7 +8628,14 @@
       "unavailable": "Der Content-Marktplatz ist für diese Organisation nicht verfügbar.",
       "listingNotFound": "Dieser Marktplatz-Kurs wurde nicht gefunden.",
       "thumbnailNotFound": "Dieser Marktplatz-Kurs hat kein Vorschaubild.",
-      "serviceError": "Der Content-Marktplatz konnte die Anfrage nicht abschließen. Versuchen Sie es später erneut."
+      "serviceError": "Der Content-Marktplatz konnte die Anfrage nicht abschließen. Versuchen Sie es später erneut.",
+      "outlineNotFound": "Eine Vorschau des Kursinhalts ist noch nicht verfügbar."
+    },
+    "preview": {
+      "open": "Inhalt ansehen",
+      "noChapters": "Dieser Kurs hat noch keine Kapitel.",
+      "chaptersCount_one": "{{count}} Kapitel",
+      "chaptersCount_other": "{{count}} Kapitel"
     }
   },
   "aiJudgeConfiguration": {
@@ -9718,5 +9785,62 @@
       }
     },
     "requiresGamification": "Aktiviere zuerst die Gamification."
+  },
+  "forum": {
+    "title": "Forum",
+    "description": "Stellen Sie Fragen und teilen Sie Wissen mit allen in Ihrer Organisation.",
+    "newTopic": "Neues Thema",
+    "searchPlaceholder": "Themen durchsuchen",
+    "filter": {
+      "label": "Themen anzeigen",
+      "all": "Alle Themen",
+      "general": "Allgemein"
+    },
+    "sort": {
+      "label": "Themen sortieren",
+      "lastActivity": "Neueste Aktivität",
+      "newest": "Neueste",
+      "mostReplies": "Meiste Antworten"
+    },
+    "empty": "Noch keine Themen. Starten Sie das erste.",
+    "noResults": "Keine Themen entsprechen Ihren Filtern.",
+    "replies_one": "{{count}} Antwort",
+    "replies_other": "{{count}} Antworten",
+    "lastActivity": "Letzte Aktivität {{time}}",
+    "deletedPost": "Dieser Beitrag wurde gelöscht.",
+    "deletePost": "Beitrag löschen",
+    "createDialog": {
+      "title": "Neues Thema",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "Worum geht es in Ihrem Thema?",
+      "contentLabel": "Nachricht",
+      "contentPlaceholder": "Schreiben Sie den ersten Beitrag",
+      "submit": "Thema erstellen"
+    },
+    "topic": {
+      "backToForum": "Zurück zum Forum",
+      "courseThreadTitle": "Diskussion im Kurs {{course}}",
+      "noReplies": "Noch keine Antworten.",
+      "replyPlaceholder": "Antwort schreiben",
+      "replySubmit": "Antworten",
+      "closed": "Antworten sind geschlossen, weil der erste Beitrag gelöscht wurde."
+    },
+    "deleteDialog": {
+      "title": "Diesen Beitrag löschen?",
+      "description": "Der Beitrag wird für alle entfernt. Dies kann nicht rückgängig gemacht werden."
+    },
+    "toast": {
+      "createTopicError": "Das Thema konnte nicht erstellt werden.",
+      "createPostError": "Die Antwort konnte nicht gesendet werden.",
+      "deletePostError": "Der Beitrag konnte nicht gelöscht werden."
+    },
+    "errors": {
+      "topicNotFound": "Dieses Thema existiert nicht oder Sie haben keinen Zugriff darauf.",
+      "postNotFound": "Dieser Beitrag existiert nicht mehr.",
+      "cannotDeletePost": "Sie können nur Ihre eigenen Beiträge löschen.",
+      "topicDeleted": "Antworten sind geschlossen, weil der erste Beitrag gelöscht wurde.",
+      "emptyTitle": "Geben Sie einen Titel ein.",
+      "emptyContent": "Geben Sie eine Nachricht ein."
+    }
   }
 }

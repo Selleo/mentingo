@@ -13,7 +13,9 @@ import { CategoryChip } from "~/components/ui/CategoryChip";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 
-import { doesExpandedCardCoverRowEdge, formatDuration, getExpandedCardOffset } from "./utils";
+import { formatDuration } from "../../utils/formatDuration";
+
+import { doesExpandedCardCoverRowEdge, getExpandedCardOffset } from "./utils";
 
 import type { CourseCardMediaState, ExpandedCardLayout } from "./ModernCourseCard.types";
 import type { CSSProperties } from "react";
@@ -57,7 +59,6 @@ type ModernCourseCardProps = ModernCourseCardVariantProps & {
   estimatedDurationMinutes?: number;
   lessonCount?: number;
   progressPercent?: number;
-  category: string | null;
   className?: string;
   enrolled?: boolean;
   hasFreeChapters?: boolean;
@@ -74,7 +75,6 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
     estimatedDurationMinutes,
     lessonCount,
     progressPercent,
-    category,
     className,
     enrolled,
     hasFreeChapters,
@@ -184,7 +184,11 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
     };
   }, [isHovered]);
 
-  const durationLabel = formatDuration(estimatedDurationMinutes);
+  const durationLabel =
+    estimatedDurationMinutes !== undefined
+      ? formatDuration(estimatedDurationMinutes * 60, t)
+      : undefined;
+
   const lessonsLabel = lessonCount
     ? t("studentCoursesView.modernView.lessonsCount", { count: lessonCount })
     : undefined;
@@ -288,7 +292,7 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
         className={cn(
           "relative aspect-video overflow-hidden border border-gray-200 bg-white shadow-md transition-all rounded-lg",
           {
-            "rounded-b-none": isHovered && popoutEnabled,
+            "rounded-b-none shadow-none": isHovered && popoutEnabled,
           },
         )}
         style={{
@@ -383,6 +387,22 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
           </div>
         )}
 
+        {!isPicker && (
+          <div
+            aria-hidden
+            className="absolute bottom-3 left-3 z-30 flex size-9 items-center justify-center rounded-full bg-primary-700 text-white shadow-md transition-[opacity,transform]"
+            style={{
+              opacity: isHovered ? 1 : 0,
+              transform: isHovered ? "scale(1)" : "scale(0.8)",
+              transitionDuration: PANEL_TRANSITION_DURATION,
+              transitionTimingFunction: SMOOTH_EASE,
+              transitionDelay: isHovered ? "0.2s" : "0s",
+            }}
+          >
+            <Play className="size-4" fill="currentColor" />
+          </div>
+        )}
+
         <div
           className="absolute bottom-0 left-0 right-0 z-20 p-4 transition-opacity ease-out"
           style={{
@@ -408,39 +428,30 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
             transitionDelay: isHovered ? "0.2s" : "0s",
           }}
         >
-          <div className="space-y-3 border border-t-0 border-gray-200 p-4">
-            <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-gray-900 transition-all duration-300">
+          <div className="flex flex-col gap-2 border border-t-0 border-neutral-200 p-4">
+            <h3 className="line-clamp-2 break-words text-base font-semibold leading-snug text-neutral-950">
               {title}
             </h3>
 
-            {(durationLabel || lessonsLabel) && (
-              <div className="flex items-center gap-4 text-xs text-neutral-700">
-                {durationLabel && (
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>{durationLabel}</span>
-                  </div>
-                )}
-                {lessonsLabel && (
-                  <div className="flex items-center gap-1.5">
-                    <BookOpen className="h-3.5 w-3.5" />
-                    <span>{lessonsLabel}</span>
-                  </div>
-                )}
-              </div>
-            )}
-
             {nonFormattedDescription && (
-              <p className="line-clamp-2 text-xs text-neutral-600">{nonFormattedDescription}</p>
+              <p className="line-clamp-2 text-sm leading-relaxed text-neutral-600">
+                {nonFormattedDescription}
+              </p>
             )}
 
-            <div className="flex items-center justify-between">
-              <span className="rounded bg-neutral-900 px-2.5 py-1 text-xs font-medium text-white">
-                {category}
-              </span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-white shadow-md transition-transform duration-200 group-hover:scale-110">
-                <Play className="h-4 w-4" fill="currentColor" />
-              </div>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {lessonsLabel && (
+                <span className="flex items-center gap-1.5 rounded-lg bg-primary-50 px-2.5 py-1.5 text-xs font-semibold leading-none text-primary-800">
+                  <BookOpen className="size-3.5 shrink-0" aria-hidden />
+                  {lessonsLabel}
+                </span>
+              )}
+              {durationLabel && (
+                <span className="flex items-center gap-1.5 rounded-lg bg-primary-50 px-2.5 py-1.5 text-xs font-semibold leading-none text-primary-800">
+                  <Clock className="size-3.5 shrink-0" aria-hidden />
+                  {durationLabel}
+                </span>
+              )}
             </div>
           </div>
         </div>

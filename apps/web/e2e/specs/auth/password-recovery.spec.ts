@@ -15,9 +15,9 @@ const UPDATED_PASSWORD = "ChangedPassword123@";
 test("visitor can request a password reset email", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const userFactory = factories.createUserFactory();
     const email = `password-reset-${Date.now()}@example.com`;
     const user = await userFactory.register({
@@ -42,9 +42,9 @@ test("visitor can request a password reset email", async ({
 test("visitor can reset a password from the recovery email", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const userFactory = factories.createUserFactory();
     const email = `password-reset-flow-${Date.now()}@example.com`;
     const user = await userFactory.register({

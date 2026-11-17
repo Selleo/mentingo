@@ -1,5 +1,13 @@
-import type { Question } from "./CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
-import type { AiMentorTTSPreset, AiMentorVoiceMode, SupportedLanguages } from "@repo/shared";
+import type {
+  Question,
+  QuizFeedbackRange,
+} from "./CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
+import type {
+  AiMentorTTSPreset,
+  AiMentorVoiceMode,
+  AssessmentFeedbackMode,
+  SupportedLanguages,
+} from "@repo/shared";
 
 export const EDIT_COURSE_TABS = {
   CURRICULUM: "Curriculum",
@@ -41,6 +49,8 @@ export interface Lesson {
   attemptsLimit?: number;
   quizCooldownInHours?: number;
   timeLimitMinutes?: number | null;
+  feedbackMode?: AssessmentFeedbackMode;
+  feedbackRanges?: QuizFeedbackRange[];
   fileS3Key?: string;
   fileS3SignedUrl?: string;
   avatarReferenceUrl?: string;

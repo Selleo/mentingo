@@ -58,6 +58,8 @@ export const routes: (
           route("ai-mentor/practice/:id", "modules/AiMentorPractice/AiMentorPractice.page.tsx");
           route("competencies", "modules/Competencies/Competencies.page.tsx");
           route("leaderboards", "modules/Gamification/Leaderboard/Leaderboard.page.tsx");
+          route("forum", "modules/Forum/ForumTopics.page.tsx");
+          route("forum/topics/:topicId", "modules/Forum/ForumTopic.page.tsx");
           route("phishing", "modules/Phishing/Phishing.page.tsx");
           route("phishing/new", "modules/Phishing/CreatePhishing.page.tsx");
           route("phishing/:id", "modules/Phishing/PhishingReport.page.tsx");

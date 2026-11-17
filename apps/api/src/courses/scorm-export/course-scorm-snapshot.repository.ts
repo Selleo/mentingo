@@ -4,7 +4,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { DatabasePg } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
-import { resources } from "src/storage/schema";
+import { courses, resources } from "src/storage/schema";
 
 import type { CourseScormResourceAssetRow } from "./course-scorm-export.types";
 import type { SupportedLanguages } from "@repo/shared";
@@ -16,6 +16,15 @@ export class CourseScormSnapshotRepository {
     @Inject(DB) private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
   ) {}
+
+  async findCourseAuthorId(courseId: UUIDType): Promise<UUIDType | undefined> {
+    const [course] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    return course?.authorId;
+  }
 
   async getActiveResourceAssetsByIds(
     resourceIds: UUIDType[],

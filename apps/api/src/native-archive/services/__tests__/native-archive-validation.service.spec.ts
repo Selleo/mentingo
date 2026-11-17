@@ -71,6 +71,18 @@ describe("NativeArchiveValidationService", () => {
     expect(service.validateCourseSnapshot(value).assessmentQuestionMatchingPairs).toEqual([]);
   });
 
+  it("keeps feedback ranges and treats archives exported before them as having none", () => {
+    const ranges = [{ id: "0b9b1b0e-4a07-4c3c-9e57-2c1d3f6c1a03", minPercent: 0, maxPercent: 100 }];
+    const withRanges = snapshot();
+    const legacy = snapshot();
+
+    withRanges.assessmentFeedbackRanges = ranges;
+    delete legacy.assessmentFeedbackRanges;
+
+    expect(service.validateCourseSnapshot(withRanges).assessmentFeedbackRanges).toEqual(ranges);
+    expect(service.validateCourseSnapshot(legacy).assessmentFeedbackRanges).toEqual([]);
+  });
+
   it("rejects matching questions with fewer than two pairs", () => {
     const questionId = "0b9b1b0e-4a07-4c3c-9e57-2c1d3f6c1a01";
     const value = snapshot();

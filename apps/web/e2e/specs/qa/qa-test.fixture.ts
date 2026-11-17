@@ -17,7 +17,6 @@ type WithAuthPage = (
 ) => Promise<void>;
 
 export const test = base.extend<{
-  withReadonlyPage: WithAuthPage;
   withWorkerPage: WithAuthPage;
 }>({
   withWorkerPage: async (
@@ -31,33 +30,24 @@ export const test = base.extend<{
     use: (value: WithAuthPage) => Promise<void>,
   ) => {
     await use(async (role, run, options) => {
+      // Non-admin roles cannot change settings, so enable Q&A as admin first.
+      if (role !== USER_ROLE.admin) {
+        await withWorkerPage(USER_ROLE.admin, async () => {
+          await ensureQAEnabled(apiClient);
+        });
+      }
+
       await withWorkerPage(
         role,
         async (handle) => {
-          await ensureQAEnabled(apiClient);
+          if (role === USER_ROLE.admin) {
+            await ensureQAEnabled(apiClient);
+          }
+
           await run(handle);
         },
         options,
       );
-    });
-  },
-  withReadonlyPage: async (
-    {
-      apiClient,
-      withReadonlyPage,
-      withWorkerPage,
-    }: {
-      apiClient: Parameters<typeof ensureQAEnabled>[0];
-      withReadonlyPage: WithAuthPage;
-      withWorkerPage: WithAuthPage;
-    },
-    use: (value: WithAuthPage) => Promise<void>,
-  ) => {
-    await use(async (role, run, options) => {
-      await withWorkerPage(USER_ROLE.admin, async () => {
-        await ensureQAEnabled(apiClient);
-      });
-      await withReadonlyPage(role, run, options);
     });
   },
 });

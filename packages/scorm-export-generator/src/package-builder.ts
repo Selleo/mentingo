@@ -16,13 +16,21 @@ export type BuildScormExportPackageResult = {
   stream: Readable;
 };
 
+const PRECOMPRESSED_FILE_EXTENSION =
+  /\.(mp4|m4v|webm|mov|mp3|m4a|aac|ogg|oga|opus|wav|flac|png|jpe?g|gif|webp|avif|zip|gz|pdf|woff2?)$/i;
+
+/** Deflating media again costs time without making it smaller, so it is stored as is. */
+function isPrecompressedFile(path: string) {
+  return PRECOMPRESSED_FILE_EXTENSION.test(path);
+}
+
 export function buildScormExportPackage({
   courseJson,
   files = [],
 }: BuildScormExportPackageInput): BuildScormExportPackageResult {
   const packageFiles = buildPackageFiles([...buildRuntimePackageFiles(courseJson), ...files]);
   const output = new PassThrough();
-  const zip = archiver("zip", { zlib: { level: 9 } });
+  const zip = archiver("zip", { zlib: { level: 6 } });
 
   zip.on("error", (error) => output.destroy(error));
   zip.pipe(output);
@@ -34,7 +42,10 @@ export function buildScormExportPackage({
     name: "data/course.json",
   });
   packageFiles.forEach((file) => {
-    zip.append(resolvePackageFileInput(file), { name: file.path });
+    zip.append(resolvePackageFileInput(file), {
+      name: file.path,
+      store: isPrecompressedFile(file.path),
+    });
   });
 
   queueMicrotask(() => {

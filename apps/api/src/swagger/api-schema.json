@@ -907,23 +907,6 @@
         }
       }
     },
-    "/api/settings/admin/enforce-sso": {
-      "patch": {
-        "operationId": "SettingsController_updateEnforceSSO",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/settings/admin/modern-course-list": {
       "patch": {
         "operationId": "SettingsController_updateModernCourseListEnabled",
@@ -995,6 +978,23 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UpdateCourseDiscussionsEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/forum": {
+      "patch": {
+        "operationId": "SettingsController_updateForumEnabled",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateForumEnabledResponse"
                 }
               }
             }
@@ -6784,8 +6784,14 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportCourseAsScormResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -6975,6 +6981,309 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/native-archives/tus/init": {
+      "post": {
+        "operationId": "NativeArchiveController_initTusImport",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitTusImportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitTusImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/tus": {
+      "options": {
+        "operationId": "NativeArchiveController_tusOptionsBase",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "NativeArchiveController_createTusUpload",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/native-archives/tus/{id}": {
+      "options": {
+        "operationId": "NativeArchiveController_tusOptionsUpload",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "head": {
+        "operationId": "NativeArchiveController_headTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "NativeArchiveController_patchTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/native-archives/tus/{id}/complete": {
+      "post": {
+        "operationId": "NativeArchiveController_completeTusImport",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompleteTusImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/live-training/{id}/dismiss-review": {
+      "patch": {
+        "operationId": "NativeArchiveController_dismissLiveTrainingReview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/native-archives/courses/{id}/export": {
+      "post": {
+        "operationId": "NativeArchiveController_exportNativeCourse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportNativeCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/learning-paths/{id}/export": {
+      "post": {
+        "operationId": "NativeArchiveController_exportNativeLearningPath",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportNativeLearningPathResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/import": {
+      "post": {
+        "operationId": "NativeArchiveController_importNativeArchive",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportNativeArchiveResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/jobs/{id}": {
+      "get": {
+        "operationId": "NativeArchiveController_getNativeArchiveStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNativeArchiveStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/jobs/{id}/download-url": {
+      "get": {
+        "operationId": "NativeArchiveController_getNativeArchiveDownloadUrl",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNativeArchiveDownloadUrlResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native-archives/jobs/{id}/download": {
+      "get": {
+        "operationId": "NativeArchiveController_downloadNativeArchive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
@@ -12125,6 +12434,43 @@
         }
       }
     },
+    "/api/lesson-audio-progress": {
+      "post": {
+        "operationId": "LessonAudioProgressController_upsertLessonAudioProgress",
+        "parameters": [
+          {
+            "name": "x-course-learning-state-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertLessonAudioProgressBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertLessonAudioProgressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stripe": {
       "post": {
         "operationId": "StripeController_createPaymentIntent",
@@ -15340,309 +15686,6 @@
         }
       }
     },
-    "/api/native-archives/tus/init": {
-      "post": {
-        "operationId": "NativeArchiveController_initTusImport",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InitTusImportBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InitTusImportResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/tus": {
-      "options": {
-        "operationId": "NativeArchiveController_tusOptionsBase",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "post": {
-        "operationId": "NativeArchiveController_createTusUpload",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/native-archives/tus/{id}": {
-      "options": {
-        "operationId": "NativeArchiveController_tusOptionsUpload",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "head": {
-        "operationId": "NativeArchiveController_headTusUpload",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "NativeArchiveController_patchTusUpload",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/native-archives/tus/{id}/complete": {
-      "post": {
-        "operationId": "NativeArchiveController_completeTusImport",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompleteTusImportResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/live-training/{id}/dismiss-review": {
-      "patch": {
-        "operationId": "NativeArchiveController_dismissLiveTrainingReview",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/native-archives/courses/{id}/export": {
-      "post": {
-        "operationId": "NativeArchiveController_exportNativeCourse",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportNativeCourseResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/learning-paths/{id}/export": {
-      "post": {
-        "operationId": "NativeArchiveController_exportNativeLearningPath",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportNativeLearningPathResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/import": {
-      "post": {
-        "operationId": "NativeArchiveController_importNativeArchive",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "file"
-                ],
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportNativeArchiveResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/jobs/{id}": {
-      "get": {
-        "operationId": "NativeArchiveController_getNativeArchiveStatus",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetNativeArchiveStatusResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/jobs/{id}/download-url": {
-      "get": {
-        "operationId": "NativeArchiveController_getNativeArchiveDownloadUrl",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetNativeArchiveDownloadUrlResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/native-archives/jobs/{id}/download": {
-      "get": {
-        "operationId": "NativeArchiveController_downloadNativeArchive",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/api/course-chat/{courseId}/messages": {
       "get": {
         "operationId": "CourseChatController_getMessages",
@@ -15852,6 +15895,374 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeleteMessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/topics": {
+      "get": {
+        "operationId": "ForumController_getTopics",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "lastActivity",
+                  "type": "string"
+                },
+                {
+                  "const": "newest",
+                  "type": "string"
+                },
+                {
+                  "const": "mostReplies",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "general",
+                  "type": "string"
+                },
+                {
+                  "const": "course",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTopicsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "ForumController_createTopic",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTopicBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTopicResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/topics/{topicId}": {
+      "get": {
+        "operationId": "ForumController_getTopic",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTopicResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/topics/{topicId}/posts": {
+      "get": {
+        "operationId": "ForumController_getTopicPosts",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTopicPostsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "ForumController_createPost",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePostBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePostResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/posts/{postId}": {
+      "delete": {
+        "operationId": "ForumController_deletePost",
+        "parameters": [
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletePostResponse"
                 }
               }
             }
@@ -19902,6 +20313,80 @@
         }
       }
     },
+    "/api/scorm/runtime/preview": {
+      "get": {
+        "operationId": "ScormController_launchScormPreview",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "scoId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaunchScormPreviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/scorm/runtime/content/renew": {
       "post": {
         "operationId": "ScormController_renewScormContent",
@@ -21703,6 +22188,100 @@
         ]
       }
     },
+    "/api/integration/courses/{courseId}/outline": {
+      "get": {
+        "operationId": "IntegrationCoursesController_getTenantCourseOutline",
+        "summary": "Get a course outline for an external catalog",
+        "description": "Returns the chapters and lessons of a non-archived course of the tenant selected by X-Tenant-Id, in course order, with its learning outcomes. Lesson content is not included.\n\nRequires a managing tenant key whose owner has the course export permission. Titles and learning outcomes use the given language and fall back to the course's base language.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTenantCourseOutlineResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/courses/{courseId}/native-archive": {
       "post": {
         "operationId": "IntegrationNativeArchiveController_startCourseArchiveExport",
@@ -22989,6 +23568,73 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetContentMarketplaceListingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content-marketplace/listings/{listingId}/outline": {
+      "get": {
+        "operationId": "ContentMarketplaceController_getContentMarketplaceListingOutline",
+        "summary": "Preview a content marketplace course's content",
+        "description": "Returns the chapters, lessons and learning outcomes of the listing's current version, the one a copy would get. They are in the given language when the listing has it, otherwise in the course's base language. Lesson content is not included.",
+        "parameters": [
+          {
+            "name": "listingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                },
+                {
+                  "const": "fr",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetContentMarketplaceListingOutlineResponse"
                 }
               }
             }
@@ -27111,6 +27757,22 @@
                     {
                       "const": "gamification.leaderboard_read_all",
                       "type": "string"
+                    },
+                    {
+                      "const": "forum.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "forum.topic.create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "forum.post.create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "forum.post.delete",
+                      "type": "string"
                     }
                   ]
                 }
@@ -27834,6 +28496,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -27864,9 +28529,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -28050,13 +28712,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -29574,6 +30236,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -29604,9 +30269,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -29790,292 +30452,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
-              "certificateBackgroundImage",
-              "platformLogoS3Key",
-              "loginBackgroundImageS3Key",
-              "platformSimpleLogoS3Key",
-              "MFAEnforcedRoles",
-              "defaultCourseCurrency",
-              "inviteOnlyRegistration",
-              "primaryColor",
-              "contrastColor",
-              "backgroundColor",
-              "accentColor",
-              "unregisteredUserQAAccessibility",
-              "QAEnabled",
-              "unregisteredUserNewsAccessibility",
-              "newsEnabled",
-              "unregisteredUserArticlesAccessibility",
-              "articlesEnabled",
-              "learningPathsEnabled",
-              "ageLimit",
-              "loginPageFiles"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateEnforceSSOResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "modernCourseListEnabled": {
-                "type": "boolean"
-              },
-              "publicCoursePreviewEnabled": {
-                "type": "boolean"
-              },
-              "featuredCourseId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "courseDiscussionsEnabled": {
-                "type": "boolean"
-              },
-              "gamificationEnabled": {
-                "type": "boolean"
-              },
-              "leaderboardsEnabled": {
-                "type": "boolean"
-              },
-              "leaderboardVisibility": {
-                "anyOf": [
-                  {
-                    "const": "closed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "public",
-                    "type": "string"
-                  }
-                ]
-              },
-              "calendarEnabled": {
-                "type": "boolean"
-              },
-              "liveTrainingEnabled": {
-                "type": "boolean"
-              },
-              "liveTrainingMaxParallelSessions": {
-                "minimum": 1,
-                "type": "number"
-              },
-              "trainerRoleUserCount": {
-                "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "certificateBackgroundImage": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "companyShortName": {
-                    "maxLength": 10,
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "loginBackgroundImageS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "platformSimpleLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "MFAEnforcedRoles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "defaultCourseCurrency": {
-                "anyOf": [
-                  {
-                    "const": "pln",
-                    "type": "string"
-                  },
-                  {
-                    "const": "eur",
-                    "type": "string"
-                  },
-                  {
-                    "const": "gbp",
-                    "type": "string"
-                  },
-                  {
-                    "const": "usd",
-                    "type": "string"
-                  }
-                ]
-              },
-              "inviteOnlyRegistration": {
-                "type": "boolean"
-              },
-              "primaryColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "contrastColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "backgroundColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "accentColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "unregisteredUserQAAccessibility": {
-                "type": "boolean"
-              },
-              "QAEnabled": {
-                "type": "boolean"
-              },
-              "unregisteredUserNewsAccessibility": {
-                "type": "boolean"
-              },
-              "newsEnabled": {
-                "type": "boolean"
-              },
-              "unregisteredUserArticlesAccessibility": {
-                "type": "boolean"
-              },
-              "articlesEnabled": {
-                "type": "boolean"
-              },
-              "learningPathsEnabled": {
-                "type": "boolean"
-              },
-              "ageLimit": {
-                "anyOf": [
-                  {
-                    "const": 13,
-                    "type": "number"
-                  },
-                  {
-                    "const": 16,
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "loginPageFiles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "modernCourseListEnabled",
-              "publicCoursePreviewEnabled",
-              "featuredCourseId",
-              "courseDiscussionsEnabled",
-              "gamificationEnabled",
-              "leaderboardsEnabled",
-              "leaderboardVisibility",
-              "calendarEnabled",
-              "liveTrainingEnabled",
-              "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -30132,6 +30515,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -30162,9 +30548,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -30348,13 +30731,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -30411,6 +30794,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -30441,9 +30827,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -30627,13 +31010,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -30709,6 +31092,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -30739,9 +31125,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -30925,13 +31308,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -30988,6 +31371,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -31018,9 +31404,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -31204,13 +31587,292 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration",
+              "primaryColor",
+              "contrastColor",
+              "backgroundColor",
+              "accentColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled",
+              "learningPathsEnabled",
+              "ageLimit",
+              "loginPageFiles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateForumEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "modernCourseListEnabled": {
+                "type": "boolean"
+              },
+              "publicCoursePreviewEnabled": {
+                "type": "boolean"
+              },
+              "featuredCourseId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "courseDiscussionsEnabled": {
+                "type": "boolean"
+              },
+              "forumEnabled": {
+                "type": "boolean"
+              },
+              "gamificationEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardsEnabled": {
+                "type": "boolean"
+              },
+              "leaderboardVisibility": {
+                "anyOf": [
+                  {
+                    "const": "closed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "public",
+                    "type": "string"
+                  }
+                ]
+              },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
+              "trainerRoleUserCount": {
+                "type": "number"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "backgroundColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "accentColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
+              },
+              "learningPathsEnabled": {
+                "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "modernCourseListEnabled",
+              "publicCoursePreviewEnabled",
+              "featuredCourseId",
+              "courseDiscussionsEnabled",
+              "forumEnabled",
+              "gamificationEnabled",
+              "leaderboardsEnabled",
+              "leaderboardVisibility",
+              "calendarEnabled",
+              "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -31288,6 +31950,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -31318,9 +31983,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -31504,13 +32166,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -31567,6 +32229,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -31597,9 +32262,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -31783,13 +32445,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -31846,6 +32508,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -31876,9 +32541,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -32062,13 +32724,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -32137,6 +32799,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -32167,9 +32832,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -32353,13 +33015,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -32416,6 +33078,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -32446,9 +33111,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -32632,13 +33294,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -32695,6 +33357,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -32725,9 +33390,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -32911,13 +33573,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -33143,6 +33805,9 @@
               "courseDiscussionsEnabled": {
                 "type": "boolean"
               },
+              "forumEnabled": {
+                "type": "boolean"
+              },
               "gamificationEnabled": {
                 "type": "boolean"
               },
@@ -33173,9 +33838,6 @@
               },
               "trainerRoleUserCount": {
                 "type": "number"
-              },
-              "enforceSSO": {
-                "type": "boolean"
               },
               "certificateBackgroundImage": {
                 "anyOf": [
@@ -33359,13 +34021,13 @@
               "publicCoursePreviewEnabled",
               "featuredCourseId",
               "courseDiscussionsEnabled",
+              "forumEnabled",
               "gamificationEnabled",
               "leaderboardsEnabled",
               "leaderboardVisibility",
               "calendarEnabled",
               "liveTrainingEnabled",
               "liveTrainingMaxParallelSessions",
-              "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
@@ -41240,6 +41902,9 @@
           "videoCompletionTrackingEnabled": {
             "type": "boolean"
           },
+          "audioCompletionTrackingEnabled": {
+            "type": "boolean"
+          },
           "certificateFontColor": {
             "type": "string"
           },
@@ -41358,6 +42023,10 @@
               },
               "videoCompletionTrackingEnabled": {
                 "default": true,
+                "type": "boolean"
+              },
+              "audioCompletionTrackingEnabled": {
+                "default": false,
                 "type": "boolean"
               },
               "certificateSignature": {
@@ -42287,6 +42956,25 @@
           "pagination"
         ]
       },
+      "ExportCourseAsScormResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "TransferCourseOwnershipBody": {
         "type": "object",
         "properties": {
@@ -42692,6 +43380,300 @@
             "required": [
               "currentAuthor",
               "possibleCandidates"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "InitTusImportBody": {
+        "type": "object",
+        "properties": {
+          "sizeBytes": {
+            "minimum": 1,
+            "maximum": 838860800,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sizeBytes"
+        ]
+      },
+      "InitTusImportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "uploadId": {
+                "type": "string"
+              },
+              "tusEndpoint": {
+                "type": "string"
+              },
+              "tusHeaders": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "string"
+                  }
+                }
+              },
+              "expiresAt": {
+                "type": "string"
+              },
+              "partSize": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "uploadId",
+              "tusEndpoint",
+              "tusHeaders",
+              "expiresAt",
+              "partSize"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CompleteTusImportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ExportNativeCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ExportNativeLearningPathResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ImportNativeArchiveResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetNativeArchiveStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "jobId": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "result": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "anyOf": [
+                          {
+                            "const": "course",
+                            "type": "string"
+                          },
+                          {
+                            "const": "learning-path",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "rootId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "alreadyExists": {
+                        "type": "boolean"
+                      },
+                      "createdCourseIds": {
+                        "type": "array",
+                        "items": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      },
+                      "reusedCourseIds": {
+                        "type": "array",
+                        "items": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "rootId"
+                    ]
+                  }
+                ]
+              },
+              "failedReason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "progress": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "stage": {
+                        "anyOf": [
+                          {
+                            "const": "collecting-content",
+                            "type": "string"
+                          },
+                          {
+                            "const": "copying-files",
+                            "type": "string"
+                          },
+                          {
+                            "const": "packaging",
+                            "type": "string"
+                          },
+                          {
+                            "const": "downloading",
+                            "type": "string"
+                          },
+                          {
+                            "const": "verifying",
+                            "type": "string"
+                          },
+                          {
+                            "const": "uploading-files",
+                            "type": "string"
+                          },
+                          {
+                            "const": "indexing",
+                            "type": "string"
+                          },
+                          {
+                            "const": "saving",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "percent": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "stage",
+                      "percent"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "jobId",
+              "state",
+              "result",
+              "failedReason",
+              "progress"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetNativeArchiveDownloadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "expiresInSeconds": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "url",
+              "expiresInSeconds"
             ]
           }
         },
@@ -44539,6 +45521,16 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "feedbackMessage": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [
@@ -44848,6 +45840,12 @@
                 "type": "boolean"
               },
               "videoCompletionTrackingEnabled": {
+                "type": "boolean"
+              },
+              "hasTrackedAudio": {
+                "type": "boolean"
+              },
+              "audioCompletionTrackingEnabled": {
                 "type": "boolean"
               },
               "hasAutoplayTrigger": {
@@ -47672,6 +48670,52 @@
                   }
                 ]
               },
+              "feedbackMode": {
+                "anyOf": [
+                  {
+                    "const": "full",
+                    "type": "string"
+                  },
+                  {
+                    "const": "score_only",
+                    "type": "string"
+                  },
+                  {
+                    "const": "none",
+                    "type": "string"
+                  }
+                ]
+              },
+              "feedbackRanges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "minPercent": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "maxPercent": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "minPercent",
+                    "maxPercent",
+                    "message"
+                  ]
+                }
+              },
               "questions": {
                 "type": "array",
                 "items": {
@@ -48024,6 +49068,52 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "feedbackMode": {
+                    "anyOf": [
+                      {
+                        "const": "full",
+                        "type": "string"
+                      },
+                      {
+                        "const": "score_only",
+                        "type": "string"
+                      },
+                      {
+                        "const": "none",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "feedbackRanges": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "minPercent": {
+                          "minimum": 0,
+                          "maximum": 100,
+                          "type": "integer"
+                        },
+                        "maxPercent": {
+                          "minimum": 0,
+                          "maximum": 100,
+                          "type": "integer"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "minPercent",
+                        "maxPercent",
+                        "message"
+                      ]
+                    }
                   },
                   "questions": {
                     "type": "array",
@@ -71476,6 +72566,171 @@
               "watchedRanges",
               "isWatched",
               "watchedAt",
+              "lessonCompleted"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpsertLessonAudioProgressBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "resourceEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "durationSeconds": {
+            "minimum": 1,
+            "type": "number"
+          },
+          "bucketSize": {
+            "minimum": 1,
+            "default": 1,
+            "type": "number"
+          },
+          "listenedRanges": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "activeListenSecondsDelta": {
+            "minimum": 0,
+            "default": 0,
+            "type": "number"
+          },
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "lessonId",
+          "resourceEntityId",
+          "durationSeconds",
+          "listenedRanges"
+        ]
+      },
+      "UpsertLessonAudioProgressResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "lessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "resourceEntityId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "durationSeconds": {
+                "type": "number"
+              },
+              "bucketSizeSeconds": {
+                "type": "number"
+              },
+              "coveredBucketCount": {
+                "type": "number"
+              },
+              "coveragePercent": {
+                "type": "number"
+              },
+              "listenedRanges": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "minimum": 0,
+                      "type": "number"
+                    },
+                    {
+                      "minimum": 0,
+                      "type": "number"
+                    }
+                  ],
+                  "additionalItems": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "isListened": {
+                "type": "boolean"
+              },
+              "listenedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lessonCompleted": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "lessonId",
+              "resourceEntityId",
+              "durationSeconds",
+              "bucketSizeSeconds",
+              "coveredBucketCount",
+              "coveragePercent",
+              "listenedRanges",
+              "isListened",
+              "listenedAt",
               "lessonCompleted"
             ]
           }
@@ -160426,300 +161681,6 @@
           "data"
         ]
       },
-      "InitTusImportBody": {
-        "type": "object",
-        "properties": {
-          "sizeBytes": {
-            "minimum": 1,
-            "maximum": 838860800,
-            "type": "integer"
-          }
-        },
-        "required": [
-          "sizeBytes"
-        ]
-      },
-      "InitTusImportResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "uploadId": {
-                "type": "string"
-              },
-              "tusEndpoint": {
-                "type": "string"
-              },
-              "tusHeaders": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "string"
-                  }
-                }
-              },
-              "expiresAt": {
-                "type": "string"
-              },
-              "partSize": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "uploadId",
-              "tusEndpoint",
-              "tusHeaders",
-              "expiresAt",
-              "partSize"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "CompleteTusImportResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "jobId": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "jobId"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "ExportNativeCourseResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "jobId": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "jobId"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "ExportNativeLearningPathResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "jobId": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "jobId"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "ImportNativeArchiveResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "jobId": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "jobId"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetNativeArchiveStatusResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "jobId": {
-                "type": "string"
-              },
-              "state": {
-                "type": "string"
-              },
-              "result": {
-                "anyOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "anyOf": [
-                          {
-                            "const": "course",
-                            "type": "string"
-                          },
-                          {
-                            "const": "learning-path",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "rootId": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "alreadyExists": {
-                        "type": "boolean"
-                      },
-                      "createdCourseIds": {
-                        "type": "array",
-                        "items": {
-                          "format": "uuid",
-                          "type": "string"
-                        }
-                      },
-                      "reusedCourseIds": {
-                        "type": "array",
-                        "items": {
-                          "format": "uuid",
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "rootId"
-                    ]
-                  }
-                ]
-              },
-              "failedReason": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "progress": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "stage": {
-                        "anyOf": [
-                          {
-                            "const": "collecting-content",
-                            "type": "string"
-                          },
-                          {
-                            "const": "copying-files",
-                            "type": "string"
-                          },
-                          {
-                            "const": "packaging",
-                            "type": "string"
-                          },
-                          {
-                            "const": "downloading",
-                            "type": "string"
-                          },
-                          {
-                            "const": "verifying",
-                            "type": "string"
-                          },
-                          {
-                            "const": "uploading-files",
-                            "type": "string"
-                          },
-                          {
-                            "const": "indexing",
-                            "type": "string"
-                          },
-                          {
-                            "const": "saving",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "percent": {
-                        "minimum": 0,
-                        "maximum": 100,
-                        "type": "integer"
-                      }
-                    },
-                    "required": [
-                      "stage",
-                      "percent"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "jobId",
-              "state",
-              "result",
-              "failedReason",
-              "progress"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetNativeArchiveDownloadUrlResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "url": {
-                "type": "string"
-              },
-              "expiresInSeconds": {
-                "type": "integer"
-              }
-            },
-            "required": [
-              "url",
-              "expiresInSeconds"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
       "GetMessagesResponse": {
         "type": "object",
         "properties": {
@@ -161791,6 +162752,922 @@
               "parentMessageId",
               "removed",
               "deletedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetTopicsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "scope": {
+                  "anyOf": [
+                    {
+                      "const": "general",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "title": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "course": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "author": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "avatarReference": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "firstName",
+                    "lastName",
+                    "avatarReference"
+                  ]
+                },
+                "replyCount": {
+                  "type": "number"
+                },
+                "lastActivityAt": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "excerpt": {
+                  "type": "string"
+                },
+                "isDeleted": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "scope",
+                "title",
+                "course",
+                "author",
+                "replyCount",
+                "lastActivityAt",
+                "createdAt",
+                "excerpt",
+                "isDeleted"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "CreateTopicBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "minLength": 1,
+            "maxLength": 200,
+            "type": "string"
+          },
+          "content": {
+            "minLength": 1,
+            "maxLength": 5000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "content"
+        ]
+      },
+      "CreateTopicResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "scope": {
+                "anyOf": [
+                  {
+                    "const": "general",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course",
+                    "type": "string"
+                  }
+                ]
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "course": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "author": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "avatarReference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "firstName",
+                  "lastName",
+                  "avatarReference"
+                ]
+              },
+              "replyCount": {
+                "type": "number"
+              },
+              "lastActivityAt": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "firstPost": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "topicId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "userId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "isFirstPost": {
+                    "type": "boolean"
+                  },
+                  "deletedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "avatarReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "firstName",
+                      "lastName",
+                      "avatarReference"
+                    ]
+                  },
+                  "reactions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "reaction": {
+                          "type": "string"
+                        },
+                        "count": {
+                          "type": "number"
+                        },
+                        "reactedByCurrentUser": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "reaction",
+                        "count",
+                        "reactedByCurrentUser"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "topicId",
+                  "userId",
+                  "content",
+                  "isFirstPost",
+                  "deletedAt",
+                  "createdAt",
+                  "updatedAt",
+                  "user",
+                  "reactions"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "scope",
+              "title",
+              "course",
+              "author",
+              "replyCount",
+              "lastActivityAt",
+              "createdAt",
+              "firstPost"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetTopicResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "scope": {
+                "anyOf": [
+                  {
+                    "const": "general",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course",
+                    "type": "string"
+                  }
+                ]
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "course": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "author": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "avatarReference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "firstName",
+                  "lastName",
+                  "avatarReference"
+                ]
+              },
+              "replyCount": {
+                "type": "number"
+              },
+              "lastActivityAt": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "firstPost": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "topicId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "userId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "isFirstPost": {
+                    "type": "boolean"
+                  },
+                  "deletedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "avatarReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "firstName",
+                      "lastName",
+                      "avatarReference"
+                    ]
+                  },
+                  "reactions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "reaction": {
+                          "type": "string"
+                        },
+                        "count": {
+                          "type": "number"
+                        },
+                        "reactedByCurrentUser": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "reaction",
+                        "count",
+                        "reactedByCurrentUser"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "topicId",
+                  "userId",
+                  "content",
+                  "isFirstPost",
+                  "deletedAt",
+                  "createdAt",
+                  "updatedAt",
+                  "user",
+                  "reactions"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "scope",
+              "title",
+              "course",
+              "author",
+              "replyCount",
+              "lastActivityAt",
+              "createdAt",
+              "firstPost"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetTopicPostsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "topicId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "isFirstPost": {
+                  "type": "boolean"
+                },
+                "deletedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "avatarReference": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "firstName",
+                    "lastName",
+                    "avatarReference"
+                  ]
+                },
+                "reactions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "reaction": {
+                        "type": "string"
+                      },
+                      "count": {
+                        "type": "number"
+                      },
+                      "reactedByCurrentUser": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "reaction",
+                      "count",
+                      "reactedByCurrentUser"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "topicId",
+                "userId",
+                "content",
+                "isFirstPost",
+                "deletedAt",
+                "createdAt",
+                "updatedAt",
+                "user",
+                "reactions"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "CreatePostBody": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "minLength": 1,
+            "maxLength": 5000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "CreatePostResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "topicId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "isFirstPost": {
+                "type": "boolean"
+              },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "user": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "avatarReference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "firstName",
+                  "lastName",
+                  "avatarReference"
+                ]
+              },
+              "reactions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reaction": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "number"
+                    },
+                    "reactedByCurrentUser": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "reaction",
+                    "count",
+                    "reactedByCurrentUser"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "topicId",
+              "userId",
+              "content",
+              "isFirstPost",
+              "deletedAt",
+              "createdAt",
+              "updatedAt",
+              "user",
+              "reactions"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeletePostResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "topicId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "postId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isFirstPost": {
+                "type": "boolean"
+              },
+              "removed": {
+                "type": "boolean"
+              },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "topicRemoved": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "topicId",
+              "postId",
+              "isFirstPost",
+              "removed",
+              "deletedAt",
+              "topicRemoved"
             ]
           }
         },
@@ -173902,6 +175779,90 @@
           "data"
         ]
       },
+      "LaunchScormPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "packageId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "scoId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "lessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "launchUrl": {
+                "type": "string"
+              },
+              "scoTitle": {
+                "type": "string"
+              },
+              "navigation": {
+                "type": "object",
+                "properties": {
+                  "previousScoId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "nextScoId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "previousScoId",
+                  "nextScoId"
+                ]
+              },
+              "runtime": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [
+              "packageId",
+              "scoId",
+              "lessonId",
+              "courseId",
+              "launchUrl",
+              "scoTitle",
+              "navigation",
+              "runtime"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "RenewScormContentBody": {
         "type": "object",
         "properties": {
@@ -175940,6 +177901,102 @@
         "required": [
           "data",
           "pagination"
+        ]
+      },
+      "GetTenantCourseOutlineResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "learningOutcomes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "chapters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "lessons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "anyOf": [
+                              {
+                                "const": "content",
+                                "type": "string"
+                              },
+                              {
+                                "const": "quiz",
+                                "type": "string"
+                              },
+                              {
+                                "const": "ai_mentor",
+                                "type": "string"
+                              },
+                              {
+                                "const": "embed",
+                                "type": "string"
+                              },
+                              {
+                                "const": "scorm",
+                                "type": "string"
+                              },
+                              {
+                                "const": "live_training",
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "lessons"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "learningOutcomes",
+              "chapters"
+            ]
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "StartCourseArchiveExportResponse": {
@@ -180222,6 +182279,66 @@
                   "copiedCourse"
                 ]
               }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetContentMarketplaceListingOutlineResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "learningOutcomes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "chapters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "lessons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "title",
+                          "type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "title",
+                    "lessons"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "language",
+              "learningOutcomes",
+              "chapters"
             ]
           }
         },
@@ -190422,6 +192539,10 @@
                       },
                       "videoCompletionTrackingEnabled": {
                         "default": true,
+                        "type": "boolean"
+                      },
+                      "audioCompletionTrackingEnabled": {
+                        "default": false,
                         "type": "boolean"
                       },
                       "certificateFontColor": {

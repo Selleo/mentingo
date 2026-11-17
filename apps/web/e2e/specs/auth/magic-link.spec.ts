@@ -10,8 +10,8 @@ import { extractLinkFromMailhogMessage, waitForMailhogMessage } from "../../util
 
 const INITIAL_PASSWORD = "Password123@";
 
-test("visitor can request a login link email", async ({ cleanup, factories, withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("visitor can request a login link email", async ({ cleanup, factories, withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const userFactory = factories.createUserFactory();
     const email = `magic-link-${Date.now()}@example.com`;
     const user = await userFactory.register({
@@ -36,9 +36,9 @@ test("visitor can request a login link email", async ({ cleanup, factories, with
 test("visitor can log in from the magic link email", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const userFactory = factories.createUserFactory();
     const email = `magic-link-flow-${Date.now()}@example.com`;
     const user = await userFactory.register({

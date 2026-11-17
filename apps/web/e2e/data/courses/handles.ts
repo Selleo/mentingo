@@ -148,6 +148,7 @@ export const COURSE_SETTINGS_HANDLES = {
   LESSON_SEQUENCE_SWITCH: "course-settings-lesson-sequence-switch",
   QUIZ_FEEDBACK_SWITCH: "course-settings-quiz-feedback-switch",
   VIDEO_COMPLETION_TRACKING_SWITCH: "course-settings-video-completion-tracking-switch",
+  AUDIO_COMPLETION_TRACKING_SWITCH: "course-settings-audio-completion-tracking-switch",
   REPETITION_SWITCH: "course-repetition-switch",
   CERTIFICATE_SWITCH: "course-settings-certificate-switch",
 } as const;

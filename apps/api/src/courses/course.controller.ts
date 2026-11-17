@@ -11,7 +11,6 @@ import {
   Post,
   Query,
   Req,
-  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -29,7 +28,7 @@ import {
   MAX_IMAGE_FILE_SIZE_BYTES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { Request, Response } from "express";
+import { Request } from "express";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -144,6 +143,8 @@ import {
 } from "src/learning-time";
 import { assertCourseUploadGrant } from "src/mcp/mcp-upload-grant.assertions";
 import { MCP_UPLOAD_GRANT_KIND, McpRequest } from "src/mcp/mcp.types";
+import { nativeArchiveJobResponseSchema } from "src/native-archive/schemas/native-archive.schema";
+import { NativeArchiveJobService } from "src/native-archive/services/native-archive-job.service";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
@@ -207,6 +208,7 @@ export class CourseController {
     private readonly courseRepetitionService: CourseRepetitionService,
     private readonly courseTranslationService: CourseTranslationService,
     private readonly courseScormExportService: CourseScormExportService,
+    private readonly nativeArchiveJobService: NativeArchiveJobService,
     private readonly learningTimeService: LearningTimeService,
     private readonly masterCourseService: MasterCourseService,
     private readonly courseDuplicationService: CourseDuplicationService,
@@ -1351,24 +1353,24 @@ export class CourseController {
       { type: "param", name: "courseId", schema: UUIDSchema, required: true },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
+    response: baseResponse(nativeArchiveJobResponseSchema),
   })
   async exportCourseAsScorm(
     @Param("courseId") courseId: UUIDType,
     @Query("language") language: SupportedLanguages | undefined,
     @CurrentUser() currentUser: CurrentUserType,
     @Req() request: Request,
-    @Res() res: Response,
-  ): Promise<void> {
-    const exportedPackage = await this.courseScormExportService.exportCourse(
-      courseId,
-      currentUser,
-      language,
-      getRequestBaseUrl(request),
-    );
+  ) {
+    await this.courseScormExportService.assertCanExport(courseId, currentUser);
 
-    res.setHeader("Content-Type", exportedPackage.contentType);
-    res.setHeader("Content-Disposition", `attachment; filename="${exportedPackage.filename}"`);
-    exportedPackage.stream.pipe(res);
+    return new BaseResponse(
+      await this.nativeArchiveJobService.enqueueScormExport(
+        courseId,
+        currentUser,
+        language,
+        getRequestBaseUrl(request),
+      ),
+    );
   }
 
   @Post("course-ownership/transfer")
