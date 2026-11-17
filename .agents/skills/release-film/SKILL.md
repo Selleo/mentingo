@@ -411,3 +411,18 @@ Helpdesk publication is performed. To retry after new commits, manually dispatch
 first be present on that trusted branch. Narration uses the existing four-voice
 ElevenLabs pool. Native upload permission failures retain the downloadable video
 artifact and the previous PR section; never label an artifact link as a player.
+
+
+Before the new workflow is registered on the default branch, use the existing
+Release film workflow from staging with a positive `pr_number`. This calls the
+same PR pipeline and skips both release recording and release publication,
+regardless of the `publish` input. With zero/omitted `pr_number`, release behavior
+is unchanged. Example after this entry point reaches staging:
+
+```sh
+gh workflow run release-film.yml --ref staging -f pr_number=2258 -f publish=false
+```
+
+This manual staging entry point does not test the ready-for-review dispatcher;
+that dispatcher still needs registration on the default branch. No environment
+branch policies or repository admin settings need to be changed.
