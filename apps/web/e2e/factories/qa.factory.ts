@@ -91,6 +91,11 @@ export class QAFactory {
     await this.apiClient.api.qaControllerDeleteLanguage(id, { language });
   }
 
+  /** Cleanup helper: deletes the entry unless the test already removed it. */
+  async safeDelete(id: string): Promise<void> {
+    if (await this.safeGetById(id)) await this.delete(id);
+  }
+
   async delete(id: string): Promise<void> {
     await this.apiClient.api.qaControllerDeleteQa(id);
   }

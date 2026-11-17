@@ -1,118 +1,119 @@
-import { ALLOWED_ARTICLES_SETTINGS, ALLOWED_NEWS_SETTINGS } from "@repo/shared";
+import {
+  ALLOWED_ARTICLES_SETTINGS,
+  ALLOWED_NEWS_SETTINGS,
+  ALLOWED_QA_SETTINGS,
+} from "@repo/shared";
 
 import type { FixtureApiClient } from "./api-client";
 
-type ContentFeatureKey =
-  | "unregisteredUserNewsAccessibility"
-  | "unregisteredUserArticlesAccessibility";
+export type ContentModule = "news" | "articles" | "qa";
 
-type ContentFeatureState = {
-  unregisteredUserNewsAccessibility: boolean;
-  unregisteredUserArticlesAccessibility: boolean;
+export type ContentModuleState = {
+  enabled: boolean;
+  public: boolean;
 };
 
-const readContentFeatureState = async (
+type ContentModuleField = keyof ContentModuleState;
+
+const readContentModuleState = async (
   apiClient: FixtureApiClient,
-): Promise<ContentFeatureState> => {
-  const response = await apiClient.api.settingsControllerGetPublicGlobalSettings();
-
-  return {
-    unregisteredUserNewsAccessibility: response.data.data.unregisteredUserNewsAccessibility,
-    unregisteredUserArticlesAccessibility: response.data.data.unregisteredUserArticlesAccessibility,
+  module: ContentModule,
+): Promise<ContentModuleState> => {
+  const settings = (await apiClient.api.settingsControllerGetPublicGlobalSettings()).data.data;
+  const stateByModule: Record<ContentModule, ContentModuleState> = {
+    news: { enabled: settings.newsEnabled, public: settings.unregisteredUserNewsAccessibility },
+    articles: {
+      enabled: settings.articlesEnabled,
+      public: settings.unregisteredUserArticlesAccessibility,
+    },
+    qa: { enabled: settings.QAEnabled, public: settings.unregisteredUserQAAccessibility },
   };
+
+  return stateByModule[module];
 };
 
-const readContentModuleState = async (apiClient: FixtureApiClient) => {
-  const response = await apiClient.api.settingsControllerGetPublicGlobalSettings();
-
-  return {
-    newsEnabled: response.data.data.newsEnabled,
-    articlesEnabled: response.data.data.articlesEnabled,
-  };
-};
-
-const setContentFeature = async (
+const toggleContentModuleField = async (
   apiClient: FixtureApiClient,
-  setting: ContentFeatureKey,
-  enabled: boolean,
+  module: ContentModule,
+  field: ContentModuleField,
 ) => {
-  const state = await readContentFeatureState(apiClient);
-  const current = state[setting];
+  const isEnabledField = field === "enabled";
 
-  if (current === enabled) return;
-
-  if (setting === "unregisteredUserNewsAccessibility") {
-    await apiClient.api.settingsControllerUpdateNewsSetting("unregisteredUserNewsAccessibility");
+  if (module === "news") {
+    await apiClient.api.settingsControllerUpdateNewsSetting(
+      isEnabledField
+        ? ALLOWED_NEWS_SETTINGS.NEWS_ENABLED
+        : ALLOWED_NEWS_SETTINGS.UNREGISTERED_USER_NEWS_ACCESSIBILITY,
+    );
     return;
   }
 
-  await apiClient.api.settingsControllerUpdateArticlesSetting(
-    "unregisteredUserArticlesAccessibility",
-  );
-};
-
-const setContentModule = async (
-  apiClient: FixtureApiClient,
-  setting: "newsEnabled" | "articlesEnabled",
-  enabled: boolean,
-) => {
-  const state = await readContentModuleState(apiClient);
-  const current = state[setting];
-
-  if (current === enabled) return;
-
-  if (setting === "newsEnabled") {
-    await apiClient.api.settingsControllerUpdateNewsSetting(ALLOWED_NEWS_SETTINGS.NEWS_ENABLED);
+  if (module === "articles") {
+    await apiClient.api.settingsControllerUpdateArticlesSetting(
+      isEnabledField
+        ? ALLOWED_ARTICLES_SETTINGS.ARTICLES_ENABLED
+        : ALLOWED_ARTICLES_SETTINGS.UNREGISTERED_USER_ARTICLES_ACCESSIBILITY,
+    );
     return;
   }
 
-  await apiClient.api.settingsControllerUpdateArticlesSetting(
-    ALLOWED_ARTICLES_SETTINGS.ARTICLES_ENABLED,
+  await apiClient.api.settingsControllerUpdateQaSetting(
+    isEnabledField
+      ? ALLOWED_QA_SETTINGS.QA_ENABLED
+      : ALLOWED_QA_SETTINGS.UNREGISTERED_USER_QA_ACCESSIBILITY,
   );
 };
 
-export const ensureContentModulesEnabled = async (apiClient: FixtureApiClient) => {
-  await setContentModule(apiClient, "newsEnabled", true);
-  await setContentModule(apiClient, "articlesEnabled", true);
-};
-
-export const ensureNewsModuleEnabled = async (apiClient: FixtureApiClient) => {
-  await setContentModule(apiClient, "newsEnabled", true);
-};
-
-export const ensureArticlesModuleEnabled = async (apiClient: FixtureApiClient) => {
-  await setContentModule(apiClient, "articlesEnabled", true);
-};
-
-export const ensureContentFeaturesEnabled = async (
+const setContentModuleField = async (
   apiClient: FixtureApiClient,
-  options: {
-    publicNews?: boolean;
-    publicArticles?: boolean;
-  } = {},
+  module: ContentModule,
+  field: ContentModuleField,
+  value: boolean,
 ) => {
-  const desiredPublicNews = options.publicNews ?? false;
-  const desiredPublicArticles = options.publicArticles ?? false;
+  const current = await readContentModuleState(apiClient, module);
 
-  const initialState = await readContentFeatureState(apiClient);
+  if (current[field] !== value) {
+    await toggleContentModuleField(apiClient, module, field);
+  }
+};
 
-  await setContentFeature(apiClient, "unregisteredUserNewsAccessibility", desiredPublicNews);
-  await setContentFeature(
-    apiClient,
-    "unregisteredUserArticlesAccessibility",
-    desiredPublicArticles,
-  );
+/** Public access can only change while the module is enabled, so enable first and disable last. */
+export const setContentModuleState = async (
+  apiClient: FixtureApiClient,
+  module: ContentModule,
+  desired: Partial<ContentModuleState>,
+) => {
+  if (desired.enabled === true || desired.public !== undefined) {
+    await setContentModuleField(apiClient, module, "enabled", true);
+  }
 
-  return async () => {
-    await setContentFeature(
-      apiClient,
-      "unregisteredUserNewsAccessibility",
-      initialState.unregisteredUserNewsAccessibility,
-    );
-    await setContentFeature(
-      apiClient,
-      "unregisteredUserArticlesAccessibility",
-      initialState.unregisteredUserArticlesAccessibility,
-    );
-  };
+  if (desired.public !== undefined) {
+    await setContentModuleField(apiClient, module, "public", desired.public);
+  }
+
+  if (desired.enabled === false) {
+    await setContentModuleField(apiClient, module, "enabled", false);
+  }
+};
+
+/** Applies the state and returns a cleanup that restores the original module and public access. */
+export const overrideContentModuleState = async (
+  apiClient: FixtureApiClient,
+  module: ContentModule,
+  desired: Partial<ContentModuleState>,
+) => {
+  const original = await readContentModuleState(apiClient, module);
+
+  await setContentModuleState(apiClient, module, desired);
+
+  return () => setContentModuleState(apiClient, module, original);
+};
+
+export const enableContentModules = async (
+  apiClient: FixtureApiClient,
+  modules: readonly ContentModule[],
+) => {
+  for (const module of modules) {
+    await setContentModuleState(apiClient, module, { enabled: true });
+  }
 };

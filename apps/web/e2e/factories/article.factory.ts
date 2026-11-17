@@ -176,6 +176,18 @@ export class ArticleFactory {
     await this.apiClient.api.articlesControllerDeleteArticle(id);
   }
 
+  /** Cleanup helper: deletes the article unless the test already removed it. */
+  async safeDelete(id: string): Promise<void> {
+    if (await this.safeGetById(id)) await this.delete(id);
+  }
+
+  /** Cleanup helper: deletes the section once it exists and has no articles left. */
+  async safeDeleteSection(id: string): Promise<void> {
+    const section = await this.safeGetSectionById(id);
+
+    if (section && section.assignedArticlesCount === 0) await this.deleteSection(id);
+  }
+
   async getSectionById(
     id: string,
     language: SupportedLanguages = getSelfOnboardingLanguage(),
