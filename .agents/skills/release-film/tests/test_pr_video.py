@@ -1,5 +1,6 @@
 """No network or providers: immutable PR inputs and the trusted recorder seam."""
 
+import json
 import subprocess
 import sys
 import tempfile
@@ -121,6 +122,54 @@ class Inputs(unittest.TestCase):
             result = pr_video.inspect(REPO, 10, "writer", temp, temp, "c" * 40)
             self.assertFalse(result["eligible"])
             git.assert_not_called()
+
+
+class DispatchIdentity(unittest.TestCase):
+    def test_existing_entry_point_preserves_head_and_original_actor(self):
+        self.check_actor("github-actions[bot]", "reviewer")
+
+    def test_manual_actor_cannot_be_replaced_by_dispatch_input(self):
+        self.check_actor("maintainer", "maintainer")
+
+    def check_actor(self, actual_actor, expected_actor):
+        with tempfile.TemporaryDirectory() as temp:
+            event = Path(temp) / "event.json"
+            event.write_text(
+                json.dumps(
+                    {
+                        "inputs": {
+                            "pr_number": "10",
+                            "expected_head": HEAD,
+                            "requested_by": "reviewer",
+                            "publish": "false",
+                        }
+                    }
+                )
+            )
+            arguments = [
+                "pr_video.py",
+                "inspect",
+                "--run",
+                temp,
+                "--repository",
+                REPO,
+                "--event-file",
+                str(event),
+                "--actor",
+                actual_actor,
+            ]
+            with (
+                patch.object(sys, "argv", arguments),
+                patch.object(
+                    pr_video,
+                    "inspect",
+                    return_value={"eligible": True, "head": HEAD, "base": BASE},
+                ) as inspect,
+                patch.object(pr_video, "outputs"),
+                patch("builtins.print"),
+            ):
+                pr_video.main()
+            inspect.assert_called_once_with(REPO, 10, expected_actor, ".", temp, HEAD)
 
 
 class Recorder(unittest.TestCase):
