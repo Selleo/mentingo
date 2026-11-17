@@ -14,6 +14,10 @@ export const AI_MENTOR_PRACTICE_HANDLES = {
   PRACTICE_AGAIN_BUTTON: "ai-mentor-practice-again-button",
   FEEDBACK_DIALOG: VOICE_JUDGE_TEST_IDS.DIALOG,
   WIDGET: "ai-mentor-practice-dashboard-widget",
+  WIDGET_BETA_BADGE: "ai-mentor-practice-dashboard-beta-badge",
   WIDGET_GENERATING: "ai-mentor-practice-dashboard-generating",
+  WIDGET_FAILED: "ai-mentor-practice-dashboard-failed",
+  WIDGET_RETRY: "ai-mentor-practice-dashboard-retry",
+  WIDGET_MESSAGE_INPUT: "ai-mentor-practice-dashboard-message-input",
   CONTINUE_LINK: "ai-mentor-practice-continue-link",
 } as const;

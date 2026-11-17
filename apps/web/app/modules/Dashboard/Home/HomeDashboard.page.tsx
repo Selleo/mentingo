@@ -26,6 +26,11 @@ import Loader from "~/modules/common/Loader/Loader";
 import { useDownloadSummaryReport } from "~/modules/Statistics/Admin/hooks/useDownloadSummaryReport";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import {
+  DASHBOARD_EDIT_HANDLES,
+  DASHBOARD_REPORT_HANDLES,
+} from "../../../../e2e/data/dashboard/handles";
+
 import { DashboardError } from "./components/DashboardError";
 import { DashboardGrid } from "./components/DashboardGrid";
 import { WidgetPickerDialog } from "./components/WidgetPickerDialog";
@@ -34,6 +39,7 @@ import { DashboardEditModeProvider } from "./dashboardEditContext";
 import type { DashboardLayoutItem } from "./types";
 import type { MetaFunction } from "@remix-run/react";
 import type { DashboardWidgetType } from "@repo/shared";
+
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.dashboard");
 
 type DashboardSettingsWidget = {
@@ -83,10 +89,13 @@ const mergeVisibleLayout = (
   if (!isVisibleOnlyUpdate) return nextVisibleLayout.map((widget) => ({ ...widget }));
 
   let nextVisibleIndex = 0;
+
   return currentLayout.map((widget) => {
     if (widget.visible === false) return { ...widget };
     const replacement = nextVisibleLayout[nextVisibleIndex];
+
     nextVisibleIndex += 1;
+
     return replacement ? { ...replacement } : { ...widget };
   });
 };
@@ -121,9 +130,11 @@ export default function HomeDashboardPage() {
   const visibleLayout = (isEditing ? draftWidgets : savedWidgets).filter(
     (widget) => widget.visible !== false,
   );
+
   useEffect(() => {
     if (!dashboardSettings || !userId) return;
     const userLayout = createLayout(dashboardSettings.layout.widgets, dashboardSettings.catalog);
+
     setSavedWidgets(userLayout);
     setDraftWidgets(cloneLayout(userLayout));
     setHydratedUserId(userId);
@@ -135,6 +146,7 @@ export default function HomeDashboardPage() {
     const normalizedWidgets = mergeVisibleLayout(draftWidgets, nextWidgets).map(
       (widget, order) => ({ ...widget, order }),
     );
+
     setDraftWidgets(normalizedWidgets);
     setSavedWidgets(normalizedWidgets);
     updateDashboardSettings({
@@ -156,6 +168,7 @@ export default function HomeDashboardPage() {
     resetDashboardSettings(dashboardSettings?.layout.revision ?? 0, {
       onSuccess: (response) => {
         const layout = createLayout(response.layout.widgets, response.catalog);
+
         setSavedWidgets(layout);
         setDraftWidgets(cloneLayout(layout));
       },
@@ -177,7 +190,7 @@ export default function HomeDashboardPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  data-testid="dashboard-report-download"
+                  data-testid={DASHBOARD_REPORT_HANDLES.DOWNLOAD}
                   onClick={() => void downloadReport()}
                   disabled={isDownloading}
                 >
@@ -198,17 +211,26 @@ export default function HomeDashboardPage() {
                   <Button
                     type="button"
                     variant="outline"
+                    data-testid={DASHBOARD_EDIT_HANDLES.OPEN_WIDGET_PICKER}
                     onClick={() => setIsWidgetPickerOpen(true)}
                   >
                     <LayoutGrid className="mr-2 size-4" aria-hidden="true" />
                     {t("dashboardHome.edit.widgetsButton")}
                   </Button>
-                  <Button type="button" onClick={() => setIsEditing(false)}>
+                  <Button
+                    type="button"
+                    data-testid={DASHBOARD_EDIT_HANDLES.FINISH_EDITING}
+                    onClick={() => setIsEditing(false)}
+                  >
                     {t("common.button.close")}
                   </Button>
                 </div>
               ) : (
-                <Button type="button" onClick={handleStartEditing}>
+                <Button
+                  type="button"
+                  data-testid={DASHBOARD_EDIT_HANDLES.CUSTOMIZE}
+                  onClick={handleStartEditing}
+                >
                   <Settings2 className="mr-2 size-4" aria-hidden="true" />
                   {t("dashboardHome.customize")}
                 </Button>
@@ -253,7 +275,7 @@ export default function HomeDashboardPage() {
         isRestoringDefault={isRestoringDefault}
       />
       <AlertDialog open={isRestoreConfirmOpen} onOpenChange={setIsRestoreConfirmOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid={DASHBOARD_EDIT_HANDLES.RESTORE_DEFAULT_DIALOG}>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("dashboardHome.edit.restore")}</AlertDialogTitle>
             <AlertDialogDescription>
@@ -261,8 +283,13 @@ export default function HomeDashboardPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("common.button.cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRestoreDefault}>
+            <AlertDialogCancel data-testid={DASHBOARD_EDIT_HANDLES.RESTORE_DEFAULT_CANCEL}>
+              {t("common.button.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              data-testid={DASHBOARD_EDIT_HANDLES.RESTORE_DEFAULT_CONFIRM}
+              onClick={confirmRestoreDefault}
+            >
               {t("dashboardHome.edit.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -15,7 +15,10 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 
-import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+import {
+  DASHBOARD_TODO_HANDLES,
+  DASHBOARD_WIDGET_HANDLES,
+} from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
 import {
   DashboardWidgetCard,
@@ -50,7 +53,9 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
 
   const saveTitle = () => {
     const nextTitle = title.trim();
+
     setIsEditingTitle(false);
+
     if (nextTitle && nextTitle !== task.title) {
       onSave(nextTitle);
     }
@@ -63,6 +68,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
       ref={setNodeRef}
       role="group"
       aria-label={task.title}
+      data-testid={DASHBOARD_TODO_HANDLES.TASK}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       onPointerDown={(event) => event.stopPropagation()}
       onKeyDown={(event) => event.stopPropagation()}
@@ -74,6 +80,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
       <button
         type="button"
         onClick={onToggle}
+        data-testid={DASHBOARD_TODO_HANDLES.TASK_TOGGLE}
         className={cn(
           "flex size-5 shrink-0 items-center justify-center rounded border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2",
           task.completed
@@ -90,6 +97,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
         className="mt-0.5 cursor-grab touch-none text-neutral-400 hover:text-neutral-700 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
         {...attributes}
         {...listeners}
+        data-testid={DASHBOARD_TODO_HANDLES.TASK_REORDER}
         aria-label={t("dashboardHome.widgets.todoTasks.reorder")}
       >
         <GripVertical className="size-4" aria-hidden="true" />
@@ -98,11 +106,13 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
       {isEditingTitle ? (
         <Input
           ref={titleInputRef}
+          data-testid={DASHBOARD_TODO_HANDLES.TASK_TITLE_INPUT}
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           onBlur={saveTitle}
           onKeyDown={(event) => {
             if (event.key === "Enter") event.currentTarget.blur();
+
             if (event.key === "Escape") {
               setTitle(task.title);
               setIsEditingTitle(false);
@@ -113,6 +123,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
         />
       ) : (
         <span
+          data-testid={DASHBOARD_TODO_HANDLES.TASK_TITLE}
           className={cn(
             "min-w-0 flex-1 break-words text-sm leading-5",
             task.completed && "text-neutral-400 line-through",
@@ -129,6 +140,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
           size="icon"
           className="size-7"
           onClick={() => setIsEditingTitle(true)}
+          data-testid={DASHBOARD_TODO_HANDLES.TASK_EDIT}
           aria-label={t("dashboardHome.widgets.todoTasks.edit")}
         >
           <Pencil className="size-3.5" aria-hidden="true" />
@@ -139,6 +151,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
           size="icon"
           className="size-7 text-error-600 hover:text-error-700"
           onClick={onDelete}
+          data-testid={DASHBOARD_TODO_HANDLES.TASK_DELETE}
           aria-label={t("dashboardHome.widgets.todoTasks.delete")}
         >
           <Trash2 className="size-3.5" aria-hidden="true" />
@@ -178,16 +191,19 @@ export function WidgetTodoTasks({
 
     const source = tasks.find((task) => task.id === String(event.active.id));
     const target = tasks.find((task) => task.id === String(event.over?.id));
+
     if (!source || !target || source.completed !== target.completed) return;
 
     const section = source.completed ? completedTasks : activeTasks;
     const ids = section.map((task) => task.id);
     const from = ids.indexOf(String(event.active.id));
     const to = ids.indexOf(String(event.over.id));
+
     if (from < 0 || to < 0) return;
 
     const next = [...ids];
     const [moved] = next.splice(from, 1);
+
     if (moved) next.splice(to, 0, moved);
 
     void reorderTasks({
@@ -198,6 +214,7 @@ export function WidgetTodoTasks({
 
   const addTask = async () => {
     const title = newTask.trim();
+
     if (!title || isCreating) return;
 
     await createTask(title);
@@ -263,6 +280,7 @@ export function WidgetTodoTasks({
         >
           <Input
             value={newTask}
+            data-testid={DASHBOARD_TODO_HANDLES.NEW_TASK_INPUT}
             onChange={(event) => setNewTask(event.target.value)}
             maxLength={200}
             placeholder={t("dashboardHome.widgets.todoTasks.placeholder")}
@@ -273,6 +291,7 @@ export function WidgetTodoTasks({
             size="icon"
             className={cn("shrink-0", isCompact ? "size-7" : "size-9")}
             disabled={!newTask.trim() || isCreating}
+            data-testid={DASHBOARD_TODO_HANDLES.ADD_TASK}
             aria-label={t("dashboardHome.widgets.todoTasks.add")}
           >
             <Plus className="size-4" aria-hidden="true" />

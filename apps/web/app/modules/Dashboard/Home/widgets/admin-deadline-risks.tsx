@@ -61,7 +61,10 @@ import { useDebounce } from "~/hooks/useDebounce";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+import {
+  DASHBOARD_DEADLINE_RISK_HANDLES,
+  DASHBOARD_WIDGET_HANDLES,
+} from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
 import {
   DashboardWidgetCard,
@@ -255,10 +258,12 @@ export function WidgetAdminDeadlineRisks() {
     manualSorting: true,
     onExpandedChange: (updater) => {
       const expanded = typeof updater === "function" ? updater(dialogState.expanded) : updater;
+
       dispatchDialog({ type: DEADLINE_RISK_DIALOG_ACTIONS.SET_EXPANDED, expanded });
     },
     onSortingChange: (updater) => {
       const sorting = typeof updater === "function" ? updater(dialogState.sorting) : updater;
+
       dispatchDialog({ type: DEADLINE_RISK_DIALOG_ACTIONS.SET_SORTING, sorting });
     },
     state: {
@@ -286,12 +291,14 @@ export function WidgetAdminDeadlineRisks() {
   };
   const handleCoursesScroll = () => {
     const element = coursesScrollRef.current;
+
     if (element && element.scrollHeight - element.scrollTop - element.clientHeight < 96) {
       loadNextCoursesPage();
     }
   };
   const handleGroupsScroll = () => {
     const element = groupsScrollRef.current;
+
     if (element && element.scrollHeight - element.scrollTop - element.clientHeight < 96) {
       loadNextGroupsPage();
     }
@@ -312,6 +319,7 @@ export function WidgetAdminDeadlineRisks() {
                   variant="ghost"
                   size="icon"
                   className="size-8 rounded-md text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950"
+                  data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.SORT_TRIGGER}
                   aria-label={t("dashboardHome.widgets.deadline_risks.sort")}
                   title={t("dashboardHome.widgets.deadline_risks.sort")}
                 >
@@ -327,12 +335,18 @@ export function WidgetAdminDeadlineRisks() {
                 >
                   <DropdownMenuRadioItem
                     value={DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT}
+                    data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.sortOption(
+                      DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.MOST_URGENT,
+                    )}
                     className="pl-2 data-[state=checked]:bg-primary-50 data-[state=checked]:text-primary-800 [&>span:first-child]:hidden"
                   >
                     {t("dashboardHome.widgets.deadline_risks.sortMostUrgent")}
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem
                     value={DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.LEAST_URGENT}
+                    data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.sortOption(
+                      DASHBOARD_DEADLINE_RISK_URGENCY_ORDERS.LEAST_URGENT,
+                    )}
                     className="pl-2 data-[state=checked]:bg-primary-50 data-[state=checked]:text-primary-800 [&>span:first-child]:hidden"
                   >
                     {t("dashboardHome.widgets.deadline_risks.sortLeastUrgent")}
@@ -356,6 +370,7 @@ export function WidgetAdminDeadlineRisks() {
           ) : (
             <div
               ref={coursesScrollRef}
+              data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.COURSE_LIST}
               onScroll={handleCoursesScroll}
               className="h-full min-h-0 overflow-y-auto p-3"
             >
@@ -364,6 +379,7 @@ export function WidgetAdminDeadlineRisks() {
                   <button
                     key={course.id}
                     type="button"
+                    data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.course(course.id)}
                     onClick={() =>
                       dispatchDialog({
                         type: DEADLINE_RISK_DIALOG_ACTIONS.SELECT_COURSE,
@@ -402,6 +418,7 @@ export function WidgetAdminDeadlineRisks() {
       >
         <DialogContent
           variant="mobileDrawer"
+          data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.DIALOG}
           className="!flex h-[85dvh] !flex-col overflow-hidden p-0 sm:h-auto sm:max-h-[min(720px,calc(100dvh-2rem))] sm:!max-w-2xl"
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => event.stopPropagation()}
@@ -416,6 +433,7 @@ export function WidgetAdminDeadlineRisks() {
           <div className="grid shrink-0 gap-2 border-b border-neutral-100 px-5 py-3 sm:grid-cols-[minmax(0,1fr)_11rem]">
             <Input
               type="search"
+              data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.SEARCH}
               value={dialogState.search}
               onChange={(event) =>
                 dispatchDialog({
@@ -440,6 +458,7 @@ export function WidgetAdminDeadlineRisks() {
             >
               <SelectTrigger
                 className="h-9"
+                data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.STATUS_FILTER}
                 aria-label={t("dashboardHome.widgets.deadline_risks.status")}
               >
                 <SelectValue />
@@ -453,12 +472,18 @@ export function WidgetAdminDeadlineRisks() {
                 </SelectItem>
                 <SelectItem
                   value={DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE}
+                  data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.statusOption(
+                    DASHBOARD_DEADLINE_RISK_TYPES.OVERDUE,
+                  )}
                   className="pl-2 data-[state=checked]:bg-primary-50 data-[state=checked]:text-primary-800 [&>span:first-child]:hidden"
                 >
                   {t("dashboardHome.widgets.deadline_risks.overdue")}
                 </SelectItem>
                 <SelectItem
                   value={DASHBOARD_DEADLINE_RISK_TYPES.DUE_SOON}
+                  data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.statusOption(
+                    DASHBOARD_DEADLINE_RISK_TYPES.DUE_SOON,
+                  )}
                   className="pl-2 data-[state=checked]:bg-primary-50 data-[state=checked]:text-primary-800 [&>span:first-child]:hidden"
                 >
                   {t("dashboardHome.widgets.deadline_risks.dueSoon")}
@@ -468,6 +493,7 @@ export function WidgetAdminDeadlineRisks() {
           </div>
           <div
             ref={groupsScrollRef}
+            data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.GROUP_LIST}
             onScroll={handleGroupsScroll}
             className="min-h-0 flex-1 overflow-y-auto px-5 py-4"
           >
@@ -502,6 +528,9 @@ export function WidgetAdminDeadlineRisks() {
                                 {header.isPlaceholder ? null : (
                                   <button
                                     type="button"
+                                    data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.groupSort(
+                                      header.column.id,
+                                    )}
                                     className={cn(
                                       "flex w-full items-center gap-1.5 text-left hover:text-neutral-950",
                                       header.column.id ===
@@ -539,6 +568,7 @@ export function WidgetAdminDeadlineRisks() {
                         {groupsTable.getRowModel().rows.map((row) => (
                           <Fragment key={row.id}>
                             <TableRow
+                              data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.group(row.original.id)}
                               data-state={row.getIsExpanded() ? "selected" : undefined}
                               className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-300"
                               onClick={row.getToggleExpandedHandler()}
@@ -560,6 +590,7 @@ export function WidgetAdminDeadlineRisks() {
                               row.original.students.map((student) => (
                                 <TableRow
                                   key={`${row.id}-${student.id}`}
+                                  data-testid={DASHBOARD_DEADLINE_RISK_HANDLES.learner(student.id)}
                                   className="bg-neutral-50/60"
                                 >
                                   <TableCell className="py-2 pl-9 pr-3 text-sm text-neutral-700">

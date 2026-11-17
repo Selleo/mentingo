@@ -7,7 +7,10 @@ import { useStudentDashboardSummary } from "~/api/queries/useStudentDashboardSum
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { cn } from "~/lib/utils";
 
-import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+import {
+  DASHBOARD_STUDENT_HANDLES,
+  DASHBOARD_WIDGET_HANDLES,
+} from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
 import {
   DashboardWidgetCard,
@@ -47,6 +50,7 @@ export function WidgetStudentContinueLearning({
           />
         ) : courses.length === 0 ? (
           <div
+            data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE}
             className={cn(
               "flex h-full items-center justify-center text-center text-neutral-600",
               !isCompact && "min-h-32",
@@ -69,6 +73,7 @@ export function WidgetStudentContinueLearning({
                 <Link
                   key={course.courseId}
                   to={destination}
+                  data-testid={DASHBOARD_STUDENT_HANDLES.continueCourse(course.courseId)}
                   className={cn(
                     "group grid items-center rounded-lg border border-neutral-100 transition-colors hover:border-primary-200 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300",
                     isCompact
@@ -105,7 +110,10 @@ export function WidgetStudentContinueLearning({
                       />
                     </div>
                     {!isCompact && (
-                      <p className="details mt-1.5 line-clamp-1 text-neutral-500">
+                      <p
+                        data-testid={DASHBOARD_STUDENT_HANDLES.CONTINUE_NEXT_LESSON}
+                        className="details mt-1.5 line-clamp-1 text-neutral-500"
+                      >
                         {course.lesson?.title
                           ? t("dashboardHome.widgets.studentTiles.continueLearning.nextLesson", {
                               title: course.lesson.title,

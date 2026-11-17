@@ -11,7 +11,10 @@ import { useStudentDashboardSummary } from "~/api/queries/useStudentDashboardSum
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { cn } from "~/lib/utils";
 
-import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+import {
+  DASHBOARD_STUDENT_HANDLES,
+  DASHBOARD_WIDGET_HANDLES,
+} from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
 import {
   DashboardWidgetCard,
@@ -55,6 +58,7 @@ export function WidgetStudentRequiredCourse({
           />
         ) : courses.length === 0 ? (
           <div
+            data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE}
             className={cn(
               "flex h-full items-center justify-center text-center text-neutral-600",
               !isCompact && "min-h-32",
@@ -68,6 +72,7 @@ export function WidgetStudentRequiredCourse({
               <Link
                 key={course.courseId}
                 to={`/course/${course.slug}`}
+                data-testid={DASHBOARD_STUDENT_HANDLES.requiredCourse(course.courseId)}
                 className={cn(
                   "group flex items-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
                   isCompact ? "min-h-0 gap-2 p-2" : "min-h-24 gap-3 p-3",
@@ -95,6 +100,7 @@ export function WidgetStudentRequiredCourse({
                 />
                 <div className="min-w-0 flex-1">
                   <span
+                    data-testid={DASHBOARD_STUDENT_HANDLES.requiredCourseUrgency(course.urgency)}
                     className={cn("details font-medium text-neutral-500", {
                       "text-error-700": course.urgency === STUDENT_COURSE_URGENCY.OVERDUE,
                       "text-warning-700": course.urgency === STUDENT_COURSE_URGENCY.DUE_SOON,
@@ -132,13 +138,16 @@ export function WidgetStudentRequiredCourse({
       {courses.length > 0 && !isCompact && (
         <DashboardWidgetFooter>
           <div className="flex items-center justify-between gap-3">
-            <span>
+            <span data-testid={DASHBOARD_STUDENT_HANDLES.REQUIRED_COURSES_TOTAL}>
               {t("dashboardHome.widgets.studentTiles.requiredCourse.total", {
                 count: courses.length,
               })}
             </span>
             {overdueCount > 0 && (
-              <span className="font-medium text-error-700">
+              <span
+                data-testid={DASHBOARD_STUDENT_HANDLES.REQUIRED_COURSES_OVERDUE}
+                className="font-medium text-error-700"
+              >
                 {t("dashboardHome.widgets.studentTiles.requiredCourse.overdueCount", {
                   count: overdueCount,
                 })}
