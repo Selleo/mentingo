@@ -59,3 +59,24 @@ class Workflow(unittest.TestCase):
         self.assertNotIn("ELEVENLABS", str(job))
         self.assertIn("needs.film.outputs.record == 'true'", job["if"])
         self.assertFalse(self.workflow["concurrency"]["cancel-in-progress"])
+
+    def test_registered_release_entry_point_reuses_the_same_pr_pipeline(self):
+        release = yaml.safe_load(
+            (ROOT / ".github/workflows/release-film.yml").read_text()
+        )
+        events = release.get("on", release.get(True))
+        self.assertEqual(
+            events["workflow_dispatch"]["inputs"]["pr_number"]["default"], 0
+        )
+        caller = release["jobs"]["pr_video"]
+        self.assertEqual(caller["uses"], "./.github/workflows/pr-flow-video.yml")
+        self.assertIn("inputs.pr_number > 0", caller["if"])
+        self.assertIn("refs/heads/staging", caller["if"])
+        self.assertEqual(caller["with"], {"pr_number": "${{ inputs.pr_number }}"})
+        self.assertNotIn("secrets", caller)
+        self.assertIn("!inputs.pr_number", release["jobs"]["film"]["if"])
+        self.assertIn("!inputs.pr_number", release["jobs"]["publish"]["if"])
+        called_events = self.workflow.get("on", self.workflow.get(True))
+        self.assertEqual(
+            called_events["workflow_call"]["inputs"]["pr_number"]["type"], "number"
+        )

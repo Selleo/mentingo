@@ -1,5 +1,11 @@
 name: PR flow video
 on:
+  workflow_call:
+    inputs:
+      pr_number:
+        description: Same-repository PR to demonstrate through a trusted caller
+        required: true
+        type: number
   pull_request_target:
     types: [opened, ready_for_review]
     branches: [staging, main]
