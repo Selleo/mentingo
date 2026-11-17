@@ -4608,6 +4608,8 @@
       "threeOrFiveWordSentence": "Parašykite išsamų atsakymą (3-5 sakiniai).",
       "aiMentorLesson": {
         "sendMessage": "Rašyk žinutę...",
+        "messageLabel": "Tavo žinutė",
+        "conversationLabel": "Pokalbis",
         "check": "Patikrinkite",
         "aiMentorName": "AI mentorius",
         "retake": "Perimti",

@@ -4613,6 +4613,8 @@
       "threeOrFiveWordSentence": "Napište podrobnou odpověď (3-5 vět).",
       "aiMentorLesson": {
         "sendMessage": "Napište zprávu...",
+        "messageLabel": "Vaše zpráva",
+        "conversationLabel": "Konverzace",
         "check": "Kontrola",
         "aiMentorName": "AI mentor",
         "retake": "Znovudobytí",

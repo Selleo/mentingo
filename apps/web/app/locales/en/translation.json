@@ -4607,6 +4607,8 @@
       "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences).",
       "aiMentorLesson": {
         "sendMessage": "Write a message...",
+        "messageLabel": "Your message",
+        "conversationLabel": "Conversation",
         "check": "Check",
         "aiMentorName": "AI Mentor",
         "retake": "Retake",
