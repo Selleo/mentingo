@@ -7,9 +7,16 @@ import { renderWith } from "~/utils/testUtils";
 import { CourseGenerationSession } from "./CourseGenerationSession";
 
 import type { AuthoringChatMessage } from "./authoringChatTransport";
-import type { AssetRequestView, CurriculumPreviewActions } from "./courseAuthoring.types";
+import type {
+  AuthoringConnectionState,
+  AssetRequestView,
+  CurriculumPreviewActions,
+} from "./courseAuthoring.types";
 
 const state = vi.hoisted(() => ({
+  connection: "live" as AuthoringConnectionState,
+  snapshotMissing: false,
+  reconnectAttempt: 0,
   missingDependency: false,
   assetRequests: [] as AssetRequestView[],
   questionCapability: "web_search",
@@ -161,38 +168,43 @@ vi.mock("./hooks/useCourseAuthoringSession", () => ({
     ];
     return {
       sessionQuery: {
-        data: {
-          schemaVersion: 1,
-          sessionId: "session",
-          courseId: "course",
-          language: "en",
-          status: "active",
-          snapshotSequence: state.accepted ? 2 : 1,
-          workspaceRevision: state.accepted ? 2 : 1,
-          records,
-          tasks: state.groupedReview
-            ? [
-                {
-                  taskId: "task-1",
-                  requestId: "request-1",
-                  kind: "edit",
-                  status: "succeeded",
-                  errorCode: null,
-                  outputId: "content-proposal",
-                },
-                ...state.siblingTasks,
-                ...Array.from({ length: state.additionalRequestProposals }, (_, index) => ({
-                  taskId: `lesson-task-${index}`,
-                  requestId: "request-1",
-                  kind: "lesson",
-                  status: "succeeded",
-                  errorCode: null,
-                  outputId: `lesson-proposal-${index}`,
-                })),
-              ]
-            : state.siblingTasks,
-        },
-        isError: false,
+        data: state.snapshotMissing
+          ? undefined
+          : {
+              schemaVersion: 1,
+              sessionId: "session",
+              courseId: "course",
+              language: "en",
+              status: "active",
+              snapshotSequence: state.accepted ? 2 : 1,
+              workspaceRevision: state.accepted ? 2 : 1,
+              records,
+              tasks: state.groupedReview
+                ? [
+                    {
+                      taskId: "task-1",
+                      requestId: "request-1",
+                      kind: "edit",
+                      status: "succeeded",
+                      errorCode: null,
+                      outputId: "content-proposal",
+                    },
+                    ...state.siblingTasks,
+                    ...Array.from({ length: state.additionalRequestProposals }, (_, index) => ({
+                      taskId: `lesson-task-${index}`,
+                      requestId: "request-1",
+                      kind: "lesson",
+                      status: "succeeded",
+                      errorCode: null,
+                      outputId: `lesson-proposal-${index}`,
+                    })),
+                  ]
+                : state.siblingTasks,
+            },
+        isError: state.snapshotMissing,
+        error: state.snapshotMissing
+          ? { isAxiosError: true, response: { status: 404, data: {} } }
+          : null,
       },
       contextQuery: {
         data: { courseId: "course", title: "Smoke course", chapters: [] },
@@ -268,7 +280,12 @@ vi.mock("~/api/queries/useCourseAuthoringTurnHistoryQuery", () => ({
     fetchNextPage: vi.fn(),
   }),
 }));
-vi.mock("./hooks/useCourseAuthoringSocket", () => ({ useCourseAuthoringSocket: () => "live" }));
+vi.mock("./hooks/useCourseAuthoringSocket", () => ({
+  useCourseAuthoringSocket: (options: { reconnectAttempt: number }) => {
+    state.reconnectAttempt = options.reconnectAttempt;
+    return state.connection;
+  },
+}));
 vi.mock("./hooks/useCourseAuthoringChat", () => ({
   useCourseAuthoringChat: () => ({
     messages: state.chatMessages,
@@ -382,6 +399,9 @@ vi.mock("./components/ProposalReview", () => ({
 
 describe("CourseGenerationSession proposal decisions", () => {
   beforeEach(() => {
+    state.connection = "live";
+    state.snapshotMissing = false;
+    state.reconnectAttempt = 0;
     state.proposalRevision = 1;
     state.questionCapability = "web_search";
     state.questionAnswer = "allow";
@@ -1247,5 +1267,43 @@ describe("CourseGenerationSession proposal decisions", () => {
         description: "Changes were applied. Refresh the course if they are not visible yet.",
       }),
     );
+  });
+  it("retries the existing session without resubmitting a generation command", async () => {
+    state.connection = "offline";
+    renderWith().render(
+      <CourseGenerationSession courseId="course-1" language="en" sessionId="session-1" embedded />,
+    );
+    await userEvent.setup().click(screen.getByRole("button", { name: "Reconnect" }));
+    expect(state.reconnectAttempt).toBe(1);
+    expect(state.commandCalls).toEqual([]);
+  });
+
+  it.each(["permission_revoked", "session_unavailable"] as const)(
+    "hides cached generation content when connection is %s",
+    (connection) => {
+      state.connection = connection;
+      renderWith().render(
+        <CourseGenerationSession
+          courseId="course-1"
+          language="en"
+          sessionId="session-1"
+          embedded
+        />,
+      );
+      expect(screen.queryByTestId("course-authoring-brief-input")).toBeNull();
+      expect(screen.queryByRole("button", { name: "Reconnect" })).toBeNull();
+      expect(screen.queryByText("Reconnecting. Your work is saved.")).toBeNull();
+      expect(screen.getByRole("status")).toBeInTheDocument();
+    },
+  );
+  it("shows an unavailable message when the initial snapshot is already missing", () => {
+    state.snapshotMissing = true;
+    renderWith().render(
+      <CourseGenerationSession courseId="course" language="en" sessionId="session" embedded />,
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "This course generation session is no longer available.",
+    );
+    expect(state.commandCalls).toEqual([]);
   });
 });

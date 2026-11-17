@@ -85,14 +85,15 @@ const AiMentorLesson = ({
   const courseExperience = useOptionalCourseAccessProvider();
   const isPreviewMode = courseExperience?.isPreviewMode ?? true;
 
+  const isReadOnly = isPreviewMode || hideControls;
+  const isChatReadOnly = hideControls || !lesson.threadId || lesson.status !== "active";
   const isAuthorPreview =
     isPreviewMode &&
     !hideControls &&
     Boolean(courseExperience?.canEditCourse || allowVoiceMentorInPreview);
-  const isReadOnly = isPreviewMode || hideControls;
-  const isChatReadOnly = hideControls || !lesson.threadId || lesson.status !== "active";
-  // Author previews can evaluate their own active conversation; learner progress
-  // remains governed by the existing backend learning-mode checks.
+  // Active public-preview threads may use voice; evaluation remains author-only in preview.
+  // The backend rechecks preview eligibility at voice startup and on each spoken turn.
+  const canPreviewVoice = isAuthorPreview || (isPreviewMode && !isChatReadOnly);
   const canJudge = !isChatReadOnly && (!isPreviewMode || isAuthorPreview);
 
   const { mutateAsync: judgeLesson, isPending: isJudgePending } = useJudgeLesson(lesson.id);
@@ -503,10 +504,10 @@ const AiMentorLesson = ({
             {isJudgePending && <AiMentorEvaluationLoader />}
 
             {shouldShowComposer && !isJudgePending && !hideControls && (
-              <fieldset disabled={isChatReadOnly && !isAuthorPreview} className="w-full min-w-0">
+              <fieldset disabled={isChatReadOnly && !canPreviewVoice} className="w-full min-w-0">
                 <LessonForm
                   voiceTarget={{ lessonId: lesson.id, ...(isPreviewMode ? { preview: true } : {}) }}
-                  allowVoiceMentor={!isReadOnly || isAuthorPreview}
+                  allowVoiceMentor={!isReadOnly || canPreviewVoice}
                   allowJudge={canJudge}
                   textReadOnly={isChatReadOnly}
                   mentorName={

@@ -1,7 +1,7 @@
 /** Streams durable authoring snapshots and events to authorized workspace clients. */
 import { setTimeout as delay } from "node:timers/promises";
 
-import { HttpException, Logger, UseGuards } from "@nestjs/common";
+import { ForbiddenException, HttpException, Logger, UseGuards } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
@@ -11,9 +11,11 @@ import {
 } from "@nestjs/websockets";
 import { Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
+import { isAxiosError } from "axios";
 
 import { UUIDSchema } from "src/common";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import { WsAuthenticationException } from "src/websocket/guards/ws-authentication.exception";
 import { WsJwtGuard } from "src/websocket/guards/ws-jwt.guard";
 import { AuthenticatedSocket } from "src/websocket/websocket.types";
 
@@ -134,13 +136,28 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
   /** Consumes session events and emits only data authorized at delivery time. */
   private async consume(key: string, subscription: CourseAuthoringSubscription) {
     let backoff = 500;
+    let needsReconcile = false;
     while (!subscription.abort.signal.aborted && subscription.members.size) {
-      let terminal = false;
-      let recovered = false;
-      let needsReconcile = false;
+      if (needsReconcile) {
+        try {
+          const recovered = await this.tenants.runWithTenant(subscription.tenantId, () =>
+            this.reconcile(subscription),
+          );
+          needsReconcile = !recovered;
+        } catch (error) {
+          this.logStreamIssue("reconcile_failed", subscription, error);
+        }
+        if (subscription.abort.signal.aborted || !subscription.members.size) break;
+        if (needsReconcile) {
+          if (!(await this.waitForRetry(subscription, backoff))) break;
+          backoff = Math.min(backoff * 2, 10000);
+          continue;
+        }
+      }
       const streamAbort = new AbortController();
       const abortStream = () => streamAbort.abort(subscription.abort.signal.reason);
       subscription.abort.signal.addEventListener("abort", abortStream, { once: true });
+      const connectedAt = Date.now();
       try {
         await this.tenants.runWithTenant(subscription.tenantId, async () => {
           const client = await this.luma.getLumaClient();
@@ -155,7 +172,7 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
               )
                 return;
               if (event.sequence !== subscription.cursor + 1) {
-                recovered = await this.reconcile(subscription);
+                needsReconcile = true;
                 streamAbort.abort();
                 return;
               }
@@ -168,18 +185,22 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
                   );
                 }
               }
-              await this.deliverEvent(subscription, event);
+              try {
+                await this.deliverEvent(subscription, event);
+              } catch (error) {
+                // A transient authorization failure must neither deliver the event nor
+                // advance its cursor. Reconcile before reading more from this stream.
+                this.logStreamIssue("authorization_unavailable", subscription, error);
+                needsReconcile = true;
+                streamAbort.abort();
+                return;
+              }
               subscription.cursor = event.sequence;
               backoff = 500;
             },
             onError: (error) => {
               if (error.code === "permission_revoked") {
-                terminal = true;
-                for (const socket of subscription.members.values())
-                  this.emit(socket, "authoring.error", {
-                    sessionId: subscription.sessionId,
-                    code: error.code,
-                  });
+                this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.PERMISSION_REVOKED);
                 return;
               }
               needsReconcile = true;
@@ -187,24 +208,40 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
             },
           });
         });
+        if (!subscription.abort.signal.aborted && !needsReconcile)
+          this.logStreamIssue("disconnected", subscription, undefined, Date.now() - connectedAt);
       } catch (error) {
-        if (!subscription.abort.signal.aborted && !terminal) {
-          this.logStreamIssue("disconnected", subscription, error);
-          if (needsReconcile) recovered = await this.reconcile(subscription);
+        if (!subscription.abort.signal.aborted) {
+          const status = this.errorStatus(error);
+          if (status === 404)
+            this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND);
+          else if (this.isAccessError(error))
+            this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.PERMISSION_REVOKED);
+          else this.logStreamIssue("disconnected", subscription, error, Date.now() - connectedAt);
         }
       } finally {
         subscription.abort.signal.removeEventListener("abort", abortStream);
+        streamAbort.abort();
       }
-      if (terminal || subscription.abort.signal.aborted) break;
-      if (recovered) continue;
-      try {
-        await delay(backoff, undefined, { signal: subscription.abort.signal });
-      } catch {
-        break;
-      }
+      if (subscription.abort.signal.aborted) break;
+      // EOF and ordinary transport errors can hide a terminal event just as a
+      // sequence gap can. A fresh snapshot closes that turn before resubscribing.
+      needsReconcile = true;
+      this.emitResync(subscription);
+      if (!(await this.waitForRetry(subscription, backoff))) break;
       backoff = Math.min(backoff * 2, 10000);
     }
     if (this.subscriptions.get(key) === subscription) this.subscriptions.delete(key);
+  }
+
+  /** Waits between reconnects without keeping a released subscription alive. */
+  private async waitForRetry(subscription: CourseAuthoringSubscription, backoff: number) {
+    try {
+      await delay(backoff, undefined, { signal: subscription.abort.signal });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /** Rebuilds the shared cursor from a durable snapshot after a replay gap. */
@@ -223,6 +260,10 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
         );
         break;
       } catch (error) {
+        if (this.errorStatus(error) === 404) {
+          this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND);
+          return false;
+        }
         if (this.isAccessError(error)) {
           this.revokeMember(subscription, socket);
           continue;
@@ -233,18 +274,26 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
     }
     if (!snapshot || subscription.abort.signal.aborted) return false;
 
-    subscription.cursor = snapshot.snapshotSequence;
     for (const socket of [...subscription.members.values()]) {
-      if (await this.authorizeMember(subscription, socket))
+      if (
+        (await this.authorizeMember(subscription, socket)) &&
+        !subscription.abort.signal.aborted &&
+        subscription.members.has(socket.id)
+      )
         this.emit(socket, "authoring.snapshot", snapshot);
     }
+    subscription.cursor = snapshot.snapshotSequence;
     return subscription.members.size > 0;
   }
 
   /** Delivers one event only after rechecking each member's current access. */
   private async deliverEvent(subscription: CourseAuthoringSubscription, event: unknown) {
     for (const socket of [...subscription.members.values()]) {
-      if (await this.authorizeMember(subscription, socket))
+      if (
+        (await this.authorizeMember(subscription, socket)) &&
+        !subscription.abort.signal.aborted &&
+        subscription.members.has(socket.id)
+      )
         this.emit(socket, "authoring.event", event);
     }
   }
@@ -254,19 +303,40 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
     subscription: CourseAuthoringSubscription,
     socket: AuthenticatedSocket,
   ): Promise<boolean> {
+    if (subscription.abort.signal.aborted || !subscription.members.has(socket.id)) return false;
     try {
       await this.authentication.authenticateCurrent(socket);
-      if (socket.data.user.tenantId !== subscription.tenantId) throw new Error("tenant_changed");
+      if (socket.data.user.tenantId !== subscription.tenantId)
+        throw new ForbiddenException("common.toast.noAccess");
       await this.context.authorize(subscription.courseId, socket.data.user);
       return true;
-    } catch {
+    } catch (error) {
+      if (this.errorStatus(error) === 404) {
+        this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND);
+        return false;
+      }
+      if (!this.isAccessError(error)) throw error;
       this.revokeMember(subscription, socket);
       return false;
     }
   }
 
+  /** Reports a terminal producer failure once and releases every room and retry timer. */
+  private endSubscription(
+    subscription: CourseAuthoringSubscription,
+    code:
+      | typeof AUTHORING_SOCKET_ERROR.PERMISSION_REVOKED
+      | typeof AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND,
+  ) {
+    for (const socket of [...subscription.members.values()]) {
+      this.emit(socket, "authoring.error", { sessionId: subscription.sessionId, code });
+      this.remove(socket.id, subscription.sessionId);
+    }
+  }
+
   /** Removes a member and keeps permission failures terminal for that member. */
   private revokeMember(subscription: CourseAuthoringSubscription, socket: AuthenticatedSocket) {
+    if (subscription.abort.signal.aborted || !subscription.members.has(socket.id)) return;
     this.emit(socket, "authoring.error", {
       sessionId: subscription.sessionId,
       code: AUTHORING_SOCKET_ERROR.PERMISSION_REVOKED,
@@ -286,8 +356,7 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
 
   /** Maps expected authorization and stale-session failures without forwarding provider details. */
   private joinErrorCode(error: unknown) {
-    if (error instanceof HttpException && error.getStatus() === 404)
-      return AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND;
+    if (this.errorStatus(error) === 404) return AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND;
     if (this.isAccessError(error)) return AUTHORING_SOCKET_ERROR.PERMISSION_REVOKED;
     return AUTHORING_SOCKET_ERROR.JOIN_FAILED;
   }
@@ -300,9 +369,10 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
 
   /** Emits identifiers and error categories only; provider details never enter logs. */
   private logStreamIssue(
-    kind: "disconnected" | "reconcile_failed",
+    kind: "disconnected" | "reconcile_failed" | "authorization_unavailable",
     subscription: CourseAuthoringSubscription,
     error: unknown,
+    connectedForMs?: number,
   ) {
     const errorName = error instanceof Error ? error.name : typeof error;
     this.logger.warn(
@@ -313,13 +383,42 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
         sessionId: subscription.sessionId,
         cursor: subscription.cursor,
         errorName,
+        status: this.errorStatus(error),
+        code: this.transportErrorCode(error),
+        connectedForMs,
       }),
     );
   }
 
   /** Distinguishes access revocation from transient producer or transport failures. */
   private isAccessError(error: unknown) {
-    return error instanceof HttpException && [401, 403].includes(error.getStatus());
+    return (
+      error instanceof WsAuthenticationException ||
+      [401, 403].includes(this.errorStatus(error) ?? 0)
+    );
+  }
+
+  /** Extracts only numeric HTTP status, never a provider response body. */
+  private errorStatus(error: unknown): number | undefined {
+    if (error instanceof HttpException) return error.getStatus();
+    if (isAxiosError(error)) return error.response?.status;
+    return undefined;
+  }
+
+  /** Allows only known transport codes so diagnostics cannot include provider secrets. */
+  private transportErrorCode(error: unknown): string | undefined {
+    if (!error || typeof error !== "object" || !("code" in error)) return undefined;
+    const allowedCodes = [
+      "ECONNRESET",
+      "ECONNABORTED",
+      "ETIMEDOUT",
+      "ERR_NETWORK",
+      "ERR_CANCELED",
+      "EPIPE",
+    ];
+    return typeof error.code === "string" && allowedCodes.includes(error.code)
+      ? error.code
+      : undefined;
   }
 
   /** Emits a socket event while isolating delivery failures from the stream loop. */

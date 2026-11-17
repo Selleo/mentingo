@@ -1,4 +1,5 @@
-/** Maintains the workspace websocket subscription and recovers from disconnects or sequence gaps. */
+/** Maintains the workspace subscription; connection recovery never resubmits generation. */
+import { isAxiosError } from "axios";
 import { useEffect, useRef, useState } from "react";
 
 import { acquireSocket, releaseSocket } from "~/api/socket";
@@ -13,6 +14,9 @@ import type {
 } from "../courseAuthoring.types";
 
 const RECOVERY_DELAYS_MS = [0, 500, 1_000, 2_000] as const;
+const OFFLINE_RETRY_DELAY_MS = 30_000;
+const JOIN_TIMEOUT_MS = 10_000;
+const SNAPSHOT_TIMEOUT_MS = 10_000;
 export const ACTIVE_TURN_RECONCILE_DELAYS_MS = [5_000, 10_000, 20_000, 30_000] as const;
 export const ACTIVE_TURN_RECONCILE_DELAY_MS = ACTIVE_TURN_RECONCILE_DELAYS_MS[0];
 
@@ -21,11 +25,12 @@ type Options = {
   session: AuthoringSession | undefined;
   onSnapshot: (snapshot: AuthoringSession) => void;
   onEvent?: (session: AuthoringSession, event: AuthoringEvent) => void;
-  onRefresh: () => Promise<AuthoringSession | void>;
+  onRefresh: (signal?: AbortSignal) => Promise<AuthoringSession | void>;
   onSessionUnavailable?: (sessionId: string) => void;
+  reconnectAttempt?: number;
 };
 
-/** Subscribes to one session and recovers through a fresh snapshot after gaps. */
+/** Keeps authoritative work state available across transport failures and missed terminal events. */
 export const useCourseAuthoringSocket = ({
   courseId,
   session,
@@ -33,11 +38,21 @@ export const useCourseAuthoringSocket = ({
   onEvent,
   onRefresh,
   onSessionUnavailable,
+  reconnectAttempt = 0,
 }: Options) => {
   const [connectionState, setConnectionState] = useState<AuthoringConnectionState>("connecting");
   const cursorRef = useRef(session?.snapshotSequence ?? 0);
   const sessionRef = useRef(session);
   const sessionIdRef = useRef(session?.sessionId);
+  const callbacksRef = useRef({ onSnapshot, onEvent, onRefresh, onSessionUnavailable });
+  const rearmWatchdogRef = useRef<(() => void) | null>(null);
+  const hasActiveWork = Boolean(
+    session?.turns?.some((turn) => turn.status === "queued" || turn.status === "running") ||
+      session?.tasks.some((task) => task.status === "queued" || task.status === "running"),
+  );
+  useEffect(() => {
+    callbacksRef.current = { onSnapshot, onEvent, onRefresh, onSessionUnavailable };
+  }, [onSnapshot, onEvent, onRefresh, onSessionUnavailable]);
 
   useEffect(() => {
     if (sessionIdRef.current !== session?.sessionId) {
@@ -58,27 +73,84 @@ export const useCourseAuthoringSocket = ({
     const socket = acquireSocket();
     const sessionId = session.sessionId;
     let active = true;
-    let permissionRevoked = false;
-    let sessionUnavailable = false;
+    let terminal = false;
+    let streamHealthy = false;
+    let hasConnected = socket.connected;
+    let reconnectSnapshotReady = false;
     let recoveryPromise: Promise<void> | null = null;
+    let recoveryRequested = false;
     let recoveryTimer: ReturnType<typeof setTimeout> | null = null;
+    let snapshotController: AbortController | null = null;
     let resolveRecoveryTimer: (() => void) | null = null;
+    let offlineRetryTimer: ReturnType<typeof setTimeout> | null = null;
+    let joinTimer: ReturnType<typeof setTimeout> | null = null;
     let activeTurnReconcileTimer: ReturnType<typeof setTimeout> | null = null;
     let activeTurnReconcileDelayIndex = 0;
+    let streamRevision = 0;
     let preserveNextSocketSnapshotWatchdog = false;
 
-    /** Reconciles a still-running turn if its terminal event was silently lost. */
-    const scheduleActiveTurnReconciliation = (resetDelay = true) => {
+    const canRecover = () => active && !terminal;
+    const clearJoinTimeout = () => {
+      if (joinTimer) clearTimeout(joinTimer);
+      joinTimer = null;
+    };
+    const clearOfflineRetry = () => {
+      if (offlineRetryTimer) clearTimeout(offlineRetryTimer);
+      offlineRetryTimer = null;
+    };
+    const clearActiveTurnTimer = () => {
       if (activeTurnReconcileTimer) clearTimeout(activeTurnReconcileTimer);
       activeTurnReconcileTimer = null;
-      if (resetDelay) activeTurnReconcileDelayIndex = 0;
+    };
+    /** Releases every retry, including a suspended fast retry, on cleanup or terminal rejection. */
+    const clearTimers = () => {
+      clearJoinTimeout();
+      clearOfflineRetry();
+      clearActiveTurnTimer();
+      if (recoveryTimer) clearTimeout(recoveryTimer);
+      recoveryTimer = null;
+      resolveRecoveryTimer?.();
+      resolveRecoveryTimer = null;
+      snapshotController?.abort();
+    };
+    const stopRecovery = (state: "permission_revoked" | "session_unavailable") => {
+      if (!canRecover()) return;
+      terminal = true;
+      streamHealthy = false;
+      clearTimers();
+      setConnectionState(state);
+      if (socket.connected) socket.emit("leave:course-authoring", { sessionId });
+      if (state === "session_unavailable") callbacksRef.current.onSessionUnavailable?.(sessionId);
+    };
 
+    /** Bounds a missing join acknowledgement even if the shared socket itself stays connected. */
+    const watchJoin = () => {
+      clearJoinTimeout();
+      joinTimer = setTimeout(() => {
+        joinTimer = null;
+        if (canRecover()) recover();
+      }, JOIN_TIMEOUT_MS);
+    };
+    const join = () => {
+      if (!canRecover()) return;
+      streamHealthy = false;
+      setConnectionState("connecting");
+      watchJoin();
+      socket.emit("join:course-authoring", {
+        courseId,
+        sessionId,
+        afterSequence: cursorRef.current,
+      });
+    };
+    /** Refreshes only active work; healthy streams keep their subscription and cursor. */
+    const scheduleActiveTurnReconciliation = (resetDelay = true) => {
+      clearActiveTurnTimer();
+      if (resetDelay) activeTurnReconcileDelayIndex = 0;
       const current = sessionRef.current;
       const hasActiveWork =
         current?.turns?.some((turn) => turn.status === "queued" || turn.status === "running") ||
         current?.tasks.some((task) => task.status === "queued" || task.status === "running");
-      if (!active || permissionRevoked || sessionUnavailable || !hasActiveWork) return;
-
+      if (!canRecover() || !hasActiveWork || offlineRetryTimer) return;
       const delay = ACTIVE_TURN_RECONCILE_DELAYS_MS[activeTurnReconcileDelayIndex];
       activeTurnReconcileTimer = setTimeout(() => {
         activeTurnReconcileTimer = null;
@@ -86,40 +158,34 @@ export const useCourseAuthoringSocket = ({
           activeTurnReconcileDelayIndex + 1,
           ACTIVE_TURN_RECONCILE_DELAYS_MS.length - 1,
         );
-        const latest = sessionRef.current;
-        const stillActive =
-          latest?.turns?.some((turn) => turn.status === "queued" || turn.status === "running") ||
-          latest?.tasks.some((task) => task.status === "queued" || task.status === "running");
-        if (stillActive) recover(true);
+        recover(true);
       }, delay);
     };
-
-    /** Joins the server stream from the latest durable cursor. */
-    const join = () => {
-      if (!active || permissionRevoked || sessionUnavailable) return;
-      setConnectionState("connecting");
-      socket.emit("join:course-authoring", {
-        courseId,
-        sessionId,
-        afterSequence: cursorRef.current,
-      });
-    };
-    /** Accepts snapshots belonging to the active course/session pair. */
-    const handleSnapshot = (snapshot: AuthoringSession, resetWatchdog = true) => {
-      if (!active || snapshot.sessionId !== sessionId || snapshot.courseId !== courseId) {
-        return;
-      }
-      if (snapshot.snapshotSequence < cursorRef.current) return;
-
+    /** Applies snapshots monotonically; REST success alone does not prove stream liveness. */
+    const acceptSnapshot = (snapshot: AuthoringSession, resetWatchdog: boolean) => {
+      if (
+        !canRecover() ||
+        snapshot.sessionId !== sessionId ||
+        snapshot.courseId !== courseId ||
+        snapshot.snapshotSequence < cursorRef.current
+      )
+        return false;
       cursorRef.current = snapshot.snapshotSequence;
       sessionRef.current = snapshot;
-      onSnapshot(snapshot);
-      setConnectionState("live");
-      const shouldResetWatchdog = resetWatchdog && !preserveNextSocketSnapshotWatchdog;
-      preserveNextSocketSnapshotWatchdog = false;
-      scheduleActiveTurnReconciliation(shouldResetWatchdog);
+      callbacksRef.current.onSnapshot(snapshot);
+      scheduleActiveTurnReconciliation(resetWatchdog);
+      return true;
     };
-    /** Waits between bounded recovery attempts and can be released on cleanup. */
+    const handleSnapshot = (snapshot: AuthoringSession) => {
+      if (!acceptSnapshot(snapshot, !preserveNextSocketSnapshotWatchdog)) return;
+      preserveNextSocketSnapshotWatchdog = false;
+      streamRevision += 1;
+      streamHealthy = true;
+      clearJoinTimeout();
+      clearOfflineRetry();
+      setConnectionState("live");
+      scheduleActiveTurnReconciliation(false);
+    };
     const waitForRetry = (delayMs: number) =>
       new Promise<void>((resolve) => {
         resolveRecoveryTimer = resolve;
@@ -129,149 +195,202 @@ export const useCourseAuthoringSocket = ({
           resolve();
         }, delayMs);
       });
-    /** Requests one durable snapshot and explicitly rejoins from its recovered cursor. */
+    /** Retains slow retries after a temporary outage even when no task is currently active. */
+    const scheduleOfflineRetry = () => {
+      if (!canRecover() || offlineRetryTimer) return;
+      clearActiveTurnTimer();
+      offlineRetryTimer = setTimeout(() => {
+        offlineRetryTimer = null;
+        recover();
+      }, OFFLINE_RETRY_DELAY_MS);
+    };
+    /** Cancels stalled reads as well as their late cache writes; only the snapshot request is aborted. */
+    const refreshSnapshot = async () => {
+      const controller = new AbortController();
+      snapshotController = controller;
+      const timer = setTimeout(() => controller.abort(), SNAPSHOT_TIMEOUT_MS);
+      try {
+        return await Promise.race([
+          callbacksRef.current.onRefresh(controller.signal),
+          new Promise<never>((_resolve, reject) => {
+            controller.signal.addEventListener(
+              "abort",
+              () => reject(new Error("Authoring snapshot read interrupted")),
+              { once: true },
+            );
+          }),
+        ]);
+      } finally {
+        clearTimeout(timer);
+        if (snapshotController === controller) snapshotController = null;
+      }
+    };
     const recover = (fromWatchdog = false) => {
-      if (!active || permissionRevoked || sessionUnavailable) return;
-      if (recoveryPromise) return;
-      if (activeTurnReconcileTimer) clearTimeout(activeTurnReconcileTimer);
-      activeTurnReconcileTimer = null;
+      if (!canRecover()) return;
+      if (recoveryPromise) {
+        if (!fromWatchdog) {
+          recoveryRequested = true;
+          setConnectionState("recovering");
+        }
+        return;
+      }
+      clearJoinTimeout();
+      clearOfflineRetry();
+      clearActiveTurnTimer();
       if (!fromWatchdog) activeTurnReconcileDelayIndex = 0;
-
-      setConnectionState("recovering");
+      if (!fromWatchdog || !streamHealthy) setConnectionState("recovering");
+      const startingRevision = streamRevision;
       const operation = (async () => {
         for (const delayMs of RECOVERY_DELAYS_MS) {
-          if (!active || permissionRevoked || sessionUnavailable) return;
+          if (!canRecover()) return;
           if (delayMs > 0) await waitForRetry(delayMs);
-          if (!active || permissionRevoked || sessionUnavailable) return;
-
+          if (!canRecover() || streamRevision !== startingRevision) return;
           try {
-            const snapshot = await onRefresh();
-            if (!active || permissionRevoked) return;
-            if (snapshot && snapshot.sessionId === sessionId && snapshot.courseId === courseId) {
-              handleSnapshot(snapshot, !fromWatchdog);
-            }
+            const snapshot = await refreshSnapshot();
+            if (!canRecover() || streamRevision !== startingRevision) return;
+            if (snapshot) acceptSnapshot(snapshot, !fromWatchdog);
             if (fromWatchdog) preserveNextSocketSnapshotWatchdog = true;
+            if (fromWatchdog && streamHealthy) return;
             if (socket.connected) join();
-            else socket.connect();
+            else {
+              reconnectSnapshotReady = true;
+              watchJoin();
+              socket.connect();
+            }
             return;
           } catch (error) {
+            if (!canRecover() || streamRevision !== startingRevision) return;
             if (isUnavailableAuthoringSession(error)) {
-              sessionUnavailable = true;
-              setConnectionState("offline");
-              if (socket.connected) socket.emit("leave:course-authoring", { sessionId });
-              onSessionUnavailable?.(sessionId);
+              stopRecovery("session_unavailable");
               return;
             }
-            // Retry transient snapshot failures without polling a healthy stream.
+            if (isAxiosError(error) && error.response?.status === 403) {
+              stopRecovery("permission_revoked");
+              return;
+            }
           }
         }
-        if (active && !permissionRevoked && !sessionUnavailable) setConnectionState("offline");
+        if (!canRecover()) return;
+        streamHealthy = false;
+        setConnectionState("offline");
+        scheduleOfflineRetry();
       })();
       recoveryPromise = operation;
       void operation.then(() => {
         if (recoveryPromise !== operation) return;
         recoveryPromise = null;
-        if (!activeTurnReconcileTimer) scheduleActiveTurnReconciliation(false);
+        const retryRequested = recoveryRequested;
+        recoveryRequested = false;
+        if (retryRequested && !streamHealthy && !joinTimer && !offlineRetryTimer) {
+          recover();
+          return;
+        }
+        if (!activeTurnReconcileTimer && !offlineRetryTimer)
+          scheduleActiveTurnReconciliation(false);
       });
     };
-    /** Advances contiguous events and recovers instead of applying partial history. */
     const handleEvent = (event: AuthoringEvent) => {
-      preserveNextSocketSnapshotWatchdog = false;
+      if (!canRecover()) return;
       const current = sessionRef.current;
-      if (!current) {
-        return;
-      }
-
+      if (!current) return;
       const decision = decideEventCursor(
         { ...current, snapshotSequence: cursorRef.current },
         event,
       );
-
-      if (decision.type === "ignore") {
-        return;
-      }
-
+      if (decision.type === "ignore") return;
       if (decision.type === "gap") {
         recover();
         return;
       }
+      preserveNextSocketSnapshotWatchdog = false;
+      streamRevision += 1;
+      streamHealthy = true;
+      clearJoinTimeout();
+      clearOfflineRetry();
+      setConnectionState("live");
       cursorRef.current = decision.cursor;
       const nextSession = applyAuthoringEvent(
         { ...current, snapshotSequence: cursorRef.current - 1 },
         event,
       );
       sessionRef.current = nextSession;
-      onEvent?.(nextSession, event);
+      callbacksRef.current.onEvent?.(nextSession, event);
       scheduleActiveTurnReconciliation();
     };
-    /** Translates server errors into recoverable or offline connection state. */
     const handleError = (payload: { sessionId?: string; code?: string }) => {
-      if (payload.sessionId && payload.sessionId !== sessionId) {
-        return;
-      }
-
+      if (payload.sessionId && payload.sessionId !== sessionId) return;
       if (payload.code === "permission_revoked") {
-        permissionRevoked = true;
-        setConnectionState("offline");
+        stopRecovery("permission_revoked");
         return;
       }
       if (payload.code === "session_not_found") {
-        sessionUnavailable = true;
-        setConnectionState("offline");
-        if (socket.connected) socket.emit("leave:course-authoring", { sessionId });
-        onSessionUnavailable?.(sessionId);
+        stopRecovery("session_unavailable");
         return;
       }
+      streamHealthy = false;
       recover();
     };
-    /** Marks the workspace offline while allowing the shared socket to reconnect. */
     const handleDisconnect = () => {
-      if (active) {
-        setConnectionState("offline");
-      }
+      if (!canRecover()) return;
+      streamHealthy = false;
+      recover();
     };
-    /** Treat failed handshakes like disconnects so a missed stream cannot leave stale UI state. */
+    const handleConnect = () => {
+      if (!canRecover()) return;
+      if (reconnectSnapshotReady) {
+        reconnectSnapshotReady = false;
+        join();
+      } else if (hasConnected) recover();
+      else join();
+      hasConnected = true;
+    };
     const handleConnectError = () => {
-      if (active) recover();
+      streamHealthy = false;
+      recover();
     };
-    /** Nest surfaces rejected join messages as `exception`; recover the durable snapshot too. */
-    const handleSocketException = () => {
-      if (active) recover();
+    const handleResync = (payload: { sessionId?: string }) => {
+      if (payload?.sessionId && payload.sessionId !== sessionId) return;
+      streamHealthy = false;
+      recover();
     };
 
-    socket.on("connect", join);
+    rearmWatchdogRef.current = () => scheduleActiveTurnReconciliation(false);
+    setConnectionState("connecting");
+    socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("connect_error", handleConnectError);
-    socket.on("exception", handleSocketException);
+    socket.on("exception", handleConnectError);
     socket.on("authoring.snapshot", handleSnapshot);
     socket.on("authoring.event", handleEvent);
-    socket.on("authoring.resync", recover);
+    socket.on("authoring.resync", handleResync);
     socket.on("authoring.error", handleError);
-    socket.connect();
-
     if (socket.connected) join();
+    else {
+      watchJoin();
+      socket.connect();
+    }
     scheduleActiveTurnReconciliation();
 
     return () => {
       active = false;
-      if (recoveryTimer) clearTimeout(recoveryTimer);
-      recoveryTimer = null;
-      if (activeTurnReconcileTimer) clearTimeout(activeTurnReconcileTimer);
-      activeTurnReconcileTimer = null;
-      resolveRecoveryTimer?.();
-      resolveRecoveryTimer = null;
-      socket.off("connect", join);
+      rearmWatchdogRef.current = null;
+      clearTimers();
+      socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
       socket.off("connect_error", handleConnectError);
-      socket.off("exception", handleSocketException);
+      socket.off("exception", handleConnectError);
       socket.off("authoring.snapshot", handleSnapshot);
       socket.off("authoring.event", handleEvent);
-      socket.off("authoring.resync", recover);
+      socket.off("authoring.resync", handleResync);
       socket.off("authoring.error", handleError);
       if (socket.connected) socket.emit("leave:course-authoring", { sessionId });
       releaseSocket();
     };
-  }, [courseId, onEvent, onRefresh, onSessionUnavailable, onSnapshot, session?.sessionId]);
+  }, [courseId, reconnectAttempt, session?.sessionId]);
+
+  useEffect(() => {
+    if (hasActiveWork) rearmWatchdogRef.current?.();
+  }, [hasActiveWork]);
 
   return connectionState;
 };

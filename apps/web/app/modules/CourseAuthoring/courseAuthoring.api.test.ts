@@ -52,6 +52,33 @@ const expectedSources = [
 ];
 
 describe("persisted authoring citations", () => {
+  it("bounds a recovery snapshot request and forwards its cancellation signal to the generated client", async () => {
+    const controller = new AbortController();
+    api.courseAuthoringControllerGetAuthoringSession.mockResolvedValue({
+      data: {
+        data: {
+          schemaVersion: 1,
+          sessionId: "session",
+          courseId: "course",
+          language: "en",
+          status: "active",
+          snapshotSequence: 1,
+          workspaceRevision: 1,
+          records: [],
+          tasks: [],
+        },
+      },
+    });
+
+    await getAuthoringSession("course", "session", controller.signal);
+
+    expect(api.courseAuthoringControllerGetAuthoringSession).toHaveBeenLastCalledWith(
+      "course",
+      "session",
+      { timeout: 10_000, signal: controller.signal },
+    );
+  });
+
   it("restores normalized citations and queries from a session snapshot", async () => {
     const session: OpenAuthoringSessionResponse["data"] = {
       schemaVersion: 1,

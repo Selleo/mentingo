@@ -674,7 +674,12 @@ export const AuthoringToolActivity = ({
 const connectionVariant = (connection: AuthoringConnectionState) =>
   match(connection)
     .with(AUTHORING_CONNECTION_STATE.LIVE, () => "success" as const)
-    .with(AUTHORING_CONNECTION_STATE.OFFLINE, () => "blocked" as const)
+    .with(
+      AUTHORING_CONNECTION_STATE.OFFLINE,
+      AUTHORING_CONNECTION_STATE.PERMISSION_REVOKED,
+      AUTHORING_CONNECTION_STATE.SESSION_UNAVAILABLE,
+      () => "blocked" as const,
+    )
     .otherwise(() => "inProgress" as const);
 
 /** Renders durable task progress and human action inbox items. */
@@ -786,6 +791,12 @@ export const AuthoringActivityRail = ({
   } else if (hasOpenWork) liveWorkIcon = <Clock3 className="size-3.5 text-neutral-500" />;
   const connectionLabel = match(connection)
     .with(AUTHORING_CONNECTION_STATE.LIVE, () => t("courseAuthoring.activityRail.connection.live"))
+    .with(AUTHORING_CONNECTION_STATE.PERMISSION_REVOKED, () =>
+      t("courseAuthoring.conversation.connectionPermissionRevoked"),
+    )
+    .with(AUTHORING_CONNECTION_STATE.SESSION_UNAVAILABLE, () =>
+      t("courseAuthoring.conversation.connectionSessionUnavailable"),
+    )
     .with(AUTHORING_CONNECTION_STATE.OFFLINE, () =>
       t("courseAuthoring.activityRail.connection.offline"),
     )

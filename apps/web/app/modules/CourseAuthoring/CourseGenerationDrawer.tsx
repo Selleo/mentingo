@@ -11,11 +11,9 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { useCreateCourseAuthoringSession } from "~/api/mutations/useCreateCourseAuthoringSession";
-import { authoringSessionKey } from "~/api/queries/useCourseAuthoringSessionQuery";
 import { useCourseAuthoringSessionsQuery } from "~/api/queries/useCourseAuthoringSessionsQuery";
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
 import { useInfiniteCourseAuthoringSessionsQuery } from "~/api/queries/useInfiniteCourseAuthoringSessionsQuery";
-import { queryClient } from "~/api/queryClient";
 import { Button } from "~/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "~/components/ui/drawer";
 import { useDebounce } from "~/hooks/useDebounce";
@@ -193,19 +191,13 @@ export const CourseGenerationDrawer = ({
     selectedSessionSummary?.sessionId === selectedSessionId
       ? selectedSessionSummary
       : sessionsQuery.data?.find((session) => session.sessionId === selectedSessionId);
-  /** Drops an inaccessible cached timeline and chooses only from a fresh authorized list. */
+  /** Refreshes the picker after a missing session without silently switching or creating a conversation. */
   const recoverUnavailableSession = useCallback(
-    async (staleSessionId: string) => {
-      queryClient.removeQueries({ queryKey: authoringSessionKey(courseId, staleSessionId) });
-      createSessionScopeRef.current = null;
-      setSelectedSessionId((current) => (current === staleSessionId ? null : current));
+    async (_staleSessionId: string) => {
       writeAuthoringSessionSelection(sessionSelectionKey, null);
-      const result = await refetchSessions();
-      const nextSessionId = selectAuthoringSession(result.data ?? [], null);
-      setSelectedSessionId(nextSessionId);
-      writeAuthoringSessionSelection(sessionSelectionKey, nextSessionId);
+      await refetchSessions();
     },
-    [courseId, refetchSessions, sessionSelectionKey],
+    [refetchSessions, sessionSelectionKey],
   );
 
   /** Caps the drawer at ninety percent of the viewport while remaining usable on short screens. */

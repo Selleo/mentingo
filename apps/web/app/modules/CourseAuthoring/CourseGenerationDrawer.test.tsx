@@ -1,12 +1,15 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
+import { listAuthoringSessions, openAuthoringSession } from "./courseAuthoring.api";
 import { CourseGenerationDrawer } from "./CourseGenerationDrawer";
 
 import type { ListAuthoringSessionsResponse } from "~/api/generated-api";
+
+const apiState = vi.hoisted(() => ({ emptyList: false }));
 
 const COURSE_ID = "00000000-0000-4000-8000-000000000001";
 const TOTAL_SESSIONS = 24;
@@ -26,12 +29,24 @@ vi.mock("~/api/queries/useCurrentUser", () => ({
 }));
 
 vi.mock("./CourseGenerationSession", () => ({
-  CourseGenerationSession: ({ sessionId }: { sessionId: string }) => (
-    <output aria-label="Open conversation">{sessionId}</output>
+  CourseGenerationSession: ({
+    sessionId,
+    onSessionUnavailable,
+  }: {
+    sessionId: string;
+    onSessionUnavailable: (sessionId: string) => Promise<void>;
+  }) => (
+    <>
+      <output aria-label="Open conversation">{sessionId}</output>
+      <button onClick={() => void onSessionUnavailable(sessionId)}>
+        Report unavailable session
+      </button>
+    </>
   ),
 }));
 
 vi.mock("./courseAuthoring.api", () => ({
+  openAuthoringSession: vi.fn(),
   listAuthoringSessions: vi.fn(
     async (
       _courseId: string,
@@ -39,6 +54,7 @@ vi.mock("./courseAuthoring.api", () => ({
     ): Promise<ListAuthoringSessionsResponse> => {
       const page = params?.page ?? 1;
       const perPage = params?.perPage ?? 20;
+      if (apiState.emptyList) return { data: [], pagination: { totalItems: 0, page, perPage } };
       const filtered = params?.keyword
         ? allSessions.filter((session) =>
             session.title.toLowerCase().includes(params.keyword!.toLowerCase()),
@@ -55,6 +71,9 @@ vi.mock("./courseAuthoring.api", () => ({
 
 describe("CourseGenerationDrawer session menu", () => {
   beforeEach(() => {
+    apiState.emptyList = false;
+    vi.mocked(listAuthoringSessions).mockClear();
+    vi.mocked(openAuthoringSession).mockClear();
     window.sessionStorage.clear();
   });
 
@@ -174,4 +193,35 @@ describe("CourseGenerationDrawer session menu", () => {
       ),
     );
   });
+  it.each([false, true])(
+    "keeps an unavailable session selected without creating or switching conversations (empty list=%s)",
+    async (emptyList) => {
+      const onSessionChange = vi.fn();
+      renderWith()
+        .withQuery()
+        .withI18n()
+        .render(
+          <CourseGenerationDrawer
+            courseId={COURSE_ID}
+            language="en"
+            requestedSessionId={allSessions[23].sessionId}
+            onSessionChange={onSessionChange}
+            open
+            onOpenChange={() => {}}
+          />,
+        );
+      await screen.findByLabelText("Open conversation");
+      const beforeRefresh = vi.mocked(listAuthoringSessions).mock.calls.length;
+      apiState.emptyList = emptyList;
+      fireEvent.click(screen.getByRole("button", { name: "Report unavailable session" }));
+      await waitFor(() =>
+        expect(vi.mocked(listAuthoringSessions).mock.calls.length).toBeGreaterThan(beforeRefresh),
+      );
+      expect(screen.getByLabelText("Open conversation")).toHaveTextContent(
+        allSessions[23].sessionId,
+      );
+      expect(openAuthoringSession).not.toHaveBeenCalled();
+      expect(onSessionChange).not.toHaveBeenCalled();
+    },
+  );
 });

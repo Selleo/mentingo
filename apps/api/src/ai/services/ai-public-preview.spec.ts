@@ -1,4 +1,4 @@
-import { ForbiddenException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, UnauthorizedException } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
@@ -71,6 +71,78 @@ describe("public course AI Mentor previews", () => {
     expect(aiRepository.resetStudentProgressForLesson).not.toHaveBeenCalled();
     expect(judgeService.evaluate).not.toHaveBeenCalled();
     expect(outboxPublisher.publish).not.toHaveBeenCalled();
+  });
+
+  it("streams an eligible ordinary public voice preview without enrollment, grading or progress writes", async () => {
+    const { service, stream, aiRepository, judgeService, outboxPublisher } = fixture();
+    await expect(
+      service.streamMessage(
+        { threadId, content: "Public voice preview" },
+        "model" as never,
+        student,
+        true,
+      ),
+    ).resolves.toBe(stream);
+    expect(aiRepository.getHasPublicCoursePreviewAccess).toHaveBeenCalledWith(lessonId, userId);
+    expect(aiRepository.checkLessonAssignment).not.toHaveBeenCalled();
+    expect(aiRepository.resetStudentProgressForLesson).not.toHaveBeenCalled();
+    expect(judgeService.evaluate).not.toHaveBeenCalled();
+    expect(outboxPublisher.publish).not.toHaveBeenCalled();
+  });
+
+  it("rechecks public eligibility before the next voice turn", async () => {
+    const { service, aiRepository, aiRuntimeService } = fixture();
+    await service.streamMessage(
+      { threadId, content: "First preview turn" },
+      "model" as never,
+      student,
+      true,
+    );
+    aiRuntimeService.streamMentorChat.mockClear();
+    aiRepository.getHasPublicCoursePreviewAccess.mockResolvedValue(false);
+    await expect(
+      service.streamMessage(
+        { threadId, content: "A turn after previews were disabled" },
+        "model" as never,
+        student,
+        true,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(aiRuntimeService.streamMentorChat).not.toHaveBeenCalled();
+  });
+
+  it("keeps an ordinary preview on its owner's active thread", async () => {
+    const { service, aiRuntimeService } = fixture();
+    await expect(
+      service.streamMessage(
+        { threadId, content: "Public voice preview" },
+        "model" as never,
+        { ...student, userId: lessonId },
+        true,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(aiRuntimeService.streamMentorChat).not.toHaveBeenCalled();
+  });
+
+  it("requires an explicit retake instead of reopening a completed public voice thread", async () => {
+    const { service, aiRepository, aiRuntimeService } = fixture();
+    aiRepository.findThread.mockResolvedValue({
+      id: threadId,
+      userId,
+      status: "completed",
+      aiMentorLessonId: lessonId,
+    });
+    await expect(
+      service.streamMessage(
+        { threadId, content: "Continue a completed preview" },
+        "model" as never,
+        student,
+        true,
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(aiRuntimeService.streamMentorChat).not.toHaveBeenCalled();
+    expect(aiRepository.setThreadsToArchived).not.toHaveBeenCalled();
+    expect(aiRepository.resetStudentProgressForLesson).not.toHaveBeenCalled();
   });
 
   it("does not grant another author access to an unassigned voice conversation", async () => {

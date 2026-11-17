@@ -166,9 +166,17 @@ describe("AI Mentor preview", () => {
     expect(state.judge).toHaveBeenCalledTimes(1);
   });
 
-  it("does not offer Voice Mentor to a public course preview", () => {
+  it("enables Voice Mentor on the student's active preview thread without learning mode or grading", () => {
     renderLesson({ status: "active", threadId: "thread-1" });
-    expect(screen.queryByRole("button", { name: "Voice Mentor" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Voice Mentor" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Voice Mentor" })).toHaveAttribute(
+      "data-preview",
+      "true",
+    );
+    expect(screen.queryByRole("button", { name: "Voice grade" })).not.toBeInTheDocument();
+    expect(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeDisabled();
+    expect(state.judge).not.toHaveBeenCalled();
+    expect(state.retake).not.toHaveBeenCalled();
   });
 
   it("shows the full lesson with disabled interaction even without a thread", async () => {
@@ -176,6 +184,7 @@ describe("AI Mentor preview", () => {
     expect(screen.getByRole("textbox", { name: "Message" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Microphone" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Voice Mentor" })).not.toBeInTheDocument();
     expect(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeDisabled();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -207,6 +216,7 @@ describe("AI Mentor preview", () => {
   it("offers a confirmed retake for a completed preview instead of a disabled composer", async () => {
     renderLesson({ status: "completed", threadId: "thread-1", lessonCompleted: true });
     expect(screen.queryByRole("textbox", { name: "Message" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Voice Mentor" })).not.toBeInTheDocument();
     expect(screen.queryByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).not.toBeInTheDocument();
     await userEvent.click(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON));
     expect(screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_MODAL)).toBeInTheDocument();
@@ -238,6 +248,7 @@ describe("AI Mentor preview", () => {
     renderLesson({ threadId: "thread-1", status: "active" }, true);
     expect(screen.getByText("Recorded mentor reply")).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Voice Mentor" })).not.toBeInTheDocument();
     expect(screen.queryByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON)).not.toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
