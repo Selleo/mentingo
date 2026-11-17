@@ -7,6 +7,8 @@ import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { QuestionCard } from "~/modules/Courses/Lesson/Question/QuestionCard";
 
+import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
+
 import type { QuizQuestion } from "~/modules/Courses/Lesson/Question/types";
 import type { QuizForm } from "~/modules/Courses/Lesson/types";
 
@@ -30,7 +32,7 @@ export const BriefResponse = ({ question, isCompleted = false }: BriefResponsePr
       reviewerFeedback={question.reviewerFeedback}
     >
       <Textarea
-        data-testid="brief-response"
+        data-testid={LEARNING_HANDLES.BRIEF_RESPONSE_INPUT}
         {...register(`briefResponses.${question.id}`)}
         placeholder={t("studentLessonView.placeholder.openQuestion")}
         rows={5}

@@ -4,19 +4,19 @@ import { expect } from "@playwright/test";
 
 import { USER_ROLE } from "~/config/userRoles";
 
-import { SCORM_TEST_DATA } from "../../data/scorm/scorm.data";
-import { fillCreateScormCourseFormFlow } from "../../flows/courses/fill-create-scorm-course-form.flow";
-import { openCreateScormCoursePageFlow } from "../../flows/courses/open-create-scorm-course-page.flow";
-import { submitCreateScormCourseFormFlow } from "../../flows/courses/submit-create-scorm-course-form.flow";
-import { fillScormLessonFormFlow } from "../../flows/curriculum/fill-scorm-lesson-form.flow";
-import { openCurriculumPageFlow } from "../../flows/curriculum/open-curriculum-page.flow";
-import { openNewLessonFormFlow } from "../../flows/curriculum/open-new-lesson-form.flow";
-import { saveScormLessonFormFlow } from "../../flows/curriculum/save-scorm-lesson-form.flow";
+import { SCORM_TEST_DATA } from "../data/scorm/scorm.data";
+import { fillCreateScormCourseFormFlow } from "../flows/courses/fill-create-scorm-course-form.flow";
+import { openCreateScormCoursePageFlow } from "../flows/courses/open-create-scorm-course-page.flow";
+import { submitCreateScormCourseFormFlow } from "../flows/courses/submit-create-scorm-course-form.flow";
+import { fillScormLessonFormFlow } from "../flows/curriculum/fill-scorm-lesson-form.flow";
+import { openCurriculumPageFlow } from "../flows/curriculum/open-curriculum-page.flow";
+import { openNewLessonFormFlow } from "../flows/curriculum/open-new-lesson-form.flow";
+import { saveScormLessonFormFlow } from "../flows/curriculum/save-scorm-lesson-form.flow";
 
-import type { FixtureFactories } from "../../factories";
-import type { CurriculumCourseLessonRecord } from "../../factories/curriculum.factory";
-import type { Cleanup, PageHandle, WithWorkerPage } from "../../fixtures/types";
-import type { AnswerAllRenderedQuizQuestionTypesFlowInput } from "../../flows/learning/answer-all-rendered-quiz-question-types.flow";
+import type { FixtureFactories } from "../factories";
+import type { CurriculumCourseLessonRecord } from "../factories/curriculum.factory";
+import type { Cleanup, PageHandle, WithWorkerPage } from "../fixtures/types";
+import type { AnswerAllRenderedQuizQuestionTypesFlowInput } from "../flows/learning/answer-all-rendered-quiz-question-types.flow";
 import type { UpdateCourseSettingsBody } from "~/api/generated-api";
 
 type LearningCourseBuilderContext = {

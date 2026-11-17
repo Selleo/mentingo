@@ -5,7 +5,7 @@ import { COURSE_STATISTICS_HANDLES } from "../../data/statistics/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openCourseStatisticsTabFlow } from "../../flows/statistics/open-course-statistics-tab.flow";
 import { openCourseStatisticsFlow } from "../../flows/statistics/open-course-statistics.flow";
-import { createAiMentorLessonCourse } from "../learning/learning-test-helpers";
+import { createAiMentorLessonCourse } from "../../utils/learning-courses";
 
 test("admin can view AI mentor statistics after prepared mentor progress", async ({
   apiClient,

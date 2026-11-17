@@ -12,7 +12,7 @@ import { waitForUserQuizAttemptCountFlow } from "../../flows/learning/wait-for-q
 import { openCourseStatisticsTabFlow } from "../../flows/statistics/open-course-statistics-tab.flow";
 import { openCourseStatisticsFlow } from "../../flows/statistics/open-course-statistics.flow";
 import { searchCourseStatisticsFlow } from "../../flows/statistics/search-course-statistics.flow";
-import { createSingleChoiceQuizLessonCourse } from "../learning/learning-test-helpers";
+import { createSingleChoiceQuizLessonCourse } from "../../utils/learning-courses";
 
 test("admin can view localized course statistics overview, progress, quiz results and filters", async ({
   apiClient,

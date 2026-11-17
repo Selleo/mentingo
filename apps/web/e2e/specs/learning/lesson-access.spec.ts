@@ -6,8 +6,10 @@ import { assertCourseLessonProgressFlow } from "../../flows/learning/assert-lear
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { openLessonFromSidebarFlow } from "../../flows/learning/open-lesson-from-sidebar.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
-
-import { createEmbedLessonCourse, createThreeContentLessonsCourse } from "./learning-test-helpers";
+import {
+  createEmbedLessonCourse,
+  createThreeContentLessonsCourse,
+} from "../../utils/learning-courses";
 
 test("student can open lessons out of order from the sidebar when sequence is disabled", async ({
   apiClient,

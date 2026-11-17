@@ -11,8 +11,7 @@ import {
 import { goToNextLessonFlow } from "../../flows/learning/go-to-next-lesson.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
-
-import { createTwoContentLessonsCourse } from "./learning-test-helpers";
+import { createTwoContentLessonsCourse } from "../../utils/learning-courses";
 
 test("an opted-in completed course can be repeated, resumed and replaced", async ({
   cleanup,

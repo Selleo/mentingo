@@ -9,9 +9,10 @@ import {
 } from "../../data/live-training/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openLiveTrainingFlow } from "../../flows/live-training/open-live-training.flow";
-import { createPublishedLearningCourse } from "../learning/learning-test-helpers";
+import { createPublishedLearningCourse } from "../../utils/learning-courses";
 
 test("Live Training materials, hosts and sessions are gated by role and session state", async ({
+  apiClient,
   cleanup,
   factories,
   withWorkerPage,
@@ -23,14 +24,13 @@ test("Live Training materials, hosts and sessions are gated by role and session 
   let afterResourceId = "";
 
   await withWorkerPage(USER_ROLE.admin, async () => {
-    const liveTraining = await liveTrainingFactory.createOffline({
+    // Its cleanup is registered before the course's, so it runs after the course (and its lesson link) is gone.
+    const liveTraining = await liveTrainingFactory.createOffline(cleanup, {
       title: `${prefix}-training`,
       description: "Materials visibility",
       location: "Lesson room",
     });
     liveTrainingId = liveTraining.id;
-    // Registered before the course, so it runs after the course (and its lesson link) is gone.
-    cleanup.add(() => liveTrainingFactory.delete(liveTraining.id));
 
     const beforeResource = await liveTrainingFactory.uploadResource(liveTrainingId, {
       filePath: CURRICULUM_TEST_DATA.files.documentPreview,
@@ -62,6 +62,19 @@ test("Live Training materials, hosts and sessions are gated by role and session 
     }),
   });
   const lessonUrl = `/course/${courseId}/lesson/${lessons.liveTrainingLesson.id}`;
+  // Checks what the API serves to the current (student) session, not only what the UI renders.
+  const getServedLessonMaterials = async () => {
+    const response = await apiClient.api.lessonControllerGetLessonById(
+      lessons.liveTrainingLesson.id,
+      { language: "en" },
+    );
+    const materials = response.data.data.liveTraining?.materials;
+
+    return {
+      before: materials?.before.some((material) => material.resourceId === beforeResourceId),
+      after: materials?.after.some((material) => material.resourceId === afterResourceId),
+    };
+  };
 
   await test.step("admin sees every file and the sessions tab", async () => {
     await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
@@ -111,6 +124,7 @@ test("Live Training materials, hosts and sessions are gated by role and session 
         page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.beforeFileCard(beforeResourceId)),
       ).toBeVisible();
       await expect(page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.AFTER_FILES_TAB)).toBeDisabled();
+      await expect.poll(getServedLessonMaterials).toEqual({ before: true, after: false });
     });
   });
 
@@ -135,6 +149,7 @@ test("Live Training materials, hosts and sessions are gated by role and session 
       await expect(
         page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.afterFileCard(afterResourceId)),
       ).toBeVisible();
+      await expect.poll(getServedLessonMaterials).toEqual({ before: true, after: true });
     });
   });
 });

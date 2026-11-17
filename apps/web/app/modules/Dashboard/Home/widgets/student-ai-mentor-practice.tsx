@@ -307,6 +307,7 @@ export function WidgetStudentAiMentorPractice({
 
   const handleCreate = async () => {
     const value = scenario.trim();
+
     if (!value || isCreating) return;
     await createPractice({ scenario: value, language });
     setScenario("");
@@ -315,6 +316,7 @@ export function WidgetStudentAiMentorPractice({
   const isSending = status === "submitted" || status === "streaming";
   const handleSend = () => {
     const value = message.trim();
+
     if (!value || !threadId || isSending) return;
     setMessage("");
     void sendMessage({ text: value });
@@ -398,6 +400,7 @@ export function WidgetStudentAiMentorPractice({
         ) : data.status === AI_MENTOR_PRACTICE_STATUSES.QUEUED ||
           data.status === AI_MENTOR_PRACTICE_STATUSES.PROCESSING ? (
           <AiMentorReplayLoader
+            testId={AI_MENTOR_PRACTICE_HANDLES.WIDGET_GENERATING}
             text={t(`dashboardHome.widgets.studentTiles.aiMentorPractice.status.${data.status}`)}
             className="py-5"
           />

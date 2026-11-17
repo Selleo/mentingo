@@ -11,8 +11,7 @@ import { openCourseOverviewFlow } from "../../flows/learning/open-course-overvie
 import { selectQuizOptionFlow } from "../../flows/learning/select-quiz-option.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
 import { submitQuizFlow } from "../../flows/learning/submit-quiz.flow";
-
-import { createSingleChoiceQuizLessonCourse } from "./learning-test-helpers";
+import { createSingleChoiceQuizLessonCourse } from "../../utils/learning-courses";
 
 const TIME_LIMIT_MINUTES = 5;
 // a 5-minute limit shows 05:00 right after start and stays above 03:00 for this test

@@ -5,6 +5,7 @@ export const AI_CONVERSATIONS_HANDLES = {
   READER: "admin-ai-conversations-reader",
   MESSAGE: "admin-ai-conversations-message",
   RESULT: "admin-ai-conversations-result",
+  SCORE: "admin-ai-conversations-score",
   DETAILS_TAB: "admin-ai-conversations-details-tab",
   DETAILS_PANEL: "admin-ai-conversations-details-panel",
   BACK: "admin-ai-conversations-back",

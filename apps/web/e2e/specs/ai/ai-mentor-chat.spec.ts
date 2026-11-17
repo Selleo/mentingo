@@ -7,7 +7,7 @@ import { assertAiMentorEntryFlow } from "../../flows/learning/assert-ai-mentor-e
 import { dismissAiMentorTaskDescriptionFlow } from "../../flows/learning/dismiss-ai-mentor-task-description.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
-import { createAiMentorLessonCourse } from "../learning/learning-test-helpers";
+import { createAiMentorLessonCourse } from "../../utils/learning-courses";
 
 test.setTimeout(240 * 1000);
 

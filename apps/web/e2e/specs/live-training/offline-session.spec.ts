@@ -14,11 +14,10 @@ test("admin can start and end an offline Live Training session", async ({
   const liveTrainingFactory = factories.createLiveTrainingFactory();
 
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const liveTraining = await liveTrainingFactory.createOffline({
+    const liveTraining = await liveTrainingFactory.createOffline(cleanup, {
       title: `offline-session-${Date.now()}`,
       location: "Offline room",
     });
-    cleanup.add(() => liveTrainingFactory.delete(liveTraining.id));
 
     await openLiveTrainingFlow(page, liveTraining.id);
     await page.getByTestId(LIVE_TRAINING_HANDLES.START_SESSION_BUTTON).click();

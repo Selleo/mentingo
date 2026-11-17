@@ -11,8 +11,7 @@ import {
   getUserQuizAttemptCountFlow,
   waitForUserQuizAttemptCountFlow,
 } from "../../flows/learning/wait-for-quiz-attempt-count.flow";
-
-import { createAllRenderedQuestionTypesQuizCourse } from "./learning-test-helpers";
+import { createAllRenderedQuestionTypesQuizCourse } from "../../utils/learning-courses";
 
 test("student can submit a quiz containing every rendered question type", async ({
   apiClient,

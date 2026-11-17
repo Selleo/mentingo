@@ -7,8 +7,7 @@ import { openCourseOverviewFlow } from "../../flows/learning/open-course-overvie
 import { retakeQuizFlow } from "../../flows/learning/retake-quiz.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
 import { submitQuizFlow } from "../../flows/learning/submit-quiz.flow";
-
-import { createTextGapFillQuizCourse } from "./learning-test-helpers";
+import { createTextGapFillQuizCourse } from "../../utils/learning-courses";
 
 test("student sees the correct answer for an incorrect text gap fill when quiz feedback is enabled", async ({
   cleanup,

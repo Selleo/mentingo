@@ -4,6 +4,7 @@ import { USER_ROLE } from "~/config/userRoles";
 
 import {
   AI_CONVERSATION,
+  AI_CONVERSATION_EVALUATION,
   AI_CONVERSATION_MESSAGES,
   AI_CONVERSATION_THREAD_ID,
 } from "../../data/ai-conversations/ai-conversations.data";
@@ -21,6 +22,8 @@ test("admin browses paginated saved history and evaluation without conversation 
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const { mutations } = await mockAiConversationsFlow(page);
     await page.goto("/admin/ai-conversations?status=archived&search=Historical&page=2");
+    await expect(page.getByTestId(HANDLES.row(AI_CONVERSATION_THREAD_ID))).toBeVisible();
+    // The history list shows no learner avatars.
     await expect(page.getByTestId(HANDLES.LIST).getByRole("img")).toHaveCount(0);
     await page.getByTestId(HANDLES.row(AI_CONVERSATION_THREAD_ID)).click();
     await expect(page).toHaveURL(
@@ -41,8 +44,11 @@ test("admin browses paginated saved history and evaluation without conversation 
     );
     await page.getByTestId(HANDLES.DETAILS_TAB).click();
     await expect(page.getByTestId(HANDLES.DETAILS_PANEL)).toBeVisible();
+    const score = String(AI_CONVERSATION_EVALUATION.score);
+    await expect(page.getByTestId(HANDLES.SCORE)).toHaveText(score);
     await page.getByTestId(HANDLES.RESULT).click();
-    await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.FEEDBACK_DIALOG)).toBeVisible();
+    // The dialog comes from @mentingo/voice, which exposes no handle on the score itself.
+    await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.FEEDBACK_DIALOG)).toContainText(score);
     await page.keyboard.press("Escape");
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(page.getByTestId(HANDLES.LIST)).toBeHidden();
@@ -91,8 +97,10 @@ test("admin Assistant history never requests model-provided images or links", as
     const message = page.getByTestId(HANDLES.MESSAGE);
     await expect(message).toContainText("Saved Assistant answer.");
     await expect(message).toContainText("preview");
-    await expect(message.locator('img[src*="attacker.invalid"]')).toHaveCount(0);
-    await expect(message.locator('a[href*="attacker.invalid"]')).toHaveCount(0);
+    // innerHTML always serializes attributes with double quotes; the URL may survive only as plain text.
+    expect(await message.evaluate((element) => element.innerHTML)).not.toMatch(
+      /\b(?:src|href|srcset|style)="[^"]*attacker\.invalid/,
+    );
     expect(blockedRequests).toEqual([]);
   });
 });

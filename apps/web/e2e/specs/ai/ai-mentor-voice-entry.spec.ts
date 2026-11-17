@@ -7,7 +7,7 @@ import { mockLumaConfigFlow } from "../../flows/ai/mock-luma.flow";
 import { assertAiMentorEntryFlow } from "../../flows/learning/assert-ai-mentor-entry.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
-import { createAiMentorLessonCourse } from "../learning/learning-test-helpers";
+import { createAiMentorLessonCourse } from "../../utils/learning-courses";
 
 const VOICE_VARIANTS = [
   { voiceMentorEnabled: false, actionMode: "send", label: "unavailable" },

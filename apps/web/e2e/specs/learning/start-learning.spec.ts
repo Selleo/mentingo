@@ -7,8 +7,7 @@ import { assertCourseLessonProgressFlow } from "../../flows/learning/assert-lear
 import { goToNextLessonFlow } from "../../flows/learning/go-to-next-lesson.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
-
-import { createTwoContentLessonsCourse } from "./learning-test-helpers";
+import { createTwoContentLessonsCourse } from "../../utils/learning-courses";
 
 test("student can start learning and continue to the next content lesson", async ({
   apiClient,

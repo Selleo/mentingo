@@ -16,8 +16,7 @@ import {
   getUserQuizAttemptCountFlow,
   waitForUserQuizAttemptCountFlow,
 } from "../../flows/learning/wait-for-quiz-attempt-count.flow";
-
-import { createSingleChoiceQuizLessonCourse } from "./learning-test-helpers";
+import { createSingleChoiceQuizLessonCourse } from "../../utils/learning-courses";
 
 test("student can submit and retake a quiz lesson", async ({
   apiClient,

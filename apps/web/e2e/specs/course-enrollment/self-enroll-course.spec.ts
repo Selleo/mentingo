@@ -3,7 +3,7 @@ import { USER_ROLE } from "~/config/userRoles";
 import { LEARNING_HANDLES } from "../../data/learning/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { selfEnrollCourseFlow } from "../../flows/courses/self-enroll-course.flow";
-import { createTwoContentLessonsCourse } from "../learning/learning-test-helpers";
+import { createTwoContentLessonsCourse } from "../../utils/learning-courses";
 
 test("student can self-enroll in a free published course", async ({
   cleanup,

@@ -42,7 +42,7 @@ test("student can start a practice from the dashboard and see background prepara
     });
 
     await expect(page).toHaveURL(/\/dashboard$/);
-    await expect(widget.getByRole("status")).toBeVisible();
+    await expect(widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET_GENERATING)).toBeVisible();
     await widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.CONTINUE_LINK).click();
     await expect(page).toHaveURL(new RegExp(`/ai-mentor/practice/${AI_MENTOR_PRACTICE_ID}$`));
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.PREPARING_STATE)).toBeVisible();

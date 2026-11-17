@@ -10,8 +10,10 @@ import { assertCourseLessonProgressFlow } from "../../flows/learning/assert-lear
 import { clickScormIframeButtonFlow } from "../../flows/learning/click-scorm-iframe-button.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
-
-import { createMultiScoScormLessonCourse, createScormPackageCourse } from "./learning-test-helpers";
+import {
+  createMultiScoScormLessonCourse,
+  createScormPackageCourse,
+} from "../../utils/learning-courses";
 
 test.use({
   launchOptions: { args: ["--ignore-certificate-errors", "--allow-insecure-localhost"] },

@@ -13,8 +13,7 @@ import { submitQuizFlow } from "../../flows/learning/submit-quiz.flow";
 import { getUserQuizAttemptCountFlow } from "../../flows/learning/wait-for-quiz-attempt-count.flow";
 import { gradeQuizAnswerFlow } from "../../flows/quiz-grading/grade-quiz-answer.flow";
 import { createDisposableAdminSession } from "../../utils/create-disposable-admin-session";
-
-import { createAllRenderedQuestionTypesQuizCourse } from "./learning-test-helpers";
+import { createAllRenderedQuestionTypesQuizCourse } from "../../utils/learning-courses";
 
 const REVIEWER_COMMENT = "Clear reasoning, well done.";
 const REVIEWED_ANSWER_COUNT = 2;

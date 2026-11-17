@@ -16,8 +16,7 @@ import {
   getUserQuizAttemptCountFlow,
   waitForUserQuizAttemptCountFlow,
 } from "../../flows/learning/wait-for-quiz-attempt-count.flow";
-
-import { createSequencedQuizAndContentCourse } from "./learning-test-helpers";
+import { createSequencedQuizAndContentCourse } from "../../utils/learning-courses";
 
 test("student cannot skip ahead when lesson sequence is enabled", async ({
   apiClient,

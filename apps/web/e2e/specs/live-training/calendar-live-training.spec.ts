@@ -18,16 +18,18 @@ test("admin can open a Live Training calendar event and navigate to details page
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const liveTrainingFactory = factories.createLiveTrainingFactory();
-    const liveTraining = await liveTrainingFactory.createOffline({
+    const liveTraining = await liveTrainingFactory.createOffline(cleanup, {
       title: `calendar-open-${Date.now()}`,
       location: "Room 101",
     });
-    cleanup.add(() => liveTrainingFactory.delete(liveTraining.id));
 
     await waitForCalendarEventFlow(apiClient, liveTraining);
 
     await openCalendarFlow(page);
-    await page.getByTestId(CALENDAR_HANDLES.event(liveTraining.calendarEventId)).click();
+    const event = page.getByTestId(CALENDAR_HANDLES.event(liveTraining.calendarEventId));
+    // The time grid scrolls internally; the chip can start below the fold.
+    await event.scrollIntoViewIfNeeded();
+    await event.click();
 
     const detailsDialog = page.getByTestId(CALENDAR_HANDLES.EVENT_DETAILS_DIALOG);
     await expect(detailsDialog).toBeVisible();
