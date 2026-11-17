@@ -239,11 +239,9 @@ export class CurriculumFactory {
     );
   }
 
-  async getAiMentorLessonFiles(lessonId: string) {
-    const response =
-      await this.apiClient.api.ingestionControllerGetAllAssignedDocumentsForLesson(lessonId);
-
-    return response.data.data;
+  /** Updates a chapter translation without reading it back (the read endpoint needs the base language). */
+  async updateChapterTranslation(id: string, language: SupportedLanguages, title: string) {
+    await this.apiClient.api.chapterControllerUpdateChapter({ language, title }, { id });
   }
 
   async updateAiMentorConfigurationTranslations(

@@ -87,7 +87,7 @@ export const translateAiMentorCourseExceptJudge = async ({
     title: `Deutscher ${courseTitle}`,
     description: "<p>Deutsche Kursbeschreibung</p>",
   });
-  await curriculumFactory.updateChapter(chapterId, { language: "de", title: "Deutsches Kapitel" });
+  await curriculumFactory.updateChapterTranslation(chapterId, "de", "Deutsches Kapitel");
   await curriculumFactory.updateAiMentorLesson(lessonId, {
     language: "de",
     title: "Deutsche KI-Mentor-Lektion",
