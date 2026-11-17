@@ -5,7 +5,7 @@ import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openRegisterPageFlow } from "../../flows/auth/open-register-page.flow";
 import { addRegistrationFieldFlow } from "../../flows/settings/add-registration-field.flow";
-import { openPlatformCustomizationSettingsFlow } from "../../flows/settings/open-platform-customization-settings.flow";
+import { openRegistrationFormBuilderFlow } from "../../flows/settings/open-registration-form-builder.flow";
 import {
   findRegistrationFieldByLabel,
   getRegistrationForm,
@@ -28,7 +28,7 @@ test("admin adds, archives and restores a registration checkbox that visitors se
     const visitor = await createWorkspacePage();
     cleanup.add(() => visitor.context.close());
 
-    await openPlatformCustomizationSettingsFlow(page);
+    await openRegistrationFormBuilderFlow(page, fieldIndex);
     await addRegistrationFieldFlow(page, fieldIndex, fieldLabel);
 
     await expect.poll(() => findRegistrationFieldByLabel(apiClient, fieldLabel)).toBeTruthy();
@@ -83,7 +83,7 @@ test("registration form builder blocks saving when required labels are missing",
 
     cleanup.add(async () => restoreRegistrationForm(apiClient, originalForm.fields));
 
-    await openPlatformCustomizationSettingsFlow(page);
+    await openRegistrationFormBuilderFlow(page, fieldIndex);
     await page.getByTestId(SETTINGS_PAGE_HANDLES.REGISTRATION_FORM_ADD_FIELD).click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.REGISTRATION_FORM_SAVE).click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldEdit(fieldIndex)).click();
