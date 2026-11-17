@@ -100,6 +100,7 @@ Start with this file, then read the root `AGENTS.local.md` if it exists, followe
 - Run the narrowest relevant validation command for touched code.
 - Update or add tests for changed behavior.
 - When a change meaningfully alters a product capability, user workflow, access rule, or business outcome, run `.agents/skills/mentingo-feature-overview/SKILL.md` and update the matching business spec in `docs/specs/<feature-slug>-business-spec.md` as part of the same change. If no spec exists yet, create it. Do not update business specs for cosmetic changes, copy or styling adjustments, implementation-only refactors, or small bug fixes that merely restore already-documented intended behavior.
+- When adding an app area or changing a user flow, keep `packages/shared/src/constants/self-onboarding-areas.json` and `.agents/skills/release-film/projects/mentingo-self-onboarding.json` aligned with its business spec, assign recording flows to stable video groups of at most three, and run the self-onboarding catalog tests (including `validate_app_coverage`).
 - Regenerate generated artifacts only through existing scripts.
 - Keep changes limited to the task.
 - Report commands run, commands skipped, assumptions, and remaining risks.

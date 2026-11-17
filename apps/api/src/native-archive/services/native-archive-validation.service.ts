@@ -121,6 +121,7 @@ export class NativeArchiveValidationService {
     const snapshot = {
       ...value,
       assessmentQuestionMatchingPairs: value.assessmentQuestionMatchingPairs ?? [],
+      assessmentFeedbackRanges: value.assessmentFeedbackRanges ?? [],
     } as unknown as NativeArchiveValidatedCourseSnapshot;
     const hasIncompleteMatchingQuestion = snapshot.questions.some(
       (question) =>

@@ -27,6 +27,7 @@ ONBOARDING = (
     'test_self_onboarding_localization', 'test_self_onboarding_progress',
     'test_elevenlabs', 'test_elevenlabs_v4', 'test_tutorial_media',
     'test_tutorial_focus', 'test_viewport_edges',
+    'test_pr_video_plan', 'test_pr_video', 'test_pr_video_publish', 'test_pr_video_workflow',
 )
 
 

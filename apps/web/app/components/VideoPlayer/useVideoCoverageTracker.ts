@@ -8,13 +8,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { syncLessonVideoCompletionQueries, useLessonVideoProgress } from "~/api/mutations";
 
 import type {
+  CoverageTrackedPlayer,
+  UpsertMediaCoverage,
   VideoCoverageRange,
   VideoCoverageSnapshot,
   VideoCoverageTrackingOptions,
 } from "./videoCoverage.types";
-import type videojs from "video.js";
-
-type VideoJSType = ReturnType<typeof videojs>;
 
 const DEFAULT_BUCKET_SIZE_SECONDS = 1;
 const DEFAULT_FLUSH_INTERVAL_MS = 15_000;
@@ -26,7 +25,7 @@ type FlushOptions = {
 };
 
 const getSafeDurationSeconds = (
-  player: VideoJSType | null,
+  player: CoverageTrackedPlayer | null,
   canonicalDurationSeconds: number | null,
 ) => {
   if (
@@ -87,13 +86,22 @@ export const getVideoResumeTimeSeconds = ({
 };
 
 export const useVideoCoverageTracker = (
-  player: VideoJSType | null,
+  player: CoverageTrackedPlayer | null,
   options: VideoCoverageTrackingOptions,
+) => {
+  const { mutateAsync: upsertVideoProgress } = useLessonVideoProgress();
+
+  return useMediaCoverageTracker(player, options, upsertVideoProgress);
+};
+
+export const useMediaCoverageTracker = (
+  player: CoverageTrackedPlayer | null,
+  options: VideoCoverageTrackingOptions,
+  upsertMediaCoverage: UpsertMediaCoverage,
 ) => {
   const [snapshot, setSnapshot] = useState<VideoCoverageSnapshot>(() =>
     getInitialSnapshot(options),
   );
-  const { mutateAsync: upsertVideoProgress } = useLessonVideoProgress();
   const optionsRef = useRef(options);
   const pendingRangesRef = useRef<VideoCoverageRange[]>([]);
   const activeWatchSecondsDeltaRef = useRef(0);
@@ -249,7 +257,7 @@ export const useVideoCoverageTracker = (
       isFlushingRef.current = true;
 
       try {
-        const progress = await upsertVideoProgress({
+        const progress = await upsertMediaCoverage({
           lessonId: currentOptions.lessonId,
           learningStateId: currentOptions.learningStateId,
           resourceEntityId: currentOptions.resourceEntityId,
@@ -313,7 +321,7 @@ export const useVideoCoverageTracker = (
         }
       }
     },
-    [player, syncPendingLessonCompletion, upsertVideoProgress],
+    [player, syncPendingLessonCompletion, upsertMediaCoverage],
   );
 
   useEffect(() => {

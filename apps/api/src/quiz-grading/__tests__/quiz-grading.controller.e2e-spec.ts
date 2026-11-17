@@ -7,6 +7,7 @@ import {
   ASSESSMENT_QUESTION_TYPES,
   COURSE_ENROLLMENT,
   COURSE_LEARNING_STATE_KINDS,
+  LEARNER_PROGRESS_STATUSES,
   QUIZ_REVIEW_GRADING_METHODS,
   SYSTEM_ROLE_SLUGS,
   type SystemRoleSlug,
@@ -38,6 +39,7 @@ import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { getCourseLessonStatus } from "../../../test/helpers/course-lesson-status";
 import { addSystemRoleToUserInTests } from "../../../test/helpers/permission-role-helpers";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
@@ -402,9 +404,13 @@ describe("QuizGradingController (e2e)", () => {
 
   it("completes the lesson when a re-grade turns a failed attempt into a pass", async () => {
     const t = await setup();
+    const lessonStatus = () =>
+      getCourseLessonStatus(app, t.studentCookie, t.course.id, t.lesson.id);
 
     await submitQuiz(t.studentCookie, t.lesson.id, t.briefId, t.detailedId);
     const [first, second] = (await listAnswers(t.reviewerCookie).expect(200)).body.data;
+
+    expect(await lessonStatus()).toBe(LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW);
 
     await grade(t.reviewerCookie, first.id, false).expect(201);
     await grade(t.reviewerCookie, second.id, false).expect(201);
@@ -413,6 +419,7 @@ describe("QuizGradingController (e2e)", () => {
       result: ASSESSMENT_ATTEMPT_RESULTS.FAILED,
     });
     expect(await findProgress(t.student.id, t.lesson.id)).toMatchObject({ isQuizPassed: false });
+    expect(await lessonStatus()).toBe(LEARNER_PROGRESS_STATUSES.FAILED);
 
     const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish");
 
@@ -442,6 +449,7 @@ describe("QuizGradingController (e2e)", () => {
       .expect(200);
 
     expect(lessonView.body.data.lessonCompleted).toBe(true);
+    expect(await lessonStatus()).toBe(LEARNER_PROGRESS_STATUSES.COMPLETED);
   });
 
   it("scores mixed quizzes on all points and refuses to grade automatically graded answers", async () => {

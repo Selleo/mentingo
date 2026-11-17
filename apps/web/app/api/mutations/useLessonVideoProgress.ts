@@ -9,7 +9,7 @@ import { ApiClient } from "../api-client";
 import type { GetLessonByIdResponse, UpsertProgressBody } from "../generated-api";
 import type { CourseLearningIdentity } from "~/api/utils/course-learning-state.types";
 
-const markLessonCompletedInCache = (
+export const markLessonCompletedInCache = (
   lessonId: string,
   learningStateId: CourseLearningIdentity["learningStateId"],
 ) => {

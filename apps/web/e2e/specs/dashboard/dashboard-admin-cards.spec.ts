@@ -107,9 +107,9 @@ const group = (
 
 test.describe("admin dashboard utility cards", () => {
   test("deadline risks sends urgency, filter, search, sort and pagination parameters", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
       const requests: URL[] = [];
       await dashboardMocks(
         page,
@@ -212,9 +212,9 @@ test.describe("admin dashboard utility cards", () => {
   });
 
   test("keeps the same-course rows visible during sorting and expands learners without bubbling out of the dialog", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
       let releaseSortedGroups!: () => void;
       const sortedGroups = new Promise<void>((resolve) => {
         releaseSortedGroups = resolve;
@@ -271,9 +271,9 @@ test.describe("admin dashboard utility cards", () => {
   });
 
   test("does not show groups from the previous course after switching courses", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
       let releaseCourseTwo!: () => void;
       const courseTwoResponse = new Promise<void>((resolve) => {
         releaseCourseTwo = resolve;
@@ -325,9 +325,9 @@ test.describe("admin dashboard utility cards", () => {
   });
 
   test("renders training completion data, empty state, and an accessible chart tooltip", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
       await dashboardMocks(
         page,
         [widget(DASHBOARD_WIDGET_TYPES.TRAINING_COMPLETION)],
@@ -358,8 +358,8 @@ test.describe("admin dashboard utility cards", () => {
     });
   });
 
-  test("shows training completion empty and error states", async ({ withReadonlyPage }) => {
-    await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  test("shows training completion empty and error states", async ({ withWorkerPage }) => {
+    await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
       let requestCount = 0;
       await dashboardMocks(
         page,
@@ -391,9 +391,9 @@ test.describe("admin dashboard utility cards", () => {
   });
 
   test("renders calendar events on mobile, navigates months, and handles an empty upcoming list", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
       const allRequests: URL[] = [];
       await dashboardMocks(
         page,

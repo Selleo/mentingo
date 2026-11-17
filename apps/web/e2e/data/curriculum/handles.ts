@@ -89,6 +89,14 @@ export const QUIZ_LESSON_FORM_HANDLES = {
     `curriculum-quiz-question-${questionIndex}-photo-type-select`,
   photoTypeOption: (questionIndex: number, type: QuestionType) =>
     `curriculum-quiz-question-${questionIndex}-photo-type-option-${type}`,
+  FEEDBACK_MODE_SELECT: "curriculum-quiz-feedback-mode-select",
+  FEEDBACK_ADD_RANGE_BUTTON: "curriculum-quiz-feedback-add-range-button",
+  feedbackRangeMinInput: (rangeIndex: number) =>
+    `curriculum-quiz-feedback-range-${rangeIndex}-min-input`,
+  feedbackRangeMaxInput: (rangeIndex: number) =>
+    `curriculum-quiz-feedback-range-${rangeIndex}-max-input`,
+  feedbackRangeRemoveButton: (rangeIndex: number) =>
+    `curriculum-quiz-feedback-range-${rangeIndex}-remove-button`,
 } as const;
 
 export const EMBED_LESSON_FORM_HANDLES = {

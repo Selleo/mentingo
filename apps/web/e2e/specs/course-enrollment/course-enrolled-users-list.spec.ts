@@ -10,9 +10,9 @@ import { openCourseEnrolledTabFlow } from "../../flows/courses/open-course-enrol
 test("admin can verify enrolled users and filter by keyword and group", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const categoryFactory = factories.createCategoryFactory();
     const courseFactory = factories.createCourseFactory();
     const enrollmentFactory = factories.createEnrollmentFactory();

@@ -32,7 +32,11 @@ export default defineConfig({
     },
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
-    include: ["./app/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+    include: [
+      "./app/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      // Recorder helper checks; Playwright only runs e2e/specs.
+      "./e2e/utils/**/*.test.ts",
+    ],
     coverage: {
       exclude: ["**/browser.ts", "**/handler.ts"],
     },

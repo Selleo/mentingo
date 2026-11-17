@@ -17,7 +17,6 @@ describe("ModernCourseCard picker variant", () => {
       <ModernCourseCard
         id="course-1"
         title="Leadership"
-        category="Leadership"
         trailerUrl="https://example.test/trailer.mp4"
         variant="picker"
         mediaState="play"

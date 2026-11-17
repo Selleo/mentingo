@@ -1,3 +1,4 @@
+import type { AssessmentFeedbackMode } from "@repo/shared";
 import type { Readable } from "node:stream";
 
 export const SCORM_EXPORT_LESSON_TYPES = ["content", "quiz", "embed", "scorm"] as const;
@@ -83,6 +84,7 @@ export type ScormExportContentLessonSnapshot = ScormExportBaseLessonSnapshot & {
 export type ScormExportQuizLessonSnapshot = ScormExportBaseLessonSnapshot & {
   type: "quiz";
   passingScorePercent?: number | null;
+  feedbackMode: AssessmentFeedbackMode;
   questions: ScormExportQuizQuestion[];
 };
 

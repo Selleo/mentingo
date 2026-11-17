@@ -17,6 +17,8 @@ import { cn, formatWithPlural } from "~/lib/utils";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { ChapterCounter } from "~/modules/Courses/CourseView/components/ChapterCounter";
 import { CourseChapterLesson } from "~/modules/Courses/CourseView/CourseChapterLesson";
+import { LESSON_PROGRESS_STATUSES } from "~/modules/Courses/Lesson/types";
+import { isResumableLessonStatus } from "~/modules/Courses/Lesson/utils";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -94,12 +96,11 @@ export const CourseChapter = ({ chapter, isLastChapter = false }: CourseChapterP
 
     const firstNotStartedLesson = find(
       accessibleLessons,
-      (lesson) => lesson.status === "not_started",
+      (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.NOT_STARTED,
     )?.id;
 
-    const firstInProgressLesson = find(
-      accessibleLessons,
-      (lesson) => lesson.status === "in_progress",
+    const firstInProgressLesson = find(accessibleLessons, (lesson) =>
+      isResumableLessonStatus(lesson.status),
     )?.id;
 
     const lessonToPlay = firstInProgressLesson ?? firstNotStartedLesson ?? accessibleLessons[0].id;

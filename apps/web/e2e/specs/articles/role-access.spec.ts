@@ -45,13 +45,13 @@ const ensureArticleVisibilityForAllLocales = async ({
 };
 
 for (const { role, title } of ROLES) {
-  test(`${title} can open article details`, async ({ factories, apiClient, withReadonlyPage }) => {
+  test(`${title} can open article details`, async ({ factories, apiClient, withWorkerPage }) => {
     const articleFactory = factories.createArticleFactory();
     let articleId = "";
     let articleTitlePrefix = "";
     let sectionId = "";
 
-    await withReadonlyPage(USER_ROLE.admin, async () => {
+    await withWorkerPage(USER_ROLE.admin, async () => {
       const { article, section } = await articleFactory.createWithSection({
         title: `article-role-${title.replace(/\s+/g, "-")}-${Date.now()}`,
         summary: `article-role-summary-${Date.now()}`,
@@ -72,7 +72,7 @@ for (const { role, title } of ROLES) {
     });
 
     try {
-      await withReadonlyPage(role, async ({ page }) => {
+      await withWorkerPage(role, async ({ page }) => {
         await openArticleDetailsPageFlow(page, articleId);
 
         await expect(page).toHaveURL(new RegExp(`/articles/${articleId}$`));
@@ -85,7 +85,7 @@ for (const { role, title } of ROLES) {
         await expect(page.getByTestId(ARTICLE_DETAILS_PAGE_HANDLES.DELETE_BUTTON)).toHaveCount(0);
       });
     } finally {
-      await withReadonlyPage(USER_ROLE.admin, async () => {
+      await withWorkerPage(USER_ROLE.admin, async () => {
         await Promise.allSettled([
           articleId ? articleFactory.delete(articleId) : Promise.resolve(),
           sectionId ? articleFactory.deleteSection(sectionId) : Promise.resolve(),

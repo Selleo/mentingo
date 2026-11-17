@@ -86,6 +86,7 @@ import type {
   CourseTransferResourceCollection,
   SourceSnapshot,
   SyncAiMentorsParams,
+  SyncAssessmentFeedbackRangesParams,
   SyncAssessmentQuestionDetailsParams,
   SyncChaptersParams,
   SyncFillInTheBlanksQuestionReferencesParams,
@@ -268,6 +269,11 @@ export class CourseTransferMaterializerService {
       questionMap,
       targetCourseId: resolvedTargetCourseId,
     });
+    await this.syncAssessmentFeedbackRanges({
+      sourceSnapshot,
+      lessonMap,
+      targetCourseId: resolvedTargetCourseId,
+    });
 
     const aiMentorMap = await this.syncAiMentors({
       sourceSnapshot,
@@ -416,6 +422,11 @@ export class CourseTransferMaterializerService {
     const blankMap = await this.syncAssessmentQuestionDetails({
       sourceSnapshot,
       questionMap,
+      targetCourseId,
+    });
+    await this.syncAssessmentFeedbackRanges({
+      sourceSnapshot,
+      lessonMap,
       targetCourseId,
     });
     const aiMentorMap = await this.syncAiMentors({
@@ -1348,6 +1359,70 @@ export class CourseTransferMaterializerService {
     }
 
     return blankMap;
+  }
+
+  private async syncAssessmentFeedbackRanges(params: SyncAssessmentFeedbackRangesParams) {
+    const targetLessonIds = params.sourceSnapshot.assessments
+      .map((assessment) => params.lessonMap.get(assessment.lessonId))
+      .filter((lessonId): lessonId is UUIDType => Boolean(lessonId));
+    const targetAssessmentRows =
+      await this.courseTransferGraphRepository.findAssessmentIdsByLessonIds(targetLessonIds);
+    const targetAssessmentIdByLessonId = new Map(
+      targetAssessmentRows.map((row) => [row.lessonId, row.id]),
+    );
+
+    const sourceFeedbackRanges = params.sourceSnapshot.assessmentFeedbackRanges;
+    const rangesBySourceAssessmentId = new Map<
+      UUIDType,
+      SourceSnapshot["assessmentFeedbackRanges"]
+    >();
+    for (const range of sourceFeedbackRanges) {
+      const group = rangesBySourceAssessmentId.get(range.assessmentId) ?? [];
+      group.push(range);
+      rangesBySourceAssessmentId.set(range.assessmentId, group);
+    }
+
+    const targetAssessmentIds: UUIDType[] = [];
+    const plannedRanges: Array<{
+      targetAssessmentId: UUIDType;
+      targetRangeId: UUIDType;
+      source: SourceSnapshot["assessmentFeedbackRanges"][number];
+    }> = [];
+
+    for (const sourceAssessment of params.sourceSnapshot.assessments) {
+      const targetLessonId = params.lessonMap.get(sourceAssessment.lessonId);
+      if (!targetLessonId) continue;
+
+      const targetAssessmentId = targetAssessmentIdByLessonId.get(targetLessonId);
+      if (!targetAssessmentId) continue;
+
+      targetAssessmentIds.push(targetAssessmentId);
+
+      for (const source of rangesBySourceAssessmentId.get(sourceAssessment.id) ?? []) {
+        plannedRanges.push({
+          targetAssessmentId,
+          targetRangeId: uuidv5(source.id, params.targetCourseId) as UUIDType,
+          source,
+        });
+      }
+    }
+
+    await this.courseTransferGraphRepository.deleteStaleTargetFeedbackRanges(
+      targetAssessmentIds,
+      plannedRanges.map(({ targetRangeId }) => targetRangeId),
+    );
+    await this.courseTransferGraphRepository.parkTargetFeedbackRanges(targetAssessmentIds);
+
+    for (const { targetAssessmentId, targetRangeId, source } of plannedRanges) {
+      await this.courseTransferGraphRepository.upsertTargetFeedbackRange({
+        id: targetRangeId,
+        assessmentId: targetAssessmentId,
+        minPercent: source.minPercent,
+        maxPercent: source.maxPercent,
+        displayOrder: source.displayOrder,
+        message: source.message as LocalizedText,
+      });
+    }
   }
 
   private omitCopiedRowFields<T extends object, K extends keyof T>(

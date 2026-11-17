@@ -839,7 +839,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "\"Video completion tracking\" option updated successfully",
     "videoCompletionTrackingUpdateFailed": "Failed to update \"Video completion tracking\" option",
     "settingsUpdatedSuccessfully": "Settings updated successfully",
-    "settingsUpdateFailed": "Failed to update settings"
+    "settingsUpdateFailed": "Failed to update settings",
+    "audioCompletionTrackingUpdatedSuccessfully": "\"Audio completion tracking\" option updated successfully",
+    "audioCompletionTrackingUpdateFailed": "Failed to update \"Audio completion tracking\" option"
   },
   "uploadFile": {
     "header": "Click to upload",
@@ -1103,7 +1105,9 @@
     "promotionCodes": "Promotion Codes",
     "manage": "Manage",
     "ariaLabels": {
-      "goToAvailableCourses": "Go to available courses"
+      "goToAvailableCourses": "Go to available courses",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar"
     },
     "qa": "Q&A",
     "tenants": "Organizations",
@@ -2893,7 +2897,8 @@
         "curriculum": "Curriculum editing is not available for SCORM courses.",
         "lessonSequence": "Lesson sequence enforcement is not available for SCORM courses.",
         "quizFeedback": "Quiz feedback settings are not available for SCORM courses.",
-        "videoCompletionTracking": "Video completion tracking is not available for SCORM courses."
+        "videoCompletionTracking": "Video completion tracking is not available for SCORM courses.",
+        "audioCompletionTracking": "Audio completion tracking is not available for SCORM courses."
       },
       "notFound": {
         "course": "Course not found.",
@@ -3084,7 +3089,9 @@
         "courseAvailabilityTitle": "Course availability",
         "fallbackLanguageWarningTitle": "Note: missing translations",
         "fallbackLanguageWarningDescription": "Some fields in this language version are empty. In those places, students will see content from the default language until you add translations.",
-        "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course."
+        "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course.",
+        "enableAudioCompletionTracking": "Audio completion tracking",
+        "enableAudioCompletionTrackingDescription": "Require learners to listen to at least 90% of each audio recording in a lesson before it is marked as completed."
       },
       "validation": {
         "titleMinLength": "Title must be at least 2 characters.",
@@ -3189,14 +3196,27 @@
           "quizCooldownInHours": "Time lock after failed attempts (in hours)",
           "numberOfQuestions": "{{count1}} of {{count2}} questions",
           "noQuestions": "No questions",
-          "timeLimitMinutes": "Time limit (hh:mm)"
+          "timeLimitMinutes": "Time limit (hh:mm)",
+          "feedbackMode": "Feedback visibility",
+          "feedbackModeFull": "Score and messages",
+          "feedbackModeScoreOnly": "Score only",
+          "feedbackModeNone": "No feedback",
+          "feedbackRanges": "Score-range messages",
+          "feedbackVariablesHint": "You can use {{firstNameVar}} for the learner's first name and {{scoreVar}} for their score.",
+          "feedbackRangeMin": "From (%)",
+          "feedbackRangeMax": "To (%)",
+          "feedbackRangeMessage": "Message",
+          "feedbackRangeAdd": "Add range",
+          "feedbackRangeReset": "Restore default ranges"
         },
         "tooltip": {
           "switch": "If enabled, the student has a limited number of quiz attempts.",
           "passingThreshold": "The percentage threshold for passing the quiz. If a student reaches this score, the quiz will be considered passed.",
           "attemptsLimit": "Number of quiz attempts allowed before time lock is triggered.",
           "quizCooldownInHours": "Duration of the quiz lock after all attempts are used.",
-          "timeLimitMinutes": "Optional. When set, learners start the quiz explicitly and their answers are submitted automatically when time runs out. Leave empty for no time limit."
+          "timeLimitMinutes": "Optional. When set, learners start the quiz explicitly and their answers are submitted automatically when time runs out. Leave empty for no time limit.",
+          "feedbackMode": "Controls what learners see after submitting: the score and messages, only the score, or nothing.",
+          "feedbackRanges": "Ordered score bands shown to learners. Bands must cover 0-100% with no gaps or overlaps."
         },
         "validation": {
           "optionTextRequired": "Option text is required",
@@ -3226,7 +3246,13 @@
           "matchingPairsRequired": "Add at least 2 pairs and fill in both sides of each pair",
           "matchingMatchRequired": "Fill in the match for this pair",
           "matchingPairsUnique": "Each pair needs a unique match",
-          "timeLimitMinutes": "Enter a time limit between {{min}} and {{max}}."
+          "timeLimitMinutes": "Enter a time limit between {{min}} and {{max}}.",
+          "feedbackRangeNotInteger": "Range bounds must be whole numbers.",
+          "feedbackRangeOutOfBounds": "Range bounds must be between 0 and 100.",
+          "feedbackRangeBoundsReversed": "A range's start cannot be greater than its end.",
+          "feedbackRangesMustStartAtZero": "Ranges must start at 0%.",
+          "feedbackRangesMustEndAtHundred": "Ranges must end at 100%.",
+          "feedbackRangesGapOrOverlap": "Ranges must cover 0-100% with no gaps or overlaps."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",
@@ -4389,7 +4415,17 @@
       "scale_1_5": "Scale question (1-5)",
       "matching": "Match each item with its pair.",
       "noMatchesAvailable": "No matches are available for this question yet.",
-      "correctMatch": "Correct match:"
+      "correctMatch": "Correct match:",
+      "fillInTheBlanksInstruction": "Click a blank and choose a word.",
+      "matchingInstruction": "Click an item and choose its match.",
+      "blankLabel": "Blank {{current}} of {{total}}",
+      "answerBank": "the answer bank",
+      "removeWord": "Remove word",
+      "dndInstructions": "To pick up a word, press space or enter. Use the arrow keys to move it between blanks. Press space or enter again to drop it, or escape to cancel.",
+      "dndOnStart": "Picked up the word {{word}}.",
+      "dndOnOver": "Word {{word}} is over {{blank}}.",
+      "dndOnEnd": "Word {{word}} was placed in {{blank}}.",
+      "dndOnCancel": "Dragging cancelled. Word {{word}} returned to its previous position."
     },
     "aiMentor": {
       "title": "AI Mentor Session",
@@ -4522,6 +4558,42 @@
       "timeLeft": "Time left: {{time}}",
       "warning": "Less than a minute left. Your answers will be submitted automatically when time runs out.",
       "timeUp": "Time is up. Your answers are being submitted."
+    },
+    "audioProgress": {
+      "label": "Audio progress",
+      "completedSummary": "{{completed}} of {{total}} completed",
+      "overviewAriaLabel": "Lesson audio progress",
+      "segmentAriaLabel": "Audio {{index}} progress: {{progress}}% listened",
+      "requirementSingle": "Listen to the entire audio recording to complete this lesson.",
+      "requirementMultiple": "Listen to all audio recordings to complete this lesson.",
+      "errors": {
+        "resourceNotFound": "Audio progress could not be saved for this lesson.",
+        "unsupportedLessonType": "Audio progress is only available for content lessons.",
+        "unsupportedBucketSize": "Audio progress uses an unsupported tracking interval.",
+        "invalidResourceType": "This resource cannot be tracked as a lesson audio recording.",
+        "accessDenied": "You do not have access to update audio progress for this lesson."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Finish listening before leaving?",
+      "descriptionSingle": "This lesson requires the entire audio recording to be listened to before it can be completed.",
+      "descriptionMultiple": "This lesson requires all audio recordings to be listened to before it can be completed.",
+      "continueListening": "Continue listening"
+    },
+    "requiredMediaLeave": {
+      "title": "Finish the lesson media before leaving?",
+      "description": "This lesson requires all videos to be watched and all audio recordings to be listened to before it can be completed.",
+      "continue": "Continue"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Watch the video and listen to the audio recording to complete this lesson.",
+      "requirementMultiple": "Watch all videos and listen to all audio recordings to complete this lesson.",
+      "label": "Lesson progress",
+      "overviewAriaLabel": "Lesson media progress"
+    },
+    "navigation": {
+      "previousLesson": "Previous lesson",
+      "nextLesson": "Next lesson"
     }
   },
   "studentCourseView": {
@@ -4546,6 +4618,8 @@
       "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences).",
       "aiMentorLesson": {
         "sendMessage": "Write a message...",
+        "messageLabel": "Your message",
+        "conversationLabel": "Conversation",
         "check": "Check",
         "aiMentorName": "AI Mentor",
         "retake": "Retake",
@@ -4930,7 +5004,8 @@
     "inProgress": "In Progress",
     "notStarted": "Not Started",
     "blocked": "Blocked",
-    "awaitingReview": "Waiting for review"
+    "awaitingReview": "Waiting for review",
+    "failed": "Failed"
   },
   "studentCertificateView": {
     "header": "Certificates",
@@ -4954,7 +5029,7 @@
       "courseCompletionRequired": "You must complete the course before generating a certificate."
     },
     "button": {
-      "download": "Download",
+      "download": "Download certificate (PDF)",
       "preview": "Preview",
       "shareLinkedIn": "Share on LinkedIn"
     },
@@ -5416,7 +5491,9 @@
       },
       "ariaLabel": {
         "drag": "Drag video embed",
-        "remove": "Remove video embed"
+        "remove": "Remove video embed",
+        "play": "Play video",
+        "playWithTitle": "Play video: {{title}}"
       }
     },
     "presentation": {
@@ -6628,13 +6705,6 @@
       "averageRating": "Avg. rating",
       "detailedStatisticsSoon": "Detailed statistics coming soon",
       "detailedStatisticsDescription": "This section will display comprehensive analytics including student progress over time, chapter completion rates, engagement metrics, and more.",
-      "status": {
-        "started": "Started",
-        "completed": "Completed",
-        "inProgress": "In progress",
-        "notStarted": "Not started",
-        "awaitingReview": "Waiting for review"
-      },
       "lessonTypes": {
         "content": "Content",
         "quiz": "Quiz",
@@ -8598,7 +8668,14 @@
       "unavailable": "The content marketplace is not available for this organization.",
       "listingNotFound": "This marketplace course was not found.",
       "thumbnailNotFound": "This marketplace course has no thumbnail.",
-      "serviceError": "The content marketplace could not complete the request. Try again later."
+      "serviceError": "The content marketplace could not complete the request. Try again later.",
+      "outlineNotFound": "A preview of this course's content is not available yet."
+    },
+    "preview": {
+      "open": "Preview content",
+      "noChapters": "This course has no chapters yet.",
+      "chaptersCount_one": "{{count}} chapter",
+      "chaptersCount_other": "{{count}} chapters"
     }
   },
   "aiJudgeConfiguration": {

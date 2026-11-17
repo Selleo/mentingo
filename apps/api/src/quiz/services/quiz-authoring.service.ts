@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import {
   ASSESSMENT_ATTEMPT_LIMIT_MODES,
+  ASSESSMENT_FEEDBACK_MODES,
   ASSESSMENT_TIME_LIMIT_MINUTES,
   ASSESSMENT_QUESTION_TYPES,
   ENTITY_TYPES,
@@ -24,10 +25,12 @@ import {
   hasValidMatchingPairs,
   validateCanonicalQuizQuestions,
 } from "../validators/canonical-quiz-authoring.validator";
+import { validateFeedbackRanges } from "../validators/quiz-feedback-range.validator";
 
 import { QuizAuthoringPersistenceService } from "./quiz-authoring-persistence.service";
 
 import type {
+  QuizAuthoringFeedbackRange,
   QuizAuthoringRows,
   QuizAuthoringInput,
   QuizAuthoringQuestion,
@@ -87,9 +90,12 @@ export class QuizAuthoringService {
         throw new BadRequestException("adminCourseView.toast.languageNotSupported");
       }
       const existingQuestions = existingQuiz.questions;
-      if (input.language !== existingQuiz.assessment.baseLanguage) {
-        this.validateTranslatedQuizStructure(input.questions ?? [], existingQuestions);
-      }
+      this.validateTranslatedSave(
+        input.language,
+        existingQuiz,
+        input.questions ?? [],
+        input.feedbackRanges,
+      );
       const assessment = this.toAssessmentData(input);
       const questions = preserveExistingQuizAuthoringIds(input.questions ?? [], existingQuestions);
       const assessmentRow = await this.quizAuthoringPersistenceService.updateQuizLesson({
@@ -110,7 +116,9 @@ export class QuizAuthoringService {
           ...(input.timeLimitMinutes === undefined
             ? {}
             : { timeLimitMinutes: input.timeLimitMinutes }),
+          feedbackMode: input.feedbackMode,
         },
+        feedbackRanges: input.feedbackRanges,
         questions,
       });
       if (!assessmentRow) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
@@ -132,6 +140,7 @@ export class QuizAuthoringService {
         displayOrder: input.displayOrder,
       },
       assessment: this.toAssessmentData(input),
+      feedbackRanges: input.feedbackRanges ?? [],
       questions: input.questions ?? [],
     });
     await this.createPromptImageResources(input.questions ?? []);
@@ -168,6 +177,7 @@ export class QuizAuthoringService {
       language: quizAuthoringInput.language,
       lesson,
       assessment: this.toAssessmentData(quizAuthoringInput),
+      feedbackRanges: quizAuthoringInput.feedbackRanges ?? [],
       questions: quizAuthoringInput.questions ?? [],
     });
     await this.createPromptImageResources(quizAuthoringInput.questions ?? []);
@@ -192,20 +202,18 @@ export class QuizAuthoringService {
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
     }
 
-    const existingQuestions = existingQuizAuthoringRows
-      ? this.mapQuizAuthoringRows(existingQuizAuthoringRows).questions
-      : [];
+    const existingQuiz = existingQuizAuthoringRows
+      ? this.mapQuizAuthoringRows(existingQuizAuthoringRows)
+      : null;
+    const existingQuestions = existingQuiz?.questions ?? [];
 
-    if (
-      input.questions !== undefined &&
-      existingQuizAuthoringRows &&
-      mappedQuizAuthoringInput.language !== existingQuizAuthoringRows.assessment.baseLanguage
-    ) {
-      this.validateTranslatedQuizStructure(
-        mappedQuizAuthoringInput.questions ?? [],
-        existingQuestions,
+    if (existingQuiz)
+      this.validateTranslatedSave(
+        mappedQuizAuthoringInput.language,
+        existingQuiz,
+        mappedQuizAuthoringInput.questions,
+        mappedQuizAuthoringInput.feedbackRanges,
       );
-    }
 
     const quizAuthoringInput =
       input.questions !== undefined
@@ -248,7 +256,9 @@ export class QuizAuthoringService {
         ...(input.timeLimitMinutes === undefined
           ? {}
           : { timeLimitMinutes: input.timeLimitMinutes }),
+        feedbackMode: input.feedbackMode,
       },
+      feedbackRanges: quizAuthoringInput.feedbackRanges,
       ...(input.questions === undefined ? {} : { questions: quizAuthoringInput.questions ?? [] }),
     };
 
@@ -337,9 +347,10 @@ export class QuizAuthoringService {
 
     const blankIds = blanks.map(({ id }) => id);
 
-    const [answerSets, promptImages] = await Promise.all([
+    const [answerSets, promptImages, feedbackRanges] = await Promise.all([
       this.quizAuthoringRepository.findBlankAnswerSets(blankIds, language),
       this.quizAuthoringRepository.findPromptImages(questionIds),
+      this.quizAuthoringRepository.findFeedbackRanges(assessment.id, language),
     ]);
 
     return {
@@ -349,6 +360,7 @@ export class QuizAuthoringService {
       choiceOptions,
       trueFalseStatements,
       scaleOptions,
+      feedbackRanges,
       openTextSettings,
       blanks,
       answerSets,
@@ -370,9 +382,16 @@ export class QuizAuthoringService {
         maximumAttempts: assessment.maximumAttempts,
         attemptCooldown: assessment.attemptCooldown,
         timeLimitMinutes: assessment.timeLimitMinutes,
+        feedbackMode: assessment.feedbackMode,
         baseLanguage: assessment.baseLanguage,
         availableLocales: assessment.availableLocales,
       },
+      feedbackRanges: rows.feedbackRanges.map((range) => ({
+        id: range.id,
+        minPercent: range.minPercent,
+        maxPercent: range.maxPercent,
+        message: range.message,
+      })),
       questions: questions.map((question) => {
         const blanks = filterItemsByQuestionId(rows.blanks, question.id);
         const orderedBlanks = orderBlanksByPrompt(question.prompt, blanks);
@@ -471,6 +490,31 @@ export class QuizAuthoringService {
       )
     )
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+    this.assertValidFeedbackRanges(input.feedbackRanges);
+  }
+
+  private assertValidFeedbackRanges(ranges: QuizAuthoringFeedbackRange[] | undefined) {
+    if (!ranges) return;
+
+    const issues = validateFeedbackRanges(ranges);
+
+    if (issues.length)
+      throw new BadRequestException({
+        message: "courseAuthoring.errors.invalidFeedbackRanges",
+        issues,
+      });
+  }
+
+  private validateTranslatedSave(
+    language: QuizAuthoringInput["language"],
+    existingQuiz: QuizAuthoringLocalizedReadModel,
+    questions: QuizAuthoringQuestion[] | undefined,
+    feedbackRanges: QuizAuthoringFeedbackRange[] | undefined,
+  ) {
+    if (language === existingQuiz.assessment.baseLanguage) return;
+
+    if (questions) this.validateTranslatedQuizStructure(questions, existingQuiz.questions);
+    this.validateTranslatedFeedbackRanges(feedbackRanges, existingQuiz.feedbackRanges);
   }
 
   private validateTranslatedQuizStructure(
@@ -491,6 +535,30 @@ export class QuizAuthoringService {
       throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
   }
 
+  private validateTranslatedFeedbackRanges(
+    translatedRanges: QuizAuthoringFeedbackRange[] | undefined,
+    existingRanges: QuizAuthoringFeedbackRange[],
+  ) {
+    if (!translatedRanges) return;
+
+    const existingRangesById = new Map(existingRanges.map((range) => [range.id, range]));
+    const matchedIds = new Set(translatedRanges.map(({ id }) => id));
+    const hasStructureMismatch =
+      translatedRanges.length !== existingRanges.length ||
+      matchedIds.size !== existingRanges.length ||
+      translatedRanges.some((range) => {
+        const existingRange = range.id ? existingRangesById.get(range.id) : undefined;
+        return (
+          !existingRange ||
+          existingRange.minPercent !== range.minPercent ||
+          existingRange.maxPercent !== range.maxPercent
+        );
+      });
+
+    if (hasStructureMismatch)
+      throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
+  }
+
   private toAssessmentData(input: QuizAuthoringInput): QuizLessonCreateData["assessment"] {
     return {
       passingScorePercentage: String(input.thresholdScore),
@@ -504,6 +572,7 @@ export class QuizAuthoringService {
           ? null
           : `${input.quizCooldownInHours} hours`,
       timeLimitMinutes: input.timeLimitMinutes ?? null,
+      feedbackMode: input.feedbackMode ?? ASSESSMENT_FEEDBACK_MODES.FULL,
       baseLanguage: input.language,
       availableLocales: [input.language],
     };

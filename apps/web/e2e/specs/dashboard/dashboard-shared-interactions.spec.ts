@@ -116,9 +116,9 @@ const dashboardWidget = (type: string, size: DashboardWidget["size"] = "2x1") =>
 
 test.describe("dashboard layout persistence", () => {
   test("clamps persisted wide spans on mobile and restores them at md", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
       const state = await installDashboardMocks(page, {
         widgets: [
           dashboardWidget(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, "3x2"),
@@ -268,9 +268,9 @@ test.describe("dashboard layout persistence", () => {
 
 test.describe("dashboard navigation and role catalog", () => {
   test("removes Calendar from the sidebar while keeping the card CTA route", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await installDashboardMocks(page, {
         widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR, "4x2")],
         catalog: [
@@ -307,9 +307,9 @@ test.describe("dashboard navigation and role catalog", () => {
   });
 
   test("keeps learner widgets opt-in for admins while exposing eligible catalog entries", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
       await installDashboardMocks(page, {
         widgets: [
           dashboardWidget(DASHBOARD_WIDGET_TYPES.TODO_LIST, "2x2"),
@@ -364,9 +364,9 @@ test.describe("dashboard navigation and role catalog", () => {
 });
 
 test("admin can drill into deadline courses, sort urgency, load more, and keep the dialog contained", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     let groupPage = 1;
     await installDashboardMocks(page, {
       widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS, "2x1")],
@@ -510,9 +510,9 @@ test("admin can drill into deadline courses, sort urgency, load more, and keep t
 });
 
 test("student certificate tile scroll-loads certificates and opens a preview", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     const certificates = Array.from({ length: 10 }, (_, index) => ({
       id: `${CERTIFICATE_ID_PREFIX}${index}`,
       userId: "88888888-8888-4888-8888-888888888888",

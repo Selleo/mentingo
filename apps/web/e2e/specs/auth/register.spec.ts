@@ -9,8 +9,8 @@ import { submitRegisterFormFlow } from "../../flows/auth/submit-register-form.fl
 
 const REGISTER_PASSWORD = "Password123@";
 
-test("visitor can register a new account", async ({ cleanup, factories, withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("visitor can register a new account", async ({ cleanup, factories, withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const userFactory = factories.createUserFactory();
     const email = `register-${Date.now()}@example.com`;
 
@@ -47,8 +47,8 @@ test("visitor can register a new account", async ({ cleanup, factories, withRead
   });
 });
 
-test("visitor cannot submit invalid registration data", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("visitor cannot submit invalid registration data", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openRegisterPageFlow(page);
 
     await fillRegisterFormFlow(page, {

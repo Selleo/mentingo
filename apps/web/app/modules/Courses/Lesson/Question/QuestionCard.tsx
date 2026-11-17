@@ -1,4 +1,5 @@
 import { sanitizeQuizQuestionTitle } from "@repo/shared";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ProgressBadge } from "~/components/Badges/ProgressBadge";
@@ -33,8 +34,16 @@ export const QuestionCard = ({
   title = "Question title not provided",
 }: QuestionCardProps) => {
   const { t } = useTranslation();
+  const titleId = useId();
+  const instructionId = useId();
+
+  // A fieldset labelled by the title lets screen readers announce the question with its answers.
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-neutral-200 bg-white p-8">
+    <fieldset
+      aria-labelledby={titleId}
+      aria-describedby={instructionId}
+      className="flex min-w-0 flex-col gap-2 rounded-lg border border-neutral-200 bg-white p-8"
+    >
       <div className="flex items-center justify-between gap-2">
         <div className="details uppercase text-primary-700">
           {t("studentLessonView.other.question")} {questionNumber ?? 0}
@@ -46,10 +55,11 @@ export const QuestionCard = ({
         )}
       </div>
       <div
+        id={titleId}
         className="h6 text-neutral-950"
         dangerouslySetInnerHTML={{ __html: sanitizeQuizQuestionTitle(title) }}
       />
-      <div className="body-base text-neutral-900">
+      <div id={instructionId} className="body-base text-neutral-900">
         {t(`studentLessonView.other.${questionType}`)}
       </div>
       <div className="mt-4 flex flex-col gap-4">{children}</div>
@@ -74,6 +84,6 @@ export const QuestionCard = ({
           )}
         </div>
       )}
-    </div>
+    </fieldset>
   );
 };

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatLoader";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 
@@ -19,11 +21,15 @@ export function AiMentorPracticeMessages({
   aiMentorName,
   messagesContainerRef,
 }: AiMentorPracticeMessagesProps) {
+  const { t } = useTranslation();
+
   return (
     <div
       ref={messagesContainerRef}
       className="relative flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-5 sm:px-8 sm:py-7"
-      aria-live="polite"
+      role="log"
+      aria-live="off"
+      aria-label={t("studentCourseView.lesson.aiMentorLesson.conversationLabel")}
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         {!isMessagesLoading &&

@@ -7,3 +7,5 @@ export const PDF_VIEWER_ACTION = {
   PRELOAD_SUCCESS: "preloadSuccess",
   PRELOAD_ERROR: "preloadError",
 } as const;
+
+export const PDF_WORKER_CACHE_VERSION = "2";

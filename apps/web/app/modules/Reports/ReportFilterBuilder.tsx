@@ -92,11 +92,13 @@ function RuleEditor({
   const isNumeric = ["progress", "score", "attempts"].includes(rule.field);
   const isDate = ["enrolledAt", "completedAt", "lastActivity"].includes(rule.field);
   const valueInputType = isNumeric ? "number" : "text";
+  const hasRemoteChoices = ["groupId", "learner", "courseId", "pathId"].includes(rule.field);
   const choices =
     rule.field === "learner" && rule.operator === "contains"
       ? undefined
       : (staticValues?.map((value) => ({ id: value, label: t(`reports.values.${value}`) })) ??
-        options[rule.field]);
+        // Keep the picker mounted while a new search has no cached response.
+        (hasRemoteChoices ? (options[rule.field] ?? []) : undefined));
   const selectedIds = match(rule.value)
     .when(Array.isArray, (value) => value.map(String))
     .when(

@@ -8,9 +8,9 @@ import { expect, test } from "./article-test.fixture";
 test("admin can open article details and see it in TOC", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const articleFactory = factories.createArticleFactory();
     const title = `open-article-${Date.now()}`;
     const summary = `open-article-summary-${Date.now()}`;

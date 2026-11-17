@@ -3,11 +3,13 @@ import { and, asc, countDistinct, eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { addPagination } from "src/common/pagination";
+import { localizedLearningOutcomesSql } from "src/courses/utils/course-learning-outcomes-sql";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
-import { categories, chapters, courses } from "src/storage/schema";
+import { categories, chapters, courses, lessons } from "src/storage/schema";
 
 import type { IntegrationCoursesQuery } from "../integration-course.types";
+import type { LessonTypes, SupportedLanguages } from "@repo/shared";
 
 /** Reads the courses of the tenant selected by the integration key, for catalogs such as the content marketplace. */
 @Injectable()
@@ -63,6 +65,40 @@ export class IntegrationCourseRepository {
       .where(this.buildCourseConditions(query));
 
     return totalItems;
+  }
+
+  async findCourseLearningOutcomes(courseId: string, language: SupportedLanguages) {
+    const [course] = await this.db
+      .select({
+        id: courses.id,
+        learningOutcomes: localizedLearningOutcomesSql(language, true),
+      })
+      .from(courses)
+      .where(and(eq(courses.id, courseId), eq(courses.isArchived, false)));
+
+    return course;
+  }
+
+  /** One row per lesson in course order; a chapter without lessons yields one row with null lesson fields. */
+  async findCourseOutlineRows(courseId: string, language: SupportedLanguages) {
+    return this.db
+      .select({
+        chapterId: chapters.id,
+        chapterTitle: this.localizationService.getLocalizedSqlField(chapters.title, language),
+        lessonId: lessons.id,
+        lessonTitle: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        lessonType: sql<LessonTypes | null>`${lessons.type}`,
+      })
+      .from(chapters)
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(lessons, eq(lessons.chapterId, chapters.id))
+      .where(eq(chapters.courseId, courseId))
+      .orderBy(
+        asc(chapters.displayOrder),
+        asc(chapters.id),
+        asc(lessons.displayOrder),
+        asc(lessons.id),
+      );
   }
 
   private buildCourseConditions(query: IntegrationCoursesQuery) {

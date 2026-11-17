@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Query, Res, UseGuards } from "@nestjs/common";
-import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
+import { buildCertificateContentDisposition, PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
@@ -69,15 +69,7 @@ export class LearningPathCertificateController {
         body.language,
       );
 
-    const asciiFilename =
-      filename
-        .replace(/[^\x20-\x7E]/g, "")
-        .replace(/["\\]/g, "")
-        .trim() || "certificate.pdf";
-
-    const contentDisposition = `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodeURIComponent(
-      filename,
-    )}`;
+    const contentDisposition = buildCertificateContentDisposition(filename);
 
     res.set({
       "Content-Type": "application/pdf",

@@ -2636,7 +2636,10 @@ export interface GetCourseResponse {
         title: string;
         type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
         displayOrder: number;
-        status: ("not_started" | "in_progress" | "completed" | "blocked") | "awaiting_review";
+        status:
+          | ("not_started" | "in_progress" | "completed" | "blocked")
+          | "awaiting_review"
+          | "failed";
         quizQuestionCount: number | null;
         isExternal?: boolean;
         lessonResources?: {
@@ -2978,6 +2981,7 @@ export interface UpdateCourseSettingsBody {
   lessonSequenceEnabled?: boolean;
   quizFeedbackEnabled?: boolean;
   videoCompletionTrackingEnabled?: boolean;
+  audioCompletionTrackingEnabled?: boolean;
   certificateFontColor?: string;
   certificateValidity?:
     | (
@@ -3016,6 +3020,8 @@ export interface GetCourseSettingsResponse {
     quizFeedbackEnabled: boolean;
     /** @default true */
     videoCompletionTrackingEnabled?: boolean;
+    /** @default false */
+    audioCompletionTrackingEnabled?: boolean;
     /** @default null */
     certificateSignature: string | null;
     /** @default "#000000" */
@@ -3435,7 +3441,10 @@ export interface GetChapterWithLessonResponse {
       title: string;
       type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
       displayOrder: number;
-      status: ("not_started" | "in_progress" | "completed" | "blocked") | "awaiting_review";
+      status:
+        | ("not_started" | "in_progress" | "completed" | "blocked")
+        | "awaiting_review"
+        | "failed";
       quizQuestionCount: number | null;
       isExternal?: boolean;
       lessonResources?: {
@@ -3746,6 +3755,7 @@ export interface GetLessonByIdResponse {
       correctAnswerCount: number | null;
       wrongAnswerCount: number | null;
       score: number | null;
+      feedbackMessage?: string | null;
     };
     lessonCompleted?: boolean;
     thresholdScore: number | null;
@@ -3804,6 +3814,8 @@ export interface GetLessonByIdResponse {
     hasVideo?: boolean;
     hasTrackedVideo?: boolean;
     videoCompletionTrackingEnabled?: boolean;
+    hasTrackedAudio?: boolean;
+    audioCompletionTrackingEnabled?: boolean;
     hasAutoplayTrigger?: boolean;
     videos?: string[];
     isQuizFeedbackRedacted?: boolean;
@@ -4330,6 +4342,22 @@ export type BetaCreateQuizLessonBody = {
   attemptsLimit: number | null;
   quizCooldownInHours: number | null;
   timeLimitMinutes?: number | null;
+  feedbackMode?: "full" | "score_only" | "none";
+  feedbackRanges?: {
+    /** @format uuid */
+    id?: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    minPercent: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxPercent: number;
+    message: string;
+  }[];
   questions?: {
     /** @format uuid */
     id?: string;
@@ -4395,6 +4423,22 @@ export type BetaUpdateQuizLessonBody = ({
   attemptsLimit?: number | null;
   quizCooldownInHours?: number | null;
   timeLimitMinutes?: number | null;
+  feedbackMode?: "full" | "score_only" | "none";
+  feedbackRanges?: {
+    /** @format uuid */
+    id?: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    minPercent: number;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxPercent: number;
+    message: string;
+  }[];
   questions?: {
     /** @format uuid */
     id?: string;
@@ -9277,6 +9321,45 @@ export interface UpsertProgressResponse {
     watchedRanges: [number, number][];
     isWatched: boolean;
     watchedAt: string | null;
+    lessonCompleted: boolean;
+  };
+}
+
+export interface UpsertLessonAudioProgressBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  resourceEntityId: string;
+  /** @min 1 */
+  durationSeconds: number;
+  /**
+   * @min 1
+   * @default 1
+   */
+  bucketSize?: number;
+  listenedRanges: [number, number][];
+  /**
+   * @min 0
+   * @default 0
+   */
+  activeListenSecondsDelta?: number;
+  /** @default "en" */
+  language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface UpsertLessonAudioProgressResponse {
+  data: {
+    /** @format uuid */
+    lessonId: string;
+    /** @format uuid */
+    resourceEntityId: string;
+    durationSeconds: number;
+    bucketSizeSeconds: number;
+    coveredBucketCount: number;
+    coveragePercent: number;
+    listenedRanges: [number, number][];
+    isListened: boolean;
+    listenedAt: string | null;
     lessonCompleted: boolean;
   };
 }
@@ -34306,6 +34389,25 @@ export interface GetTenantCoursesResponse {
   appliedFilters?: object;
 }
 
+export interface GetTenantCourseOutlineResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    learningOutcomes: string[];
+    chapters: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      lessons: {
+        /** @format uuid */
+        id: string;
+        title: string;
+        type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
+      }[];
+    }[];
+  };
+}
+
 export interface StartCourseArchiveExportResponse {
   data: {
     jobId: string;
@@ -35378,6 +35480,20 @@ export interface GetContentMarketplaceListingResponse {
       id: string;
       isOutdated: boolean;
     } | null;
+  };
+}
+
+export interface GetContentMarketplaceListingOutlineResponse {
+  data: {
+    language: string;
+    learningOutcomes: string[];
+    chapters: {
+      title: string;
+      lessons: {
+        title: string;
+        type: string;
+      }[];
+    }[];
   };
 }
 
@@ -37254,6 +37370,8 @@ export interface GetAuthoringCourseContextResponse {
         quizFeedbackEnabled: boolean;
         /** @default true */
         videoCompletionTrackingEnabled?: boolean;
+        /** @default false */
+        audioCompletionTrackingEnabled?: boolean;
         /** @default "#000000" */
         certificateFontColor: string | null;
         /** @default null */
@@ -44880,6 +44998,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LessonAudioProgressControllerUpsertLessonAudioProgress
+     * @request POST:/api/lesson-audio-progress
+     */
+    lessonAudioProgressControllerUpsertLessonAudioProgress: (
+      data: UpsertLessonAudioProgressBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpsertLessonAudioProgressResponse, any>({
+        path: `/api/lesson-audio-progress`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name StripeControllerCreatePaymentIntent
      * @request POST:/api/stripe
      */
@@ -49044,6 +49181,30 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Returns the chapters and lessons of a non-archived course of the tenant selected by X-Tenant-Id, in course order, with its learning outcomes. Lesson content is not included. Requires a managing tenant key whose owner has the course export permission. Titles and learning outcomes use the given language and fall back to the course's base language.
+     *
+     * @tags Integration
+     * @name IntegrationCoursesControllerGetTenantCourseOutline
+     * @summary Get a course outline for an external catalog
+     * @request GET:/api/integration/courses/{courseId}/outline
+     */
+    integrationCoursesControllerGetTenantCourseOutline: (
+      courseId: string,
+      query: {
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTenantCourseOutlineResponse, void>({
+        path: `/api/integration/courses/${courseId}/outline`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Queues a native archive (mentingo-package zip) export of a course in the tenant selected by X-Tenant-Id and returns the job id. Poll GET /integration/native-archive/jobs/:jobId until the job completes, then download the archive. Requires a managing tenant key whose owner has the course export permission.
      *
      * @tags Integration
@@ -49600,6 +49761,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetContentMarketplaceListingResponse, any>({
         path: `/api/content-marketplace/listings/${listingId}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns the chapters, lessons and learning outcomes of the listing's current version, the one a copy would get. They are in the given language when the listing has it, otherwise in the course's base language. Lesson content is not included.
+     *
+     * @name ContentMarketplaceControllerGetContentMarketplaceListingOutline
+     * @summary Preview a content marketplace course's content
+     * @request GET:/api/content-marketplace/listings/{listingId}/outline
+     */
+    contentMarketplaceControllerGetContentMarketplaceListingOutline: (
+      listingId: string,
+      query: {
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetContentMarketplaceListingOutlineResponse, any>({
+        path: `/api/content-marketplace/listings/${listingId}/outline`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

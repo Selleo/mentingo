@@ -1,9 +1,9 @@
 # App-wide self-onboarding coverage
 
 This inventory describes registered recording contracts, not a library of verified finished videos.
-The catalog covers all 31 user-facing route areas and the 60 app business specifications currently
-in `docs/specs`. It contains 232 explicit flows, assigned exactly once to 96 stable video groups per
-language. Groups contain one to three related flows. English and Polish therefore allow up to 192
+The catalog covers all 33 user-facing route areas and the 61 app business specifications currently
+in `docs/specs`. It contains 246 explicit flows, assigned exactly once to 104 stable video groups per
+language. Groups contain one to three related flows. English and Polish therefore allow up to 208
 video variants for this inventory; an individual build selects affected groups rather than requiring
 all of them to be generated together.
 
@@ -16,8 +16,8 @@ AI search. Workflow selection by business spec maps to these same recording feat
 | Area key                    | Registered flows | Stable video groups | Source business specifications                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | --------------------------- | ---------------: | ------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `development-paths`         |               20 |                   7 | `learning-paths`, `certificates`                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `course-authoring`          |               32 |                  13 | `course-authoring-management`, `course-overview-management`, `curriculum-lesson-builder`, `ai-course-generation`, `ai-course-translation`, `course-duplication`, `course-sharing`, `course-authoring`, `resource-library`, `course-duration-estimates`, `learning-time-tracking`, `quiz-assessment-engine`, `scorm-support`, `ai-mentor-lessons`, `live-training`, `lesson-delivery-learning-mode`, `course-repetition`, `certificates`, `course-enrollment` |
-| `course-learning`           |               16 |                   6 | `lesson-delivery-learning-mode`, `course-enrollment`, `course-repetition`, `quiz-assessment-engine`, `scorm-support`, `course-discussions`, `certificates`, `learning-time-tracking`, `course-duration-estimates`, `course-overview-management`, `ai-mentor-lessons`, `live-training`                                                                                                                                                                        |
+| `course-authoring`          |               33 |                  14 | `course-authoring-management`, `course-overview-management`, `curriculum-lesson-builder`, `ai-course-generation`, `ai-course-translation`, `course-duplication`, `course-sharing`, `course-authoring`, `resource-library`, `course-duration-estimates`, `learning-time-tracking`, `quiz-assessment-engine`, `scorm-support`, `ai-mentor-lessons`, `live-training`, `lesson-delivery-learning-mode`, `course-repetition`, `certificates`, `course-enrollment` |
+| `course-learning`           |               18 |                   7 | `lesson-delivery-learning-mode`, `course-enrollment`, `course-repetition`, `quiz-assessment-engine`, `scorm-support`, `course-discussions`, `certificates`, `learning-time-tracking`, `course-duration-estimates`, `course-overview-management`, `ai-mentor-lessons`, `live-training`                                                                                                                                                                        |
 | `knowledge-base-articles`   |               14 |                   6 | `knowledge-base-articles`, `knowledge-base`                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `news`                      |               11 |                   4 | `news-hub`                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `authentication`            |                7 |                   3 | `authentication-account-access`, `mentingo-mcp`                                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -46,6 +46,8 @@ AI search. Workflow selection by business spec maps to these same recording feat
 | `tenants`                   |                5 |                   2 | `tenant-administration`                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `competencies`              |               15 |                   5 | `competencies`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `gamification`              |                2 |                   1 | `gamification`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `forum` | 7 | 4 | `forum` |
+| `quiz-grading` | 4 | 2 | `quiz-assessment-engine` |
 
 ## Evidence and boundaries
 
@@ -96,3 +98,22 @@ independent flows continuing. They must never produce fabricated browser success
 from the required inventory, or claim a complete published guide. No new hosted recording,
 provider request, Bunny upload, indexing, playback check or production deployment was performed
 as part of this app-wide registration change.
+
+## Forum and reviewer grading coverage
+
+Forum adds explicit contracts for organization enablement, filtered discovery, general topics,
+paginated replies, enrolled-course discussion continuity, own-post removal and moderator removal.
+The disabled-state demonstration has no Forum feature prerequisite; the remaining contracts require
+`FEATURES.FORUM` (`forum`) and their relevant read/create/reply/moderation permissions. Course-thread
+recording also requires enrollment and enabled course discussions. Reactions, mentions, edit actions
+and reply notifications are not presented as Forum functionality because they are not implemented.
+
+Reviewer grading has a separate queue/navigation and grading/history inventory. The associated
+creator flow belongs to Course authoring: enable the real Graded by reviewer switch for brief or
+detailed responses. The associated learner flows belong to Course learning: submit and wait without
+resubmitting, then inspect a prepared final result through its notification. Recording checks final
+score, lesson completion and configured feedback visibility rather than inventing a new grading
+method. Only pass/fail is available; re-grading preserves revisions and does not reopen a completed
+lesson. Use synthetic answers from another learner, current course runs and published courses.
+No model provider is needed for these manual-review workflows. Actual browser/provider-backed
+recordings of the new contracts have not been run as part of the registry repair.

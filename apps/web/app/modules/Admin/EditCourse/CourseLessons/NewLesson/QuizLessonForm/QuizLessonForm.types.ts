@@ -1,5 +1,12 @@
 import type { AssessmentScoringMode } from "@repo/shared";
 
+export type QuizFeedbackRange = {
+  id?: string;
+  minPercent: number;
+  maxPercent: number;
+  message: string;
+};
+
 export enum QuestionIcons {
   MultiSelect = "MultiSelect",
   SingleSelect = "SingleSelect",

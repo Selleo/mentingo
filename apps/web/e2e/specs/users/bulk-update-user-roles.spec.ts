@@ -13,10 +13,8 @@ import { selectUsersFlow } from "../../flows/users/select-users.flow";
 import { assertToastVisible } from "../../utils/assert-toast-visible";
 import { createDisposableAdminSession } from "../../utils/create-disposable-admin-session";
 
-test("admin cannot open bulk edit actions without selecting users", async ({
-  withReadonlyPage,
-}) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin cannot open bulk edit actions without selecting users", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openUsersPageFlow(page);
 
     await expect(page.getByTestId(USERS_PAGE_HANDLES.BULK_EDIT_TRIGGER)).toBeDisabled();
@@ -26,9 +24,9 @@ test("admin cannot open bulk edit actions without selecting users", async ({
 test("admin cannot submit a bulk role update without choosing a role", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const userFactory = factories.createUserFactory();
     const student = await userFactory.create({
       email: `bulk-role-no-choice-${Date.now()}@example.com`,

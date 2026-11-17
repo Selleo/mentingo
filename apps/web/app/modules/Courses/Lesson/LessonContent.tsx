@@ -1,11 +1,17 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useMarkLessonAsCompleted } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { getCourseQueryKey } from "~/api/queries/useCourse";
 import { Icon } from "~/components/Icon";
+import {
+  pauseAllLessonAudios,
+  resumeLessonAudio,
+} from "~/components/RichText/components/AudioPlayer";
 import { Button } from "~/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { pauseAllLessonVideos, resumeLessonVideo } from "~/components/VideoPlayer/Video";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
@@ -49,6 +55,7 @@ export const LessonContent = ({
   lessonLoading,
   isLastLesson,
 }: LessonContentProps) => {
+  const { t } = useTranslation();
   const { isEffectiveStudentExperience, isPreviewMode } = useCourseAccessProvider();
 
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
@@ -65,6 +72,13 @@ export const LessonContent = ({
   const videoCompletionTrackingEnabled = Boolean(lesson.videoCompletionTrackingEnabled);
   const shouldUseCoverageCompletion =
     videoProgressPersistenceEnabled && videoCompletionTrackingEnabled;
+  const audioProgressPersistenceEnabled = Boolean(
+    lesson.hasTrackedAudio && isEffectiveStudentExperience && !isPreviewMode,
+  );
+  const shouldUseAudioCoverageCompletion =
+    audioProgressPersistenceEnabled && Boolean(lesson.audioCompletionTrackingEnabled);
+  const shouldUseMediaCoverageCompletion =
+    shouldUseCoverageCompletion || shouldUseAudioCoverageCompletion;
   const videoProgressStore = useMemo(() => createLessonVideoProgressStore(), []);
   const videoCoverageTracking = useMemo(
     () => ({
@@ -85,6 +99,38 @@ export const LessonContent = ({
       videoProgressStore,
     ],
   );
+
+  const audioCoverageTracking = useMemo(
+    () => ({
+      enabled: audioProgressPersistenceEnabled,
+      showCoverageMarkers: shouldUseAudioCoverageCompletion,
+      lessonId: lesson.id,
+      learningStateId: lesson.learningStateId,
+      language,
+      onAudioActivated: videoProgressStore.getState().markVideoActivated,
+      onSnapshotChange: videoProgressStore.getState().publishSnapshot,
+    }),
+    [
+      audioProgressPersistenceEnabled,
+      language,
+      lesson.id,
+      lesson.learningStateId,
+      shouldUseAudioCoverageCompletion,
+      videoProgressStore,
+    ],
+  );
+
+  const pauseAllLessonMedia = useCallback(() => {
+    pauseAllLessonVideos();
+    pauseAllLessonAudios();
+  }, []);
+
+  const resumeLessonMedia = useCallback((resourceEntityId: string | null) => {
+    if (!resourceEntityId) return;
+
+    resumeLessonVideo(resourceEntityId);
+    resumeLessonAudio(resourceEntityId);
+  }, []);
 
   const currentChapterIndex = course.chapters.findIndex((chapter) =>
     chapter.lessons.some(({ id }) => id === lesson.id),
@@ -170,6 +216,7 @@ export const LessonContent = ({
     if (
       (lesson.type === LessonType.CONTENT || lesson.type === LessonType.EMBED) &&
       !lesson.hasVideo &&
+      !shouldUseAudioCoverageCompletion &&
       !lesson.lessonCompleted
     ) {
       markLessonAsCompleted({
@@ -206,6 +253,7 @@ export const LessonContent = ({
     language,
     lesson.hasVideo,
     lesson.lessonCompleted,
+    shouldUseAudioCoverageCompletion,
   ]);
 
   const handleVideoEnded = useCallback(
@@ -219,7 +267,7 @@ export const LessonContent = ({
         return;
       }
 
-      if (shouldUseCoverageCompletion) return;
+      if (shouldUseMediaCoverageCompletion) return;
 
       const videosCount = lesson.videos?.length ?? 0;
       if (videosCount === 0) return;
@@ -243,7 +291,7 @@ export const LessonContent = ({
       lesson.type,
       lesson.videos,
       markLessonAsCompleted,
-      shouldUseCoverageCompletion,
+      shouldUseMediaCoverageCompletion,
     ],
   );
 
@@ -261,25 +309,45 @@ export const LessonContent = ({
           </div>
           {!hideControls && (
             <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
-              <div className="flex flex-row gap-x-4">
-                <Button
-                  variant="outline"
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                  disabled={isPreviousDisabled || isFirstLesson}
-                  onClick={handlePrevious}
-                >
-                  <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
-                </Button>
-                <Button
-                  data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
-                  variant="outline"
-                  disabled={isNextDisabled}
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                  onClick={handleNext}
-                >
-                  <Icon name="ArrowRight" className="h-auto w-4" />
-                </Button>
-              </div>
+              <TooltipProvider>
+                <div className="flex flex-row gap-x-4">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                        disabled={isPreviousDisabled || isFirstLesson}
+                        onClick={handlePrevious}
+                        aria-label={t("studentLessonView.navigation.previousLesson")}
+                      >
+                        <Icon
+                          name="ArrowRight"
+                          className="h-auto w-4 rotate-180"
+                          aria-hidden="true"
+                        />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t("studentLessonView.navigation.previousLesson")}
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
+                        variant="outline"
+                        disabled={isNextDisabled}
+                        className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                        onClick={handleNext}
+                        aria-label={t("studentLessonView.navigation.nextLesson")}
+                      >
+                        <Icon name="ArrowRight" className="h-auto w-4" aria-hidden="true" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("studentLessonView.navigation.nextLesson")}</TooltipContent>
+                  </Tooltip>
+                </div>
+              </TooltipProvider>
             </div>
           )}
         </div>
@@ -290,6 +358,7 @@ export const LessonContent = ({
           lessonId={lesson.id}
           description={lesson.description}
           enabled={shouldUseCoverageCompletion}
+          audioEnabled={shouldUseAudioCoverageCompletion}
           showRequirementWarning={!lesson.lessonCompleted}
           store={videoProgressStore}
         />
@@ -298,12 +367,10 @@ export const LessonContent = ({
           courseId={course.id}
           userId={user?.id ?? ""}
           lessonCompleted={Boolean(lesson.lessonCompleted)}
-          enabled={shouldUseCoverageCompletion}
+          enabled={shouldUseMediaCoverageCompletion}
           store={videoProgressStore}
-          onPause={pauseAllLessonVideos}
-          onContinueWatching={(resourceEntityId) => {
-            if (resourceEntityId) resumeLessonVideo(resourceEntityId);
-          }}
+          onPause={pauseAllLessonMedia}
+          onContinueWatching={resumeLessonMedia}
         />
 
         <LessonContentRenderer
@@ -314,6 +381,7 @@ export const LessonContent = ({
           lessonLoading={lessonLoading}
           onVideoEnded={handleVideoEnded}
           videoCoverageTracking={videoCoverageTracking}
+          audioCoverageTracking={audioCoverageTracking}
         />
       </div>
     </div>

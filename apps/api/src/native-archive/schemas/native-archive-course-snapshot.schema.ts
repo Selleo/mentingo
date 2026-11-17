@@ -146,6 +146,8 @@ export const nativeArchiveCourseSnapshotSchema = Type.Object(
     assessmentQuestionDragAndDropOptions: Type.Array(rowSchema),
     // Archives exported before matching questions existed have no pairs.
     assessmentQuestionMatchingPairs: Type.Optional(Type.Array(rowSchema)),
+    // Archives exported before quiz feedback ranges existed have none.
+    assessmentFeedbackRanges: Type.Optional(Type.Array(rowSchema)),
     assessmentQuestionScaleOptions: Type.Array(rowSchema),
     assessmentQuestionTrueFalseStatements: Type.Array(rowSchema),
     questionResources: Type.Array(resourcePairSchema),

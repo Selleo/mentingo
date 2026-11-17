@@ -5,8 +5,8 @@ import { openArticleDetailsPageFlow } from "../../flows/articles/open-article-de
 
 import { expect, test } from "./article-test.fixture";
 
-test("admin can browse articles list", async ({ cleanup, factories, withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin can browse articles list", async ({ cleanup, factories, withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const articleFactory = factories.createArticleFactory();
     const prefix = `articles-list-${Date.now()}`;
     const { article: firstArticle, section } = await articleFactory.createWithSection({

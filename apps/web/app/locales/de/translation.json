@@ -839,7 +839,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "Die Option „Video-Abschlussverfolgung“ wurde erfolgreich aktualisiert",
     "videoCompletionTrackingUpdateFailed": "Die Option „Video-Abschlussverfolgung“ konnte nicht aktualisiert werden",
     "settingsUpdatedSuccessfully": "Einstellungen erfolgreich aktualisiert",
-    "settingsUpdateFailed": "Die Einstellungen konnten nicht aktualisiert werden"
+    "settingsUpdateFailed": "Die Einstellungen konnten nicht aktualisiert werden",
+    "audioCompletionTrackingUpdatedSuccessfully": "Die Option „Audio-Abschlussverfolgung“ wurde erfolgreich aktualisiert",
+    "audioCompletionTrackingUpdateFailed": "Die Option „Audio-Abschlussverfolgung“ konnte nicht aktualisiert werden"
   },
   "uploadFile": {
     "header": "Klicken Sie zum Hochladen",
@@ -1103,7 +1105,9 @@
     "promotionCodes": "Aktionscodes",
     "manage": "Verwalten",
     "ariaLabels": {
-      "goToAvailableCourses": "Gehen Sie zu den verfügbaren Kursen"
+      "goToAvailableCourses": "Gehen Sie zu den verfügbaren Kursen",
+      "collapseSidebar": "Seitenleiste einklappen",
+      "expandSidebar": "Seitenleiste ausklappen"
     },
     "qa": "Fragen und Antworten",
     "tenants": "Organisationen",
@@ -2892,7 +2896,8 @@
         "curriculum": "Die Bearbeitung des Lehrplans ist für SCORM-Kurse nicht verfügbar.",
         "lessonSequence": "Die erzwungene Lektionenreihenfolge ist für SCORM-Kurse nicht verfügbar.",
         "quizFeedback": "Quiz-Feedback-Einstellungen sind für SCORM-Kurse nicht verfügbar.",
-        "videoCompletionTracking": "Video-Abschlussverfolgung ist für SCORM-Kurse nicht verfügbar."
+        "videoCompletionTracking": "Video-Abschlussverfolgung ist für SCORM-Kurse nicht verfügbar.",
+        "audioCompletionTracking": "Audio-Abschlussverfolgung ist für SCORM-Kurse nicht verfügbar."
       },
       "notFound": {
         "course": "Kurs nicht gefunden.",
@@ -3083,7 +3088,9 @@
         "courseAvailabilityTitle": "Kursverfügbarkeit",
         "fallbackLanguageWarningTitle": "Hinweis: fehlende Übersetzungen",
         "fallbackLanguageWarningDescription": "Einige Felder in dieser Sprachversion sind leer. An diesen Stellen sehen die Schüler Inhalte in der Standardsprache, bis Sie Übersetzungen hinzufügen.",
-        "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil des Kurses sein."
+        "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil des Kurses sein.",
+        "enableAudioCompletionTracking": "Audio-Abschlussverfolgung",
+        "enableAudioCompletionTrackingDescription": "Lernende müssen mindestens 90% jeder Audioaufnahme in einer Lektion anhören, bevor sie als abgeschlossen markiert wird."
       },
       "validation": {
         "titleMinLength": "Der Titel muss mindestens 2 Zeichen lang sein.",
@@ -3188,14 +3195,27 @@
           "quizCooldownInHours": "Zeitsperre nach Fehlversuchen (in Stunden)",
           "numberOfQuestions": "{{count1}} von {{count2}} Fragen",
           "noQuestions": "Keine Fragen",
-          "timeLimitMinutes": "Zeitlimit (hh:mm)"
+          "timeLimitMinutes": "Zeitlimit (hh:mm)",
+          "feedbackMode": "Sichtbarkeit des Feedbacks",
+          "feedbackModeFull": "Ergebnis und Nachrichten",
+          "feedbackModeScoreOnly": "Nur Ergebnis",
+          "feedbackModeNone": "Kein Feedback",
+          "feedbackRanges": "Nachrichten für Ergebnisbereiche",
+          "feedbackVariablesHint": "Du kannst {{firstNameVar}} für den Vornamen des Lernenden und {{scoreVar}} für sein Ergebnis verwenden.",
+          "feedbackRangeMin": "Von (%)",
+          "feedbackRangeMax": "Bis (%)",
+          "feedbackRangeMessage": "Nachricht",
+          "feedbackRangeAdd": "Bereich hinzufügen",
+          "feedbackRangeReset": "Standardbereiche wiederherstellen"
         },
         "tooltip": {
           "switch": "Wenn diese Option aktiviert ist, hat der Schüler eine begrenzte Anzahl von Quizversuchen.",
           "passingThreshold": "Der prozentuale Schwellenwert für das Bestehen des Quiz. Erreicht ein Schüler diese Punktzahl, gilt das Quiz als bestanden.",
           "attemptsLimit": "Anzahl der erlaubten Quizversuche, bevor die Zeitsperre ausgelöst wird.",
           "quizCooldownInHours": "Dauer der Quizsperre nach Ausschöpfung aller Versuche.",
-          "timeLimitMinutes": "Optional. Wenn festgelegt, starten Lernende das Quiz ausdrücklich und ihre Antworten werden nach Ablauf der Zeit automatisch abgegeben. Leer lassen für kein Zeitlimit."
+          "timeLimitMinutes": "Optional. Wenn festgelegt, starten Lernende das Quiz ausdrücklich und ihre Antworten werden nach Ablauf der Zeit automatisch abgegeben. Leer lassen für kein Zeitlimit.",
+          "feedbackMode": "Legt fest, was Lernende nach dem Absenden sehen: Ergebnis und Nachrichten, nur das Ergebnis oder nichts.",
+          "feedbackRanges": "Geordnete Ergebnisbereiche, die Lernenden angezeigt werden. Bereiche müssen 0-100% lückenlos und ohne Überschneidung abdecken."
         },
         "validation": {
           "optionTextRequired": "Optionstext ist erforderlich",
@@ -3225,7 +3245,13 @@
           "matchingPairsRequired": "Füge mindestens 2 Paare hinzu und fülle beide Seiten jedes Paares aus",
           "matchingMatchRequired": "Gib die Zuordnung für dieses Paar ein",
           "matchingPairsUnique": "Jedes Paar braucht eine eindeutige Zuordnung",
-          "timeLimitMinutes": "Gib ein Zeitlimit zwischen {{min}} und {{max}} ein."
+          "timeLimitMinutes": "Gib ein Zeitlimit zwischen {{min}} und {{max}} ein.",
+          "feedbackRangeNotInteger": "Bereichsgrenzen müssen ganze Zahlen sein.",
+          "feedbackRangeOutOfBounds": "Bereichsgrenzen müssen zwischen 0 und 100 liegen.",
+          "feedbackRangeBoundsReversed": "Der Beginn eines Bereichs darf nicht größer als sein Ende sein.",
+          "feedbackRangesMustStartAtZero": "Bereiche müssen bei 0% beginnen.",
+          "feedbackRangesMustEndAtHundred": "Bereiche müssen bei 100% enden.",
+          "feedbackRangesGapOrOverlap": "Bereiche müssen 0-100% lückenlos und ohne Überschneidung abdecken."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Die Anzeigereihenfolge der Lektionen wurde erfolgreich aktualisiert",
@@ -4388,7 +4414,17 @@
       "scale_1_5": "Frage vom Typ Skala 1 bis 5.",
       "matching": "Ordne jedes Element seinem Paar zu.",
       "noMatchesAvailable": "Für diese Frage sind noch keine Zuordnungen verfügbar.",
-      "correctMatch": "Richtige Zuordnung:"
+      "correctMatch": "Richtige Zuordnung:",
+      "fillInTheBlanksInstruction": "Klicke auf eine Lücke und wähle ein Wort.",
+      "matchingInstruction": "Klicke auf ein Element und wähle die passende Zuordnung.",
+      "blankLabel": "Lücke {{current}} von {{total}}",
+      "answerBank": "dem Antwortbereich",
+      "removeWord": "Wort entfernen",
+      "dndInstructions": "Zum Aufnehmen eines Wortes Leertaste oder Enter drücken. Mit den Pfeiltasten zwischen den Lücken bewegen. Zum Ablegen erneut Leertaste oder Enter drücken, zum Abbrechen Escape.",
+      "dndOnStart": "Wort {{word}} aufgenommen.",
+      "dndOnOver": "Wort {{word}} befindet sich über {{blank}}.",
+      "dndOnEnd": "Wort {{word}} wurde in {{blank}} platziert.",
+      "dndOnCancel": "Ziehen abgebrochen. Wort {{word}} ist an seine vorherige Position zurückgekehrt."
     },
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",
@@ -4521,6 +4557,42 @@
       "timeLeft": "Verbleibende Zeit: {{time}}",
       "warning": "Weniger als eine Minute übrig. Deine Antworten werden nach Ablauf der Zeit automatisch abgegeben.",
       "timeUp": "Die Zeit ist abgelaufen. Deine Antworten werden abgegeben."
+    },
+    "audioProgress": {
+      "label": "Audio-Fortschritt",
+      "completedSummary": "{{completed}} von {{total}} abgeschlossen",
+      "overviewAriaLabel": "Audio-Fortschritt der Lektion",
+      "segmentAriaLabel": "Fortschritt von Audio {{index}}: {{progress}}% angehört",
+      "requirementSingle": "Hören Sie die gesamte Audioaufnahme an, um diese Lektion abzuschließen.",
+      "requirementMultiple": "Hören Sie alle Audioaufnahmen an, um diese Lektion abzuschließen.",
+      "errors": {
+        "resourceNotFound": "Der Audio-Fortschritt konnte für diese Lektion nicht gespeichert werden.",
+        "unsupportedLessonType": "Audio-Fortschritt ist nur für Inhaltslektionen verfügbar.",
+        "unsupportedBucketSize": "Der Audio-Fortschritt verwendet ein nicht unterstütztes Erfassungsintervall.",
+        "invalidResourceType": "Diese Ressource kann nicht als Audioaufnahme der Lektion verfolgt werden.",
+        "accessDenied": "Sie haben keine Berechtigung, den Audio-Fortschritt dieser Lektion zu aktualisieren."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Vor dem Verlassen fertig anhören?",
+      "descriptionSingle": "Für den Abschluss dieser Lektion muss die gesamte Audioaufnahme angehört werden.",
+      "descriptionMultiple": "Für den Abschluss dieser Lektion müssen alle Audioaufnahmen angehört werden.",
+      "continueListening": "Weiter anhören"
+    },
+    "requiredMediaLeave": {
+      "title": "Lektionsmedien vor dem Verlassen abschließen?",
+      "description": "Für den Abschluss dieser Lektion müssen alle Videos angesehen und alle Audioaufnahmen angehört werden.",
+      "continue": "Fortfahren"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Sehen Sie sich das Video an und hören Sie die Audioaufnahme an, um diese Lektion abzuschließen.",
+      "requirementMultiple": "Sehen Sie sich alle Videos an und hören Sie alle Audioaufnahmen an, um diese Lektion abzuschließen.",
+      "label": "Lektionsfortschritt",
+      "overviewAriaLabel": "Fortschritt der Lektionsmedien"
+    },
+    "navigation": {
+      "previousLesson": "Vorherige Lektion",
+      "nextLesson": "Nächste Lektion"
     }
   },
   "studentCourseView": {
@@ -4545,6 +4617,8 @@
       "threeOrFiveWordSentence": "Schreiben Sie eine ausführliche Antwort (3-5 Sätze).",
       "aiMentorLesson": {
         "sendMessage": "Nachricht schreiben...",
+        "messageLabel": "Ihre Nachricht",
+        "conversationLabel": "Unterhaltung",
         "check": "Überprüfen",
         "aiMentorName": "KI-Mentor",
         "retake": "Wiederholung",
@@ -4929,7 +5003,8 @@
     "inProgress": "Im Gange",
     "notStarted": "Nicht gestartet",
     "blocked": "Blockiert",
-    "awaitingReview": "Wartet auf Bewertung"
+    "awaitingReview": "Wartet auf Bewertung",
+    "failed": "Nicht bestanden"
   },
   "studentCertificateView": {
     "header": "Zertifikate",
@@ -4953,7 +5028,7 @@
       "courseCompletionRequired": "Sie müssen den Kurs abschließen, bevor Sie ein Zertifikat erstellen können."
     },
     "button": {
-      "download": "Herunterladen",
+      "download": "Zertifikat herunterladen (PDF)",
       "preview": "Vorschau",
       "shareLinkedIn": "Auf LinkedIn teilen"
     },
@@ -5396,7 +5471,9 @@
       },
       "ariaLabel": {
         "drag": "Video per Drag & Drop einbetten",
-        "remove": "Videoeinbettung entfernen"
+        "remove": "Videoeinbettung entfernen",
+        "play": "Video abspielen",
+        "playWithTitle": "Video abspielen: {{title}}"
       }
     },
     "presentation": {
@@ -6606,13 +6683,6 @@
       "averageRating": "Durchschn. Bewertung",
       "detailedStatisticsSoon": "Detaillierte Statistiken folgen bald",
       "detailedStatisticsDescription": "Dieser Bereich zeigt künftig umfassende Analysen zu Fortschritt, Kapitelabschlüssen, Beteiligung und mehr.",
-      "status": {
-        "started": "Begonnen",
-        "completed": "Abgeschlossen",
-        "inProgress": "In Bearbeitung",
-        "notStarted": "Nicht begonnen",
-        "awaitingReview": "Wartet auf Bewertung"
-      },
       "lessonTypes": {
         "content": "Inhalt",
         "quiz": "Quiz",
@@ -8556,7 +8626,14 @@
       "unavailable": "Der Content-Marktplatz ist für diese Organisation nicht verfügbar.",
       "listingNotFound": "Dieser Marktplatz-Kurs wurde nicht gefunden.",
       "thumbnailNotFound": "Dieser Marktplatz-Kurs hat kein Vorschaubild.",
-      "serviceError": "Der Content-Marktplatz konnte die Anfrage nicht abschließen. Versuchen Sie es später erneut."
+      "serviceError": "Der Content-Marktplatz konnte die Anfrage nicht abschließen. Versuchen Sie es später erneut.",
+      "outlineNotFound": "Eine Vorschau des Kursinhalts ist noch nicht verfügbar."
+    },
+    "preview": {
+      "open": "Inhalt ansehen",
+      "noChapters": "Dieser Kurs hat noch keine Kapitel.",
+      "chaptersCount_one": "{{count}} Kapitel",
+      "chaptersCount_other": "{{count}} Kapitel"
     }
   },
   "aiJudgeConfiguration": {

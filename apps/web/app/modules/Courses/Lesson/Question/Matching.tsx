@@ -16,6 +16,8 @@ import { useTranslation } from "react-i18next";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 
 import { DndBlank, DraggableWord } from "./FillInTheBlanks/dnd";
+import { BlankSelect, DRAG_ACTIVATION_DISTANCE } from "./FillInTheBlanks/dnd/BlankSelect";
+import { buildDndAccessibility } from "./FillInTheBlanks/dnd/dndAnnouncements";
 import { WordBank } from "./FillInTheBlanks/dnd/WordBank";
 import { QuestionCard } from "./QuestionCard";
 
@@ -85,7 +87,9 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
   const [previewDropId, setPreviewDropId] = useState<string | null>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: isCompleted ? Infinity : 0 } }),
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: isCompleted ? Infinity : DRAG_ACTIVATION_DISTANCE },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
       keyboardCodes: { start: isCompleted ? [] : ["Space"], cancel: ["Escape"], end: ["Space"] },
@@ -142,14 +146,41 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
     resetDrag();
   };
 
+  const handleSelectMatch = (pairId: string, targetKey: string | null) => {
+    if (isCompleted) return;
+
+    // No target means "remove word": send the pair's current match back to the bank.
+    const movedTarget = targetKey ?? answers[pairId];
+
+    if (movedTarget) field.onChange(placeMatch(answers, movedTarget, targetKey ? pairId : null));
+  };
+
+  const targetItems = targets.map((target) => ({ key: target, label: target }));
+  const pairLabelById = new Map(
+    (question.options ?? []).map(({ id, optionText }) => [id, optionText ?? ""]),
+  );
+  const dndAccessibility = buildDndAccessibility(t, {
+    getWordLabel: (activeId) => activeId.slice(WORD_ID_PREFIX.length),
+    getBlankLabel: (overId) =>
+      overId === BANK_ID
+        ? t("studentLessonView.other.answerBank")
+        : (pairLabelById.get(overId) ?? overId),
+  });
+
   return (
     <QuestionCard
       title={question.title ?? ""}
       questionType="matching"
       questionNumber={question.displayOrder ?? 0}
     >
+      {!isCompleted && (
+        <p className="body-sm text-neutral-700">
+          {t("studentLessonView.other.matchingInstruction")}
+        </p>
+      )}
       <DndContext
         sensors={sensors}
+        accessibility={dndAccessibility}
         collisionDetection={collisionDetection}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
@@ -177,14 +208,26 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
                 {optionText}
               </span>
               <div className="flex w-full min-w-0 flex-col gap-1">
-                <DndBlank
-                  blankId={id}
-                  words={words}
-                  isCorrect={isCorrect}
-                  isStudentAnswer={Boolean(answer)}
-                  className="mx-0 flex h-auto min-h-9 w-full"
-                  wrapText
-                />
+                {isCompleted ? (
+                  <DndBlank
+                    blankId={id}
+                    words={words}
+                    isCorrect={isCorrect}
+                    isStudentAnswer={Boolean(answer)}
+                    className="mx-0 flex h-auto min-h-9 w-full"
+                    wrapText
+                  />
+                ) : (
+                  <BlankSelect
+                    blankId={id}
+                    label={optionText ?? ""}
+                    selectedKey={renderedAnswers[id] ?? null}
+                    items={targetItems}
+                    onSelect={(targetKey) => handleSelectMatch(id, targetKey)}
+                    dragId={answer ? wordId : undefined}
+                    wrapText
+                  />
+                )}
                 {isCompleted && !isQuizFeedbackRedacted && !isCorrect && matchedWord && (
                   <span className="body-sm text-neutral-800 [overflow-wrap:anywhere]">
                     {t("studentLessonView.other.correctMatch")} {matchedWord}

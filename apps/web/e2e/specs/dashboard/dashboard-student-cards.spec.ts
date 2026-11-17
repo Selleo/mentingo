@@ -164,9 +164,9 @@ const learnerCard = (type: DashboardWidgetType, size: DashboardWidgetSize = "2x1
 
 test.describe("learner dashboard card contracts", () => {
   test("omits AI Mentor from the learner layout and catalog when AI is unavailable", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await installLearnerDashboardMocks(page, {
         widgets: [learnerCard(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING)],
         catalog: [learnerCard(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING)],
@@ -198,9 +198,9 @@ test.describe("learner dashboard card contracts", () => {
   });
 
   test("sends the learner language and renders each summary card from its response", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       const summaryLanguages: string[] = [];
       await installLearnerDashboardMocks(page, {
         widgets: [
@@ -239,9 +239,9 @@ test.describe("learner dashboard card contracts", () => {
   });
 
   test("shows shared empty states for continue learning, required courses, and completion", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await installLearnerDashboardMocks(page, {
         widgets: [
           learnerCard(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING),
@@ -275,9 +275,9 @@ test.describe("learner dashboard card contracts", () => {
   });
 
   test("shows an error state for all summary cards when the dashboard query fails", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await installLearnerDashboardMocks(page, {
         widgets: [
           learnerCard(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING),
@@ -311,9 +311,9 @@ test.describe("learner dashboard card contracts", () => {
   });
 
   test("keeps the card content aligned to compact and expanded learner layouts", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await installLearnerDashboardMocks(page, {
         widgets: [
           learnerCard(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING, "2x1"),
@@ -373,8 +373,8 @@ test.describe("learner AI Mentor practice card", () => {
     AI_MENTOR_PRACTICE_STATUSES.QUEUED,
     AI_MENTOR_PRACTICE_STATUSES.PROCESSING,
   ]) {
-    test(`renders the ${status} generation state`, async ({ withReadonlyPage }) => {
-      await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+    test(`renders the ${status} generation state`, async ({ withWorkerPage }) => {
+      await withWorkerPage(USER_ROLE.student, async ({ page }) => {
         await installLearnerDashboardMocks(page, {
           widgets: [learnerCard(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, "3x2")],
           onRequest: async (route, url) => {
@@ -409,8 +409,8 @@ test.describe("learner AI Mentor practice card", () => {
     });
   }
 
-  test("renders an empty generation form", async ({ withReadonlyPage }) => {
-    await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+  test("renders an empty generation form", async ({ withWorkerPage }) => {
+    await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await installLearnerDashboardMocks(page, {
         widgets: [learnerCard(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, "2x2")],
         onRequest: async (route, url) => {
@@ -435,8 +435,8 @@ test.describe("learner AI Mentor practice card", () => {
     });
   });
 
-  test("offers retry for failed generation", async ({ withReadonlyPage }) => {
-    await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+  test("offers retry for failed generation", async ({ withWorkerPage }) => {
+    await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await installLearnerDashboardMocks(page, {
         widgets: [learnerCard(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, "2x2")],
         onRequest: async (route, url) => {
@@ -459,10 +459,10 @@ test.describe("learner AI Mentor practice card", () => {
   });
 
   test("keeps inline thread messages available for active and completed practices", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
     for (const threadStatus of ["active", "completed"] as const) {
-      await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+      await withWorkerPage(USER_ROLE.student, async ({ page }) => {
         await installLearnerDashboardMocks(page, {
           widgets: [learnerCard(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, "3x2")],
           onRequest: async (route, url) => {
@@ -518,9 +518,9 @@ test.describe("learner AI Mentor practice card", () => {
 
 test.describe("learner certificates card", () => {
   test("renders direct certificate rows, paginates, and opens the preview", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       const certificateRequests: string[] = [];
       const firstPage = Array.from({ length: 10 }, (_, index) => ({
         id: `99999999-9999-4999-8999-99999999999${index}`,
@@ -611,9 +611,9 @@ test.describe("learner certificates card", () => {
   });
 
   test("shows the certificate empty state when the direct rows query is empty", async ({
-    withReadonlyPage,
+    withWorkerPage,
   }) => {
-    await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+    await withWorkerPage(USER_ROLE.student, async ({ page }) => {
       await installLearnerDashboardMocks(page, {
         widgets: [learnerCard(DASHBOARD_WIDGET_TYPES.CERTIFICATES)],
         onRequest: async (route, url) => {

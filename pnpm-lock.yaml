@@ -107,8 +107,8 @@ importers:
         specifier: 0.1.0
         version: 0.1.0
       '@mentingo/content-marketplace-sdk':
-        specifier: 0.1.0
-        version: 0.1.0
+        specifier: 0.2.0
+        version: 0.2.0
       '@mentingo/guide-sdk':
         specifier: 0.2.0
         version: 0.2.0
@@ -4815,8 +4815,8 @@ packages:
     resolution: {integrity: sha512-P0e0Hh0fEpdxvg4bwMdUYSxKsRc1N7Xo9jXAKkVQ1tZmVSdObNR5Fmov3AkQkaEkgbgRT93qBepNCFTEiHktgw==}
     engines: {node: '>=22.15.0'}
 
-  '@mentingo/content-marketplace-sdk@0.1.0':
-    resolution: {integrity: sha512-E4ONXeomg7QojFSdyempCqtRkzGgX10moG/pHfGXODn6h/Lq5CSNKKbJcFbvM8jtEbt5IUV/yZQGrXPDICJLYA==}
+  '@mentingo/content-marketplace-sdk@0.2.0':
+    resolution: {integrity: sha512-TN0ufpvmJrEua3hapG4J2h2121Mpa/bXL2RkjwawBrKGNn00RuN8HeVEaDVsdTiIBrHVD7nro0AMOa9ifc6B9w==}
     engines: {node: '>=22.15.0'}
 
   '@mentingo/guide-sdk@0.2.0':
@@ -23744,7 +23744,7 @@ snapshots:
 
   '@mentingo/competencies-sdk@0.1.0': {}
 
-  '@mentingo/content-marketplace-sdk@0.1.0': {}
+  '@mentingo/content-marketplace-sdk@0.2.0': {}
 
   '@mentingo/guide-sdk@0.2.0':
     dependencies:

@@ -2,7 +2,7 @@ import { Readable } from "node:stream";
 
 import { Controller, Get, Param, Post, Query, Res, UseGuards } from "@nestjs/common";
 import { ApiProduces } from "@nestjs/swagger";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
@@ -19,6 +19,7 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
 import {
   CONTENT_MARKETPLACE_CATALOG_DEFAULTS,
@@ -29,6 +30,7 @@ import {
   contentMarketplaceCatalogFiltersSchema,
   contentMarketplaceCatalogQuerySchema,
   contentMarketplaceCopySchema,
+  contentMarketplaceListingOutlineSchema,
   contentMarketplaceTenantListingSchema,
   contentMarketplaceTenantListingsSchema,
 } from "./schemas/content-marketplace.schema";
@@ -118,6 +120,29 @@ export class ContentMarketplaceController {
   })
   async getContentMarketplaceListing(@Param("listingId") listingId: UUIDType) {
     return new BaseResponse(await this.contentMarketplaceService.getListing(listingId));
+  }
+
+  @Get("listings/:listingId/outline")
+  @RequirePermission(PERMISSIONS.CONTENT_MARKETPLACE_BROWSE)
+  @ApiEndpointDocs({
+    summary: "Preview a content marketplace course's content",
+    description:
+      "Returns the chapters, lessons and learning outcomes of the listing's current version, the one a copy would get. They are in the given language when the listing has it, otherwise in the course's base language. Lesson content is not included.",
+  })
+  @Validate({
+    request: [
+      { type: "param", name: "listingId", schema: UUIDSchema, required: true },
+      { type: "query", name: "language", schema: supportedLanguagesSchema, required: true },
+    ],
+    response: baseResponse(contentMarketplaceListingOutlineSchema),
+  })
+  async getContentMarketplaceListingOutline(
+    @Param("listingId") listingId: UUIDType,
+    @Query("language") language: SupportedLanguages,
+  ) {
+    return new BaseResponse(
+      await this.contentMarketplaceService.getListingOutline(listingId, language),
+    );
   }
 
   @Get("listings/:listingId/thumbnail")

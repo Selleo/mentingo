@@ -842,7 +842,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "Opcja \"Śledzenie ukończenia wideo\" została pomyślnie zaktualizowana",
     "videoCompletionTrackingUpdateFailed": "Nie udało się zaktualizować opcji \"Śledzenie ukończenia wideo\"",
     "settingsUpdatedSuccessfully": "Ustawienia zostały pomyślnie zaktualizowane",
-    "settingsUpdateFailed": "Nie udało się zaktualizować ustawień"
+    "settingsUpdateFailed": "Nie udało się zaktualizować ustawień",
+    "audioCompletionTrackingUpdatedSuccessfully": "Opcja \"Śledzenie ukończenia audio\" została pomyślnie zaktualizowana",
+    "audioCompletionTrackingUpdateFailed": "Nie udało się zaktualizować opcji \"Śledzenie ukończenia audio\""
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",
@@ -1104,7 +1106,9 @@
     "promotionCodes": "Kody promocyjne",
     "manage": "Zarządzaj",
     "ariaLabels": {
-      "goToAvailableCourses": "Przejdź do dostępnych kursów"
+      "goToAvailableCourses": "Przejdź do dostępnych kursów",
+      "collapseSidebar": "Zwiń pasek boczny",
+      "expandSidebar": "Rozwiń pasek boczny"
     },
     "qa": "Q&A",
     "articles": "Baza wiedzy",
@@ -3144,7 +3148,8 @@
         "curriculum": "Edycja programu nie jest dostępna dla kursów SCORM.",
         "lessonSequence": "Wymuszanie kolejności lekcji nie jest dostępne dla kursów SCORM.",
         "quizFeedback": "Ustawienia informacji zwrotnej quizu nie są dostępne dla kursów SCORM.",
-        "videoCompletionTracking": "Śledzenie ukończenia wideo nie jest dostępne dla kursów SCORM."
+        "videoCompletionTracking": "Śledzenie ukończenia wideo nie jest dostępne dla kursów SCORM.",
+        "audioCompletionTracking": "Śledzenie ukończenia audio nie jest dostępne dla kursów SCORM."
       },
       "notFound": {
         "course": "Nie znaleziono kursu.",
@@ -3336,7 +3341,9 @@
         "courseAvailabilityTitle": "Dostępność kursu",
         "fallbackLanguageWarningTitle": "Uwaga: brakujące tłumaczenia",
         "fallbackLanguageWarningDescription": "Niektóre pola w tej wersji językowej są puste. W tych miejscach system wyświetli studentom treści z języka domyślnego, dopóki nie dodasz tłumaczeń.",
-        "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu."
+        "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu.",
+        "enableAudioCompletionTracking": "Śledzenie ukończenia audio",
+        "enableAudioCompletionTrackingDescription": "Uczestnik musi odsłuchać co najmniej 90% każdego nagrania audio w lekcji, aby lekcja została oznaczona jako ukończona."
       },
       "validation": {
         "titleMinLength": "Tytuł musi mieć co najmniej 2 znaki.",
@@ -3441,14 +3448,27 @@
           "quizCooldownInHours": "Blokada czasowa po niezdaniu (w godzinach)",
           "numberOfQuestions": "{{count1}} z {{count2}} pytań",
           "noQuestions": "Brak pytań",
-          "timeLimitMinutes": "Limit czasu (gg:mm)"
+          "timeLimitMinutes": "Limit czasu (gg:mm)",
+          "feedbackMode": "Widoczność informacji zwrotnej",
+          "feedbackModeFull": "Wynik i komunikaty",
+          "feedbackModeScoreOnly": "Tylko wynik",
+          "feedbackModeNone": "Brak informacji zwrotnej",
+          "feedbackRanges": "Komunikaty dla zakresów wyniku",
+          "feedbackVariablesHint": "Możesz użyć {{firstNameVar}} dla imienia uczestnika oraz {{scoreVar}} dla jego wyniku.",
+          "feedbackRangeMin": "Od (%)",
+          "feedbackRangeMax": "Do (%)",
+          "feedbackRangeMessage": "Komunikat",
+          "feedbackRangeAdd": "Dodaj zakres",
+          "feedbackRangeReset": "Przywróć domyślne zakresy"
         },
         "tooltip": {
           "switch": "Jeśli włączone, student ma ograniczoną liczbę podejść do quizu.",
           "passingThreshold": "Procentowy próg zaliczenia quizu. Jeśli student osiągnie ten wynik, quiz zostanie uznany za zaliczony.",
           "attemptsLimit": "Liczba podejść do quizu przed uruchomieniem blokady czasowej.",
           "quizCooldownInHours": "Czas trwania blokady quizu po wykorzystaniu wszystkich prób.",
-          "timeLimitMinutes": "Opcjonalne. Po ustawieniu kursant rozpoczyna quiz samodzielnie, a jego odpowiedzi są wysyłane automatycznie po upływie czasu. Pozostaw puste, aby nie ograniczać czasu."
+          "timeLimitMinutes": "Opcjonalne. Po ustawieniu kursant rozpoczyna quiz samodzielnie, a jego odpowiedzi są wysyłane automatycznie po upływie czasu. Pozostaw puste, aby nie ograniczać czasu.",
+          "feedbackMode": "Określa, co uczestnik widzi po przesłaniu: wynik i komunikaty, tylko wynik albo nic.",
+          "feedbackRanges": "Uporządkowane przedziały wyniku pokazywane uczestnikom. Przedziały muszą pokrywać 0-100% bez luk i nakładania się."
         },
         "validation": {
           "optionTextRequired": "Tekst opcji jest wymagany",
@@ -3480,7 +3500,13 @@
           "matchingPairsRequired": "Dodaj co najmniej 2 pary i uzupełnij obie strony każdej pary",
           "matchingMatchRequired": "Uzupełnij dopasowanie w tej parze",
           "matchingPairsUnique": "Każda para musi mieć unikalne dopasowanie",
-          "timeLimitMinutes": "Podaj limit czasu od {{min}} do {{max}}."
+          "timeLimitMinutes": "Podaj limit czasu od {{min}} do {{max}}.",
+          "feedbackRangeNotInteger": "Granice zakresu muszą być liczbami całkowitymi.",
+          "feedbackRangeOutOfBounds": "Granice zakresu muszą mieścić się w przedziale od 0 do 100.",
+          "feedbackRangeBoundsReversed": "Początek zakresu nie może być większy niż jego koniec.",
+          "feedbackRangesMustStartAtZero": "Zakresy muszą zaczynać się od 0%.",
+          "feedbackRangesMustEndAtHundred": "Zakresy muszą kończyć się na 100%.",
+          "feedbackRangesGapOrOverlap": "Zakresy muszą pokrywać 0-100% bez luk i nakładania się."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
@@ -4658,7 +4684,17 @@
       "scale_1_5": "Pytanie typu skala (1-5)",
       "matching": "Dopasuj każdy element do jego pary.",
       "noMatchesAvailable": "To pytanie nie ma jeszcze dopasowań do ułożenia.",
-      "correctMatch": "Poprawne dopasowanie:"
+      "correctMatch": "Poprawne dopasowanie:",
+      "fillInTheBlanksInstruction": "Kliknij lukę i wybierz słowo.",
+      "matchingInstruction": "Kliknij element i wybierz dopasowanie.",
+      "blankLabel": "Luka {{current}} z {{total}}",
+      "answerBank": "bank odpowiedzi",
+      "removeWord": "Usuń słowo",
+      "dndInstructions": "Aby podnieść słowo, naciśnij spację lub enter. Używaj strzałek, aby przenosić je między lukami. Naciśnij ponownie spację lub enter, aby je upuścić, lub escape, aby anulować.",
+      "dndOnStart": "Podniesiono słowo {{word}}.",
+      "dndOnOver": "Słowo {{word}} znajduje się nad {{blank}}.",
+      "dndOnEnd": "Słowo {{word}} zostało umieszczone w {{blank}}.",
+      "dndOnCancel": "Przeciąganie anulowane. Słowo {{word}} wróciło na poprzednie miejsce."
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",
@@ -4791,6 +4827,42 @@
       "timeLeft": "Pozostały czas: {{time}}",
       "warning": "Została mniej niż minuta. Odpowiedzi zostaną wysłane automatycznie po upływie czasu.",
       "timeUp": "Czas minął. Wysyłamy Twoje odpowiedzi."
+    },
+    "audioProgress": {
+      "label": "Postęp audio",
+      "completedSummary": "Ukończono {{completed}} z {{total}}",
+      "overviewAriaLabel": "Postęp nagrań audio w lekcji",
+      "segmentAriaLabel": "Postęp nagrania {{index}}: odsłuchano {{progress}}%",
+      "requirementSingle": "Odsłuchaj całe nagranie, aby ukończyć tę lekcję.",
+      "requirementMultiple": "Odsłuchaj wszystkie nagrania, aby ukończyć tę lekcję.",
+      "errors": {
+        "resourceNotFound": "Nie udało się zapisać postępu audio dla tej lekcji.",
+        "unsupportedLessonType": "Postęp audio jest dostępny tylko dla lekcji z treścią.",
+        "unsupportedBucketSize": "Postęp audio używa nieobsługiwanego interwału śledzenia.",
+        "invalidResourceType": "Tego zasobu nie można śledzić jako nagrania audio lekcji.",
+        "accessDenied": "Nie masz uprawnień do aktualizacji postępu audio w tej lekcji."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Dokończyć słuchanie przed wyjściem?",
+      "descriptionSingle": "Ta lekcja wymaga odsłuchania całego nagrania, zanim zostanie ukończona.",
+      "descriptionMultiple": "Ta lekcja wymaga odsłuchania wszystkich nagrań, zanim zostanie ukończona.",
+      "continueListening": "Kontynuuj słuchanie"
+    },
+    "requiredMediaLeave": {
+      "title": "Dokończyć materiały lekcji przed wyjściem?",
+      "description": "Ta lekcja wymaga obejrzenia wszystkich filmów i odsłuchania wszystkich nagrań, zanim zostanie ukończona.",
+      "continue": "Kontynuuj"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Obejrzyj film i odsłuchaj nagranie, aby ukończyć tę lekcję.",
+      "requirementMultiple": "Obejrzyj wszystkie filmy i odsłuchaj wszystkie nagrania, aby ukończyć tę lekcję.",
+      "label": "Postęp lekcji",
+      "overviewAriaLabel": "Postęp materiałów lekcji"
+    },
+    "navigation": {
+      "previousLesson": "Poprzednia lekcja",
+      "nextLesson": "Następna lekcja"
     }
   },
   "studentCourseView": {
@@ -4815,6 +4887,8 @@
       "threeOrFiveWordSentence": "Napisz szczegółową odpowiedź (3-5 zdań)",
       "aiMentorLesson": {
         "sendMessage": "Napisz wiadomość...",
+        "messageLabel": "Twoja wiadomość",
+        "conversationLabel": "Rozmowa",
         "check": "Sprawdź",
         "retake": "Powtórz",
         "aiMentorName": "AI Mentor",
@@ -5244,7 +5318,8 @@
     "inProgress": "W trakcie",
     "notStarted": "Nierozpoczęte",
     "blocked": "Zablokowane",
-    "awaitingReview": "Oczekuje na ocenę"
+    "awaitingReview": "Oczekuje na ocenę",
+    "failed": "Niezaliczone"
   },
   "studentCertificateView": {
     "header": "Certyfikaty",
@@ -5268,7 +5343,7 @@
       "courseCompletionRequired": "Aby wygenerować certyfikat, musisz ukończyć kurs."
     },
     "button": {
-      "download": "Pobierz",
+      "download": "Pobierz certyfikat (PDF)",
       "preview": "Podgląd",
       "shareLinkedIn": "Udostępnij na LinkedIn"
     },
@@ -5714,7 +5789,9 @@
       },
       "ariaLabel": {
         "drag": "Przeciągnij osadzone wideo",
-        "remove": "Usuń osadzone wideo"
+        "remove": "Usuń osadzone wideo",
+        "play": "Odtwórz wideo",
+        "playWithTitle": "Odtwórz wideo: {{title}}"
       }
     },
     "presentation": {
@@ -6682,13 +6759,6 @@
       "averageRating": "Śr. ocena",
       "detailedStatisticsSoon": "Szczegółowe statystyki już wkrótce",
       "detailedStatisticsDescription": "Ta sekcja będzie zawierać szczegółowe analizy postępów uczestników, ukończenia rozdziałów, zaangażowania i innych danych.",
-      "status": {
-        "started": "Rozpoczęto",
-        "completed": "Ukończono",
-        "inProgress": "W toku",
-        "notStarted": "Nie rozpoczęto",
-        "awaitingReview": "Oczekuje na ocenę"
-      },
       "lessonTypes": {
         "content": "Treść",
         "quiz": "Quiz",
@@ -8659,7 +8729,16 @@
       "unavailable": "Katalog kursów nie jest dostępny dla tej organizacji.",
       "listingNotFound": "Nie znaleziono tego kursu w katalogu kursów.",
       "thumbnailNotFound": "Ten kurs z katalogu kursów nie ma miniatury.",
-      "serviceError": "Katalog kursów nie mógł zrealizować żądania. Spróbuj ponownie później."
+      "serviceError": "Katalog kursów nie mógł zrealizować żądania. Spróbuj ponownie później.",
+      "outlineNotFound": "Podgląd zawartości tego kursu nie jest jeszcze dostępny."
+    },
+    "preview": {
+      "open": "Podgląd zawartości",
+      "noChapters": "Ten kurs nie ma jeszcze rozdziałów.",
+      "chaptersCount_one": "{{count}} rozdział",
+      "chaptersCount_few": "{{count}} rozdziały",
+      "chaptersCount_many": "{{count}} rozdziałów",
+      "chaptersCount_other": "{{count}} rozdziałów"
     }
   },
   "aiJudgeConfiguration": {

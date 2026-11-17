@@ -47,8 +47,14 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
               },
             )}
           >
-            <div className="w-full">{optionText}</div>
-            <div className="flex gap-x-4">
+            <div id={`true-or-false-statement-${id}`} className="w-full">
+              {optionText}
+            </div>
+            <div
+              role="radiogroup"
+              aria-labelledby={`true-or-false-statement-${id}`}
+              className="flex gap-x-4"
+            >
               <label className="flex items-center gap-x-1">
                 <Input
                   className={cn("size-4", {
@@ -58,6 +64,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
                   value="true"
                   {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
                   name={`trueOrFalseQuestions.${question.id}.${id}`}
+                  disabled={isCompleted}
                 />
                 {t("studentLessonView.other.true")}
               </label>
@@ -68,6 +75,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
                   })}
                   {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
                   name={`trueOrFalseQuestions.${question.id}.${id}`}
+                  disabled={isCompleted}
                   type="radio"
                   value="false"
                 />

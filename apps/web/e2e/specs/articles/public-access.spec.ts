@@ -10,9 +10,9 @@ test("visitor cannot see private article when public articles access is enabled"
   createWorkspaceContext,
   factories,
   apiClient,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async () => {
+  await withWorkerPage(USER_ROLE.admin, async () => {
     const restoreContentFeatures = await ensureContentFeaturesEnabled(apiClient, {
       publicArticles: true,
     });

@@ -96,6 +96,7 @@ export const LEARNER_PROGRESS_STATUSES = {
   NOT_STARTED: "not_started",
   IN_PROGRESS: "in_progress",
   AWAITING_REVIEW: "awaiting_review",
+  FAILED: "failed",
   COMPLETED: "completed",
 } as const;
 export type LearnerProgressStatus =

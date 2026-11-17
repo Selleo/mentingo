@@ -5,10 +5,11 @@ import { USER_ROLE } from "~/config/userRoles";
 import { FORUM_HANDLES } from "../../data/forum/handles";
 import { NAVIGATION_HANDLES } from "../../data/navigation/handles";
 import { expect, test } from "../../fixtures/test.fixture";
+import { openDashboardFlow } from "../../flows/dashboard/open-dashboard.flow";
 import { createForumTopicFlow } from "../../flows/forum/create-forum-topic.flow";
 import { openForumFlow } from "../../flows/forum/open-forum.flow";
 import { replyToForumTopicFlow } from "../../flows/forum/reply-to-forum-topic.flow";
-import { prepareNavigationPageFlow } from "../../flows/navigation/prepare-navigation-page.flow";
+import { openPathAtOriginFlow } from "../../flows/navigation/open-path-at-origin.flow";
 import { setForumFeatureState } from "../../utils/forum-features";
 
 import type { IsolatedWorkspaceHandle } from "../../fixtures/test.fixture";
@@ -58,10 +59,10 @@ test("forum stays hidden while it is disabled", async ({ createIsolatedWorkspace
   await setForumFeatureState(workspace.apiClient, { forumEnabled: false });
   const student = await createStudent(workspace, "Disabled");
 
-  await prepareNavigationPageFlow(student.page);
+  await openDashboardFlow(student.page, student.origin);
   await expect(student.page.getByTestId(NAVIGATION_HANDLES.FORUM_LINK)).toHaveCount(0);
 
-  await student.page.goto("/forum");
+  await openPathAtOriginFlow(student.page, student.origin, "/forum");
   await expect(student.page).not.toHaveURL(/\/forum/);
   await expect(student.page.getByTestId(FORUM_HANDLES.PAGE)).toHaveCount(0);
 });
@@ -73,7 +74,7 @@ test("student creates a forum topic and replies to it", async ({ createIsolatedW
   const title = uniqueLabel("forum-topic");
   const reply = uniqueLabel("forum-reply");
 
-  await prepareNavigationPageFlow(student.page);
+  await openDashboardFlow(student.page, student.origin);
   await student.page.getByTestId(NAVIGATION_HANDLES.FORUM_LINK).click();
   await expect(student.page.getByTestId(FORUM_HANDLES.PAGE)).toBeVisible();
 
@@ -88,7 +89,7 @@ test("student creates a forum topic and replies to it", async ({ createIsolatedW
   await expect(student.page.getByTestId(FORUM_HANDLES.postContent(replyId))).toHaveText(reply);
   await expect(student.page.getByTestId(FORUM_HANDLES.REPLY_INPUT)).toHaveValue("");
 
-  await openForumFlow(student.page);
+  await openForumFlow(student.page, student.origin);
   await expect(student.page.getByTestId(FORUM_HANDLES.topicItemReplies(topicId))).toContainText(
     "1",
   );
@@ -122,7 +123,7 @@ test("enrolled users read their course discussion in the forum", async ({
     content: threadContent,
   });
 
-  await openForumFlow(enrolledStudent.page);
+  await openForumFlow(enrolledStudent.page, enrolledStudent.origin);
   await expect(enrolledStudent.page.getByTestId(FORUM_HANDLES.EMPTY_STATE)).toBeVisible();
 
   const courseDiscussion = enrolledStudent.page.getByTestId(
@@ -138,7 +139,7 @@ test("enrolled users read their course discussion in the forum", async ({
     enrolledStudent.page.getByTestId(FORUM_HANDLES.postContent(message.data.data.id)),
   ).toHaveText(threadContent);
 
-  await openForumFlow(outsider.page);
+  await openForumFlow(outsider.page, outsider.origin);
   await expect(outsider.page.getByTestId(FORUM_HANDLES.EMPTY_STATE)).toBeVisible();
   await expect(outsider.page.getByTestId(FORUM_HANDLES.COURSE_DISCUSSIONS)).toHaveCount(0);
 });

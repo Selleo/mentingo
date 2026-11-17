@@ -112,6 +112,4 @@ jobs:
         timeout-minutes: 5
         run: corepack pnpm --filter web exec playwright install --with-deps chromium
       - name: Check recorder assertions against seeded progress states
-        run: |
-          SELF_ONBOARDING_DEMO=1 SELF_ONBOARDING_LANGUAGE=en corepack pnpm --filter web exec playwright test -c playwright.self-onboarding-checks.config.ts
-          SELF_ONBOARDING_DEMO=1 SELF_ONBOARDING_LANGUAGE=pl corepack pnpm --filter web exec playwright test -c playwright.self-onboarding-checks.config.ts
+        run: corepack pnpm --filter web exec playwright test -c playwright.self-onboarding-checks.config.ts

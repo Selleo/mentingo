@@ -839,7 +839,9 @@
     "videoCompletionTrackingUpdatedSuccessfully": "Parinktis „Vaizdo įrašo užbaigimo sekimas“ sėkmingai atnaujinta",
     "videoCompletionTrackingUpdateFailed": "Nepavyko atnaujinti parinkties „Vaizdo įrašo užbaigimo sekimas“.",
     "settingsUpdatedSuccessfully": "Nustatymai sėkmingai atnaujinti",
-    "settingsUpdateFailed": "Nepavyko atnaujinti nustatymų"
+    "settingsUpdateFailed": "Nepavyko atnaujinti nustatymų",
+    "audioCompletionTrackingUpdatedSuccessfully": "Parinktis „Garso įrašo užbaigimo sekimas“ sėkmingai atnaujinta",
+    "audioCompletionTrackingUpdateFailed": "Nepavyko atnaujinti parinkties „Garso įrašo užbaigimo sekimas“."
   },
   "uploadFile": {
     "header": "Spustelėkite norėdami įkelti",
@@ -1103,7 +1105,9 @@
     "promotionCodes": "Reklamos kodai",
     "manage": "Tvarkyti",
     "ariaLabels": {
-      "goToAvailableCourses": "Eikite į galimus kursus"
+      "goToAvailableCourses": "Eikite į galimus kursus",
+      "collapseSidebar": "Sutraukti šoninę juostą",
+      "expandSidebar": "Išskleisti šoninę juostą"
     },
     "qa": "Klausimai ir atsakymai",
     "tenants": "Organizacijos",
@@ -2892,7 +2896,8 @@
         "curriculum": "SCORM kursuose mokymo programos redagavimas nepasiekiamas.",
         "lessonSequence": "SCORM kursuose pamokų eigos privalomas laikymasis nepasiekiamas.",
         "quizFeedback": "SCORM kursuose viktorinos grįžtamojo ryšio nustatymai nepasiekiami.",
-        "videoCompletionTracking": "SCORM kursuose vaizdo įrašo užbaigimo sekimas nepasiekiamas."
+        "videoCompletionTracking": "SCORM kursuose vaizdo įrašo užbaigimo sekimas nepasiekiamas.",
+        "audioCompletionTracking": "SCORM kursuose garso įrašo užbaigimo sekimas nepasiekiamas."
       },
       "notFound": {
         "course": "Kursas nerastas.",
@@ -3083,7 +3088,9 @@
         "courseAvailabilityTitle": "Kurso prieinamumas",
         "fallbackLanguageWarningTitle": "Pastaba: trūksta vertimų",
         "fallbackLanguageWarningDescription": "Kai kurie šios kalbos versijos laukai yra tušti. Tose vietose mokiniai matys turinį iš numatytosios kalbos, kol nepridėsite vertimų.",
-        "baseLanguageTooltip": "Negalite pakeisti ar pašalinti šios kalbos. Tai yra numatytoji ir visada bus kurso dalis."
+        "baseLanguageTooltip": "Negalite pakeisti ar pašalinti šios kalbos. Tai yra numatytoji ir visada bus kurso dalis.",
+        "enableAudioCompletionTracking": "Garso įrašo užbaigimo sekimas",
+        "enableAudioCompletionTrackingDescription": "Besimokantysis turi perklausyti bent 90 % kiekvieno pamokos garso įrašo, kad pamoka būtų pažymėta kaip baigta."
       },
       "validation": {
         "titleMinLength": "Pavadinimą turi sudaryti bent 2 simboliai.",
@@ -3188,14 +3195,27 @@
           "quizCooldownInHours": "Laiko užraktas po nesėkmingų bandymų (valandomis)",
           "numberOfQuestions": "{{count1}} iš {{count2}} klausimų",
           "noQuestions": "Jokių klausimų",
-          "timeLimitMinutes": "Laiko limitas (hh:mm)"
+          "timeLimitMinutes": "Laiko limitas (hh:mm)",
+          "feedbackMode": "Atsiliepimo matomumas",
+          "feedbackModeFull": "Rezultatas ir žinutės",
+          "feedbackModeScoreOnly": "Tik rezultatas",
+          "feedbackModeNone": "Jokio atsiliepimo",
+          "feedbackRanges": "Rezultatų intervalų žinutės",
+          "feedbackVariablesHint": "Galite naudoti {{firstNameVar}} besimokančiojo vardui ir {{scoreVar}} jo rezultatui.",
+          "feedbackRangeMin": "Nuo (%)",
+          "feedbackRangeMax": "Iki (%)",
+          "feedbackRangeMessage": "Žinutė",
+          "feedbackRangeAdd": "Pridėti intervalą",
+          "feedbackRangeReset": "Atkurti numatytuosius intervalus"
         },
         "tooltip": {
           "switch": "Jei įjungta, mokinys gali atlikti ribotą testų skaičių.",
           "passingThreshold": "Procentinė viktorinos išlaikymo riba. Jei mokinys pasiekia šį balą, viktorina bus laikoma išlaikyta.",
           "attemptsLimit": "Leidžiamas testų bandymų skaičius prieš suveikiant laiko užraktą.",
           "quizCooldownInHours": "Viktorinos užrakto trukmė išnaudojus visus bandymus.",
-          "timeLimitMinutes": "Neprivaloma. Nustačius, besimokantieji patys pradeda viktoriną, o jų atsakymai pateikiami automatiškai pasibaigus laikui. Palikite tuščią, jei laiko limito nereikia."
+          "timeLimitMinutes": "Neprivaloma. Nustačius, besimokantieji patys pradeda viktoriną, o jų atsakymai pateikiami automatiškai pasibaigus laikui. Palikite tuščią, jei laiko limito nereikia.",
+          "feedbackMode": "Nustato, ką besimokantysis mato pateikęs: rezultatą ir žinutes, tik rezultatą arba nieko.",
+          "feedbackRanges": "Surikiuoti rezultatų intervalai, rodomi besimokantiesiems. Intervalai turi padengti 0-100% be tarpų ir persidengimų."
         },
         "validation": {
           "optionTextRequired": "Būtinas parinkties tekstas",
@@ -3225,7 +3245,13 @@
           "matchingPairsRequired": "Pridėkite bent 2 poras ir užpildykite abi kiekvienos poros puses",
           "matchingMatchRequired": "Įrašykite šios poros atitikmenį",
           "matchingPairsUnique": "Kiekviena pora turi turėti unikalų atitikmenį",
-          "timeLimitMinutes": "Įveskite laiko limitą nuo {{min}} iki {{max}}."
+          "timeLimitMinutes": "Įveskite laiko limitą nuo {{min}} iki {{max}}.",
+          "feedbackRangeNotInteger": "Intervalo ribos turi būti sveikieji skaičiai.",
+          "feedbackRangeOutOfBounds": "Intervalo ribos turi būti nuo 0 iki 100.",
+          "feedbackRangeBoundsReversed": "Intervalo pradžia negali būti didesnė už jo pabaigą.",
+          "feedbackRangesMustStartAtZero": "Intervalai turi prasidėti nuo 0%.",
+          "feedbackRangesMustEndAtHundred": "Intervalai turi baigtis ties 100%.",
+          "feedbackRangesGapOrOverlap": "Intervalai turi padengti 0-100% be tarpų ir persidengimų."
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Pamokos rodymo tvarka sėkmingai atnaujinta",
@@ -4390,7 +4416,17 @@
       "scale_1_5": "Domanda di tipo scala (1–5)",
       "matching": "Suderinkite kiekvieną elementą su jo pora.",
       "noMatchesAvailable": "Šiam klausimui dar nėra atitikmenų.",
-      "correctMatch": "Teisingas atitikmuo:"
+      "correctMatch": "Teisingas atitikmuo:",
+      "fillInTheBlanksInstruction": "Spustelėkite tarpą ir pasirinkite žodį.",
+      "matchingInstruction": "Spustelėkite elementą ir pasirinkite jo atitikmenį.",
+      "blankLabel": "Tarpas {{current}} iš {{total}}",
+      "answerBank": "atsakymų banką",
+      "removeWord": "Pašalinti žodį",
+      "dndInstructions": "Norėdami paimti žodį, paspauskite tarpą arba enter. Rodyklių klavišais perkelkite jį tarp tarpų. Norėdami padėti, dar kartą paspauskite tarpą arba enter, arba escape, kad atšauktumėte.",
+      "dndOnStart": "Paimtas žodis {{word}}.",
+      "dndOnOver": "Žodis {{word}} yra virš {{blank}}.",
+      "dndOnEnd": "Žodis {{word}} įdėtas į {{blank}}.",
+      "dndOnCancel": "Vilkimas atšauktas. Žodis {{word}} grįžo į ankstesnę vietą."
     },
     "aiMentor": {
       "title": "AI mentoriaus sesija",
@@ -4523,6 +4559,42 @@
       "timeLeft": "Liko laiko: {{time}}",
       "warning": "Liko mažiau nei minutė. Pasibaigus laikui atsakymai bus pateikti automatiškai.",
       "timeUp": "Laikas baigėsi. Jūsų atsakymai pateikiami."
+    },
+    "audioProgress": {
+      "label": "Garso įrašų pažanga",
+      "completedSummary": "Baigta {{completed}} iš {{total}}",
+      "overviewAriaLabel": "Pamokos garso įrašų pažanga",
+      "segmentAriaLabel": "Garso įrašo {{index}} pažanga: perklausyta {{progress}} %",
+      "requirementSingle": "Perklausykite visą garso įrašą, kad užbaigtumėte šią pamoką.",
+      "requirementMultiple": "Perklausykite visus garso įrašus, kad užbaigtumėte šią pamoką.",
+      "errors": {
+        "resourceNotFound": "Nepavyko išsaugoti šios pamokos garso įrašų pažangos.",
+        "unsupportedLessonType": "Garso įrašų pažanga pasiekiama tik turinio pamokoms.",
+        "unsupportedBucketSize": "Garso įrašų pažangai naudojamas nepalaikomas sekimo intervalas.",
+        "invalidResourceType": "Šio ištekliaus negalima sekti kaip pamokos garso įrašo.",
+        "accessDenied": "Neturite teisės atnaujinti šios pamokos garso įrašų pažangos."
+      }
+    },
+    "requiredAudioLeave": {
+      "title": "Baigti klausyti prieš išeinant?",
+      "descriptionSingle": "Kad pamoka būtų baigta, reikia perklausyti visą garso įrašą.",
+      "descriptionMultiple": "Kad pamoka būtų baigta, reikia perklausyti visus garso įrašus.",
+      "continueListening": "Tęsti klausymą"
+    },
+    "requiredMediaLeave": {
+      "title": "Baigti pamokos medžiagą prieš išeinant?",
+      "description": "Kad pamoka būtų baigta, reikia peržiūrėti visus vaizdo įrašus ir perklausyti visus garso įrašus.",
+      "continue": "Tęsti"
+    },
+    "mediaProgress": {
+      "requirementSingle": "Peržiūrėkite vaizdo įrašą ir perklausykite garso įrašą, kad užbaigtumėte šią pamoką.",
+      "requirementMultiple": "Peržiūrėkite visus vaizdo įrašus ir perklausykite visus garso įrašus, kad užbaigtumėte šią pamoką.",
+      "label": "Pamokos pažanga",
+      "overviewAriaLabel": "Pamokos medžiagos pažanga"
+    },
+    "navigation": {
+      "previousLesson": "Ankstesnė pamoka",
+      "nextLesson": "Kita pamoka"
     }
   },
   "studentCourseView": {
@@ -4547,6 +4619,8 @@
       "threeOrFiveWordSentence": "Parašykite išsamų atsakymą (3-5 sakiniai).",
       "aiMentorLesson": {
         "sendMessage": "Rašyk žinutę...",
+        "messageLabel": "Tavo žinutė",
+        "conversationLabel": "Pokalbis",
         "check": "Patikrinkite",
         "aiMentorName": "AI mentorius",
         "retake": "Perimti",
@@ -4933,7 +5007,8 @@
     "inProgress": "Vykdoma",
     "notStarted": "Nepradėtas",
     "blocked": "Užblokuota",
-    "awaitingReview": "Laukia įvertinimo"
+    "awaitingReview": "Laukia įvertinimo",
+    "failed": "Neišlaikyta"
   },
   "studentCertificateView": {
     "header": "Sertifikatai",
@@ -4957,7 +5032,7 @@
       "courseCompletionRequired": "Prieš generuodami sertifikatą, turite baigti kursą."
     },
     "button": {
-      "download": "Atsisiųsti",
+      "download": "Atsisiųsti sertifikatą (PDF)",
       "preview": "Peržiūra",
       "shareLinkedIn": "Bendrinkite „LinkedIn“."
     },
@@ -5400,7 +5475,9 @@
       },
       "ariaLabel": {
         "drag": "Vilkite vaizdo įrašo įdėjimą",
-        "remove": "Pašalinti vaizdo įrašo įdėjimą"
+        "remove": "Pašalinti vaizdo įrašo įdėjimą",
+        "play": "Paleisti vaizdo įrašą",
+        "playWithTitle": "Paleisti vaizdo įrašą: {{title}}"
       }
     },
     "presentation": {
@@ -6619,13 +6696,6 @@
       "averageRating": "Vid. įvertinimas",
       "detailedStatisticsSoon": "Išsami statistika jau netrukus",
       "detailedStatisticsDescription": "Šioje skiltyje bus rodoma išsami pažangos, skyrių baigimo, įsitraukimo ir kitų duomenų analizė.",
-      "status": {
-        "started": "Pradėta",
-        "completed": "Baigta",
-        "inProgress": "Vykdoma",
-        "notStarted": "Nepradėta",
-        "awaitingReview": "Laukia įvertinimo"
-      },
       "lessonTypes": {
         "content": "Turinys",
         "quiz": "Testas",
@@ -8573,7 +8643,16 @@
       "unavailable": "Turinio prekyvietė šiai organizacijai nepasiekiama.",
       "listingNotFound": "Šis prekyvietės kursas nerastas.",
       "thumbnailNotFound": "Šis prekyvietės kursas neturi miniatiūros.",
-      "serviceError": "Turinio prekyvietė negalėjo įvykdyti užklausos. Bandykite vėliau."
+      "serviceError": "Turinio prekyvietė negalėjo įvykdyti užklausos. Bandykite vėliau.",
+      "outlineNotFound": "Šio kurso turinio peržiūra dar neprieinama."
+    },
+    "preview": {
+      "open": "Peržiūrėti turinį",
+      "noChapters": "Šis kursas dar neturi skyrių.",
+      "chaptersCount_one": "{{count}} skyrius",
+      "chaptersCount_few": "{{count}} skyriai",
+      "chaptersCount_many": "{{count}} skyriaus",
+      "chaptersCount_other": "{{count}} skyrių"
     }
   },
   "aiJudgeConfiguration": {
