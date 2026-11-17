@@ -45,6 +45,7 @@ import { AiMentorEvaluationDialog } from "~/modules/Courses/Lesson/AiMentorLesso
 import { AiMentorEvaluationLoader } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationLoader";
 import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatLoader";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
+import { ChatReplyAnnouncer } from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatReplyAnnouncer";
 import { LessonForm } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonForm";
 import RetakeModal from "~/modules/Courses/Lesson/AiMentorLesson/components/RetakeModal";
 
@@ -110,6 +111,7 @@ const AiMentorLesson = ({
   const [input, setInput] = useState("");
   const taskDialogLessonIdRef = useRef<string | null>(null);
   const voiceResponseMessageIdRef = useRef<string | null>(null);
+  const taskButtonRef = useRef<HTMLButtonElement>(null);
 
   const transport = useMemo(
     () => createAiMentorChatTransport(lesson.threadId ?? "", lesson.learningStateId),
@@ -369,6 +371,12 @@ const AiMentorLesson = ({
                   variant="mobileDrawer"
                   data-testid={LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION_DIALOG}
                   className="flex flex-col sm:!max-w-2xl"
+                  onCloseAutoFocus={(event) => {
+                    // The dialog can open on its own, so return focus to its trigger rather than to <body>.
+                    if (!taskButtonRef.current) return;
+                    event.preventDefault();
+                    taskButtonRef.current.focus();
+                  }}
                 >
                   <DialogHeader className="border-b border-neutral-100 px-6 py-4 text-left">
                     <DialogTitle className="text-lg font-semibold text-neutral-950">
@@ -398,6 +406,7 @@ const AiMentorLesson = ({
             {!lessonLoading && !hideControls && (
               <div className="mb-5 grid w-full grid-cols-2 gap-2 border-b border-neutral-100 pb-3">
                 <Button
+                  ref={taskButtonRef}
                   data-testid={LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION}
                   type="button"
                   variant="outline"
@@ -458,6 +467,9 @@ const AiMentorLesson = ({
             <div
               data-testid={LEARNING_HANDLES.AI_MENTOR_MESSAGES}
               ref={messagesContainerRef}
+              role="log"
+              aria-live="off"
+              aria-label={t("studentCourseView.lesson.aiMentorLesson.conversationLabel")}
               className="relative flex w-full max-w-full grow flex-col gap-y-4 overflow-y-scroll"
             >
               {!lessonLoading &&
@@ -482,6 +494,8 @@ const AiMentorLesson = ({
                 />
               )}
             </div>
+
+            <ChatReplyAnnouncer messages={messages} isProcessing={isProcessing} />
 
             {isJudgePending && <AiMentorEvaluationLoader />}
 

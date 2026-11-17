@@ -24,6 +24,7 @@ import { createAiMentorChatTransport } from "~/modules/Courses/Lesson/AiMentorLe
 import { AiMentorEvaluationDialog } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationDialog";
 import { AI_MENTOR_EVALUATION_CONTEXT } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationDialog.types";
 import { AiMentorEvaluationLoader } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationLoader";
+import { ChatReplyAnnouncer } from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatReplyAnnouncer";
 
 import { AI_MENTOR_PRACTICE_HANDLES } from "../../../e2e/data/ai-mentor-practice/handles";
 
@@ -228,6 +229,8 @@ export function AiMentorPracticeConversation({
               messagesContainerRef={messagesContainerRef}
             />
           )}
+
+          <ChatReplyAnnouncer messages={messages} isProcessing={isProcessing} />
 
           {isJudgePending && <AiMentorEvaluationLoader />}
 
