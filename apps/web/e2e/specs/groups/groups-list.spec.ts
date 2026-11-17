@@ -46,7 +46,7 @@ test("admin can browse, sort, and open group details from the groups list", asyn
     }));
 
     cleanup.add(async () => {
-      await Promise.allSettled(groups.map((group) => groupFactory.delete(group.id)));
+      await groupFactory.deleteMany(groups.map((group) => group.id));
     });
 
     await openGroupsPageFlow(page);

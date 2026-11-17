@@ -4,10 +4,12 @@ import { CREATE_TENANT_PAGE_HANDLES, TENANTS_PAGE_HANDLES } from "../../data/ten
 import { expect, test } from "../../fixtures/test.fixture";
 import { fillTenantFormFlow } from "../../flows/tenants/fill-tenant-form.flow";
 import { filterTenantsFlow } from "../../flows/tenants/filter-tenants.flow";
+import { openCreateTenantFromListFlow } from "../../flows/tenants/open-create-tenant-from-list.flow";
 import { openCreateTenantPageFlow } from "../../flows/tenants/open-create-tenant-page.flow";
+import { openTenantsPageFlow } from "../../flows/tenants/open-tenants-page.flow";
 import { submitTenantFormFlow } from "../../flows/tenants/submit-tenant-form.flow";
 
-test("managing admin can create a tenant from the create page", async ({
+test("managing admin can create a tenant from the tenant list", async ({
   cleanup,
   factories,
   withWorkerPage,
@@ -20,7 +22,16 @@ test("managing admin can create a tenant from the create page", async ({
       const name = `create-tenant-${suffix}`;
       const host = `http://create-tenant-${suffix}.local`;
 
-      await openCreateTenantPageFlow(page);
+      cleanup.add(async () => {
+        const createdTenant = await tenantFactory.findByHost(host);
+
+        if (createdTenant) await tenantFactory.deactivate(createdTenant.id);
+      });
+
+      await openTenantsPageFlow(page);
+      await openCreateTenantFromListFlow(page);
+      await expect(page).toHaveURL(/\/super-admin\/tenants\/new$/);
+
       await fillTenantFormFlow(page, {
         name,
         host,
@@ -31,24 +42,14 @@ test("managing admin can create a tenant from the create page", async ({
       });
       await submitTenantFormFlow(page);
 
-      await expect
-        .poll(async () => {
-          const createdTenant = await tenantFactory.findByHost(host);
-          return createdTenant?.id ?? null;
-        })
-        .not.toBeNull();
-
+      await expect(page).toHaveURL(/\/super-admin\/tenants$/);
+      await expect.poll(async () => (await tenantFactory.findByHost(host))?.id).toBeTruthy();
       const createdTenant = await tenantFactory.findByHost(host);
 
-      cleanup.add(async () => {
-        if (createdTenant) {
-          await tenantFactory.deactivate(createdTenant.id);
-        }
-      });
+      if (!createdTenant) throw new Error(`Expected tenant ${host} to exist`);
 
-      await expect(page).toHaveURL(/\/super-admin\/tenants$/);
       await filterTenantsFlow(page, host);
-      await expect(page.getByTestId(TENANTS_PAGE_HANDLES.row(createdTenant!.id))).toBeVisible();
+      await expect(page.getByTestId(TENANTS_PAGE_HANDLES.row(createdTenant.id))).toBeVisible();
     },
     { root: true },
   );
@@ -73,7 +74,7 @@ test("managing admin cannot submit invalid tenant data", async ({ factories, wit
 
       await expect(page).toHaveURL(/\/super-admin\/tenants\/new$/);
       await expect(page.getByTestId(CREATE_TENANT_PAGE_HANDLES.PAGE)).toBeVisible();
-      await expect(await tenantFactory.findByName(name)).toBeNull();
+      await expect.poll(() => tenantFactory.findByName(name)).toBeNull();
     },
     { root: true },
   );

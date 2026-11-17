@@ -1,7 +1,9 @@
 import { USER_ROLE } from "~/config/userRoles";
 
+import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { expect, test } from "../../fixtures/test.fixture";
 
+// Self-test of the isolated-workspace fixtures, not a product test.
 test("isolated workspace keeps changes tenant-scoped", async ({ createIsolatedWorkspace }) => {
   const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
   const peerWorkspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
@@ -12,16 +14,18 @@ test("isolated workspace keeps changes tenant-scoped", async ({ createIsolatedWo
     firstName: "Isolated",
     lastName: "User",
     email,
-    password: "Password123@",
+    password: TEST_PASSWORD,
     role: USER_ROLE.student,
   });
 
-  await expect(await peerUserFactory.getByEmail(email)).toBeNull();
-  await expect(
-    await workspace.factories.createUserFactory().getById(isolatedUser.user.id),
-  ).not.toBeNull();
-  await expect(workspace.origin).toContain(new URL(workspace.tenant.host).host);
-  await expect(peerWorkspace.origin).toContain(new URL(peerWorkspace.tenant.host).host);
+  await expect.poll(() => peerUserFactory.getByEmail(email)).toBeNull();
+  await expect
+    .poll(
+      async () => (await workspace.factories.createUserFactory().getById(isolatedUser.user.id)).id,
+    )
+    .toBe(isolatedUser.user.id);
+  expect(workspace.origin).toContain(new URL(workspace.tenant.host).host);
+  expect(peerWorkspace.origin).toContain(new URL(peerWorkspace.tenant.host).host);
 });
 
 test("isolated worker helper opens a tenant-scoped workspace", async ({
@@ -32,8 +36,8 @@ test("isolated worker helper opens a tenant-scoped workspace", async ({
     const categoryFactory = workspace.factories.createCategoryFactory();
 
     await categoryFactory.create({ title });
-    await expect(await categoryFactory.findByTitle(title)).not.toBeNull();
+    await expect.poll(async () => (await categoryFactory.findByTitle(title))?.title).toBe(title);
 
-    await expect(workspace.origin).toContain(new URL(workspace.tenant.host).host);
+    expect(workspace.origin).toContain(new URL(workspace.tenant.host).host);
   });
 });
