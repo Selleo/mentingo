@@ -97,4 +97,5 @@ export const USERS_IMPORT_MODAL_HANDLES = {
   RESULT_IMPORTED_TAB: "users-import-modal-result-imported-tab",
   RESULT_SKIPPED_TAB: "users-import-modal-result-skipped-tab",
   RESULT_CLOSE: "users-import-modal-result-close",
+  resultEmail: (email: string) => `users-import-modal-result-email-${email}`,
 } as const;

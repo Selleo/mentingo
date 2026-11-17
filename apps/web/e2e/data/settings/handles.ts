@@ -4,6 +4,7 @@ export const SETTINGS_PAGE_SELECTORS = {
 } as const;
 
 export const SETTINGS_PAGE_HANDLES = {
+  TABS: "settings-tabs",
   ACCOUNT_TAB: "settings-account-tab",
   INTEGRATIONS_TAB: "settings-integrations-tab",
   PUBLIC_COURSE_PREVIEW_SWITCH: "settings-public-course-preview-switch",

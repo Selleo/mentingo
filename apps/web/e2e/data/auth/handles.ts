@@ -20,6 +20,8 @@ export const REGISTER_PAGE_HANDLES = {
   PASSWORD: "register-password-input",
   SUBMIT: "register-submit-button",
   SIGN_IN_LINK: "register-sign-in-link",
+  INVITE_ONLY: "register-invite-only",
+  INVITE_ONLY_SIGN_IN_LINK: "register-invite-only-action",
 } as const;
 
 export const CREATE_NEW_PASSWORD_PAGE_HANDLES = {
@@ -48,4 +50,15 @@ export const MFA_PAGE_HANDLES = {
   SECRET: "mfa-secret-value",
   TOKEN: "mfa-token-input",
   SUBMIT: "mfa-submit-button",
+} as const;
+
+// ErrorPage renders its action as `${testId}-action`.
+export const CONTENT_ACCESS_HANDLES = {
+  COURSE_LOGIN_REQUIRED: "content-access-course-login-required",
+  COURSE_LOGIN_REQUIRED_SIGN_IN_LINK: "content-access-course-login-required-action",
+  COURSE_NOT_FOUND: "content-access-course-not-found",
+  LESSON_LOGIN_REQUIRED: "content-access-lesson-login-required",
+  LESSON_LOGIN_REQUIRED_SIGN_IN_LINK: "content-access-lesson-login-required-action",
+  LESSON_NOT_AUTHORIZED: "content-access-lesson-not-authorized",
+  LESSON_NOT_AUTHORIZED_BACK_LINK: "content-access-lesson-not-authorized-action",
 } as const;

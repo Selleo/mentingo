@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { LOGIN_REDIRECT_URL } from "~/modules/Auth/constants";
 
+import { CONTENT_ACCESS_HANDLES } from "../../../../e2e/data/auth/handles";
+
 import { COURSE_UNAVAILABLE_REASONS, type CourseUnavailableReason } from "./CourseView.constants";
 
 type CourseUnavailableProps = {
@@ -18,6 +20,7 @@ export default function CourseUnavailable({ reason, canAccessCourseList }: Cours
   if (reason === COURSE_UNAVAILABLE_REASONS.NOT_FOUND) {
     return (
       <ErrorPage
+        testId={CONTENT_ACCESS_HANDLES.COURSE_NOT_FOUND}
         iconName="Search"
         title={t("studentCoursesView.courseUnavailable.notFoundTitle")}
         description={t("studentCoursesView.courseUnavailable.notFoundDescription")}
@@ -34,6 +37,7 @@ export default function CourseUnavailable({ reason, canAccessCourseList }: Cours
 
   return (
     <ErrorPage
+      testId={CONTENT_ACCESS_HANDLES.COURSE_LOGIN_REQUIRED}
       iconName="LogIn"
       title={t("studentCoursesView.courseUnavailable.accessTitle")}
       description={t("studentCoursesView.courseUnavailable.accessDescription")}
