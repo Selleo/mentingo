@@ -12,12 +12,12 @@ const ROLES: Array<{ role: USER_ROLE; title: string }> = [
 ];
 
 for (const { role, title } of ROLES) {
-  test(`${title} can browse and open news details`, async ({ factories, withReadonlyPage }) => {
+  test(`${title} can browse and open news details`, async ({ factories, withWorkerPage }) => {
     const newsFactory = factories.createNewsFactory();
     let newsId = "";
     let newsTitle = "";
 
-    await withReadonlyPage(USER_ROLE.admin, async () => {
+    await withWorkerPage(USER_ROLE.admin, async () => {
       const news = await newsFactory.create({
         title: `news-role-${title.replace(/\s+/g, "-")}-${Date.now()}`,
         summary: `news-role-summary-${Date.now()}`,
@@ -30,7 +30,7 @@ for (const { role, title } of ROLES) {
     });
 
     try {
-      await withReadonlyPage(role, async ({ page }) => {
+      await withWorkerPage(role, async ({ page }) => {
         await openNewsPageFlow(page);
         await expect(page.getByTestId(NEWS_PAGE_HANDLES.item(newsId))).toBeVisible();
 
@@ -43,7 +43,7 @@ for (const { role, title } of ROLES) {
         await expect(page.getByTestId(NEWS_DETAILS_PAGE_HANDLES.DELETE_BUTTON)).toHaveCount(0);
       });
     } finally {
-      await withReadonlyPage(USER_ROLE.admin, async () => {
+      await withWorkerPage(USER_ROLE.admin, async () => {
         const existingNews = newsId ? await newsFactory.safeGetById(newsId) : null;
 
         await Promise.allSettled([existingNews ? newsFactory.delete(newsId) : Promise.resolve()]);

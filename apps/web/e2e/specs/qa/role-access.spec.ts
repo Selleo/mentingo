@@ -8,7 +8,6 @@ import { expect, test } from "./qa-test.fixture";
 test("student can read Q&A without management actions", async ({
   cleanup,
   factories,
-  withReadonlyPage,
   withWorkerPage,
 }) => {
   const qaFactory = factories.createQAFactory();
@@ -35,7 +34,7 @@ test("student can read Q&A without management actions", async ({
     qaId = qa.id;
   });
 
-  await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     await openQAPageFlow(page);
 
     await expect(page.getByTestId(QA_PAGE_HANDLES.item(qaId))).toBeVisible();

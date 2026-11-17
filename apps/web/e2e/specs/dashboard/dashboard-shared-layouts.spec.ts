@@ -165,9 +165,9 @@ test("trainer restores the trainer default profile", async ({ createIsolatedWork
 });
 
 test("an unavailable AI environment omits AI Mentor from the catalog and restored layout", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     const expectedWidgets = roleDefaults[SYSTEM_ROLE_SLUGS.STUDENT].filter(
       (widget) => widget.type !== W.AI_MENTOR_PRACTICE,
     );
@@ -191,9 +191,9 @@ test("an unavailable AI environment omits AI Mentor from the catalog and restore
 });
 
 test("a multi-role admin and student restores the management profile", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const managementDefaults = roleDefaults[SYSTEM_ROLE_SLUGS.ADMIN];
     const state = await mockDashboardLayout(page, {
       widgets: reverseLayout(roleDefaults[SYSTEM_ROLE_SLUGS.STUDENT]),
@@ -214,9 +214,9 @@ test("a multi-role admin and student restores the management profile", async ({
 });
 
 test("uses catalog sizes for alignment and does not offer an invalid span", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const widgets: DashboardLayoutWidget[] = [
       { type: W.EVENT_CALENDAR, size: "4x2", visible: true },
       { type: W.TRAINING_COMPLETION, size: "1x1", visible: true },

@@ -14,8 +14,7 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { createFixtureFactories } from "../factories";
 import { createFixtureApiClient } from "../utils/api-client";
 import {
-  AUTH_ACCOUNT_TEMPLATE,
-  getAuthEmail,
+  getWorkerAuthEmail,
   getWorkerAuthStatePath,
   getWorkerTenantAuthEmail,
   getWorkerTenantAuthStatePath,
@@ -228,7 +227,7 @@ const ensureWorkerUserAccount = async (
   workerIndex: number,
   role: UserRole,
 ) => {
-  const email = getAuthEmail(AUTH_ACCOUNT_TEMPLATE.WORKER, role, projectName, workerIndex);
+  const email = getWorkerAuthEmail(projectName, workerIndex, role);
   let user = await findUserByEmail(apiClient, email);
 
   if (!user) {
@@ -328,7 +327,6 @@ export const test = mergedFixture.extend<
     createWorkspaceContext: CreateWorkspaceContext;
     createWorkspacePage: CreateWorkspacePage;
     workerTenantApiClient: FixtureApiClient;
-    withReadonlyPage: WithAuthPage;
     withWorkerPage: WithAuthPage;
     createIsolatedWorkspace: CreateIsolatedWorkspace;
     withIsolatedWorkerPage: WithIsolatedWorkspace;
@@ -583,24 +581,6 @@ export const test = mergedFixture.extend<
         } finally {
           await context.close();
         }
-      },
-    );
-  },
-  withReadonlyPage: async (
-    {
-      withWorkerPage,
-    }: {
-      withWorkerPage: WithAuthPage;
-    },
-    use: (value: WithAuthPage) => Promise<void>,
-  ) => {
-    await use(
-      async (
-        role: UserRole,
-        run: (handle: PageHandle) => Promise<void>,
-        options?: WithAuthPageOptions,
-      ) => {
-        await withWorkerPage(role, run, options);
       },
     );
   },

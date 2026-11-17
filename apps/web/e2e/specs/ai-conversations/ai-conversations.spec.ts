@@ -79,9 +79,9 @@ async function mockConversations(page: Page) {
 }
 
 test("admin browses paginated saved history and evaluation without conversation mutations", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }, testInfo) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const mutations = await mockConversations(page);
     await page.goto("/admin/ai-conversations?status=archived&search=Historical&page=2");
     await expect(page.getByRole("button", { name: "Refresh" })).toHaveCount(0);
@@ -116,9 +116,9 @@ test("admin browses paginated saved history and evaluation without conversation 
 });
 
 test("admin sees an unavailable transcript and can return to the list", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await mockConversations(page);
     await page.route(new RegExp(`/api/admin/ai-threads/${THREAD_ID}(?:\\?|$)`), (route) =>
       route.fulfill({ status: 404, json: { message: "Not found" } }),
@@ -132,9 +132,9 @@ test("admin sees an unavailable transcript and can return to the list", async ({
 });
 
 test("admin Assistant history never requests model-provided images or links", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await mockConversations(page);
     const externalRequests: string[] = [];
     await page.route("**://attacker.invalid/**", (route) => {

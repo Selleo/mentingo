@@ -47,8 +47,8 @@ const FORBIDDEN_ROUTE_REDIRECT_CASES: ForbiddenRouteRedirectCase[] = [
 ];
 
 for (const { role, title, path } of FORBIDDEN_ROUTE_REDIRECT_CASES) {
-  test(`${title} is redirected from ${path} to dashboard`, async ({ withReadonlyPage }) => {
-    await withReadonlyPage(role, async ({ page }) => {
+  test(`${title} is redirected from ${path} to dashboard`, async ({ withWorkerPage }) => {
+    await withWorkerPage(role, async ({ page }) => {
       await page.goto(path);
       await expect(page).toHaveURL("/dashboard");
     });

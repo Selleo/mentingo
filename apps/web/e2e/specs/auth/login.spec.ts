@@ -18,8 +18,8 @@ import { assertToastVisible } from "../../utils/assert-toast-visible";
 
 const { version } = versionJson;
 
-test("admin can sign in and sign out", async ({ apiClient, withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin can sign in and sign out", async ({ apiClient, withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const currentUser = await apiClient.api.authControllerCurrentUser();
 
     await login(page, currentUser.data.data.email, "Password123@");
@@ -37,8 +37,8 @@ test("admin can sign in and sign out", async ({ apiClient, withReadonlyPage }) =
   });
 });
 
-test("visitor can navigate between auth pages", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("visitor can navigate between auth pages", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openLoginPageFlow(page);
 
     await page.getByTestId(LOGIN_PAGE_HANDLES.FORGOT_PASSWORD_LINK).click();
@@ -62,8 +62,8 @@ test("visitor can navigate between auth pages", async ({ withReadonlyPage }) => 
   });
 });
 
-test("visitor can open changelog for the current app version", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("visitor can open changelog for the current app version", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openLoginPageFlow(page);
 
     const changelogLink = page.getByTestId(LOGIN_PAGE_HANDLES.VERSION_CHANGELOG_LINK);
@@ -77,8 +77,8 @@ test("visitor can open changelog for the current app version", async ({ withRead
   });
 });
 
-test("visitor cannot log in with invalid credentials", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("visitor cannot log in with invalid credentials", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openLoginPageFlow(page);
     await fillLoginFormFlow(page, `visitor-${Date.now()}@example.com`, "wrong-password");
     await submitLoginFormFlow(page);

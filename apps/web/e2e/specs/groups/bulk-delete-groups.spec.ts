@@ -9,8 +9,8 @@ import { openDeleteGroupsDialogFlow } from "../../flows/groups/open-delete-group
 import { openGroupsPageFlow } from "../../flows/groups/open-groups-page.flow";
 import { selectGroupsFlow } from "../../flows/groups/select-groups.flow";
 
-test("admin cannot delete groups when no rows are selected", async ({ withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin cannot delete groups when no rows are selected", async ({ withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openGroupsPageFlow(page);
 
     await expect(page.getByTestId(GROUPS_PAGE_HANDLES.BULK_EDIT_TRIGGER)).toBeDisabled();
@@ -20,9 +20,9 @@ test("admin cannot delete groups when no rows are selected", async ({ withReadon
 test("admin can cancel group deletion from the delete dialog", async ({
   cleanup,
   factories,
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const groupFactory = factories.createGroupFactory();
     const prefix = `cancel-delete-group-${Date.now()}`;
     const groups = await groupFactory.createMany(2, (index) => ({

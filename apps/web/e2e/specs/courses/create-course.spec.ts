@@ -47,8 +47,8 @@ test("admin can create a course from the create page", async ({
   });
 });
 
-test("admin cannot submit invalid course data", async ({ factories, withReadonlyPage }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+test("admin cannot submit invalid course data", async ({ factories, withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const courseFactory = factories.createCourseFactory();
     const title = `x`;
 

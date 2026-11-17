@@ -5,9 +5,9 @@ import { expect, test } from "../../fixtures/test.fixture";
 import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
 
 test("user without user-management permission does not see registration form builder", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     await openSettingsPageFlow(page);
 
     await expect(
@@ -17,9 +17,9 @@ test("user without user-management permission does not see registration form bui
 });
 
 test("user without integration API permission does not see integration API key card", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     await openSettingsPageFlow(page);
 
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.INTEGRATION_API_KEY_CARD)).toHaveCount(0);
@@ -27,9 +27,9 @@ test("user without integration API permission does not see integration API key c
 });
 
 test("user without course or user management permission does not see admin notification preferences", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     await openSettingsPageFlow(page);
 
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.NOTIFICATION_PREFERENCES_CARD)).toHaveCount(
@@ -39,9 +39,9 @@ test("user without course or user management permission does not see admin notif
 });
 
 test("student-level user can still access language and password settings", async ({
-  withReadonlyPage,
+  withWorkerPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.student, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     await openSettingsPageFlow(page);
 
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.LANGUAGE_SELECT)).toBeVisible();
