@@ -1,3 +1,53 @@
+<a name="v4.33.0"></a>
+
+## [v4.33.0] - 17.11.2026
+
+### Features:
+
+- add audio completion tracking setting ([#2208](https://github.com/Selleo/mentingo/issues/2208))
+
+- display lesson statuses in the lesson sidebar ([#2231](https://github.com/Selleo/mentingo/issues/2231))
+
+- add forum API with general topics and course threads ([#2189](https://github.com/Selleo/mentingo/issues/2189))
+
+- notify learners and reviewers about open answer grading ([#2225](https://github.com/Selleo/mentingo/issues/2225))
+
+- count re-graded quiz scores toward achievements ([#2206](https://github.com/Selleo/mentingo/issues/2206))
+
+- let reviewers grade open quiz answers ([#2179](https://github.com/Selleo/mentingo/issues/2179))
+
+- add quiz time limit to the editor and learner view ([#2180](https://github.com/Selleo/mentingo/issues/2180))
+
+### Bug Fixes:
+
+- give the video play button a name instead of the thumbnail URL ([#2244](https://github.com/Selleo/mentingo/issues/2244))
+
+- make PDF previews load reliably ([#2255](https://github.com/Selleo/mentingo/issues/2255))
+
+- speed up SCORM export and keep SCORM preview playback stable ([#2234](https://github.com/Selleo/mentingo/issues/2234))
+
+- remove the redundant SSO settings section ([#2201](https://github.com/Selleo/mentingo/issues/2201))
+
+- show achievement toasts for rewards earned in lessons ([#2227](https://github.com/Selleo/mentingo/issues/2227))
+
+- enable Voice Mentor in lesson previews for authorized users ([#2197](https://github.com/Selleo/mentingo/issues/2197))
+
+- stretch placed matching answers across the slot and center their text ([#2205](https://github.com/Selleo/mentingo/issues/2205))
+
+- align course completion conditions and action audiences in automations ([#2188](https://github.com/Selleo/mentingo/issues/2188))
+
+### Chores:
+
+- add content marketplace course preview with chapters, lessons and learning outcomes ([#2200](https://github.com/Selleo/mentingo/issues/2200))
+
+- align registration with password login settings ([#2207](https://github.com/Selleo/mentingo/issues/2207))
+
+- include audio playback in content lesson learning time calculations ([#2191](https://github.com/Selleo/mentingo/issues/2191))
+
+### Tests:
+
+- cover matching questions in duplication, translation and SCORM ([#2223](https://github.com/Selleo/mentingo/issues/2223))
+
 <a name="v4.32.0"></a>
 
 ## [v4.32.0] - 12.11.2026
@@ -19,6 +69,10 @@
 - make outbox event processing reliable and unified ([#2181](https://github.com/Selleo/mentingo/issues/2181))
 
 - add activity logs to native import and export ([#2175](https://github.com/Selleo/mentingo/issues/2175))
+
+### Documentation:
+
+- update changelog for version v4.32.0
 
 <a name="v4.31.1"></a>
 
@@ -3800,7 +3854,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.32.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.33.0...HEAD
+[v4.33.0]: https://github.com/Selleo/mentingo/compare/v4.32.0...v4.33.0
 [v4.32.0]: https://github.com/Selleo/mentingo/compare/v4.31.1...v4.32.0
 [v4.31.1]: https://github.com/Selleo/mentingo/compare/v4.31.0...v4.31.1
 [v4.31.0]: https://github.com/Selleo/mentingo/compare/v4.30.0...v4.31.0
