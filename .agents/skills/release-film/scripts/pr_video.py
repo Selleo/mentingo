@@ -72,46 +72,39 @@ def inspect(repository, number, actor, repo, run, expected_head=None):
     merge_base = git(repo, "merge-base", base, head).strip()
     names = git(repo, "diff", "--name-only", "-z", merge_base, head).split("\0")
     names = [name for name in names if name]
-    if len(names) > 80:
-        raise ValueError(
-            "PR exceeds 80 changed files; split the PR before automatic recording"
-        )
-    files = []
     for name in names:
         if Path(name).is_absolute() or ".." in Path(name).parts:
             raise ValueError("Unsafe changed path")
-        diff = git(
-            repo,
-            "diff",
-            "--no-ext-diff",
-            "--no-color",
-            "--unified=3",
-            merge_base,
-            head,
-            "--",
-            name,
-        )
-        files.append({"path": name, "diff": diff})
-    # Specs come from the trusted control checkout; PR prose/code is reference data.
+    # Names route specs and existing browser fixtures; implementation code never
+    # enters the planner. Read specs as inert text from the immutable PR head.
+    inventory = {
+        path
+        for path in git(
+            repo, "ls-tree", "-r", "--name-only", "-z", head, "--", "docs/specs/"
+        ).split("\0")
+        if path.startswith("docs/specs/") and path.endswith("-business-spec.md")
+    }
     registry = core.load(
         repo / ".agents/skills/release-film/projects/mentingo-self-onboarding.json"
     )
     specs = set()
     for domain in registry["domains"]:
-        patterns = list(domain["watchPaths"])
-        if any(fnmatch.fnmatchcase(name, path) for name in names for path in patterns):
+        if any(
+            fnmatch.fnmatchcase(name, pattern)
+            for name in names
+            for pattern in domain["watchPaths"]
+        ):
             specs.update(domain["specPaths"])
-    specs.update(
-        name
-        for name in names
-        if name.startswith("docs/specs/") and (repo / name).is_file()
-    )
+    specs.update(name for name in names if name in inventory)
+    specs.intersection_update(inventory)
+    if not specs:
+        specs = inventory  # New/unregistered areas can still route by overview.
     inputs = {
         "title": pr["title"],
         "body": pr.get("body") or "",
-        "files": files,
+        "files": [{"path": name} for name in names],
         "business_specs": [
-            {"path": path, "content": (repo / path).read_text()}
+            {"path": path, "content": git(repo, "show", f"{head}:{path}")}
             for path in sorted(specs)
         ],
     }
@@ -210,7 +203,18 @@ def prepare(run, repo):
             "title": re.sub(r"[\r\n|]+", " ", item["title"])[:200],
             "proofs": [],
             "base": bases[0],
-            "show": json.dumps(item, ensure_ascii=False).replace("|", "/"),
+            "show": json.dumps(
+                dict(
+                    item,
+                    verification=(
+                        "This flow was selected only from the PR overview and cited business specs. "
+                        "Inspect only the relevant implementation and existing browser helpers to verify this flow. "
+                        "Do not derive additional flows from code or expand into a product tour. "
+                        "Prove the described visible outcome on screen; report a scene failure if it is unsupported."
+                    ),
+                ),
+                ensure_ascii=False,
+            ).replace("|", "/"),
         }
         for index, item in enumerate(plan["flows"], 1)
     ]

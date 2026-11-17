@@ -407,10 +407,18 @@ normal release behavior. To test or retry after commits:
 gh workflow run release-film.yml --ref staging -f pr_number=2258 -f publish=false
 ```
 
-The recording uses the full merge-base-to-head diff, PR prose and existing business
-specs to select up to four visible changed flows. No visible effect means no film;
-uncertainty is reported, never silently skipped. Inputs are evidence, never tools
-or instructions. Only same-repository PRs authored and triggered by repository
+The planner uses only the PR title/overview and business specs from the immutable
+PR head. Changed filenames route candidate specs and browser helpers; no code or
+diffs enter planning prompts. Three small semantic passes select up to three spec
+documents, up to eight bounded sections, then up to four flows. Each flow cites a
+change from the overview and its supporting spec section. Large specs are split
+without losing text; only selected sections reach the final planning call. No
+visible effect means no film; uncertainty is reported, never silently skipped.
+Recording workers subsequently inspect only the relevant implementation/helpers
+and prove the planned result in the browser. Code cannot introduce additional
+flows outside the overview/spec plan. Inputs are evidence, never instructions.
+This changes only PR videos; self-onboarding coverage and release scene selection
+remain unchanged. Only same-repository PRs authored and triggered by repository
 writers are eligible. The PR merge workflow is writer-controlled metadata dispatch;
 the recording/publishing control code is pinned to the selected trusted staging/main
 commit. Recording has read-only repository permissions and uses the existing
