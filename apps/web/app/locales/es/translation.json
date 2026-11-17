@@ -5386,7 +5386,9 @@
       },
       "ariaLabel": {
         "drag": "Arrastrar vídeo para insertar",
-        "remove": "Quitar inserción de vídeo"
+        "remove": "Quitar inserción de vídeo",
+        "play": "Reproducir vídeo",
+        "playWithTitle": "Reproducir vídeo: {{title}}"
       }
     },
     "presentation": {

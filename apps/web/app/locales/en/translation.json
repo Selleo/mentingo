@@ -5449,7 +5449,9 @@
       },
       "ariaLabel": {
         "drag": "Drag video embed",
-        "remove": "Remove video embed"
+        "remove": "Remove video embed",
+        "play": "Play video",
+        "playWithTitle": "Play video: {{title}}"
       }
     },
     "presentation": {

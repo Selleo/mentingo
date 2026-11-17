@@ -5438,7 +5438,9 @@
       },
       "ariaLabel": {
         "drag": "Přetáhněte vložení videa",
-        "remove": "Odebrat vložení videa"
+        "remove": "Odebrat vložení videa",
+        "play": "Přehrát video",
+        "playWithTitle": "Přehrát video: {{title}}"
       }
     },
     "presentation": {

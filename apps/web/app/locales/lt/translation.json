@@ -5433,7 +5433,9 @@
       },
       "ariaLabel": {
         "drag": "Vilkite vaizdo įrašo įdėjimą",
-        "remove": "Pašalinti vaizdo įrašo įdėjimą"
+        "remove": "Pašalinti vaizdo įrašo įdėjimą",
+        "play": "Paleisti vaizdo įrašą",
+        "playWithTitle": "Paleisti vaizdo įrašą: {{title}}"
       }
     },
     "presentation": {

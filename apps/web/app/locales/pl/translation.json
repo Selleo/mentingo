@@ -5747,7 +5747,9 @@
       },
       "ariaLabel": {
         "drag": "Przeciągnij osadzone wideo",
-        "remove": "Usuń osadzone wideo"
+        "remove": "Usuń osadzone wideo",
+        "play": "Odtwórz wideo",
+        "playWithTitle": "Odtwórz wideo: {{title}}"
       }
     },
     "presentation": {

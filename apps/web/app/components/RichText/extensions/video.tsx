@@ -30,6 +30,7 @@ import type { VideoCoverageSnapshotChange } from "~/components/VideoPlayer/video
 
 type VideoViewerOptions = {
   onVideoEnded?: (index: number | null) => void;
+  videoTitle?: string;
   videoCoverageTracking?: {
     enabled: boolean;
     showCoverageMarkers?: boolean;
@@ -228,7 +229,8 @@ const VideoEditorView = ({ node, editor, getPos }: NodeViewProps) => {
 
 const VideoViewerView = ({ node, extension }: NodeViewProps) => {
   const attrs = normalizeVideoEmbedAttributes(node.attrs);
-  const { onVideoEnded, videoCoverageTracking } = extension.options as VideoViewerOptions;
+  const { onVideoEnded, videoCoverageTracking, videoTitle } =
+    extension.options as VideoViewerOptions;
 
   if (!attrs.src) return null;
 
@@ -256,6 +258,7 @@ const VideoViewerView = ({ node, extension }: NodeViewProps) => {
         provider={attrs.provider}
         index={attrs.index}
         onEnded={onVideoEnded}
+        title={videoTitle}
         coverageTracking={{
           enabled: trackingEnabled,
           showCoverageMarkers: trackingEnabled && videoCoverageTracking?.showCoverageMarkers,
