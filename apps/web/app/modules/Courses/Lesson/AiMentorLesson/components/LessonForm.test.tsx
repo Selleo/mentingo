@@ -109,14 +109,29 @@ describe("preview voice composer", () => {
   });
 });
 
-describe("message input label", () => {
-  it("connects a visible label to the message field", () => {
+describe("message input", () => {
+  it("names the message field without adding a visible label", () => {
     const label = i18next.t("studentCourseView.lesson.aiMentorLesson.messageLabel");
 
     renderForm();
-    expect(screen.getByText(label)).toBeVisible();
-    expect(screen.getByLabelText(label)).toBe(
+    expect(screen.getByRole("textbox", { name: label })).toBe(
       screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT),
     );
+    expect(screen.queryByText(label)).not.toBeInTheDocument();
+  });
+
+  it("sends once on Enter and not on Shift+Enter", () => {
+    renderWith().render(
+      <TooltipProvider>
+        <LessonForm {...props} textReadOnly={false} input="Hello" />
+      </TooltipProvider>,
+    );
+    const textbox = screen.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT);
+
+    fireEvent.keyDown(textbox, { key: "Enter", shiftKey: true });
+    expect(props.handleSubmit).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(textbox, { key: "Enter" });
+    expect(props.handleSubmit).toHaveBeenCalledOnce();
   });
 });

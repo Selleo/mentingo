@@ -230,7 +230,7 @@ export function AiMentorPracticeConversation({
             />
           )}
 
-          <ChatReplyAnnouncer messages={messages} isProcessing={isProcessing} />
+          <ChatReplyAnnouncer messages={messages} status={status} />
 
           {isJudgePending && <AiMentorEvaluationLoader />}
 

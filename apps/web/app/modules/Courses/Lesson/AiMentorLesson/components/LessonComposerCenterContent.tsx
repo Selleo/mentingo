@@ -1,9 +1,7 @@
 import { VoiceLevelBars } from "@mentingo/voice";
 import { AnimatePresence, motion } from "motion/react";
-import { useId } from "react";
 
 import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
-import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 
 import type { ChangeEvent } from "react";
@@ -18,7 +16,6 @@ type LessonComposerCenterContentProps = {
   onSubmit: () => void;
   textInputTestId?: string;
   ariaLabel?: string;
-  label?: string;
 };
 
 export function LessonComposerCenterContent({
@@ -31,10 +28,7 @@ export function LessonComposerCenterContent({
   onSubmit,
   textInputTestId,
   ariaLabel,
-  label,
 }: LessonComposerCenterContentProps) {
-  const textareaId = useId();
-
   return (
     <div className="flex w-full flex-col min-w-0">
       <AnimatePresence initial={false} mode="wait">
@@ -58,13 +52,7 @@ export function LessonComposerCenterContent({
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="w-full min-w-0"
           >
-            {label && (
-              <Label htmlFor={textareaId} className="block text-xs font-medium text-neutral-700">
-                {label}
-              </Label>
-            )}
             <AutosizeTextarea
-              id={textareaId}
               data-testid={textInputTestId}
               aria-label={ariaLabel}
               value={input}
