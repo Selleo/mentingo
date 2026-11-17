@@ -20,8 +20,7 @@ export const updateNewsFlow = async (
   await page.getByTestId(NEWS_FORM_PAGE_HANDLES.PAGE).waitFor({ state: "visible" });
   await fillNewsFormFlow(page, { title, summary, status });
   await submitNewsFormFlow(page);
-  if (page.url().endsWith("/edit")) {
-    await page.goto(`/news/${newsId}`);
-  }
+  // Saving navigates to the details page; leaving earlier would cancel the update request.
+  await page.waitForURL(new RegExp(`/news/${newsId}$`));
   await page.getByTestId(NEWS_DETAILS_PAGE_HANDLES.PAGE).waitFor({ state: "visible" });
 };
