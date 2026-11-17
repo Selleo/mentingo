@@ -64,6 +64,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
                   value="true"
                   {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
                   name={`trueOrFalseQuestions.${question.id}.${id}`}
+                  disabled={isCompleted}
                 />
                 {t("studentLessonView.other.true")}
               </label>
@@ -74,6 +75,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
                   })}
                   {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
                   name={`trueOrFalseQuestions.${question.id}.${id}`}
+                  disabled={isCompleted}
                   type="radio"
                   value="false"
                 />

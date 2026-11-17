@@ -82,6 +82,8 @@ export const SingleSelect = ({
         })}
         id={answerId}
         readOnly
+        // pointer-events-none only stops the mouse; disabled also stops arrow keys and Space.
+        disabled={isFieldDisabled}
         type="radio"
         value={answerId}
         {...register(`${optionFieldId}.${questionId}.${answerId}`)}
