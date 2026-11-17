@@ -1,5 +1,5 @@
 import { matchesRequirement, PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useCompetenciesConfiguration } from "~/api/queries/useCompetenciesConfiguration";
@@ -252,5 +252,27 @@ describe("global search mounting", () => {
     render(<Navigation />);
 
     expect(screen.getAllByTestId("global-search")).toHaveLength(1);
+  });
+});
+
+describe("sidebar collapse toggle", () => {
+  it("names the toggle after the action it performs", async () => {
+    vi.mocked(usePhishingConfiguration).mockReturnValue({
+      data: { enabled: false },
+      isError: false,
+    } as ReturnType<typeof usePhishingConfiguration>);
+    vi.spyOn(window, "innerWidth", "get").mockReturnValue(1440);
+    useNavigationStore.setState({ isSidebarCollapsed: false });
+
+    render(<Navigation />);
+
+    const toggle = await screen.findByRole("button", {
+      name: "navigationSideBar.ariaLabels.collapseSidebar",
+    });
+    fireEvent.click(toggle);
+
+    expect(
+      screen.getByRole("button", { name: "navigationSideBar.ariaLabels.expandSidebar" }),
+    ).toBeInTheDocument();
   });
 });

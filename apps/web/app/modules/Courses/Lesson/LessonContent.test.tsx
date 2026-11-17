@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { renderWith } from "~/utils/testUtils";
 
 import { LessonContent } from "./LessonContent";
+import { makeCourse, makeLesson } from "./testFactories";
 
 import type { GetCourseResponse, GetLessonByIdResponse } from "~/api/generated-api";
 
@@ -58,4 +59,23 @@ describe("lesson content in statistics", () => {
       expect(screen.queryByText("Enroll or enable learning mode")).not.toBeInTheDocument();
     },
   );
+});
+
+describe("lesson navigation controls", () => {
+  it("gives the previous and next lesson arrows accessible names", () => {
+    renderWith({ withQuery: true }).render(
+      <LessonContent
+        lesson={makeLesson()}
+        course={makeCourse()}
+        handlePrevious={vi.fn()}
+        handleNext={vi.fn()}
+        isFirstLesson={false}
+        isLastLesson={false}
+        lessonLoading={false}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Previous lesson" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Next lesson" })).toBeInTheDocument();
+  });
 });

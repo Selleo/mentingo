@@ -724,7 +724,7 @@
       "back": "Zadní",
       "proceed": "Pokračovat",
       "add": "Přidat",
-      "close": "Blízko",
+      "close": "Zavřít",
       "goToDashboard": "Přejděte na řídicí panel",
       "goBack": "Vraťte se",
       "ignore": "Ignorovat",
@@ -1111,7 +1111,9 @@
     "promotionCodes": "Propagační kódy",
     "manage": "Spravovat",
     "ariaLabels": {
-      "goToAvailableCourses": "Přejděte na dostupné kurzy"
+      "goToAvailableCourses": "Přejděte na dostupné kurzy",
+      "collapseSidebar": "Sbalit postranní panel",
+      "expandSidebar": "Rozbalit postranní panel"
     },
     "qa": "Otázky a odpovědi",
     "tenants": "Organizace",
@@ -4564,6 +4566,10 @@
       "requirementMultiple": "Pro dokončení lekce zhlédněte všechna videa a poslechněte všechny zvukové nahrávky.",
       "label": "Průběh lekce",
       "overviewAriaLabel": "Průběh médií lekce"
+    },
+    "navigation": {
+      "previousLesson": "Předchozí lekce",
+      "nextLesson": "Další lekce"
     }
   },
   "studentCourseView": {
@@ -4995,7 +5001,7 @@
       "courseCompletionRequired": "Před vygenerováním certifikátu musíte kurz dokončit."
     },
     "button": {
-      "download": "Stáhnout",
+      "download": "Stáhnout certifikát (PDF)",
       "preview": "Náhled",
       "shareLinkedIn": "Sdílet na LinkedIn"
     },

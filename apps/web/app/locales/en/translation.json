@@ -1105,7 +1105,9 @@
     "promotionCodes": "Promotion Codes",
     "manage": "Manage",
     "ariaLabels": {
-      "goToAvailableCourses": "Go to available courses"
+      "goToAvailableCourses": "Go to available courses",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar"
     },
     "qa": "Q&A",
     "tenants": "Organizations",
@@ -4558,6 +4560,10 @@
       "requirementMultiple": "Watch all videos and listen to all audio recordings to complete this lesson.",
       "label": "Lesson progress",
       "overviewAriaLabel": "Lesson media progress"
+    },
+    "navigation": {
+      "previousLesson": "Previous lesson",
+      "nextLesson": "Next lesson"
     }
   },
   "studentCourseView": {
@@ -4987,7 +4993,7 @@
       "courseCompletionRequired": "You must complete the course before generating a certificate."
     },
     "button": {
-      "download": "Download",
+      "download": "Download certificate (PDF)",
       "preview": "Preview",
       "shareLinkedIn": "Share on LinkedIn"
     },

@@ -1105,7 +1105,9 @@
     "promotionCodes": "Reklamos kodai",
     "manage": "Tvarkyti",
     "ariaLabels": {
-      "goToAvailableCourses": "Eikite į galimus kursus"
+      "goToAvailableCourses": "Eikite į galimus kursus",
+      "collapseSidebar": "Sutraukti šoninę juostą",
+      "expandSidebar": "Išskleisti šoninę juostą"
     },
     "qa": "Klausimai ir atsakymai",
     "tenants": "Organizacijos",
@@ -4559,6 +4561,10 @@
       "requirementMultiple": "Peržiūrėkite visus vaizdo įrašus ir perklausykite visus garso įrašus, kad užbaigtumėte šią pamoką.",
       "label": "Pamokos pažanga",
       "overviewAriaLabel": "Pamokos medžiagos pažanga"
+    },
+    "navigation": {
+      "previousLesson": "Ankstesnė pamoka",
+      "nextLesson": "Kita pamoka"
     }
   },
   "studentCourseView": {
@@ -4990,7 +4996,7 @@
       "courseCompletionRequired": "Prieš generuodami sertifikatą, turite baigti kursą."
     },
     "button": {
-      "download": "Atsisiųsti",
+      "download": "Atsisiųsti sertifikatą (PDF)",
       "preview": "Peržiūra",
       "shareLinkedIn": "Bendrinkite „LinkedIn“."
     },

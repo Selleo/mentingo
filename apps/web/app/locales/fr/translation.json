@@ -1104,7 +1104,9 @@
     "promotionCodes": "Codes promotionnels",
     "manage": "Gérer",
     "ariaLabels": {
-      "goToAvailableCourses": "Aller aux cours disponibles"
+      "goToAvailableCourses": "Aller aux cours disponibles",
+      "collapseSidebar": "Réduire la barre latérale",
+      "expandSidebar": "Développer la barre latérale"
     },
     "qa": "Questions et réponses",
     "tenants": "Organisations",
@@ -4305,6 +4307,10 @@
       "requirementMultiple": "Regardez toutes les vidéos et écoutez tous les enregistrements audio pour terminer cette leçon.",
       "label": "Progression de la leçon",
       "overviewAriaLabel": "Progression des médias de la leçon"
+    },
+    "navigation": {
+      "previousLesson": "Leçon précédente",
+      "nextLesson": "Leçon suivante"
     }
   },
   "studentCourseView": {
@@ -4718,7 +4724,7 @@
       "courseCompletionRequired": "Vous devez terminer le cours avant de générer un certificat."
     },
     "button": {
-      "download": "Télécharger",
+      "download": "Télécharger le certificat (PDF)",
       "preview": "Aperçu",
       "shareLinkedIn": "Partager sur LinkedIn"
     },
