@@ -4937,7 +4937,8 @@
     "inProgress": "En progreso",
     "notStarted": "No iniciado",
     "blocked": "Bloqueado",
-    "awaitingReview": "Pendiente de revisión"
+    "awaitingReview": "Pendiente de revisión",
+    "failed": "No superado"
   },
   "studentCertificateView": {
     "header": "Certificados",
@@ -6637,12 +6638,6 @@
       "averageRating": "Valoración media",
       "detailedStatisticsSoon": "Estadísticas detalladas próximamente",
       "detailedStatisticsDescription": "Esta sección mostrará análisis completos del progreso, finalización de capítulos, participación y mucho más.",
-      "status": {
-        "completed": "Completado",
-        "inProgress": "En curso",
-        "notStarted": "No iniciado",
-        "awaitingReview": "Pendiente de revisión"
-      },
       "lessonTypes": {
         "content": "Contenido",
         "quiz": "Cuestionario",

@@ -5000,7 +5000,8 @@
     "inProgress": "In Progress",
     "notStarted": "Not Started",
     "blocked": "Blocked",
-    "awaitingReview": "Waiting for review"
+    "awaitingReview": "Waiting for review",
+    "failed": "Failed"
   },
   "studentCertificateView": {
     "header": "Certificates",
@@ -6700,13 +6701,6 @@
       "averageRating": "Avg. rating",
       "detailedStatisticsSoon": "Detailed statistics coming soon",
       "detailedStatisticsDescription": "This section will display comprehensive analytics including student progress over time, chapter completion rates, engagement metrics, and more.",
-      "status": {
-        "started": "Started",
-        "completed": "Completed",
-        "inProgress": "In progress",
-        "notStarted": "Not started",
-        "awaitingReview": "Waiting for review"
-      },
       "lessonTypes": {
         "content": "Content",
         "quiz": "Quiz",

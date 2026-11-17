@@ -19,6 +19,7 @@ const badgeVariants = cva("", {
       notStartedFilled: "bg-neutral-50 text-neutral-900 details-md",
       blocked: "text-neutral-600 bg-neutral-100",
       blockedFilled: "bg-neutral-50 text-black details-md",
+      failedFilled: "text-error-700 bg-error-50",
       secondary: "border-transparent bg-secondary text-accent-foreground hover:bg-secondary/80",
       secondaryWithOutline: "border-transparent bg-secondary text-accent-foreground hover:bg-secondary/80 border border-primary-300",
       destructive:

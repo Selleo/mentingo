@@ -4731,7 +4731,8 @@
     "inProgress": "En cours",
     "notStarted": "Non démarré",
     "blocked": "Bloqué",
-    "awaitingReview": "En attente d'évaluation"
+    "awaitingReview": "En attente d'évaluation",
+    "failed": "Non réussi"
   },
   "studentCertificateView": {
     "header": "Certificats",
@@ -6431,13 +6432,6 @@
       "averageRating": "Note moyenne",
       "detailedStatisticsSoon": "Statistiques détaillées bientôt disponibles",
       "detailedStatisticsDescription": "Cette section affichera des analyses détaillées, notamment la progression des étudiants au fil du temps, les taux de validation des chapitres, les indicateurs d'engagement et plus encore.",
-      "status": {
-        "started": "Commencé",
-        "completed": "Terminé",
-        "inProgress": "En cours",
-        "notStarted": "Non commencé",
-        "awaitingReview": "En attente d'évaluation"
-      },
       "lessonTypes": {
         "content": "Contenu",
         "quiz": "Quiz",

@@ -5003,7 +5003,8 @@
     "inProgress": "Vykdoma",
     "notStarted": "Nepradėtas",
     "blocked": "Užblokuota",
-    "awaitingReview": "Laukia įvertinimo"
+    "awaitingReview": "Laukia įvertinimo",
+    "failed": "Neišlaikyta"
   },
   "studentCertificateView": {
     "header": "Sertifikatai",
@@ -6691,13 +6692,6 @@
       "averageRating": "Vid. įvertinimas",
       "detailedStatisticsSoon": "Išsami statistika jau netrukus",
       "detailedStatisticsDescription": "Šioje skiltyje bus rodoma išsami pažangos, skyrių baigimo, įsitraukimo ir kitų duomenų analizė.",
-      "status": {
-        "started": "Pradėta",
-        "completed": "Baigta",
-        "inProgress": "Vykdoma",
-        "notStarted": "Nepradėta",
-        "awaitingReview": "Laukia įvertinimo"
-      },
       "lessonTypes": {
         "content": "Turinys",
         "quiz": "Testas",

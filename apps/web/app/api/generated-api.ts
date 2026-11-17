@@ -2635,7 +2635,10 @@ export interface GetCourseResponse {
         title: string;
         type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
         displayOrder: number;
-        status: ("not_started" | "in_progress" | "completed" | "blocked") | "awaiting_review";
+        status:
+          | ("not_started" | "in_progress" | "completed" | "blocked")
+          | "awaiting_review"
+          | "failed";
         quizQuestionCount: number | null;
         isExternal?: boolean;
         lessonResources?: {
@@ -3437,7 +3440,10 @@ export interface GetChapterWithLessonResponse {
       title: string;
       type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
       displayOrder: number;
-      status: ("not_started" | "in_progress" | "completed" | "blocked") | "awaiting_review";
+      status:
+        | ("not_started" | "in_progress" | "completed" | "blocked")
+        | "awaiting_review"
+        | "failed";
       quizQuestionCount: number | null;
       isExternal?: boolean;
       lessonResources?: {

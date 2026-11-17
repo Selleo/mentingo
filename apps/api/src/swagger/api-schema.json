@@ -40186,6 +40186,10 @@
                               {
                                 "const": "awaiting_review",
                                 "type": "string"
+                              },
+                              {
+                                "const": "failed",
+                                "type": "string"
                               }
                             ]
                           },
@@ -43764,6 +43768,10 @@
                         },
                         {
                           "const": "awaiting_review",
+                          "type": "string"
+                        },
+                        {
+                          "const": "failed",
                           "type": "string"
                         }
                       ]
