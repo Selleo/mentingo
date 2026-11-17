@@ -71,6 +71,8 @@ export class LearningPathCertificateController {
 
     const asciiFilename =
       filename
+        // Keep base letters of accented characters (ó -> o) in the ASCII fallback.
+        .normalize("NFD")
         .replace(/[^\x20-\x7E]/g, "")
         .replace(/["\\]/g, "")
         .trim() || "certificate.pdf";

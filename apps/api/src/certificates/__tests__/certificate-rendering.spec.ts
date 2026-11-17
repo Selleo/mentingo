@@ -1,6 +1,8 @@
 import {
+  buildCertificateDocumentTitle,
   buildCertificateHtmlDocument,
   buildCertificateMarkup,
+  buildCertificatePdfFilename,
   CERTIFICATE_KIND,
   CERTIFICATE_STYLES,
   defaultCertificateRenderTheme,
@@ -103,6 +105,7 @@ describe("certificate markup security", () => {
           expiryDate: "2027-01-01",
           isDownload: true,
         }),
+        { lang, courseName: "Course" },
       );
       expect(document).not.toContain("<script");
       expect(document).not.toContain("<base");
@@ -112,6 +115,71 @@ describe("certificate markup security", () => {
       expect(document).toContain("297mm");
     },
   );
+});
+
+describe("certificate PDF document metadata", () => {
+  it.each(Object.values(SUPPORTED_LANGUAGES))(
+    "sets the document language and translated title in %s",
+    (lang) => {
+      const document = buildCertificateHtmlDocument("<p>Certificate</p>", {
+        lang,
+        courseName: "Kurs <b>BHP</b>",
+      });
+      const title = buildCertificateDocumentTitle({ lang, courseName: "Kurs <b>BHP</b>" });
+
+      expect(document).toContain(`<html lang="${lang}">`);
+      expect(title).toMatch(/ – Kurs <b>BHP<\/b>$/);
+      expect(document).toContain("<title>");
+      expect(document).toContain(" – Kurs &lt;b&gt;BHP&lt;/b&gt;</title>");
+    },
+  );
+
+  it("translates the document title", () => {
+    expect(buildCertificateDocumentTitle({ lang: "pl", courseName: "Pierwsza pomoc" })).toBe(
+      "Certyfikat ukończenia – Pierwsza pomoc",
+    );
+    expect(buildCertificateDocumentTitle({ lang: "en", courseName: "First aid" })).toBe(
+      "Certificate of completion – First aid",
+    );
+    expect(buildCertificateDocumentTitle({ lang: "de", courseName: " " })).toBe(
+      "Abschlusszertifikat",
+    );
+  });
+
+  it("names the file with the translated word, course and learner", () => {
+    expect(
+      buildCertificatePdfFilename({
+        lang: "pl",
+        courseName: "Pierwsza pomoc",
+        studentName: "Łukasz Żółkiewski",
+      }),
+    ).toBe("Certyfikat - Pierwsza pomoc - Łukasz Żółkiewski.pdf");
+  });
+
+  it("removes characters that are illegal in file names", () => {
+    expect(
+      buildCertificatePdfFilename({
+        lang: "en",
+        courseName: 'AI/ML: "Basics" <v2>\\?*|',
+        studentName: "Jane\u0000 Doe",
+      }),
+    ).toBe("Certificate - AI ML Basics v2 - Jane Doe.pdf");
+  });
+
+  it("skips empty parts and caps the length", () => {
+    expect(buildCertificatePdfFilename({ lang: "fr", courseName: "", studentName: " " })).toBe(
+      "Certificat.pdf",
+    );
+
+    const filename = buildCertificatePdfFilename({
+      lang: "en",
+      courseName: "Ż".repeat(300),
+      studentName: "Jane Doe",
+    });
+
+    expect(Array.from(filename)).toHaveLength(124);
+    expect(filename).toMatch(/^Certificate - Ż+\.pdf$/);
+  });
 });
 
 describe.each(classes)("%p rendering", (Service) => {

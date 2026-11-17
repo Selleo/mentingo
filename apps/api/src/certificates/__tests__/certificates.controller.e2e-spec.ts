@@ -53,6 +53,21 @@ import type { DatabasePg } from "src/common";
 // The first PDF render launches the shared headless browser, which can exceed the default timeout on CI.
 const FIRST_PDF_RENDER_TIMEOUT_MS = 90_000;
 
+// Chromium writes the catalog and info dictionaries uncompressed, so the raw bytes can be searched.
+const readPdfDocumentMetadata = (pdf: Buffer) => {
+  const source = pdf.toString("latin1");
+  // Chromium encodes non-ASCII titles as UTF-16BE hex strings with a byte order mark.
+  const hexTitle = /\/Title\s*<FEFF([0-9A-F]*)>/i.exec(source)?.[1] ?? "";
+
+  return {
+    lang: /\/Lang\s*\(([^)]*)\)/.exec(source)?.[1],
+    title: Buffer.from(hexTitle, "hex").swap16().toString("utf16le"),
+    displaysDocTitle: /\/DisplayDocTitle\s+true/.test(source),
+    isMarked: /\/MarkInfo\s*<<[^>]*\/Marked\s+true/.test(source),
+    hasStructTreeRoot: /\/StructTreeRoot\b/.test(source),
+  };
+};
+
 describe("CertificatesController (e2e)", () => {
   let app: INestApplication;
   let inTenant: <T>(fn: () => Promise<T>) => Promise<T>;
@@ -1697,7 +1712,7 @@ describe("CertificatesController (e2e)", () => {
           const student = await userFactory
             .withCredentials({ password })
             .withUserSettings(db)
-            .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+            .create({ role: SYSTEM_ROLE_SLUGS.STUDENT, firstName: "Jan", lastName: "Kowalski" });
           const cookies = await cookieFor(student, app);
           const category = await categoryFactory.create();
           const course = await courseFactory.create({
@@ -1722,19 +1737,23 @@ describe("CertificatesController (e2e)", () => {
             .expect(201);
 
           expect(response.headers["content-type"]).toBe("application/pdf");
-          expect(response.headers["content-disposition"]).toContain(
-            'attachment; filename="Python Basics.pdf"',
-          );
-          expect(response.headers["content-disposition"]).toContain(
-            "filename*=UTF-8''Python%20Basics.pdf",
+          expect(response.headers["content-disposition"]).toBe(
+            "attachment; filename=\"Certificate - Python Basics - Jan Kowalski.pdf\"; filename*=UTF-8''Certificate%20-%20Python%20Basics%20-%20Jan%20Kowalski.pdf",
           );
           expect(response.body instanceof Buffer).toBe(true);
           expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
+          expect(readPdfDocumentMetadata(response.body)).toEqual({
+            lang: "en",
+            title: "Certificate of completion – Python Basics",
+            displaysDocTitle: true,
+            isMarked: true,
+            hasStructTreeRoot: true,
+          });
         },
         FIRST_PDF_RENDER_TIMEOUT_MS,
       );
 
-      it("returns pdf file with custom filename", async () => {
+      it("returns a polish pdf with translated metadata and file name", async () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
@@ -1742,7 +1761,11 @@ describe("CertificatesController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+          .create({
+            role: SYSTEM_ROLE_SLUGS.STUDENT,
+            firstName: "Łukasz",
+            lastName: "Żółkiewski",
+          });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
         const course = await courseFactory.create({
@@ -1763,15 +1786,22 @@ describe("CertificatesController (e2e)", () => {
         const response = await request(app.getHttpServer())
           .post("/api/certificates/download")
           .set("Cookie", cookies)
-          .send({ certificateId: createdCertificate.id, language: "en" })
+          .send({ certificateId: createdCertificate.id, language: "pl" })
           .expect(201);
+        const filename = "Certyfikat - Python Basics - Łukasz Żółkiewski.pdf";
 
         expect(response.headers["content-type"]).toBe("application/pdf");
         expect(response.headers["content-disposition"]).toBe(
-          "attachment; filename=\"Python Basics.pdf\"; filename*=UTF-8''Python%20Basics.pdf",
+          `attachment; filename="Certyfikat - Python Basics - ukasz Zokiewski.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}`,
         );
         expect(response.body instanceof Buffer).toBe(true);
-        expect(response.body.subarray(0, 5).toString("ascii")).toBe("%PDF-");
+        expect(readPdfDocumentMetadata(response.body)).toEqual({
+          lang: "pl",
+          title: "Certyfikat ukończenia – Python Basics",
+          displaysDocTitle: true,
+          isMarked: true,
+          hasStructTreeRoot: true,
+        });
       });
 
       it.each([false, true])(

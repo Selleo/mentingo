@@ -49,6 +49,8 @@ export type CertificateKind = (typeof CERTIFICATE_KIND)[keyof typeof CERTIFICATE
 
 const certificateTranslations = {
   pl: {
+    documentTitle: "Certyfikat ukończenia",
+    fileName: "Certyfikat",
     certificate: "CERTYFIKAT",
     courseCompletion: "UKOŃCZENIA KURSU",
     certifyThat: "NINIEJSZYM ZAŚWIADCZA SIĘ, ŻE",
@@ -62,6 +64,8 @@ const certificateTranslations = {
     signature: "Podpis",
   },
   en: {
+    documentTitle: "Certificate of completion",
+    fileName: "Certificate",
     certificate: "CERTIFICATE",
     courseCompletion: "OF COURSE COMPLETION",
     certifyThat: "THIS IS TO CERTIFY THAT",
@@ -75,6 +79,8 @@ const certificateTranslations = {
     signature: "Signature",
   },
   de: {
+    documentTitle: "Abschlusszertifikat",
+    fileName: "Zertifikat",
     certificate: "ZERTIFIKAT",
     courseCompletion: "KURSABSCHLUSS",
     certifyThat: "HIERMIT WIRD BESTÄTIGT, DASS",
@@ -88,6 +94,8 @@ const certificateTranslations = {
     signature: "Unterschrift",
   },
   lt: {
+    documentTitle: "Baigimo sertifikatas",
+    fileName: "Sertifikatas",
     certificate: "SERTIFIKATAS",
     courseCompletion: "KURSO PABAIGOS",
     certifyThat: "ŠIUO PATVIRTINAMA, KAD",
@@ -101,6 +109,8 @@ const certificateTranslations = {
     signature: "Parašas",
   },
   cs: {
+    documentTitle: "Certifikát o absolvování",
+    fileName: "Certifikát",
     certificate: "CERTIFIKÁT",
     courseCompletion: "UKONČENÍ KURZU",
     certifyThat: "TÍMTO SE POTVRZUJE, ŽE",
@@ -114,6 +124,8 @@ const certificateTranslations = {
     signature: "Podpis",
   },
   es: {
+    documentTitle: "Certificado de finalización",
+    fileName: "Certificado",
     certificate: "CERTIFICADO",
     courseCompletion: "DE FINALIZACIÓN DEL CURSO",
     certifyThat: "SE CERTIFICA QUE",
@@ -127,6 +139,8 @@ const certificateTranslations = {
     signature: "Firma",
   },
   fr: {
+    documentTitle: "Certificat de réussite",
+    fileName: "Certificat",
     certificate: "CERTIFICAT",
     courseCompletion: "DE RÉUSSITE DU COURS",
     certifyThat: "CECI CERTIFIE QUE",
@@ -296,9 +310,55 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
   return `<div class="mx-auto h-[210mm] w-[297mm] overflow-hidden">${certificateBodyMarkup}</div>`;
 }
 
-export function buildCertificateHtmlDocument(html: string): string {
+export type CertificateDocumentOptions = {
+  lang?: SupportedLanguages;
+  courseName?: string;
+  studentName?: string;
+};
+
+// Long enough for real names, well under the 255-byte file name limit even in multi-byte UTF-8.
+const MAX_CERTIFICATE_FILENAME_LENGTH = 120;
+
+export function buildCertificateDocumentTitle({
+  lang = "en",
+  courseName = "",
+}: CertificateDocumentOptions = {}): string {
+  const { documentTitle } = certificateTranslations[lang];
+  const trimmedCourseName = courseName.trim();
+
+  return trimmedCourseName ? `${documentTitle} – ${trimmedCourseName}` : documentTitle;
+}
+
+const sanitizeFilenamePart = (part: string) =>
+  part
+    .replace(/[<>:"/\\|?*\u0000-\u001F\u007F]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+export function buildCertificatePdfFilename({
+  lang = "en",
+  courseName = "",
+  studentName = "",
+}: CertificateDocumentOptions = {}): string {
+  const baseName = [certificateTranslations[lang].fileName, courseName, studentName]
+    .map(sanitizeFilenamePart)
+    .filter(Boolean)
+    .join(" - ");
+  const truncatedBaseName = Array.from(baseName)
+    .slice(0, MAX_CERTIFICATE_FILENAME_LENGTH)
+    .join("")
+    .trimEnd();
+
+  return `${truncatedBaseName}.pdf`;
+}
+
+export function buildCertificateHtmlDocument(
+  html: string,
+  options: CertificateDocumentOptions = {},
+): string {
+  // Chromium copies <html lang> and <title> into the PDF /Lang and /Title entries.
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${options.lang ?? "en"}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -320,7 +380,7 @@ export function buildCertificateHtmlDocument(html: string): string {
         transform-origin: top left;
       }
     </style>
-    <title>Certificate</title>
+    <title>${escapeHtml(buildCertificateDocumentTitle(options))}</title>
     <style>${CERTIFICATE_STYLES}</style>
     ${CERTIFICATE_CONTENT_SECURITY_POLICY}
   </head>
