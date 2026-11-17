@@ -6,6 +6,16 @@ on:
         description: Same-repository PR to demonstrate through a trusted caller
         required: true
         type: string
+      branch_test:
+        description: Manual full recording test; the environment must explicitly allow this branch
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN:
+        required: true
+      ELEVENLABS_API_KEY:
+        required: true
   pull_request:
     types: [opened, ready_for_review]
     branches: [staging, main]
@@ -73,7 +83,7 @@ jobs:
             -f "pr_number=$NUMBER" -f "expected_head=$HEAD_SHA" -f "requested_by=$REQUESTED_BY" -f publish=false
 
   film:
-    if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main')
+    if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || inputs.branch_test == true)
     name: Analyze and record visible PR flows
     runs-on: ubuntu-24.04
     timeout-minutes: 150
@@ -109,6 +119,20 @@ jobs:
       - name: Validate PR identity and collect its overview and business specs
         id: inspect
         run: python3 "$S/pr_video.py" inspect --run "$RUNNER_TEMP/pr-video"
+      - name: Validate the existing recording credentials
+        if: steps.inspect.outputs.eligible == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: |
+          python3 - <<'PY'
+          import os
+          required = ('CLAUDE_CODE_OAUTH_TOKEN', 'ELEVENLABS_API_KEY')
+          missing = [name for name in required if not os.environ.get(name, '').strip()]
+          if missing:
+              raise SystemExit('Missing recording secrets: ' + ', '.join(missing))
+          print('Both existing recording credentials are configured.')
+          PY
       - name: Install the pinned semantic planner
         if: steps.inspect.outputs.eligible == 'true'
         working-directory: ${{ runner.temp }}

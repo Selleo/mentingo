@@ -432,3 +432,18 @@ and replacing only its managed section. Changed heads are rejected. No release o
 Helpdesk publication is performed. Native-upload permission failures preserve the
 previous section and downloadable MP4 artifact; never call an artifact link a player.
 No repository admin settings or environment policies are changed by these workflows.
+
+
+The Release film caller forwards only the existing `CLAUDE_CODE_OAUTH_TOKEN` and
+`ELEVENLABS_API_KEY` repository secrets into the reusable PR workflow; reusable
+workflows do not inherit these automatically. Missing values fail before planning.
+No provider credentials enter the metadata dispatcher or attachment job.
+
+To test the complete pipeline before merging, manually dispatch Release film on
+the fix branch with `pr_number`, `pr_video_branch_test=true` and `publish=false`.
+The target PR head is recorded, while control scripts come from the selected fix
+branch. The `release-film` environment must explicitly allow that branch; the flag
+does not bypass its protection. Adding a temporary environment branch policy is
+an admin-level change requiring explicit user authorization. Remove that exact
+temporary policy after the test. Normal readiness runs omit the flag and continue
+on staging/main. Test mode never starts release recording/publication.

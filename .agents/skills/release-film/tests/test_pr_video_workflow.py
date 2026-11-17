@@ -89,9 +89,21 @@ class Workflow(unittest.TestCase):
         self.assertIn("refs/heads/staging", self.workflow["jobs"]["film"]["if"])
         self.assertIn("refs/heads/main", self.workflow["jobs"]["film"]["if"])
         self.assertEqual(
-            caller["with"], {"pr_number": "${{ format('{0}', inputs.pr_number) }}"}
+            caller["with"],
+            {
+                "pr_number": "${{ format('{0}', inputs.pr_number) }}",
+                "branch_test": "${{ inputs.pr_video_branch_test == true }}",
+            },
         )
-        self.assertNotIn("secrets", caller)
+        expected_secrets = {
+            "CLAUDE_CODE_OAUTH_TOKEN": "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}",
+            "ELEVENLABS_API_KEY": "${{ secrets.ELEVENLABS_API_KEY }}",
+        }
+        self.assertEqual(caller["secrets"], expected_secrets)
+        self.assertEqual(
+            events["workflow_dispatch"]["inputs"]["pr_video_branch_test"]["default"],
+            False,
+        )
         for field in ("expected_head", "requested_by"):
             self.assertEqual(
                 events["workflow_dispatch"]["inputs"][field]["type"], "string"
@@ -101,4 +113,66 @@ class Workflow(unittest.TestCase):
         called_events = self.workflow.get("on", self.workflow.get(True))
         self.assertEqual(
             called_events["workflow_call"]["inputs"]["pr_number"]["type"], "string"
+        )
+        self.assertEqual(
+            set(called_events["workflow_call"]["secrets"]), set(expected_secrets)
+        )
+        self.assertTrue(
+            all(
+                value["required"]
+                for value in called_events["workflow_call"]["secrets"].values()
+            )
+        )
+        self.assertIs(
+            called_events["workflow_call"]["inputs"]["branch_test"]["default"], False
+        )
+        self.assertIn("inputs.branch_test == true", self.workflow["jobs"]["film"]["if"])
+        self.assertEqual(self.workflow["jobs"]["film"]["environment"], "release-film")
+        self.assertIn("!inputs.pr_video_branch_test", release["jobs"]["film"]["if"])
+        self.assertIn("!inputs.pr_video_branch_test", release["jobs"]["publish"]["if"])
+
+    def test_missing_credentials_fail_before_any_model_or_voice_call(self):
+        import os
+        import subprocess
+        import sys
+
+        steps = self.workflow["jobs"]["film"]["steps"]
+        guard = next(
+            step
+            for step in steps
+            if step.get("name") == "Validate the existing recording credentials"
+        )
+        script = guard["run"].split("<<'PY'\n", 1)[1].rsplit("\nPY", 1)[0]
+        self.assertIn("steps.inspect.outputs.eligible == 'true'", guard["if"])
+        self.assertLess(
+            steps.index(guard),
+            next(index for index, step in enumerate(steps) if step.get("id") == "plan"),
+        )
+        environment = dict(
+            os.environ,
+            CLAUDE_CODE_OAUTH_TOKEN="test-claude",
+            ELEVENLABS_API_KEY="test-eleven",
+        )
+        for missing in ("CLAUDE_CODE_OAUTH_TOKEN", "ELEVENLABS_API_KEY"):
+            with self.subTest(missing=missing):
+                result = subprocess.run(
+                    [sys.executable, "-c", script],
+                    env=dict(environment, **{missing: ""}),
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(missing, result.stderr)
+                self.assertNotIn("test-claude", result.stderr)
+                self.assertNotIn("test-eleven", result.stderr)
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            env=environment,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertEqual(
+            result.stdout.strip(), "Both existing recording credentials are configured."
         )
