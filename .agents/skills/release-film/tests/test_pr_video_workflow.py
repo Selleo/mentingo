@@ -23,14 +23,21 @@ class Workflow(unittest.TestCase):
         self.assertNotIn("pull_request_target", events)
         self.assertNotIn("synchronize", events["pull_request"]["types"])
         dispatch = self.workflow["jobs"]["dispatch"]
-        self.assertIn("!github.event.pull_request.draft", dispatch["if"])
-        self.assertIn("head.repo.full_name == github.repository", dispatch["if"])
-        self.assertEqual(dispatch["permissions"], {"actions": "write"})
+        self.assertEqual(dispatch["if"], "github.event_name == 'pull_request'")
+        self.assertEqual(
+            dispatch["permissions"], {"actions": "write", "pull-requests": "read"}
+        )
         self.assertFalse(
             any("checkout" in step.get("uses", "") for step in dispatch["steps"])
         )
         self.assertNotIn("secrets.", str(dispatch))
         command = dispatch["steps"][0]["run"]
+        self.assertIn(".draft == false", command)
+        self.assertIn(".head.repo.full_name == env.REPOSITORY", command)
+        self.assertIn(".head.sha == env.HEAD_SHA", command)
+        self.assertIn("/collaborators/$login/permission", command)
+        self.assertIn("admin|maintain|write)", command)
+        self.assertLess(command.index("eligible="), command.index("gh workflow run"))
         self.assertIn("gh workflow run release-film.yml", command)
         self.assertIn('-f "expected_head=$HEAD_SHA"', command)
         self.assertIn('-f "requested_by=$REQUESTED_BY"', command)

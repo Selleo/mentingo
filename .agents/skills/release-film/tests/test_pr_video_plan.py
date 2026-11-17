@@ -84,6 +84,15 @@ class Plan(unittest.TestCase):
             pr_video_plan.plan(inputs(), self.run)
         self.assertFalse((self.run / 'pr-video-plan.json').exists())
 
+    def test_complete_large_diff_and_specs_are_not_truncated(self):
+        source = inputs()
+        source['files'][0]['diff'] += '\n+' + 'implementation ' * 12000
+        source['business_specs'][0]['content'] += 'Business context. ' * 12000
+        self.assertGreater(len(json.dumps(source).encode('utf-8')), 250_000)
+        result, call = self.classify(source, recorded())
+        self.assertEqual(result['decision'], 'record')
+        self.assertEqual(json.loads(call.call_args.args[0]), source)
+
     def test_file_budget_context_budget_duplicate_paths_and_flow_bound(self):
         source = inputs()
         source['files'] *= pr_video_plan.MAX_FILES + 1

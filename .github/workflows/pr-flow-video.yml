@@ -31,14 +31,12 @@ concurrency:
 jobs:
   dispatch:
     # Metadata only. The PR merge workflow dispatches a recorder on its trusted base branch.
-    if: >-
-      github.event_name == 'pull_request' && !github.event.pull_request.draft &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     permissions:
       actions: write
+      pull-requests: read
     steps:
       - name: Dispatch the trusted base-branch recorder
         env:
@@ -53,6 +51,24 @@ jobs:
           [[ "$NUMBER" =~ ^[1-9][0-9]*$ ]]
           [[ "$HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$BASE_REF" == staging || "$BASE_REF" == main ]]
+          # Read current eligibility explicitly rather than silently skipping the job
+          # on PR event payload fields. The recorder independently checks these again.
+          eligible=$(gh api "repos/$REPOSITORY/pulls/$NUMBER" --jq \
+            '.state == "open" and .draft == false and .head.repo.full_name == env.REPOSITORY
+              and .head.sha == env.HEAD_SHA and .base.ref == env.BASE_REF')
+          if [ "$eligible" != true ]; then
+            echo "Skipping: PR is draft, closed, external or no longer matches this event."
+            exit 0
+          fi
+          author=$(gh api "repos/$REPOSITORY/pulls/$NUMBER" --jq .user.login)
+          for login in "$REQUESTED_BY" "$author"; do
+            permission=$(gh api "repos/$REPOSITORY/collaborators/$login/permission" --jq .permission)
+            case "$permission" in
+              admin|maintain|write) ;;
+              *) echo "Skipping: PR author and readiness actor must both be repository writers."; exit 0 ;;
+            esac
+          done
+          echo "Dispatching PR #$NUMBER at $HEAD_SHA from $BASE_REF."
           gh workflow run release-film.yml --repo "$REPOSITORY" --ref "$BASE_REF" \
             -f "pr_number=$NUMBER" -f "expected_head=$HEAD_SHA" -f "requested_by=$REQUESTED_BY" -f publish=false
 
