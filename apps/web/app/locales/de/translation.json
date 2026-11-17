@@ -1105,7 +1105,9 @@
     "promotionCodes": "Aktionscodes",
     "manage": "Verwalten",
     "ariaLabels": {
-      "goToAvailableCourses": "Gehen Sie zu den verfügbaren Kursen"
+      "goToAvailableCourses": "Gehen Sie zu den verfügbaren Kursen",
+      "collapseSidebar": "Seitenleiste einklappen",
+      "expandSidebar": "Seitenleiste ausklappen"
     },
     "qa": "Fragen und Antworten",
     "tenants": "Organisationen",
@@ -4557,6 +4559,10 @@
       "requirementMultiple": "Sehen Sie sich alle Videos an und hören Sie alle Audioaufnahmen an, um diese Lektion abzuschließen.",
       "label": "Lektionsfortschritt",
       "overviewAriaLabel": "Fortschritt der Lektionsmedien"
+    },
+    "navigation": {
+      "previousLesson": "Vorherige Lektion",
+      "nextLesson": "Nächste Lektion"
     }
   },
   "studentCourseView": {
@@ -4986,7 +4992,7 @@
       "courseCompletionRequired": "Sie müssen den Kurs abschließen, bevor Sie ein Zertifikat erstellen können."
     },
     "button": {
-      "download": "Herunterladen",
+      "download": "Zertifikat herunterladen (PDF)",
       "preview": "Vorschau",
       "shareLinkedIn": "Auf LinkedIn teilen"
     },

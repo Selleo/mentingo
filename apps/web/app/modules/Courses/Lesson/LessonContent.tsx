@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useMarkLessonAsCompleted } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
@@ -10,6 +11,7 @@ import {
   resumeLessonAudio,
 } from "~/components/RichText/components/AudioPlayer";
 import { Button } from "~/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { pauseAllLessonVideos, resumeLessonVideo } from "~/components/VideoPlayer/Video";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
@@ -53,6 +55,7 @@ export const LessonContent = ({
   lessonLoading,
   isLastLesson,
 }: LessonContentProps) => {
+  const { t } = useTranslation();
   const { isEffectiveStudentExperience, isPreviewMode } = useCourseAccessProvider();
 
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
@@ -306,25 +309,45 @@ export const LessonContent = ({
           </div>
           {!hideControls && (
             <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
-              <div className="flex flex-row gap-x-4">
-                <Button
-                  variant="outline"
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                  disabled={isPreviousDisabled || isFirstLesson}
-                  onClick={handlePrevious}
-                >
-                  <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
-                </Button>
-                <Button
-                  data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
-                  variant="outline"
-                  disabled={isNextDisabled}
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                  onClick={handleNext}
-                >
-                  <Icon name="ArrowRight" className="h-auto w-4" />
-                </Button>
-              </div>
+              <TooltipProvider>
+                <div className="flex flex-row gap-x-4">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                        disabled={isPreviousDisabled || isFirstLesson}
+                        onClick={handlePrevious}
+                        aria-label={t("studentLessonView.navigation.previousLesson")}
+                      >
+                        <Icon
+                          name="ArrowRight"
+                          className="h-auto w-4 rotate-180"
+                          aria-hidden="true"
+                        />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t("studentLessonView.navigation.previousLesson")}
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
+                        variant="outline"
+                        disabled={isNextDisabled}
+                        className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                        onClick={handleNext}
+                        aria-label={t("studentLessonView.navigation.nextLesson")}
+                      >
+                        <Icon name="ArrowRight" className="h-auto w-4" aria-hidden="true" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("studentLessonView.navigation.nextLesson")}</TooltipContent>
+                  </Tooltip>
+                </div>
+              </TooltipProvider>
             </div>
           )}
         </div>

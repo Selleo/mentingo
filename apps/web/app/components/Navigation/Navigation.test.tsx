@@ -1,6 +1,6 @@
 import { matchesRequirement, PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useCompetenciesConfiguration } from "~/api/queries/useCompetenciesConfiguration";
 import { usePhishingConfiguration } from "~/api/queries/usePhishingConfiguration";
@@ -24,7 +24,9 @@ vi.mock("~/api/queries/admin/useConfigurationState", () => ({
 vi.mock("~/api/queries/useGlobalSettings", () => ({ useGlobalSettings: () => ({}) }));
 vi.mock("~/api/queries/useLearningPaths", () => ({ useLearningPaths: () => ({}) }));
 vi.mock("~/api/queries/useStripeConfigured", () => ({ useStripeConfigured: () => ({}) }));
-vi.mock("~/api/queries/usePhishingConfiguration", () => ({ usePhishingConfiguration: vi.fn() }));
+vi.mock("~/api/queries/usePhishingConfiguration", () => ({
+  usePhishingConfiguration: vi.fn(() => ({ data: { enabled: false }, isError: false })),
+}));
 vi.mock("~/api/queries/useCompetenciesConfiguration", () => ({
   useCompetenciesConfiguration: vi.fn(),
 }));
@@ -252,5 +254,47 @@ describe("global search mounting", () => {
     render(<Navigation />);
 
     expect(screen.getAllByTestId("global-search")).toHaveLength(1);
+  });
+});
+
+describe("sidebar collapse toggle", () => {
+  beforeEach(() => {
+    vi.spyOn(window, "innerWidth", "get").mockReturnValue(1440);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("names the toggle after the action it performs", async () => {
+    useNavigationStore.setState({ isSidebarCollapsed: false });
+
+    render(<Navigation />);
+
+    const toggle = await screen.findByRole("button", {
+      name: "navigationSideBar.ariaLabels.collapseSidebar",
+    });
+
+    fireEvent.click(toggle);
+
+    expect(
+      screen.getByRole("button", { name: "navigationSideBar.ariaLabels.expandSidebar" }),
+    ).toBeInTheDocument();
+  });
+
+  it("offers to expand a collapsed sidebar and to collapse it again after expanding", async () => {
+    useNavigationStore.setState({ isSidebarCollapsed: true });
+
+    render(<Navigation />);
+
+    const toggle = await screen.findByRole("button", {
+      name: "navigationSideBar.ariaLabels.expandSidebar",
+    });
+
+    fireEvent.click(toggle);
+
+    expect(
+      screen.getByRole("button", { name: "navigationSideBar.ariaLabels.collapseSidebar" }),
+    ).toBeInTheDocument();
   });
 });
