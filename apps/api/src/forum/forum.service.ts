@@ -5,34 +5,50 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { DISCUSSION_SCOPES, PERMISSIONS } from "@repo/shared";
+import {
+  DISCUSSION_SCOPES,
+  FORUM_SOCKET_EVENTS,
+  PERMISSIONS,
+  findMentionedUserIds,
+  getForumRoom,
+  getForumTopicRoom,
+} from "@repo/shared";
 
 import { BaseResponse, DatabasePg, PaginatedResponse } from "src/common";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { CourseChatMessageMapper } from "src/course-chat/course-chat-message.mapper";
 import { CourseChatRepository } from "src/course-chat/course-chat.repository";
 import { CourseChatService } from "src/course-chat/course-chat.service";
+import { ForumReplyCreatedEvent } from "src/events/forum/forum-reply-created.event";
+import { ForumTopicCreatedEvent } from "src/events/forum/forum-topic-created.event";
+import { ForumUserMentionedEvent } from "src/events/forum/forum-user-mentioned.event";
 import { FORUM_TOPIC_EXCERPT_LENGTH } from "src/forum/forum.constants";
 import { ForumRepository } from "src/forum/forum.repository";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
+import { REALTIME_PUBLISHER, type RealtimePublisher } from "src/websocket/realtime.publisher";
+import { getUserRoomName } from "src/websocket/websocket.rooms";
 
 import type { PermissionKey, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { ToggleCourseChatMessageReactionBody } from "src/course-chat/schemas/course-chat.schema";
 import type {
   ForumPostContext,
   ForumPostRow,
   ForumThreadContext,
   ForumTopicRow,
 } from "src/forum/forum.repository.types";
-import type { ForumPostDeletion, ForumTopicListQuery } from "src/forum/forum.types";
+import type { ForumPostDeletion, ForumTopicListQuery, ForumViewer } from "src/forum/forum.types";
 import type {
   CreateForumPostBody,
   CreateForumTopicBody,
   DeleteForumPostResponse,
+  ForumPostReactionsResponse,
   ForumPostResponse,
   ForumTopicListItemResponse,
   ForumTopicResponse,
+  ForumUserResponse,
 } from "src/forum/schemas/forum.schema";
 
 @Injectable()
@@ -43,7 +59,9 @@ export class ForumService {
     private readonly courseChatRepository: CourseChatRepository,
     private readonly courseChatMessageMapper: CourseChatMessageMapper,
     private readonly settingsService: SettingsService,
+    private readonly outboxPublisher: OutboxPublisher,
     @Inject("DB") private readonly db: DatabasePg,
+    @Inject(REALTIME_PUBLISHER) private readonly realtimePublisher: RealtimePublisher,
   ) {}
 
   async getTopics(
@@ -113,12 +131,33 @@ export class ForumService {
     language: SupportedLanguages;
   }): Promise<BaseResponse<ForumTopicResponse>> {
     const { body, currentUser, language } = params;
+    this.assertHasPermission(currentUser, PERMISSIONS.FORUM_READ);
+
     const title = this.normalizeText(body.title, "forum.errors.emptyTitle");
     const content = this.normalizeText(body.content, "forum.errors.emptyContent");
-
-    const topicId = await this.db.transaction((trx) =>
-      this.forumRepository.createGeneralTopic({ userId: currentUser.userId, title, content }, trx),
+    const mentionedUserIds = await this.getMentionedUserIds(
+      body.mentionedUserIds,
+      content,
+      currentUser,
     );
+
+    const { topicId, postId } = await this.db.transaction(async (trx) => {
+      const createdTopic = await this.forumRepository.createGeneralTopic(
+        { userId: currentUser.userId, title, content },
+        trx,
+      );
+
+      await this.outboxPublisher.publish(
+        new ForumTopicCreatedEvent({ ...createdTopic, actorUserId: currentUser.userId }),
+        trx,
+      );
+      await this.publishMentionEvent({ ...createdTopic, currentUser, mentionedUserIds }, trx);
+
+      return createdTopic;
+    });
+
+    this.emitForumChanged(currentUser.tenantId);
+    this.emitMentions({ topicId, postId, mentionedUserIds });
 
     return new BaseResponse(await this.getTopicResponse(topicId, currentUser.userId, language));
   }
@@ -130,6 +169,8 @@ export class ForumService {
     tenantId: UUIDType;
   }): Promise<BaseResponse<ForumPostResponse>> {
     const { topicId, body, currentUser, tenantId } = params;
+    this.assertHasPermission(currentUser, PERMISSIONS.FORUM_READ);
+
     const thread = await this.getAccessibleThread(topicId, currentUser);
     const content = this.normalizeText(body.content, "forum.errors.emptyContent");
 
@@ -144,11 +185,21 @@ export class ForumService {
         thread.courseId,
         currentUser,
         tenantId,
-        { content, parentMessageId: thread.firstPostId },
+        {
+          content,
+          parentMessageId: thread.firstPostId,
+          mentionedUserIds: body.mentionedUserIds,
+        },
       );
 
       return new BaseResponse(await this.getPostResponse(message.id, currentUser.userId));
     }
+
+    const mentionedUserIds = await this.getMentionedUserIds(
+      body.mentionedUserIds,
+      content,
+      currentUser,
+    );
 
     const postId = await this.db.transaction(async (trx) => {
       const isFirstPostVisible = await this.courseChatRepository.lockThreadForReply(
@@ -159,7 +210,7 @@ export class ForumService {
 
       if (!isFirstPostVisible) throw new BadRequestException("forum.errors.topicDeleted");
 
-      return this.forumRepository.createGeneralReply(
+      const createdPostId = await this.forumRepository.createGeneralReply(
         {
           threadId: thread.id,
           firstPostId: thread.firstPostId,
@@ -168,9 +219,99 @@ export class ForumService {
         },
         trx,
       );
+
+      await this.outboxPublisher.publish(
+        new ForumReplyCreatedEvent({
+          topicId: thread.id,
+          postId: createdPostId,
+          firstPostId: thread.firstPostId,
+          actorUserId: currentUser.userId,
+        }),
+        trx,
+      );
+      await this.publishMentionEvent(
+        { topicId: thread.id, postId: createdPostId, currentUser, mentionedUserIds },
+        trx,
+      );
+
+      return createdPostId;
     });
 
+    this.emitTopicChanged(thread.id);
+    this.emitForumChanged(tenantId);
+    this.emitMentions({ topicId: thread.id, postId, mentionedUserIds });
+
     return new BaseResponse(await this.getPostResponse(postId, currentUser.userId));
+  }
+
+  async togglePostReaction(
+    postId: UUIDType,
+    body: ToggleCourseChatMessageReactionBody,
+    currentUser: CurrentUserType,
+  ): Promise<BaseResponse<ForumPostReactionsResponse>> {
+    this.assertHasPermission(currentUser, PERMISSIONS.FORUM_READ);
+
+    const post = await this.forumRepository.findPostContext(postId);
+
+    if (!post || post.deletedAt) throw new NotFoundException("forum.errors.postNotFound");
+
+    const thread = await this.getAccessibleThread(post.threadId, currentUser);
+
+    if (thread.scope === DISCUSSION_SCOPES.COURSE) {
+      this.assertHasPermission(currentUser, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_REACT);
+
+      const { data } = await this.courseChatService.toggleMessageReaction(
+        post.id,
+        currentUser.userId,
+        body,
+      );
+
+      return new BaseResponse({ topicId: thread.id, postId: post.id, reactions: data.reactions });
+    }
+
+    if (!this.courseChatService.isAllowedReaction(body.reaction)) {
+      throw new BadRequestException("forum.errors.invalidReaction");
+    }
+
+    await this.courseChatRepository.toggleMessageReaction({
+      messageId: post.id,
+      courseId: null,
+      userId: currentUser.userId,
+      reaction: body.reaction,
+    });
+
+    const reactions = this.courseChatMessageMapper.mapReactions(
+      await this.courseChatRepository.getMessageReactions(post.id, currentUser.userId),
+    );
+
+    this.emitTopicChanged(thread.id);
+
+    return new BaseResponse({ topicId: thread.id, postId: post.id, reactions });
+  }
+
+  async getMentionableUsers(
+    currentUser: CurrentUserType,
+  ): Promise<BaseResponse<ForumUserResponse[]>> {
+    this.assertHasPermission(currentUser, PERMISSIONS.FORUM_READ);
+
+    const users = await this.forumRepository.findMentionableUsers();
+    const avatarUrlByReference = await this.courseChatMessageMapper.getAvatarUrlByReference(
+      users.map((user) => user.avatarReference),
+    );
+
+    return new BaseResponse(
+      users.map((user) => ({
+        ...user,
+        avatarReference: this.courseChatMessageMapper.getMappedAvatarReference(
+          user.avatarReference,
+          avatarUrlByReference,
+        ),
+      })),
+    );
+  }
+
+  async assertTopicAccessible(topicId: UUIDType, viewer: ForumViewer) {
+    await this.getAccessibleThread(topicId, viewer);
   }
 
   async deletePost(
@@ -186,6 +327,10 @@ export class ForumService {
       thread.scope === DISCUSSION_SCOPES.COURSE
         ? await this.deleteCoursePost(post, currentUser)
         : await this.deleteGeneralPost(post, currentUser);
+
+    this.emitTopicChanged(thread.id);
+
+    if (thread.scope === DISCUSSION_SCOPES.GENERAL) this.emitForumChanged(currentUser.tenantId);
 
     return new BaseResponse({
       topicId: thread.id,
@@ -235,7 +380,7 @@ export class ForumService {
   /** Inaccessible topics are reported as missing so their existence is not revealed. */
   private async getAccessibleThread(
     threadId: UUIDType,
-    currentUser: CurrentUserType,
+    currentUser: ForumViewer,
   ): Promise<ForumThreadContext> {
     const thread = await this.forumRepository.findThreadContext(threadId);
 
@@ -261,7 +406,7 @@ export class ForumService {
     return thread;
   }
 
-  private async canReadCourseThreads(currentUser: CurrentUserType) {
+  private async canReadCourseThreads(currentUser: ForumViewer) {
     if (!hasPermission(currentUser.permissions ?? [], PERMISSIONS.COURSE_DISCUSSION_READ)) {
       return false;
     }
@@ -269,6 +414,68 @@ export class ForumService {
     const globalSettings = await this.settingsService.getGlobalSettings();
 
     return globalSettings.courseDiscussionsEnabled === true;
+  }
+
+  private async getMentionedUserIds(
+    requestedUserIds: UUIDType[] | undefined,
+    content: string,
+    currentUser: CurrentUserType,
+  ): Promise<UUIDType[]> {
+    const otherUserIds = Array.from(new Set(requestedUserIds ?? [])).filter(
+      (requestedUserId) => requestedUserId !== currentUser.userId,
+    );
+    const mentionableUsers = await this.forumRepository.findMentionableUsers(otherUserIds);
+
+    return findMentionedUserIds(content, mentionableUsers);
+  }
+
+  private async publishMentionEvent(
+    params: {
+      topicId: UUIDType;
+      postId: UUIDType;
+      currentUser: CurrentUserType;
+      mentionedUserIds: UUIDType[];
+    },
+    dbInstance: DatabasePg,
+  ) {
+    if (!params.mentionedUserIds.length) return;
+
+    await this.outboxPublisher.publish(
+      new ForumUserMentionedEvent({
+        tenantId: params.currentUser.tenantId,
+        topicId: params.topicId,
+        postId: params.postId,
+        actorUserId: params.currentUser.userId,
+        mentionedUserIds: params.mentionedUserIds,
+      }),
+      dbInstance,
+    );
+  }
+
+  private emitMentions(params: {
+    topicId: UUIDType;
+    postId: UUIDType;
+    mentionedUserIds: UUIDType[];
+  }) {
+    for (const mentionedUserId of params.mentionedUserIds) {
+      this.realtimePublisher.emitToRoom(
+        FORUM_SOCKET_EVENTS.USER_MENTIONED,
+        getUserRoomName(mentionedUserId),
+        { topicId: params.topicId, postId: params.postId },
+      );
+    }
+  }
+
+  private emitForumChanged(tenantId: UUIDType) {
+    this.realtimePublisher.emitToRoom(FORUM_SOCKET_EVENTS.CHANGED, getForumRoom(tenantId), {});
+  }
+
+  private emitTopicChanged(topicId: UUIDType) {
+    this.realtimePublisher.emitToRoom(
+      FORUM_SOCKET_EVENTS.TOPIC_CHANGED,
+      getForumTopicRoom(topicId),
+      { topicId },
+    );
   }
 
   private assertHasPermission(currentUser: CurrentUserType, permission: PermissionKey) {

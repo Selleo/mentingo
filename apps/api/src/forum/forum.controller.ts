@@ -23,6 +23,10 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import {
+  toggleCourseChatMessageReactionSchema,
+  type ToggleCourseChatMessageReactionBody,
+} from "src/course-chat/schemas/course-chat.schema";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { ForumService } from "src/forum/forum.service";
 import {
@@ -32,18 +36,22 @@ import {
   forumPageQuerySchema,
   forumPerPageQuerySchema,
   forumPostListSchema,
+  forumPostReactionsSchema,
   forumPostSchema,
   forumSearchQuerySchema,
   forumTopicListSchema,
   forumTopicSchema,
   forumTopicScopeQuerySchema,
   forumTopicSortQuerySchema,
+  forumUserListSchema,
   type CreateForumPostBody,
   type CreateForumTopicBody,
   type DeleteForumPostResponse,
+  type ForumPostReactionsResponse,
   type ForumPostResponse,
   type ForumTopicListItemResponse,
   type ForumTopicResponse,
+  type ForumUserResponse,
 } from "src/forum/schemas/forum.schema";
 
 @Controller("forum")
@@ -162,6 +170,34 @@ export class ForumController {
     @CurrentUser("tenantId") tenantId: UUIDType,
   ): Promise<BaseResponse<ForumPostResponse>> {
     return this.forumService.createPost({ topicId, body, currentUser, tenantId });
+  }
+
+  @Post("posts/:postId/reactions")
+  @RequirePermission(PERMISSIONS.FORUM_POST_REACT)
+  @Validate({
+    request: [
+      { type: "param", name: "postId", schema: UUIDSchema },
+      { type: "body", schema: toggleCourseChatMessageReactionSchema },
+    ],
+    response: baseResponse(forumPostReactionsSchema),
+  })
+  async togglePostReaction(
+    @Param("postId") postId: UUIDType,
+    @Body() body: ToggleCourseChatMessageReactionBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<ForumPostReactionsResponse>> {
+    return this.forumService.togglePostReaction(postId, body, currentUser);
+  }
+
+  @Get("users")
+  @RequirePermission(PERMISSIONS.FORUM_TOPIC_CREATE, PERMISSIONS.FORUM_POST_CREATE)
+  @Validate({
+    response: baseResponse(forumUserListSchema),
+  })
+  async getMentionableUsers(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<ForumUserResponse[]>> {
+    return this.forumService.getMentionableUsers(currentUser);
   }
 
   @Delete("posts/:postId")

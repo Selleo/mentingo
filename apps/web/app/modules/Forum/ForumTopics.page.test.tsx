@@ -1,11 +1,12 @@
 import { createRemixStub } from "@remix-run/testing";
-import { DISCUSSION_SCOPES, PERMISSIONS } from "@repo/shared";
+import { DISCUSSION_SCOPES, FORUM_SOCKET_EVENTS, PERMISSIONS } from "@repo/shared";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiClient } from "~/api/api-client";
 import { queryClient } from "~/api/queryClient";
+import { fakeSocket } from "~/utils/mocks/socket.mock";
 import { renderWith } from "~/utils/testUtils";
 
 import { FORUM_HANDLES } from "../../../e2e/data/forum/handles";
@@ -21,6 +22,12 @@ vi.mock("~/api/api-client", () => ({
     },
   },
 }));
+
+vi.mock("~/api/socket", async () => {
+  const { fakeSocket } = await import("~/utils/mocks/socket.mock");
+
+  return { acquireSocket: () => fakeSocket, releaseSocket: () => undefined };
+});
 
 const currentUserPermissions = vi.hoisted(() => ({ value: [] as string[] }));
 
@@ -87,6 +94,7 @@ describe("ForumTopicsPage", () => {
       PERMISSIONS.FORUM_TOPIC_CREATE,
     ];
     queryClient.clear();
+    fakeSocket.reset();
     vi.clearAllMocks();
     mockSettings(true);
     vi.mocked(ApiClient.api.courseControllerGetStudentCourses).mockResolvedValue({
@@ -136,6 +144,35 @@ describe("ForumTopicsPage", () => {
 
     expect(await screen.findByText(TOPIC_TITLE)).toBeInTheDocument();
     expect(screen.queryByTestId(FORUM_HANDLES.NEW_TOPIC_BUTTON)).not.toBeInTheDocument();
+  });
+
+  it("reloads the list when the forum changes elsewhere", async () => {
+    renderForum("/forum");
+    expect(await screen.findByText(TOPIC_TITLE)).toBeInTheDocument();
+    expect(fakeSocket.emitted).toContainEqual([FORUM_SOCKET_EVENTS.JOIN, undefined]);
+    const requestsBefore = vi.mocked(ApiClient.api.forumControllerGetTopics).mock.calls.length;
+
+    fakeSocket.receive(FORUM_SOCKET_EVENTS.CHANGED, {});
+
+    await waitFor(() =>
+      expect(vi.mocked(ApiClient.api.forumControllerGetTopics).mock.calls.length).toBeGreaterThan(
+        requestsBefore,
+      ),
+    );
+  });
+
+  it("reloads the list after the live connection comes back", async () => {
+    renderForum("/forum");
+    expect(await screen.findByText(TOPIC_TITLE)).toBeInTheDocument();
+    const requestsBefore = vi.mocked(ApiClient.api.forumControllerGetTopics).mock.calls.length;
+
+    fakeSocket.receive("connect");
+
+    await waitFor(() =>
+      expect(vi.mocked(ApiClient.api.forumControllerGetTopics).mock.calls.length).toBeGreaterThan(
+        requestsBefore,
+      ),
+    );
   });
 
   it("redirects away without loading topics while the forum is disabled", async () => {

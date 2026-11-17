@@ -303,6 +303,7 @@ export interface CurrentUserResponse {
       | "forum.read"
       | "forum.topic.create"
       | "forum.post.create"
+      | "forum.post.react"
       | "forum.post.delete"
     )[];
     shouldVerifyMFA: boolean;
@@ -31171,6 +31172,8 @@ export interface CreateTopicBody {
    * @maxLength 5000
    */
   content: string;
+  /** @maxItems 20 */
+  mentionedUserIds?: string[];
 }
 
 export interface CreateTopicResponse {
@@ -31311,6 +31314,8 @@ export interface CreatePostBody {
    * @maxLength 5000
    */
   content: string;
+  /** @maxItems 20 */
+  mentionedUserIds?: string[];
 }
 
 export interface CreatePostResponse {
@@ -31339,6 +31344,38 @@ export interface CreatePostResponse {
       reactedByCurrentUser: boolean;
     }[];
   };
+}
+
+export interface TogglePostReactionBody {
+  /**
+   * @minLength 1
+   * @maxLength 16
+   */
+  reaction: string;
+}
+
+export interface TogglePostReactionResponse {
+  data: {
+    /** @format uuid */
+    topicId: string;
+    /** @format uuid */
+    postId: string;
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+  };
+}
+
+export interface GetMentionableUsersResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarReference: string | null;
+  }[];
 }
 
 export interface DeletePostResponse {
@@ -46540,6 +46577,40 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerTogglePostReaction
+     * @request POST:/api/forum/posts/{postId}/reactions
+     */
+    forumControllerTogglePostReaction: (
+      postId: string,
+      data: TogglePostReactionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<TogglePostReactionResponse, any>({
+        path: `/api/forum/posts/${postId}/reactions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetMentionableUsers
+     * @request GET:/api/forum/users
+     */
+    forumControllerGetMentionableUsers: (params: RequestParams = {}) =>
+      this.request<GetMentionableUsersResponse, any>({
+        path: `/api/forum/users`,
+        method: "GET",
         format: "json",
         ...params,
       }),

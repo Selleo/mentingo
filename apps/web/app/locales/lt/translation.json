@@ -2451,7 +2451,8 @@
         "forum_read": "Gali peržiūrėti forumą.",
         "forum_topic_create": "Gali kurti forumo temas.",
         "forum_post_create": "Gali atsakyti forumo temose.",
-        "forum_post_delete": "Gali trinti bet kuriuos forumo įrašus."
+        "forum_post_delete": "Gali trinti bet kuriuos forumo įrašus.",
+        "forum_post_react": "Gali reaguoti į forumo įrašus."
       }
     },
     "dropdown": {
@@ -9893,7 +9894,9 @@
     "toast": {
       "createTopicError": "Nepavyko sukurti temos.",
       "createPostError": "Nepavyko išsiųsti atsakymo.",
-      "deletePostError": "Nepavyko ištrinti įrašo."
+      "deletePostError": "Nepavyko ištrinti įrašo.",
+      "mentioned": "Kažkas jus paminėjo forume.",
+      "reactionError": "Nepavyko išsaugoti reakcijos."
     },
     "errors": {
       "topicNotFound": "Ši tema neegzistuoja arba neturite prieigos prie jos.",
@@ -9901,7 +9904,8 @@
       "cannotDeletePost": "Galite ištrinti tik savo įrašus.",
       "topicDeleted": "Atsakymai uždaryti, nes pirmasis įrašas buvo ištrintas.",
       "emptyTitle": "Įveskite pavadinimą.",
-      "emptyContent": "Įveskite žinutę."
+      "emptyContent": "Įveskite žinutę.",
+      "invalidReaction": "Pasirinkite vieną iš galimų reakcijų."
     }
   }
 }

@@ -80,6 +80,7 @@ export function updateMessageReactionsInCache(payload: ToggleMessageReactionResp
   );
 
   queryClient.invalidateQueries({ queryKey: COURSE_CHAT_REPLIES_QUERY_KEY });
+  invalidateForumCourseThreads();
 }
 
 export function updateDeletedMessageInCache(payload: DeleteMessageResponse["data"]) {

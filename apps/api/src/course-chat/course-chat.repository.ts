@@ -289,6 +289,7 @@ export class CourseChatRepository {
         id: courseChatMessages.id,
         threadId: courseChatMessages.threadId,
         courseId: sql<UUIDType>`${courseChatMessages.courseId}`,
+        tenantId: courseChatMessages.tenantId,
         userId: courseChatMessages.userId,
         parentMessageId: courseChatMessages.parentMessageId,
         deletedAt: courseChatMessages.deletedAt,
@@ -309,7 +310,7 @@ export class CourseChatRepository {
 
   async toggleMessageReaction(params: {
     messageId: UUIDType;
-    courseId: UUIDType;
+    courseId: UUIDType | null;
     userId: UUIDType;
     reaction: string;
   }): Promise<boolean> {

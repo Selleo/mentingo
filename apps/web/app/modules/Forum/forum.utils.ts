@@ -63,6 +63,11 @@ export const canReplyInTopic = (scope: DiscussionScope, permissions: Permissions
   (scope === DISCUSSION_SCOPES.GENERAL ||
     hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_CREATE));
 
+export const canReactInTopic = (scope: DiscussionScope, permissions: Permissions) =>
+  hasPermission(permissions, PERMISSIONS.FORUM_POST_REACT) &&
+  (scope === DISCUSSION_SCOPES.GENERAL ||
+    hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_MESSAGE_REACT));
+
 export const canDeleteForumPost = ({
   authorId,
   currentUserId,

@@ -19,6 +19,7 @@ export const ANNOUNCEMENT_SOURCE_TYPES = {
   COURSE_DUE_DATE_REMINDER: "course_due_date_reminder",
   COURSE_CHAT: "course_chat",
   QUIZ_GRADING: "quiz_grading",
+  FORUM: "forum",
 } as const;
 
 export type AnnouncementSourceType =

@@ -1,9 +1,13 @@
 import { faker } from "@faker-js/faker";
 import {
   DISCUSSION_SCOPES,
+  FORUM_POST_MAX_MENTIONS,
+  FORUM_SOCKET_EVENTS,
   FORUM_TOPIC_SORTS,
   PERMISSIONS,
   SYSTEM_ROLE_SLUGS,
+  getForumRoom,
+  getForumTopicRoom,
   type PermissionKey,
 } from "@repo/shared";
 import { eq, inArray, isNull } from "drizzle-orm";
@@ -12,6 +16,7 @@ import request from "supertest";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   courseChatThreads,
+  outboxEvents,
   permissionRuleSetPermissions,
   settings,
   studentCourses,
@@ -97,7 +102,10 @@ describe("ForumController (e2e)", () => {
     );
   };
 
-  const createTopic = async (cookie: string, body: { title: string; content: string }) => {
+  const createTopic = async (
+    cookie: string,
+    body: { title: string; content: string; mentionedUserIds?: string[] },
+  ) => {
     const response = await request(app.getHttpServer())
       .post("/api/forum/topics")
       .set("Cookie", cookie)
@@ -237,6 +245,27 @@ describe("ForumController (e2e)", () => {
       ];
 
       for (const buildRequest of readRequests) {
+        const response = await buildRequest().set("Cookie", noAccessCookie).expect(403);
+        expect(response.body.message).toBe("auth.error.missingPermission");
+      }
+
+      const actionsThatAlsoNeedReadAccess = [
+        () =>
+          request(app.getHttpServer())
+            .post("/api/forum/topics")
+            .send({ title: "Blocked", content: "Blocked" }),
+        () =>
+          request(app.getHttpServer())
+            .post(`/api/forum/topics/${topic.id}/posts`)
+            .send({ content: "Blocked" }),
+        () =>
+          request(app.getHttpServer())
+            .post(`/api/forum/posts/${topic.firstPost.id}/reactions`)
+            .send({ reaction: "👍" }),
+        () => request(app.getHttpServer()).get("/api/forum/users"),
+      ];
+
+      for (const buildRequest of actionsThatAlsoNeedReadAccess) {
         const response = await buildRequest().set("Cookie", noAccessCookie).expect(403);
         expect(response.body.message).toBe("auth.error.missingPermission");
       }
@@ -664,6 +693,224 @@ describe("ForumController (e2e)", () => {
         .get(`/api/forum/topics/${faker.string.uuid()}`)
         .set("Cookie", cookie)
         .expect(404);
+    });
+  });
+
+  describe("reactions", () => {
+    const react = (cookie: string, postId: string, reaction: string) =>
+      request(app.getHttpServer())
+        .post(`/api/forum/posts/${postId}/reactions`)
+        .set("Cookie", cookie)
+        .send({ reaction });
+
+    it("toggles reactions on forum posts and requires the react permission", async () => {
+      const { cookie: authorCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const { cookie: readerCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const topic = await createTopic(authorCookie, { title: "Launch", content: "We are live" });
+      emitToRoom.mockClear();
+
+      const reacted = await react(readerCookie, topic.firstPost.id, "👍").expect(201);
+      expect(reacted.body.data).toEqual({
+        topicId: topic.id,
+        postId: topic.firstPost.id,
+        reactions: [{ reaction: "👍", count: 1, reactedByCurrentUser: true }],
+      });
+      expect(emitToRoom).toHaveBeenCalledWith(
+        FORUM_SOCKET_EVENTS.TOPIC_CHANGED,
+        getForumTopicRoom(topic.id),
+        { topicId: topic.id },
+      );
+
+      const authorView = await request(app.getHttpServer())
+        .get(`/api/forum/topics/${topic.id}`)
+        .query({ language: "en" })
+        .set("Cookie", authorCookie)
+        .expect(200);
+      expect(authorView.body.data.firstPost.reactions).toEqual([
+        { reaction: "👍", count: 1, reactedByCurrentUser: false },
+      ]);
+
+      const toggledOff = await react(readerCookie, topic.firstPost.id, "👍").expect(201);
+      expect(toggledOff.body.data.reactions).toEqual([]);
+
+      const invalid = await react(readerCookie, topic.firstPost.id, "🚀").expect(400);
+      expect(invalid.body.message).toBe("forum.errors.invalidReaction");
+
+      const { cookie: noReactCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT, [
+        PERMISSIONS.FORUM_POST_REACT,
+      ]);
+      const forbidden = await react(noReactCookie, topic.firstPost.id, "👍").expect(403);
+      expect(forbidden.body.message).toBe("auth.error.missingPermission");
+    });
+
+    it("applies course discussion rules to reactions on course threads", async () => {
+      const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const { cookie: outsiderCookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const course = await courseFactory.create({ authorId: student.id });
+      await enroll(course.id, student);
+      const courseThread = await createCourseThread(cookie, course.id, "Great lesson");
+
+      await react(cookie, courseThread.id, "🎉").expect(201);
+
+      const courseMessages = await request(app.getHttpServer())
+        .get(`/api/course-chat/${course.id}/messages`)
+        .set("Cookie", cookie)
+        .expect(200);
+      expect(courseMessages.body.data[0].reactions).toEqual([
+        { reaction: "🎉", count: 1, reactedByCurrentUser: true },
+      ]);
+
+      const hidden = await react(outsiderCookie, courseThread.id, "🎉").expect(404);
+      expect(hidden.body.message).toBe("forum.errors.topicNotFound");
+    });
+  });
+
+  describe("mentions", () => {
+    it("lists the users who can be mentioned", async () => {
+      const { user: author, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const { user: colleague } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
+      const { user: reviewer } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.REVIEWER);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/forum/users")
+        .set("Cookie", cookie)
+        .expect(200);
+      const userIds = response.body.data.map((user: { id: string }) => user.id);
+
+      expect(userIds).toEqual(expect.arrayContaining([author.id, colleague.id]));
+      expect(userIds).not.toContain(reviewer.id);
+    });
+
+    it("notifies each mentioned user who can read the forum, but not the author", async () => {
+      const { user: author, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const { user: target } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const { user: reviewer } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.REVIEWER);
+      const { user: bystander } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const mentionOf = (user: UserWithCredentials) => `@${user.firstName} ${user.lastName}`;
+      const mentionedUserIds = [target.id, target.id, author.id, reviewer.id, bystander.id];
+      const content = `${mentionOf(target)} ${mentionOf(author)} ${mentionOf(reviewer)} please review`;
+
+      const topic = await createTopic(cookie, {
+        title: "Release notes",
+        content,
+        mentionedUserIds,
+      });
+      const replyResponse = await request(app.getHttpServer())
+        .post(`/api/forum/topics/${topic.id}/posts`)
+        .set("Cookie", cookie)
+        .send({ content, mentionedUserIds })
+        .expect(201);
+
+      const mentionCalls = emitToRoom.mock.calls.filter(
+        ([event]) => event === FORUM_SOCKET_EVENTS.USER_MENTIONED,
+      );
+      expect(mentionCalls).toEqual([
+        [
+          FORUM_SOCKET_EVENTS.USER_MENTIONED,
+          `user:${target.id}`,
+          { topicId: topic.id, postId: topic.firstPost.id },
+        ],
+        [
+          FORUM_SOCKET_EVENTS.USER_MENTIONED,
+          `user:${target.id}`,
+          { topicId: topic.id, postId: replyResponse.body.data.id },
+        ],
+      ]);
+
+      const mentionEvents = await db
+        .select({ payload: outboxEvents.payload })
+        .from(outboxEvents)
+        .where(eq(outboxEvents.eventType, "ForumUserMentionedEvent"));
+      expect(mentionEvents).toHaveLength(2);
+      expect(mentionEvents[0].payload).toMatchObject({
+        forumUserMentionedData: {
+          topicId: topic.id,
+          actorUserId: author.id,
+          mentionedUserIds: [target.id],
+        },
+      });
+    });
+
+    it("rejects more mentions than a post may carry", async () => {
+      const { cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const mentionedUserIds = Array.from({ length: FORUM_POST_MAX_MENTIONS + 1 }, () =>
+        faker.string.uuid(),
+      );
+
+      await request(app.getHttpServer())
+        .post("/api/forum/topics")
+        .set("Cookie", cookie)
+        .send({ title: "Everyone", content: "hi", mentionedUserIds })
+        .expect(400);
+    });
+  });
+
+  describe("live updates and domain events", () => {
+    it("signals the forum and the topic and records an event for topics and replies", async () => {
+      const { user: author, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const forumRoom = getForumRoom(author.tenantId);
+
+      const topic = await createTopic(cookie, { title: "Roadmap", content: "What is next?" });
+      expect(emitToRoom).toHaveBeenCalledWith(FORUM_SOCKET_EVENTS.CHANGED, forumRoom, {});
+
+      emitToRoom.mockClear();
+      const reply = await createReply(cookie, topic.id, "Forum reactions");
+      expect(emitToRoom).toHaveBeenCalledWith(
+        FORUM_SOCKET_EVENTS.TOPIC_CHANGED,
+        getForumTopicRoom(topic.id),
+        { topicId: topic.id },
+      );
+      expect(emitToRoom).toHaveBeenCalledWith(FORUM_SOCKET_EVENTS.CHANGED, forumRoom, {});
+
+      const events = await db
+        .select({ eventType: outboxEvents.eventType, payload: outboxEvents.payload })
+        .from(outboxEvents)
+        .where(
+          inArray(outboxEvents.eventType, ["ForumTopicCreatedEvent", "ForumReplyCreatedEvent"]),
+        );
+      expect(events).toEqual(
+        expect.arrayContaining([
+          {
+            eventType: "ForumTopicCreatedEvent",
+            payload: {
+              forumTopicCreatedData: {
+                topicId: topic.id,
+                postId: topic.firstPost.id,
+                actorUserId: author.id,
+              },
+            },
+          },
+          {
+            eventType: "ForumReplyCreatedEvent",
+            payload: {
+              forumReplyCreatedData: {
+                topicId: topic.id,
+                postId: reply.id,
+                firstPostId: topic.firstPost.id,
+                actorUserId: author.id,
+              },
+            },
+          },
+        ]),
+      );
+    });
+
+    it("signals the forum when a course discussion thread is started or deleted", async () => {
+      const { user: student, cookie } = await createUserWithCookie(SYSTEM_ROLE_SLUGS.STUDENT);
+      const course = await courseFactory.create({ authorId: student.id });
+      await enroll(course.id, student);
+      const forumChanged = [FORUM_SOCKET_EVENTS.CHANGED, getForumRoom(student.tenantId), {}];
+      emitToRoom.mockClear();
+
+      const courseThread = await createCourseThread(cookie, course.id, "Started in the course tab");
+      expect(emitToRoom.mock.calls).toContainEqual(forumChanged);
+
+      emitToRoom.mockClear();
+      await request(app.getHttpServer())
+        .delete(`/api/course-chat/messages/${courseThread.id}`)
+        .set("Cookie", cookie)
+        .expect(200);
+      expect(emitToRoom.mock.calls).toContainEqual(forumChanged);
     });
   });
 });

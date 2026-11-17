@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 import {
   FORUM_FILTERS,
   canDeleteForumPost,
+  canReactInTopic,
   canReadCourseThreads,
   canReplyInTopic,
   getLastPage,
@@ -92,6 +93,16 @@ describe("forum permissions", () => {
     expect(canReplyInTopic(DISCUSSION_SCOPES.COURSE, forumMember)).toBe(false);
     expect(canReplyInTopic(DISCUSSION_SCOPES.COURSE, learner)).toBe(false);
     expect(canReplyInTopic(DISCUSSION_SCOPES.COURSE, [...forumMember, ...learner])).toBe(true);
+  });
+
+  it("requires the forum react permission, plus course access for course threads", () => {
+    const forumMember = [PERMISSIONS.FORUM_POST_REACT];
+    const courseMember = [PERMISSIONS.COURSE_DISCUSSION_MESSAGE_REACT];
+
+    expect(canReactInTopic(DISCUSSION_SCOPES.GENERAL, forumMember)).toBe(true);
+    expect(canReactInTopic(DISCUSSION_SCOPES.GENERAL, [])).toBe(false);
+    expect(canReactInTopic(DISCUSSION_SCOPES.COURSE, forumMember)).toBe(false);
+    expect(canReactInTopic(DISCUSSION_SCOPES.COURSE, [...forumMember, ...courseMember])).toBe(true);
   });
 
   it("lets authors delete their own posts", () => {

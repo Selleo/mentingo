@@ -8,8 +8,10 @@ import {
 import {
   COURSE_CHAT_ALLOWED_REACTIONS,
   COURSE_CHAT_SOCKET_EVENTS,
+  FORUM_SOCKET_EVENTS,
   PERMISSIONS,
   getCourseChatRoom,
+  getForumRoom,
 } from "@repo/shared";
 
 import { AnnouncementsService } from "src/announcements/announcements.service";
@@ -210,6 +212,7 @@ export class CourseChatService {
       getCourseChatRoom(courseId),
       message,
     );
+    this.realtimePublisher.emitToRoom(FORUM_SOCKET_EVENTS.CHANGED, getForumRoom(tenantId), {});
     this.emitMentionRealtimeNotifications({
       courseId,
       message,
@@ -307,6 +310,11 @@ export class CourseChatService {
       getCourseChatRoom(message.courseId),
       payload,
     );
+    this.realtimePublisher.emitToRoom(
+      FORUM_SOCKET_EVENTS.CHANGED,
+      getForumRoom(message.tenantId),
+      {},
+    );
 
     return { payload, threadRemoved: deletion.threadRemoved };
   }
@@ -348,7 +356,7 @@ export class CourseChatService {
     return normalized;
   }
 
-  private isAllowedReaction(reaction: string) {
+  isAllowedReaction(reaction: string) {
     return (COURSE_CHAT_ALLOWED_REACTIONS as readonly string[]).includes(reaction);
   }
 

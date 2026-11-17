@@ -5,7 +5,7 @@ import {
   type ForumTopicSort,
 } from "@repo/shared";
 import { Plus } from "lucide-react";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useToast } from "~/components/ui/use-toast";
 import { ForumFeatureGuard } from "~/Guards/ForumFeatureGuard";
 import { useUrlTableState } from "~/hooks/useUrlTableState";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -45,6 +46,7 @@ import {
   parseSortParam,
   toTopicFilterQuery,
 } from "./forum.utils";
+import { useForumSocket } from "./useForumSocket";
 
 const SORT_LABEL_KEYS = {
   [FORUM_TOPIC_SORTS.LAST_ACTIVITY]: "forum.sort.lastActivity",
@@ -91,8 +93,16 @@ type ForumTopicsProps = {
 function ForumTopics({ courses }: ForumTopicsProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
+  const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { data: currentUser } = useCurrentUser();
+
+  const handleMentioned = useCallback(() => {
+    toast({ description: t("forum.toast.mentioned") });
+  }, [t, toast]);
+
+  useForumSocket({ onMentioned: handleMentioned });
+
   const canCreateTopic = hasPermission(
     currentUser?.permissions ?? [],
     PERMISSIONS.FORUM_TOPIC_CREATE,

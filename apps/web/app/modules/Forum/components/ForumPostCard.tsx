@@ -1,3 +1,4 @@
+import { COURSE_CHAT_ALLOWED_REACTIONS } from "@repo/shared";
 import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -6,25 +7,45 @@ import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { cn } from "~/lib/utils";
+import { renderMessageContent } from "~/modules/Courses/CourseView/CourseChat/courseChatUtils";
+import { ReactionButton } from "~/modules/Courses/CourseView/CourseChat/ReactionButton";
 
 import { FORUM_HANDLES } from "../../../../e2e/data/forum/handles";
 
 import { DeleteForumPostDialog } from "./DeleteForumPostDialog";
 
+import type { MentionableUser } from "~/api/queries/course-chat/courseChatTypes";
 import type { ForumPost } from "~/api/queries/forum/forumTypes";
 
 type ForumPostCardProps = {
   post: ForumPost;
+  mentionableUsers: MentionableUser[];
   canDelete: boolean;
   isDeleting: boolean;
   onDelete: (postId: string, onDeleted: () => void) => void;
+  canReact: boolean;
+  isReacting: boolean;
+  onToggleReaction: (postId: string, reaction: string) => void;
 };
 
-export function ForumPostCard({ post, canDelete, isDeleting, onDelete }: ForumPostCardProps) {
+export function ForumPostCard({
+  post,
+  mentionableUsers,
+  canDelete,
+  isDeleting,
+  onDelete,
+  canReact,
+  isReacting,
+  onToggleReaction,
+}: ForumPostCardProps) {
   const { t } = useTranslation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const isDeleted = Boolean(post.deletedAt);
   const authorName = `${post.user.firstName} ${post.user.lastName}`;
+  const reactions = COURSE_CHAT_ALLOWED_REACTIONS.map((reaction) => ({
+    reaction,
+    summary: post.reactions.find((postReaction) => postReaction.reaction === reaction),
+  })).filter(({ summary }) => canReact || summary);
 
   return (
     <article
@@ -71,8 +92,26 @@ export function ForumPostCard({ post, canDelete, isDeleting, onDelete }: ForumPo
           })}
           data-testid={FORUM_HANDLES.postContent(post.id)}
         >
-          {isDeleted ? t("forum.deletedPost") : post.content}
+          {isDeleted
+            ? t("forum.deletedPost")
+            : renderMessageContent(post.content, mentionableUsers)}
         </p>
+        {!isDeleted && reactions.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {reactions.map(({ reaction, summary }) => (
+              <ReactionButton
+                key={reaction}
+                reaction={reaction}
+                count={summary?.count}
+                reactedByCurrentUser={summary?.reactedByCurrentUser}
+                disabled={!canReact || isReacting}
+                tooltip={t("studentCourseView.courseChat.reactWith", { reaction })}
+                testId={FORUM_HANDLES.postReaction(post.id, reaction)}
+                onClick={() => onToggleReaction(post.id, reaction)}
+              />
+            ))}
+          </div>
+        )}
       </div>
       {canDelete && (
         <DeleteForumPostDialog

@@ -16243,6 +16243,60 @@
         }
       }
     },
+    "/api/forum/posts/{postId}/reactions": {
+      "post": {
+        "operationId": "ForumController_togglePostReaction",
+        "parameters": [
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TogglePostReactionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TogglePostReactionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/users": {
+      "get": {
+        "operationId": "ForumController_getMentionableUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMentionableUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/forum/posts/{postId}": {
       "delete": {
         "operationId": "ForumController_deletePost",
@@ -27768,6 +27822,10 @@
                     },
                     {
                       "const": "forum.post.create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "forum.post.react",
                       "type": "string"
                     },
                     {
@@ -162928,6 +162986,14 @@
             "minLength": 1,
             "maxLength": 5000,
             "type": "string"
+          },
+          "mentionedUserIds": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -163517,6 +163583,14 @@
             "minLength": 1,
             "maxLength": 5000,
             "type": "string"
+          },
+          "mentionedUserIds": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -163629,6 +163703,109 @@
               "user",
               "reactions"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "TogglePostReactionBody": {
+        "type": "object",
+        "properties": {
+          "reaction": {
+            "minLength": 1,
+            "maxLength": 16,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reaction"
+        ]
+      },
+      "TogglePostReactionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "topicId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "postId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "reactions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reaction": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "number"
+                    },
+                    "reactedByCurrentUser": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "reaction",
+                    "count",
+                    "reactedByCurrentUser"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "topicId",
+              "postId",
+              "reactions"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetMentionableUsersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "avatarReference": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "firstName",
+                "lastName",
+                "avatarReference"
+              ]
+            }
           }
         },
         "required": [
