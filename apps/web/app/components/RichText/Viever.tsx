@@ -25,6 +25,7 @@ type ViewerProps = {
   className?: string;
   variant?: RichTextViewerVariant;
   onVideoEnded?: (index: number | null) => void;
+  videoTitle?: string;
   videoCoverageTracking?: {
     enabled: boolean;
     showCoverageMarkers?: boolean;
@@ -50,6 +51,7 @@ const Viewer = ({
   className,
   variant = RICH_TEXT_VIEWER_VARIANT.DEFAULT,
   onVideoEnded,
+  videoTitle,
   videoCoverageTracking,
   audioCoverageTracking,
 }: ViewerProps) => {
@@ -113,12 +115,16 @@ const Viewer = ({
     return plugins.map((extension) =>
       match(extension.name)
         .with("video", () =>
-          extension.configure({ onVideoEnded: handleVideoEnded, videoCoverageTracking }),
+          extension.configure({
+            onVideoEnded: handleVideoEnded,
+            videoTitle,
+            videoCoverageTracking,
+          }),
         )
         .with("audio", () => extension.configure({ audioCoverageTracking }))
         .otherwise(() => extension),
     );
-  }, [audioCoverageTracking, handleVideoEnded, variant, videoCoverageTracking]);
+  }, [audioCoverageTracking, handleVideoEnded, variant, videoCoverageTracking, videoTitle]);
 
   const mediaPolicy = useRichTextContentPolicy();
   const normalizedContent = useMemo(() => {

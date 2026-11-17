@@ -71,6 +71,7 @@ export const LessonContentRenderer = memo(
           variant={RICH_TEXT_VIEWER_VARIANT.CONTENT}
           content={lesson?.description ?? ""}
           onVideoEnded={onVideoEnded}
+          videoTitle={lesson.title}
           videoCoverageTracking={videoCoverageTracking}
           audioCoverageTracking={audioCoverageTracking}
         />

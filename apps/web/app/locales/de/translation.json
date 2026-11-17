@@ -5429,7 +5429,9 @@
       },
       "ariaLabel": {
         "drag": "Video per Drag & Drop einbetten",
-        "remove": "Videoeinbettung entfernen"
+        "remove": "Videoeinbettung entfernen",
+        "play": "Video abspielen",
+        "playWithTitle": "Video abspielen: {{title}}"
       }
     },
     "presentation": {

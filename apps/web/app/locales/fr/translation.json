@@ -5180,7 +5180,9 @@
       },
       "ariaLabel": {
         "drag": "Faites glisser l'intégration de la vidéo",
-        "remove": "Supprimer l'intégration de la vidéo"
+        "remove": "Supprimer l'intégration de la vidéo",
+        "play": "Lire la vidéo",
+        "playWithTitle": "Lire la vidéo : {{title}}"
       }
     },
     "presentation": {
