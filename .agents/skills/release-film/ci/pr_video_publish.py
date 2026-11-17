@@ -255,8 +255,14 @@ def publish(folder: str | Path, repository: str, number: int, head_sha: str, run
         previous = managed_section(current.get('body') or '')
         try:
             attachment = release_assets.upload_video(bundle.video, repository, previous, bundle.checksum)
-        except (OSError, ValueError, TypeError, KeyError, RuntimeError, subprocess.SubprocessError, SystemExit):
-            raise PublicationError('Native GitHub video upload failed; the existing PR section was preserved') from None
+        except (OSError, ValueError, TypeError, KeyError, RuntimeError, subprocess.SubprocessError, SystemExit) as error:
+            # Retain only the status, never gh stderr or a provider response body.
+            # This distinguishes rejected credentials from network/format failures.
+            status = re.search(r'\bHTTP ([1-5][0-9]{2})\b', str(error))
+            suffix = f' (HTTP {status[1]})' if status else ''
+            raise PublicationError(
+                'Native GitHub video upload failed' + suffix + '; the existing PR section was preserved'
+            ) from None
         section = video_section(head_sha, bundle, attachment)
 
         latest = _pull(repository, number)

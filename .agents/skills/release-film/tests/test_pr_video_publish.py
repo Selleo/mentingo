@@ -329,6 +329,18 @@ class Publish(unittest.TestCase):
         self.assertNotIn('private-token', str(failure.exception))
         self.assertFalse(self.patches)
 
+    def test_upload_failure_keeps_http_status_without_leaking_response(self):
+        with mock.patch.object(
+            release_assets, 'upload_video',
+            side_effect=SystemExit('private-token response body: Not Found (HTTP 404)'),
+        ):
+            with self.assertRaises(publisher.PublicationError) as failure:
+                self.publish()
+        self.assertIn('HTTP 404', str(failure.exception))
+        self.assertNotIn('private-token', str(failure.exception))
+        self.assertNotIn('response body', str(failure.exception))
+        self.assertFalse(self.patches)
+
     def test_cli_returns_json_or_a_safe_failure(self):
         arguments = ['pr_video_publish.py', '--bundle', str(self.folder), '--repository', REPOSITORY,
                      '--number', str(NUMBER), '--head-sha', HEAD_SHA, '--run-id', RUN_ID]
