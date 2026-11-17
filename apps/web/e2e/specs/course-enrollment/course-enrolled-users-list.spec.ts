@@ -71,8 +71,23 @@ test("admin can verify enrolled users and filter by keyword and group", async ({
     await page.getByTestId(COURSE_ENROLLED_HANDLES.row(notEnrolledUser.id)).click();
     await expect(userActionsTrigger).toBeEnabled();
 
+    // Emails end in -0/-1/-2 in creation order, so sorting by email has a known order.
+    const rows = page.getByTestId(COURSE_ENROLLED_HANDLES.ROW_PATTERN);
+    const usersByEmail = [notEnrolledUser, directUser, groupUser];
     await page.getByTestId(COURSE_ENROLLED_HANDLES.sortButton("email")).click();
-    await expect(page.getByTestId(COURSE_ENROLLED_HANDLES.row(directUser.id))).toBeVisible();
+    for (const [index, user] of usersByEmail.entries()) {
+      await expect(rows.nth(index)).toHaveAttribute(
+        "data-testid",
+        COURSE_ENROLLED_HANDLES.row(user.id),
+      );
+    }
+    await page.getByTestId(COURSE_ENROLLED_HANDLES.sortButton("email")).click();
+    for (const [index, user] of [...usersByEmail].reverse().entries()) {
+      await expect(rows.nth(index)).toHaveAttribute(
+        "data-testid",
+        COURSE_ENROLLED_HANDLES.row(user.id),
+      );
+    }
 
     await filterEnrolledUsersFlow(page, { groupIds: [group.id] });
     await expect(page.getByTestId(COURSE_ENROLLED_HANDLES.row(groupUser.id))).toBeVisible();
