@@ -49,6 +49,8 @@ export type CertificateKind = (typeof CERTIFICATE_KIND)[keyof typeof CERTIFICATE
 
 const certificateTranslations = {
   pl: {
+    documentTitle: "Certyfikat ukończenia",
+    fileName: "Certyfikat",
     certificate: "CERTYFIKAT",
     courseCompletion: "UKOŃCZENIA KURSU",
     certifyThat: "NINIEJSZYM ZAŚWIADCZA SIĘ, ŻE",
@@ -62,6 +64,8 @@ const certificateTranslations = {
     signature: "Podpis",
   },
   en: {
+    documentTitle: "Certificate of completion",
+    fileName: "Certificate",
     certificate: "CERTIFICATE",
     courseCompletion: "OF COURSE COMPLETION",
     certifyThat: "THIS IS TO CERTIFY THAT",
@@ -75,6 +79,8 @@ const certificateTranslations = {
     signature: "Signature",
   },
   de: {
+    documentTitle: "Abschlusszertifikat",
+    fileName: "Zertifikat",
     certificate: "ZERTIFIKAT",
     courseCompletion: "KURSABSCHLUSS",
     certifyThat: "HIERMIT WIRD BESTÄTIGT, DASS",
@@ -88,6 +94,8 @@ const certificateTranslations = {
     signature: "Unterschrift",
   },
   lt: {
+    documentTitle: "Baigimo sertifikatas",
+    fileName: "Sertifikatas",
     certificate: "SERTIFIKATAS",
     courseCompletion: "KURSO PABAIGOS",
     certifyThat: "ŠIUO PATVIRTINAMA, KAD",
@@ -101,6 +109,8 @@ const certificateTranslations = {
     signature: "Parašas",
   },
   cs: {
+    documentTitle: "Certifikát o absolvování",
+    fileName: "Certifikát",
     certificate: "CERTIFIKÁT",
     courseCompletion: "UKONČENÍ KURZU",
     certifyThat: "TÍMTO SE POTVRZUJE, ŽE",
@@ -114,6 +124,8 @@ const certificateTranslations = {
     signature: "Podpis",
   },
   es: {
+    documentTitle: "Certificado de finalización",
+    fileName: "Certificado",
     certificate: "CERTIFICADO",
     courseCompletion: "DE FINALIZACIÓN DEL CURSO",
     certifyThat: "SE CERTIFICA QUE",
@@ -127,6 +139,8 @@ const certificateTranslations = {
     signature: "Firma",
   },
   fr: {
+    documentTitle: "Certificat de réussite",
+    fileName: "Certificat",
     certificate: "CERTIFICAT",
     courseCompletion: "DE RÉUSSITE DU COURS",
     certifyThat: "CECI CERTIFIE QUE",
@@ -296,9 +310,136 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
   return `<div class="mx-auto h-[210mm] w-[297mm] overflow-hidden">${certificateBodyMarkup}</div>`;
 }
 
-export function buildCertificateHtmlDocument(html: string): string {
+export type CertificateDocumentOptions = {
+  lang?: SupportedLanguages;
+  courseName?: string;
+  studentName?: string;
+};
+
+// File systems cap names at 255 UTF-8 bytes; the slack leaves room for a browser " (1)" suffix.
+const MAX_CERTIFICATE_FILENAME_BYTES = 200;
+const CERTIFICATE_FILENAME_SEPARATOR = " - ";
+const CERTIFICATE_FILENAME_EXTENSION = ".pdf";
+const FALLBACK_CERTIFICATE_FILENAME = "certificate.pdf";
+
+export function buildCertificateDocumentTitle({
+  lang = "en",
+  courseName = "",
+}: CertificateDocumentOptions = {}): string {
+  const { documentTitle } = certificateTranslations[lang];
+  const trimmedCourseName = courseName.trim();
+
+  return trimmedCourseName ? `${documentTitle} – ${trimmedCourseName}` : documentTitle;
+}
+
+const sanitizeFilenamePart = (part: string) =>
+  part
+    // Bidi controls are invisible and can make a name display a fake extension.
+    .replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "")
+    .replace(/[<>:"/\\|?*\u0000-\u001F\u007F]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const utf8ByteLength = (text: string) => new TextEncoder().encode(text).length;
+
+const truncateFilenamePart = (part: string, maxBytes: number) => {
+  let truncatedPart = "";
+  let byteLength = 0;
+
+  for (const codePoint of part) {
+    byteLength += utf8ByteLength(codePoint);
+    if (byteLength > maxBytes) break;
+    truncatedPart += codePoint;
+  }
+
+  return truncatedPart.replace(/[\s.\-–]+$/, "");
+};
+
+const joinFilenameParts = (parts: string[]) =>
+  parts.filter(Boolean).join(CERTIFICATE_FILENAME_SEPARATOR);
+
+export function buildCertificatePdfFilename({
+  lang = "en",
+  courseName = "",
+  studentName = "",
+}: CertificateDocumentOptions = {}): string {
+  const translatedWord = sanitizeFilenamePart(certificateTranslations[lang].fileName);
+  const learnerName = sanitizeFilenamePart(studentName);
+  // Only the course name is shortened, so the translated word and the learner name always survive.
+  const courseBudget =
+    MAX_CERTIFICATE_FILENAME_BYTES -
+    utf8ByteLength(
+      `${joinFilenameParts([translatedWord, learnerName])}${CERTIFICATE_FILENAME_SEPARATOR}${CERTIFICATE_FILENAME_EXTENSION}`,
+    );
+  const coursePart = truncateFilenamePart(sanitizeFilenamePart(courseName), courseBudget);
+  // Safety net for a learner name that alone exceeds the limit.
+  const baseName = truncateFilenamePart(
+    joinFilenameParts([translatedWord, coursePart, learnerName]),
+    MAX_CERTIFICATE_FILENAME_BYTES - utf8ByteLength(CERTIFICATE_FILENAME_EXTENSION),
+  );
+
+  return `${baseName}${CERTIFICATE_FILENAME_EXTENSION}`;
+}
+
+// Letters that NFD does not split into an ASCII base letter plus a combining mark.
+const NON_DECOMPOSING_LETTERS: Record<string, string> = {
+  Ł: "L",
+  ł: "l",
+  ß: "ss",
+  Ø: "O",
+  ø: "o",
+  Đ: "D",
+  đ: "d",
+  Æ: "AE",
+  æ: "ae",
+  Œ: "OE",
+  œ: "oe",
+};
+const NON_DECOMPOSING_LETTER_PATTERN = new RegExp(
+  `[${Object.keys(NON_DECOMPOSING_LETTERS).join("")}]`,
+  "g",
+);
+
+const toAsciiFilenamePart = (part: string) =>
+  part
+    .normalize("NFD")
+    .replace(NON_DECOMPOSING_LETTER_PATTERN, (letter) => NON_DECOMPOSING_LETTERS[letter] ?? "")
+    .replace(/[^\x20-\x7E]/g, "")
+    .replace(/["\\]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const toAsciiCertificateFilename = (filename: string) => {
+  const asciiBaseName = filename
+    .replace(/\.pdf$/i, "")
+    .split(CERTIFICATE_FILENAME_SEPARATOR)
+    .map(toAsciiFilenamePart)
+    .filter(Boolean)
+    .join(CERTIFICATE_FILENAME_SEPARATOR);
+
+  return /[a-z0-9]/i.test(asciiBaseName)
+    ? `${asciiBaseName}${CERTIFICATE_FILENAME_EXTENSION}`
+    : FALLBACK_CERTIFICATE_FILENAME;
+};
+
+// RFC 5987 attr-char excludes the sub-delims that encodeURIComponent leaves unescaped.
+const encodeRfc5987Value = (value: string) =>
+  encodeURIComponent(value).replace(
+    /['()*!]/g,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+
+export function buildCertificateContentDisposition(filename: string): string {
+  return `attachment; filename="${toAsciiCertificateFilename(filename)}"; filename*=UTF-8''${encodeRfc5987Value(filename)}`;
+}
+
+export function buildCertificateHtmlDocument(
+  html: string,
+  options: CertificateDocumentOptions = {},
+): string {
+  // Chromium copies <html lang> and <title> into the PDF /Lang and /Title entries.
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${options.lang ?? "en"}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -320,7 +461,7 @@ export function buildCertificateHtmlDocument(html: string): string {
         transform-origin: top left;
       }
     </style>
-    <title>Certificate</title>
+    <title>${escapeHtml(buildCertificateDocumentTitle(options))}</title>
     <style>${CERTIFICATE_STYLES}</style>
     ${CERTIFICATE_CONTENT_SECURITY_POLICY}
   </head>

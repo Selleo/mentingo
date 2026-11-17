@@ -10,6 +10,7 @@ import {
   SUPPORTED_LANGUAGES,
   buildCertificateHtmlDocument as buildSharedCertificateHtmlDocument,
   buildCertificateMarkup,
+  buildCertificatePdfFilename,
   CERTIFICATE_STYLES,
   CERTIFICATE_CONTENT_SECURITY_POLICY,
   isSupportedLanguage,
@@ -282,12 +283,17 @@ export class LearningPathCertificateService {
       },
     });
 
-    const completeHtml = buildSharedCertificateHtmlDocument(html);
+    const documentOptions = {
+      lang: shareLanguage,
+      courseName: certificate.pathTitle ?? "",
+      studentName: certificate.fullName ?? "",
+    };
+    const completeHtml = buildSharedCertificateHtmlDocument(html, documentOptions);
     const pdfBuffer = await this.renderPdfFromHtml(completeHtml);
 
     return {
       pdfBuffer,
-      filename: this.buildPdfFilename(certificate.pathTitle),
+      filename: buildCertificatePdfFilename(documentOptions),
     };
   }
 
@@ -615,16 +621,6 @@ export class LearningPathCertificateService {
 
   private normalizeLanguage(language?: string): SupportedLanguages {
     return language && isSupportedLanguage(language) ? language : SUPPORTED_LANGUAGES.EN;
-  }
-
-  private buildPdfFilename(courseTitle?: string | null) {
-    const sanitizedTitle = (courseTitle || "")
-      .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "")
-      .replace(/\.+$/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    return `${sanitizedTitle || "certificate"}.pdf`;
   }
 
   private formatDate(inputDate?: string | null): string {
