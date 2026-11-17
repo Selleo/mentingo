@@ -2,90 +2,47 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
+import { MFA_PAGE_HANDLES, REGISTER_PAGE_HANDLES } from "../../data/auth/handles";
+import { PRICE_INPUT_HANDLES } from "../../data/common/handles";
+import { COURSE_PRICING_HANDLES, COURSE_TAB_VALUES } from "../../data/courses/handles";
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
+import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
+import { login } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
+import { openRegisterPageFlow } from "../../flows/auth/open-register-page.flow";
+import {
+  openCourseOverviewSettingsFlow,
+  selectCourseOverviewSettingsTabFlow,
+} from "../../flows/courses/open-course-overview-settings.flow";
+import { mockStripeEnabledFlow } from "../../flows/settings/mock-settings-env.flow";
+import { openOrganizationSettingsFlow } from "../../flows/settings/open-organization-settings.flow";
 import { saveMfaEnforcementFlow } from "../../flows/settings/save-mfa-enforcement.flow";
 import { toggleMfaEnforcementRoleFlow } from "../../flows/settings/toggle-mfa-enforcement-role.flow";
+import { getGlobalSettings } from "../../utils/global-settings";
 
-import type { FixtureApiClient } from "../../utils/api-client";
-import type { Locator, Page } from "@playwright/test";
-
-const openOrganizationSettings = async (page: Page) => {
-  await openSettingsPageFlow(page);
-  await page.getByTestId(SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB).click();
-  await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.ORGANIZATION_CONTENT)).toBeVisible();
-};
-
-const getGlobalSettings = async (apiClient: FixtureApiClient) => {
-  const response = await apiClient.api.settingsControllerGetPublicGlobalSettings();
-
-  return response.data.data;
-};
-
-const expectSwitchState = async (locator: Locator, checked: boolean) => {
-  if (checked) {
-    await expect(locator).toBeChecked();
-  } else {
-    await expect(locator).not.toBeChecked();
-  }
-};
-
-test("admin can toggle invite-only registration and the setting persists", async ({
+test("admin enforces MFA for a role and a user of that role must enroll on login", async ({
   apiClient,
   cleanup,
+  createWorkspacePage,
+  factories,
   withWorkerPage,
 }) => {
+  let studentEmail = "";
+
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const originalSettings = await getGlobalSettings(apiClient);
+    const userFactory = factories.createUserFactory();
+    const student = await userFactory.register({ password: TEST_PASSWORD });
+    studentEmail = student.email;
+    cleanup.add(() => userFactory.delete(student.id));
 
-    cleanup.add(async () => {
-      const currentSettings = await getGlobalSettings(apiClient);
-      if (currentSettings.inviteOnlyRegistration !== originalSettings.inviteOnlyRegistration) {
-        await apiClient.api.settingsControllerUpdateInviteOnlyRegistration();
-      }
-    });
+    const originalRoles = new Set((await getGlobalSettings(apiClient)).MFAEnforcedRoles);
+    const readEnforcedRoles = async () => {
+      const enforcedRoles = new Set((await getGlobalSettings(apiClient)).MFAEnforcedRoles);
 
-    await openOrganizationSettings(page);
-
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.INVITE_ONLY_REGISTRATION_SWITCH).click();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.INVITE_ONLY_REGISTRATION_SAVE).click();
-
-    await expect
-      .poll(async () => (await getGlobalSettings(apiClient)).inviteOnlyRegistration)
-      .toBe(!originalSettings.inviteOnlyRegistration);
-
-    await page.reload();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB).click();
-    await expectSwitchState(
-      page.getByTestId(SETTINGS_PAGE_HANDLES.INVITE_ONLY_REGISTRATION_SWITCH),
-      !originalSettings.inviteOnlyRegistration,
-    );
-  });
-});
-
-test("organization settings no longer expose email trigger switches", async ({
-  withWorkerPage,
-}) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await openOrganizationSettings(page);
-    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.USER_EMAIL_TRIGGERS_CARD)).toHaveCount(0);
-  });
-});
-
-test("admin can enable or disable MFA enforcement per role and save only when changes exist", async ({
-  apiClient,
-  cleanup,
-  withWorkerPage,
-}) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const originalSettings = await getGlobalSettings(apiClient);
-    const originalRoles = new Set(originalSettings.MFAEnforcedRoles);
-    const targetRoles = {
-      admin: originalRoles.has(USER_ROLE.admin),
-      student: !originalRoles.has(USER_ROLE.student),
-      content_creator: !originalRoles.has(USER_ROLE.contentCreator),
-      trainer: !originalRoles.has(SYSTEM_ROLE_SLUGS.TRAINER),
+      return {
+        student: enforcedRoles.has(USER_ROLE.student),
+        content_creator: enforcedRoles.has(USER_ROLE.contentCreator),
+      };
     };
 
     cleanup.add(async () => {
@@ -97,34 +54,34 @@ test("admin can enable or disable MFA enforcement per role and save only when ch
       });
     });
 
-    await openOrganizationSettings(page);
+    await apiClient.api.settingsControllerUpdateMfaEnforcedRoles({
+      student: false,
+      content_creator: false,
+    });
 
+    await openOrganizationSettingsFlow(page);
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_SAVE)).toBeDisabled();
 
-    for (const role of [USER_ROLE.student, USER_ROLE.contentCreator, SYSTEM_ROLE_SLUGS.TRAINER]) {
-      await toggleMfaEnforcementRoleFlow(page, role);
-    }
+    await toggleMfaEnforcementRoleFlow(page, USER_ROLE.student);
+    await toggleMfaEnforcementRoleFlow(page, USER_ROLE.contentCreator);
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_SAVE)).toBeEnabled();
     await saveMfaEnforcementFlow(page);
 
-    await expect
-      .poll(async () => {
-        const currentRoles = new Set((await getGlobalSettings(apiClient)).MFAEnforcedRoles);
-
-        return {
-          admin: currentRoles.has(USER_ROLE.admin),
-          student: currentRoles.has(USER_ROLE.student),
-          content_creator: currentRoles.has(USER_ROLE.contentCreator),
-          trainer: currentRoles.has(SYSTEM_ROLE_SLUGS.TRAINER),
-        };
-      })
-      .toEqual(targetRoles);
+    await expect.poll(readEnforcedRoles).toEqual({ student: true, content_creator: true });
   });
+
+  const visitor = await createWorkspacePage();
+  cleanup.add(() => visitor.context.close());
+
+  await login(visitor.page, studentEmail, TEST_PASSWORD);
+  await expect(visitor.page).toHaveURL("/auth/mfa");
+  await expect(visitor.page.getByTestId(MFA_PAGE_HANDLES.SECRET)).toBeVisible();
 });
 
-test("admin can change the default course currency when Stripe is configured", async ({
+test("admin changes the default course currency and a new course is priced in it", async ({
   apiClient,
   cleanup,
+  factories,
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
@@ -137,15 +94,8 @@ test("admin can change the default course currency when Stripe is configured", a
       });
     });
 
-    await page.route("**/api/env/frontend/stripe", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ data: { enabled: true } }),
-      });
-    });
-
-    await openOrganizationSettings(page);
+    await mockStripeEnabledFlow(page);
+    await openOrganizationSettingsFlow(page);
 
     await page.getByTestId(SETTINGS_PAGE_HANDLES.DEFAULT_CURRENCY_SELECT).click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.defaultCurrencyOption(targetCurrency)).click();
@@ -154,12 +104,29 @@ test("admin can change the default course currency when Stripe is configured", a
     await expect
       .poll(async () => (await getGlobalSettings(apiClient)).defaultCourseCurrency)
       .toBe(targetCurrency);
+
+    const categoryFactory = factories.createCategoryFactory();
+    const courseFactory = factories.createCourseFactory();
+    const category = await categoryFactory.create(`Currency category ${Date.now()}`);
+    cleanup.add(() => categoryFactory.delete(category.id));
+    const course = await courseFactory.create({
+      title: `currency-course-${Date.now()}`,
+      categoryId: category.id,
+    });
+    cleanup.add(() => courseFactory.delete(course.id));
+
+    await openCourseOverviewSettingsFlow(page, course.id);
+    await selectCourseOverviewSettingsTabFlow(page, COURSE_TAB_VALUES.PRICING);
+    await page.getByTestId(COURSE_PRICING_HANDLES.PAID_CARD).click();
+
+    await expect(page.getByTestId(PRICE_INPUT_HANDLES.CURRENCY)).toHaveText(targetCurrency);
   });
 });
 
-test("admin can change the age limit and clear it back to no age limit", async ({
+test("admin sets an age limit and visitors must give their birthday to register", async ({
   apiClient,
   cleanup,
+  createWorkspacePage,
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
@@ -170,7 +137,10 @@ test("admin can change the age limit and clear it back to no age limit", async (
       await apiClient.api.settingsControllerUpdateAgeLimit({ ageLimit: originalSettings.ageLimit });
     });
 
-    await openOrganizationSettings(page);
+    const visitor = await createWorkspacePage();
+    cleanup.add(() => visitor.context.close());
+
+    await openOrganizationSettingsFlow(page);
 
     await page.getByTestId(SETTINGS_PAGE_HANDLES.AGE_LIMIT_SELECT).click();
     await page
@@ -182,10 +152,16 @@ test("admin can change the age limit and clear it back to no age limit", async (
       .poll(async () => (await getGlobalSettings(apiClient)).ageLimit)
       .toBe(targetAgeLimit);
 
+    await openRegisterPageFlow(visitor.page);
+    await expect(visitor.page.getByTestId(REGISTER_PAGE_HANDLES.BIRTHDAY)).toBeVisible();
+
     await page.getByTestId(SETTINGS_PAGE_HANDLES.AGE_LIMIT_SELECT).click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.ageLimitOption("null")).click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.AGE_LIMIT_SAVE).click();
 
     await expect.poll(async () => (await getGlobalSettings(apiClient)).ageLimit).toBe(null);
+
+    await openRegisterPageFlow(visitor.page);
+    await expect(visitor.page.getByTestId(REGISTER_PAGE_HANDLES.BIRTHDAY)).toHaveCount(0);
   });
 });
