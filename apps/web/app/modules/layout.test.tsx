@@ -15,8 +15,64 @@ vi.mock("~/api/api-client", () => ({
   ApiClient: { api: { settingsControllerGetCompanyInformation: vi.fn() } },
 }));
 
+const languageStore = vi.hoisted(() => {
+  let language = "en";
+  const listeners = new Set<() => void>();
+
+  return {
+    get: () => language,
+    set: (next: string) => {
+      language = next;
+      listeners.forEach((listener) => listener());
+    },
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+
+      return () => listeners.delete(listener);
+    },
+  };
+});
+
+vi.mock("react-i18next", async () => {
+  const { useSyncExternalStore } = await import("react");
+
+  return {
+    useTranslation: () => ({
+      i18n: { language: useSyncExternalStore(languageStore.subscribe, languageStore.get) },
+    }),
+  };
+});
+
+const renderLayout = () => {
+  const router = createMemoryRouter(
+    [
+      {
+        element: (
+          <Suspense fallback={<div>Loading company</div>}>
+            <Layout />
+          </Suspense>
+        ),
+        children: [{ path: "dashboard", element: <div>Dashboard page</div> }],
+      },
+    ],
+    { initialEntries: ["/dashboard"] },
+  );
+  const revalidate = vi.spyOn(router, "revalidate");
+
+  render(
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>,
+  );
+
+  return revalidate;
+};
+
 describe("company metadata without route loaders", () => {
-  beforeEach(() => queryClient.clear());
+  beforeEach(() => {
+    queryClient.clear();
+    languageStore.set("en");
+  });
   afterEach(() => queryClient.clear());
 
   it("waits for company information and re-renders route metadata when the platform name changes", async () => {
@@ -30,37 +86,33 @@ describe("company metadata without route loaders", () => {
         resolveCompany = resolve;
       }) as ReturnType<typeof ApiClient.api.settingsControllerGetCompanyInformation>,
     );
-    const router = createMemoryRouter(
-      [
-        {
-          element: (
-            <Suspense fallback={<div>Loading company</div>}>
-              <Layout />
-            </Suspense>
-          ),
-          children: [{ path: "dashboard", element: <div>Dashboard page</div> }],
-        },
-      ],
-      { initialEntries: ["/dashboard"] },
-    );
-    const revalidate = vi.spyOn(router, "revalidate");
+    const revalidate = renderLayout();
 
-    render(
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>,
-    );
     expect(screen.getByText("Loading company")).toBeInTheDocument();
     expect(screen.queryByText("Dashboard page")).not.toBeInTheDocument();
     resolveCompany({ data: { data: { companyShortName: "Acme" } } } as CompanyResponse);
     await screen.findByText("Dashboard page");
-    await waitFor(() => expect(revalidate).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(revalidate).toHaveBeenCalled());
+    revalidate.mockClear();
     act(() => {
       queryClient.setQueryData(companyInformationQueryOptions.queryKey, {
         data: { companyShortName: "Renamed" },
       });
     });
-    await waitFor(() => expect(revalidate).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(revalidate).toHaveBeenCalled());
+  });
+
+  it("re-renders route metadata when the user's language changes", async () => {
+    queryClient.setQueryData(companyInformationQueryOptions.queryKey, {
+      data: { companyShortName: "Acme" },
+    });
+    const revalidate = renderLayout();
+
+    await screen.findByText("Dashboard page");
+    await waitFor(() => expect(revalidate).toHaveBeenCalled());
+    revalidate.mockClear();
+    act(() => languageStore.set("pl"));
+    await waitFor(() => expect(revalidate).toHaveBeenCalled());
   });
 
   it("reads company branding from the query cache for route metadata", () => {

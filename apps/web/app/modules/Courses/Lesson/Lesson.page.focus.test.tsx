@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { usePageTitle } from "~/hooks/usePageTitle";
+
 import LessonPage from "./Lesson.page";
 import { makeCourse, makeLesson } from "./testFactories";
 
@@ -16,8 +18,8 @@ type LessonContentMockProps = {
 
 const mounts: Array<{ lessonId: string; focusTitleOnMount: boolean }> = [];
 const lessons: Record<string, GetLessonByIdResponse["data"]> = {
-  "lesson-1": makeLesson({ id: "lesson-1", learningStateId: "state-1" }),
-  "lesson-2": makeLesson({ id: "lesson-2", learningStateId: "state-1" }),
+  "lesson-1": makeLesson({ id: "lesson-1", title: "Lesson One", learningStateId: "state-1" }),
+  "lesson-2": makeLesson({ id: "lesson-2", title: "Lesson Two", learningStateId: "state-1" }),
 };
 const course = makeCourse({
   availableLocales: ["en"],
@@ -68,7 +70,7 @@ vi.mock("~/modules/Courses/Lesson/LessonContent", () => ({
     useEffect(() => {
       mounts.push({ lessonId: lesson.id, focusTitleOnMount });
       if (focusTitleOnMount) onTitleFocused?.();
-      // Record each mount once, like the real component's mount effect.
+      // Record each mount once; the real effect focuses only while focusTitleOnMount is true.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -90,7 +92,11 @@ const renderLesson = () => {
 describe("LessonPage heading focus", () => {
   beforeEach(() => {
     mounts.length = 0;
-    lessons["lesson-2"] = makeLesson({ id: "lesson-2", learningStateId: "state-1" });
+    lessons["lesson-2"] = makeLesson({
+      id: "lesson-2",
+      title: "Lesson Two",
+      learningStateId: "state-1",
+    });
   });
 
   it("focuses the heading only when moving to a different lesson", async () => {
@@ -104,6 +110,7 @@ describe("LessonPage heading focus", () => {
     await waitFor(() =>
       expect(mounts.at(-1)).toEqual({ lessonId: "lesson-2", focusTitleOnMount: true }),
     );
+    expect(vi.mocked(usePageTitle)).toHaveBeenLastCalledWith(["Lesson Two", "Course"]);
 
     await act(() => router.navigate("/course/course-1/lesson/lesson-1"));
     await waitFor(() =>
@@ -118,7 +125,11 @@ describe("LessonPage heading focus", () => {
     await act(() => router.navigate("/course/course-1/lesson/lesson-2"));
     await waitFor(() => expect(mounts).toHaveLength(2));
 
-    lessons["lesson-2"] = makeLesson({ id: "lesson-2", learningStateId: "state-2" });
+    lessons["lesson-2"] = makeLesson({
+      id: "lesson-2",
+      title: "Lesson Two",
+      learningStateId: "state-2",
+    });
     await act(() => router.navigate("/course/course-1/lesson/lesson-2"));
 
     await waitFor(() => expect(mounts).toHaveLength(3));

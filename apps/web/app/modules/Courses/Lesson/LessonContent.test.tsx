@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
@@ -144,6 +144,8 @@ describe("lesson navigation controls", () => {
 
 describe("lesson heading", () => {
   const onTitleFocused = vi.fn();
+
+  beforeEach(() => onTitleFocused.mockClear());
   const renderLessonContent = (focusTitleOnMount?: boolean) =>
     renderWith({ withQuery: true }).render(
       <LessonContent
@@ -163,6 +165,7 @@ describe("lesson heading", () => {
     renderLessonContent();
 
     expect(screen.getByRole("heading", { level: 1, name: "Lesson heading" })).not.toHaveFocus();
+    expect(onTitleFocused).not.toHaveBeenCalled();
   });
 
   it("moves focus to the lesson heading after navigating to another lesson", () => {

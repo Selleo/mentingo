@@ -21,7 +21,8 @@ export default function Layout() {
   const platformName = getPlatformName(companyInfo.data);
 
   // Remix metadata cannot subscribe to Query or i18n state. Route metadata ran before the company
-  // information and the user's language were known, so re-render it (routes have no loaders).
+  // information and the user's language were known, so re-render it. Only redirect-only
+  // clientLoaders exist, so revalidation is cheap.
   useEffect(() => {
     revalidate();
   }, [platformName, i18n.language, revalidate]);

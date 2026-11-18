@@ -11,15 +11,26 @@ export const usePageTitle = (parts: Array<string | null | undefined>) => {
   const title = formatPageTitle(parts, getPlatformName(companyInformation?.data));
 
   useLayoutEffect(() => {
+    // The route's own title, restored on cleanup: the next route may render the same `<title>`
+    // string, in which case React leaves our title in the DOM.
+    let routeTitle = document.title;
+
     document.title = title;
 
     // Watch the whole head: Remix may update the `<title>` text or replace the element.
     const observer = new MutationObserver(() => {
-      if (document.title !== title) document.title = title;
+      if (document.title === title) return;
+
+      routeTitle = document.title;
+      document.title = title;
     });
 
     observer.observe(document.head, { childList: true, characterData: true, subtree: true });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      // Keep a title Remix committed in the same commit as the unmount.
+      if (document.title === title) document.title = routeTitle;
+    };
   }, [title]);
 };
