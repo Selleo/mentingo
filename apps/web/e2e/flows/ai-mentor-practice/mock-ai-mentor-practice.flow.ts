@@ -7,7 +7,7 @@ import {
   QUEUED_AI_MENTOR_PRACTICE,
   READY_AI_MENTOR_PRACTICE,
 } from "../../data/ai-mentor-practice/ai-mentor-practice.data";
-import { mockDashboardWidget } from "../dashboard/mock-dashboard-widget.flow";
+import { mockDashboardFlow } from "../dashboard/mock-dashboard.flow";
 
 import type { Page, Route } from "@playwright/test";
 
@@ -31,16 +31,22 @@ const mockEndpoint = (
  * only the practice widget and the practice endpoints answer with a queued session.
  */
 export const mockAiMentorPracticeDashboardFlow = async (page: Page) => {
-  await mockDashboardWidget(
-    page,
-    DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
-    [
-      { path: "/api/ai/practice/today", body: null },
-      { path: "/api/ai/practice", method: "POST", body: QUEUED_AI_MENTOR_PRACTICE },
-      { path: `/api/ai/practice/${AI_MENTOR_PRACTICE_ID}`, body: QUEUED_AI_MENTOR_PRACTICE },
+  await mockDashboardFlow(page, {
+    widgets: [
+      {
+        type: DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+        size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
+        visible: true,
+      },
     ],
-    DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
-  );
+    responses: [
+      { path: "/api/ai/practice", method: "POST", body: { data: QUEUED_AI_MENTOR_PRACTICE } },
+      {
+        path: `/api/ai/practice/${AI_MENTOR_PRACTICE_ID}`,
+        body: { data: QUEUED_AI_MENTOR_PRACTICE },
+      },
+    ],
+  });
 };
 
 /**
