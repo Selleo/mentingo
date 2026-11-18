@@ -46,4 +46,6 @@ export const EMAIL_TEMPLATES_HANDLES = {
   STAY: "email-template-stay",
   LEAVE: "email-template-leave",
   ERROR: "email-template-error",
+  CANVAS_IMAGE: "email-template-canvas-image",
+  WORKSPACE_TAB: (tab: string) => `automations-workspace-tab-${tab}`,
 } as const;

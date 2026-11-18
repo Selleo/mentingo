@@ -1,14 +1,20 @@
+import { expect, type Locator, type Page } from "@playwright/test";
+
+import { AUTOMATION_WORKSPACE_TABS } from "~/modules/Admin/Automations/Workspace/workspace.constants";
+
 import { EMAIL_TEMPLATES_HANDLES } from "../../data/email-templates/handles";
 import { NAVIGATION_HANDLES } from "../../data/navigation/handles";
+import { openManageMenuFlow } from "../navigation/open-manage-menu.flow";
 
-import type { Page } from "@playwright/test";
 import type { GetEmailTemplateResponse } from "~/api/generated-api";
 
 export const openEmailCatalogFromNavigationFlow = async (page: Page) => {
   await page.goto("/");
-  await page.getByTestId(NAVIGATION_HANDLES.MANAGE_TOGGLE).click();
+  await openManageMenuFlow(page);
   await page.getByTestId(NAVIGATION_HANDLES.AUTOMATIONS_LINK).click();
-  await page.getByRole("tab", { name: "Email templates", exact: true }).click();
+  await page
+    .getByTestId(EMAIL_TEMPLATES_HANDLES.WORKSPACE_TAB(AUTOMATION_WORKSPACE_TABS.EMAIL_TEMPLATES))
+    .click();
 };
 
 export const copyEmailTemplateFlow = async (page: Page, input: { templateKey: string }) => {
@@ -45,11 +51,8 @@ export const sendTestEmailFlow = async (page: Page) => {
 };
 
 export const returnToEmailCatalogFlow = async (page: Page) => {
-  const workspaceLink = page.getByTestId(NAVIGATION_HANDLES.AUTOMATIONS_LINK);
-  if (!(await workspaceLink.isVisible())) {
-    await page.getByTestId(NAVIGATION_HANDLES.MANAGE_TOGGLE).click();
-  }
-  await workspaceLink.click();
+  await openManageMenuFlow(page);
+  await page.getByTestId(NAVIGATION_HANDLES.AUTOMATIONS_LINK).click();
 };
 
 export const saveEmailDraftFlow = async (page: Page) => {
@@ -57,4 +60,22 @@ export const saveEmailDraftFlow = async (page: Page) => {
   const saveItem = page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE);
   await saveItem.click();
   await saveItem.waitFor({ state: "detached" });
+};
+
+/** Opens the given actions menu, picks delete and either confirms or cancels the dialog. */
+export const deleteEmailTemplateFlow = async (
+  page: Page,
+  actionsMenu: Locator,
+  { confirm }: { confirm: boolean },
+) => {
+  await actionsMenu.click();
+  await page.getByTestId(EMAIL_TEMPLATES_HANDLES.DELETE).click();
+
+  if (confirm) {
+    await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM).click();
+    return;
+  }
+
+  await page.getByTestId(EMAIL_TEMPLATES_HANDLES.CANCEL).click();
+  await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.CONFIRM)).toBeHidden();
 };

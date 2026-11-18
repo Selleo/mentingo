@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { TEST_DATA } from "../data/test-data/entity-name.data";
+import { nullIfNotFound } from "../utils/not-found";
 import { getSelfOnboardingLanguage } from "../utils/self-onboarding-context";
 
 import type { FixtureApiClient } from "../utils/api-client";
@@ -154,11 +155,7 @@ export class ArticleFactory {
     id: string,
     language: SupportedLanguages = getSelfOnboardingLanguage(),
   ): Promise<ArticleFactoryRecord | null> {
-    try {
-      return await this.getById(id, language);
-    } catch {
-      return null;
-    }
+    return nullIfNotFound(this.getById(id, language));
   }
 
   async update(id: string, data: ArticleFactoryUpdateInput): Promise<ArticleFactoryRecord> {
@@ -176,6 +173,16 @@ export class ArticleFactory {
     await this.apiClient.api.articlesControllerDeleteArticle(id);
   }
 
+  /** Cleanup helper: deletes the article unless the test already removed it. */
+  async safeDelete(id: string): Promise<void> {
+    if (await this.safeGetById(id)) await this.delete(id);
+  }
+
+  /** Cleanup helper: deletes the section unless already gone; fails if articles are still assigned. */
+  async safeDeleteSection(id: string): Promise<void> {
+    if (await this.safeGetSectionById(id)) await this.deleteSection(id);
+  }
+
   async getSectionById(
     id: string,
     language: SupportedLanguages = getSelfOnboardingLanguage(),
@@ -188,11 +195,7 @@ export class ArticleFactory {
     id: string,
     language: SupportedLanguages = getSelfOnboardingLanguage(),
   ): Promise<ArticleSectionFactoryRecord | null> {
-    try {
-      return await this.getSectionById(id, language);
-    } catch {
-      return null;
-    }
+    return nullIfNotFound(this.getSectionById(id, language));
   }
 
   async updateSection(
