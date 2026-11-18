@@ -38,6 +38,7 @@ vi.mock("react-i18next", async () => {
 
   return {
     useTranslation: () => ({
+      t: (key: string) => key,
       i18n: { language: useSyncExternalStore(languageStore.subscribe, languageStore.get) },
     }),
   };
