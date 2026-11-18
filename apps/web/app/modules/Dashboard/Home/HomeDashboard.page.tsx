@@ -39,7 +39,6 @@ import { DashboardEditModeProvider } from "./dashboardEditContext";
 import type { DashboardLayoutItem } from "./types";
 import type { MetaFunction } from "@remix-run/react";
 import type { DashboardWidgetType } from "@repo/shared";
-
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.dashboard");
 
 type DashboardSettingsWidget = {
@@ -89,13 +88,10 @@ const mergeVisibleLayout = (
   if (!isVisibleOnlyUpdate) return nextVisibleLayout.map((widget) => ({ ...widget }));
 
   let nextVisibleIndex = 0;
-
   return currentLayout.map((widget) => {
     if (widget.visible === false) return { ...widget };
     const replacement = nextVisibleLayout[nextVisibleIndex];
-
     nextVisibleIndex += 1;
-
     return replacement ? { ...replacement } : { ...widget };
   });
 };
@@ -130,11 +126,9 @@ export default function HomeDashboardPage() {
   const visibleLayout = (isEditing ? draftWidgets : savedWidgets).filter(
     (widget) => widget.visible !== false,
   );
-
   useEffect(() => {
     if (!dashboardSettings || !userId) return;
     const userLayout = createLayout(dashboardSettings.layout.widgets, dashboardSettings.catalog);
-
     setSavedWidgets(userLayout);
     setDraftWidgets(cloneLayout(userLayout));
     setHydratedUserId(userId);
@@ -146,7 +140,6 @@ export default function HomeDashboardPage() {
     const normalizedWidgets = mergeVisibleLayout(draftWidgets, nextWidgets).map(
       (widget, order) => ({ ...widget, order }),
     );
-
     setDraftWidgets(normalizedWidgets);
     setSavedWidgets(normalizedWidgets);
     updateDashboardSettings({
@@ -168,7 +161,6 @@ export default function HomeDashboardPage() {
     resetDashboardSettings(dashboardSettings?.layout.revision ?? 0, {
       onSuccess: (response) => {
         const layout = createLayout(response.layout.widgets, response.catalog);
-
         setSavedWidgets(layout);
         setDraftWidgets(cloneLayout(layout));
       },

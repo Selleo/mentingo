@@ -21,12 +21,16 @@ test("student can start a practice from the dashboard and see background prepara
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-    await mockAiMentorPracticeDashboardFlow(page);
+    const dashboard = await mockAiMentorPracticeDashboardFlow(page);
 
     await page.goto("/dashboard");
 
     const widget = page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET);
-    await expect(widget).toBeVisible();
+    const scenarioInput = widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.SCENARIO_INPUT);
+    await expect(scenarioInput).toHaveValue("");
+    await widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.SUGGESTIONS_TRIGGER).click();
+    await page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.SUGGESTION).first().click();
+    await expect(scenarioInput).toHaveValue(/\S/);
     await widget
       .getByTestId(AI_MENTOR_PRACTICE_HANDLES.SCENARIO_INPUT)
       .fill(AI_MENTOR_PRACTICE_SCENARIO);
@@ -47,6 +51,7 @@ test("student can start a practice from the dashboard and see background prepara
     await expect(page).toHaveURL(new RegExp(`/ai-mentor/practice/${AI_MENTOR_PRACTICE_ID}$`));
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.PREPARING_STATE)).toBeVisible();
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.GO_TO_DASHBOARD_BUTTON)).toBeVisible();
+    expect(dashboard.unexpectedRequests).toEqual([]);
   });
 });
 

@@ -113,6 +113,7 @@ function ScenarioComposer({
               variant="ghost"
               size="icon"
               className="size-8 rounded-lg text-neutral-600 hover:bg-primary-50 hover:text-primary-700"
+              data-testid={AI_MENTOR_PRACTICE_HANDLES.SUGGESTIONS_TRIGGER}
               aria-label={t("aiMentorPractice.form.suggestions.title")}
             >
               <Plus className="size-4" aria-hidden="true" />
@@ -130,6 +131,7 @@ function ScenarioComposer({
             {PRACTICE_SUGGESTIONS.map(({ labelKey, valueKey }) => (
               <DropdownMenuItem
                 key={valueKey}
+                data-testid={AI_MENTOR_PRACTICE_HANDLES.SUGGESTION}
                 className="cursor-pointer rounded-lg px-2.5 py-2.5 outline-none transition-colors focus:bg-primary-50"
                 onSelect={() => onScenarioChange(t(valueKey))}
               >

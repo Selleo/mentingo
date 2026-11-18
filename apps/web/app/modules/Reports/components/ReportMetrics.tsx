@@ -71,7 +71,9 @@ export function ReportHeadlineMetrics({ metrics }: ReportMetricsProps) {
             <MetricIcon className="size-4 shrink-0 text-neutral-500" aria-hidden="true" />
             {label}
           </p>
-          <p className="h4 text-neutral-950">{value}</p>
+          <p className="h4 text-neutral-950" data-testid={REPORTS_HANDLES.METRIC_VALUE}>
+            {value}
+          </p>
           <p className="details text-neutral-500">{context}</p>
           {rate !== undefined && (
             <Progress

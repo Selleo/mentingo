@@ -14,6 +14,8 @@ export const DASHBOARD_WIDGET_HANDLES = {
   ERROR_STATE: "dashboard-widget-error-state",
   RETRY: "dashboard-widget-retry",
   CHART: "dashboard-widget-chart",
+  CHART_PERCENTAGE: "dashboard-widget-chart-percentage",
+  CHART_COMPLETED_OF_TOTAL: "dashboard-widget-chart-completed-of-total",
 } as const;
 
 export const DASHBOARD_EDIT_HANDLES = {

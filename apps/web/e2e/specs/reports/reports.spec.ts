@@ -1,6 +1,7 @@
 import { stat } from "node:fs/promises";
 
 import { USER_ROLE } from "~/config/userRoles";
+import { formatReportDate } from "~/modules/Reports/reports.utils";
 
 import { REPORTS_HANDLES } from "../../data/reports/handles";
 import {
@@ -39,10 +40,18 @@ test("reports render learner results", async ({ withWorkerPage }) => {
     await expect(learnerRow).toContainText(RESULT_ROW.course.title);
     await expect(learnerRow).toContainText(RESULT_ROW.path.title);
     await expect(learnerRow).toContainText(`${RESULT_ROW.score}%`);
-    await expect(learnerRow).toContainText("2026");
-    await expect(page.getByTestId(REPORTS_HANDLES.metric("learners"))).toContainText(
-      String(REPORTS_RESULT.metrics.learners),
+    await expect(learnerRow).toContainText(
+      formatReportDate(
+        RESULT_ROW.lastActivityAt,
+        "en",
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+      ),
     );
+    await expect(
+      page
+        .getByTestId(REPORTS_HANDLES.metric("learners"))
+        .getByTestId(REPORTS_HANDLES.METRIC_VALUE),
+    ).toHaveText(String(REPORTS_RESULT.metrics.learners));
   });
 });
 
@@ -229,7 +238,11 @@ test("reports recover from a saved configuration with inaccessible references", 
     await expect(page.getByTestId(REPORTS_HANDLES.SUBJECT_PICKER)).toContainText(
       RESULT_ROW.learner.name,
     );
-    await expect(page.getByTestId(REPORTS_HANDLES.GROUPS_PICKER)).not.toContainText("Product team");
+    // The inaccessible group is dropped, so the picker is back on "all groups".
+    await expect(page.getByTestId(REPORTS_HANDLES.GROUPS_PICKER)).toHaveAttribute(
+      "data-selected-count",
+      "0",
+    );
     await removeReportConditionFlow(page);
     await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveAttribute(
       "data-count",
@@ -274,7 +287,31 @@ test("reports run a real course report and export it as a spreadsheet", async ({
 
     await expect(page.getByTestId(REPORTS_HANDLES.RESULT_TITLE)).toContainText(course.title);
     await expect(page.getByTestId(REPORTS_HANDLES.RESULTS_TABLE)).toContainText(learner.email);
-    await expect(page.getByTestId(REPORTS_HANDLES.metric("learners"))).toContainText("1");
+    await expect(
+      page
+        .getByTestId(REPORTS_HANDLES.metric("learners"))
+        .getByTestId(REPORTS_HANDLES.METRIC_VALUE),
+    ).toHaveText("1");
+
+    // A new condition filters on status "completed"; the enrolled learner has not started yet.
+    const learnersMetric = page
+      .getByTestId(REPORTS_HANDLES.metric("learners"))
+      .getByTestId(REPORTS_HANDLES.METRIC_VALUE);
+    await openReportFiltersFlow(page);
+    await addReportConditionFlow(page);
+    await applyReportFlow(page);
+    await expect(learnersMetric).toHaveText("0");
+    await expect(page.getByTestId(REPORTS_HANDLES.RESULTS_TABLE)).not.toContainText(learner.email);
+    await chooseReportOptionFlow(
+      page,
+      page
+        .getByTestId(REPORTS_HANDLES.CONDITION)
+        .getByTestId(REPORTS_HANDLES.CONDITION_VALUE_PICKER),
+      REPORTS_HANDLES.option("notStarted"),
+    );
+    await applyReportFlow(page);
+    await expect(learnersMetric).toHaveText("1");
+    await expect(page.getByTestId(REPORTS_HANDLES.RESULTS_TABLE)).toContainText(learner.email);
 
     const download = await exportReportSpreadsheetFlow(page);
     await expect(page.getByTestId(REPORTS_HANDLES.EXPORT_DOWNLOAD)).toBeVisible();

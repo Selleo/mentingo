@@ -53,9 +53,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
 
   const saveTitle = () => {
     const nextTitle = title.trim();
-
     setIsEditingTitle(false);
-
     if (nextTitle && nextTitle !== task.title) {
       onSave(nextTitle);
     }
@@ -112,7 +110,6 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
           onBlur={saveTitle}
           onKeyDown={(event) => {
             if (event.key === "Enter") event.currentTarget.blur();
-
             if (event.key === "Escape") {
               setTitle(task.title);
               setIsEditingTitle(false);
@@ -191,19 +188,16 @@ export function WidgetTodoTasks({
 
     const source = tasks.find((task) => task.id === String(event.active.id));
     const target = tasks.find((task) => task.id === String(event.over?.id));
-
     if (!source || !target || source.completed !== target.completed) return;
 
     const section = source.completed ? completedTasks : activeTasks;
     const ids = section.map((task) => task.id);
     const from = ids.indexOf(String(event.active.id));
     const to = ids.indexOf(String(event.over.id));
-
     if (from < 0 || to < 0) return;
 
     const next = [...ids];
     const [moved] = next.splice(from, 1);
-
     if (moved) next.splice(to, 0, moved);
 
     void reorderTasks({
@@ -214,7 +208,6 @@ export function WidgetTodoTasks({
 
   const addTask = async () => {
     const title = newTask.trim();
-
     if (!title || isCreating) return;
 
     await createTask(title);

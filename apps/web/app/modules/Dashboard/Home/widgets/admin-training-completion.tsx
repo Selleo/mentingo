@@ -135,6 +135,7 @@ export function WidgetAdminTrainingCompletion({
                             x={viewBox.cx}
                             y={(viewBox.cy ?? 0) + (isCompact ? 5 : -8)}
                             className={cn("fill-neutral-950", isCompact ? "body-base-md" : "h4")}
+                            data-testid={DASHBOARD_WIDGET_HANDLES.CHART_PERCENTAGE}
                           >
                             {percentage}%
                           </tspan>
@@ -143,6 +144,7 @@ export function WidgetAdminTrainingCompletion({
                               x={viewBox.cx}
                               y={(viewBox.cy ?? 0) + 16}
                               className="details fill-neutral-500"
+                              data-testid={DASHBOARD_WIDGET_HANDLES.CHART_COMPLETED_OF_TOTAL}
                             >
                               {stats?.completed}/{total}
                             </tspan>

@@ -87,8 +87,10 @@ test.describe("admin dashboard widgets", () => {
       const chart = page
         .getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION)
         .getByTestId(DASHBOARD_WIDGET_HANDLES.CHART);
-      await expect(chart).toContainText("0%");
-      await expect(chart).toContainText("0/1");
+      await expect(chart.getByTestId(DASHBOARD_WIDGET_HANDLES.CHART_PERCENTAGE)).toHaveText("0%");
+      await expect(chart.getByTestId(DASHBOARD_WIDGET_HANDLES.CHART_COMPLETED_OF_TOTAL)).toHaveText(
+        "0/1",
+      );
     });
   });
 

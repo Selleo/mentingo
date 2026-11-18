@@ -57,7 +57,6 @@ export function WidgetPickerDialog({
   const handleVisibilityChange = (id: DashboardWidgetType, isVisible: boolean) => {
     const definition = availableWidgets.find((widget) => widget.type === id);
     const isAlwaysVisible = definition?.alwaysVisible ?? DASHBOARD_WIDGET_CATALOG[id].alwaysVisible;
-
     if (!definition || isAlwaysVisible) return;
 
     if (!isVisible) {
@@ -66,17 +65,13 @@ export function WidgetPickerDialog({
           .map((widget) => (widget.id === id ? { ...widget, visible: false } : widget))
           .map((widget, order) => ({ ...widget, order })),
       );
-
       return;
     }
-
     const existingWidget = savedWidgets.find((widget) => widget.id === id);
-
     if (existingWidget) {
       onWidgetsChange(
         savedWidgets.map((widget) => (widget.id === id ? { ...widget, visible: true } : widget)),
       );
-
       return;
     }
 
@@ -111,7 +106,6 @@ export function WidgetPickerDialog({
             .map((definition) => {
               const widgetId = definition.type;
               const entry = DASHBOARD_WIDGET_REGISTRY[widgetId];
-
               if (!entry) return null;
               const isAlwaysVisible = isRequiredWidget(definition);
               const isVisible = savedWidgets.some(

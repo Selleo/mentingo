@@ -4,6 +4,8 @@ export const AI_MENTOR_PRACTICE_HANDLES = {
   FORM: "ai-mentor-practice-form",
   SCENARIO_INPUT: "ai-mentor-practice-scenario-input",
   SUBMIT_BUTTON: "ai-mentor-practice-submit-button",
+  SUGGESTIONS_TRIGGER: "ai-mentor-practice-suggestions-trigger",
+  SUGGESTION: "ai-mentor-practice-suggestion",
   PREPARING_STATE: "ai-mentor-practice-preparing-state",
   REPLAY_LOADER: "ai-mentor-practice-replay-loader",
   GO_TO_DASHBOARD_BUTTON: "ai-mentor-practice-go-to-dashboard-button",

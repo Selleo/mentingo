@@ -106,10 +106,12 @@ test("content creator sees deadline risks of their own courses only", async ({
     await expect(
       deadlineRisks.getByTestId(DASHBOARD_DEADLINE_RISK_HANDLES.course(otherCourseId)),
     ).toHaveCount(0);
-    await expect(
-      page
-        .getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION)
-        .getByTestId(DASHBOARD_WIDGET_HANDLES.CHART),
-    ).toBeVisible();
+    // Only the own course counts: its group has one learner who has not completed it.
+    const chart = page
+      .getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION)
+      .getByTestId(DASHBOARD_WIDGET_HANDLES.CHART);
+    await expect(chart.getByTestId(DASHBOARD_WIDGET_HANDLES.CHART_COMPLETED_OF_TOTAL)).toHaveText(
+      "0/1",
+    );
   });
 });

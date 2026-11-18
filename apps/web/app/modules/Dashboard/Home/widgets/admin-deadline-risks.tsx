@@ -258,12 +258,10 @@ export function WidgetAdminDeadlineRisks() {
     manualSorting: true,
     onExpandedChange: (updater) => {
       const expanded = typeof updater === "function" ? updater(dialogState.expanded) : updater;
-
       dispatchDialog({ type: DEADLINE_RISK_DIALOG_ACTIONS.SET_EXPANDED, expanded });
     },
     onSortingChange: (updater) => {
       const sorting = typeof updater === "function" ? updater(dialogState.sorting) : updater;
-
       dispatchDialog({ type: DEADLINE_RISK_DIALOG_ACTIONS.SET_SORTING, sorting });
     },
     state: {
@@ -291,14 +289,12 @@ export function WidgetAdminDeadlineRisks() {
   };
   const handleCoursesScroll = () => {
     const element = coursesScrollRef.current;
-
     if (element && element.scrollHeight - element.scrollTop - element.clientHeight < 96) {
       loadNextCoursesPage();
     }
   };
   const handleGroupsScroll = () => {
     const element = groupsScrollRef.current;
-
     if (element && element.scrollHeight - element.scrollTop - element.clientHeight < 96) {
       loadNextGroupsPage();
     }

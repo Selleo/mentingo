@@ -19,7 +19,11 @@ import {
 } from "../../flows/dashboard/customize-dashboard.flow";
 import { mockDashboardFlow } from "../../flows/dashboard/mock-dashboard.flow";
 import { openDashboardFlow } from "../../flows/dashboard/open-dashboard.flow";
-import { setDashboardWidgets } from "../../utils/dashboard-settings";
+import {
+  getDashboardLayout,
+  getRoleDefaultDashboardWidgets,
+  setDashboardWidgets,
+} from "../../utils/dashboard-settings";
 
 import type { DashboardWidgetType } from "@repo/shared";
 import type { UserRole } from "~/config/userRoles";
@@ -31,15 +35,21 @@ const ISOLATED_ROLES = [SYSTEM_ROLE_SLUGS.TRAINER, SYSTEM_ROLE_SLUGS.GROUP_MANAG
 
 test.describe("role-specific dashboard default layouts", () => {
   for (const role of WORKER_ROLES) {
-    test(`${role} restores its default profile and persists it`, async ({ withWorkerPage }) => {
+    test(`${role} restores its default profile from the API and persists it`, async ({
+      apiClient,
+      cleanup,
+      withWorkerPage,
+    }) => {
       await withWorkerPage(role, async ({ page }) => {
-        const expectedWidgets = defaultDashboardLayout(role);
-        const state = await mockDashboardFlow(page, {
-          widgets: [...expectedWidgets].reverse(),
-          resetWidgets: expectedWidgets,
-        });
+        const expectedWidgets = await getRoleDefaultDashboardWidgets(apiClient, role);
+        const reversedWidgets = [...expectedWidgets].reverse();
+        cleanup.add(await setDashboardWidgets(apiClient, reversedWidgets));
 
         await openDashboardFlow(page);
+        await assertDashboardWidgetOrderFlow(
+          page,
+          reversedWidgets.map((widget) => widget.type),
+        );
         await openWidgetPickerFlow(page);
 
         await page.getByTestId(DASHBOARD_EDIT_HANDLES.RESTORE_DEFAULT).click();
@@ -47,10 +57,12 @@ test.describe("role-specific dashboard default layouts", () => {
         await expect(confirmation).toBeVisible();
         await page.getByTestId(DASHBOARD_EDIT_HANDLES.RESTORE_DEFAULT_CANCEL).click();
         await expect(confirmation).toBeHidden();
-        expect(state.getResetRequests()).toBe(0);
+        expect((await getDashboardLayout(apiClient)).widgets).toEqual(reversedWidgets);
 
         await restoreDashboardDefaultFlow(page);
-        await expect.poll(() => state.getResetRequests()).toBe(1);
+        await expect
+          .poll(async () => (await getDashboardLayout(apiClient)).widgets)
+          .toEqual(expectedWidgets);
         await closeWidgetPickerFlow(page);
         await page.reload();
 
@@ -63,28 +75,62 @@ test.describe("role-specific dashboard default layouts", () => {
   }
 
   for (const role of ISOLATED_ROLES) {
-    test(`${role} restores its default profile`, async ({ createIsolatedWorkspace }) => {
+    test(`${role} restores its default profile from the API`, async ({
+      createIsolatedWorkspace,
+    }) => {
       const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
       await workspace.apiClient.api.settingsControllerUpdateLiveTrainingEnabled();
       // shortcut: the fixture types roles as worker roles only; widen UserRole when more roles get worker accounts
       const user = await workspace.createTenantUserWithPasswordAndRole({ role: role as UserRole });
-      const expectedWidgets = defaultDashboardLayout(role);
-      const state = await mockDashboardFlow(user.page, {
-        widgets: [...expectedWidgets].reverse(),
-        resetWidgets: expectedWidgets,
-      });
+      const expectedWidgets = await getRoleDefaultDashboardWidgets(user.apiClient, role);
+      await setDashboardWidgets(user.apiClient, [...expectedWidgets].reverse());
 
       await openDashboardFlow(user.page, user.origin);
       await openWidgetPickerFlow(user.page);
       await restoreDashboardDefaultFlow(user.page);
 
-      await expect.poll(() => state.getResetRequests()).toBe(1);
+      await expect
+        .poll(async () => (await getDashboardLayout(user.apiClient)).widgets)
+        .toEqual(expectedWidgets);
       await assertDashboardWidgetOrderFlow(
         user.page,
         expectedWidgets.map((widget) => widget.type),
       );
     });
   }
+
+  test("an admin who is also a student restores the management profile from the API", async ({
+    createIsolatedWorkspace,
+  }) => {
+    const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
+    const user = await workspace.createTenantUserWithPasswordAndRole({
+      role: USER_ROLE.student,
+      roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN, SYSTEM_ROLE_SLUGS.STUDENT],
+    });
+    const expectedWidgets = await getRoleDefaultDashboardWidgets(
+      user.apiClient,
+      SYSTEM_ROLE_SLUGS.ADMIN,
+    );
+    await setDashboardWidgets(user.apiClient, [...expectedWidgets].reverse());
+
+    await openDashboardFlow(user.page, user.origin);
+    await openWidgetPickerFlow(user.page);
+    // The learner role adds learner widgets to the catalog; the admin role decides the default.
+    await expect(
+      user.page.getByTestId(
+        DASHBOARD_EDIT_HANDLES.widgetToggle(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING),
+      ),
+    ).toBeVisible();
+    await restoreDashboardDefaultFlow(user.page);
+
+    await expect
+      .poll(async () => (await getDashboardLayout(user.apiClient)).widgets)
+      .toEqual(expectedWidgets);
+    await assertDashboardWidgetOrderFlow(
+      user.page,
+      expectedWidgets.map((widget) => widget.type),
+    );
+  });
 });
 
 test("admin hides a widget, keeps it hidden after reload and restores the default layout", async ({
@@ -125,6 +171,49 @@ test("admin hides a widget, keeps it hidden after reload and restores the defaul
     await expect(
       page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION),
     ).toBeVisible();
+  });
+});
+
+test("a student without AI Mentor available gets no AI widget or picker toggle after restoring the default", async ({
+  withWorkerPage,
+}) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
+    const defaultsWithoutAi = defaultDashboardLayout(SYSTEM_ROLE_SLUGS.STUDENT).filter(
+      ({ type }) => type !== DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+    );
+    const state = await mockDashboardFlow(page, {
+      widgets: [
+        dashboardWidget(
+          DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING,
+          DASHBOARD_WIDGET_SIZES.TWO_BY_ONE,
+        ),
+      ],
+      catalog: defaultsWithoutAi.map(({ type }) => type),
+      resetWidgets: defaultsWithoutAi,
+      responses: [{ path: "/api/env/ai", body: { data: { enabled: false } } }],
+    });
+
+    await openDashboardFlow(page);
+    await openWidgetPickerFlow(page);
+    await expect(
+      page.getByTestId(
+        DASHBOARD_EDIT_HANDLES.widgetToggle(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING),
+      ),
+    ).toBeVisible();
+    await expect(
+      page.getByTestId(
+        DASHBOARD_EDIT_HANDLES.widgetToggle(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE),
+      ),
+    ).toHaveCount(0);
+    await restoreDashboardDefaultFlow(page);
+    await closeWidgetPickerFlow(page);
+
+    await assertDashboardWidgetOrderFlow(
+      page,
+      defaultsWithoutAi.map(({ type }) => type),
+    );
+    await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET)).toHaveCount(0);
+    expect(state.unexpectedRequests).toEqual([]);
   });
 });
 
@@ -176,30 +265,6 @@ test("a student restores a default layout without AI Mentor when AI is unavailab
   });
 });
 
-test("a multi-role admin and student restores the management profile", async ({
-  withWorkerPage,
-}) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const managementDefaults = defaultDashboardLayout(SYSTEM_ROLE_SLUGS.ADMIN);
-    const studentDefaults = defaultDashboardLayout(SYSTEM_ROLE_SLUGS.STUDENT);
-    const state = await mockDashboardFlow(page, {
-      widgets: [...studentDefaults].reverse(),
-      resetWidgets: managementDefaults,
-      catalog: [...new Set([...studentDefaults, ...managementDefaults].map(({ type }) => type))],
-    });
-
-    await openDashboardFlow(page);
-    await openWidgetPickerFlow(page);
-    await restoreDashboardDefaultFlow(page);
-
-    await expect.poll(() => state.getResetRequests()).toBe(1);
-    await assertDashboardWidgetOrderFlow(
-      page,
-      managementDefaults.map((widget) => widget.type),
-    );
-  });
-});
-
 test("uses catalog sizes for alignment and does not offer an invalid span", async ({
   withWorkerPage,
 }) => {
@@ -242,6 +307,7 @@ test("uses catalog sizes for alignment and does not offer an invalid span", asyn
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(calendar).toHaveClass(/col-span-2/);
     await expect(completion).toHaveClass(/col-span-1/);
+    expect(state.unexpectedRequests).toEqual([]);
   });
 });
 
@@ -276,7 +342,10 @@ test("clamps persisted wide spans on mobile and restores them at md", async ({
     await page.setViewportSize({ width: 1024, height: 900 });
     await expect(aiSlot).toHaveClass(/md:col-span-3/);
     await expect(calendarSlot).toHaveClass(/md:col-span-4/);
-    expect(state.getWidgets().map((widget) => widget.size)).toEqual(["3x2", "4x2"]);
+    await expect
+      .poll(() => state.getWidgets().map((widget) => widget.size))
+      .toEqual(["3x2", "4x2"]);
+    expect(state.unexpectedRequests).toEqual([]);
   });
 });
 
@@ -337,6 +406,7 @@ test("autosaves resize and reorder without a global save", async ({ withWorkerPa
         .getByTestId(DASHBOARD_WIDGET_HANDLES.SLOT)
         .filter({ has: page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION) }),
     ).toHaveAttribute("style", /grid-row: span 2/);
+    expect(state.unexpectedRequests).toEqual([]);
   });
 });
 
@@ -344,19 +414,21 @@ test("removes Calendar from the sidebar while keeping the card CTA route", async
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-    await mockDashboardFlow(page, {
+    const state = await mockDashboardFlow(page, {
       widgets: [
         dashboardWidget(DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR, DASHBOARD_WIDGET_SIZES.FOUR_BY_TWO),
       ],
     });
 
     await openDashboardFlow(page);
+    await expect(page.getByTestId(NAVIGATION_HANDLES.DASHBOARD_LINK)).toBeVisible();
     await expect(page.getByTestId(NAVIGATION_HANDLES.CALENDAR_LINK)).toHaveCount(0);
 
     const widget = page.getByTestId(DASHBOARD_WIDGET_HANDLES.EVENT_CALENDAR);
     await expect(widget.getByRole("grid")).toBeVisible();
     await widget.getByTestId(DASHBOARD_CALENDAR_HANDLES.OPEN_CALENDAR).click();
     await expect(page).toHaveURL(/\/calendar$/);
+    expect(state.unexpectedRequests).toEqual([]);
   });
 });
 
@@ -364,7 +436,7 @@ test("keeps learner widgets opt-in for admins while exposing eligible catalog en
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await mockDashboardFlow(page, {
+    const state = await mockDashboardFlow(page, {
       widgets: [
         dashboardWidget(DASHBOARD_WIDGET_TYPES.TODO_LIST, DASHBOARD_WIDGET_SIZES.TWO_BY_TWO),
         dashboardWidget(DASHBOARD_WIDGET_TYPES.DEADLINE_RISKS, DASHBOARD_WIDGET_SIZES.TWO_BY_ONE),
@@ -378,6 +450,7 @@ test("keeps learner widgets opt-in for admins while exposing eligible catalog en
     });
 
     await openDashboardFlow(page);
+    await expect(page.getByTestId(DASHBOARD_WIDGET_HANDLES.TODO_TASKS)).toBeVisible();
     await expect(page.getByTestId(DASHBOARD_WIDGET_HANDLES.STUDENT_CONTINUE_LEARNING)).toHaveCount(
       0,
     );
@@ -394,5 +467,6 @@ test("keeps learner widgets opt-in for admins while exposing eligible catalog en
     await expect(
       page.getByTestId(DASHBOARD_EDIT_HANDLES.widgetToggle(DASHBOARD_WIDGET_TYPES.TODO_LIST)),
     ).toBeChecked();
+    expect(state.unexpectedRequests).toEqual([]);
   });
 });

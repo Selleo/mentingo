@@ -62,14 +62,12 @@ export function WidgetStudentCertificates({
     setCertificates((current) => {
       if (page === 1) return data.data;
       const knownIds = new Set(current.map((certificate) => certificate.id));
-
       return [...current, ...data.data.filter((certificate) => !knownIds.has(certificate.id))];
     });
   }, [data, page]);
 
   const handleScroll = () => {
     const element = scrollRef.current;
-
     if (!element || !hasMore || isFetching) return;
     if (element.scrollHeight - element.scrollTop - element.clientHeight < 80)
       setPage((current) => current + 1);

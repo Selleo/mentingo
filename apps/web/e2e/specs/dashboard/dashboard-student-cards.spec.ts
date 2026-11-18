@@ -58,6 +58,7 @@ test.describe("learner dashboard card contracts", () => {
           dashboardWidget(DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES, SIZE.TWO_BY_TWO),
           dashboardWidget(DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION, SIZE.TWO_BY_TWO),
         ],
+        language: "pl",
         responses: [{ path: SUMMARY_PATH, body: LEARNER_SUMMARY }],
       });
 
@@ -84,9 +85,12 @@ test.describe("learner dashboard card contracts", () => {
           .getByTestId(DASHBOARD_WIDGET_HANDLES.STUDENT_COURSE_COMPLETION)
           .getByTestId(DASHBOARD_WIDGET_HANDLES.CHART),
       ).toContainText("3/5");
-      expect(state.requestsTo(SUMMARY_PATH).map((url) => url.searchParams.get("language"))).toEqual(
-        ["en"],
-      );
+      const languages = state
+        .requestsTo(SUMMARY_PATH)
+        .map((url) => url.searchParams.get("language"));
+      expect(languages.length).toBeGreaterThan(0);
+      expect(languages.every((language) => language === "pl")).toBe(true);
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
@@ -94,7 +98,7 @@ test.describe("learner dashboard card contracts", () => {
     withWorkerPage,
   }) => {
     await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-      await mockDashboardFlow(page, { widgets: SUMMARY_WIDGETS });
+      const state = await mockDashboardFlow(page, { widgets: SUMMARY_WIDGETS });
 
       await openDashboardFlow(page);
 
@@ -103,6 +107,7 @@ test.describe("learner dashboard card contracts", () => {
         await expect(widget.getByTestId(DASHBOARD_WIDGET_HANDLES.EMPTY_STATE)).toBeVisible();
         await expect(widget.getByTestId(DASHBOARD_WIDGET_HANDLES.CHART)).toHaveCount(0);
       }
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
@@ -110,7 +115,7 @@ test.describe("learner dashboard card contracts", () => {
     withWorkerPage,
   }) => {
     await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-      await mockDashboardFlow(page, {
+      const state = await mockDashboardFlow(page, {
         widgets: SUMMARY_WIDGETS,
         responses: [{ path: SUMMARY_PATH, status: 500, body: { message: "summary unavailable" } }],
       });
@@ -122,6 +127,7 @@ test.describe("learner dashboard card contracts", () => {
         await expect(widget.getByTestId(DASHBOARD_WIDGET_HANDLES.ERROR_STATE)).toBeVisible();
         await expect(widget.getByTestId(DASHBOARD_WIDGET_HANDLES.RETRY)).toBeVisible();
       }
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
@@ -129,7 +135,7 @@ test.describe("learner dashboard card contracts", () => {
     withWorkerPage,
   }) => {
     await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-      await mockDashboardFlow(page, {
+      const state = await mockDashboardFlow(page, {
         widgets: [
           dashboardWidget(DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING, SIZE.TWO_BY_ONE),
           dashboardWidget(DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES, SIZE.TWO_BY_TWO),
@@ -155,15 +161,16 @@ test.describe("learner dashboard card contracts", () => {
       const requiredWidget = page.getByTestId(DASHBOARD_WIDGET_HANDLES.STUDENT_REQUIRED_COURSE);
       await expect(
         requiredWidget.getByTestId(DASHBOARD_STUDENT_HANDLES.REQUIRED_COURSES_TOTAL),
-      ).toContainText("1");
+      ).toHaveAttribute("data-count", "1");
       await expect(
         requiredWidget.getByTestId(DASHBOARD_STUDENT_HANDLES.REQUIRED_COURSES_OVERDUE),
-      ).toContainText("1");
+      ).toHaveAttribute("data-count", "1");
       await expect(
         page
           .getByTestId(DASHBOARD_WIDGET_HANDLES.STUDENT_CERTIFICATES)
           .getByTestId(DASHBOARD_WIDGET_HANDLES.EMPTY_STATE),
       ).toBeVisible();
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 });
@@ -175,7 +182,7 @@ test.describe("learner AI Mentor practice card", () => {
   ]) {
     test(`renders the ${status} generation state`, async ({ withWorkerPage }) => {
       await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-        await mockDashboardFlow(page, {
+        const state = await mockDashboardFlow(page, {
           widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, SIZE.THREE_BY_TWO)],
           responses: [
             {
@@ -203,13 +210,14 @@ test.describe("learner AI Mentor practice card", () => {
         await expect(
           widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET_GENERATING),
         ).toBeVisible();
+        expect(state.unexpectedRequests).toEqual([]);
       });
     });
   }
 
   test("renders an empty generation form", async ({ withWorkerPage }) => {
     await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-      await mockDashboardFlow(page, {
+      const state = await mockDashboardFlow(page, {
         widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, SIZE.TWO_BY_TWO)],
       });
 
@@ -218,12 +226,13 @@ test.describe("learner AI Mentor practice card", () => {
       const widget = page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET);
       await expect(widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.SCENARIO_INPUT)).toBeVisible();
       await expect(widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.SUBMIT_BUTTON)).toBeDisabled();
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
   test("offers retry for failed generation", async ({ withWorkerPage }) => {
     await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-      await mockDashboardFlow(page, {
+      const state = await mockDashboardFlow(page, {
         widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, SIZE.TWO_BY_TWO)],
         responses: [
           {
@@ -238,6 +247,7 @@ test.describe("learner AI Mentor practice card", () => {
       const widget = page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET);
       await expect(widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET_FAILED)).toBeVisible();
       await expect(widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET_RETRY)).toBeEnabled();
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
@@ -249,7 +259,7 @@ test.describe("learner AI Mentor practice card", () => {
       withWorkerPage,
     }) => {
       await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-        await mockDashboardFlow(page, {
+        const state = await mockDashboardFlow(page, {
           widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE, SIZE.THREE_BY_TWO)],
           responses: [
             { path: PRACTICE_TODAY_PATH, body: { data: aiPracticeSession({ threadStatus }) } },
@@ -266,6 +276,7 @@ test.describe("learner AI Mentor practice card", () => {
         await expect(
           widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET_MESSAGE_INPUT),
         ).toHaveCount(canReply ? 1 : 0);
+        expect(state.unexpectedRequests).toEqual([]);
       });
     });
   }
@@ -275,6 +286,7 @@ test("learner certificates card paginates and opens the preview", async ({ withW
   await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     const state = await mockDashboardFlow(page, {
       widgets: [dashboardWidget(DASHBOARD_WIDGET_TYPES.CERTIFICATES, SIZE.TWO_BY_TWO)],
+      language: "pl",
       responses: [
         { path: "/api/auth/current-user", body: MOCK_STUDENT_SESSION },
         { path: "/api/settings/global", body: { data: {} } },
@@ -302,12 +314,15 @@ test("learner certificates card paginates and opens the preview", async ({ withW
       widget.getByTestId(DASHBOARD_STUDENT_HANDLES.certificate(LAST_CERTIFICATE.id)),
     ).toBeVisible();
 
-    const [firstPage] = state.requestsTo("/api/certificates/dashboard");
+    // The card can fire once with the default language before the user's setting loads.
+    const firstPage = state
+      .requestsTo("/api/certificates/dashboard")
+      .find((url) => url.searchParams.get("language") === "pl");
     expect(firstPage?.searchParams.get("page")).toBe("1");
     expect(firstPage?.searchParams.get("perPage")).toBe("10");
-    expect(firstPage?.searchParams.get("language")).toBe("en");
 
     await firstCertificate.click();
     await expect(page.getByRole("dialog")).toContainText("Taylor Student");
+    expect(state.unexpectedRequests).toEqual([]);
   });
 });

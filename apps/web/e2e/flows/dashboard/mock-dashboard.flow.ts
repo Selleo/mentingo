@@ -1,7 +1,7 @@
 import { DASHBOARD_SCHEMA_VERSION, DASHBOARD_WIDGET_CATALOG } from "@repo/shared";
 
 import type { Page, Request, Route } from "@playwright/test";
-import type { DashboardLayoutWidget, DashboardWidgetType } from "@repo/shared";
+import type { DashboardLayoutWidget, DashboardWidgetType, SupportedLanguages } from "@repo/shared";
 
 type DashboardMockRequest = { request: Request; url: URL };
 
@@ -23,6 +23,8 @@ type MockDashboardOptions = {
   /** Layout returned by "Restore default"; defaults to `widgets`. */
   resetWidgets?: DashboardLayoutWidget[];
   responses?: DashboardMockResponse[];
+  /** UI language stored in the mocked user settings. */
+  language?: SupportedLanguages;
 };
 
 const EMPTY_PAGE = { data: [], pagination: { totalItems: 0, page: 1, perPage: 10 } };
@@ -30,6 +32,7 @@ const EMPTY_PAGE = { data: [], pagination: { totalItems: 0, page: 1, perPage: 10
 /** Widget endpoints answered with empty data unless a test response overrides them. */
 const EMPTY_WIDGET_RESPONSES: DashboardMockResponse[] = [
   { path: "/api/ai/practice/today", body: { data: null } },
+  { path: "/api/ai/thread/messages", body: { data: [] } },
   { path: "/api/calendar/dashboard/events", body: { data: [] } },
   {
     path: "/api/course/dashboard-summary",
@@ -49,6 +52,24 @@ const EMPTY_WIDGET_RESPONSES: DashboardMockResponse[] = [
   { path: "/api/certificates/dashboard", body: EMPTY_PAGE },
   { path: "/api/todo-tasks", body: EMPTY_PAGE },
 ];
+
+/**
+ * App-shell requests that may reach the real backend: session, feature flags, branding, navigation
+ * badges and the dev toolbar, plus the calendar page the calendar card links to.
+ */
+const REAL_BACKEND_PATHS = [
+  /^\/api\/auth\//,
+  /^\/api\/env\//,
+  /^\/api\/settings\/(global|company-information|platform-logo|platform-simple-logo)$/,
+  /^\/api\/announcements\/unread$/,
+  /^\/api\/competencies\/configuration$/,
+  /^\/api\/phishing\/configuration$/,
+  /^\/api\/gamification\/users\//,
+  /^\/api\/dev\/users$/,
+  /^\/api\/calendar\/(events|microsoft\/connection)$/,
+];
+
+const STALE_LAYOUT = { statusCode: 409, message: "dashboardHome.error.staleLayout" };
 
 const copyWidgets = (widgets: DashboardLayoutWidget[]) => widgets.map((widget) => ({ ...widget }));
 
@@ -77,6 +98,7 @@ export const mockDashboardFlow = async (page: Page, options: MockDashboardOption
   let revision = 0;
   let widgets = copyWidgets(options.widgets);
   let resetRequests = 0;
+  const unexpectedRequests: string[] = [];
   const updates: DashboardLayoutWidget[][] = [];
   const requestUrls: URL[] = [];
   const catalogTypes = options.catalog ?? options.widgets.map((widget) => widget.type);
@@ -92,55 +114,83 @@ export const mockDashboardFlow = async (page: Page, options: MockDashboardOption
   });
   const responses = [...(options.responses ?? []), ...EMPTY_WIDGET_RESPONSES];
 
-  await page.route("**/api/**", async (route) => {
-    const request = route.request();
-    const url = new URL(request.url());
-    const method = request.method();
-    requestUrls.push(url);
+  // A glob like "**/api/**" would also catch Vite's "/app/api/*.ts" modules.
+  await page.route(
+    (url) => url.pathname.startsWith("/api/"),
+    async (route) => {
+      const request = route.request();
+      const url = new URL(request.url());
+      const method = request.method();
+      requestUrls.push(url);
 
-    if (url.pathname === "/api/settings" && method === "GET") {
-      await fulfill(route, 200, {
-        data: { language: "en", isMFAEnabled: false, MFASecret: null, dashboard: { widgets: [] } },
-      });
-      return;
-    }
+      if (url.pathname === "/api/settings" && method === "GET") {
+        await fulfill(route, 200, {
+          data: {
+            language: options.language ?? "en",
+            isMFAEnabled: false,
+            MFASecret: null,
+            dashboard: { widgets: [] },
+          },
+        });
+        return;
+      }
 
-    if (url.pathname === "/api/settings/dashboard" && method === "GET") {
-      await fulfill(route, 200, layoutBody());
-      return;
-    }
+      if (url.pathname === "/api/settings/dashboard" && method === "GET") {
+        await fulfill(route, 200, layoutBody());
+        return;
+      }
 
-    if (url.pathname === "/api/settings/dashboard" && method === "PUT") {
-      const payload: { widgets: DashboardLayoutWidget[] } = request.postDataJSON();
-      widgets = copyWidgets(payload.widgets);
-      updates.push(copyWidgets(widgets));
-      revision += 1;
-      await fulfill(route, 200, layoutBody());
-      return;
-    }
+      if (
+        (url.pathname === "/api/settings/dashboard" && method === "PUT") ||
+        (url.pathname === "/api/settings/dashboard/reset" && method === "POST")
+      ) {
+        // Like the API, a write based on an older layout revision is rejected.
+        const { expectedRevision }: { expectedRevision: number } = request.postDataJSON();
+        if (expectedRevision !== revision) {
+          await fulfill(route, 409, STALE_LAYOUT);
+          return;
+        }
+      }
 
-    if (url.pathname === "/api/settings/dashboard/reset" && method === "POST") {
-      resetRequests += 1;
-      widgets = copyWidgets(options.resetWidgets ?? options.widgets);
-      updates.push(copyWidgets(widgets));
-      revision += 1;
-      await fulfill(route, 200, layoutBody());
-      return;
-    }
+      if (url.pathname === "/api/settings/dashboard" && method === "PUT") {
+        const payload: { widgets: DashboardLayoutWidget[] } = request.postDataJSON();
+        widgets = copyWidgets(payload.widgets);
+        updates.push(copyWidgets(widgets));
+        revision += 1;
+        await fulfill(route, 200, layoutBody());
+        return;
+      }
 
-    const response = responses.find((candidate) => matches(candidate, method, url.pathname));
-    if (!response) {
-      await route.continue();
-      return;
-    }
+      if (url.pathname === "/api/settings/dashboard/reset" && method === "POST") {
+        resetRequests += 1;
+        widgets = copyWidgets(options.resetWidgets ?? options.widgets);
+        updates.push(copyWidgets(widgets));
+        revision += 1;
+        await fulfill(route, 200, layoutBody());
+        return;
+      }
 
-    const body = response.respond ? await response.respond({ request, url }) : response.body;
-    await fulfill(route, response.status ?? 200, body);
-  });
+      const response = responses.find((candidate) => matches(candidate, method, url.pathname));
+      if (!response) {
+        if (REAL_BACKEND_PATHS.some((pattern) => pattern.test(url.pathname))) {
+          await route.continue();
+          return;
+        }
+        unexpectedRequests.push(`${method} ${url.pathname}`);
+        await route.abort();
+        return;
+      }
+
+      const body = response.respond ? await response.respond({ request, url }) : response.body;
+      await fulfill(route, response.status ?? 200, body);
+    },
+  );
 
   return {
     getWidgets: () => copyWidgets(widgets),
     getResetRequests: () => resetRequests,
+    /** API requests no mock answered; they are aborted instead of reaching the real backend. */
+    unexpectedRequests,
     updates,
     /** Every API request the page sent while mocked, newest last. */
     requestsTo: (pathname: string | RegExp) =>

@@ -24,6 +24,7 @@ export const REPORTS_HANDLES = {
   WARNING: "reports-warning",
   RESULT_TITLE: "reports-result-title",
   metric: (key: string) => `reports-metric-${key}`,
+  METRIC_VALUE: "reports-metric-value",
   RESULTS_TABLE: "reports-results-table",
   resultRow: (id: string) => `reports-result-row-${id}`,
   SAVED_CONFIGURATIONS: "reports-saved-configurations",

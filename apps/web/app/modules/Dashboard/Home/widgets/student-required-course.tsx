@@ -138,7 +138,10 @@ export function WidgetStudentRequiredCourse({
       {courses.length > 0 && !isCompact && (
         <DashboardWidgetFooter>
           <div className="flex items-center justify-between gap-3">
-            <span data-testid={DASHBOARD_STUDENT_HANDLES.REQUIRED_COURSES_TOTAL}>
+            <span
+              data-testid={DASHBOARD_STUDENT_HANDLES.REQUIRED_COURSES_TOTAL}
+              data-count={courses.length}
+            >
               {t("dashboardHome.widgets.studentTiles.requiredCourse.total", {
                 count: courses.length,
               })}
@@ -146,6 +149,7 @@ export function WidgetStudentRequiredCourse({
             {overdueCount > 0 && (
               <span
                 data-testid={DASHBOARD_STUDENT_HANDLES.REQUIRED_COURSES_OVERDUE}
+                data-count={overdueCount}
                 className="font-medium text-error-700"
               >
                 {t("dashboardHome.widgets.studentTiles.requiredCourse.overdueCount", {

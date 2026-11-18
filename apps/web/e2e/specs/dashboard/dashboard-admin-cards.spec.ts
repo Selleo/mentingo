@@ -3,6 +3,7 @@ import {
   DASHBOARD_WIDGET_SIZES,
   DASHBOARD_WIDGET_TYPES,
 } from "@repo/shared";
+import { startOfWeek } from "date-fns";
 
 import { USER_ROLE } from "~/config/userRoles";
 
@@ -20,6 +21,7 @@ import {
 } from "../../data/dashboard/dashboard.data";
 import {
   DASHBOARD_DEADLINE_RISK_HANDLES,
+  DASHBOARD_EDIT_HANDLES,
   DASHBOARD_TODO_HANDLES,
   DASHBOARD_WIDGET_HANDLES,
 } from "../../data/dashboard/handles";
@@ -76,6 +78,7 @@ test.describe("admin dashboard utility cards", () => {
     await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
       const state = await mockDashboardFlow(page, {
         widgets: [deadlineRisksWidget],
+        language: "pl",
         responses: [
           {
             path: DEADLINE_RISK_COURSES_PATH,
@@ -154,8 +157,21 @@ test.describe("admin dashboard utility cards", () => {
       const nextGroupsPage = state
         .requestsTo(deadlineRiskGroupsPath(COURSE_ONE))
         .find((url) => url.searchParams.get("page") === "2");
-      expect(nextGroupsPage?.searchParams.get("language")).toBe("en");
-      expect(nextGroupsPage?.searchParams.get("perPage")).toBe("20");
+      expect(
+        Object.fromEntries(
+          ["language", "perPage", "urgency", "search", "sortBy", "sortDirection"].map((key) => [
+            key,
+            nextGroupsPage?.searchParams.get(key),
+          ]),
+        ),
+      ).toEqual({
+        language: "pl",
+        perPage: "20",
+        urgency: "overdue",
+        search: "Sales",
+        sortBy: "studentCount",
+        sortDirection: "desc",
+      });
 
       await page.keyboard.press("Escape");
       await expect(dialog).toBeHidden();
@@ -173,6 +189,12 @@ test.describe("admin dashboard utility cards", () => {
       await expect(
         widget.getByTestId(DASHBOARD_DEADLINE_RISK_HANDLES.course(COURSE_ONE)),
       ).toHaveCount(0);
+      const languages = state
+        .requestsTo(DEADLINE_RISK_COURSES_PATH)
+        .map((url) => url.searchParams.get("language"));
+      expect(languages.length).toBeGreaterThan(0);
+      expect(languages.every((language) => language === "pl")).toBe(true);
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
@@ -189,7 +211,7 @@ test.describe("admin dashboard utility cards", () => {
         id: "learner-2",
         name: "Sorted Learner",
       });
-      await mockDashboardFlow(page, {
+      const state = await mockDashboardFlow(page, {
         widgets: [deadlineRisksWidget],
         responses: [
           {
@@ -230,6 +252,7 @@ test.describe("admin dashboard utility cards", () => {
 
       await dialog.click({ position: { x: 20, y: 20 } });
       await expect(dialog).toBeVisible();
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
@@ -246,7 +269,7 @@ test.describe("admin dashboard utility cards", () => {
         id: "two",
         name: "Two learner",
       });
-      await mockDashboardFlow(page, {
+      const state = await mockDashboardFlow(page, {
         widgets: [deadlineRisksWidget],
         responses: [
           {
@@ -280,6 +303,8 @@ test.describe("admin dashboard utility cards", () => {
       await page.keyboard.press("Escape");
       await openDeadlineRiskCourseFlow(page, COURSE_TWO);
       await expect(dialog).toBeVisible();
+      // The dialog has switched to course two once its groups are requested.
+      await expect.poll(() => state.requestsTo(deadlineRiskGroupsPath(COURSE_TWO)).length).toBe(1);
       await expect(
         dialog.getByTestId(DASHBOARD_DEADLINE_RISK_HANDLES.group(oneGroup.id)),
       ).toHaveCount(0);
@@ -287,12 +312,13 @@ test.describe("admin dashboard utility cards", () => {
       await expect(
         dialog.getByTestId(DASHBOARD_DEADLINE_RISK_HANDLES.group(twoGroup.id)),
       ).toBeVisible();
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
   test("renders training completion totals in the chart", async ({ withWorkerPage }) => {
     await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-      await mockDashboardFlow(page, {
+      const state = await mockDashboardFlow(page, {
         widgets: [trainingCompletionWidget],
         responses: [
           {
@@ -308,26 +334,31 @@ test.describe("admin dashboard utility cards", () => {
       const chart = page
         .getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION)
         .getByTestId(DASHBOARD_WIDGET_HANDLES.CHART);
-      await expect(chart).toContainText("57%");
-      await expect(chart).toContainText("4/7");
+      await expect(chart.getByTestId(DASHBOARD_WIDGET_HANDLES.CHART_PERCENTAGE)).toHaveText("57%");
+      await expect(chart.getByTestId(DASHBOARD_WIDGET_HANDLES.CHART_COMPLETED_OF_TOTAL)).toHaveText(
+        "4/7",
+      );
       // Screen readers get the totals from the chart's image label; recharts 2 shows no pie tooltip on keyboard focus.
       await expect(chart).toHaveRole("img");
+      await expect(chart).toHaveAccessibleName(/4 of 7.*57/);
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
   test("shows the training completion empty state", async ({ withWorkerPage }) => {
     await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-      await mockDashboardFlow(page, { widgets: [trainingCompletionWidget] });
+      const state = await mockDashboardFlow(page, { widgets: [trainingCompletionWidget] });
 
       await openDashboardFlow(page);
       const card = page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION);
       await expect(card.getByTestId(DASHBOARD_WIDGET_HANDLES.EMPTY_STATE)).toBeVisible();
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
   test("shows the training completion error state with a retry", async ({ withWorkerPage }) => {
     await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-      await mockDashboardFlow(page, {
+      const state = await mockDashboardFlow(page, {
         widgets: [trainingCompletionWidget],
         responses: [
           {
@@ -342,6 +373,7 @@ test.describe("admin dashboard utility cards", () => {
       const card = page.getByTestId(DASHBOARD_WIDGET_HANDLES.ADMIN_TRAINING_COMPLETION);
       await expect(card.getByTestId(DASHBOARD_WIDGET_HANDLES.ERROR_STATE)).toBeVisible();
       await expect(card.getByTestId(DASHBOARD_WIDGET_HANDLES.RETRY)).toBeVisible();
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
@@ -385,26 +417,25 @@ test.describe("admin dashboard utility cards", () => {
       await expect(card).toContainText("Planning session");
       await expect(card.getByTestId(DASHBOARD_WIDGET_HANDLES.EMPTY_STATE)).toBeVisible();
 
-      const monthsRequested = new Set(
-        state
-          .requestsTo("/api/calendar/dashboard/events")
-          .map((url) => url.searchParams.get("start")),
-      ).size;
-      // The caption renders the month dropdown before the year dropdown.
-      await card
-        .getByRole("combobox")
-        .first()
-        .selectOption({ index: (new Date().getMonth() + 1) % 12 });
+      // The widget requests whole weeks (Monday first) around the month; Date rolls December into January.
+      const today = new Date();
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      const nextMonthStart = startOfWeek(nextMonth, { weekStartsOn: 1 }).toISOString();
+      // The caption renders the month dropdown before the year dropdown; option values are numbers.
+      const [monthSelect, yearSelect] = [
+        card.getByRole("combobox").first(),
+        card.getByRole("combobox").nth(1),
+      ];
+      await yearSelect.selectOption(String(nextMonth.getFullYear()));
+      await monthSelect.selectOption(String(nextMonth.getMonth()));
       await expect
-        .poll(
-          () =>
-            new Set(
-              state
-                .requestsTo("/api/calendar/dashboard/events")
-                .map((url) => url.searchParams.get("start")),
-            ).size,
+        .poll(() =>
+          state
+            .requestsTo("/api/calendar/dashboard/events")
+            .map((url) => url.searchParams.get("start")),
         )
-        .toBeGreaterThan(monthsRequested);
+        .toContain(nextMonthStart);
+      expect(state.unexpectedRequests).toEqual([]);
     });
   });
 
@@ -430,6 +461,10 @@ test.describe("admin dashboard utility cards", () => {
         await openDashboardFlow(page, origin);
         const card = page.getByTestId(DASHBOARD_WIDGET_HANDLES.TODO_TASKS);
         const tasks = card.getByTestId(DASHBOARD_TODO_HANDLES.TASK);
+        await expect(tasks.filter({ hasText: "Archive notes" })).toBeVisible();
+        await expect(
+          page.getByTestId(DASHBOARD_EDIT_HANDLES.dragHandle(DASHBOARD_WIDGET_TYPES.TODO_LIST)),
+        ).toHaveCount(0);
         await dragByPointerFlow(
           page,
           tasks
@@ -474,6 +509,10 @@ test.describe("admin dashboard utility cards", () => {
         await expect(
           tasks.filter({ hasText: "Review inbox" }).getByTestId(DASHBOARD_TODO_HANDLES.TASK_TITLE),
         ).toHaveClass(/line-through/);
+        // Let the completion save before editing the title, so the two updates do not race.
+        await expect
+          .poll(async () => (await taskFactory.list()).find((task) => task.id === reviewTask.id))
+          .toMatchObject({ completed: true });
 
         await tasks
           .filter({ hasText: "Review inbox" })
@@ -492,6 +531,7 @@ test.describe("admin dashboard utility cards", () => {
 
         await page.reload();
         await expect(tasks.filter({ hasText: "Review the inbox" })).toBeVisible();
+        await expect(tasks.filter({ hasText: "Archive notes" })).toBeVisible();
         await expect(tasks.filter({ hasText: "Send follow-up" })).toHaveCount(0);
         await expect
           .poll(async () => (await taskFactory.list()).find((task) => task.id === reviewTask.id))
