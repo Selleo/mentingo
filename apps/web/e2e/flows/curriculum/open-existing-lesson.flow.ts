@@ -4,9 +4,10 @@ import { CURRICULUM_HANDLES } from "../../data/curriculum/handles";
 import { waitForDialogOverlaysHiddenFlow } from "../common/wait-for-dialog-overlays-hidden.flow";
 
 /**
- * Expands the chapter and opens the lesson. The chapter list expands a chapter by itself when course
- * data refreshes (e.g. after a language switch), so the trigger is clicked only while it is collapsed;
- * a blind click would collapse a chapter the app has just expanded.
+ * Expands the chapter and opens the lesson. Whenever course data refetches (e.g. after a language
+ * switch) the single-open chapter list auto-expands the most recently updated chapter, which can
+ * collapse ours. So the trigger is clicked only while collapsed (a blind click would toggle an
+ * auto-expanded chapter shut) and the check retries until the lesson card is visible.
  */
 export const openExistingLessonFlow = async (page: Page, chapterId: string, lessonId: string) => {
   await waitForDialogOverlaysHiddenFlow(page);
@@ -17,7 +18,7 @@ export const openExistingLessonFlow = async (page: Page, chapterId: string, less
     if ((await accordion.getAttribute("aria-expanded")) !== "true") await accordion.click();
     await expect(accordion).toHaveAttribute("aria-expanded", "true", { timeout: 1_000 });
     await expect(lessonCard).toBeVisible({ timeout: 1_000 });
-  }).toPass();
+  }).toPass({ timeout: 15_000 });
 
   await lessonCard.click();
 };
