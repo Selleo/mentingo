@@ -141,3 +141,31 @@ describe("lesson navigation controls", () => {
     expect(await screen.findByRole("tooltip", { name: "Next lesson" })).toBeInTheDocument();
   });
 });
+
+describe("lesson heading", () => {
+  const renderLessonContent = (focusTitleOnMount?: boolean) =>
+    renderWith({ withQuery: true }).render(
+      <LessonContent
+        lesson={makeLesson({ title: "Lesson heading" })}
+        course={makeCourse()}
+        focusTitleOnMount={focusTitleOnMount}
+        handlePrevious={vi.fn()}
+        handleNext={vi.fn()}
+        isFirstLesson={false}
+        isLastLesson={false}
+        lessonLoading={false}
+      />,
+    );
+
+  it("renders the lesson title as the level-one heading without stealing focus on first load", () => {
+    renderLessonContent();
+
+    expect(screen.getByRole("heading", { level: 1, name: "Lesson heading" })).not.toHaveFocus();
+  });
+
+  it("moves focus to the lesson heading after navigating to another lesson", () => {
+    renderLessonContent(true);
+
+    expect(screen.getByRole("heading", { level: 1, name: "Lesson heading" })).toHaveFocus();
+  });
+});

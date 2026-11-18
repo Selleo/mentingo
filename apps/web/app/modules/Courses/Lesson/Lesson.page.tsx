@@ -10,6 +10,7 @@ import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
+import { usePageTitle } from "~/hooks/usePageTitle";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import Loader from "~/modules/common/Loader/Loader";
 import {
@@ -56,6 +57,12 @@ export default function LessonPage() {
   const [error, setError] = useState(false);
   const [freshLessonRequestKey, setFreshLessonRequestKey] = useState<string | null>(null);
 
+  const [entryLessonId] = useState(lessonId);
+  const [hasChangedLesson, setHasChangedLesson] = useState(false);
+
+  // Focus the lesson heading only after moving between lessons, not on the initial page load.
+  if (!hasChangedLesson && lessonId !== entryLessonId) setHasChangedLesson(true);
+
   const lessonRequestKey = `${lessonId}:${language}:${user?.id ?? ""}`;
 
   const {
@@ -64,6 +71,8 @@ export default function LessonPage() {
     isError: lessonError,
   } = useLesson(lessonId, language, user?.id || "");
   const { data: course } = useCourse(courseId, language);
+
+  usePageTitle([lesson?.id === lessonId ? lesson.title : undefined, course?.title]);
 
   useEffect(() => {
     if (course && !course.availableLocales.includes(language)) setLanguage(course.baseLanguage);
@@ -252,6 +261,7 @@ export default function LessonPage() {
               </div>
               <LessonContent
                 showPreviewNotice
+                focusTitleOnMount={hasChangedLesson}
                 key={`${lesson.id}:${lesson.learningStateId ?? "current"}`}
                 lesson={lesson}
                 course={course}
