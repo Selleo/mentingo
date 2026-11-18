@@ -5,6 +5,7 @@ export type CourseChatReplyCreatedData = {
   actorUserId: UUIDType;
   messageId: UUIDType;
   parentMessageId: UUIDType;
+  mentionedUserIds: UUIDType[];
 };
 
 export class CourseChatReplyCreatedEvent {

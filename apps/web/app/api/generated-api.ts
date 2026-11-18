@@ -9042,6 +9042,7 @@ export interface GetAllAnnouncementsResponse {
     emailTemplate: string;
     sourceType: string;
     sourceId: string | null;
+    linkPath: string | null;
     title: string;
     content: string;
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -9077,6 +9078,7 @@ export interface GetAnnouncementsForUserResponse {
     emailTemplate: string;
     sourceType: string;
     sourceId: string | null;
+    linkPath: string | null;
     title: string;
     content: string;
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -9126,6 +9128,7 @@ export interface CreateAnnouncementResponse {
     emailTemplate: string;
     sourceType: string;
     sourceId: string | null;
+    linkPath: string | null;
     title: string;
     content: string;
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -46359,6 +46362,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         /** @min 1 */
         perPage?: number;
+        /** @format uuid */
+        aroundMessageId?: string;
       },
       params: RequestParams = {},
     ) =>

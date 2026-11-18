@@ -2081,6 +2081,7 @@ export const announcements = pgTable(
       .notNull()
       .default(ANNOUNCEMENT_SOURCE_TYPES.MANUAL),
     sourceId: uuid("source_id"),
+    linkPath: text("link_path"),
     baseLanguage,
     availableLocales,
     deletedAt: timestampWithTimezone({ name: "deleted_at" }),

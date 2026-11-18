@@ -39,6 +39,7 @@ const announcement: NotificationAnnouncement = {
   emailTemplate: "default",
   sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_CHAT,
   sourceId: courseId,
+  linkPath: null,
   title: "You were mentioned",
   content: 'In the course "Safety"',
   baseLanguage: SUPPORTED_LANGUAGES.EN,

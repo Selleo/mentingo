@@ -898,6 +898,7 @@ describe("ForumController (e2e)", () => {
                 postId: reply.id,
                 firstPostId: topic.firstPost.id,
                 actorUserId: author.id,
+                mentionedUserIds: [],
               },
             },
           },

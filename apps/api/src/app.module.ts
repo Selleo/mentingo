@@ -51,6 +51,7 @@ import { ContentMarketplaceModule } from "./content-marketplace/content-marketpl
 import { CourseChatModule } from "./course-chat/course-chat.module";
 import { CourseModule } from "./courses/course.module";
 import { DevToolsModule, isDevToolsEnabled } from "./dev-tools/dev-tools.module";
+import { DiscussionNotificationsModule } from "./discussion-notifications/discussion-notifications.module";
 import { EmailTemplateModule } from "./email-templates/email-template.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
@@ -141,6 +142,7 @@ import type { RedisClient } from "src/redis";
     NativeArchiveModule,
     CourseChatModule,
     ForumModule,
+    DiscussionNotificationsModule,
     LearningPathModule,
     GroupModule,
     GlobalSearchModule,

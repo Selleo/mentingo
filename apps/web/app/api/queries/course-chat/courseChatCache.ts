@@ -1,7 +1,10 @@
 import { FORUM_QUERY_KEY } from "~/api/queries/forum/forumQueryKeys";
 import { queryClient } from "~/api/queryClient";
 
-import { COURSE_CHAT_MESSAGES_QUERY_KEY } from "./useCourseChatMessages";
+import {
+  COURSE_CHAT_MESSAGES_QUERY_KEY,
+  getCourseChatMessagesQueryKey,
+} from "./useCourseChatMessages";
 import { COURSE_CHAT_REPLIES_QUERY_KEY } from "./useCourseChatReplies";
 import { getCourseChatUsersQueryKey } from "./useCourseChatUsers";
 
@@ -17,6 +20,12 @@ import type {
   GetMessagesResponse,
   ToggleMessageReactionResponse,
 } from "~/api/generated-api";
+
+export function cacheCourseChatMessagesPage(courseId: string, messages: GetMessagesResponse) {
+  const { page, perPage } = messages.pagination;
+
+  queryClient.setQueryData(getCourseChatMessagesQueryKey(courseId, page, perPage), messages);
+}
 
 export function invalidateCourseChatMessages(courseId: string) {
   queryClient.invalidateQueries({

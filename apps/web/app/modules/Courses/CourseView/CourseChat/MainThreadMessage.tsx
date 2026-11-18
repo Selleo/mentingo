@@ -24,6 +24,7 @@ import type {
 type MainThreadMessageProps = {
   message: CourseChatMessage;
   isOpen: boolean;
+  isRequested: boolean;
   isLoadingReplies: boolean;
   replies: CourseChatMessage[];
   users: CourseChatUser[];
@@ -42,6 +43,7 @@ type MainThreadMessageProps = {
 export function MainThreadMessage({
   message,
   isOpen,
+  isRequested,
   isLoadingReplies,
   replies,
   users,
@@ -98,6 +100,7 @@ export function MainThreadMessage({
 
   return (
     <article
+      ref={isRequested ? scrollIntoView : undefined}
       className="rounded-2xl bg-transparent"
       data-testid={COURSE_DISCUSSION_HANDLES.thread(message.id)}
     >
@@ -176,6 +179,10 @@ export function MainThreadMessage({
       )}
     </article>
   );
+}
+
+function scrollIntoView(element: HTMLElement | null) {
+  element?.scrollIntoView({ block: "center" });
 }
 
 function LatestReplyAvatars({

@@ -34,6 +34,8 @@ export const buildAnnouncementScheduledAt = (date: string, time: string) =>
   new Date(`${date}T${time}:00`).toISOString();
 
 export const getNotificationHref = (announcement: NotificationAnnouncement) => {
+  if (announcement.linkPath?.startsWith("/")) return announcement.linkPath;
+
   if (announcement.sourceType === ANNOUNCEMENT_SOURCE_TYPES.COURSE_CHAT && announcement.sourceId) {
     return `/course/${announcement.sourceId}`;
   }

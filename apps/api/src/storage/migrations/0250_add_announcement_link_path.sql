@@ -1,0 +1,1 @@
+ALTER TABLE "announcements" ADD COLUMN "link_path" text;

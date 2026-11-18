@@ -14,5 +14,6 @@ import { SettingsModule } from "src/settings/settings.module";
   imports: [AnnouncementsModule, CourseChatModule, LocalizationModule, SettingsModule],
   controllers: [ForumController],
   providers: [ForumService, ForumRepository, ForumGateway, ForumMentionNotificationHandler],
+  exports: [ForumRepository],
 })
 export class ForumModule {}

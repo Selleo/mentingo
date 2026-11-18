@@ -4,6 +4,7 @@ import { match } from "ts-pattern";
 
 import {
   COURSE_CHAT_MESSAGES_PER_PAGE,
+  cacheCourseChatMessagesPage,
   useInfiniteCourseChatReplies,
   useCourseChatMessages,
   useCourseChatUsers,
@@ -26,21 +27,39 @@ type CourseChatTabProps = {
   courseId: string;
   currentUserId: string;
   canDeleteAnyMessage: boolean;
+  requestedThreadId?: string;
 };
 
 export function CourseChatTab({
   courseId,
   currentUserId,
   canDeleteAnyMessage,
+  requestedThreadId,
 }: CourseChatTabProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { openMessageId, page, setOpenMessage, setPage, toggleOpenMessage } = useCourseChatState();
+  const {
+    openMessageId,
+    page,
+    requestedThreadId: pendingThreadId,
+    setOpenMessage,
+    setPage,
+    showRequestedThread,
+    toggleOpenMessage,
+  } = useCourseChatState(requestedThreadId);
 
   const { data: messagesResponse, isLoading: isLoadingMessages } = useCourseChatMessages(
     courseId,
     page,
+    pendingThreadId,
   );
+
+  useEffect(() => {
+    if (!pendingThreadId || !messagesResponse) return;
+
+    cacheCourseChatMessagesPage(courseId, messagesResponse);
+    showRequestedThread(messagesResponse.pagination.page);
+  }, [courseId, pendingThreadId, messagesResponse, showRequestedThread]);
   const { data: chatUsers = [] } = useCourseChatUsers(courseId);
   const chatUsersById = useMemo(
     () => new Map(chatUsers.map((user) => [user.id, user])),
@@ -115,6 +134,7 @@ export function CourseChatTab({
           key={message.id}
           message={message}
           isOpen={message.id === openMessageId}
+          isRequested={message.id === pendingThreadId}
           isLoadingReplies={isLoadingReplies && message.id === openMessageId}
           hasMoreReplies={Boolean(hasMoreReplies)}
           isFetchingMoreReplies={isFetchingMoreReplies}

@@ -1,5 +1,7 @@
+import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
@@ -8,6 +10,7 @@ import { TableOfContent } from "./TableOfContent";
 
 const {
   courseAccessState,
+  globalSettingsState,
   currentUserState,
   missingTranslationsState,
   useMissingTranslationsMock,
@@ -18,7 +21,9 @@ const {
     courseAccessState: {
       isAdminExperience: true,
       isCourseStudentModeActive: false,
+      enrolled: false,
     },
+    globalSettingsState: { courseDiscussionsEnabled: false },
     currentUserState: {
       id: "user-1",
       permissions: ["course.statistics", "course.update_own"],
@@ -46,7 +51,7 @@ vi.mock("~/api/queries", () => ({
 }));
 
 vi.mock("~/api/queries/useGlobalSettings", () => ({
-  useGlobalSettings: () => ({ data: { courseDiscussionsEnabled: false } }),
+  useGlobalSettings: () => ({ data: globalSettingsState }),
 }));
 
 vi.mock("~/api/queries/admin/useHasMissingTranslations", () => ({
@@ -58,7 +63,7 @@ vi.mock("../../context/CourseAccessProvider", () => ({
     course: {
       authorId: "user-1",
       id: "course-1",
-      enrolled: false,
+      enrolled: courseAccessState.enrolled,
     },
     isAdminExperience: courseAccessState.isAdminExperience,
     isCourseStudentModeActive: courseAccessState.isCourseStudentModeActive,
@@ -69,9 +74,26 @@ vi.mock("../CourseAdminStatistics/CourseAdminStatistics", () => ({
   CourseAdminStatistics: () => <div>Course statistics content</div>,
 }));
 
+vi.mock("../CourseChat/CourseChatTab", () => ({
+  CourseChatTab: ({ requestedThreadId }: { requestedThreadId?: string }) => (
+    <div>Course discussion content, thread: {requestedThreadId ?? "none"}</div>
+  ),
+}));
+
 vi.mock("~/modules/Courses/CourseView/components/ChapterListOverview", () => ({
   ChapterListOverview: () => <div>Course chapters content</div>,
 }));
+
+const THREAD_LINK = "/course/course-1?tab=Discussion&thread=message-1";
+
+const tableOfContent = ({
+  url = "/course/course-1",
+  language = "en",
+}: { url?: string; language?: SupportedLanguages } = {}) => (
+  <MemoryRouter initialEntries={[url]}>
+    <TableOfContent language={language} />
+  </MemoryRouter>
+);
 
 describe("TableOfContent", () => {
   beforeEach(() => {
@@ -81,6 +103,8 @@ describe("TableOfContent", () => {
     });
     courseAccessState.isAdminExperience = true;
     courseAccessState.isCourseStudentModeActive = false;
+    courseAccessState.enrolled = false;
+    globalSettingsState.courseDiscussionsEnabled = false;
     currentUserState.id = "user-1";
     currentUserState.permissions = ["course.statistics", "course.update_own"];
     missingTranslationsState.hasMissingTranslations = false;
@@ -95,14 +119,14 @@ describe("TableOfContent", () => {
     courseAccessState.isAdminExperience = false;
     currentUserState.permissions = [];
 
-    renderWith().render(<TableOfContent language="en" />);
+    renderWith().render(tableOfContent());
 
     expect(screen.getByRole("heading", { name: "Table of contents" })).toBeInTheDocument();
   });
 
   it("returns to the table of contents when learning mode hides statistics", async () => {
     const user = userEvent.setup();
-    const view = renderWith().render(<TableOfContent language="en" />);
+    const view = renderWith().render(tableOfContent());
 
     await user.click(screen.getByRole("button", { name: "Statistics" }));
 
@@ -110,17 +134,35 @@ describe("TableOfContent", () => {
 
     courseAccessState.isAdminExperience = false;
     courseAccessState.isCourseStudentModeActive = true;
-    view.rerender(<TableOfContent language="en" />);
+    view.rerender(tableOfContent());
 
     expect(await screen.findByText("Course chapters content")).toBeInTheDocument();
     expect(screen.queryByText("Course statistics content")).not.toBeInTheDocument();
+  });
+
+  it("opens the discussion on the linked thread for a user who can read it", () => {
+    courseAccessState.enrolled = true;
+    globalSettingsState.courseDiscussionsEnabled = true;
+    currentUserState.permissions = [PERMISSIONS.COURSE_DISCUSSION_READ];
+
+    renderWith().render(tableOfContent({ url: THREAD_LINK }));
+
+    expect(screen.getByText("Course discussion content, thread: message-1")).toBeInTheDocument();
+    expect(screen.queryByText("Course chapters content")).not.toBeInTheDocument();
+  });
+
+  it("shows the table of contents when a discussion link is opened without access", () => {
+    renderWith().render(tableOfContent({ url: THREAD_LINK }));
+
+    expect(screen.getByText("Course chapters content")).toBeInTheDocument();
+    expect(screen.queryByText(/Course discussion content/)).not.toBeInTheDocument();
   });
 
   it("shows statistics to the course author with the required permissions", async () => {
     courseAccessState.isAdminExperience = false;
     const user = userEvent.setup();
 
-    renderWith().render(<TableOfContent language="en" />);
+    renderWith().render(tableOfContent());
     await user.click(screen.getByRole("button", { name: "Statistics" }));
 
     expect(screen.getByText("Course statistics content")).toBeInTheDocument();
@@ -129,7 +171,7 @@ describe("TableOfContent", () => {
   it("hides statistics from a non-author with the own-course permission", () => {
     currentUserState.id = "user-2";
 
-    renderWith().render(<TableOfContent language="en" />);
+    renderWith().render(tableOfContent());
 
     expect(screen.queryByRole("button", { name: "Statistics" })).not.toBeInTheDocument();
   });
@@ -137,7 +179,7 @@ describe("TableOfContent", () => {
   it("hides statistics from an administrator without the statistics permission", () => {
     currentUserState.permissions = [];
 
-    renderWith().render(<TableOfContent language="en" />);
+    renderWith().render(tableOfContent());
 
     expect(screen.queryByRole("button", { name: "Statistics" })).not.toBeInTheDocument();
   });
@@ -145,7 +187,7 @@ describe("TableOfContent", () => {
   it("uses the existing missing translations query for the selected course language", () => {
     missingTranslationsState.hasMissingTranslations = true;
 
-    renderWith().render(<TableOfContent language="pl" />);
+    renderWith().render(tableOfContent({ language: "pl" }));
 
     expect(useMissingTranslationsMock).toHaveBeenCalledWith("course-1", "pl", true);
     expect(screen.getByRole("button", { name: "Missing translations" })).toBeInTheDocument();

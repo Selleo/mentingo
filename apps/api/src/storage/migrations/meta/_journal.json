@@ -1751,6 +1751,13 @@
       "when": 1794847269217,
       "tag": "0249_enable_assessment_feedback_ranges_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 250,
+      "version": "7",
+      "when": 1795005125184,
+      "tag": "0250_add_announcement_link_path",
+      "breakpoints": true
     }
   ]
 }

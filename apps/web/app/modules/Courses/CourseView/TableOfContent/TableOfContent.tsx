@@ -1,5 +1,10 @@
-import { useNavigate } from "@remix-run/react";
-import { COURSE_ORIGIN_TYPES, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
+import { useNavigate, useSearchParams } from "@remix-run/react";
+import {
+  COURSE_DISCUSSION_URL_PARAMS,
+  COURSE_ORIGIN_TYPES,
+  PERMISSIONS,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,7 +39,14 @@ export function TableOfContent({ language }: TableOfContentProps) {
     isAdminExperience,
   );
 
-  const [activeTab, setActiveTab] = useState<CourseOverviewTab>(COURSE_OVERVIEW_TABS.TOC);
+  const [searchParams] = useSearchParams();
+  const isDiscussionRequested =
+    searchParams.get(COURSE_DISCUSSION_URL_PARAMS.TAB) === COURSE_DISCUSSION_URL_PARAMS.TAB_VALUE;
+  const requestedThreadId = searchParams.get(COURSE_DISCUSSION_URL_PARAMS.THREAD) ?? undefined;
+
+  const [selectedTab, setActiveTab] = useState<CourseOverviewTab>(
+    isDiscussionRequested ? COURSE_OVERVIEW_TABS.CHAT : COURSE_OVERVIEW_TABS.TOC,
+  );
 
   const permissions = currentUser?.permissions ?? [];
   const canManageCourse = canManageCourseByAuthor({
@@ -48,6 +60,11 @@ export function TableOfContent({ language }: TableOfContentProps) {
       currentUser &&
       hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_READ),
   );
+
+  const activeTab =
+    selectedTab === COURSE_OVERVIEW_TABS.CHAT && !canShowChat
+      ? COURSE_OVERVIEW_TABS.TOC
+      : selectedTab;
 
   const canDeleteAnyMessage = hasPermission(
     permissions,
@@ -64,6 +81,10 @@ export function TableOfContent({ language }: TableOfContentProps) {
   const navigateToCourseEditor = () => {
     navigate(`/admin/beta-courses/${course.id}`);
   };
+
+  useEffect(() => {
+    if (isDiscussionRequested) setActiveTab(COURSE_OVERVIEW_TABS.CHAT);
+  }, [isDiscussionRequested, requestedThreadId]);
 
   useEffect(() => {
     if (!canShowStatistics && activeTab === COURSE_OVERVIEW_TABS.STATISTICS) {
@@ -101,9 +122,11 @@ export function TableOfContent({ language }: TableOfContentProps) {
 
       {canShowChat && activeTab === COURSE_OVERVIEW_TABS.CHAT && currentUser && (
         <CourseChatTab
+          key={requestedThreadId}
           courseId={course.id}
           currentUserId={currentUser.id}
           canDeleteAnyMessage={canDeleteAnyMessage}
+          requestedThreadId={requestedThreadId}
         />
       )}
     </div>

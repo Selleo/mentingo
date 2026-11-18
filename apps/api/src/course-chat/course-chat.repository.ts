@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
-import { and, count, desc, eq, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
@@ -81,6 +81,35 @@ export class CourseChatRepository {
       data: data.reverse(),
       pagination: { totalItems, page, perPage },
     };
+  }
+
+  async findTopLevelMessagePage(
+    courseId: UUIDType,
+    messageId: UUIDType,
+    perPage = DEFAULT_PAGE_SIZE,
+  ): Promise<number> {
+    const [message] = await this.db
+      .select({ createdAt: courseChatMessages.createdAt })
+      .from(courseChatMessages)
+      .innerJoin(courseChatThreads, eq(courseChatThreads.id, courseChatMessages.threadId))
+      .where(
+        and(eq(courseChatMessages.id, messageId), this.visibleTopLevelMessagesWhere(courseId)),
+      );
+
+    if (!message) return 1;
+
+    const [{ newerMessages }] = await this.db
+      .select({ newerMessages: count() })
+      .from(courseChatMessages)
+      .innerJoin(courseChatThreads, eq(courseChatThreads.id, courseChatMessages.threadId))
+      .where(
+        and(
+          this.visibleTopLevelMessagesWhere(courseId),
+          gt(courseChatMessages.createdAt, message.createdAt),
+        ),
+      );
+
+    return Math.floor(newerMessages / perPage) + 1;
   }
 
   async getReplies(parentMessageId: UUIDType, page = 1, perPage = DEFAULT_PAGE_SIZE) {
