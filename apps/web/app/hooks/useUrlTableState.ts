@@ -7,6 +7,7 @@ import {
   type ItemsPerPageOption,
 } from "~/components/Pagination/Pagination";
 import { useDebounce } from "~/hooks/useDebounce";
+import { useSentSearchAcknowledgments } from "~/hooks/useSentSearchAcknowledgments";
 
 export const TABLE_URL_PARAMS = {
   SORT: "sort",
@@ -120,22 +121,17 @@ export function useUrlTableState<TFilterKey extends string, TSortField extends s
 
   const lastUrlSearch = useRef(search);
   const isHydratingFromUrl = useRef(false);
-  // Acknowledging our own navigation must not overwrite text typed while it was pending.
-  const pendingSearch = useRef<string[]>([]);
+  const { rememberSentSearch, isAcknowledgingSentSearch } = useSentSearchAcknowledgments<string>();
 
   useEffect(() => {
     if (lastUrlSearch.current === search) return;
 
     lastUrlSearch.current = search;
-    const acknowledgedIndex = pendingSearch.current.indexOf(search);
-    if (acknowledgedIndex !== -1) {
-      pendingSearch.current.splice(0, acknowledgedIndex + 1);
-      return;
-    }
-    pendingSearch.current = [];
+    if (isAcknowledgingSentSearch(search)) return;
+
     isHydratingFromUrl.current = true;
     setSearchInput((currentInput) => (currentInput.trim() === search ? currentInput : search));
-  }, [search]);
+  }, [search, isAcknowledgingSentSearch]);
 
   useEffect(() => {
     if (isHydratingFromUrl.current) {
@@ -144,7 +140,7 @@ export function useUrlTableState<TFilterKey extends string, TSortField extends s
     }
     if (debouncedSearch !== searchInput.trim() || debouncedSearch === search) return;
 
-    pendingSearch.current.push(debouncedSearch);
+    rememberSentSearch(debouncedSearch);
     updateListParams({ [searchParam]: debouncedSearch });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, search, searchInput]);

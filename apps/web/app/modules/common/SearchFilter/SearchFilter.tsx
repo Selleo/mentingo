@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useSentSearchAcknowledgments } from "~/hooks/useSentSearchAcknowledgments";
 import { cn } from "~/lib/utils";
 
 import type React from "react";
@@ -108,29 +109,25 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
-  const pendingText = useRef<FilterValue[]>([]);
+  const { rememberSentSearch, isAcknowledgingSentSearch } =
+    useSentSearchAcknowledgments<FilterValue>();
   const debouncedSearchTitle = useMemo(
     () =>
       debounce((name: string, value: FilterValue) => {
-        pendingText.current.push(value);
+        rememberSentSearch(value);
         onChangeRef.current(name, value);
       }, 300),
-    [],
+    [rememberSentSearch],
   );
   useEffect(() => () => debouncedSearchTitle.cancel(), [debouncedSearchTitle]);
   const textFilter = filters.find((filter) => filter.type === "text");
   const textValue = textFilter ? values[textFilter.name] : undefined;
   useEffect(() => {
-    // This is an acknowledgment, not a reset: keep newer text, caret and pending debounce.
-    const acknowledgedIndex = pendingText.current.indexOf(textValue);
-    if (acknowledgedIndex !== -1) {
-      pendingText.current.splice(0, acknowledgedIndex + 1);
-      return;
-    }
-    pendingText.current = [];
+    if (isAcknowledgingSentSearch(textValue)) return;
+
     debouncedSearchTitle.cancel();
     if (inputRef.current) inputRef.current.value = typeof textValue === "string" ? textValue : "";
-  }, [textValue, debouncedSearchTitle]);
+  }, [textValue, debouncedSearchTitle, isAcknowledgingSentSearch]);
 
   const handleChange = (name: string, value: FilterValue) => {
     if (filters.find((filter) => filter?.type === "status")?.name === name) {

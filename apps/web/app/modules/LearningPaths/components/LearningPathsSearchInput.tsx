@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { SearchInput } from "~/components/SearchInput/SearchInput";
 import { useDebounce } from "~/hooks/useDebounce";
+import { useSentSearchAcknowledgments } from "~/hooks/useSentSearchAcknowledgments";
 
 import { LEARNING_PATHS_PAGE_HANDLES } from "../../../../e2e/data/learning-paths/handles";
 
@@ -17,20 +18,15 @@ export function LearningPathsSearchInput() {
   const debouncedValue = useDebounce(value, 300);
 
   const isHydratingFromUrlRef = useRef(false);
-  const pendingSearch = useRef<string[]>([]);
+  const { rememberSentSearch, isAcknowledgingSentSearch } = useSentSearchAcknowledgments<string>();
 
   useEffect(() => {
-    // The URL can finish navigating after the user has already continued typing.
-    const acknowledgedIndex = pendingSearch.current.indexOf(searchQuery);
-    if (acknowledgedIndex !== -1) {
-      pendingSearch.current.splice(0, acknowledgedIndex + 1);
-      return;
-    }
-    pendingSearch.current = [];
+    if (isAcknowledgingSentSearch(searchQuery)) return;
+
     isHydratingFromUrlRef.current = true;
 
     setValue(searchQuery);
-  }, [searchQuery]);
+  }, [searchQuery, isAcknowledgingSentSearch]);
 
   useEffect(() => {
     if (debouncedValue !== value) return;
@@ -52,9 +48,9 @@ export function LearningPathsSearchInput() {
       nextParams.delete("searchQuery");
     }
 
-    pendingSearch.current.push(nextSearchQuery);
+    rememberSentSearch(nextSearchQuery);
     setSearchParams(nextParams, { replace: true });
-  }, [debouncedValue, searchParams, searchQuery, setSearchParams, value]);
+  }, [debouncedValue, searchParams, searchQuery, setSearchParams, value, rememberSentSearch]);
 
   return (
     <SearchInput
