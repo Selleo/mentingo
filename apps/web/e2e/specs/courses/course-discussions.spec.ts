@@ -1,8 +1,5 @@
-import { randomUUID } from "node:crypto";
-
 import { USER_ROLE } from "~/config/userRoles";
 
-import { TOAST_HANDLES } from "../../data/common/handles";
 import { COURSE_DISCUSSION_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { deleteCourseDiscussionMessageFlow } from "../../flows/courses/delete-course-discussion-message.flow";
@@ -13,208 +10,84 @@ import { selectCourseDiscussionMentionFlow } from "../../flows/courses/select-co
 import { submitCourseDiscussionReplyFlow } from "../../flows/courses/submit-course-discussion-reply.flow";
 import { submitCourseDiscussionThreadFlow } from "../../flows/courses/submit-course-discussion-thread.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
-
-import type { IsolatedWorkspaceHandle, TenantUserHandle } from "../../fixtures/test.fixture";
-import type { FixtureApiClient } from "../../utils/api-client";
-import type {
-  GetMessagesResponse,
-  GetPublicGlobalSettingsResponse,
-  GetRepliesResponse,
-} from "~/api/generated-api";
-
-type GlobalSettings = GetPublicGlobalSettingsResponse["data"];
-type CourseDiscussionThread = GetMessagesResponse["data"][number];
-type CourseDiscussionReply = GetRepliesResponse["data"][number];
-
-type DiscussionCourseSetup = {
-  courseId: string;
-  studentSession: TenantUserHandle;
-};
+import {
+  arrangeDiscussionCourse,
+  createDiscussionParticipant,
+  uniqueDiscussionLabel,
+} from "../../utils/course-discussion";
 
 const DISCUSSION_REACTION = "👍";
-
-const uniqueLabel = (prefix: string) => `${prefix}-${randomUUID().slice(0, 8)}`;
-
-test.describe.configure({ mode: "serial" });
-
-const getGlobalSettings = async (apiClient: FixtureApiClient): Promise<GlobalSettings> => {
-  const response = await apiClient.api.settingsControllerGetPublicGlobalSettings();
-
-  return response.data.data;
-};
-
-const setCourseDiscussionsEnabled = async (apiClient: FixtureApiClient, enabled: boolean) => {
-  const settings = await getGlobalSettings(apiClient);
-
-  if (settings.courseDiscussionsEnabled !== enabled) {
-    await apiClient.api.settingsControllerUpdateCourseDiscussionsEnabled();
-  }
-};
-
-const createDiscussionCourseSetup = async (
-  workspace: IsolatedWorkspaceHandle,
-  enabled: boolean,
-): Promise<DiscussionCourseSetup> => {
-  await setCourseDiscussionsEnabled(workspace.apiClient, enabled);
-
-  const categoryFactory = workspace.factories.createCategoryFactory();
-  const courseFactory = workspace.factories.createCourseFactory();
-  const enrollmentFactory = workspace.factories.createEnrollmentFactory();
-  const category = await categoryFactory.create(uniqueLabel("Discussion Category"));
-  const course = await courseFactory.create({
-    title: uniqueLabel("discussion-course"),
-    categoryId: category.id,
-    status: "published",
-  });
-  const studentSession = await workspace.createTenantUserWithPasswordAndRole({
-    firstName: "Discussion",
-    lastName: "Student",
-    role: USER_ROLE.student,
-  });
-
-  await enrollmentFactory.enrollUsers(course.id, [studentSession.user.id]);
-
-  return {
-    courseId: course.id,
-    studentSession,
-  };
-};
-
-const findThreadByContent = async (
-  apiClient: FixtureApiClient,
-  courseId: string,
-  content: string,
-) => {
-  const response = await apiClient.api.courseChatControllerGetMessages(courseId, {
-    page: 1,
-    perPage: 10,
-  });
-
-  return response.data.data.find((message) => message.content === content) ?? null;
-};
-
-const findThreadById = async (apiClient: FixtureApiClient, courseId: string, messageId: string) => {
-  const response = await apiClient.api.courseChatControllerGetMessages(courseId, {
-    page: 1,
-    perPage: 10,
-  });
-
-  return response.data.data.find((message) => message.id === messageId) ?? null;
-};
-
-const waitForThreadByContent = async (
-  apiClient: FixtureApiClient,
-  courseId: string,
-  content: string,
-): Promise<CourseDiscussionThread> => {
-  let thread: CourseDiscussionThread | null = null;
-
-  await expect
-    .poll(async () => {
-      thread = await findThreadByContent(apiClient, courseId, content);
-
-      return thread?.id ?? null;
-    })
-    .not.toBeNull();
-
-  return thread!;
-};
-
-const waitForReplyByContent = async (
-  apiClient: FixtureApiClient,
-  messageId: string,
-  content: string,
-): Promise<CourseDiscussionReply> => {
-  let reply: CourseDiscussionReply | null = null;
-
-  await expect
-    .poll(async () => {
-      const response = await apiClient.api.courseChatControllerGetReplies(messageId, {
-        page: 1,
-        perPage: 10,
-      });
-      reply = response.data.data.find((message) => message.content === content) ?? null;
-
-      return reply?.id ?? null;
-    })
-    .not.toBeNull();
-
-  return reply!;
-};
 
 test.describe("availability", () => {
   test("enrolled student does not see Discussion tab when global discussions are disabled", async ({
     createIsolatedWorkspace,
   }) => {
     const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
-    const { courseId, studentSession } = await createDiscussionCourseSetup(workspace, false);
+    const { courseId, student } = await arrangeDiscussionCourse(workspace, { enabled: false });
 
-    await openCourseOverviewFlow(studentSession.page, courseId);
+    await openCourseOverviewFlow(student.session.page, courseId);
 
-    await expect(studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.TAB)).toHaveCount(0);
+    await expect(student.session.page.getByTestId(COURSE_DISCUSSION_HANDLES.TAB)).toHaveCount(0);
   });
 
   test("enrolled student sees empty discussion state when global discussions are enabled", async ({
     createIsolatedWorkspace,
   }) => {
     const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
-    const { courseId, studentSession } = await createDiscussionCourseSetup(workspace, true);
+    const { courseId, student } = await arrangeDiscussionCourse(workspace, { enabled: true });
+    const { page } = student.session;
 
-    await openCourseDiscussionFlow(studentSession.page, courseId);
+    await openCourseDiscussionFlow(page, courseId);
 
-    await expect(studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.ROOT)).toBeVisible();
-    await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.EMPTY_STATE),
-    ).toBeVisible();
+    await expect(page.getByTestId(COURSE_DISCUSSION_HANDLES.ROOT)).toBeVisible();
+    await expect(page.getByTestId(COURSE_DISCUSSION_HANDLES.EMPTY_STATE)).toBeVisible();
   });
 });
 
 test.describe("messaging", () => {
   test("student can create a top-level discussion thread", async ({ createIsolatedWorkspace }) => {
     const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
-    const { courseId, studentSession } = await createDiscussionCourseSetup(workspace, true);
-    const content = uniqueLabel("discussion-thread");
+    const { courseId, student } = await arrangeDiscussionCourse(workspace, { enabled: true });
+    const { page } = student.session;
+    const content = uniqueDiscussionLabel("discussion-thread");
 
-    await openCourseDiscussionFlow(studentSession.page, courseId);
-    const sendButton = studentSession.page.getByTestId(
-      COURSE_DISCUSSION_HANDLES.THREAD_SEND_BUTTON,
-    );
+    await openCourseDiscussionFlow(page, courseId);
+    const sendButton = page.getByTestId(COURSE_DISCUSSION_HANDLES.THREAD_SEND_BUTTON);
     await expect(sendButton).toBeDisabled();
-    await studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.THREAD_INPUT).fill("   ");
+    await page.getByTestId(COURSE_DISCUSSION_HANDLES.THREAD_INPUT).fill("   ");
     await expect(sendButton).toBeDisabled();
-    await submitCourseDiscussionThreadFlow(studentSession.page, content);
+    await submitCourseDiscussionThreadFlow(page, content);
 
-    const thread = await waitForThreadByContent(studentSession.apiClient, courseId, content);
+    await expect.poll(() => student.discussions.findThread(courseId, { content })).not.toBeNull();
+    const thread = await student.discussions.findThread(courseId, { content });
     await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(thread.id)),
+      page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(thread?.id ?? "")),
     ).toContainText(content);
   });
 
   test("student can reply to a discussion thread", async ({ createIsolatedWorkspace }) => {
     const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
-    const { courseId, studentSession } = await createDiscussionCourseSetup(workspace, true);
-    const threadContent = uniqueLabel("discussion-thread-for-reply");
-    const replyContent = uniqueLabel("discussion-reply");
-    const threadResponse = await studentSession.apiClient.api.courseChatControllerCreateMessage(
-      courseId,
-      { content: threadContent },
-    );
-    const thread = threadResponse.data.data;
+    const { courseId, student } = await arrangeDiscussionCourse(workspace, { enabled: true });
+    const { page } = student.session;
+    const threadContent = uniqueDiscussionLabel("discussion-thread-for-reply");
+    const replyContent = uniqueDiscussionLabel("discussion-reply");
+    const thread = await student.discussions.createMessage(courseId, { content: threadContent });
 
-    await openCourseDiscussionFlow(studentSession.page, courseId);
+    await openCourseDiscussionFlow(page, courseId);
     await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(thread.id)),
+      page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(thread.id)),
     ).toContainText(threadContent);
 
-    await openCourseDiscussionRepliesFlow(studentSession.page, thread.id);
-    await submitCourseDiscussionReplyFlow(studentSession.page, thread.id, replyContent);
+    await openCourseDiscussionRepliesFlow(page, thread.id);
+    await submitCourseDiscussionReplyFlow(page, thread.id, replyContent);
 
-    const reply = await waitForReplyByContent(studentSession.apiClient, thread.id, replyContent);
+    await expect.poll(() => student.discussions.findReply(thread.id, replyContent)).not.toBeNull();
+    const reply = await student.discussions.findReply(thread.id, replyContent);
     await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(reply.id)),
+      page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(reply?.id ?? "")),
     ).toContainText(replyContent);
     await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.repliesToggle(thread.id)),
+      page.getByTestId(COURSE_DISCUSSION_HANDLES.repliesToggle(thread.id)),
     ).toContainText("1");
   });
 });
@@ -224,53 +97,28 @@ test.describe("reactions", () => {
     createIsolatedWorkspace,
   }) => {
     const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
-    const { courseId, studentSession } = await createDiscussionCourseSetup(workspace, true);
-    const threadContent = uniqueLabel("discussion-thread-for-reaction");
-    const threadResponse = await studentSession.apiClient.api.courseChatControllerCreateMessage(
-      courseId,
-      { content: threadContent },
+    const { courseId, student } = await arrangeDiscussionCourse(workspace, { enabled: true });
+    const { page } = student.session;
+    const thread = await student.discussions.createMessage(courseId, {
+      content: uniqueDiscussionLabel("discussion-thread-for-reaction"),
+    });
+    const reactionSummary = page.getByTestId(
+      COURSE_DISCUSSION_HANDLES.messageReactionSummary(thread.id, DISCUSSION_REACTION),
     );
-    const thread = threadResponse.data.data;
 
-    await openCourseDiscussionFlow(studentSession.page, courseId);
-    await reactToCourseDiscussionMessageFlow(studentSession.page, thread.id, DISCUSSION_REACTION);
+    await openCourseDiscussionFlow(page, courseId);
+    await reactToCourseDiscussionMessageFlow(page, thread.id, DISCUSSION_REACTION);
 
+    await expect(reactionSummary).toContainText("1");
     await expect
-      .poll(async () => {
-        const message = await findThreadByContent(
-          studentSession.apiClient,
-          courseId,
-          threadContent,
-        );
-
-        return message?.reactions.find((reaction) => reaction.reaction === DISCUSSION_REACTION)
-          ?.count;
-      })
+      .poll(() => student.discussions.getReactionCount(courseId, thread.id, DISCUSSION_REACTION))
       .toBe(1);
 
-    await expect(
-      studentSession.page.getByTestId(
-        COURSE_DISCUSSION_HANDLES.messageReactionSummary(thread.id, DISCUSSION_REACTION),
-      ),
-    ).toContainText("1");
+    await reactionSummary.click();
 
-    await studentSession.page
-      .getByTestId(COURSE_DISCUSSION_HANDLES.messageReactionSummary(thread.id, DISCUSSION_REACTION))
-      .click();
-
+    await expect(reactionSummary).toBeHidden();
     await expect
-      .poll(async () => {
-        const message = await findThreadByContent(
-          studentSession.apiClient,
-          courseId,
-          threadContent,
-        );
-
-        return (
-          message?.reactions.find((reaction) => reaction.reaction === DISCUSSION_REACTION)?.count ??
-          0
-        );
-      })
+      .poll(() => student.discussions.getReactionCount(courseId, thread.id, DISCUSSION_REACTION))
       .toBe(0);
   });
 });
@@ -280,68 +128,52 @@ test.describe("deletion", () => {
     createIsolatedWorkspace,
   }) => {
     const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
-    const { courseId, studentSession } = await createDiscussionCourseSetup(workspace, true);
-    const threadContent = uniqueLabel("discussion-thread-for-delete");
-    const replyContent = uniqueLabel("discussion-reply-before-delete");
-    const threadResponse = await studentSession.apiClient.api.courseChatControllerCreateMessage(
-      courseId,
-      { content: threadContent },
-    );
-    const thread = threadResponse.data.data;
-    await studentSession.apiClient.api.courseChatControllerCreateMessage(courseId, {
-      content: replyContent,
+    const { courseId, student } = await arrangeDiscussionCourse(workspace, { enabled: true });
+    const { page } = student.session;
+    const threadContent = uniqueDiscussionLabel("discussion-thread-for-delete");
+    const thread = await student.discussions.createMessage(courseId, { content: threadContent });
+    await student.discussions.createMessage(courseId, {
+      content: uniqueDiscussionLabel("discussion-reply-before-delete"),
       parentMessageId: thread.id,
     });
 
-    await openCourseDiscussionFlow(studentSession.page, courseId);
-    await deleteCourseDiscussionMessageFlow(studentSession.page, thread.id);
+    await openCourseDiscussionFlow(page, courseId);
+    await deleteCourseDiscussionMessageFlow(page, thread.id);
 
+    // A thread with replies stays in the list as a deleted placeholder.
+    const threadContentBubble = page.getByTestId(
+      COURSE_DISCUSSION_HANDLES.messageContent(thread.id),
+    );
+    await expect(threadContentBubble).toHaveAttribute("data-deleted", "true");
+    await expect(threadContentBubble).not.toContainText(threadContent);
     await expect
-      .poll(async () => {
-        const message = await findThreadById(studentSession.apiClient, courseId, thread.id);
-
-        return message?.deletedAt ?? null;
-      })
+      .poll(
+        async () =>
+          (await student.discussions.findThread(courseId, { id: thread.id }))?.deletedAt ?? null,
+      )
       .not.toBeNull();
-
-    await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(thread.id)),
-    ).toContainText("This message was deleted");
   });
 
   test("student can cancel deletion and can remove a thread without replies", async ({
     createIsolatedWorkspace,
   }) => {
     const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
-    const { courseId, studentSession } = await createDiscussionCourseSetup(workspace, true);
-    const response = await studentSession.apiClient.api.courseChatControllerCreateMessage(
-      courseId,
-      { content: uniqueLabel("reply-free-thread") },
-    );
-    const thread = response.data.data;
+    const { courseId, student } = await arrangeDiscussionCourse(workspace, { enabled: true });
+    const { page } = student.session;
+    const thread = await student.discussions.createMessage(courseId, {
+      content: uniqueDiscussionLabel("reply-free-thread"),
+    });
 
-    await openCourseDiscussionFlow(studentSession.page, courseId);
-    await studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.message(thread.id)).hover();
-    await studentSession.page
-      .getByTestId(COURSE_DISCUSSION_HANDLES.messageDeleteAction(thread.id))
-      .click();
-    await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.DELETE_DIALOG),
-    ).toBeVisible();
-    await studentSession.page
-      .getByTestId(COURSE_DISCUSSION_HANDLES.DELETE_DIALOG_CANCEL_BUTTON)
-      .click();
-    await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.message(thread.id)),
-    ).toBeVisible();
+    await openCourseDiscussionFlow(page, courseId);
+    await page.getByTestId(COURSE_DISCUSSION_HANDLES.message(thread.id)).hover();
+    await page.getByTestId(COURSE_DISCUSSION_HANDLES.messageDeleteAction(thread.id)).click();
+    await expect(page.getByTestId(COURSE_DISCUSSION_HANDLES.DELETE_DIALOG)).toBeVisible();
+    await page.getByTestId(COURSE_DISCUSSION_HANDLES.DELETE_DIALOG_CANCEL_BUTTON).click();
+    await expect(page.getByTestId(COURSE_DISCUSSION_HANDLES.message(thread.id))).toBeVisible();
 
-    await deleteCourseDiscussionMessageFlow(studentSession.page, thread.id);
-    await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.message(thread.id)),
-    ).toHaveCount(0);
-    await expect
-      .poll(() => findThreadById(studentSession.apiClient, courseId, thread.id))
-      .toBeNull();
+    await deleteCourseDiscussionMessageFlow(page, thread.id);
+    await expect(page.getByTestId(COURSE_DISCUSSION_HANDLES.message(thread.id))).toHaveCount(0);
+    await expect.poll(() => student.discussions.findThread(courseId, { id: thread.id })).toBeNull();
   });
 });
 
@@ -350,47 +182,42 @@ test.describe("mentions", () => {
     createIsolatedWorkspace,
   }) => {
     const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
-    const { courseId, studentSession } = await createDiscussionCourseSetup(workspace, true);
+    const { courseId, student } = await arrangeDiscussionCourse(workspace, { enabled: true });
+    const { page } = student.session;
     const userFactory = workspace.factories.createUserFactory();
-    const enrollmentFactory = workspace.factories.createEnrollmentFactory();
     const mentionTarget = await userFactory.create({
       firstName: "Mention",
-      lastName: uniqueLabel("Target"),
+      lastName: uniqueDiscussionLabel("Target"),
     });
     const mentionLabel = `@${mentionTarget.firstName} ${mentionTarget.lastName}`;
-    const content = `${mentionLabel} ${uniqueLabel("please-review")}`;
+    const content = `${mentionLabel} ${uniqueDiscussionLabel("please-review")}`;
     const outsider = await userFactory.create({
       firstName: "Unenrolled",
-      lastName: uniqueLabel("Mention"),
+      lastName: uniqueDiscussionLabel("Mention"),
     });
 
-    await enrollmentFactory.enrollUsers(courseId, [mentionTarget.id]);
+    await workspace.factories.createEnrollmentFactory().enrollUsers(courseId, [mentionTarget.id]);
 
-    await openCourseDiscussionFlow(studentSession.page, courseId);
-    const input = studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.THREAD_INPUT);
+    await openCourseDiscussionFlow(page, courseId);
+    const input = page.getByTestId(COURSE_DISCUSSION_HANDLES.THREAD_INPUT);
     await input.fill("@");
     await expect(
-      studentSession.page.getByTestId(
-        COURSE_DISCUSSION_HANDLES.threadMentionOption(studentSession.user.id),
-      ),
+      page.getByTestId(COURSE_DISCUSSION_HANDLES.threadMentionOption(student.session.user.id)),
     ).toHaveCount(0);
     await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.threadMentionOption(outsider.id)),
+      page.getByTestId(COURSE_DISCUSSION_HANDLES.threadMentionOption(outsider.id)),
     ).toHaveCount(0);
     await input.fill("");
-    await selectCourseDiscussionMentionFlow(
-      studentSession.page,
-      mentionTarget.firstName,
-      mentionTarget.id,
-    );
+    await selectCourseDiscussionMentionFlow(page, mentionTarget.firstName, mentionTarget.id);
 
     await expect(input).toHaveValue(`${mentionLabel} `);
     await input.fill(content);
-    await studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.THREAD_SEND_BUTTON).click();
+    await page.getByTestId(COURSE_DISCUSSION_HANDLES.THREAD_SEND_BUTTON).click();
 
-    const thread = await waitForThreadByContent(studentSession.apiClient, courseId, content);
+    await expect.poll(() => student.discussions.findThread(courseId, { content })).not.toBeNull();
+    const thread = await student.discussions.findThread(courseId, { content });
     await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(thread.id)),
+      page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(thread?.id ?? "")),
     ).toContainText(mentionLabel);
   });
 });
@@ -400,60 +227,59 @@ test.describe("realtime collaboration", () => {
     createIsolatedWorkspace,
   }) => {
     const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
-    const { courseId, studentSession: firstStudent } = await createDiscussionCourseSetup(
-      workspace,
-      true,
-    );
-    const secondStudent = await workspace.createTenantUserWithPasswordAndRole({
-      firstName: "Realtime",
-      lastName: uniqueLabel("Student"),
-      role: USER_ROLE.student,
+    const { courseId, student: firstStudent } = await arrangeDiscussionCourse(workspace, {
+      enabled: true,
     });
-    const enrollmentFactory = workspace.factories.createEnrollmentFactory();
-    await enrollmentFactory.enrollUsers(courseId, [secondStudent.user.id]);
+    const secondStudent = await createDiscussionParticipant(workspace, courseId, {
+      firstName: "Realtime",
+      lastName: uniqueDiscussionLabel("Student"),
+    });
+    const firstPage = firstStudent.session.page;
+    const secondPage = secondStudent.session.page;
 
-    await openCourseDiscussionFlow(firstStudent.page, courseId);
-    await openCourseDiscussionFlow(secondStudent.page, courseId);
+    await openCourseDiscussionFlow(firstPage, courseId);
+    await openCourseDiscussionFlow(secondPage, courseId);
 
-    const mentionLabel = `@${firstStudent.user.firstName} ${firstStudent.user.lastName}`;
-    const threadContent = `${mentionLabel} ${uniqueLabel("realtime-thread")}`;
-    await selectCourseDiscussionMentionFlow(
-      secondStudent.page,
-      firstStudent.user.firstName,
-      firstStudent.user.id,
+    const { firstName, lastName, id: firstStudentId } = firstStudent.session.user;
+    const mentionLabel = `@${firstName} ${lastName}`;
+    const threadContent = `${mentionLabel} ${uniqueDiscussionLabel("realtime-thread")}`;
+    await selectCourseDiscussionMentionFlow(secondPage, firstName, firstStudentId);
+    await expect(secondPage.getByTestId(COURSE_DISCUSSION_HANDLES.THREAD_INPUT)).toHaveValue(
+      `${mentionLabel} `,
     );
-    await secondStudent.page
-      .getByTestId(COURSE_DISCUSSION_HANDLES.THREAD_INPUT)
-      .fill(threadContent);
-    await secondStudent.page.getByTestId(COURSE_DISCUSSION_HANDLES.THREAD_SEND_BUTTON).click();
+    await submitCourseDiscussionThreadFlow(secondPage, threadContent);
 
-    const thread = await waitForThreadByContent(secondStudent.apiClient, courseId, threadContent);
+    await expect
+      .poll(() => secondStudent.discussions.findThread(courseId, { content: threadContent }))
+      .not.toBeNull();
+    const thread = await secondStudent.discussions.findThread(courseId, { content: threadContent });
+    const threadId = thread?.id ?? "";
+
     await expect(
-      firstStudent.page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(thread.id)),
+      firstPage.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(threadId)),
     ).toContainText(threadContent);
-    await expect(firstStudent.page.getByTestId(TOAST_HANDLES.DESCRIPTION)).toHaveText(
-      "Someone mentioned you in the course discussion.",
-    );
+    await expect(firstPage.getByTestId(COURSE_DISCUSSION_HANDLES.MENTION_TOAST)).toBeVisible();
     await expect(
-      firstStudent.page.getByTestId(COURSE_DISCUSSION_HANDLES.messageAuthorPresence(thread.id)),
+      firstPage.getByTestId(COURSE_DISCUSSION_HANDLES.messageAuthorPresence(threadId)),
     ).toHaveAttribute("data-online", "true");
 
-    await openCourseDiscussionRepliesFlow(firstStudent.page, thread.id);
-    await openCourseDiscussionRepliesFlow(secondStudent.page, thread.id);
-    const replyContent = uniqueLabel("realtime-reply");
-    await submitCourseDiscussionReplyFlow(firstStudent.page, thread.id, replyContent);
-    const reply = await waitForReplyByContent(firstStudent.apiClient, thread.id, replyContent);
+    await openCourseDiscussionRepliesFlow(secondPage, threadId);
+    const replyContent = uniqueDiscussionLabel("realtime-reply");
+    const reply = await firstStudent.discussions.createMessage(courseId, {
+      content: replyContent,
+      parentMessageId: threadId,
+    });
 
     await expect(
-      secondStudent.page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(reply.id)),
+      secondPage.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(reply.id)),
     ).toContainText(replyContent);
     await expect(
-      secondStudent.page.getByTestId(COURSE_DISCUSSION_HANDLES.repliesToggle(thread.id)),
+      secondPage.getByTestId(COURSE_DISCUSSION_HANDLES.repliesToggle(threadId)),
     ).toContainText("1");
 
-    await secondStudent.context.close();
+    await secondStudent.session.context.close();
     await expect(
-      firstStudent.page.getByTestId(COURSE_DISCUSSION_HANDLES.messageAuthorPresence(thread.id)),
+      firstPage.getByTestId(COURSE_DISCUSSION_HANDLES.messageAuthorPresence(threadId)),
     ).toHaveAttribute("data-online", "false");
   });
 
@@ -461,39 +287,36 @@ test.describe("realtime collaboration", () => {
     createIsolatedWorkspace,
   }) => {
     const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
-    const { courseId, studentSession: author } = await createDiscussionCourseSetup(workspace, true);
-    const observer = await workspace.createTenantUserWithPasswordAndRole({
+    const { courseId, student: author } = await arrangeDiscussionCourse(workspace, {
+      enabled: true,
+    });
+    const observer = await createDiscussionParticipant(workspace, courseId, {
       firstName: "Discussion",
-      lastName: uniqueLabel("Observer"),
-      role: USER_ROLE.student,
+      lastName: uniqueDiscussionLabel("Observer"),
     });
-    const enrollmentFactory = workspace.factories.createEnrollmentFactory();
-    await enrollmentFactory.enrollUsers(courseId, [observer.user.id]);
-
-    const threadContent = uniqueLabel("realtime-reaction-delete");
-    const threadResponse = await author.apiClient.api.courseChatControllerCreateMessage(courseId, {
-      content: threadContent,
-    });
-    const thread = threadResponse.data.data;
-    await author.apiClient.api.courseChatControllerCreateMessage(courseId, {
-      content: uniqueLabel("reply-preserving-thread"),
+    const threadContent = uniqueDiscussionLabel("realtime-reaction-delete");
+    const thread = await author.discussions.createMessage(courseId, { content: threadContent });
+    await author.discussions.createMessage(courseId, {
+      content: uniqueDiscussionLabel("reply-preserving-thread"),
       parentMessageId: thread.id,
     });
 
-    await openCourseDiscussionFlow(author.page, courseId);
-    await openCourseDiscussionFlow(observer.page, courseId);
-    await reactToCourseDiscussionMessageFlow(observer.page, thread.id, DISCUSSION_REACTION);
+    await openCourseDiscussionFlow(author.session.page, courseId);
+    await openCourseDiscussionFlow(observer.session.page, courseId);
+    await observer.discussions.toggleReaction(thread.id, DISCUSSION_REACTION);
 
     await expect(
-      author.page.getByTestId(
+      author.session.page.getByTestId(
         COURSE_DISCUSSION_HANDLES.messageReactionSummary(thread.id, DISCUSSION_REACTION),
       ),
     ).toContainText("1");
 
-    await deleteCourseDiscussionMessageFlow(author.page, thread.id);
-    await expect(
-      observer.page.getByTestId(COURSE_DISCUSSION_HANDLES.messageContent(thread.id)),
-    ).toContainText("This message was deleted");
+    await author.discussions.deleteMessage(thread.id);
+    const observedThread = observer.session.page.getByTestId(
+      COURSE_DISCUSSION_HANDLES.messageContent(thread.id),
+    );
+    await expect(observedThread).toHaveAttribute("data-deleted", "true");
+    await expect(observedThread).not.toContainText(threadContent);
   });
 });
 
@@ -502,41 +325,36 @@ test.describe("pagination", () => {
     createIsolatedWorkspace,
   }) => {
     const workspace = await createIsolatedWorkspace({ role: USER_ROLE.admin });
-    const { courseId, studentSession } = await createDiscussionCourseSetup(workspace, true);
-    const contents: string[] = [];
+    const { courseId, student } = await arrangeDiscussionCourse(workspace, { enabled: true });
+    const { page } = student.session;
+    const threadIds: string[] = [];
 
     for (let index = 0; index < 11; index++) {
-      const content = uniqueLabel(`paginated-thread-${index}`);
-      contents.push(content);
-      await studentSession.apiClient.api.courseChatControllerCreateMessage(courseId, { content });
+      const thread = await student.discussions.createMessage(courseId, {
+        content: uniqueDiscussionLabel(`paginated-thread-${index}`),
+      });
+      threadIds.push(thread.id);
     }
 
-    await openCourseDiscussionFlow(studentSession.page, courseId);
-    await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.PAGINATION_PREVIOUS_BUTTON),
-    ).toBeDisabled();
-    await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.PAGINATION_NEXT_BUTTON),
-    ).toBeEnabled();
-    await expect(studentSession.page.getByText(contents[0], { exact: true })).toHaveCount(0);
-    await expect(studentSession.page.getByText(contents[10], { exact: true })).toBeVisible();
+    const oldestThread = page.getByTestId(COURSE_DISCUSSION_HANDLES.message(threadIds[0]));
+    const newestThread = page.getByTestId(COURSE_DISCUSSION_HANDLES.message(threadIds[10]));
+    const previousButton = page.getByTestId(COURSE_DISCUSSION_HANDLES.PAGINATION_PREVIOUS_BUTTON);
+    const nextButton = page.getByTestId(COURSE_DISCUSSION_HANDLES.PAGINATION_NEXT_BUTTON);
 
-    await studentSession.page
-      .getByTestId(COURSE_DISCUSSION_HANDLES.paginationPageButton(2))
-      .click();
+    await openCourseDiscussionFlow(page, courseId);
+    await expect(previousButton).toBeDisabled();
+    await expect(nextButton).toBeEnabled();
+    await expect(oldestThread).toHaveCount(0);
+    await expect(newestThread).toBeVisible();
 
-    await expect(studentSession.page.getByText(contents[0], { exact: true })).toBeVisible();
-    await expect(studentSession.page.getByText(contents[10], { exact: true })).toHaveCount(0);
-    await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.PAGINATION_PREVIOUS_BUTTON),
-    ).toBeEnabled();
-    await expect(
-      studentSession.page.getByTestId(COURSE_DISCUSSION_HANDLES.PAGINATION_NEXT_BUTTON),
-    ).toBeDisabled();
+    await page.getByTestId(COURSE_DISCUSSION_HANDLES.paginationPageButton(2)).click();
 
-    await studentSession.page
-      .getByTestId(COURSE_DISCUSSION_HANDLES.PAGINATION_PREVIOUS_BUTTON)
-      .click();
-    await expect(studentSession.page.getByText(contents[10], { exact: true })).toBeVisible();
+    await expect(oldestThread).toBeVisible();
+    await expect(newestThread).toHaveCount(0);
+    await expect(previousButton).toBeEnabled();
+    await expect(nextButton).toBeDisabled();
+
+    await previousButton.click();
+    await expect(newestThread).toBeVisible();
   });
 });

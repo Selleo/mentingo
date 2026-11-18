@@ -1,5 +1,6 @@
 import { USER_ROLE } from "~/config/userRoles";
 
+import { COURSES_PAGE_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { confirmDeleteCoursesFlow } from "../../flows/courses/confirm-delete-courses.flow";
 import { filterCoursesFlow } from "../../flows/courses/filter-courses.flow";
@@ -33,6 +34,9 @@ test("admin can bulk delete draft courses", async ({ cleanup, factories, withWor
     await openDeleteCoursesDialogFlow(page);
     await confirmDeleteCoursesFlow(page);
 
+    for (const course of courses) {
+      await expect(page.getByTestId(COURSES_PAGE_HANDLES.row(course.id))).toBeHidden();
+    }
     await expect
       .poll(async () => {
         const remaining = await Promise.all(

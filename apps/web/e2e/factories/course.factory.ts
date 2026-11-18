@@ -78,6 +78,17 @@ export class CourseFactory {
     return response.data.data.find((course) => course.title === title) ?? null;
   }
 
+  async isArchived(id: string) {
+    const response = await this.apiClient.api.courseControllerGetAllCourses({
+      language: "en",
+      isArchived: "all",
+      page: 1,
+      perPage: 100,
+    });
+
+    return response.data.data.find((course) => course.id === id)?.isArchived;
+  }
+
   async update(id: string, data: CourseFactoryUpdateInput) {
     await this.apiClient.api.courseControllerUpdateCourse(id, data);
     return this.getById(id, data.language ?? "en");
@@ -142,6 +153,15 @@ export class CourseFactory {
   async createLanguage(id: string, language: CreateCourseBody["language"]) {
     await this.apiClient.api.courseControllerCreateLanguage(id, { language });
     return this.getById(id, language);
+  }
+
+  async hasMissingTranslations(id: string, language: CreateCourseBody["language"]) {
+    const response = await this.apiClient.api.courseControllerHasMissingTranslations({
+      id,
+      language,
+    });
+
+    return response.data.data.hasMissingTranslations;
   }
 
   async deleteLanguage(id: string, language: CreateCourseBody["language"]) {

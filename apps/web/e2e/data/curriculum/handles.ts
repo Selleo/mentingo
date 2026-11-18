@@ -1,3 +1,4 @@
+import type { AssessmentScoringMode } from "@repo/shared";
 import type { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 
 export const LESSON_TYPE_OPTION_HANDLES = {
@@ -41,6 +42,7 @@ export const CONTENT_LESSON_FORM_HANDLES = {
   DESCRIPTION_EDITOR: "curriculum-content-lesson-description-editor",
   SAVE_BUTTON: "curriculum-content-lesson-save-button",
   DELETE_BUTTON: "curriculum-content-lesson-delete-button",
+  DELETE_CONFIRM_BUTTON: "curriculum-content-lesson-delete-confirm-button",
   CANCEL_BUTTON: "curriculum-content-lesson-cancel-button",
 } as const;
 
@@ -50,6 +52,7 @@ export const QUIZ_LESSON_FORM_HANDLES = {
   TIME_LIMIT_INPUT: "curriculum-quiz-lesson-time-limit-input",
   SAVE_BUTTON: "curriculum-quiz-lesson-save-button",
   DELETE_BUTTON: "curriculum-quiz-lesson-delete-button",
+  DELETE_CONFIRM_BUTTON: "curriculum-quiz-lesson-delete-confirm-button",
   CANCEL_BUTTON: "curriculum-quiz-lesson-cancel-button",
   ADD_QUESTION_BUTTON: "curriculum-quiz-add-question-button",
   questionTypeOption: (type: QuestionType) => `curriculum-quiz-question-type-option-${type}`,
@@ -67,6 +70,8 @@ export const QUIZ_LESSON_FORM_HANDLES = {
     `curriculum-quiz-question-${questionIndex}-option-${optionIndex}-input`,
   matchingScoringSelect: (questionIndex: number) =>
     `curriculum-quiz-question-${questionIndex}-matching-scoring-select`,
+  matchingScoringOption: (questionIndex: number, scoringMode: AssessmentScoringMode) =>
+    `curriculum-quiz-question-${questionIndex}-matching-scoring-option-${scoringMode}`,
   matchingPromptInput: (questionIndex: number, pairIndex: number) =>
     `curriculum-quiz-question-${questionIndex}-pair-${pairIndex}-prompt-input`,
   matchingMatchInput: (questionIndex: number, pairIndex: number) =>
@@ -159,6 +164,9 @@ export const AI_MENTOR_LESSON_FORM_HANDLES = {
   MENTOR_LEARNER_ROLE_INPUT: "curriculum-ai-mentor-configuration-learner-role-input",
   MENTOR_CHARACTER_GOAL_INPUT: "curriculum-ai-mentor-configuration-character-goal-input",
   MENTOR_CONFIGURATION_APPLY_BUTTON: "curriculum-ai-mentor-configuration-apply-button",
+  MENTOR_CONFIGURATION_CANCEL_BUTTON: "curriculum-ai-mentor-configuration-cancel-button",
+  mentorConfigurationChoice: (field: "type" | "teachingStyle" | "difficulty", value: string) =>
+    `curriculum-ai-mentor-configuration-${field}-${value}`,
   MENTOR_GENERATION_DIALOG: "curriculum-ai-mentor-generation-dialog",
   MENTOR_GENERATION_MODE: "curriculum-ai-mentor-generation-mode",
   SAVE_BUTTON: "curriculum-ai-mentor-lesson-save-button",
@@ -166,6 +174,8 @@ export const AI_MENTOR_LESSON_FORM_HANDLES = {
   CANCEL_BUTTON: "curriculum-ai-mentor-lesson-cancel-button",
   PREVIEW_BUTTON: "curriculum-ai-mentor-lesson-preview-button",
   RESOURCE_FILE_INPUT: "curriculum-ai-mentor-lesson-resource-file-input",
+  resourceFileCard: (fileName: string) => `curriculum-ai-mentor-lesson-resource-file-${fileName}`,
+  MISSING_TRANSLATIONS_ALERT: "curriculum-ai-mentor-lesson-missing-translations-alert",
   AVATAR_FILE_INPUT: "curriculum-ai-mentor-lesson-avatar-file-input",
   JUDGE_CONFIGURE_BUTTON: "curriculum-ai-mentor-judge-configure-button",
   JUDGE_DIALOG: "curriculum-ai-mentor-judge-dialog",

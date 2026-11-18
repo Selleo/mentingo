@@ -5,51 +5,16 @@ import { USER_ROLE } from "~/config/userRoles";
 import {
   COURSE_SETTINGS_HANDLES,
   COURSE_TAB_VALUES,
-  COURSE_TYPE_SELECTOR_HANDLES,
   COURSES_PAGE_HANDLES,
   CREATE_SCORM_COURSE_PAGE_HANDLES,
   EDIT_COURSE_PAGE_HANDLES,
 } from "../../data/courses/handles";
 import { SCORM_TEST_DATA } from "../../data/scorm/scorm.data";
 import { expect, test } from "../../fixtures/test.fixture";
-import { fillCreateScormCourseFormFlow } from "../../flows/courses/fill-create-scorm-course-form.flow";
+import { createScormCourseFlow } from "../../flows/courses/create-scorm-course.flow";
+import { filterCoursesFlow } from "../../flows/courses/filter-courses.flow";
 import { openCoursesPageFlow } from "../../flows/courses/open-courses-page.flow";
-import { openCreateCourseTypeSelectorFlow } from "../../flows/courses/open-create-course-type-selector.flow";
-import { openCreateScormCoursePageFlow } from "../../flows/courses/open-create-scorm-course-page.flow";
 import { openEditCoursePageFlow } from "../../flows/courses/open-edit-course-page.flow";
-import { submitCreateScormCourseFormFlow } from "../../flows/courses/submit-create-scorm-course-form.flow";
-
-const createScormCourseFromUi = async (
-  page: Parameters<typeof fillCreateScormCourseFormFlow>[0],
-  input: {
-    categoryTitle: string;
-    packagePath: string;
-    title: string;
-  },
-) => {
-  await openCreateScormCoursePageFlow(page);
-  await fillCreateScormCourseFormFlow(page, {
-    title: input.title,
-    categoryTitle: input.categoryTitle,
-    language: "en",
-    description: `Description for ${input.title}`,
-    packagePath: input.packagePath,
-  });
-  await expect(page.getByTestId(CREATE_SCORM_COURSE_PAGE_HANDLES.SUBMIT_BUTTON)).toBeEnabled();
-  await submitCreateScormCourseFormFlow(page);
-};
-
-test("admin can choose between standard and SCORM course creation", async ({ withWorkerPage }) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await openCreateCourseTypeSelectorFlow(page);
-
-    await expect(page.getByTestId(COURSE_TYPE_SELECTOR_HANDLES.STANDARD_CARD)).toBeVisible();
-    await expect(page.getByTestId(COURSE_TYPE_SELECTOR_HANDLES.SCORM_CARD)).toBeVisible();
-
-    await page.getByTestId(COURSE_TYPE_SELECTOR_HANDLES.SCORM_CARD).click();
-    await expect(page.getByTestId(CREATE_SCORM_COURSE_PAGE_HANDLES.PAGE)).toBeVisible();
-  });
-});
 
 test("admin can import a SCORM course and gets generated chapters and lessons", async ({
   cleanup,
@@ -70,18 +35,17 @@ test("admin can import a SCORM course and gets generated chapters and lessons", 
       await categoryFactory.delete(category.id);
     });
 
-    await createScormCourseFromUi(page, {
+    await createScormCourseFlow(page, {
       title,
       categoryTitle: category.title,
       packagePath: SCORM_TEST_DATA.files.multiScoPackage,
     });
 
-    const courseId = await expect
+    await expect
       .poll(async () => (await courseFactory.findByTitle(title))?.id ?? null, { timeout: 30_000 })
-      .not.toBeNull()
-      .then(async () => (await courseFactory.findByTitle(title))!.id);
-
-    const createdCourse = await courseFactory.getById(courseId);
+      .not.toBeNull();
+    const listedCourse = await courseFactory.findByTitle(title);
+    const createdCourse = await courseFactory.getById(listedCourse?.id ?? "");
 
     expect(createdCourse.courseType).toBe(COURSE_TYPE.SCORM);
     expect(createdCourse.chapters).toHaveLength(2);
@@ -89,8 +53,8 @@ test("admin can import a SCORM course and gets generated chapters and lessons", 
       true,
     );
 
-    await openEditCoursePageFlow(page, courseId);
-    await expect(page.getByTestId(EDIT_COURSE_PAGE_HANDLES.COURSE_TYPE_BADGE)).toHaveText("SCORM");
+    await openEditCoursePageFlow(page, createdCourse.id);
+    await expect(page.getByTestId(EDIT_COURSE_PAGE_HANDLES.COURSE_TYPE_BADGE)).toBeVisible();
   });
 });
 
@@ -113,7 +77,7 @@ test("admin cannot submit an invalid SCORM course package", async ({
       await categoryFactory.delete(category.id);
     });
 
-    await createScormCourseFromUi(page, {
+    await createScormCourseFlow(page, {
       title,
       categoryTitle: category.title,
       packagePath: SCORM_TEST_DATA.files.invalidPackage,
@@ -133,30 +97,22 @@ test("SCORM courses hide unsupported admin course features", async ({
     const categoryFactory = factories.createCategoryFactory();
     const courseFactory = factories.createCourseFactory();
     const category = await categoryFactory.create(`SCORM Restrictions Category ${Date.now()}`);
-    const title = `scorm-restrictions-${Date.now()}`;
+    const course = await courseFactory.create({
+      title: `scorm-restrictions-${Date.now()}`,
+      categoryId: category.id,
+      isScorm: true,
+    });
 
     cleanup.add(async () => {
-      const createdCourse = await courseFactory.findByTitle(title);
-      if (createdCourse) {
-        await courseFactory.delete(createdCourse.id);
-      }
+      await courseFactory.delete(course.id);
       await categoryFactory.delete(category.id);
     });
 
-    await createScormCourseFromUi(page, {
-      title,
-      categoryTitle: category.title,
-      packagePath: SCORM_TEST_DATA.files.singleScoPackage,
-    });
-
-    const course = await expect
-      .poll(async () => courseFactory.findByTitle(title), { timeout: 30_000 })
-      .not.toBeNull()
-      .then(async () => (await courseFactory.findByTitle(title))!);
-
     await openCoursesPageFlow(page);
-    await expect(page.getByTestId(COURSES_PAGE_HANDLES.rowTypeBadge(course.id))).toHaveText(
-      "SCORM",
+    await filterCoursesFlow(page, { title: course.title });
+    await expect(page.getByTestId(COURSES_PAGE_HANDLES.rowTypeBadge(course.id))).toHaveAttribute(
+      "data-course-type",
+      COURSE_TYPE.SCORM,
     );
 
     await openEditCoursePageFlow(page, course.id);

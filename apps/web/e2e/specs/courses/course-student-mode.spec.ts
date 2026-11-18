@@ -1,5 +1,6 @@
 import { USER_ROLE } from "~/config/userRoles";
 
+import { COURSE_TOC_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { toggleCourseStudentModeFlow } from "../../flows/courses/toggle-course-student-mode.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
@@ -52,11 +53,16 @@ test("admin can toggle student mode from course preview", async ({
       })
       .toBe(true);
 
-    await page.getByRole("button", { name: new RegExp(chapter.title) }).click();
-    await expect(page.getByRole("link", { name: new RegExp(firstLesson.title) })).toBeVisible();
-    await expect(page.getByRole("link", { name: new RegExp(secondLesson.title) })).toBeVisible();
-    await expect(page.getByText("Blocked")).toHaveCount(0);
-    await page.getByRole("link", { name: new RegExp(firstLesson.title) }).click();
+    await page.getByTestId(COURSE_TOC_HANDLES.chapter(chapter.id)).click();
+    // Accessible lessons render as links; blocked ones render as disabled buttons.
+    for (const lesson of [firstLesson, secondLesson]) {
+      await expect(
+        page
+          .getByRole("link")
+          .filter({ has: page.getByTestId(COURSE_TOC_HANDLES.lesson(lesson.id)) }),
+      ).toBeVisible();
+    }
+    await page.getByTestId(COURSE_TOC_HANDLES.lesson(firstLesson.id)).click();
     await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${firstLesson.id}$`));
   });
 });

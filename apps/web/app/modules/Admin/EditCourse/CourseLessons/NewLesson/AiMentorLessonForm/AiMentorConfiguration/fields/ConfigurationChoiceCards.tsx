@@ -4,6 +4,8 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/comp
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { cn } from "~/lib/utils";
 
+import { AI_MENTOR_LESSON_FORM_HANDLES } from "../../../../../../../../../e2e/data/curriculum/handles";
+
 import type { AiMentorConfigurationDraft } from "../aiMentorConfiguration.types";
 import type { LucideIcon } from "lucide-react";
 
@@ -90,6 +92,10 @@ export const ConfigurationChoiceCards = <TValue extends string>({
                     </span>
                     <RadioGroupItem
                       id={choiceId}
+                      data-testid={AI_MENTOR_LESSON_FORM_HANDLES.mentorConfigurationChoice(
+                        name,
+                        choice.value,
+                      )}
                       value={choice.value}
                       className="ml-auto mt-0.5 shrink-0"
                     />

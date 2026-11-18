@@ -62,6 +62,12 @@ export class LearningPathFactory {
     return response.data.data;
   }
 
+  async getCourseIds(id: string): Promise<string[]> {
+    const learningPath = await this.getById(id);
+
+    return learningPath.courses.map((course) => course.courseId);
+  }
+
   async search(searchQuery: string): Promise<LearningPathFactoryListRecord[]> {
     const response = await this.apiClient.api.learningPathControllerGetLearningPaths({
       searchQuery,

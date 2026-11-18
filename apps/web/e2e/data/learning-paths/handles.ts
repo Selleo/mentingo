@@ -18,8 +18,8 @@ export const LEARNING_PATH_CREATE_DIALOG_HANDLES = {
 } as const;
 
 export const LEARNING_PATH_CARD_HANDLES = {
-  CARD_PREFIX: "learning-path-item-",
   card: (learningPathId: string) => `learning-path-item-${learningPathId}`,
+  CARD_PATTERN: /^learning-path-item-[0-9a-f-]{36}$/,
   TITLE: "learning-path-card-title",
   DESCRIPTION: "learning-path-card-description",
   DESCRIPTION_INPUT: "learning-path-card-description-input",
@@ -52,8 +52,9 @@ export const LEARNING_PATH_TRAIL_STOP_STATUSES = {
 
 export const LEARNING_PATH_TRAIL_HANDLES = {
   TRAIL: "learning-path-trail",
-  STOP_PREFIX: "learning-path-trail-stop-",
   stop: (courseId: string) => `learning-path-trail-stop-${courseId}`,
+  STOP_PATTERN: /^learning-path-trail-stop-[0-9a-f-]{36}$/,
+  thumbnail: (courseId: string) => `learning-path-trail-thumbnail-${courseId}`,
   removeButton: (courseId: string) => `learning-path-trail-remove-${courseId}`,
   dragHandle: (courseId: string) => `learning-path-trail-drag-${courseId}`,
   ADD_COURSE_BUTTON: "learning-path-trail-add-course-button",

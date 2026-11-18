@@ -38,6 +38,7 @@ type CreatePublishedLearningCourseInput<TLessons> = {
 
 export type PublishedLearningCourse<TLessons> = {
   categoryId: string;
+  chapterId: string;
   courseId: string;
   lessons: TLessons;
 };
@@ -57,6 +58,7 @@ export const createPublishedLearningCourse = async <TLessons>({
   const curriculumFactory = factories.createCurriculumFactory();
 
   let categoryId = "";
+  let chapterId = "";
   let courseId = "";
   let lessons: TLessons | undefined;
 
@@ -76,6 +78,7 @@ export const createPublishedLearningCourse = async <TLessons>({
       });
 
       categoryId = category.id;
+      chapterId = chapter.id;
       courseId = course.id;
       lessons = await buildLessons({
         chapterId: chapter.id,
@@ -111,7 +114,7 @@ export const createPublishedLearningCourse = async <TLessons>({
     throw new Error(`Learning course ${prefix} was not created`);
   }
 
-  return { categoryId, courseId, lessons };
+  return { categoryId, chapterId, courseId, lessons };
 };
 
 export const createTwoContentLessonsCourse = async (

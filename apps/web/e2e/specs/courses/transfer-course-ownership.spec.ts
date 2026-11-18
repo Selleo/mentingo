@@ -2,6 +2,7 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { transferCourseOwnershipFlow } from "../../flows/courses/transfer-course-ownership.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
@@ -18,7 +19,7 @@ test("admin can transfer course ownership from the course overview", async ({
     const category = await categoryFactory.create(`Transfer Course Category ${Date.now()}`);
     const candidate = await userFactory.create({
       firstName: "Course",
-      lastName: "Owner",
+      lastName: `Owner ${Date.now()}`,
       email: `course-owner-${Date.now()}@example.com`,
       roleSlugs: [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR],
     });
@@ -48,5 +49,10 @@ test("admin can transfer course ownership from the course overview", async ({
         return ownership.currentAuthor.id;
       })
       .toBe(candidate.id);
+
+    await page.reload();
+    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.AUTHOR_CARD)).toContainText(
+      `${candidate.firstName} ${candidate.lastName}`,
+    );
   });
 });

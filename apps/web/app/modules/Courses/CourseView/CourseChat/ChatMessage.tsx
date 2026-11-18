@@ -110,6 +110,7 @@ export function ChatMessage({
               messageBubbleClassName,
             )}
             data-testid={COURSE_DISCUSSION_HANDLES.messageContent(message.id)}
+            data-deleted={isDeleted}
           >
             <p className={cn("whitespace-pre-wrap break-words", { italic: isDeleted })}>
               {isDeleted

@@ -130,6 +130,7 @@ export const EDIT_COURSE_PAGE_HANDLES = {
   PREVIEW_BUTTON: "edit-course-preview-button",
   COURSE_TYPE_BADGE: "edit-course-type-badge",
   LANGUAGE_SELECT: "edit-course-language-select",
+  LANGUAGE_SELECT_LABEL: "edit-course-language-select-label",
   languageOption: (language: SupportedLanguages) => `edit-course-language-option-${language}`,
   DELETE_LANGUAGE_BUTTON: "edit-course-delete-language-button",
   tab: (tab: CourseTabValue) => `edit-course-tab-${tab}`,
@@ -193,7 +194,9 @@ export const COURSE_OVERVIEW_HANDLES = {
   HERO_TITLE: "course-overview-hero-title",
   STUDENT_MODE_BUTTON: "course-overview-student-mode-button",
   SETTINGS_BUTTON: "course-overview-settings-button",
+  SETTINGS_BUTTON_LABEL: "course-overview-settings-button-label",
   EDIT_MEDIA_BUTTON: "course-overview-edit-media-button",
+  EDIT_MEDIA_BUTTON_LABEL: "course-overview-edit-media-button-label",
   SETTINGS_DRAWER: "course-overview-settings-drawer",
   settingsTab: (tab: string) => `course-overview-settings-tab-${tab}`,
   AUTHOR_CARD: "course-overview-author-card",
@@ -210,6 +213,14 @@ export const COURSE_OVERVIEW_HANDLES = {
   LEARNING_OUTCOMES: "course-overview-learning-outcomes",
 } as const;
 
+export const COURSE_TOC_HANDLES = {
+  chapter: (chapterId: string) => `course-toc-chapter-${chapterId}`,
+  lesson: (lessonId: string) => `course-toc-lesson-${lessonId}`,
+  lessonTypeIcon: (lessonId: string) => `course-toc-lesson-type-icon-${lessonId}`,
+  lessonTypeTooltip: (lessonId: string) => `course-toc-lesson-type-tooltip-${lessonId}`,
+  LESSON_TITLE: "lesson-title",
+} as const;
+
 const reactionHandleValue = (reaction: string) => reaction.codePointAt(0)?.toString(16) ?? reaction;
 
 export const COURSE_DISCUSSION_HANDLES = {
@@ -220,6 +231,7 @@ export const COURSE_DISCUSSION_HANDLES = {
   THREAD_INPUT: "course-discussion-thread-input",
   THREAD_SEND_BUTTON: "course-discussion-thread-send-button",
   THREAD_MENTION_LIST: "course-discussion-thread-mention-list",
+  MENTION_TOAST: "course-discussion-mention-toast",
   threadMentionOption: (userId: string) => `course-discussion-thread-mention-option-${userId}`,
   thread: (messageId: string) => `course-discussion-thread-${messageId}`,
   message: (messageId: string) => `course-discussion-message-${messageId}`,
@@ -259,6 +271,7 @@ export const COURSE_ENROLLED_HANDLES = {
   GROUP_UNENROLL_ACTION: "course-enrolled-group-unenroll-action",
   TABLE: "course-enrolled-table",
   row: (userId: string) => `course-enrolled-row-${userId}`,
+  ROW_PATTERN: /^course-enrolled-row-[0-9a-f-]{36}$/,
   rowCheckbox: (userId: string) => `course-enrolled-row-checkbox-${userId}`,
   statusBadge: (userId: string, status: CourseEnrollment) =>
     `course-enrolled-status-${userId}-${status}`,

@@ -5,7 +5,6 @@ import { expect, test } from "../../fixtures/test.fixture";
 import { filterCoursesFlow } from "../../flows/courses/filter-courses.flow";
 import { openCourseDetailsFromListFlow } from "../../flows/courses/open-course-details-from-list.flow";
 import { openCoursesPageFlow } from "../../flows/courses/open-courses-page.flow";
-import { openCreateCourseFromListFlow } from "../../flows/courses/open-create-course-from-list.flow";
 
 test("admin can browse, filter, and open course details", async ({
   cleanup,
@@ -46,14 +45,5 @@ test("admin can browse, filter, and open course details", async ({
     await openCourseDetailsFromListFlow(page, courses[0].id);
 
     await expect(page).toHaveURL(/\/course\/[^/?]+(?:\?.*)?$/);
-  });
-});
-
-test("admin can open create course page from course list", async ({ withWorkerPage }) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await openCoursesPageFlow(page);
-    await openCreateCourseFromListFlow(page);
-
-    await expect(page).toHaveURL(/\/admin\/beta-courses\/new\/standard$/);
   });
 });

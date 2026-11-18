@@ -2,7 +2,7 @@ import { USER_ROLE } from "~/config/userRoles";
 
 import { COURSE_OVERVIEW_HANDLES, COURSE_SETTINGS_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
+import { openCourseOverviewSettingsFlow } from "../../flows/courses/open-course-overview-settings.flow";
 
 test("admin can toggle course settings switches", async ({
   cleanup,
@@ -23,10 +23,8 @@ test("admin can toggle course settings switches", async ({
       await categoryFactory.delete(category.id);
     });
 
-    await openCourseOverviewFlow(page, course.id);
-    await page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON).click();
+    await openCourseOverviewSettingsFlow(page, course.id);
     const settingsDrawer = page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_DRAWER);
-    await settingsDrawer.waitFor();
 
     const lessonSequenceSwitch = settingsDrawer.getByTestId(
       COURSE_SETTINGS_HANDLES.LESSON_SEQUENCE_SWITCH,
@@ -63,5 +61,9 @@ test("admin can toggle course settings switches", async ({
         lessonSequenceEnabled: true,
         quizFeedbackEnabled: false,
       });
+
+    await openCourseOverviewSettingsFlow(page, course.id);
+    await expect(lessonSequenceSwitch).toBeChecked();
+    await expect(quizFeedbackSwitch).not.toBeChecked();
   });
 });

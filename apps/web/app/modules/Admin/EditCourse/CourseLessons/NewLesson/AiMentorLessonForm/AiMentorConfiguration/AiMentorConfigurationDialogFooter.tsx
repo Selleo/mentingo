@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
+import { AI_MENTOR_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
+
 type AiMentorConfigurationDialogFooterProps = {
   canEditStructure: boolean;
   canImprove: boolean;
@@ -79,12 +81,18 @@ export const AiMentorConfigurationDialogFooter = ({
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-      <Button type="button" variant="outline" disabled={isSaving} onClick={onCancel}>
+      <Button
+        type="button"
+        variant="outline"
+        data-testid={AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_CANCEL_BUTTON}
+        disabled={isSaving}
+        onClick={onCancel}
+      >
         {t("common.button.cancel")}
       </Button>
       <Button
         type="submit"
-        data-testid="curriculum-ai-mentor-configuration-apply-button"
+        data-testid={AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_APPLY_BUTTON}
         disabled={isSaving}
       >
         {t(submitLabelKey)}

@@ -1,6 +1,6 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { QUIZ_LESSON_FORM_HANDLES } from "../../data/curriculum/handles";
+import { CURRICULUM_HANDLES, QUIZ_LESSON_FORM_HANDLES } from "../../data/curriculum/handles";
 import { LEARNING_HANDLES } from "../../data/learning/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openCurriculumPageFlow } from "../../flows/curriculum/open-curriculum-page.flow";
@@ -13,7 +13,6 @@ import {
   getUserQuizAttemptCountFlow,
   waitForUserQuizAttemptCountFlow,
 } from "../../flows/learning/wait-for-quiz-attempt-count.flow";
-import { assertToastVisible } from "../../utils/assert-toast-visible";
 import { createSingleChoiceQuizLessonCourse } from "../learning/learning-test-helpers";
 
 test("admin can delete a quiz lesson after a student submitted answers", async ({
@@ -71,9 +70,9 @@ test("admin can delete a quiz lesson after a student submitted answers", async (
       await openExistingLessonFlow(page, quizChapter.id, quizLesson.id);
 
       await page.getByTestId(QUIZ_LESSON_FORM_HANDLES.DELETE_BUTTON).click();
-      await page.getByRole("button", { name: "Delete" }).click();
+      await page.getByTestId(QUIZ_LESSON_FORM_HANDLES.DELETE_CONFIRM_BUTTON).click();
 
-      await assertToastVisible(page, "Lesson deleted successfully");
+      await expect(page.getByTestId(CURRICULUM_HANDLES.lessonCard(quizLesson.id))).toBeHidden();
 
       await expect
         .poll(async () => {

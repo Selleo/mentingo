@@ -9,7 +9,7 @@ import { openExistingLessonFlow } from "../../flows/curriculum/open-existing-les
 import { openNewLessonFormFlow } from "../../flows/curriculum/open-new-lesson-form.flow";
 import { saveScormLessonFormFlow } from "../../flows/curriculum/save-scorm-lesson-form.flow";
 
-import { createCurriculumCourse } from "./curriculum-test-helpers";
+import { arrangeCurriculumCourse } from "./curriculum-test-helpers";
 
 test("admin can create, inspect, and delete a SCORM lesson", async ({
   cleanup,
@@ -17,21 +17,17 @@ test("admin can create, inspect, and delete a SCORM lesson", async ({
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { category, course, categoryFactory, courseFactory } = await createCurriculumCourse(
+    const { course, courseFactory } = await arrangeCurriculumCourse({
+      cleanup,
       factories,
-      `curriculum-scorm-${Date.now()}`,
-    );
+      title: `curriculum-scorm-${Date.now()}`,
+    });
     const curriculumFactory = factories.createCurriculumFactory();
     const chapter = await curriculumFactory.createChapter({
       courseId: course.id,
       title: `scorm-chapter-${Date.now()}`,
     });
     const lessonTitle = `scorm-lesson-${Date.now()}`;
-
-    cleanup.add(async () => {
-      await courseFactory.delete(course.id);
-      await categoryFactory.delete(category.id);
-    });
 
     await openCurriculumPageFlow(page, course.id);
     await openNewLessonFormFlow(page, chapter.id, "scorm");
@@ -44,21 +40,16 @@ test("admin can create, inspect, and delete a SCORM lesson", async ({
     await expect(page.getByTestId(SCORM_LESSON_FORM_HANDLES.PACKAGE_SELECTED_FILE)).toBeVisible();
     await saveScormLessonFormFlow(page);
 
-    const lessonId = await expect
+    await expect
       .poll(
-        async () => {
-          const updatedCourse = await courseFactory.getById(course.id);
-          return updatedCourse.chapters[0]?.lessons?.find((lesson) => lesson.title === lessonTitle)
-            ?.id;
+        async () => (await curriculumFactory.findCourseLessonByTitle(course.id, lessonTitle))?.id,
+        {
+          timeout: 30_000,
         },
-        { timeout: 30_000 },
       )
-      .not.toBeUndefined()
-      .then(async () => {
-        const updatedCourse = await courseFactory.getById(course.id);
-        return updatedCourse.chapters[0]!.lessons!.find((lesson) => lesson.title === lessonTitle)!
-          .id;
-      });
+      .toBeDefined();
+    const lessonId =
+      (await curriculumFactory.findCourseLessonByTitle(course.id, lessonTitle))?.id ?? "";
 
     await openExistingLessonFlow(page, chapter.id, lessonId);
     await expect(page.getByTestId(SCORM_LESSON_FORM_HANDLES.PACKAGE_READONLY)).toBeVisible();

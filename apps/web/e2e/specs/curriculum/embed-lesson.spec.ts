@@ -5,9 +5,11 @@ import { CURRICULUM_HANDLES, EMBED_LESSON_FORM_HANDLES } from "../../data/curric
 import { expect, test } from "../../fixtures/test.fixture";
 import { fillEmbedLessonFormFlow } from "../../flows/curriculum/fill-embed-lesson-form.flow";
 import { openCurriculumPageFlow } from "../../flows/curriculum/open-curriculum-page.flow";
+import { openExistingLessonFlow } from "../../flows/curriculum/open-existing-lesson.flow";
 import { openNewLessonFormFlow } from "../../flows/curriculum/open-new-lesson-form.flow";
+import { saveEmbedLessonFormFlow } from "../../flows/curriculum/save-embed-lesson-form.flow";
 
-import { createCurriculumCourse } from "./curriculum-test-helpers";
+import { arrangeCurriculumChapter } from "./curriculum-test-helpers";
 
 // Keep both embeds in one chapter: React reuses the same editor between selections.
 test("admin can switch between embed lessons and save only the selected lesson", async ({
@@ -16,16 +18,12 @@ test("admin can switch between embed lessons and save only the selected lesson",
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { category, course, categoryFactory, courseFactory } = await createCurriculumCourse(
+    const { course, chapter } = await arrangeCurriculumChapter({
+      cleanup,
       factories,
-      `curriculum-embed-switch-${Date.now()}`,
-    );
-    cleanup.add(async () => {
-      await courseFactory.delete(course.id);
-      await categoryFactory.delete(category.id);
+      title: `curriculum-embed-switch-${Date.now()}`,
     });
     const curriculum = factories.createCurriculumFactory();
-    const chapter = await curriculum.createChapter({ courseId: course.id });
     const firstResources = [{ fileUrl: "https://example.com/first", allowFullscreen: false }];
     const secondResources = [
       { fileUrl: "https://example.com/second", allowFullscreen: true },
@@ -55,10 +53,11 @@ test("admin can switch between embed lessons and save only the selected lesson",
       await expect(title).toHaveValue(lesson.title);
       const resources = lesson.id === first.id ? firstResources : secondResources;
       await expect(
-        page
-          .getByTestId(EMBED_LESSON_FORM_HANDLES.ROOT)
-          .locator('[data-testid^="curriculum-embed-resource-card-"]'),
-      ).toHaveCount(resources.length);
+        page.getByTestId(EMBED_LESSON_FORM_HANDLES.resourceCard(resources.length - 1)),
+      ).toBeVisible();
+      await expect(
+        page.getByTestId(EMBED_LESSON_FORM_HANDLES.resourceCard(resources.length)),
+      ).toHaveCount(0);
       for (const [index, resource] of resources.entries()) {
         await expect(
           page.getByTestId(EMBED_LESSON_FORM_HANDLES.resourceUrlInput(index)),
@@ -93,39 +92,40 @@ test("admin can switch between embed lessons and save only the selected lesson",
   });
 });
 
-test("admin can fill an embed lesson with YouTube and external resources", async ({
+test("admin can create an embed lesson with YouTube and external resources", async ({
   cleanup,
   factories,
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { category, course, categoryFactory, courseFactory } = await createCurriculumCourse(
+    const prefix = `curriculum-embed-${Date.now()}`;
+    const { course, chapter } = await arrangeCurriculumChapter({
+      cleanup,
       factories,
-      `curriculum-embed-${Date.now()}`,
-    );
+      title: prefix,
+    });
     const curriculumFactory = factories.createCurriculumFactory();
-    const chapter = await curriculumFactory.createChapter({
-      courseId: course.id,
-      title: `embed-chapter-${Date.now()}`,
-    });
-    const lessonTitle = `embed-lesson-${Date.now()}`;
-
-    cleanup.add(async () => {
-      await courseFactory.delete(course.id);
-      await categoryFactory.delete(category.id);
-    });
+    const lessonTitle = `${prefix}-lesson`;
+    const resourceUrls = [CURRICULUM_TEST_DATA.youtubeVideoUrl, "https://example.com"];
 
     await openCurriculumPageFlow(page, course.id);
     await openNewLessonFormFlow(page, chapter.id, "embed");
-    await fillEmbedLessonFormFlow(page, {
-      title: lessonTitle,
-      resources: [CURRICULUM_TEST_DATA.youtubeVideoUrl, "https://example.com"],
-    });
-    await expect(page.getByTestId(EMBED_LESSON_FORM_HANDLES.resourceUrlInput(0))).toHaveValue(
-      CURRICULUM_TEST_DATA.youtubeVideoUrl,
-    );
-    await expect(page.getByTestId(EMBED_LESSON_FORM_HANDLES.resourceUrlInput(1))).toHaveValue(
-      "https://example.com",
-    );
+    await fillEmbedLessonFormFlow(page, { title: lessonTitle, resources: resourceUrls });
+    await saveEmbedLessonFormFlow(page);
+
+    await expect
+      .poll(
+        async () => (await curriculumFactory.findCourseLessonByTitle(course.id, lessonTitle))?.type,
+      )
+      .toBe("embed");
+    const lesson = await curriculumFactory.findCourseLessonByTitle(course.id, lessonTitle);
+
+    await page.reload();
+    await openExistingLessonFlow(page, chapter.id, lesson?.id ?? "");
+    for (const [index, resourceUrl] of resourceUrls.entries()) {
+      await expect(page.getByTestId(EMBED_LESSON_FORM_HANDLES.resourceUrlInput(index))).toHaveValue(
+        resourceUrl,
+      );
+    }
   });
 });
