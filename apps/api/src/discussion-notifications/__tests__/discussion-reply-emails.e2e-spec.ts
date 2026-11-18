@@ -5,6 +5,7 @@ import request from "supertest";
 
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { DISCUSSION_REPLY_DIGEST_DELAY_MINUTES } from "src/discussion-notifications/discussion-notifications.constants";
+import { DiscussionNotificationsRepository } from "src/discussion-notifications/discussion-notifications.repository";
 import { DiscussionReplyDigestService } from "src/discussion-notifications/discussion-reply-digest.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { discussionReplyDigests, settings, studentCourses } from "src/storage/schema";
@@ -68,11 +69,13 @@ describe("Discussion reply emails (e2e)", () => {
     topicId: string,
     body: { content: string; mentionedUserIds?: string[] },
   ) => {
-    await request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .post(`/api/forum/topics/${topicId}/posts`)
       .set("Cookie", participant.cookie)
       .send(body)
       .expect(201);
+
+    return response.body.data as { id: string };
   };
 
   const postCourseMessage = async (
@@ -199,6 +202,71 @@ describe("Discussion reply emails (e2e)", () => {
     expect(emailsTo(topicAuthor)).toHaveLength(1);
     expect(textOf(emailsTo(topicAuthor)[0])).toContain("New replies: 1.");
     expect(textOf(emailsTo(topicAuthor)[0])).toContain("Latest reply: A later answer");
+  });
+
+  it("describes only the replies the email counts", async () => {
+    const [topicAuthor, firstReplier, secondReplier, mentioningReplier] = await createStudents(4);
+    const topic = await createTopic(topicAuthor, "Release notes");
+    await replyInTopic(firstReplier, topic.id, { content: "The counted answer" });
+    const deletedReply = await replyInTopic(secondReplier, topic.id, {
+      content: "A withdrawn answer",
+    });
+    await replyInTopic(mentioningReplier, topic.id, {
+      content: `@${fullNameOf(topicAuthor)} a mention`,
+      mentionedUserIds: [topicAuthor.user.id],
+    });
+    await dispatchOutbox(app);
+    await request(app.getHttpServer())
+      .delete(`/api/forum/posts/${deletedReply.id}`)
+      .set("Cookie", secondReplier.cookie)
+      .expect(200);
+
+    await sendEmailsDueAfterTheDelay();
+
+    const replyEmails = emailsTo(topicAuthor).filter(({ subject }) =>
+      subject.startsWith("New replies in"),
+    );
+    const [emailToAuthor] = replyEmails;
+    expect(replyEmails).toHaveLength(1);
+    expect(textOf(emailToAuthor)).toContain(`New replies: 1. From: ${fullNameOf(firstReplier)}.`);
+    expect(textOf(emailToAuthor)).toContain("Latest reply: The counted answer");
+  });
+
+  it("emails a participant who has no saved settings, in English", async () => {
+    const [topicAuthor, replier] = await createStudents(2);
+    const topic = await createTopic(topicAuthor, "Release notes");
+    await replyInTopic(replier, topic.id, { content: "First answer" });
+    await runAsTenant(defaultTenantId, () =>
+      db.delete(settings).where(eq(settings.userId, topicAuthor.user.id)),
+    );
+
+    await sendEmailsDueAfterTheDelay();
+
+    expect(emailsTo(topicAuthor)).toHaveLength(1);
+    expect(emailsTo(topicAuthor)[0].subject).toBe("New replies in Release notes");
+  });
+
+  it("sends the other emails when one fails, and retries the failed one later", async () => {
+    const [firstAuthor, secondAuthor, replier] = await createStudents(3);
+    const firstTopic = await createTopic(firstAuthor, "Release notes");
+    const secondTopic = await createTopic(secondAuthor, "Roadmap");
+    await replyInTopic(replier, firstTopic.id, { content: "First answer" });
+    await replyInTopic(replier, secondTopic.id, { content: "Second answer" });
+    const threadLookup = jest
+      .spyOn(app.get(DiscussionNotificationsRepository), "findDigestThread")
+      .mockRejectedValueOnce(new Error("Thread lookup failed"));
+
+    await sendEmailsDueAfterTheDelay();
+
+    expect(emailAdapter.getAllEmails()).toHaveLength(1);
+    expect(await countPendingEmails()).toBe(1);
+
+    await sendEmailsDueAfterTheDelay(addMinutes(new Date(), DISCUSSION_REPLY_DIGEST_DELAY_MINUTES));
+
+    expect(emailsTo(firstAuthor)).toHaveLength(1);
+    expect(emailsTo(secondAuthor)).toHaveLength(1);
+    expect(await countPendingEmails()).toBe(0);
+    threadLookup.mockRestore();
   });
 
   it("links a course thread and skips participants who left the course", async () => {

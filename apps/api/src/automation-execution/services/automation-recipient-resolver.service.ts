@@ -159,6 +159,7 @@ export class AutomationRecipientResolverService {
         AUTOMATION_EVENT_KINDS.LIVE_TRAINING_REMINDER,
         AUTOMATION_EVENT_KINDS.LIVE_TRAINING_ENDED,
         AUTOMATION_EVENT_KINDS.QUIZ_GRADING_DIGEST,
+        AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY,
       ] as string[]
     ).includes(event.kind);
   }

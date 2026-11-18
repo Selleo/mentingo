@@ -165,6 +165,7 @@ import type {
 import type { CourseDurationEstimatesByLanguage } from "src/courses/duration/course-duration.types";
 import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
 import type { CourseAuthorMetadata } from "src/courses/types/course.types";
+import type { DiscussionReplyDigestEntry } from "src/discussion-notifications/discussion-notifications.types";
 import type { HostedVideoStatus } from "src/file/hosted-video.types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 import type {
@@ -1443,7 +1444,7 @@ export const discussionReplyDigests = pgTable(
       .references(() => courseChatThreads.id, { onDelete: "cascade" })
       .notNull(),
     sendAfter: timestampWithTimezone({ name: "send_after" }).notNull(),
-    announcementIds: uuid("announcement_ids").array().notNull(),
+    replies: jsonb("replies").$type<DiscussionReplyDigestEntry[]>().notNull(),
     tenantId,
   },
   withTenantIdIndex("discussion_reply_digests", (table) => ({

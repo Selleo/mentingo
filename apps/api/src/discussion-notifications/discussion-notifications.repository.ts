@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, asc, desc, eq, inArray, isNotNull, isNull, lt, lte, ne, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, lte, ne, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import {
@@ -13,9 +13,10 @@ import {
 
 import type { UUIDType } from "src/common";
 import type {
-  DiscussionDigestRecipient,
+  DiscussionDigestReply,
   DiscussionDigestThread,
   DiscussionReplyDigest,
+  DiscussionReplyDigestEntry,
 } from "src/discussion-notifications/discussion-notifications.types";
 
 @Injectable()
@@ -35,7 +36,8 @@ export class DiscussionNotificationsRepository {
         and(
           eq(courseChatMessages.threadId, threadId),
           isNull(courseChatMessages.deletedAt),
-          lt(courseChatMessages.createdAt, sql`(${replyCreatedAt})`),
+          ne(courseChatMessages.id, replyId),
+          lte(courseChatMessages.createdAt, sql`(${replyCreatedAt})`),
         ),
       );
 
@@ -45,52 +47,65 @@ export class DiscussionNotificationsRepository {
   async queueReplyDigests(params: {
     userIds: UUIDType[];
     threadId: UUIDType;
-    announcementId: UUIDType;
+    reply: DiscussionReplyDigestEntry;
     sendAfter: string;
   }) {
-    const { userIds, threadId, announcementId, sendAfter } = params;
+    const { userIds, threadId, reply, sendAfter } = params;
+    const replies = sql<DiscussionReplyDigestEntry[]>`${JSON.stringify([reply])}::text::jsonb`;
 
     await this.db
       .insert(discussionReplyDigests)
-      .values(
-        userIds.map((userId) => ({
-          userId,
-          threadId,
-          sendAfter,
-          announcementIds: [announcementId],
-        })),
-      )
+      .values(userIds.map((userId) => ({ userId, threadId, sendAfter, replies })))
       .onConflictDoUpdate({
         target: [discussionReplyDigests.userId, discussionReplyDigests.threadId],
-        set: {
-          announcementIds: sql`${discussionReplyDigests.announcementIds} || excluded.announcement_ids`,
-        },
+        set: { replies: sql`${discussionReplyDigests.replies} || excluded.replies` },
       });
   }
 
-  async claimDueDigests(
+  async findDueDigestIds(now: Date, limit: number): Promise<UUIDType[]> {
+    const dueDigests = await this.db
+      .select({ id: discussionReplyDigests.id })
+      .from(discussionReplyDigests)
+      .where(lte(discussionReplyDigests.sendAfter, now.toISOString()))
+      .orderBy(asc(discussionReplyDigests.sendAfter))
+      .limit(limit);
+
+    return dueDigests.map(({ id }) => id);
+  }
+
+  async claimDueDigest(
+    digestId: UUIDType,
     now: Date,
-    limit: number,
     transaction: DatabasePg,
-  ): Promise<DiscussionReplyDigest[]> {
-    return transaction
+  ): Promise<DiscussionReplyDigest | null> {
+    const [digest] = await transaction
       .select({
         id: discussionReplyDigests.id,
         userId: discussionReplyDigests.userId,
         threadId: discussionReplyDigests.threadId,
-        announcementIds: discussionReplyDigests.announcementIds,
+        replies: discussionReplyDigests.replies,
       })
       .from(discussionReplyDigests)
-      .where(lte(discussionReplyDigests.sendAfter, now.toISOString()))
-      .orderBy(asc(discussionReplyDigests.sendAfter))
-      .limit(limit)
+      .where(
+        and(
+          eq(discussionReplyDigests.id, digestId),
+          lte(discussionReplyDigests.sendAfter, now.toISOString()),
+        ),
+      )
       .for("update", { skipLocked: true });
+
+    return digest ?? null;
   }
 
-  async deleteDigests(digestIds: UUIDType[], transaction: DatabasePg) {
-    await transaction
-      .delete(discussionReplyDigests)
-      .where(inArray(discussionReplyDigests.id, digestIds));
+  async deleteDigest(digestId: UUIDType, transaction: DatabasePg) {
+    await transaction.delete(discussionReplyDigests).where(eq(discussionReplyDigests.id, digestId));
+  }
+
+  async postponeDigest(digestId: UUIDType, sendAfter: Date) {
+    await this.db
+      .update(discussionReplyDigests)
+      .set({ sendAfter: sendAfter.toISOString() })
+      .where(eq(discussionReplyDigests.id, digestId));
   }
 
   async findDigestThread(threadId: UUIDType): Promise<DiscussionDigestThread | null> {
@@ -115,32 +130,16 @@ export class DiscussionNotificationsRepository {
     return thread ?? null;
   }
 
-  async findDigestRecipient(userId: UUIDType): Promise<DiscussionDigestRecipient | null> {
-    const [recipient] = await this.db
-      .select({
-        id: users.id,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-      })
-      .from(users)
-      .where(and(eq(users.id, userId), isNull(users.deletedAt), eq(users.archived, false)))
-      .limit(1);
-
-    return recipient ?? null;
-  }
-
-  async findUnreadReplyAuthorNames(
+  async findUnreadAnnouncementIds(
     userId: UUIDType,
     announcementIds: UUIDType[],
-  ): Promise<string[]> {
+  ): Promise<UUIDType[]> {
     if (!announcementIds.length) return [];
 
-    const unreadReplies = await this.db
-      .select({ firstName: users.firstName, lastName: users.lastName })
+    const unreadAnnouncements = await this.db
+      .select({ announcementId: userAnnouncements.announcementId })
       .from(userAnnouncements)
       .innerJoin(announcements, eq(announcements.id, userAnnouncements.announcementId))
-      .innerJoin(users, eq(users.id, announcements.authorId))
       .where(
         and(
           eq(userAnnouncements.userId, userId),
@@ -148,27 +147,22 @@ export class DiscussionNotificationsRepository {
           inArray(userAnnouncements.announcementId, announcementIds),
           isNull(announcements.deletedAt),
         ),
-      )
-      .orderBy(asc(announcements.createdAt));
+      );
 
-    return unreadReplies.map(({ firstName, lastName }) => `${firstName} ${lastName}`);
+    return unreadAnnouncements.map(({ announcementId }) => announcementId);
   }
 
-  async findLatestReplyContent(threadId: UUIDType, recipientId: UUIDType): Promise<string | null> {
-    const [latestReply] = await this.db
-      .select({ content: courseChatMessages.content })
-      .from(courseChatMessages)
-      .where(
-        and(
-          eq(courseChatMessages.threadId, threadId),
-          isNotNull(courseChatMessages.parentMessageId),
-          isNull(courseChatMessages.deletedAt),
-          ne(courseChatMessages.userId, recipientId),
-        ),
-      )
-      .orderBy(desc(courseChatMessages.createdAt))
-      .limit(1);
+  async findVisibleReplies(replyIds: UUIDType[]): Promise<DiscussionDigestReply[]> {
+    if (!replyIds.length) return [];
 
-    return latestReply?.content ?? null;
+    return this.db
+      .select({
+        authorFullName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+        content: courseChatMessages.content,
+      })
+      .from(courseChatMessages)
+      .innerJoin(users, eq(users.id, courseChatMessages.userId))
+      .where(and(inArray(courseChatMessages.id, replyIds), isNull(courseChatMessages.deletedAt)))
+      .orderBy(asc(courseChatMessages.createdAt), asc(courseChatMessages.id));
   }
 }

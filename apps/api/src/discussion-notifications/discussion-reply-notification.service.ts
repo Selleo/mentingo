@@ -65,7 +65,7 @@ export class DiscussionReplyNotificationService {
     await this.discussionNotificationsRepository.queueReplyDigests({
       userIds: recipientIds,
       threadId: reply.threadId,
-      announcementId: announcement.id,
+      reply: { replyId: reply.replyId, announcementId: announcement.id },
       sendAfter: addMinutes(new Date(), DISCUSSION_REPLY_DIGEST_DELAY_MINUTES).toISOString(),
     });
     await this.outboxPublisher.publish(

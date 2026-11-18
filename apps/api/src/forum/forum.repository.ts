@@ -11,16 +11,19 @@ import {
   courseChatMessages,
   courseChatThreads,
   courses,
+  settings,
   studentCourses,
   users,
 } from "src/storage/schema";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { CourseChatUserProfileRow } from "src/course-chat/course-chat.repository.types";
+import type {
+  CourseChatUserProfileRow,
+  DiscussionEmailRecipient,
+} from "src/course-chat/course-chat.repository.types";
 import type {
   ForumCourseDiscussionRow,
-  ForumMentionEmailRecipient,
   ForumPostContext,
   ForumPostRow,
   ForumThreadContext,
@@ -223,7 +226,7 @@ export class ForumRepository {
       .orderBy(users.firstName, users.lastName);
   }
 
-  async findMentionEmailRecipients(userIds: UUIDType[]): Promise<ForumMentionEmailRecipient[]> {
+  async findEmailRecipients(userIds: UUIDType[]): Promise<DiscussionEmailRecipient[]> {
     if (!userIds.length) return [];
 
     return this.db
@@ -232,8 +235,10 @@ export class ForumRepository {
         email: users.email,
         firstName: users.firstName,
         lastName: users.lastName,
+        language: sql<string | null>`${settings.settings}->>'language'`,
       })
       .from(users)
+      .leftJoin(settings, eq(settings.userId, users.id))
       .where(this.forumReaderCondition(userIds));
   }
 

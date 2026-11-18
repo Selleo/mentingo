@@ -48,6 +48,14 @@ export type CourseChatMentionEmailRecipient = {
   tenantId: UUIDType;
 };
 
+export type DiscussionEmailRecipient = {
+  id: UUIDType;
+  email: string;
+  firstName: string;
+  lastName: string;
+  language: string | null;
+};
+
 export type CourseChatEmailContext = {
   title: string;
 };

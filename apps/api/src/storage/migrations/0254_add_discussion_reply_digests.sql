@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS "discussion_reply_digests" (
 	"user_id" uuid NOT NULL,
 	"thread_id" uuid NOT NULL,
 	"send_after" timestamp(3) with time zone NOT NULL,
-	"announcement_ids" uuid[] NOT NULL,
+	"replies" jsonb NOT NULL,
 	"tenant_id" uuid DEFAULT current_setting('app.tenant_id', true)::uuid NOT NULL
 );
 --> statement-breakpoint

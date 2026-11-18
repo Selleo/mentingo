@@ -1,5 +1,5 @@
 {
-  "id": "faf3c9f6-fca3-44c3-8b65-fc1fe9cf9ac2",
+  "id": "6a387db3-2fa7-40a8-bee9-8bd97da0f77f",
   "prevId": "9f28a545-f662-42a0-b312-370c4cb11d13",
   "version": "7",
   "dialect": "postgresql",
@@ -9538,9 +9538,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "announcement_ids": {
-          "name": "announcement_ids",
-          "type": "uuid[]",
+        "replies": {
+          "name": "replies",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },

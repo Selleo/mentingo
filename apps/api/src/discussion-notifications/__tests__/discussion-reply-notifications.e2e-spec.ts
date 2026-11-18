@@ -5,7 +5,7 @@ import {
   NOTIFICATION_SOCKET_EVENTS,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
-import { and, count, eq, isNull, sql } from "drizzle-orm";
+import { and, count, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { ForumReplyCreatedEvent } from "src/events/forum/forum-reply-created.event";
@@ -426,7 +426,6 @@ describe("Discussion reply notifications (e2e)", () => {
           userId: replier.user.id,
           content: "A reply",
           parentMessageId: topic.firstPost.id,
-          createdAt: sql`CURRENT_TIMESTAMP + interval '1 second'`,
         })
         .returning({ id: courseChatMessages.id });
 

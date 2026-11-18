@@ -14,11 +14,13 @@ export type DiscussionReply = {
 
 export type DiscussionRecipientFilter = (userIds: UUIDType[]) => Promise<UUIDType[]>;
 
+export type DiscussionReplyDigestEntry = { replyId: UUIDType; announcementId: UUIDType };
+
 export type DiscussionReplyDigest = {
   id: UUIDType;
   userId: UUIDType;
   threadId: UUIDType;
-  announcementIds: UUIDType[];
+  replies: DiscussionReplyDigestEntry[];
 };
 
 export type DiscussionDigestThread = {
@@ -28,9 +30,4 @@ export type DiscussionDigestThread = {
   firstMessageId: UUIDType;
 };
 
-export type DiscussionDigestRecipient = {
-  id: UUIDType;
-  email: string;
-  firstName: string;
-  lastName: string;
-};
+export type DiscussionDigestReply = { authorFullName: string; content: string };

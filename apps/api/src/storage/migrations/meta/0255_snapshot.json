@@ -1,6 +1,6 @@
 {
-  "id": "9f731415-a130-4305-ae13-7bd7ab7fd024",
-  "prevId": "faf3c9f6-fca3-44c3-8b65-fc1fe9cf9ac2",
+  "id": "be8a8389-0236-4bdc-9605-4a3441f8bb38",
+  "prevId": "6a387db3-2fa7-40a8-bee9-8bd97da0f77f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -9538,9 +9538,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "announcement_ids": {
-          "name": "announcement_ids",
-          "type": "uuid[]",
+        "replies": {
+          "name": "replies",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },

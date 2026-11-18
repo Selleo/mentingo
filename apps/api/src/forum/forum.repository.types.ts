@@ -52,10 +52,3 @@ export type ForumCourseDiscussionRow = {
   messageCount: number;
   lastActivityAt: string | null;
 };
-
-export type ForumMentionEmailRecipient = {
-  id: UUIDType;
-  email: string;
-  firstName: string;
-  lastName: string;
-};

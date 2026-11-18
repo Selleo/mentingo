@@ -106,7 +106,6 @@ describe("Discussion reply notifications tenant isolation (e2e)", () => {
           userId: replierId,
           content: "A reply",
           parentMessageId: firstPost.id,
-          createdAt: sql`CURRENT_TIMESTAMP + interval '1 second'`,
         })
         .returning({ id: courseChatMessages.id });
 
