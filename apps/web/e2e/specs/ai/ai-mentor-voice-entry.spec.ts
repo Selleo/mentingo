@@ -25,7 +25,6 @@ for (const { voiceMentorEnabled, actionMode, label } of VOICE_VARIANTS) {
       cleanup,
       factories,
       prefix: `learning-ai-mentor-voice-${label}-${Date.now()}`,
-      root: false,
       withWorkerPage,
     });
     const { aiMentorLesson } = lessons;

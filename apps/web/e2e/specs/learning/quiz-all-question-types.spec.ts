@@ -5,6 +5,7 @@ import { expect, test } from "../../fixtures/test.fixture";
 import { answerAllRenderedQuizQuestionTypesFlow } from "../../flows/learning/answer-all-rendered-quiz-question-types.flow";
 import { assertQuizLessonProgressFlow } from "../../flows/learning/assert-learning-progress.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
+import { retakeQuizFlow } from "../../flows/learning/retake-quiz.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
 import { submitQuizFlow } from "../../flows/learning/submit-quiz.flow";
 import {
@@ -27,7 +28,6 @@ test("student can submit a quiz containing every rendered question type", async 
     cleanup,
     factories,
     prefix: `learning-all-quiz-types-${Date.now()}`,
-    root: false,
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
@@ -70,5 +70,21 @@ test("student can submit a quiz containing every rendered question type", async 
     });
 
     await waitForUserQuizAttemptCountFlow(apiClient, expectedQuizAttemptCount);
+
+    // A retake clears the submitted answers, including true/false choices.
+    const trueOrFalseInputs = answers.trueOrFalseAnswers.map(({ optionId, value }) =>
+      page.getByTestId(LEARNING_HANDLES.trueOrFalseOption(optionId, value)),
+    );
+    for (const input of trueOrFalseInputs) await expect(input).toBeChecked();
+
+    await retakeQuizFlow(page);
+
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeEnabled();
+    for (const input of trueOrFalseInputs) {
+      await expect(input).toBeEnabled();
+      await expect(input).not.toBeChecked();
+    }
+    await expect(page.getByTestId(LEARNING_HANDLES.textBlank(1))).toBeEditable();
+    await expect(page.getByTestId(LEARNING_HANDLES.textBlank(1))).toHaveValue("");
   });
 });

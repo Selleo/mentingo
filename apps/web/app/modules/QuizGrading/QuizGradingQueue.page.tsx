@@ -161,7 +161,7 @@ export default function QuizGradingQueuePage() {
             </TableHeader>
             <TableBody aria-busy={isPending}>
               {!isPending && !isError && !answers.length && (
-                <TableRow>
+                <TableRow data-testid={QUIZ_GRADING_HANDLES.EMPTY_STATE}>
                   <TableCell
                     colSpan={COLUMN_COUNT}
                     className="py-12 text-center text-muted-foreground"

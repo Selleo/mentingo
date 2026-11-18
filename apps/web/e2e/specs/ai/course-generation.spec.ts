@@ -32,12 +32,13 @@ test("admin can open the course authoring workspace for a course with chapters w
     });
 
     await mockLumaConfigFlow(page, { courseGenerationEnabled: true });
-    await mockCourseAuthoringWorkspaceFlow(page, course.id);
+    const { unexpectedRequests } = await mockCourseAuthoringWorkspaceFlow(page, course.id);
     await openCurriculumPageFlow(page, course.id);
 
     await expect(page.getByTestId(CURRICULUM_HANDLES.COURSE_GENERATION_BUTTON)).toBeVisible();
     await openCourseAuthoringFlow(page);
     await expect(page.getByTestId(COURSE_AUTHORING_HANDLES.ROOT)).toBeVisible();
+    expect(unexpectedRequests).toEqual([]);
   });
 });
 
@@ -57,7 +58,11 @@ test("course generation button is hidden when Luma course generation is unavaila
     });
 
     await mockLumaConfigFlow(page, { courseGenerationEnabled: false });
+    const lumaConfigResponse = page.waitForResponse((response) =>
+      response.url().endsWith("/api/env/luma"),
+    );
     await openCurriculumPageFlow(page, course.id);
+    await lumaConfigResponse;
 
     await expect(page.getByTestId(CURRICULUM_HANDLES.COURSE_GENERATION_BUTTON)).toHaveCount(0);
   });

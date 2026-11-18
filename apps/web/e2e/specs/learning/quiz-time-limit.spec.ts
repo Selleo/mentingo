@@ -32,7 +32,6 @@ test("author sets and clears a quiz time limit; the student resumes the timed at
     cleanup,
     factories,
     prefix: `learning-quiz-time-limit-${Date.now()}`,
-    root: false,
     settings: { lessonSequenceEnabled: false },
     // the helper registers cleanup; as in quiz-retake.spec, a course with learner attempts is
     // only unpublished, not deleted
@@ -103,8 +102,8 @@ test("author sets and clears a quiz time limit; the student resumes the timed at
 
     await page.reload();
 
-    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_START_BUTTON)).toHaveCount(0);
     await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_TIMER)).toHaveText(RUNNING_TIMER_TEXT);
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_START_BUTTON)).toHaveCount(0);
     await expect(page.getByTestId(LEARNING_HANDLES.quizOption(correctOptionId))).toBeChecked();
 
     await submitQuizFlow(page);

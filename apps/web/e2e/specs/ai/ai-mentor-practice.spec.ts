@@ -79,5 +79,7 @@ test("student can review practice feedback and start the practice again", async 
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.REPLAY_LOADER)).toBeHidden();
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.CONVERSATION)).toBeVisible();
     await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT)).toBeVisible();
+    // The replayed practice starts without the previous feedback.
+    await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.VIEW_FEEDBACK_BUTTON)).toBeHidden();
   });
 });

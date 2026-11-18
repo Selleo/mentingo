@@ -30,7 +30,6 @@ test("student can launch, resume, fullscreen, and finish a SCORM lesson", async 
     cleanup,
     factories,
     prefix: `learning-scorm-single-${Date.now()}`,
-    root: false,
     withWorkerPage,
   });
 
@@ -72,10 +71,11 @@ test("student can launch, resume, fullscreen, and finish a SCORM lesson", async 
     expect(isolation.popupBlocked).toBe(true);
     await expect(scormFrame.getByTestId(SCORM_PACKAGE_HANDLES.ENTRY)).toHaveText("ab-initio");
 
-    await Promise.all([
+    const [commitResponse] = await Promise.all([
       page.waitForResponse((response) => response.url().includes("/api/scorm/runtime/commit")),
       clickScormIframeButtonFlow(page, SCORM_PACKAGE_HANDLES.COMMIT_PROGRESS_BUTTON),
     ]);
+    expect(commitResponse.ok()).toBe(true);
 
     await page.reload();
     await expect(scormFrame.getByTestId(SCORM_PACKAGE_HANDLES.ENTRY)).toHaveText("resume");
@@ -91,10 +91,11 @@ test("student can launch, resume, fullscreen, and finish a SCORM lesson", async 
       "false",
     );
 
-    await Promise.all([
+    const [finishResponse] = await Promise.all([
       page.waitForResponse((response) => response.url().includes("/api/scorm/runtime/finish")),
       clickScormIframeButtonFlow(page, SCORM_PACKAGE_HANDLES.FINISH_LESSON_BUTTON),
     ]);
+    expect(finishResponse.ok()).toBe(true);
     await expect(page.getByTestId(TOAST_HANDLES.DESCRIPTION)).toBeVisible();
 
     await assertCourseLessonProgressFlow(apiClient, courseId, {
@@ -116,7 +117,6 @@ test("student can navigate and complete a multi-SCO SCORM lesson", async ({
     cleanup,
     factories,
     prefix: `learning-scorm-multi-${Date.now()}`,
-    root: false,
     withWorkerPage,
   });
   const { lessonId } = lessons;
@@ -138,10 +138,11 @@ test("student can navigate and complete a multi-SCO SCORM lesson", async ({
     await expect(page.getByTestId(LEARNING_HANDLES.SCORM_NEXT_SECTION_BUTTON)).toBeEnabled();
     await expect(scormFrame.getByTestId(SCORM_PACKAGE_HANDLES.SECTION_ONE_TITLE)).toBeVisible();
 
-    await Promise.all([
+    const [sectionOneFinishResponse] = await Promise.all([
       page.waitForResponse((response) => response.url().includes("/api/scorm/runtime/finish")),
       clickScormIframeButtonFlow(page, SCORM_PACKAGE_HANDLES.FINISH_SECTION_ONE_BUTTON),
     ]);
+    expect(sectionOneFinishResponse.ok()).toBe(true);
 
     await page.getByTestId(LEARNING_HANDLES.SCORM_NEXT_SECTION_BUTTON).click();
     await expect(scormFrame.getByTestId(SCORM_PACKAGE_HANDLES.SECTION_TWO_TITLE)).toBeVisible();
@@ -149,10 +150,11 @@ test("student can navigate and complete a multi-SCO SCORM lesson", async ({
       "?fromManifest=true",
     );
 
-    await Promise.all([
+    const [sectionTwoFinishResponse] = await Promise.all([
       page.waitForResponse((response) => response.url().includes("/api/scorm/runtime/finish")),
       clickScormIframeButtonFlow(page, SCORM_PACKAGE_HANDLES.FINISH_SECTION_TWO_BUTTON),
     ]);
+    expect(sectionTwoFinishResponse.ok()).toBe(true);
 
     await assertCourseLessonProgressFlow(apiClient, courseId, {
       completedLessonCount: 1,

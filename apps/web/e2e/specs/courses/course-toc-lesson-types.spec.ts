@@ -15,6 +15,7 @@ test("course table of contents shows lesson types on icon hover, not below title
     cleanup,
     factories,
     prefix,
+    root: true,
     withWorkerPage,
     buildLessons: async ({ courseId, chapterId, curriculumFactory, prefix }) => [
       await curriculumFactory.createContentLesson(courseId, {

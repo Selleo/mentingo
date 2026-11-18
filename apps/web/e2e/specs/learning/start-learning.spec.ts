@@ -21,7 +21,6 @@ test("student can start learning and continue to the next content lesson", async
     cleanup,
     factories,
     prefix: `learning-${Date.now()}`,
-    root: false,
     withWorkerPage,
   });
   const { firstLesson, secondLesson } = lessons;

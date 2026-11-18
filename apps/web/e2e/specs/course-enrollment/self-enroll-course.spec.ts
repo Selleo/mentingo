@@ -17,6 +17,7 @@ test("student can self-enroll in a free published course", async ({
     cleanup,
     factories,
     prefix: `self-enroll-${Date.now()}`,
+    root: true,
     withWorkerPage,
   });
 

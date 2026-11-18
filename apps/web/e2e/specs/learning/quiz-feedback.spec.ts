@@ -1,5 +1,6 @@
 import { USER_ROLE } from "~/config/userRoles";
 
+import { COURSE_TOC_HANDLES } from "../../data/courses/handles";
 import { LEARNING_HANDLES } from "../../data/learning/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { assertQuizLessonProgressFlow } from "../../flows/learning/assert-learning-progress.flow";
@@ -22,7 +23,6 @@ test("student sees the correct answer for an incorrect text gap fill when quiz f
     cleanup,
     factories,
     prefix: `learning-quiz-feedback-gap-${Date.now()}`,
-    root: false,
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
@@ -62,7 +62,6 @@ test("student does not see text gap fill feedback after retaking a quiz when fee
     cleanup,
     factories,
     prefix: `learning-quiz-feedback-disabled-${Date.now()}`,
-    root: false,
     settings: { quizFeedbackEnabled: false },
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
@@ -85,6 +84,8 @@ test("student does not see text gap fill feedback after retaking a quiz when fee
     quizWasSubmitted = true;
 
     await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeDisabled();
+    // The retake button unlocks only once the submitted result has rendered.
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
     await expect(
       page.getByTestId(LEARNING_HANDLES.FILL_IN_THE_BLANKS_CORRECT_SENTENCE),
     ).toBeHidden();
@@ -98,6 +99,8 @@ test("student does not see text gap fill feedback after retaking a quiz when fee
     await submitQuizFlow(page);
 
     await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeDisabled();
+    // The retake button unlocks only once the submitted result has rendered.
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
     await expect(
       page.getByTestId(LEARNING_HANDLES.FILL_IN_THE_BLANKS_CORRECT_SENTENCE),
     ).toBeHidden();
@@ -118,11 +121,10 @@ test("admin does not see text gap fill feedback in learning mode when feedback i
 }) => {
   let quizWasSubmitted = false;
 
-  const { courseId, lessons } = await createTextGapFillQuizCourse({
+  const { chapterId, courseId, lessons } = await createTextGapFillQuizCourse({
     cleanup,
     factories,
     prefix: `learning-quiz-feedback-admin-disabled-${Date.now()}`,
-    root: false,
     settings: { quizFeedbackEnabled: false },
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
@@ -135,7 +137,9 @@ test("admin does not see text gap fill feedback in learning mode when feedback i
     await courseFactory.setStudentMode(courseId, true);
 
     await openCourseOverviewFlow(page, courseId);
-    await startLearningFlow(page);
+    // In student mode staff get the exit-mode button instead of "continue", so open the lesson from the TOC.
+    await page.getByTestId(COURSE_TOC_HANDLES.chapter(chapterId)).click();
+    await page.getByTestId(COURSE_TOC_HANDLES.lesson(quizLesson.id)).click();
 
     await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${quizLesson.id}$`));
     await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_FORM)).toBeVisible();
@@ -145,6 +149,8 @@ test("admin does not see text gap fill feedback in learning mode when feedback i
     quizWasSubmitted = true;
 
     await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeDisabled();
+    // The retake button unlocks only once the submitted result has rendered.
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
     await expect(
       page.getByTestId(LEARNING_HANDLES.FILL_IN_THE_BLANKS_CORRECT_SENTENCE),
     ).toBeHidden();

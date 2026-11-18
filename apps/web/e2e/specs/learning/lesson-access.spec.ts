@@ -23,7 +23,6 @@ test("student can open lessons out of order from the sidebar when sequence is di
     cleanup,
     factories,
     prefix: `learning-sidebar-access-${Date.now()}`,
-    root: false,
     withWorkerPage,
   });
   const { firstLesson, thirdLesson } = lessons;
@@ -36,6 +35,9 @@ test("student can open lessons out of order from the sidebar when sequence is di
 
     await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${firstLesson.id}$`));
     await expect(page.getByTestId(LEARNING_HANDLES.LESSON_SIDEBAR)).toBeVisible();
+    await expect(
+      page.getByTestId(LEARNING_HANDLES.lessonSidebarLessonItem(thirdLesson.id)),
+    ).toBeVisible();
     await expect(
       page.getByTestId(LEARNING_HANDLES.lessonSidebarBlockedIndicator(thirdLesson.id)),
     ).toHaveCount(0);
@@ -64,7 +66,6 @@ test("student can open an embed lesson and complete it", async ({
     cleanup,
     factories,
     prefix: `learning-embed-${Date.now()}`,
-    root: false,
     withWorkerPage,
   });
   const { embedLesson } = lessons;

@@ -20,9 +20,15 @@ test("admin browses paginated saved history and evaluation without conversation 
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { mutations } = await mockAiConversationsFlow(page);
+    const { listRequests, mutations } = await mockAiConversationsFlow(page);
     await page.goto("/admin/ai-conversations?status=archived&search=Historical&page=2");
     await expect(page.getByTestId(HANDLES.row(AI_CONVERSATION_THREAD_ID))).toBeVisible();
+    // The URL filters reach the history API, not only the address bar.
+    expect(Object.fromEntries(listRequests[0] ?? [])).toMatchObject({
+      status: "archived",
+      search: "Historical",
+      page: "2",
+    });
     // The history list shows no learner avatars.
     await expect(page.getByTestId(HANDLES.LIST).getByRole("img")).toHaveCount(0);
     await page.getByTestId(HANDLES.row(AI_CONVERSATION_THREAD_ID)).click();
@@ -56,8 +62,8 @@ test("admin browses paginated saved history and evaluation without conversation 
     await expect(page).toHaveURL(/ai-conversations\?status=archived&search=Historical&page=2$/);
     await expect(page.getByTestId(HANDLES.LIST)).toBeVisible();
     await page.getByTestId(HANDLES.SEARCH).fill("Another title");
+    await expect.poll(() => listRequests.at(-1)?.get("search")).toBe("Another title");
     await expect(page).not.toHaveURL(/page=2/);
-    await expect(page).not.toHaveURL(new RegExp(AI_CONVERSATION_THREAD_ID));
     expect(mutations).toEqual([]);
   });
 });

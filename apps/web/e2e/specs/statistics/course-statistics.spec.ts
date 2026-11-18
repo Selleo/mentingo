@@ -2,13 +2,17 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../data/courses/handles";
 import { COURSE_STATISTICS_HANDLES } from "../../data/statistics/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { selectQuizOptionFlow } from "../../flows/learning/select-quiz-option.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
 import { submitQuizFlow } from "../../flows/learning/submit-quiz.flow";
-import { waitForUserQuizAttemptCountFlow } from "../../flows/learning/wait-for-quiz-attempt-count.flow";
+import {
+  getUserQuizAttemptCountFlow,
+  waitForUserQuizAttemptCountFlow,
+} from "../../flows/learning/wait-for-quiz-attempt-count.flow";
 import { openCourseStatisticsTabFlow } from "../../flows/statistics/open-course-statistics-tab.flow";
 import { openCourseStatisticsFlow } from "../../flows/statistics/open-course-statistics.flow";
 import { searchCourseStatisticsFlow } from "../../flows/statistics/search-course-statistics.flow";
@@ -29,7 +33,6 @@ test("admin can view localized course statistics overview, progress, quiz result
     cleanup,
     factories,
     prefix: `statistics-course-${Date.now()}`,
-    root: false,
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
@@ -45,16 +48,18 @@ test("admin can view localized course statistics overview, progress, quiz result
     studentName = `${currentUser.firstName} ${currentUser.lastName}`;
 
     await openCourseOverviewFlow(page, courseId);
+    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toBeVisible();
     // Course statistics are for staff only: learners do not get the tab.
     await expect(
       page.getByTestId(COURSE_STATISTICS_HANDLES.COURSE_VIEW_STATISTICS_TAB),
     ).toHaveCount(0);
+    const expectedQuizAttemptCount = (await getUserQuizAttemptCountFlow(apiClient)) + 1;
     await startLearningFlow(page);
     await selectQuizOptionFlow(page, correctOptionId);
     await submitQuizFlow(page);
     quizWasSubmitted = true;
 
-    await waitForUserQuizAttemptCountFlow(apiClient, 1);
+    await waitForUserQuizAttemptCountFlow(apiClient, expectedQuizAttemptCount);
   });
 
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {

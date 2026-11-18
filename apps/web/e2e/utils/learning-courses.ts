@@ -32,8 +32,6 @@ type CreatePublishedLearningCourseInput<TLessons> = {
   cleanup: Cleanup;
   factories: FixtureFactories;
   prefix: string;
-  // shortcut: defaults to the shared root tenant for specs outside learning/ai/live-training/statistics
-  // that still run there (courses, curriculum, course-enrollment); flip the default once they drop it
   root?: boolean;
   settings?: UpdateCourseSettingsBody;
   shouldKeepCourseAfterTest?: () => boolean;
@@ -58,7 +56,7 @@ export const createPublishedLearningCourse = async <TLessons>({
   cleanup,
   factories,
   prefix,
-  root = true,
+  root = false,
   settings,
   shouldKeepCourseAfterTest,
   withWorkerPage,
@@ -529,7 +527,7 @@ export const createScormPackageCourse = async ({
   cleanup,
   factories,
   prefix,
-  root = true,
+  root = false,
   withWorkerPage,
 }: Pick<
   CreatePublishedLearningCourseInput<unknown>,

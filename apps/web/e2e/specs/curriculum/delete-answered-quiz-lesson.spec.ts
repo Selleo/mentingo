@@ -28,6 +28,7 @@ test("admin can delete a quiz lesson after a student submitted answers", async (
     cleanup,
     factories,
     prefix: `curriculum-delete-answered-quiz-${Date.now()}`,
+    root: true,
     settings: { lessonSequenceEnabled: false },
     withWorkerPage,
   });

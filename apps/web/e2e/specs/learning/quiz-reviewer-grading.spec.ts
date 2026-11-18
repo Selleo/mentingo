@@ -33,6 +33,7 @@ test("grading the last answer completes the lesson", async ({
 
   let quizWasSubmitted = false;
   let studentId = "";
+  let quizAttemptCountBeforeSubmit = 0;
 
   // The reviewer is created first so that its cleanup runs after the course cleanup re-syncs
   // the admin session.
@@ -53,7 +54,6 @@ test("grading the last answer completes the lesson", async ({
     factories,
     openQuestionsRequireReview: true,
     prefix,
-    root: false,
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
@@ -68,7 +68,7 @@ test("grading the last answer completes the lesson", async ({
       await startLearningFlow(page);
       await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_FORM)).toBeVisible();
 
-      const quizAttemptCountBeforeSubmit = await getUserQuizAttemptCountFlow(apiClient);
+      quizAttemptCountBeforeSubmit = await getUserQuizAttemptCountFlow(apiClient);
 
       await answerAllRenderedQuizQuestionTypesFlow(page, answers);
       await submitQuizFlow(page);
@@ -129,6 +129,7 @@ test("grading the last answer completes the lesson", async ({
     }
 
     await page.goto(courseQueueUrl);
+    await expect(page.getByTestId(QUIZ_GRADING_HANDLES.EMPTY_STATE)).toBeVisible();
     await expect(page.getByTestId(QUIZ_GRADING_HANDLES.ROW)).toHaveCount(0);
   });
 
@@ -140,6 +141,10 @@ test("grading the last answer completes the lesson", async ({
         studentId,
         expected: { lessonCompleted: true, isQuizAwaitingReview: false, score: 100 },
       });
+      // Once graded, the attempt counts, so the unchanged count before review was not a timing fluke.
+      await expect
+        .poll(() => getUserQuizAttemptCountFlow(apiClient))
+        .toBe(quizAttemptCountBeforeSubmit + 1);
 
       await page.goto(`/course/${courseId}/lesson/${quizLesson.id}`);
       await expect(page.getByTestId(LEARNING_HANDLES.REVIEWER_FEEDBACK_POINTS)).toHaveCount(

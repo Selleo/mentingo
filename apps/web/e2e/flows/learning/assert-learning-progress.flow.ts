@@ -24,7 +24,7 @@ export const assertCourseLessonProgressFlow = async (
         const lesson = chapter?.lessons.find((item) => item.id === expectation.lessonId);
 
         return {
-          completedLessonCount: chapter?.completedLessonCount ?? 0,
+          completedLessonCount: chapter?.completedLessonCount,
           lessonStatus: lesson?.status,
         };
       },
@@ -76,15 +76,16 @@ export const assertQuizLessonProgressFlow = async (
         const lesson = chapter?.lessons.find((item) => item.id === input.lessonId);
         const lessonData = lessonResponse.data.data;
 
+        // Raw values: a field the API leaves out must fail the match, not default to the expectation.
         return {
-          completedLessonCount: chapter?.completedLessonCount ?? 0,
+          completedLessonCount: chapter?.completedLessonCount,
           courseLessonStatus: lesson?.status,
-          lessonCompleted: lessonData.lessonCompleted ?? false,
-          attempts: lessonData.attempts ?? 0,
-          correctAnswerCount: lessonData.quizDetails?.correctAnswerCount ?? 0,
-          isQuizAwaitingReview: lessonData.isQuizAwaitingReview ?? false,
-          isQuizFeedbackRedacted: lessonData.isQuizFeedbackRedacted ?? false,
-          score: lessonData.quizDetails?.score ?? null,
+          lessonCompleted: lessonData.lessonCompleted,
+          attempts: lessonData.attempts,
+          correctAnswerCount: lessonData.quizDetails?.correctAnswerCount,
+          isQuizAwaitingReview: lessonData.isQuizAwaitingReview,
+          isQuizFeedbackRedacted: lessonData.isQuizFeedbackRedacted,
+          score: lessonData.quizDetails?.score,
         };
       },
       { timeout: 15_000 },

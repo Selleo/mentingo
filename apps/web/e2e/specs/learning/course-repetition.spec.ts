@@ -23,7 +23,6 @@ test("an opted-in completed course can be repeated, resumed and replaced", async
     cleanup,
     factories,
     prefix: `repeat-${Date.now()}`,
-    root: false,
     withWorkerPage,
   });
   const { firstLesson, secondLesson } = lessons;
@@ -44,6 +43,7 @@ test("an opted-in completed course can be repeated, resumed and replaced", async
 
     await factories.createEnrollmentFactory().selfEnroll(courseId);
     await openCourseOverviewFlow(page, courseId);
+    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toBeVisible();
     await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.REPEAT_BUTTON)).toHaveCount(0);
 
     await startLearningFlow(page);

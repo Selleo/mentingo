@@ -18,7 +18,6 @@ test("admin can view AI mentor statistics after prepared mentor progress", async
     cleanup,
     factories,
     prefix: `statistics-ai-mentor-${Date.now()}`,
-    root: false,
     // Prepared mentor progress keeps the course from being deleted; it is only unpublished and
     // disappears with the worker tenant.
     shouldKeepCourseAfterTest: () => true,
@@ -77,12 +76,6 @@ test("admin can view AI mentor statistics after prepared mentor progress", async
       .click();
     const previewDialog = page.getByTestId(COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_DIALOG);
     await expect(previewDialog).toBeVisible();
-    await expect(page.getByTestId(LEARNING_HANDLES.NEXT_LESSON_BUTTON)).toBeHidden();
-    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT)).toBeHidden();
-    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_ACTION_BUTTON)).toBeHidden();
-    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MIC_BUTTON)).toBeHidden();
-    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeHidden();
-    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON)).toBeHidden();
     await expect(
       previewDialog.getByTestId(COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_CLOSE_BUTTON),
     ).toBeVisible();
@@ -92,6 +85,12 @@ test("admin can view AI mentor statistics after prepared mentor progress", async
     await expect(
       previewDialog.getByTestId(COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_RESULT_BUTTON),
     ).toBeVisible();
+    await expect(page.getByTestId(LEARNING_HANDLES.NEXT_LESSON_BUTTON)).toBeHidden();
+    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT)).toBeHidden();
+    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_ACTION_BUTTON)).toBeHidden();
+    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MIC_BUTTON)).toBeHidden();
+    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeHidden();
+    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON)).toBeHidden();
     await previewDialog.getByTestId(COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_CLOSE_BUTTON).click();
     await expect(previewDialog).toBeHidden();
 

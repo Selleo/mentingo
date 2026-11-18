@@ -50,7 +50,6 @@ test("Live Training materials, hosts and sessions are gated by role and session 
     cleanup,
     factories,
     prefix,
-    root: false,
     withWorkerPage,
     buildLessons: async ({ chapterId, courseId: createdCourseId, curriculumFactory }) => ({
       liveTrainingLesson: await curriculumFactory.createLiveTrainingLesson(createdCourseId, {
@@ -87,6 +86,8 @@ test("Live Training materials, hosts and sessions are gated by role and session 
         page.getByTestId(LIVE_TRAINING_HANDLES.afterFileCard(afterResourceId)),
       ).toBeVisible();
       await expect(page.getByTestId(LIVE_TRAINING_HANDLES.SESSIONS_TAB)).toBeVisible();
+      await page.getByTestId(LIVE_TRAINING_HANDLES.OVERVIEW_TAB).click();
+      await expect(page.getByTestId(LIVE_TRAINING_HANDLES.ADD_HOST_BUTTON)).toBeVisible();
     });
   });
 
@@ -94,6 +95,7 @@ test("Live Training materials, hosts and sessions are gated by role and session 
     await withWorkerPage(USER_ROLE.contentCreator, async ({ page }) => {
       await openLiveTrainingFlow(page, liveTrainingId);
       await page.getByTestId(LIVE_TRAINING_HANDLES.OVERVIEW_TAB).click();
+      await expect(page.getByTestId(LIVE_TRAINING_HANDLES.PEOPLE_SECTION)).toBeVisible();
       await expect(page.getByTestId(LIVE_TRAINING_HANDLES.ADD_HOST_BUTTON)).toHaveCount(0);
     });
   });
@@ -103,6 +105,7 @@ test("Live Training materials, hosts and sessions are gated by role and session 
       await factories.createEnrollmentFactory().selfEnroll(courseId);
 
       await openLiveTrainingFlow(page, liveTrainingId);
+      await expect(page.getByTestId(LIVE_TRAINING_HANDLES.FILES_TAB)).toBeVisible();
       await expect(page.getByTestId(LIVE_TRAINING_HANDLES.SESSIONS_TAB)).toHaveCount(0);
       await page.getByTestId(LIVE_TRAINING_HANDLES.FILES_TAB).click();
       await expect(

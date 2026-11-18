@@ -54,8 +54,11 @@ export const mockCourseAuthoringWorkspaceFlow = async (page: Page, courseId: str
     tasks: [],
     usage: zeroUsage(),
   };
+  // Routes registered later win, so this only sees authoring requests no mock below handles.
+  const unexpectedRequests: string[] = [];
   await page.route("**/api/luma/authoring/**", async (route) => {
-    throw new Error(`Unexpected authoring request in drawer smoke test: ${route.request().url()}`);
+    unexpectedRequests.push(route.request().url());
+    await route.abort();
   });
   await page.route(
     (url) => url.pathname === `/api/luma/authoring/courses/${courseId}/sessions`,
@@ -107,4 +110,6 @@ export const mockCourseAuthoringWorkspaceFlow = async (page: Page, courseId: str
       },
     });
   });
+
+  return { unexpectedRequests };
 };

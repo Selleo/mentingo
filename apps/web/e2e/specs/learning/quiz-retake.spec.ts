@@ -32,7 +32,6 @@ test("student can submit and retake a quiz lesson", async ({
     cleanup,
     factories,
     prefix: `learning-quiz-retake-${Date.now()}`,
-    root: false,
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
@@ -115,7 +114,6 @@ test("student can retake the final quiz when the completed course already has a 
     cleanup,
     factories,
     prefix: `learning-quiz-retake-certificate-${Date.now()}`,
-    root: false,
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
@@ -160,6 +158,16 @@ test("student can retake the final quiz when the completed course already has a 
 
     await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeEnabled();
     await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeDisabled();
+    // The retake is persisted (lesson back in progress) and the issued certificate is not revoked.
+    await assertQuizLessonProgressFlow(apiClient, {
+      courseId,
+      lessonId: quizLesson.id,
+      studentId,
+      expected: { attempts: 2, courseLessonStatus: "in_progress", lessonCompleted: false },
+    });
+    expect(await getCourseCertificateIdFlow(apiClient, { courseId, studentId })).toBe(
+      certificateId,
+    );
 
     await selectQuizOptionFlow(page, correctOptionId);
     await submitQuizFlow(page);
@@ -170,9 +178,9 @@ test("student can retake the final quiz when the completed course already has a 
     await quizProgress(2);
     await waitForUserQuizAttemptCountFlow(apiClient, initialQuizAttemptCount + 2);
 
-    // Retaking keeps the certificate that was already issued.
-    await expect
-      .poll(() => getCourseCertificateIdFlow(apiClient, { courseId, studentId }))
-      .toBe(certificateId);
+    // Completing the retake keeps the certificate that was already issued.
+    expect(await getCourseCertificateIdFlow(apiClient, { courseId, studentId })).toBe(
+      certificateId,
+    );
   });
 });

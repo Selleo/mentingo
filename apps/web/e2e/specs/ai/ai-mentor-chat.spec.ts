@@ -9,6 +9,7 @@ import { openCourseOverviewFlow } from "../../flows/learning/open-course-overvie
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
 import { createAiMentorLessonCourse } from "../../utils/learning-courses";
 
+// Real OpenAI round trips: entry greeting, a chat reply and the lesson check each take up to 90s.
 test.setTimeout(240 * 1000);
 
 test("student can chat with AI mentor, check the lesson, and retake it", async ({
@@ -30,7 +31,6 @@ test("student can chat with AI mentor, check the lesson, and retake it", async (
     cleanup,
     factories,
     prefix: `learning-ai-mentor-chat-${Date.now()}`,
-    root: false,
     withWorkerPage,
   });
   const { aiMentorLesson } = lessons;

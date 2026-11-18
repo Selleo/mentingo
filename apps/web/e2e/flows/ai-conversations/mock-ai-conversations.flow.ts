@@ -7,6 +7,8 @@ import {
 
 import type { Page } from "@playwright/test";
 
+const LIST_PATH = "/api/admin/ai-threads";
+
 type MockAiConversationsOptions = {
   /** Overrides the thread detail response; `null` makes the transcript unavailable (404). */
   thread?: (Partial<typeof AI_CONVERSATION> & { evaluation?: unknown }) | null;
@@ -22,6 +24,7 @@ export const mockAiConversationsFlow = async (
 ) => {
   const mutations: string[] = [];
   const blockedRequests: string[] = [];
+  const listRequests: URLSearchParams[] = [];
 
   page.on("request", (request) => {
     if (/\/api\/(?:admin\/ai-threads|ai\/)/.test(request.url()) && request.method() !== "GET")
@@ -31,8 +34,13 @@ export const mockAiConversationsFlow = async (
   await page.route(/\/api\/admin\/ai-threads(?:\/|\?|$)/, async (route) => {
     const url = new URL(route.request().url());
     const pageNumber = Number(url.searchParams.get("page") || 1);
+    const threadPath = `${LIST_PATH}/${AI_CONVERSATION_THREAD_ID}`;
 
-    if (url.pathname.endsWith("/messages")) {
+    if (route.request().method() !== "GET") {
+      return route.fulfill({ status: 404, json: { message: "Not found" } });
+    }
+
+    if (url.pathname === `${threadPath}/messages`) {
       if (messages) {
         return route.fulfill({
           json: {
@@ -60,7 +68,7 @@ export const mockAiConversationsFlow = async (
       });
     }
 
-    if (url.pathname.endsWith(AI_CONVERSATION_THREAD_ID)) {
+    if (url.pathname === threadPath) {
       if (thread === null) return route.fulfill({ status: 404, json: { message: "Not found" } });
 
       return route.fulfill({
@@ -68,6 +76,11 @@ export const mockAiConversationsFlow = async (
       });
     }
 
+    if (url.pathname !== LIST_PATH) {
+      return route.fulfill({ status: 404, json: { message: "Not found" } });
+    }
+
+    listRequests.push(url.searchParams);
     return route.fulfill({
       json: {
         data: [AI_CONVERSATION],
@@ -83,5 +96,5 @@ export const mockAiConversationsFlow = async (
     });
   }
 
-  return { blockedRequests, mutations };
+  return { blockedRequests, listRequests, mutations };
 };

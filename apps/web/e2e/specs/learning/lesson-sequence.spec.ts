@@ -32,7 +32,6 @@ test("student cannot skip ahead when lesson sequence is enabled", async ({
     cleanup,
     factories,
     prefix: `learning-sequence-${Date.now()}`,
-    root: false,
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
@@ -50,8 +49,13 @@ test("student cannot skip ahead when lesson sequence is enabled", async ({
     await expect(page.getByTestId(LEARNING_HANDLES.NEXT_LESSON_BUTTON)).toBeDisabled();
     await assertBlockedLessonItemFlow(page, blockedLesson.id);
 
+    // A blocked item links back to the current lesson instead of its own, so the click stays put.
+    await expect(
+      page.getByTestId(LEARNING_HANDLES.lessonSidebarLessonItem(blockedLesson.id)),
+    ).toHaveAttribute("href", new RegExp(`/lesson/${quizLesson.id}#?$`));
     await openLessonFromSidebarFlow(page, blockedLesson.id);
     await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${quizLesson.id}#?$`));
+    await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(quizLesson.title);
 
     const expectedQuizAttemptCount = (await getUserQuizAttemptCountFlow(apiClient)) + 1;
 
@@ -95,7 +99,6 @@ test("student does not unlock the next lesson after failing a required quiz", as
     cleanup,
     factories,
     prefix: `learning-sequence-failed-quiz-${Date.now()}`,
-    root: false,
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     thresholdScore: 100,
     withWorkerPage,
@@ -126,8 +129,13 @@ test("student does not unlock the next lesson after failing a required quiz", as
     await expect(page.getByTestId(LEARNING_HANDLES.NEXT_LESSON_BUTTON)).toBeDisabled();
     await assertBlockedLessonItemFlow(page, blockedLesson.id);
 
+    // A blocked item links back to the current lesson instead of its own, so the click stays put.
+    await expect(
+      page.getByTestId(LEARNING_HANDLES.lessonSidebarLessonItem(blockedLesson.id)),
+    ).toHaveAttribute("href", new RegExp(`/lesson/${quizLesson.id}#?$`));
     await openLessonFromSidebarFlow(page, blockedLesson.id);
     await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${quizLesson.id}#?$`));
+    await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(quizLesson.title);
 
     // A failed attempt finishes the quiz but does not count as a passed lesson.
     await assertQuizLessonProgressFlow(apiClient, {
