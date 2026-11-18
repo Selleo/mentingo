@@ -27,6 +27,7 @@ vi.mock("~/api/queryClient", () => ({ queryClient: { fetchQuery } }));
 vi.mock("~/modules/Dashboard/Settings/Language/LanguageStore", () => ({
   useLanguageStore: () => ({ language: "pl", setLanguage: vi.fn() }),
 }));
+vi.mock("~/hooks/usePageTitle", () => ({ usePageTitle: vi.fn() }));
 vi.mock("~/hooks/useLearningTimeTracker", () => ({ useLearningTimeTracker: vi.fn() }));
 vi.mock("~/modules/Courses/context/CourseAccessProvider", () => ({
   CourseAccessProvider: () => null,

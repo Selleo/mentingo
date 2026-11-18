@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useMarkLessonAsCompleted } from "~/api/mutations";
@@ -36,6 +36,8 @@ type LessonContentProps = {
   previewUser?: LessonPreviewUser;
   hideControls?: boolean;
   showPreviewNotice?: boolean;
+  focusTitleOnMount?: boolean;
+  onTitleFocused?: () => void;
   handlePrevious: () => void;
   handleNext: () => void;
   isFirstLesson: boolean;
@@ -49,6 +51,8 @@ export const LessonContent = ({
   previewUser,
   hideControls = false,
   showPreviewNotice = false,
+  focusTitleOnMount = false,
+  onTitleFocused,
   handlePrevious,
   handleNext,
   isFirstLesson,
@@ -58,6 +62,7 @@ export const LessonContent = ({
   const { t } = useTranslation();
   const { isEffectiveStudentExperience, isPreviewMode } = useCourseAccessProvider();
 
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
 
@@ -119,6 +124,13 @@ export const LessonContent = ({
       videoProgressStore,
     ],
   );
+
+  useEffect(() => {
+    if (!focusTitleOnMount) return;
+
+    titleRef.current?.focus();
+    onTitleFocused?.();
+  }, [focusTitleOnMount, onTitleFocused]);
 
   const pauseAllLessonMedia = useCallback(() => {
     pauseAllLessonVideos();
@@ -296,16 +308,18 @@ export const LessonContent = ({
   );
 
   return (
-    <div className="flex w-full min-w-0 flex-col items-center h-auto py-10">
+    <div className="flex w-full min-w-0 flex-col items-center h-auto py-6 sm:py-10">
       <div className="flex w-full min-w-0 flex-col px-6 sm:px-10 max-w-full 3xl:max-w-[1024px] 3xl:px-8 h-auto">
         <div className="flex w-full flex-col pb-6">
           <div className="flex w-full min-w-0 flex-col gap-y-4 overflow-x-hidden">
-            <p
+            <h1
+              ref={titleRef}
+              tabIndex={-1}
               data-testid={LEARNING_HANDLES.LESSON_TITLE}
-              className="h4 text-neutral-950 break-words min-w-0"
+              className="h4 text-neutral-950 break-words min-w-0 focus:outline-none"
             >
               {lesson.title}
-            </p>
+            </h1>
           </div>
           {!hideControls && (
             <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">

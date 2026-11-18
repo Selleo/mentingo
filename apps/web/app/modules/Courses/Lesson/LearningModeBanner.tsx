@@ -28,17 +28,21 @@ export function LearningModeBanner({ className }: LearningModeBannerProps) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 bg-primary-700 px-6 py-5 text-primary-50 md:flex-row md:items-center md:justify-between",
+        "flex flex-col gap-3 bg-primary-700 px-4 py-3 text-primary-50 md:flex-row md:px-6 md:py-5 md:items-center md:justify-between",
         className,
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary-600">
+        <div className="hidden size-10 shrink-0 md:grid place-items-center rounded-xl bg-primary-600">
           <Icon name="Hat" className="size-5 text-white" />
         </div>
         <div className="min-w-0">
-          <p className="body-lg-md">{t("studentCourseView.studentMode.bannerTitle")}</p>
-          <p className="body-base-md">{t("studentCourseView.studentMode.bannerDescription")}</p>
+          <p className="body-base-md md:body-lg-md">
+            {t("studentCourseView.studentMode.bannerTitle")}
+          </p>
+          <p className="body-sm md:body-base-md">
+            {t("studentCourseView.studentMode.bannerDescription")}
+          </p>
         </div>
       </div>
       <Button
