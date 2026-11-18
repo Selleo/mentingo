@@ -1,9 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { COURSE_ENROLLMENT, PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { and, count, desc, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { userHasPermissionCondition } from "src/common/permissions/permission-sql.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import {
   courses,
@@ -195,6 +196,32 @@ export class CourseChatRepository {
       );
 
     return rows.map(({ userId }) => userId);
+  }
+
+  async getDiscussionReaderIds(courseId: UUIDType, userIds: UUIDType[]): Promise<UUIDType[]> {
+    if (!userIds.length) return [];
+
+    const readers = await this.db
+      .select({ userId: users.id })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          inArray(users.id, userIds),
+          isNull(users.deletedAt),
+          eq(users.archived, false),
+          userHasPermissionCondition(
+            this.db,
+            users.id,
+            users.tenantId,
+            PERMISSIONS.COURSE_DISCUSSION_READ,
+          ),
+        ),
+      );
+
+    return readers.map(({ userId }) => userId);
   }
 
   async getMentionEmailRecipients(

@@ -1,17 +1,16 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
   ANNOUNCEMENT_EMAIL_TEMPLATES,
   ANNOUNCEMENT_STATUSES,
-  NOTIFICATION_SOCKET_EVENTS,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 
 import { AnnouncementsRepository } from "src/announcements/announcements.repository";
 import { DiscussionNotificationsRepository } from "src/discussion-notifications/discussion-notifications.repository";
 import { getLocalizedDiscussionReplyTitleAnnouncement } from "src/discussion-notifications/discussion-reply.localizations";
+import { UserNotificationsCreatedEvent } from "src/events/announcement/user-notifications-created.event";
 import { ForumRepository } from "src/forum/forum.repository";
-import { REALTIME_PUBLISHER, type RealtimePublisher } from "src/websocket/realtime.publisher";
-import { getUserRoomName } from "src/websocket/websocket.rooms";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 
 import type {
   DiscussionRecipientFilter,
@@ -24,11 +23,11 @@ export class DiscussionReplyNotificationService {
     private readonly discussionNotificationsRepository: DiscussionNotificationsRepository,
     private readonly announcementsRepository: AnnouncementsRepository,
     private readonly forumRepository: ForumRepository,
-    @Inject(REALTIME_PUBLISHER) private readonly realtimePublisher: RealtimePublisher,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async notifyParticipants(reply: DiscussionReply, filterRecipients: DiscussionRecipientFilter) {
-    const notNotified = new Set(reply.mentionedUserIds).add(reply.actorUserId);
+    const notNotified = new Set([...reply.mentionedUserIds, reply.actorUserId]);
     const participantIds = await this.discussionNotificationsRepository.findThreadParticipantIds(
       reply.threadId,
     );
@@ -60,12 +59,8 @@ export class DiscussionReplyNotificationService {
       usersToNotify: recipientIds,
     });
 
-    for (const recipientId of recipientIds) {
-      this.realtimePublisher.emitToRoom(
-        NOTIFICATION_SOCKET_EVENTS.CREATED,
-        getUserRoomName(recipientId),
-        {},
-      );
-    }
+    await this.outboxPublisher.publish(
+      new UserNotificationsCreatedEvent({ userIds: recipientIds }),
+    );
   }
 }

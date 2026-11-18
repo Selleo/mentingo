@@ -1,13 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { ALL_ANNOUNCEMENTS_QUERY_KEY } from "~/api/queries/admin/useAllAnnouncements";
+import { invalidateNotificationsData } from "~/api/utils/invalidateNotificationsData";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
-import { ANNOUNCEMENTS_FOR_USER_QUERY_KEY } from "../queries/useAnnouncementsForUser";
-import { UNREAD_ANNOUNCEMENTS_COUNT_QUERY_KEY } from "../queries/useUnreadAnnouncementsCount";
-import { queryClient } from "../queryClient";
 import { getTranslatedApiErrorMessage } from "../utils/getTranslatedApiErrorMessage";
 
 type MarkAnnouncementAsReadOptions = {
@@ -28,9 +25,7 @@ export function useMarkAnnouncementAsRead() {
     },
     onSuccess: () => {
       toast({ description: t("announcements.toast.markedAsRead") });
-      queryClient.invalidateQueries({ queryKey: [ANNOUNCEMENTS_FOR_USER_QUERY_KEY] });
-      queryClient.invalidateQueries({ queryKey: [ALL_ANNOUNCEMENTS_QUERY_KEY] });
-      queryClient.invalidateQueries({ queryKey: [UNREAD_ANNOUNCEMENTS_COUNT_QUERY_KEY] });
+      void invalidateNotificationsData();
     },
     onError: (error) => {
       toast({

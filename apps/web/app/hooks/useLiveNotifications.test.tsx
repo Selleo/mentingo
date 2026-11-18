@@ -29,16 +29,11 @@ describe("useLiveNotifications", () => {
   beforeEach(() => {
     queryClient.clear();
     fakeSocket.reset();
+    fakeSocket.connected = true;
 
     for (const queryKey of [...notificationQueryKeys, unrelatedQueryKey]) {
       queryClient.setQueryData<object>(queryKey, {});
     }
-  });
-
-  it("joins the user's own room so the server can reach every open session", () => {
-    renderHook(() => useLiveNotifications());
-
-    expect(fakeSocket.emitted).toContainEqual(["join:user", undefined]);
   });
 
   it("refreshes the counter and the lists when a notification arrives", () => {
@@ -55,6 +50,17 @@ describe("useLiveNotifications", () => {
 
     fakeSocket.receive("connect");
 
+    expect(notificationQueryKeys.map(isInvalidated)).toEqual([true, true, true]);
+  });
+
+  it("does not reload what has just loaded when the first connection opens", () => {
+    fakeSocket.connected = false;
+    renderHook(() => useLiveNotifications());
+
+    fakeSocket.receive("connect");
+    expect(notificationQueryKeys.map(isInvalidated)).toEqual([false, false, false]);
+
+    fakeSocket.receive("connect");
     expect(notificationQueryKeys.map(isInvalidated)).toEqual([true, true, true]);
   });
 

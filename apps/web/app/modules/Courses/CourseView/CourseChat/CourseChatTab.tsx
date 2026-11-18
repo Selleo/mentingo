@@ -28,6 +28,7 @@ type CourseChatTabProps = {
   currentUserId: string;
   canDeleteAnyMessage: boolean;
   requestedThreadId?: string;
+  onRequestedThreadShown?: () => void;
 };
 
 export function CourseChatTab({
@@ -35,6 +36,7 @@ export function CourseChatTab({
   currentUserId,
   canDeleteAnyMessage,
   requestedThreadId,
+  onRequestedThreadShown,
 }: CourseChatTabProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -59,7 +61,8 @@ export function CourseChatTab({
 
     cacheCourseChatMessagesPage(courseId, messagesResponse);
     showRequestedThread(messagesResponse.pagination.page);
-  }, [courseId, pendingThreadId, messagesResponse, showRequestedThread]);
+    onRequestedThreadShown?.();
+  }, [courseId, pendingThreadId, messagesResponse, showRequestedThread, onRequestedThreadShown]);
   const { data: chatUsers = [] } = useCourseChatUsers(courseId);
   const chatUsersById = useMemo(
     () => new Map(chatUsers.map((user) => [user.id, user])),

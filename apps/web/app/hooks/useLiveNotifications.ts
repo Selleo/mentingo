@@ -11,17 +11,16 @@ export function useLiveNotifications() {
     const refreshNotifications = () => {
       void invalidateNotificationsData();
     };
-
+    let hasConnected = socket.connected;
     const handleConnect = () => {
-      socket.emit("join:user");
-      refreshNotifications();
+      if (hasConnected) refreshNotifications();
+
+      hasConnected = true;
     };
 
     socket.on("connect", handleConnect);
     socket.on(NOTIFICATION_SOCKET_EVENTS.CREATED, refreshNotifications);
     socket.connect();
-
-    if (socket.connected) socket.emit("join:user");
 
     return () => {
       socket.off("connect", handleConnect);

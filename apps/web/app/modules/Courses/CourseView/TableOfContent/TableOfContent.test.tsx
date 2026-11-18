@@ -1,7 +1,8 @@
 import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, MemoryRouter, useLocation } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
@@ -75,9 +76,26 @@ vi.mock("../CourseAdminStatistics/CourseAdminStatistics", () => ({
 }));
 
 vi.mock("../CourseChat/CourseChatTab", () => ({
-  CourseChatTab: ({ requestedThreadId }: { requestedThreadId?: string }) => (
-    <div>Course discussion content, thread: {requestedThreadId ?? "none"}</div>
-  ),
+  CourseChatTab: function CourseChatTabStub({
+    requestedThreadId,
+    onRequestedThreadShown,
+  }: {
+    requestedThreadId?: string;
+    onRequestedThreadShown?: () => void;
+  }) {
+    useEffect(() => {
+      if (requestedThreadId) threadsShown.push(requestedThreadId);
+    }, [requestedThreadId]);
+
+    return (
+      <div>
+        Course discussion content
+        <button type="button" onClick={onRequestedThreadShown}>
+          finish showing the thread
+        </button>
+      </div>
+    );
+  },
 }));
 
 vi.mock("~/modules/Courses/CourseView/components/ChapterListOverview", () => ({
@@ -85,6 +103,13 @@ vi.mock("~/modules/Courses/CourseView/components/ChapterListOverview", () => ({
 }));
 
 const THREAD_LINK = "/course/course-1?tab=Discussion&thread=message-1";
+const DISCUSSION_TAB_NAME = "Discussion";
+
+const threadsShown: string[] = [];
+
+function CurrentSearch() {
+  return <output aria-label="current search">{useLocation().search}</output>;
+}
 
 const tableOfContent = ({
   url = "/course/course-1",
@@ -92,8 +117,16 @@ const tableOfContent = ({
 }: { url?: string; language?: SupportedLanguages } = {}) => (
   <MemoryRouter initialEntries={[url]}>
     <TableOfContent language={language} />
+    <Link to={THREAD_LINK}>open the notification</Link>
+    <CurrentSearch />
   </MemoryRouter>
 );
+
+const allowDiscussion = () => {
+  courseAccessState.enrolled = true;
+  globalSettingsState.courseDiscussionsEnabled = true;
+  currentUserState.permissions = [PERMISSIONS.COURSE_DISCUSSION_READ];
+};
 
 describe("TableOfContent", () => {
   beforeEach(() => {
@@ -105,6 +138,7 @@ describe("TableOfContent", () => {
     courseAccessState.isCourseStudentModeActive = false;
     courseAccessState.enrolled = false;
     globalSettingsState.courseDiscussionsEnabled = false;
+    threadsShown.length = 0;
     currentUserState.id = "user-1";
     currentUserState.permissions = ["course.statistics", "course.update_own"];
     missingTranslationsState.hasMissingTranslations = false;
@@ -140,15 +174,42 @@ describe("TableOfContent", () => {
     expect(screen.queryByText("Course statistics content")).not.toBeInTheDocument();
   });
 
-  it("opens the discussion on the linked thread for a user who can read it", () => {
-    courseAccessState.enrolled = true;
-    globalSettingsState.courseDiscussionsEnabled = true;
-    currentUserState.permissions = [PERMISSIONS.COURSE_DISCUSSION_READ];
+  it("opens the discussion on the linked thread and takes the link out of the URL", async () => {
+    allowDiscussion();
 
     renderWith().render(tableOfContent({ url: THREAD_LINK }));
 
-    expect(screen.getByText("Course discussion content, thread: message-1")).toBeInTheDocument();
+    expect(screen.getByText("Course discussion content")).toBeInTheDocument();
     expect(screen.queryByText("Course chapters content")).not.toBeInTheDocument();
+    expect(threadsShown).toEqual(["message-1"]);
+    await waitFor(() => expect(screen.getByLabelText("current search")).toBeEmptyDOMElement());
+  });
+
+  it("does not jump back to the linked thread when the discussion is reopened", async () => {
+    allowDiscussion();
+    const user = userEvent.setup();
+    renderWith().render(tableOfContent({ url: THREAD_LINK }));
+    await user.click(screen.getByRole("button", { name: "finish showing the thread" }));
+
+    await user.click(screen.getByRole("button", { name: "Table of contents" }));
+    await user.click(screen.getByRole("button", { name: DISCUSSION_TAB_NAME }));
+
+    expect(screen.getByText("Course discussion content")).toBeInTheDocument();
+    expect(threadsShown).toEqual(["message-1"]);
+  });
+
+  it("follows the same thread link again after the user moved to another tab", async () => {
+    allowDiscussion();
+    const user = userEvent.setup();
+    renderWith().render(tableOfContent({ url: THREAD_LINK }));
+    await user.click(screen.getByRole("button", { name: "finish showing the thread" }));
+    await user.click(screen.getByRole("button", { name: "Table of contents" }));
+    expect(screen.getByText("Course chapters content")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("link", { name: "open the notification" }));
+
+    expect(await screen.findByText("Course discussion content")).toBeInTheDocument();
+    expect(threadsShown).toEqual(["message-1", "message-1"]);
   });
 
   it("shows the table of contents when a discussion link is opened without access", () => {

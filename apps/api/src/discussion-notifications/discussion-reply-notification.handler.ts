@@ -49,13 +49,13 @@ export class DiscussionReplyNotificationHandler
       {
         threadId: thread.threadId,
         actorUserId: reply.actorUserId,
-        mentionedUserIds: reply.mentionedUserIds,
+        mentionedUserIds: reply.mentionedUserIds ?? [],
         content: getLocalizedUserMentionContentAnnouncement(courseTitles),
         sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_CHAT,
         sourceId: courseId,
         linkPath: getCourseDiscussionThreadPath(courseId, parentMessageId),
       },
-      (userIds) => this.courseChatRepository.getEnrolledUserIds(courseId, userIds),
+      (userIds) => this.courseChatRepository.getDiscussionReaderIds(courseId, userIds),
     );
   }
 
@@ -68,7 +68,7 @@ export class DiscussionReplyNotificationHandler
       {
         threadId: reply.topicId,
         actorUserId: reply.actorUserId,
-        mentionedUserIds: reply.mentionedUserIds,
+        mentionedUserIds: reply.mentionedUserIds ?? [],
         content: getLocalizedForumMentionContentAnnouncement(topicTitle),
         sourceType: ANNOUNCEMENT_SOURCE_TYPES.FORUM,
         sourceId: reply.topicId,

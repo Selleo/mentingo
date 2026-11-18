@@ -8,10 +8,12 @@ import {
 
 import { AnnouncementsRepository } from "src/announcements/announcements.repository";
 import { getLocalizedUserMentionTitleAnnouncement } from "src/course-chat/chat-mention-localizations/chat-mention-title-localization";
+import { UserNotificationsCreatedEvent } from "src/events/announcement/user-notifications-created.event";
 import { ForumUserMentionedEvent } from "src/events/forum/forum-user-mentioned.event";
 import { getLocalizedForumMentionContentAnnouncement } from "src/forum/forum-mention.localizations";
 import { ForumRepository } from "src/forum/forum.repository";
 import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import type { OutboxEventsHandlerOf } from "src/outbox/outbox.types";
@@ -25,6 +27,7 @@ export class ForumMentionNotificationHandler
     private readonly forumRepository: ForumRepository,
     private readonly announcementsRepository: AnnouncementsRepository,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async handleOutboxEvent(event: ForumUserMentionedEvent) {
@@ -56,6 +59,9 @@ export class ForumMentionNotificationHandler
         sourceId: topicId,
         usersToNotify: mentionedUserIds,
       });
+      await this.outboxPublisher.publish(
+        new UserNotificationsCreatedEvent({ userIds: mentionedUserIds }),
+      );
     });
   }
 }

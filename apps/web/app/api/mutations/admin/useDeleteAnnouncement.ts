@@ -2,11 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
-import { ALL_ANNOUNCEMENTS_QUERY_KEY } from "~/api/queries/admin/useAllAnnouncements";
-import { ANNOUNCEMENTS_FOR_USER_QUERY_KEY } from "~/api/queries/useAnnouncementsForUser";
-import { UNREAD_ANNOUNCEMENTS_COUNT_QUERY_KEY } from "~/api/queries/useUnreadAnnouncementsCount";
-import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
+import { invalidateNotificationsData } from "~/api/utils/invalidateNotificationsData";
 import { useToast } from "~/components/ui/use-toast";
 
 type DeleteAnnouncementOptions = {
@@ -24,9 +21,7 @@ export function useDeleteAnnouncement() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [ANNOUNCEMENTS_FOR_USER_QUERY_KEY] });
-      queryClient.invalidateQueries({ queryKey: [ALL_ANNOUNCEMENTS_QUERY_KEY] });
-      queryClient.invalidateQueries({ queryKey: [UNREAD_ANNOUNCEMENTS_COUNT_QUERY_KEY] });
+      void invalidateNotificationsData();
 
       toast({ description: t("announcements.toast.deletedSuccessfully") });
     },

@@ -25,7 +25,6 @@ export const ANNOUNCEMENT_SOURCE_TYPES = {
 export type AnnouncementSourceType =
   (typeof ANNOUNCEMENT_SOURCE_TYPES)[keyof typeof ANNOUNCEMENT_SOURCE_TYPES];
 
-/** Tells a user's open sessions that their notifications changed; it carries no content. */
 export const NOTIFICATION_SOCKET_EVENTS = {
   CREATED: "notifications:created",
 } as const;

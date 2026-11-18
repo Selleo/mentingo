@@ -5,7 +5,7 @@ export type ForumReplyCreatedData = {
   postId: UUIDType;
   firstPostId: UUIDType;
   actorUserId: UUIDType;
-  mentionedUserIds: UUIDType[];
+  mentionedUserIds?: UUIDType[];
 };
 
 export class ForumReplyCreatedEvent {

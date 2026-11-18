@@ -5,11 +5,19 @@ import {
   NOTIFICATION_SOCKET_EVENTS,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, count, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
+import { ForumReplyCreatedEvent } from "src/events/forum/forum-reply-created.event";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { settings, studentCourses, users } from "src/storage/schema";
+import {
+  outboxEvents,
+  settings,
+  studentCourses,
+  userAnnouncements,
+  users,
+} from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 
@@ -99,7 +107,7 @@ describe("Discussion reply notifications (e2e)", () => {
       .send({ title, content: `${title} first post` })
       .expect(201);
 
-    return response.body.data as { id: string };
+    return response.body.data as { id: string; firstPost: { id: string } };
   };
 
   const postForumReply = async (
@@ -131,6 +139,15 @@ describe("Discussion reply notifications (e2e)", () => {
       .expect(200);
 
     return response.body.data.unreadCount as number;
+  };
+
+  const countNotificationsOf = async ({ user }: Participant) => {
+    const [{ notifications }] = await db
+      .select({ notifications: count() })
+      .from(userAnnouncements)
+      .where(eq(userAnnouncements.userId, user.id));
+
+    return notifications;
   };
 
   const replyTitleFrom = (participant: Participant) =>
@@ -220,6 +237,70 @@ describe("Discussion reply notifications (e2e)", () => {
       expect(notifiedUserRooms()).toEqual(userRoomsOf(threadAuthor, earlierReplier));
     });
 
+    it("sends the live signal through an event of its own, after the notification is stored", async () => {
+      const [threadAuthor, replier] = await createStudents(2);
+      const course = await createEnrolledCourse(threadAuthor, threadAuthor, replier);
+      const thread = await postCourseMessage(threadAuthor, course.id, { content: "A question" });
+
+      await postCourseMessage(replier, course.id, {
+        content: "An answer",
+        parentMessageId: thread.id,
+      });
+      await dispatchOutbox(app);
+
+      const signalEvents = await db
+        .select({ payload: outboxEvents.payload })
+        .from(outboxEvents)
+        .where(eq(outboxEvents.eventType, "UserNotificationsCreatedEvent"));
+      expect(signalEvents.map(({ payload }) => payload)).toEqual([
+        { userNotificationsCreatedData: { userIds: [threadAuthor.user.id] } },
+      ]);
+      expect(notifiedUserRooms()).toEqual(userRoomsOf(threadAuthor));
+    });
+
+    it("skips course participants who can no longer read the discussion", async () => {
+      const [threadAuthor, archivedReplier, formerReader, replier] = await createStudents(4);
+      const course = await createEnrolledCourse(
+        threadAuthor,
+        threadAuthor,
+        archivedReplier,
+        formerReader,
+        replier,
+      );
+      const thread = await postCourseMessage(threadAuthor, course.id, { content: "A question" });
+      for (const participant of [archivedReplier, formerReader]) {
+        await postCourseMessage(participant, course.id, {
+          content: "An answer",
+          parentMessageId: thread.id,
+        });
+      }
+      await dispatchOutbox(app);
+      await db.update(users).set({ archived: true }).where(eq(users.id, archivedReplier.user.id));
+      await assignSystemRoleToUserInTests(
+        db,
+        formerReader.user.id,
+        formerReader.user.tenantId,
+        SYSTEM_ROLE_SLUGS.REVIEWER,
+      );
+      const notificationsBefore = {
+        archivedReplier: await countNotificationsOf(archivedReplier),
+        formerReader: await countNotificationsOf(formerReader),
+      };
+      emitToRoom.mockClear();
+
+      await postCourseMessage(replier, course.id, {
+        content: "A later answer",
+        parentMessageId: thread.id,
+      });
+      await dispatchOutbox(app);
+
+      expect({
+        archivedReplier: await countNotificationsOf(archivedReplier),
+        formerReader: await countNotificationsOf(formerReader),
+      }).toEqual(notificationsBefore);
+      expect(notifiedUserRooms()).toEqual(userRoomsOf(threadAuthor));
+    });
+
     it("leaves out users the reply mentions and users who left the course", async () => {
       const [threadAuthor, mentionedReplier, formerStudent, replier] = await createStudents(4);
       const course = await createEnrolledCourse(
@@ -263,7 +344,7 @@ describe("Discussion reply notifications (e2e)", () => {
       expect(await replyTitles(threadAuthor)).toHaveLength(1);
       expect(await replyTitles(mentionedReplier)).toEqual([]);
       expect(await getNotifications(formerStudent)).toEqual(formerStudentNotifications);
-      expect(notifiedUserRooms()).toEqual(userRoomsOf(threadAuthor));
+      expect(notifiedUserRooms()).toEqual(userRoomsOf(threadAuthor, mentionedReplier));
     });
 
     it("notifies nobody when the thread author answers their own thread", async () => {
@@ -311,7 +392,7 @@ describe("Discussion reply notifications (e2e)", () => {
       expect(notifiedUserRooms()).toEqual(userRoomsOf(topicAuthor, earlierReplier));
     });
 
-    it("sends a mentioned participant only the mention, and skips archived users", async () => {
+    it("sends a mentioned participant only the mention, live as well, and skips archived users", async () => {
       const [topicAuthor, archivedReplier, replier] = await createStudents(3);
       const topic = await createTopic(topicAuthor, "Release notes");
       await postForumReply(archivedReplier, topic.id, { content: "An answer" });
@@ -331,7 +412,26 @@ describe("Discussion reply notifications (e2e)", () => {
       expect(notificationsForAuthor.map(({ title }) => title)).not.toContain(
         replyTitleFrom(replier),
       );
-      expect(notifiedUserRooms()).toEqual([]);
+      expect(notifiedUserRooms()).toEqual(userRoomsOf(topicAuthor));
+    });
+
+    it("still notifies participants about a reply event stored before mentions were recorded", async () => {
+      const [topicAuthor, replier] = await createStudents(2);
+      const topic = await createTopic(topicAuthor, "Release notes");
+
+      await app.get(OutboxPublisher).publish(
+        new ForumReplyCreatedEvent({
+          topicId: topic.id,
+          postId: topic.firstPost.id,
+          firstPostId: topic.firstPost.id,
+          actorUserId: replier.user.id,
+        }),
+      );
+      await dispatchOutbox(app);
+
+      expect(await getNotifications(topicAuthor)).toEqual([
+        expect.objectContaining({ title: replyTitleFrom(replier) }),
+      ]);
     });
   });
 });

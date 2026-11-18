@@ -53,6 +53,8 @@ type MessagesQuery = { page?: number; perPage?: number; aroundMessageId?: string
 const messagesRequests = () =>
   vi.mocked(ApiClient.api.courseChatControllerGetMessages).mock.calls.map(([, query]) => query);
 
+const onRequestedThreadShown = vi.fn();
+
 const renderCourseChat = (requestedThreadId?: string) =>
   renderWith().render(
     <QueryClientProvider client={queryClient}>
@@ -61,9 +63,15 @@ const renderCourseChat = (requestedThreadId?: string) =>
         currentUserId={CURRENT_USER_ID}
         canDeleteAnyMessage={false}
         requestedThreadId={requestedThreadId}
+        onRequestedThreadShown={onRequestedThreadShown}
       />
     </QueryClientProvider>,
   );
+
+const cachedThreadLookups = () =>
+  queryClient
+    .getQueryCache()
+    .findAll({ queryKey: ["course-chat", "messages", COURSE_ID, "thread"] });
 
 describe("CourseChatTab", () => {
   beforeEach(() => {
@@ -106,6 +114,16 @@ describe("CourseChatTab", () => {
     expect(
       screen.getByTestId(COURSE_DISCUSSION_HANDLES.thread(THREAD_ID)).scrollIntoView,
     ).toHaveBeenCalled();
+  });
+
+  it("reports the requested thread as shown and keeps no copy of the lookup", async () => {
+    const { unmount } = renderCourseChat(THREAD_ID);
+    await screen.findByText("The reply");
+
+    expect(onRequestedThreadShown).toHaveBeenCalledTimes(1);
+
+    unmount();
+    await waitFor(() => expect(cachedThreadLookups()).toEqual([]));
   });
 
   it("starts on the newest page when no thread is requested", async () => {

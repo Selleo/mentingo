@@ -31,6 +31,7 @@ export const courseChatMessagesQueryOptions = (
 
       return response.data;
     },
+    ...(threadMessageId && { gcTime: 0 }),
   });
 
 export function useCourseChatMessages(courseId: string, page = 1, threadMessageId?: string) {
