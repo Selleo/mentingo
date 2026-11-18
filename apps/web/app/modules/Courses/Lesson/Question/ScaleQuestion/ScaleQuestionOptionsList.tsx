@@ -108,7 +108,7 @@ export const ScaleQuestionOptionsList = ({
               <span
                 className={`
                 text-center transition-all duration-150 select-none 
-                ${isSelected ? "text-blue-600 font-bold scale-105" : "text-gray-500 opacity-60"}
+                ${isSelected ? "text-blue-600 font-bold scale-105" : "text-neutral-800"}
               `}
               >
                 {option.optionText}
