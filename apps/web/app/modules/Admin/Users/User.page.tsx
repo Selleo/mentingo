@@ -142,6 +142,7 @@ const User = () => {
             <div>
               <Badge
                 data-testid={USER_PAGE_HANDLES.STATUS_BADGE}
+                data-status={user.archived ? "archived" : "active"}
                 variant={user.archived ? "outline" : "secondary"}
                 className="capitalize"
               >

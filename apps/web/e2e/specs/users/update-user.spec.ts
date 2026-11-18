@@ -63,6 +63,10 @@ test("admin can update a user's details, roles and groups, then archive the user
     await openUserPageFlow(page, user.id);
     await fillUserFormFlow(page, { archived: true });
     await saveUserFormFlow(page);
+    await expect(page.getByTestId(USER_PAGE_HANDLES.STATUS_BADGE)).toHaveAttribute(
+      "data-status",
+      "archived",
+    );
     await expect.poll(async () => (await userFactory.getById(user.id)).archived).toBe(true);
 
     await openUsersPageFlow(page);

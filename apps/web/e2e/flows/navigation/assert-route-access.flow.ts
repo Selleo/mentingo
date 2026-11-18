@@ -57,7 +57,8 @@ export const assertDeniedRoutesFlow = async (page: Page, role: string) => {
 
 /**
  * Direct entry and reload of /reports follow the role's permission, in the UI and the API.
- * Denied roles also try a differently cased path with a trailing slash.
+ * Denied roles enter /reports again after the redirect instead of reloading,
+ * and also try a differently cased path with a trailing slash.
  */
 export const assertReportsAccessFlow = async (
   page: Page,
@@ -71,7 +72,9 @@ export const assertReportsAccessFlow = async (
     : ["/reports?language=en", "/REPORTS/?language=en"];
 
   for (const entry of entries) {
-    for (const open of [() => page.goto(entry), () => page.reload()]) {
+    // A denied reload would only reload the redirect target, so denied roles enter /reports twice.
+    const secondOpen = allowed ? () => page.reload() : () => page.goto(entry);
+    for (const open of [() => page.goto(entry), secondOpen]) {
       await open();
       if (allowed) {
         await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeVisible();
