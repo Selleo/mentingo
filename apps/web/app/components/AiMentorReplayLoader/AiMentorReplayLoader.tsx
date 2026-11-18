@@ -3,10 +3,12 @@ import { cn } from "~/lib/utils";
 type AiMentorReplayLoaderProps = {
   text: string;
   className?: string;
+  testId?: string;
 };
 
-export const AiMentorReplayLoader = ({ text, className }: AiMentorReplayLoaderProps) => (
+export const AiMentorReplayLoader = ({ text, className, testId }: AiMentorReplayLoaderProps) => (
   <div
+    data-testid={testId}
     role="status"
     aria-live="polite"
     className={cn("flex min-h-0 flex-1 items-center justify-center px-6 py-10", className)}

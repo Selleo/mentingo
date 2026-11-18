@@ -74,7 +74,12 @@ export function ConversationDetails({
       {thread.evaluation && (
         <section className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-neutral-200 pt-6">
           <div className="flex items-baseline gap-1 text-neutral-950">
-            <span className="body-base-md tabular-nums">{thread.evaluation.score}</span>
+            <span
+              className="body-base-md tabular-nums"
+              data-testid={AI_CONVERSATIONS_HANDLES.SCORE}
+            >
+              {thread.evaluation.score}
+            </span>
             <span className="body-base text-neutral-700">/ {thread.evaluation.maxScore}</span>
           </div>
           <Button

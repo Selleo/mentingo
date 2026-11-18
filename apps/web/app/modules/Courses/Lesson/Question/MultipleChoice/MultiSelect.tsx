@@ -8,6 +8,8 @@ import { cn } from "~/lib/utils";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 import { SELECT_OPTION_VARIANTS } from "~/modules/Courses/Lesson/constants";
 
+import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
+
 import type { QuizForm } from "~/modules/Courses/Lesson/types";
 
 type MultiSelectProps = {
@@ -84,6 +86,7 @@ export const MultiSelect = ({
           "sr-only": isInputToggleHidden,
         })}
         id={answerId}
+        data-testid={LEARNING_HANDLES.quizOption(answerId)}
         readOnly
         // pointer-events-none only stops the mouse; disabled also stops arrow keys and Space.
         disabled={isFieldDisabled}

@@ -5,6 +5,7 @@ export const AI_MENTOR_PRACTICE_HANDLES = {
   SCENARIO_INPUT: "ai-mentor-practice-scenario-input",
   SUBMIT_BUTTON: "ai-mentor-practice-submit-button",
   PREPARING_STATE: "ai-mentor-practice-preparing-state",
+  REPLAY_LOADER: "ai-mentor-practice-replay-loader",
   GO_TO_DASHBOARD_BUTTON: "ai-mentor-practice-go-to-dashboard-button",
   CONVERSATION: "ai-mentor-practice-conversation",
   TASK_BUTTON: "ai-mentor-practice-task-button",
@@ -13,4 +14,6 @@ export const AI_MENTOR_PRACTICE_HANDLES = {
   PRACTICE_AGAIN_BUTTON: "ai-mentor-practice-again-button",
   FEEDBACK_DIALOG: VOICE_JUDGE_TEST_IDS.DIALOG,
   WIDGET: "ai-mentor-practice-dashboard-widget",
+  WIDGET_GENERATING: "ai-mentor-practice-dashboard-generating",
+  CONTINUE_LINK: "ai-mentor-practice-continue-link",
 } as const;

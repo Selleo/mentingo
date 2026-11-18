@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { cn } from "~/lib/utils";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 
+import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
+
 import type { QuizQuestionOption } from "../types";
 import type { QuizForm } from "~/modules/Courses/Lesson/types";
 
@@ -65,7 +67,7 @@ export const TextBlank = ({
     <input
       key={index}
       type="text"
-      data-testid={`text-blank-${formFieldId}`}
+      data-testid={LEARNING_HANDLES.textBlank(index + 1)}
       placeholder={isUnanswered ? t("studentLessonView.other.notAnswered") : undefined}
       className={textBlankClasses}
       {...(studentAnswer?.studentAnswer && { defaultValue: studentAnswer.studentAnswer })}

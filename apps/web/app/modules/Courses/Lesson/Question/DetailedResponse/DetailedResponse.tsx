@@ -7,6 +7,8 @@ import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { QuestionCard } from "~/modules/Courses/Lesson/Question/QuestionCard";
 
+import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
+
 import type { QuizQuestion } from "~/modules/Courses/Lesson/Question/types";
 import type { QuizForm } from "~/modules/Courses/Lesson/types";
 
@@ -14,6 +16,7 @@ export type DetailedResponseProps = {
   question: QuizQuestion;
   isCompleted?: boolean;
 };
+
 export const DetailedResponse = ({ question, isCompleted = false }: DetailedResponseProps) => {
   const { isPreviewMode } = useCourseAccessProvider();
   const { register } = useFormContext<QuizForm>();
@@ -29,7 +32,7 @@ export const DetailedResponse = ({ question, isCompleted = false }: DetailedResp
       reviewerFeedback={question.reviewerFeedback}
     >
       <Textarea
-        data-testid="detailed-response"
+        data-testid={LEARNING_HANDLES.DETAILED_RESPONSE_INPUT}
         {...register(`detailedResponses.${question.id}`)}
         placeholder={t("studentLessonView.placeholder.openQuestion")}
         rows={5}

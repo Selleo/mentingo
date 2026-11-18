@@ -2,115 +2,68 @@ import { AI_THREAD_TYPES, ASSISTANT_MESSAGE_ROLES, ASSISTANT_MESSAGE_STATUSES } 
 
 import { USER_ROLE } from "~/config/userRoles";
 
+import {
+  AI_CONVERSATION,
+  AI_CONVERSATION_EVALUATION,
+  AI_CONVERSATION_MESSAGES,
+  AI_CONVERSATION_THREAD_ID,
+} from "../../data/ai-conversations/ai-conversations.data";
 import { AI_CONVERSATIONS_HANDLES as HANDLES } from "../../data/ai-conversations/handles";
+import { AI_MENTOR_PRACTICE_HANDLES } from "../../data/ai-mentor-practice/handles";
 import { expect, test } from "../../fixtures/test.fixture";
+import { mockAiConversationsFlow } from "../../flows/ai-conversations/mock-ai-conversations.flow";
 
-import type { Page } from "@playwright/test";
-
-const THREAD_ID = "f6731652-8121-49d6-8d1c-dfe71e8ae515";
-const conversation = {
-  id: THREAD_ID,
-  type: "practice",
-  practiceSessionId: "5b02b66d-16e4-45ba-93aa-35241e4f1fd3",
-  aiMentorLessonId: null,
-  lessonId: null,
-  courseId: null,
-  courseTitle: null,
-  title: "Historical interview",
-  openingPreview: "Welcome to the saved interview.",
-  owner: {
-    id: "722f08f5-e085-43d7-a6e7-60599dd4038c",
-    firstName: "Alex",
-    lastName: "Learner",
-    profilePictureUrl: null,
-  },
-  status: "archived",
-  language: "en",
-  createdAt: "2026-09-01T10:00:00.000Z",
-  lastActivityAt: "2026-09-01T10:05:00.000Z",
-};
-
-async function mockConversations(page: Page) {
-  const mutations: string[] = [];
-  page.on("request", (request) => {
-    if (/\/api\/(?:admin\/ai-threads|ai\/)/.test(request.url()) && request.method() !== "GET")
-      mutations.push(request.url());
-  });
-  await page.route(/\/api\/admin\/ai-threads(?:\/|\?|$)/, async (route) => {
-    const url = new URL(route.request().url());
-    const pageNumber = Number(url.searchParams.get("page") || 1);
-    if (url.pathname.endsWith("/messages")) {
-      const content = pageNumber === 1 ? "Saved learner answer" : "Saved mentor feedback";
-      return route.fulfill({
-        json: {
-          data: [
-            {
-              id: `message-${pageNumber}`,
-              role: pageNumber === 1 ? "user" : "assistant",
-              content,
-              createdAt: conversation.lastActivityAt,
-            },
-          ],
-          pagination: { page: pageNumber, perPage: 100, totalItems: 101 },
-        },
-      });
-    }
-    if (url.pathname.endsWith(THREAD_ID))
-      return route.fulfill({
-        json: {
-          data: {
-            ...conversation,
-            evaluation: {
-              passed: true,
-              score: 8,
-              maxScore: 10,
-              percentage: 80,
-              criteria: [],
-              blockingErrors: [],
-            },
-          },
-        },
-      });
-    return route.fulfill({
-      json: { data: [conversation], pagination: { page: pageNumber, perPage: 20, totalItems: 21 } },
-    });
-  });
-  return mutations;
-}
+// UI-contract suite: saved AI threads can only be produced by LLM conversations, so the
+// admin history API is mocked through the domain mock flow (strategy §9).
 
 test("admin browses paginated saved history and evaluation without conversation mutations", async ({
   withWorkerPage,
-}, testInfo) => {
+}) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const mutations = await mockConversations(page);
+    const { listRequests, mutations } = await mockAiConversationsFlow(page);
     await page.goto("/admin/ai-conversations?status=archived&search=Historical&page=2");
-    await expect(page.getByRole("button", { name: "Refresh" })).toHaveCount(0);
+    await expect(page.getByTestId(HANDLES.row(AI_CONVERSATION_THREAD_ID))).toBeVisible();
+    // The URL filters reach the history API, not only the address bar.
+    expect(Object.fromEntries(listRequests[0] ?? [])).toMatchObject({
+      status: "archived",
+      search: "Historical",
+      page: "2",
+    });
+    // The history list shows no learner avatars.
     await expect(page.getByTestId(HANDLES.LIST).getByRole("img")).toHaveCount(0);
-    await page.getByTestId(HANDLES.row(THREAD_ID)).click();
+    await page.getByTestId(HANDLES.row(AI_CONVERSATION_THREAD_ID)).click();
     await expect(page).toHaveURL(
-      new RegExp(`${THREAD_ID}\\?status=archived&search=Historical&page=2`),
+      new RegExp(`${AI_CONVERSATION_THREAD_ID}\\?status=archived&search=Historical&page=2`),
     );
-    await expect(page.getByTestId(HANDLES.MESSAGE)).toContainText("Saved learner answer");
-    await expect(page.getByRole("button", { name: "Refresh" })).toHaveCount(0);
+    await expect(page.getByTestId(HANDLES.MESSAGE)).toContainText(
+      AI_CONVERSATION_MESSAGES.learnerAnswer,
+    );
     await expect(page.getByTestId(HANDLES.LIST)).toBeVisible();
-    await expect(page.getByTestId(HANDLES.row(THREAD_ID))).toHaveAttribute("aria-current", "page");
+    await expect(page.getByTestId(HANDLES.row(AI_CONVERSATION_THREAD_ID))).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     await page.getByTestId(HANDLES.LOAD_MORE).click();
     await expect(page.getByTestId(HANDLES.MESSAGE)).toHaveCount(2);
-    await page.screenshot({ path: testInfo.outputPath("desktop.png"), fullPage: true });
-    await page.getByRole("tab", { name: "Details", exact: true }).click();
-    await expect(page.getByRole("tabpanel", { name: "Details" })).toBeVisible();
+    await expect(page.getByTestId(HANDLES.MESSAGE).nth(1)).toContainText(
+      AI_CONVERSATION_MESSAGES.mentorFeedback,
+    );
+    await page.getByTestId(HANDLES.DETAILS_TAB).click();
+    await expect(page.getByTestId(HANDLES.DETAILS_PANEL)).toBeVisible();
+    const score = String(AI_CONVERSATION_EVALUATION.score);
+    await expect(page.getByTestId(HANDLES.SCORE)).toHaveText(score);
     await page.getByTestId(HANDLES.RESULT).click();
-    await expect(page.getByRole("dialog")).toContainText("8");
+    // The dialog comes from @mentingo/voice, which exposes no handle on the score itself.
+    await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.FEEDBACK_DIALOG)).toContainText(score);
     await page.keyboard.press("Escape");
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(page.getByTestId(HANDLES.LIST)).toBeHidden();
-    await page.screenshot({ path: testInfo.outputPath("mobile.png"), fullPage: true });
     await page.getByTestId(HANDLES.BACK).click();
     await expect(page).toHaveURL(/ai-conversations\?status=archived&search=Historical&page=2$/);
     await expect(page.getByTestId(HANDLES.LIST)).toBeVisible();
     await page.getByTestId(HANDLES.SEARCH).fill("Another title");
+    await expect.poll(() => listRequests.at(-1)?.get("search")).toBe("Another title");
     await expect(page).not.toHaveURL(/page=2/);
-    await expect(page).not.toHaveURL(new RegExp(THREAD_ID));
     expect(mutations).toEqual([]);
   });
 });
@@ -119,15 +72,12 @@ test("admin sees an unavailable transcript and can return to the list", async ({
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await mockConversations(page);
-    await page.route(new RegExp(`/api/admin/ai-threads/${THREAD_ID}(?:\\?|$)`), (route) =>
-      route.fulfill({ status: 404, json: { message: "Not found" } }),
-    );
+    await mockAiConversationsFlow(page, { thread: null });
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(`/admin/ai-conversations/${THREAD_ID}`);
+    await page.goto(`/admin/ai-conversations/${AI_CONVERSATION_THREAD_ID}`);
     await expect(page.getByTestId(HANDLES.READER).getByRole("alert")).toBeVisible();
     await page.getByTestId(HANDLES.BACK).click();
-    await expect(page.getByTestId(HANDLES.row(THREAD_ID))).toBeVisible();
+    await expect(page.getByTestId(HANDLES.row(AI_CONVERSATION_THREAD_ID))).toBeVisible();
   });
 });
 
@@ -135,40 +85,28 @@ test("admin Assistant history never requests model-provided images or links", as
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await mockConversations(page);
-    const externalRequests: string[] = [];
-    await page.route("**://attacker.invalid/**", (route) => {
-      externalRequests.push(route.request().url());
-      return route.abort();
-    });
-    await page.route(new RegExp(`/api/admin/ai-threads/${THREAD_ID}(?:\\?|$)`), (route) =>
-      route.fulfill({
-        json: { data: { ...conversation, type: AI_THREAD_TYPES.ASSISTANT, evaluation: null } },
-      }),
-    );
-    await page.route(new RegExp(`/api/admin/ai-threads/${THREAD_ID}/messages(?:\\?|$)`), (route) =>
-      route.fulfill({
-        json: {
-          data: [
-            {
-              id: "mock-model-response",
-              role: ASSISTANT_MESSAGE_ROLES.ASSISTANT,
-              status: ASSISTANT_MESSAGE_STATUSES.COMPLETE,
-              content:
-                "Saved Assistant answer.\n\n![preview][p]\n\n[p]: //attacker.invalid/pixel\n\n[unverified][x]\n\n[x]: //attacker.invalid/landing",
-              createdAt: conversation.lastActivityAt,
-            },
-          ],
-          pagination: { page: 1, perPage: 100, totalItems: 1 },
+    const { blockedRequests } = await mockAiConversationsFlow(page, {
+      blockedHost: "attacker.invalid",
+      thread: { type: AI_THREAD_TYPES.ASSISTANT, evaluation: null },
+      messages: [
+        {
+          id: "mock-model-response",
+          role: ASSISTANT_MESSAGE_ROLES.ASSISTANT,
+          status: ASSISTANT_MESSAGE_STATUSES.COMPLETE,
+          content:
+            "Saved Assistant answer.\n\n![preview][p]\n\n[p]: //attacker.invalid/pixel\n\n[unverified][x]\n\n[x]: //attacker.invalid/landing",
+          createdAt: AI_CONVERSATION.lastActivityAt,
         },
-      }),
-    );
-    await page.goto(`/admin/ai-conversations/${THREAD_ID}`);
+      ],
+    });
+    await page.goto(`/admin/ai-conversations/${AI_CONVERSATION_THREAD_ID}`);
     const message = page.getByTestId(HANDLES.MESSAGE);
     await expect(message).toContainText("Saved Assistant answer.");
     await expect(message).toContainText("preview");
-    await expect(message.locator('img[src*="attacker.invalid"]')).toHaveCount(0);
-    await expect(message.locator('a[href*="attacker.invalid"]')).toHaveCount(0);
-    expect(externalRequests).toEqual([]);
+    // innerHTML always serializes attributes with double quotes; the URL may survive only as plain text.
+    expect(await message.evaluate((element) => element.innerHTML)).not.toMatch(
+      /\b(?:src|href|srcset|style)="[^"]*attacker\.invalid/,
+    );
+    expect(blockedRequests).toEqual([]);
   });
 });

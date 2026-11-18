@@ -23,14 +23,13 @@ test.describe("admin dashboard widgets", () => {
       const startsAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
       const endsAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
       const title = `Dashboard event ${Date.now()}`;
-      const liveTraining = await liveTrainingFactory.createOffline({
+      await liveTrainingFactory.createOffline(cleanup, {
         title,
         startsAt,
         endsAt,
         allDay: true,
       });
 
-      cleanup.add(() => liveTrainingFactory.delete(liveTraining.id));
       await setDashboardWidgets(apiClient, [
         {
           type: DASHBOARD_WIDGET_TYPES.EVENT_CALENDAR,

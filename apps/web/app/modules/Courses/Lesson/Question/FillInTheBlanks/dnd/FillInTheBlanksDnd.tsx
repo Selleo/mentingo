@@ -497,11 +497,13 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
           replacement={(index, answerId) => {
             const blankId = answerId ? createDndBlankId(answerId) : `${index + 1}`;
             const wordsInBlank = renderedWords.filter((word) => word.blankId === blankId);
+            const testId = answerId ? LEARNING_HANDLES.dndBlank(answerId) : blankId;
 
             if (isCompleted) {
               return (
                 <DndBlank
                   blankId={blankId}
+                  testId={testId}
                   words={wordsInBlank}
                   isCorrect={wordsInBlank[0]?.isCorrect}
                   isStudentAnswer={!!wordsInBlank[0]?.isStudentAnswer}
@@ -513,6 +515,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
             return (
               <BlankSelect
                 blankId={blankId}
+                testId={testId}
                 label={getBlankLabel(blankId)}
                 selectedKey={wordsInBlank[0]?.id ?? null}
                 items={wordItems}

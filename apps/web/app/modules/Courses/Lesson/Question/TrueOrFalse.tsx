@@ -5,6 +5,8 @@ import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 
+import { LEARNING_HANDLES } from "../../../../../e2e/data/learning/handles";
+
 import { QuestionCard } from "./QuestionCard";
 
 import type { QuizQuestion } from "./types";
@@ -62,6 +64,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
                   })}
                   type="radio"
                   value="true"
+                  data-testid={LEARNING_HANDLES.trueOrFalseOption(id, "true")}
                   {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
                   name={`trueOrFalseQuestions.${question.id}.${id}`}
                   disabled={isCompleted}
@@ -78,6 +81,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
                   disabled={isCompleted}
                   type="radio"
                   value="false"
+                  data-testid={LEARNING_HANDLES.trueOrFalseOption(id, "false")}
                 />
                 {t("studentLessonView.other.false")}
               </label>

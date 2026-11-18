@@ -7,8 +7,7 @@ import { assertCourseLessonProgressFlow } from "../../flows/learning/assert-lear
 import { goToNextLessonFlow } from "../../flows/learning/go-to-next-lesson.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
-
-import { createTwoContentLessonsCourse } from "./learning-test-helpers";
+import { createTwoContentLessonsCourse } from "../../utils/learning-courses";
 
 test("student can start learning and continue to the next content lesson", async ({
   apiClient,
@@ -26,47 +25,42 @@ test("student can start learning and continue to the next content lesson", async
   });
   const { firstLesson, secondLesson } = lessons;
 
-  await withWorkerPage(
-    USER_ROLE.student,
-    async ({ page }) => {
-      await enrollmentFactory.selfEnroll(courseId);
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
+    await enrollmentFactory.selfEnroll(courseId);
 
-      await openCourseOverviewFlow(page, courseId);
-      await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toBeVisible();
+    await openCourseOverviewFlow(page, courseId);
+    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toBeVisible();
 
-      await startLearningFlow(page);
+    await startLearningFlow(page);
 
-      await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${firstLesson.id}$`));
-      await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(firstLesson.title);
-      const firstLessonItem = page.getByTestId(
-        LEARNING_HANDLES.lessonSidebarLessonItem(firstLesson.id),
-      );
-      await expect(firstLessonItem).toContainText(firstLesson.title);
-      await page.getByTestId(LEARNING_HANDLES.lessonSidebarTypeIcon(firstLesson.id)).hover();
-      await expect(page.getByRole("tooltip")).toHaveText("Content");
+    await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${firstLesson.id}$`));
+    await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(firstLesson.title);
+    await expect(
+      page.getByTestId(LEARNING_HANDLES.lessonSidebarLessonItem(firstLesson.id)),
+    ).toContainText(firstLesson.title);
+    await page.getByTestId(LEARNING_HANDLES.lessonSidebarTypeIcon(firstLesson.id)).hover();
+    await expect(page.getByRole("tooltip")).toBeVisible();
 
-      await assertCourseLessonProgressFlow(apiClient, courseId, {
-        completedLessonCount: 1,
-        lessonId: firstLesson.id,
-        lessonStatus: "completed",
-      });
+    await assertCourseLessonProgressFlow(apiClient, courseId, {
+      completedLessonCount: 1,
+      lessonId: firstLesson.id,
+      lessonStatus: "completed",
+    });
 
-      await expect(page.getByTestId(LEARNING_HANDLES.NEXT_LESSON_BUTTON)).toBeEnabled();
-      await goToNextLessonFlow(page);
+    await expect(page.getByTestId(LEARNING_HANDLES.NEXT_LESSON_BUTTON)).toBeEnabled();
+    await goToNextLessonFlow(page);
 
-      await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${secondLesson.id}$`));
-      await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(secondLesson.title);
+    await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${secondLesson.id}$`));
+    await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(secondLesson.title);
 
-      await assertCourseLessonProgressFlow(apiClient, courseId, {
-        completedLessonCount: 2,
-        lessonId: secondLesson.id,
-        lessonStatus: "completed",
-      });
+    await assertCourseLessonProgressFlow(apiClient, courseId, {
+      completedLessonCount: 2,
+      lessonId: secondLesson.id,
+      lessonStatus: "completed",
+    });
 
-      await openCourseOverviewFlow(page, courseId);
-      await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON)).toBeVisible();
-      await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toHaveCount(0);
-    },
-    { root: true },
-  );
+    await openCourseOverviewFlow(page, courseId);
+    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON)).toBeVisible();
+    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toHaveCount(0);
+  });
 });

@@ -3,7 +3,7 @@ import { USER_ROLE } from "~/config/userRoles";
 import { COURSE_TOC_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
-import { createPublishedLearningCourse } from "../learning/learning-test-helpers";
+import { createPublishedLearningCourse } from "../../utils/learning-courses";
 
 test("course table of contents shows lesson types on icon hover, not below titles", async ({
   cleanup,
@@ -15,6 +15,7 @@ test("course table of contents shows lesson types on icon hover, not below title
     cleanup,
     factories,
     prefix,
+    root: true,
     withWorkerPage,
     buildLessons: async ({ courseId, chapterId, curriculumFactory, prefix }) => [
       await curriculumFactory.createContentLesson(courseId, {
