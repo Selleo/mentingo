@@ -47,6 +47,10 @@ test("admin can create a localized announcement in the notification center and d
   await page.getByTestId(NOTIFICATIONS_HANDLES.TAB_ADMIN_ANNOUNCEMENTS).click();
   await expect(card).toBeVisible();
   await page.getByTestId(NOTIFICATIONS_HANDLES.TAB_SYSTEM).click();
+  await expect(page.getByTestId(NOTIFICATIONS_HANDLES.TAB_SYSTEM)).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
   await expect(card).toHaveCount(0);
   await page.getByTestId(NOTIFICATIONS_HANDLES.TAB_ALL).click();
   await expect(card).toBeVisible();

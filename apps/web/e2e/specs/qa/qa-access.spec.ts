@@ -22,21 +22,18 @@ for (const { role, canManage } of ROLES) {
     workerTenantApiClient,
   }) => {
     const qaFactory = new QAFactory(workerTenantApiClient);
-    const qa = await qaFactory.create({
-      title: `qa-access-${role}-${Date.now()}`,
-      description: `qa-access-answer-${Date.now()}`,
-    });
+    const title = `qa-access-${role}-${Date.now()}`;
+    const description = `qa-access-answer-${Date.now()}`;
+    const qa = await qaFactory.create({ title, description });
     cleanup.add(() => qaFactory.safeDelete(qa.id));
 
     await withWorkerPage(role, async ({ page }) => {
       await openQAPageFlow(page);
 
-      await expect(page.getByTestId(QA_PAGE_HANDLES.itemTitle(qa.id))).toContainText(
-        qa.title ?? "",
-      );
+      await expect(page.getByTestId(QA_PAGE_HANDLES.itemTitle(qa.id))).toContainText(title);
       await page.getByTestId(QA_PAGE_HANDLES.itemTrigger(qa.id)).click();
       await expect(page.getByTestId(QA_PAGE_HANDLES.itemDescription(qa.id))).toHaveText(
-        qa.description ?? "",
+        description,
       );
       await expect(page.getByTestId(QA_PAGE_HANDLES.CREATE_BUTTON)).toHaveCount(canManage ? 1 : 0);
       await expect(page.getByTestId(QA_PAGE_HANDLES.itemEditButton(qa.id))).toHaveCount(
@@ -62,6 +59,12 @@ for (const { role, canManage } of ROLES) {
       description: `qa-language-answer-${Date.now()}`,
     });
     cleanup.add(() => qaFactory.safeDelete(qa.id));
+    const translatedQA = await qaFactory.create({
+      language: SUPPORTED_LANGUAGES.DE,
+      title: `qa-language-de-${role}-${Date.now()}`,
+      description: `qa-language-de-answer-${Date.now()}`,
+    });
+    cleanup.add(() => qaFactory.safeDelete(translatedQA.id));
 
     await withWorkerPage(role, async ({ page }) => {
       const originalLanguage = (await apiClient.api.settingsControllerGetUserSettings()).data.data
@@ -77,6 +80,8 @@ for (const { role, canManage } of ROLES) {
       });
 
       await openQAPageFlow(page);
+      // The translated entry proves the list has loaded in the UI language before the negative check.
+      await expect(page.getByTestId(QA_PAGE_HANDLES.item(translatedQA.id))).toBeVisible();
       await expect(page.getByTestId(QA_PAGE_HANDLES.item(qa.id))).toHaveCount(canManage ? 1 : 0);
     });
   });

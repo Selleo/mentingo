@@ -26,6 +26,7 @@ test("a group announcement reaches group members only", async ({ createIsolatedW
   });
 
   const announcementFactory = workspace.factories.createAnnouncementFactory();
+  const tenantWideAnnouncement = await announcementFactory.create();
   let announcementId = "";
   await expect
     .poll(async () => {
@@ -40,7 +41,10 @@ test("a group announcement reaches group members only", async ({ createIsolatedW
   await expect(memberCard.getByTestId(NOTIFICATIONS_HANDLES.CARD_CONTENT)).toHaveText(content);
 
   await outsider.page.goto(`${workspace.origin}/notifications`);
-  await expect(outsider.page.getByTestId(NOTIFICATIONS_HANDLES.PAGE)).toBeVisible();
+  // The tenant-wide announcement proves the outsider's list has loaded before the negative check.
+  await expect(
+    outsider.page.getByTestId(NOTIFICATIONS_HANDLES.card(tenantWideAnnouncement.id)),
+  ).toBeVisible();
   await expect(outsider.page.getByTestId(NOTIFICATIONS_HANDLES.card(announcementId))).toHaveCount(
     0,
   );

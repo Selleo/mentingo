@@ -92,6 +92,8 @@ test("leaving an unsaved editor can be cancelled or confirmed without saving", a
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const template = await createEmailTemplate();
     const templateId = requireId(template, "email template");
+    const savedSubject = template.subject.en;
+    if (!savedSubject) throw new Error("Expected the email template to have an English subject");
     await page.goto(EMAIL_TEMPLATE_DATA.listPath);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
     await openEmailTemplateFlow(page, templateId);
@@ -111,9 +113,7 @@ test("leaving an unsaved editor can be cancelled or confirmed without saving", a
     await expect(page).toHaveURL(new URL(EMAIL_TEMPLATE_DATA.catalogPath, page.url()).toString());
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.TABLE)).toBeVisible();
     await openEmailTemplateFlow(page, templateId);
-    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toHaveValue(
-      template.subject.en!,
-    );
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toHaveValue(savedSubject);
     expect((await factory.getById(templateId)).subject).toEqual(template.subject);
   });
 });

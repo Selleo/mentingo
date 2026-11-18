@@ -15,27 +15,35 @@ const ROLES = [
 
 for (const { role, canManage } of ROLES) {
   test(`${role} can open an article and browse its section in the TOC`, async ({
+    apiClient,
     cleanup,
     withWorkerPage,
     workerTenantApiClient,
   }) => {
-    const articleFactory = new ArticleFactory(workerTenantApiClient);
-    const prefix = `article-access-${role}-${Date.now()}`;
-    const { article, section } = await articleFactory.createWithSection({
-      title: `${prefix}-first`,
-      summary: `${prefix}-summary`,
-      isPublic: true,
-    });
-    cleanup.add(() => articleFactory.safeDeleteSection(section.id));
-    cleanup.add(() => articleFactory.safeDelete(article.id));
-    const otherArticle = await articleFactory.create({
-      sectionId: section.id,
-      title: `${prefix}-second`,
-      isPublic: true,
-    });
-    cleanup.add(() => articleFactory.safeDelete(otherArticle.id));
-
     await withWorkerPage(role, async ({ page }) => {
+      // Non-managers only see articles translated to their UI language, so create it in that language.
+      const language = (await apiClient.api.settingsControllerGetUserSettings()).data.data
+        ?.language;
+      if (!language) throw new Error("Expected the user's UI language");
+
+      const articleFactory = new ArticleFactory(workerTenantApiClient);
+      const prefix = `article-access-${role}-${Date.now()}`;
+      const { article, section } = await articleFactory.createWithSection({
+        language,
+        title: `${prefix}-first`,
+        summary: `${prefix}-summary`,
+        isPublic: true,
+      });
+      cleanup.add(() => articleFactory.safeDeleteSection(section.id));
+      cleanup.add(() => articleFactory.safeDelete(article.id));
+      const otherArticle = await articleFactory.create({
+        language,
+        sectionId: section.id,
+        title: `${prefix}-second`,
+        isPublic: true,
+      });
+      cleanup.add(() => articleFactory.safeDelete(otherArticle.id));
+
       await openArticleDetailsPageFlow(page, article.id);
 
       await expect(page.getByTestId(ARTICLE_DETAILS_PAGE_HANDLES.TITLE)).toHaveText(article.title);

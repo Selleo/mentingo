@@ -124,6 +124,7 @@ test("an uploaded image remains visible after saving and reopening", async ({
     const image = page
       .getByTestId(EMAIL_TEMPLATES_HANDLES.CANVAS)
       .getByTestId(EMAIL_TEMPLATES_HANDLES.CANVAS_IMAGE);
+    await expect(image).toBeVisible();
     await expect(image).toHaveAttribute("alt", "Learning illustration");
     await expect
       .poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth))

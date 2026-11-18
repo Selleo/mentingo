@@ -54,7 +54,9 @@ test("publishing saves current edits while other templates remain independently 
       "Published directly from unsaved edits",
     );
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.PUBLISH)).toBeDisabled();
-    const publicationVersion = (await factory.getById(templateId)).publicationVersion;
+    const { publicationVersion } = await factory.getById(templateId);
+    if (typeof publicationVersion !== "number")
+      throw new Error("Expected a published template version");
     await editEmailTemplateFlow(page, { subject: "Draft after publication" });
     await saveEmailDraftFlow(page);
     await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SAVE_MENU)).toBeDisabled();
@@ -82,7 +84,7 @@ test("publishing saves current edits while other templates remain independently 
           publicationVersion: saved.publicationVersion,
         };
       })
-      .toEqual({ hasUnpublishedChanges: false, publicationVersion: publicationVersion! + 1 });
+      .toEqual({ hasUnpublishedChanges: false, publicationVersion: publicationVersion + 1 });
     expect((await factory.getById(previousId)).status).toBe("published");
   });
 });
@@ -135,7 +137,9 @@ test("deleting from the editor needs a saved draft and a confirmation", async ({
     await deleteEmailTemplateFlow(page, page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS), {
       confirm: false,
     });
-    await expect.poll(() => factory.exists(templateId)).toBe(true);
+    await expect(page).toHaveURL(new RegExp(`/${templateId}$`));
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.SUBJECT)).toHaveValue("Unsaved change");
+    expect(await factory.exists(templateId)).toBe(true);
     await deleteEmailTemplateFlow(page, page.getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS), {
       confirm: true,
     });
@@ -161,7 +165,8 @@ test("deleting from the list needs a confirmation", async ({
       .getByTestId(EMAIL_TEMPLATES_HANDLES.ACTIONS);
 
     await deleteEmailTemplateFlow(page, rowActions, { confirm: false });
-    await expect.poll(() => factory.exists(templateId)).toBe(true);
+    await expect(page.getByTestId(EMAIL_TEMPLATES_HANDLES.ROW(templateId))).toBeVisible();
+    expect(await factory.exists(templateId)).toBe(true);
     await deleteEmailTemplateFlow(page, rowActions, { confirm: true });
 
     await expect(page).toHaveURL(new URL(EMAIL_TEMPLATE_DATA.catalogPath, page.url()).toString());

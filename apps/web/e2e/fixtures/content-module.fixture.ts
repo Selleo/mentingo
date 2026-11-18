@@ -8,20 +8,15 @@ import type { ContentModule } from "../utils/content-features";
 export const testWithContentModules = (...modules: ContentModule[]) =>
   base.extend<{ _contentModules: void }>({
     _contentModules: [
-      async ({ workerTenantApiClient }, use) => {
-        const restores: Array<() => Promise<void>> = [];
-
-        try {
-          for (const module of modules) {
-            restores.push(
-              await overrideContentModuleState(workerTenantApiClient, module, { enabled: true }),
-            );
-          }
-
-          await use();
-        } finally {
-          for (const restore of restores.reverse()) await restore();
+      async ({ cleanup, workerTenantApiClient }, use) => {
+        // Each restore is registered right after its override, so a failed setup still restores what changed.
+        for (const module of modules) {
+          cleanup.add(
+            await overrideContentModuleState(workerTenantApiClient, module, { enabled: true }),
+          );
         }
+
+        await use();
       },
       { auto: true },
     ],
