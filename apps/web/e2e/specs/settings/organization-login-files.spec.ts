@@ -34,14 +34,17 @@ test("admin uploads, previews and deletes a login-page document that visitors se
     await expect(
       page.getByTestId(SETTINGS_PAGE_HANDLES.loginPageFileItem(displayName)),
     ).toBeVisible();
+    let resourceId = "";
     await expect
-      .poll(async () =>
-        (await getLoginPageFiles(apiClient)).some((resource) => resource.name === displayName),
-      )
-      .toBe(true);
+      .poll(async () => {
+        const files = await getLoginPageFiles(apiClient);
+        resourceId = files.find((resource) => resource.name === displayName)?.id ?? "";
+        return resourceId;
+      })
+      .not.toBe("");
 
     await openLoginPageFlow(visitor.page);
-    await expect(visitor.page.getByTestId(LOGIN_PAGE_HANDLES.resource(displayName))).toBeVisible();
+    await expect(visitor.page.getByTestId(LOGIN_PAGE_HANDLES.resource(resourceId))).toBeVisible();
 
     await page.getByTestId(SETTINGS_PAGE_HANDLES.loginPageFilePreview(displayName)).click();
     await expect(
@@ -60,7 +63,7 @@ test("admin uploads, previews and deletes a login-page document that visitors se
     ).toHaveCount(0);
 
     await openLoginPageFlow(visitor.page);
-    await expect(visitor.page.getByTestId(LOGIN_PAGE_HANDLES.resource(displayName))).toHaveCount(0);
+    await expect(visitor.page.getByTestId(LOGIN_PAGE_HANDLES.resource(resourceId))).toHaveCount(0);
   });
 });
 

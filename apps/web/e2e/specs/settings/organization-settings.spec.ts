@@ -40,8 +40,10 @@ test("admin enforces MFA for a role and a user of that role must enroll on login
       const enforcedRoles = new Set((await getGlobalSettings(apiClient)).MFAEnforcedRoles);
 
       return {
+        admin: enforcedRoles.has(USER_ROLE.admin),
         student: enforcedRoles.has(USER_ROLE.student),
         content_creator: enforcedRoles.has(USER_ROLE.contentCreator),
+        trainer: enforcedRoles.has(SYSTEM_ROLE_SLUGS.TRAINER),
       };
     };
 
@@ -67,7 +69,13 @@ test("admin enforces MFA for a role and a user of that role must enroll on login
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_SAVE)).toBeEnabled();
     await saveMfaEnforcementFlow(page);
 
-    await expect.poll(readEnforcedRoles).toEqual({ student: true, content_creator: true });
+    // Roles the admin did not toggle keep their original setting.
+    await expect.poll(readEnforcedRoles).toEqual({
+      admin: originalRoles.has(USER_ROLE.admin),
+      student: true,
+      content_creator: true,
+      trainer: originalRoles.has(SYSTEM_ROLE_SLUGS.TRAINER),
+    });
   });
 
   const visitor = await createWorkspacePage();
@@ -76,6 +84,15 @@ test("admin enforces MFA for a role and a user of that role must enroll on login
   await login(visitor.page, studentEmail, TEST_PASSWORD);
   await expect(visitor.page).toHaveURL("/auth/mfa");
   await expect(visitor.page.getByTestId(MFA_PAGE_HANDLES.SECRET)).toBeVisible();
+});
+
+test("organization settings no longer expose email trigger switches", async ({
+  withWorkerPage,
+}) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+    await openOrganizationSettingsFlow(page);
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.USER_EMAIL_TRIGGERS_CARD)).toHaveCount(0);
+  });
 });
 
 test("admin changes the default course currency and a new course is priced in it", async ({

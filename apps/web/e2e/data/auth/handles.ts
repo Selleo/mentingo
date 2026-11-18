@@ -12,7 +12,7 @@ export const LOGIN_PAGE_HANDLES = {
   REGISTER_LINK: "login-page-register-link",
   VERSION_CHANGELOG_LINK: "login-page-version-changelog-link",
   BACKGROUND: "login-page-background",
-  resource: (name: string) => `login-page-resource-${name}`,
+  resource: (id: string) => `login-page-resource-${id}`,
 } as const;
 
 const REGISTER_INVITE_ONLY = "register-invite-only";

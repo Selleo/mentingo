@@ -1,5 +1,4 @@
 import { LEADERBOARD_PERIODS, LEADERBOARD_VISIBILITY } from "@repo/shared";
-import { format } from "date-fns";
 
 import { USER_ROLE } from "~/config/userRoles";
 
@@ -118,17 +117,21 @@ test("custom period asks for a valid date range before loading the ranking", asy
     }),
   );
 
-  // Days of the current month, which is the month both pickers open on.
-  const currentMonth = format(new Date(), "yyyy-MM");
-  const fromDay = `${currentMonth}-15`;
-  const dayBeforeFrom = `${currentMonth}-10`;
-  const toDay = `${currentMonth}-20`;
-
   await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     const { data: currentUser } = await apiClient.api.authControllerCurrentUser();
     const student = currentUser.data;
 
     await openLeaderboardPageFlow(page);
+
+    // Both pickers open on the browser's current month; take it in the browser's timezone.
+    // Any range works: learners without XP in it are still ranked.
+    const currentMonth = await page.evaluate(() => {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    });
+    const fromDay = `${currentMonth}-15`;
+    const dayBeforeFrom = `${currentMonth}-10`;
+    const toDay = `${currentMonth}-20`;
 
     await page.getByTestId(LEADERBOARD_HANDLES.PERIOD_SELECT).click();
     await page.getByTestId(LEADERBOARD_HANDLES.periodOption(LEADERBOARD_PERIODS.CUSTOM)).click();

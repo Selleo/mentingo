@@ -248,7 +248,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => handlePreviewClick(resource)}
-                    data-testid={LOGIN_PAGE_HANDLES.resource(resource.name)}
+                    data-testid={LOGIN_PAGE_HANDLES.resource(resource.id)}
                     className="text-sm truncate underline"
                   >
                     {resource.name}
