@@ -167328,6 +167328,24 @@
               "rules"
             ]
           },
+          "activityPeriod": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "from": {
+                "format": "date",
+                "type": "string"
+              },
+              "to": {
+                "format": "date",
+                "type": "string"
+              }
+            },
+            "required": [
+              "from",
+              "to"
+            ]
+          },
           "sortBy": {
             "anyOf": [
               {
@@ -167435,6 +167453,111 @@
           "data": {
             "type": "object",
             "properties": {
+              "courseActivity": {
+                "type": "object",
+                "properties": {
+                  "popular": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "activeLearners": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "lastActivityAt": {
+                          "anyOf": [
+                            {
+                              "format": "date-time",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "inactiveDays": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label",
+                        "activeLearners",
+                        "lastActivityAt",
+                        "inactiveDays"
+                      ]
+                    }
+                  },
+                  "inactive": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "activeLearners": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "lastActivityAt": {
+                          "anyOf": [
+                            {
+                              "format": "date-time",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "inactiveDays": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label",
+                        "activeLearners",
+                        "lastActivityAt",
+                        "inactiveDays"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "popular",
+                  "inactive"
+                ]
+              },
               "rows": {
                 "type": "array",
                 "items": {
@@ -170630,6 +170753,24 @@
                 "required": [
                   "match",
                   "rules"
+                ]
+              },
+              "activityPeriod": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "to": {
+                    "format": "date",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
                 ]
               },
               "sortBy": {

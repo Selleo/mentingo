@@ -8,7 +8,14 @@ export type QueryRow = Record<string, unknown>;
 
 export type ReportData = Pick<
   ReportsResult,
-  "rows" | "metrics" | "breakdowns" | "total" | "page" | "pageSize" | "capturedAt"
+  | "rows"
+  | "metrics"
+  | "breakdowns"
+  | "total"
+  | "page"
+  | "pageSize"
+  | "capturedAt"
+  | "courseActivity"
 >;
 
 export type ReportStatementContext = {
@@ -17,6 +24,7 @@ export type ReportStatementContext = {
   managedGroupIds: string[];
   authorizedGroupIds: string[];
   filterSql: SQL;
+  activityCourseCandidates?: SQL;
   includeNoEnrollmentLearners: boolean;
   pageLimit: SQL;
   pageOffset: SQL;

@@ -8475,6 +8475,21 @@
     }
   },
   "reports": {
+    "activity": {
+      "title": "Aktywność kursów",
+      "popular": "Najpopularniejsze kursy · top 8",
+      "inactive": "Najdłużej nieaktywne kursy · top 8",
+      "learners": "Unikalni aktywni uczestnicy w okresie",
+      "days": "Pełne dni od ostatniej aktywności uczestnika",
+      "never": "Brak zarejestrowanej aktywności uczestników",
+      "empty": "Brak pasujących kursów",
+      "from": "Od",
+      "to": "Do",
+      "apply": "Zastosuj okres",
+      "period": "Okres popularności: {{from}} – {{to}} (strefa czasowa raportu).",
+      "definition": "Popularność liczy każdego pasującego uczestnika raz na kurs. Brak aktywności wyznacza ostatnia zarejestrowana aktywność uczestnika ze wszystkich dat, w wybranym zakresie. Edycja treści nie jest aktywnością uczestnika. Bez automatycznej archiwizacji.",
+      "limitation": "Aktywność obejmuje ostatnie otwarcie kursu, ukończenia kursów i lekcji oraz przesłane quizy (również z poprzednich cykli nauki). Starsze otwarcia nie są przechowywane, więc popularność w przeszłości może być zaniżona. Szkice i kursy zarchiwizowane są wykluczone. Kursy bez zapisów pojawiają się tylko bez filtrów grup, uczestników i nauki. Okres dotyczy tylko tych wykresów; nie jest zapisywany ani eksportowany."
+    },
     "errors": {
       "invalidQuery": "Kryteria raportu są nieprawidłowe.",
       "invalidConfigurationQuery": "Zapisana konfiguracja raportu jest nieprawidłowa.",

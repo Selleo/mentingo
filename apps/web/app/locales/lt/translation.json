@@ -8389,6 +8389,21 @@
     }
   },
   "reports": {
+    "activity": {
+      "title": "Kursų aktyvumas",
+      "popular": "Populiariausi kursai · 8 pirmieji",
+      "inactive": "Ilgiausiai neaktyvūs kursai · 8 pirmieji",
+      "learners": "Unikalūs aktyvūs dalyviai per laikotarpį",
+      "days": "Pilnos dienos nuo paskutinės dalyvio veiklos",
+      "never": "Nėra užfiksuotos dalyvių veiklos",
+      "empty": "Nėra atitinkančių kursų",
+      "from": "Nuo",
+      "to": "Iki",
+      "apply": "Taikyti laikotarpį",
+      "period": "Populiarumo laikotarpis: {{from}} – {{to}} (ataskaitos laiko juosta).",
+      "definition": "Populiarumas skaičiuoja kiekvieną atitinkantį dalyvį vieną kartą kiekvienam kursui. Neaktyvumas remiasi paskutine užfiksuota dalyvių veikla per visą laiką pasirinktame diapazone. Turinio redagavimas nėra dalyvių veikla. Be automatinio archyvavimo.",
+      "limitation": "Veikla apima paskutinį kurso atidarymą, kursų ir pamokų baigimą bei pateiktus testus (įskaitant ankstesnius mokymosi ciklus). Senesni atidarymai nesaugomi, todėl ankstesnių laikotarpių populiarumas gali būti mažesnis. Juodraščiai ir archyvuoti kursai neįtraukiami. Kursai be registracijų rodomi tik be grupių, dalyvių ir mokymosi filtrų. Laikotarpis taikomas tik šioms diagramoms; jis neišsaugomas ir neeksportuojamas."
+    },
     "errors": {
       "invalidQuery": "Ataskaitos kriterijai neteisingi.",
       "invalidConfigurationQuery": "Išsaugota ataskaitos konfigūracija neteisinga.",

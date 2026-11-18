@@ -8372,6 +8372,21 @@
     }
   },
   "reports": {
+    "activity": {
+      "title": "Kursaktivität",
+      "popular": "Beliebteste Kurse · Top 8",
+      "inactive": "Am längsten inaktive Kurse · Top 8",
+      "learners": "Eindeutige aktive Lernende im Zeitraum",
+      "days": "Volle Tage seit der letzten Lernaktivität",
+      "never": "Keine erfasste Lernaktivität",
+      "empty": "Keine passenden Kurse",
+      "from": "Von",
+      "to": "Bis",
+      "apply": "Zeitraum anwenden",
+      "period": "Beliebtheitszeitraum: {{from}} – {{to}} (Berichtszeitzone).",
+      "definition": "Beliebtheit zählt jede passende lernende Person einmal pro Kurs. Inaktivität basiert auf der letzten erfassten Lernaktivität über alle Daten im gewählten Bereich. Inhaltsänderungen sind keine Lernaktivität. Keine automatische Archivierung.",
+      "limitation": "Erfasst werden die letzte Kursöffnung, Kurs- und Lektionsabschlüsse sowie eingereichte Quizversuche (auch frühere Lernzyklen). Ältere Öffnungen werden nicht gespeichert; die Beliebtheit vergangener Zeiträume kann unterschätzt werden. Entwürfe und archivierte Kurse sind ausgeschlossen. Kurse ohne Einschreibungen erscheinen nur ohne Gruppen-, Lernenden- oder Lernfilter. Der Zeitraum gilt nur für diese Diagramme und wird nicht gespeichert oder exportiert."
+    },
     "errors": {
       "invalidQuery": "Die Berichtskriterien sind ungültig.",
       "invalidConfigurationQuery": "Die gespeicherte Berichtskonfiguration ist ungültig.",

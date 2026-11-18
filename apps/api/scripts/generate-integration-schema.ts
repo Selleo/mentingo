@@ -15,7 +15,11 @@ async function generateIntegrationSchema() {
   const { IntegrationAdminController } = await import(
     "../src/integration/integration-admin.controller"
   );
-  const controllers = [IntegrationController, IntegrationAdminController];
+  const reportOnly = process.argv.includes("--report");
+  const { ReportController } = await import("../src/report/report.controller");
+  const controllers = reportOnly
+    ? [ReportController]
+    : [IntegrationController, IntegrationAdminController];
   const tokens: InjectionToken[] = controllers.flatMap(
     (controller) => Reflect.getMetadata("design:paramtypes", controller) ?? [],
   );
@@ -41,7 +45,8 @@ async function generateIntegrationSchema() {
     });
 
     // Replace only the integration surface; preserve unrelated controllers' generated contracts.
-    for (const path of Object.keys(previousIntegration.paths)) {
+    for (const path of Object.keys(reportOnly ? api.paths : previousIntegration.paths)) {
+      if (reportOnly && !path.startsWith("/api/report/")) continue;
       if (!(path in generated.paths)) delete api.paths[path];
     }
     Object.assign(api.paths, generated.paths);
@@ -49,7 +54,7 @@ async function generateIntegrationSchema() {
       ...api.components,
       schemas: { ...api.components?.schemas, ...generated.components?.schemas },
     };
-    await writeFile(integrationPath, JSON.stringify(generated, null, 2));
+    if (!reportOnly) await writeFile(integrationPath, JSON.stringify(generated, null, 2));
     await writeFile(apiPath, JSON.stringify(api, null, 2));
   } finally {
     await app.close();

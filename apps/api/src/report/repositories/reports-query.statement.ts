@@ -11,6 +11,8 @@ import { currentLearningState } from "src/course-repetition/course-learning-stat
 
 import { REPORT_STATUS, REPORT_VIEWS } from "../constants/reports.constants";
 
+import { buildCourseActivityCtes, buildCourseActivityProjection } from "./reports-course-activity";
+
 import type { ReportStatementContext } from "./reports-query.types";
 import type { SQL } from "drizzle-orm";
 
@@ -33,6 +35,19 @@ export function buildReportStatement(
     buildCourseFactsCte(context),
     buildPathFactsCtes(context),
     buildFilteredRowsCtes(context),
+    ...(context.query.activityPeriod
+      ? [
+          buildCourseActivityCtes({
+            period: context.query.activityPeriod,
+            timezone: context.query.timezone,
+            tenantId: context.access.tenantId,
+            courseCandidates:
+              context.activityCourseCandidates ??
+              sql`SELECT DISTINCT tenant_id, course_id, course_title AS label FROM course_facts WHERE course_id IN (SELECT course_id FROM activity_keys)`,
+            pathView: context.query.view === REPORT_VIEWS.DEVELOPMENT_PATHS,
+          }),
+        ]
+      : []),
     buildSummaryCte(context),
     buildBreakdownCtes(context),
     buildPageRowsCte(context),
@@ -413,6 +428,7 @@ function buildPageRowsCte(context: ReportStatementContext): SQL {
 function buildResultProjection(context: ReportStatementContext): SQL {
   return sql`
           SELECT summary.*,
+            ${context.query.activityPeriod ? sql`${buildCourseActivityProjection()} AS course_activity,` : sql``}
             COALESCE((SELECT JSONB_AGG(JSONB_BUILD_OBJECT('id', id, 'label', label, 'learners', learners,
               'courseEnrollments', course_enrollments, 'courseCompletions', course_completions,
               'completionRate', CASE WHEN course_enrollments = 0 THEN NULL ELSE ROUND(course_completions::numeric * 100 / course_enrollments, 2) END)
