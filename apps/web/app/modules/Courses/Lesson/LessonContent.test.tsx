@@ -143,12 +143,14 @@ describe("lesson navigation controls", () => {
 });
 
 describe("lesson heading", () => {
+  const onTitleFocused = vi.fn();
   const renderLessonContent = (focusTitleOnMount?: boolean) =>
     renderWith({ withQuery: true }).render(
       <LessonContent
         lesson={makeLesson({ title: "Lesson heading" })}
         course={makeCourse()}
         focusTitleOnMount={focusTitleOnMount}
+        onTitleFocused={onTitleFocused}
         handlePrevious={vi.fn()}
         handleNext={vi.fn()}
         isFirstLesson={false}
@@ -167,5 +169,6 @@ describe("lesson heading", () => {
     renderLessonContent(true);
 
     expect(screen.getByRole("heading", { level: 1, name: "Lesson heading" })).toHaveFocus();
+    expect(onTitleFocused).toHaveBeenCalled();
   });
 });

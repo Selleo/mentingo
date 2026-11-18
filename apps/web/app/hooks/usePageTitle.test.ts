@@ -25,4 +25,15 @@ describe("usePageTitle", () => {
     await Promise.resolve();
     expect(document.title).toBe("Courses – Acme");
   });
+
+  it("restores the data-driven title when route metadata replaces the title element", async () => {
+    renderHook(() => usePageTitle(["Lesson 1", "Course A"]));
+
+    const replacement = document.createElement("title");
+
+    replacement.textContent = "Lesson – Acme";
+    document.head.querySelector("title")?.replaceWith(replacement);
+
+    await waitFor(() => expect(document.title).toBe("Lesson 1 – Course A – Acme"));
+  });
 });

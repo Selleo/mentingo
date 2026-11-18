@@ -13,15 +13,12 @@ export const usePageTitle = (parts: Array<string | null | undefined>) => {
   useLayoutEffect(() => {
     document.title = title;
 
-    const titleElement = document.querySelector("title");
-
-    if (!titleElement) return;
-
+    // Watch the whole head: Remix may update the `<title>` text or replace the element.
     const observer = new MutationObserver(() => {
       if (document.title !== title) document.title = title;
     });
 
-    observer.observe(titleElement, { childList: true, characterData: true, subtree: true });
+    observer.observe(document.head, { childList: true, characterData: true, subtree: true });
 
     return () => observer.disconnect();
   }, [title]);

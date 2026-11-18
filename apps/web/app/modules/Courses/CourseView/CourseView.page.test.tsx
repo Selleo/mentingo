@@ -27,7 +27,7 @@ vi.mock("~/api/queries/useCourseAvailabilitySuspense", () => ({
   useCourseAvailabilitySuspense: mocks.course,
 }));
 vi.mock("~/api/queries/useCompanyInformation", () => ({
-  useCompanyInformation: () => ({ data: { data: { companyName: "Premia społeczna" } } }),
+  useCompanyInformation: () => ({ data: { data: { companyName: "Acme Academy" } } }),
 }));
 vi.mock("./CourseUnavailable", () => ({
   default: ({ reason, canAccessCourseList }: { reason: string; canAccessCourseList: boolean }) => (
@@ -120,6 +120,6 @@ describe("course route access and suspense orchestration", () => {
       data: { title: "Course A", slug: "example", availableLocales: [SUPPORTED_LANGUAGES.PL] },
     });
     renderCourse();
-    expect(document.title).toBe("Course A – Premia społeczna");
+    expect(document.title).toBe("Course A – Acme Academy");
   });
 });

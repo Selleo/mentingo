@@ -37,6 +37,7 @@ type LessonContentProps = {
   hideControls?: boolean;
   showPreviewNotice?: boolean;
   focusTitleOnMount?: boolean;
+  onTitleFocused?: () => void;
   handlePrevious: () => void;
   handleNext: () => void;
   isFirstLesson: boolean;
@@ -51,6 +52,7 @@ export const LessonContent = ({
   hideControls = false,
   showPreviewNotice = false,
   focusTitleOnMount = false,
+  onTitleFocused,
   handlePrevious,
   handleNext,
   isFirstLesson,
@@ -124,8 +126,11 @@ export const LessonContent = ({
   );
 
   useEffect(() => {
-    if (focusTitleOnMount) titleRef.current?.focus();
-  }, [focusTitleOnMount]);
+    if (!focusTitleOnMount) return;
+
+    titleRef.current?.focus();
+    onTitleFocused?.();
+  }, [focusTitleOnMount, onTitleFocused]);
 
   const pauseAllLessonMedia = useCallback(() => {
     pauseAllLessonVideos();
@@ -303,7 +308,7 @@ export const LessonContent = ({
   );
 
   return (
-    <div className="flex w-full min-w-0 flex-col items-center h-auto py-10">
+    <div className="flex w-full min-w-0 flex-col items-center h-auto py-6 sm:py-10">
       <div className="flex w-full min-w-0 flex-col px-6 sm:px-10 max-w-full 3xl:max-w-[1024px] 3xl:px-8 h-auto">
         <div className="flex w-full flex-col pb-6">
           <div className="flex w-full min-w-0 flex-col gap-y-4 overflow-x-hidden">

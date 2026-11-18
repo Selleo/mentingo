@@ -57,11 +57,9 @@ export default function LessonPage() {
   const [error, setError] = useState(false);
   const [freshLessonRequestKey, setFreshLessonRequestKey] = useState<string | null>(null);
 
-  const [entryLessonId] = useState(lessonId);
-  const [hasChangedLesson, setHasChangedLesson] = useState(false);
-
-  // Focus the lesson heading only after moving between lessons, not on the initial page load.
-  if (!hasChangedLesson && lessonId !== entryLessonId) setHasChangedLesson(true);
+  // Focus the lesson heading only after moving to another lesson: not on the initial page load
+  // and not when the same lesson remounts (e.g. a new learning state after a quiz retake).
+  const [focusedLessonId, setFocusedLessonId] = useState(lessonId);
 
   const lessonRequestKey = `${lessonId}:${language}:${user?.id ?? ""}`;
 
@@ -251,7 +249,7 @@ export default function LessonPage() {
         <div className="flex w-full max-w-full flex-col gap-6">
           <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px] lg:items-start">
             <div className="flex w-full min-w-0 flex-col divide-y rounded-lg bg-white">
-              <div className="flex items-center p-6 sm:px-10 3xl:px-8">
+              <div className="flex items-center px-6 py-4 sm:p-6 sm:px-10 3xl:px-8">
                 <p className="h6 text-neutral-950">
                   <span className="text-neutral-800">
                     {t("studentLessonView.other.chapter")} {currentChapter?.displayOrder}:
@@ -261,7 +259,8 @@ export default function LessonPage() {
               </div>
               <LessonContent
                 showPreviewNotice
-                focusTitleOnMount={hasChangedLesson}
+                focusTitleOnMount={focusedLessonId !== lessonId}
+                onTitleFocused={() => setFocusedLessonId(lessonId)}
                 key={`${lesson.id}:${lesson.learningStateId ?? "current"}`}
                 lesson={lesson}
                 course={course}

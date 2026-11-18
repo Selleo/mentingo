@@ -4,12 +4,12 @@ import { formatPageTitle, getPlatformName } from "./setPageTitle";
 
 describe("getPlatformName", () => {
   it("prefers the company short name", () => {
-    expect(getPlatformName({ companyShortName: "PS", companyName: "Premia społeczna" })).toBe("PS");
+    expect(getPlatformName({ companyShortName: "Acme", companyName: "Acme Academy" })).toBe("Acme");
   });
 
   it("falls back to the company name when the short name is blank", () => {
-    expect(getPlatformName({ companyShortName: " ", companyName: "Premia społeczna" })).toBe(
-      "Premia społeczna",
+    expect(getPlatformName({ companyShortName: " ", companyName: "Acme Academy" })).toBe(
+      "Acme Academy",
     );
   });
 
