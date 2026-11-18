@@ -9384,5 +9384,35 @@
       "emptyContent": "Saisissez un message.",
       "invalidReaction": "Choisissez l'une des réactions disponibles."
     }
+  },
+  "a11y": {
+    "goToHomepage": "Aller à la page d'accueil",
+    "platformLogo": "Logo de la plateforme",
+    "uploadedImage": "Image téléversée",
+    "uploadQueue": "File d'attente de téléversement",
+    "formattingOptions": "Options de mise en forme",
+    "switchToLightMode": "Passer en mode clair",
+    "switchToDarkMode": "Passer en mode sombre",
+    "videoPlayer": "Lecteur vidéo",
+    "videoQuality": "Qualité vidéo",
+    "breadcrumb": "Fil d'Ariane",
+    "more": "Plus",
+    "carousel": "carrousel",
+    "slide": "diapositive",
+    "previousSlide": "Diapositive précédente",
+    "nextSlide": "Diapositive suivante",
+    "remove": "Retirer",
+    "clearAll": "Tout effacer",
+    "expandOptions": "Afficher les options",
+    "collapseOptions": "Masquer les options",
+    "selectAll": "Tout sélectionner",
+    "selectRow": "Sélectionner la ligne",
+    "deleteChapter": "Supprimer le chapitre",
+    "cancelEditing": "Annuler la modification",
+    "removeFile": "Retirer le fichier",
+    "editSection": "Modifier la section",
+    "deleteSection": "Supprimer la section",
+    "avatar": "Avatar",
+    "avatarFor": "Avatar de {{email}}"
   }
 }

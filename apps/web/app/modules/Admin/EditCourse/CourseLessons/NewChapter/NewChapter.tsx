@@ -112,7 +112,7 @@ const NewChapter = ({
             {chapter ? (
               <Button
                 data-testid={CHAPTER_FORM_HANDLES.DELETE_BUTTON}
-                aria-label="Delete chapter"
+                aria-label={t("a11y.deleteChapter")}
                 type="button"
                 className={buttonStyles}
                 onClick={onClickDelete}
@@ -122,7 +122,7 @@ const NewChapter = ({
             ) : (
               <Button
                 data-testid={CHAPTER_FORM_HANDLES.CANCEL_BUTTON}
-                aria-label="Cancel editing"
+                aria-label={t("a11y.cancelEditing")}
                 className={buttonStyles}
                 onClick={() => setContentTypeToDisplay(ContentTypes.EMPTY)}
               >

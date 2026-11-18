@@ -4,6 +4,31 @@
  * and should modify this configuration to best suit your team's needs.
  */
 
+const jsxTernarySyntaxRules = [
+  {
+    selector:
+      "ConditionalExpression[alternate.type='Literal'][alternate.value=null][consequent.type='JSXElement']",
+    message: "Use && instead of a JSX ternary with null as the alternate.",
+  },
+  {
+    selector:
+      "ConditionalExpression[alternate.type='Literal'][alternate.value=null][consequent.type='JSXFragment']",
+    message: "Use && instead of a JSX ternary with null as the alternate.",
+  },
+];
+
+// WCAG 3.1.2: accessible text must follow the UI language. Empty alt="" (decorative) stays allowed.
+const ACCESSIBLE_TEXT_ATTRIBUTE =
+  "JSXAttribute[name.name=/^(aria-label|aria-description|aria-roledescription|aria-valuetext|aria-placeholder|alt|title)$/]";
+const ACCESSIBLE_TEXT_MESSAGE =
+  "Translate accessible text with t(); do not hard-code it in aria-*, alt or title.";
+const accessibleTextSyntaxRules = [
+  `${ACCESSIBLE_TEXT_ATTRIBUTE}[value.type='Literal'][value.value=/\\S/]`,
+  `${ACCESSIBLE_TEXT_ATTRIBUTE} > JSXExpressionContainer > Literal[value=/\\S/]`,
+  `${ACCESSIBLE_TEXT_ATTRIBUTE} > JSXExpressionContainer > TemplateLiteral[expressions.length=0]`,
+  `${ACCESSIBLE_TEXT_ATTRIBUTE} > JSXExpressionContainer > :matches(ConditionalExpression, LogicalExpression) > Literal[value=/\\S/]`,
+].map((selector) => ({ selector, message: ACCESSIBLE_TEXT_MESSAGE }));
+
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
   root: true,
@@ -81,19 +106,7 @@ module.exports = {
         "@typescript-eslint/no-import-type-side-effects": "error",
         "react/prop-types": "off",
         "react/display-name": "off",
-        "no-restricted-syntax": [
-          "error",
-          {
-            selector:
-              "ConditionalExpression[alternate.type='Literal'][alternate.value=null][consequent.type='JSXElement']",
-            message: "Use && instead of a JSX ternary with null as the alternate.",
-          },
-          {
-            selector:
-              "ConditionalExpression[alternate.type='Literal'][alternate.value=null][consequent.type='JSXFragment']",
-            message: "Use && instead of a JSX ternary with null as the alternate.",
-          },
-        ],
+        "no-restricted-syntax": ["error", ...jsxTernarySyntaxRules, ...accessibleTextSyntaxRules],
       },
     },
 
@@ -127,6 +140,14 @@ module.exports = {
             caughtErrorsIgnorePattern: "^_",
           },
         ],
+      },
+    },
+
+    // Unit-test fixtures and dev-only tools are not shown to learners in another language.
+    {
+      files: ["**/*.test.{ts,tsx}", "**/__tests__/**", "app/modules/DevTools/**"],
+      rules: {
+        "no-restricted-syntax": ["error", ...jsxTernarySyntaxRules],
       },
     },
 

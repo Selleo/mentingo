@@ -176,7 +176,11 @@ export const AuthoringOperationPreview = ({
         {typeof payload.configurationType === "string" && (
           <div className="rounded-md bg-neutral-50 p-2 text-xs">
             <span className="block text-neutral-500">{t("courseAuthoring.review.mode")}</span>
-            <span className="font-medium">{payload.configurationType}</span>
+            <span className="font-medium">
+              {t(`courseAuthoring.review.mentorModes.${payload.configurationType}`, {
+                defaultValue: payload.configurationType,
+              })}
+            </span>
           </div>
         )}
         {configuration && typeof configuration.taskGoal === "string" && (

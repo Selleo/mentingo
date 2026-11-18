@@ -60,7 +60,7 @@ const CourseCard = ({
       <div className="relative">
         <img
           src={thumbnailUrl || DefaultPhotoCourse}
-          alt="Course"
+          alt=""
           loading="eager"
           decoding="async"
           className="aspect-video w-full rounded-t-lg object-cover"
