@@ -96,7 +96,7 @@ const CourseCard = ({
         <div className="flex flex-grow flex-col">
           {enrolled && (
             <CourseProgress
-              label="Course progress:"
+              label={t("studentLessonView.sideSection.other.courseProgress")}
               courseLessonCount={courseChapterCount}
               completedLessonCount={completedChapterCount}
             />

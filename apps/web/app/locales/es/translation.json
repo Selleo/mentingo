@@ -4369,7 +4369,8 @@
       "dndOnStart": "Palabra {{word}} tomada.",
       "dndOnOver": "La palabra {{word}} está sobre {{blank}}.",
       "dndOnEnd": "La palabra {{word}} se colocó en {{blank}}.",
-      "dndOnCancel": "Arrastre cancelado. La palabra {{word}} volvió a su posición anterior."
+      "dndOnCancel": "Arrastre cancelado. La palabra {{word}} volvió a su posición anterior.",
+      "questionTitleNotProvided": "No se ha indicado el título de la pregunta"
     },
     "aiMentor": {
       "title": "Sesión de mentores de IA",
@@ -9829,6 +9830,8 @@
     "editSection": "Editar sección",
     "deleteSection": "Eliminar sección",
     "avatar": "Avatar",
-    "avatarFor": "Avatar de {{email}}"
+    "avatarFor": "Avatar de {{name}}",
+    "selectGroup": "Seleccionar grupo {{name}}",
+    "lessonWithTitle": "Lección: {{title}}"
   }
 }

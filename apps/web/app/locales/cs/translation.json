@@ -4431,7 +4431,8 @@
       "dndOnStart": "Zvednuto slovo {{word}}.",
       "dndOnOver": "Slovo {{word}} je nad {{blank}}.",
       "dndOnEnd": "Slovo {{word}} bylo umístěno do {{blank}}.",
-      "dndOnCancel": "Přetažení zrušeno. Slovo {{word}} se vrátilo na předchozí místo."
+      "dndOnCancel": "Přetažení zrušeno. Slovo {{word}} se vrátilo na předchozí místo.",
+      "questionTitleNotProvided": "Název otázky nebyl zadán"
     },
     "aiMentor": {
       "title": "Sezení AI Mentor",
@@ -9948,6 +9949,8 @@
     "editSection": "Upravit sekci",
     "deleteSection": "Smazat sekci",
     "avatar": "Avatar",
-    "avatarFor": "Avatar uživatele {{email}}"
+    "avatarFor": "Avatar: {{name}}",
+    "selectGroup": "Vybrat skupinu {{name}}",
+    "lessonWithTitle": "Lekce: {{title}}"
   }
 }

@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { usePlatformSimpleLogo } from "~/api/queries";
 import { Icon } from "~/components/Icon";
@@ -21,22 +22,15 @@ export const PlatformLogo = memo(({ className, variant = "full", alt }: Platform
     return <div className={className}></div>;
   }
 
-  if (customLogoUrl && !isLoading && variant === "full") {
-    return (
-      <img
-        src={customLogoUrl}
-        alt={alt ?? t("a11y.platformLogo")}
-        className={cn("object-contain", className)}
-        loading="eager"
-        decoding="async"
-      />
-    );
-  }
+  const customLogoSrc = match(variant)
+    .with("full", () => customLogoUrl)
+    .with("signet", () => (isSimpleLogoLoading ? null : customSimpleLogoUrl))
+    .exhaustive();
 
-  if (customSimpleLogoUrl && !isSimpleLogoLoading && variant === "signet") {
+  if (customLogoSrc) {
     return (
       <img
-        src={customSimpleLogoUrl}
+        src={customLogoSrc}
         alt={alt ?? t("a11y.platformLogo")}
         className={cn("object-contain", className)}
         loading="eager"

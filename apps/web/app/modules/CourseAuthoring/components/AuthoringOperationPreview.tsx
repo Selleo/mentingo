@@ -1,3 +1,4 @@
+import { AI_MENTOR_TYPE, type AiMentorType } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "~/components/ui/badge";
@@ -29,6 +30,14 @@ const translateQuestionType = (t: (key: string) => string, value: unknown) =>
   typeof value === "string"
     ? t(questionTypeTranslationKeys[value] ?? "courseAuthoring.review.question")
     : t("courseAuthoring.review.question");
+
+const mentorModeTranslationKeys: Record<AiMentorType, string> = {
+  [AI_MENTOR_TYPE.TEACHER]: "courseAuthoring.review.mentorModes.teacher",
+  [AI_MENTOR_TYPE.ROLEPLAY]: "courseAuthoring.review.mentorModes.roleplay",
+};
+
+const isAiMentorType = (value: string): value is AiMentorType =>
+  Object.values<string>(AI_MENTOR_TYPE).includes(value);
 
 type Props = {
   operation: AuthoringOperation;
@@ -177,9 +186,9 @@ export const AuthoringOperationPreview = ({
           <div className="rounded-md bg-neutral-50 p-2 text-xs">
             <span className="block text-neutral-500">{t("courseAuthoring.review.mode")}</span>
             <span className="font-medium">
-              {t(`courseAuthoring.review.mentorModes.${payload.configurationType}`, {
-                defaultValue: payload.configurationType,
-              })}
+              {isAiMentorType(payload.configurationType)
+                ? t(mentorModeTranslationKeys[payload.configurationType])
+                : payload.configurationType}
             </span>
           </div>
         )}

@@ -25,7 +25,8 @@ const ACCESSIBLE_TEXT_MESSAGE =
 const accessibleTextSyntaxRules = [
   `${ACCESSIBLE_TEXT_ATTRIBUTE}[value.type='Literal'][value.value=/\\S/]`,
   `${ACCESSIBLE_TEXT_ATTRIBUTE} > JSXExpressionContainer > Literal[value=/\\S/]`,
-  `${ACCESSIBLE_TEXT_ATTRIBUTE} > JSXExpressionContainer > TemplateLiteral[expressions.length=0]`,
+  // Letters only: separators such as `${a}: ${b}` around translated parts stay allowed.
+  `${ACCESSIBLE_TEXT_ATTRIBUTE} > JSXExpressionContainer > TemplateLiteral > TemplateElement[value.raw=/[A-Za-z]/]`,
   `${ACCESSIBLE_TEXT_ATTRIBUTE} > JSXExpressionContainer > :matches(ConditionalExpression, LogicalExpression) > Literal[value=/\\S/]`,
 ].map((selector) => ({ selector, message: ACCESSIBLE_TEXT_MESSAGE }));
 

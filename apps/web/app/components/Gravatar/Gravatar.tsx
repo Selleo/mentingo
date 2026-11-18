@@ -19,7 +19,7 @@ export const Gravatar = ({ email, size = 200, className = "" }: GravatarProps) =
   return (
     <AvatarImage
       src={gravatarUrl}
-      alt={email ? t("a11y.avatarFor", { email }) : t("a11y.avatar")}
+      alt={email ? t("a11y.avatarFor", { name: email }) : t("a11y.avatar")}
       className={className}
       width={size}
       height={size}

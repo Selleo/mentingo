@@ -4426,7 +4426,8 @@
       "dndOnStart": "Paimtas žodis {{word}}.",
       "dndOnOver": "Žodis {{word}} yra virš {{blank}}.",
       "dndOnEnd": "Žodis {{word}} įdėtas į {{blank}}.",
-      "dndOnCancel": "Vilkimas atšauktas. Žodis {{word}} grįžo į ankstesnę vietą."
+      "dndOnCancel": "Vilkimas atšauktas. Žodis {{word}} grįžo į ankstesnę vietą.",
+      "questionTitleNotProvided": "Klausimo pavadinimas nepateiktas"
     },
     "aiMentor": {
       "title": "AI mentoriaus sesija",
@@ -9946,6 +9947,8 @@
     "editSection": "Redaguoti skyrelį",
     "deleteSection": "Ištrinti skyrelį",
     "avatar": "Avataras",
-    "avatarFor": "{{email}} avataras"
+    "avatarFor": "Avataras: {{name}}",
+    "selectGroup": "Pažymėti grupę {{name}}",
+    "lessonWithTitle": "Pamoka: {{title}}"
   }
 }

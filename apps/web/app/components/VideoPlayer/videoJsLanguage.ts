@@ -16,7 +16,7 @@ const VIDEO_JS_DICTIONARIES: Partial<Record<SupportedLanguages, Record<string, s
 };
 
 /** Registers the Video.js dictionary for the UI language and returns the language code to pass to the player. */
-export function registerVideoJsLanguage(language: string): string {
+export function resolveVideoJsLanguage(language: string): string {
   const dictionary = isSupportedLanguage(language) ? VIDEO_JS_DICTIONARIES[language] : undefined;
 
   if (!dictionary) return SUPPORTED_LANGUAGES.EN;

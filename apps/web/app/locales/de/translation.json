@@ -4424,7 +4424,8 @@
       "dndOnStart": "Wort {{word}} aufgenommen.",
       "dndOnOver": "Wort {{word}} befindet sich über {{blank}}.",
       "dndOnEnd": "Wort {{word}} wurde in {{blank}} platziert.",
-      "dndOnCancel": "Ziehen abgebrochen. Wort {{word}} ist an seine vorherige Position zurückgekehrt."
+      "dndOnCancel": "Ziehen abgebrochen. Wort {{word}} ist an seine vorherige Position zurückgekehrt.",
+      "questionTitleNotProvided": "Kein Fragentitel angegeben"
     },
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",
@@ -9877,6 +9878,8 @@
     "editSection": "Abschnitt bearbeiten",
     "deleteSection": "Abschnitt löschen",
     "avatar": "Avatar",
-    "avatarFor": "Avatar von {{email}}"
+    "avatarFor": "Avatar von {{name}}",
+    "selectGroup": "Gruppe {{name}} auswählen",
+    "lessonWithTitle": "Lektion: {{title}}"
   }
 }

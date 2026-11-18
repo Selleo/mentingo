@@ -4182,7 +4182,8 @@
       "dndOnStart": "Mot {{word}} saisi.",
       "dndOnOver": "Le mot {{word}} est sur {{blank}}.",
       "dndOnEnd": "Le mot {{word}} a été placé dans {{blank}}.",
-      "dndOnCancel": "Déplacement annulé. Le mot {{word}} est revenu à sa position précédente."
+      "dndOnCancel": "Déplacement annulé. Le mot {{word}} est revenu à sa position précédente.",
+      "questionTitleNotProvided": "Titre de la question non renseigné"
     },
     "aiMentor": {
       "title": "Session avec l'AI Mentor",
@@ -9413,6 +9414,8 @@
     "editSection": "Modifier la section",
     "deleteSection": "Supprimer la section",
     "avatar": "Avatar",
-    "avatarFor": "Avatar de {{email}}"
+    "avatarFor": "Avatar de {{name}}",
+    "selectGroup": "Sélectionner le groupe {{name}}",
+    "lessonWithTitle": "Leçon : {{title}}"
   }
 }
