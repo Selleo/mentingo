@@ -2210,6 +2210,7 @@ export const integrationApiKeys = pgTable(
   {
     ...id,
     ...timestamps,
+    name: text("name").notNull(),
     keyPrefix: text("key_prefix").notNull(),
     keyHash: text("key_hash").notNull(),
     createdByUserId: uuid("created_by_user_id")

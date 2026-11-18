@@ -65,7 +65,12 @@ export default function NewsDetailsPage() {
     return (
       <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_NEWS_ACCESS}>
         <PageWrapper>
-          <div className="py-10 text-center text-neutral-700">{t("newsView.notFound")}</div>
+          <div
+            className="py-10 text-center text-neutral-700"
+            data-testid={NEWS_DETAILS_PAGE_HANDLES.NOT_FOUND}
+          >
+            {t("newsView.notFound")}
+          </div>
         </PageWrapper>
       </ContentAccessGuard>
     );

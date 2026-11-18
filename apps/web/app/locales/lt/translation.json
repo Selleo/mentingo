@@ -6395,7 +6395,9 @@
     "edit": {
       "title": "Redaguoti organizaciją",
       "description": "Atnaujinkite organizacijos informaciją ir būseną.",
-      "submit": "Išsaugoti pakeitimus"
+      "submit": "Išsaugoti pakeitimus",
+      "accessEndsOn": "Prieiga baigiasi {{date}}",
+      "unlimitedAccess": "Neribota prieiga"
     },
     "form": {
       "tenantName": "Organizacijos pavadinimas",
@@ -6405,7 +6407,15 @@
       "statusPlaceholder": "Pasirinkite būseną",
       "adminFirstName": "Administratoriaus vardas",
       "adminLastName": "Administratoriaus pavardė",
-      "adminEmail": "Administratoriaus el"
+      "adminEmail": "Administratoriaus el",
+      "accessEndsAt": "Prieigos pabaiga",
+      "accessEndsAtHint": "Prieiga galioja iki pasirinktos dienos pabaigos. Palikite tuščią, jei prieiga neribota.",
+      "sections": {
+        "organization": "Organizacija",
+        "firstAdmin": "Pirmasis administratorius"
+      },
+      "accessEndsAtPlaceholder": "Neribota prieiga",
+      "accessEndsAtClear": "Pašalinti pabaigos datą"
     },
     "validation": {
       "nameRequired": "Reikalingas vardas",
@@ -6418,6 +6428,11 @@
       "tenantCreatedSuccessfully": "Organizacija sėkmingai sukurta",
       "tenantUpdatedSuccessfully": "Organizacija sėkmingai atnaujinta",
       "tenantDeletedSuccessfully": "Organizacija ištrinta visam laikui"
+    },
+    "standing": {
+      "active": "Aktyvi",
+      "inactive": "Neaktyvi",
+      "accessEnded": "Prieiga baigėsi"
     }
   },
   "superAdminTenants": {
@@ -6482,42 +6497,55 @@
     "description": "Ši darbo sritis šiuo metu neaktyvi. Jei manote, kad tai klaida, susisiekite su administratoriumi, kad atkurtumėte prieigą."
   },
   "integrationApiKey": {
-    "title": "Integravimo API raktas",
-    "description": "Sukurkite ilgalaikį išorinės integracijos raktą. Pakeitus raktą iš karto atšaukiamas ankstesnis.",
-    "status": "Būsena",
-    "active": "Aktyvus",
-    "inactive": "Nesugeneruota",
-    "prefix": "Rakto priešdėlis",
-    "createdAt": "Sukurta",
-    "lastUsedAt": "Paskutinį kartą naudotas",
-    "loading": "Įkeliami rakto metaduomenys...",
-    "generate": "Sukurti raktą",
-    "override": "Nepaisyti klavišo",
+    "title": "Integravimo API raktai",
+    "description": "Raktai leidžia išorinėms sistemoms naudoti integravimo API su administratoriaus teisėmis. Kiekvienai integracijai sukurkite atskirą raktą, kad galėtumėte jį atšaukti atskirai.",
+    "loading": "Įkeliami raktai...",
     "copy": "Kopijuoti raktą",
     "generated": {
-      "title": "Nukopijuokite šį raktą dabar. Daugiau jis nebus rodomas."
+      "title": "Nukopijuokite šį raktą dabar. Daugiau jis nebus rodomas.",
+      "dismiss": "Baigta"
     },
-    "confirm": {
-      "title": "Nepaisyti dabartinio API rakto?",
-      "description": "Šis veiksmas nedelsiant atšaukia dabartinį raktą. Ją naudojantys integracijos nustos veikti.",
-      "action": "Nepaisyti klavišo"
+    "create": {
+      "button": "Sukurti raktą",
+      "title": "Sukurti integravimo API raktą",
+      "description": "Pavadinkite raktą pagal sistemą, kuri jį naudos.",
+      "nameLabel": "Pavadinimas",
+      "namePlaceholder": "pvz., CRM sinchronizavimas",
+      "action": "Sukurti raktą"
+    },
+    "revoke": {
+      "button": "Atšaukti",
+      "title": "Atšaukti „{{name}}“?",
+      "description": "Šį raktą naudojančios integracijos iškart nustos veikti. Šio veiksmo anuliuoti negalima.",
+      "action": "Atšaukti raktą"
+    },
+    "table": {
+      "key": "Raktas",
+      "created": "Sukurta",
+      "createdBy": "sukūrė {{email}}",
+      "lastUsedAt": "Paskutinį kartą naudota",
+      "actions": "Veiksmai",
+      "empty": "Integravimo API raktų dar nėra",
+      "emptyHint": "Sukurkite raktą kiekvienai sistemai, kuriai reikia prieigos prie integravimo API."
     },
     "toast": {
-      "fetchSuccess": "Integravimo API raktas sėkmingai įkeltas",
-      "rotateSuccess": "Integravimo API raktas sėkmingai atnaujintas",
-      "rotateError": "Nepavyko atnaujinti integravimo API rakto",
+      "createSuccess": "Integravimo API raktas sukurtas",
+      "createError": "Nepavyko sukurti integravimo API rakto",
+      "revokeSuccess": "Integravimo API raktas atšauktas",
+      "revokeError": "Nepavyko atšaukti integravimo API rakto",
       "copySuccess": "Integracijos API raktas nukopijuotas",
       "copyError": "Nepavyko nukopijuoti integravimo API rakto"
     },
     "errors": {
-      "rotateFailed": "Nepavyko pasukti integravimo API rakto",
       "invalidApiKey": "Netinkamas integravimo API raktas",
       "ownerInactive": "API rakto savininkas nebėra aktyvus",
       "ownerNotAdmin": "API rakto savininkas nebeturi administratoriaus teisių",
       "missingApiKeyHeader": "Trūksta X-API-Key antraštės",
       "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės",
       "invalidPluginOrigin": "Naudokite HTTPS papildinio kilmę be kelio (HTTP localhost leidžiamas kūrimo aplinkoje)",
-      "pluginAddressUnavailable": "Nepavyko patikrinti papildinio adreso. Bandykite dar kartą."
+      "pluginAddressUnavailable": "Nepavyko patikrinti papildinio adreso. Bandykite dar kartą.",
+      "createFailed": "Nepavyko sukurti integracijos API rakto",
+      "notFound": "Integracijos API raktas nerastas"
     }
   },
   "luma": {

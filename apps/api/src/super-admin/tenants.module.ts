@@ -5,6 +5,7 @@ import { EmailTemplateRenderingModule } from "src/email-templates/email-template
 import { GamificationModule } from "src/gamification/gamification.module";
 import { UserModule } from "src/user/user.module";
 
+import { TenantAccessEndCron } from "./tenant-access-end.cron";
 import { TenantsController } from "./tenants.controller";
 import { TenantsRepository } from "./tenants.repository";
 import { TenantsService } from "./tenants.service";
@@ -12,7 +13,7 @@ import { TenantsService } from "./tenants.service";
 @Module({
   imports: [UserModule, EmailTemplateRenderingModule, GamificationModule],
   controllers: [TenantsController],
-  providers: [TenantsService, TenantsRepository, ManagingTenantAdminGuard],
+  providers: [TenantsService, TenantsRepository, ManagingTenantAdminGuard, TenantAccessEndCron],
   exports: [TenantsService],
 })
 export class TenantsModule {}

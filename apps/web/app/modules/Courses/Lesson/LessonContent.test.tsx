@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
@@ -139,5 +139,39 @@ describe("lesson navigation controls", () => {
 
     expect(screen.getByRole("button", { name: "Next lesson" })).toHaveFocus();
     expect(await screen.findByRole("tooltip", { name: "Next lesson" })).toBeInTheDocument();
+  });
+});
+
+describe("lesson heading", () => {
+  const onTitleFocused = vi.fn();
+
+  beforeEach(() => onTitleFocused.mockClear());
+  const renderLessonContent = (focusTitleOnMount?: boolean) =>
+    renderWith({ withQuery: true }).render(
+      <LessonContent
+        lesson={makeLesson({ title: "Lesson heading" })}
+        course={makeCourse()}
+        focusTitleOnMount={focusTitleOnMount}
+        onTitleFocused={onTitleFocused}
+        handlePrevious={vi.fn()}
+        handleNext={vi.fn()}
+        isFirstLesson={false}
+        isLastLesson={false}
+        lessonLoading={false}
+      />,
+    );
+
+  it("renders the lesson title as the level-one heading without stealing focus on first load", () => {
+    renderLessonContent();
+
+    expect(screen.getByRole("heading", { level: 1, name: "Lesson heading" })).not.toHaveFocus();
+    expect(onTitleFocused).not.toHaveBeenCalled();
+  });
+
+  it("moves focus to the lesson heading after navigating to another lesson", () => {
+    renderLessonContent(true);
+
+    expect(screen.getByRole("heading", { level: 1, name: "Lesson heading" })).toHaveFocus();
+    expect(onTitleFocused).toHaveBeenCalled();
   });
 });

@@ -1,3 +1,65 @@
+<a name="v4.34.0"></a>
+
+## [v4.34.0] - 18.11.2026
+
+### Features:
+
+- show forum reactions and mentions in real time ([#2236](https://github.com/Selleo/mentingo/issues/2236))
+
+- show a failed status for quizzes the learner did not pass ([#2239](https://github.com/Selleo/mentingo/issues/2239))
+
+- allow completing fill-in-the-blank and matching questions without dragging ([#2229](https://github.com/Selleo/mentingo/issues/2229))
+
+- show author-defined quiz feedback to students ([#2129](https://github.com/Selleo/mentingo/issues/2129)) ([#2235](https://github.com/Selleo/mentingo/issues/2235))
+
+- add authors interface to configure quiz feedback mode and score-range messages ([#2230](https://github.com/Selleo/mentingo/issues/2230))
+
+- let course authors set custom quiz feedback ([#2228](https://github.com/Selleo/mentingo/issues/2228))
+
+- add videos showing visible pull request changes ([#2261](https://github.com/Selleo/mentingo/issues/2261))
+
+### Bug Fixes:
+
+- keep collapsed sidebar out of focus order and add skip link ([#2274](https://github.com/Selleo/mentingo/issues/2274))
+
+- keep report filters open while searching for an option ([#2243](https://github.com/Selleo/mentingo/issues/2243))
+
+- plan PR videos from overviews and business specs ([#2269](https://github.com/Selleo/mentingo/issues/2269))
+
+- make the simulation chat accessible and announce new replies to screen readers ([#2268](https://github.com/Selleo/mentingo/issues/2268))
+
+- stop arrow keys from changing answers on already-reviewed quizzes ([#2262](https://github.com/Selleo/mentingo/issues/2262))
+
+- generate PR videos from staging review events ([#2265](https://github.com/Selleo/mentingo/issues/2265))
+
+- give downloaded certificates a proper title, file name and language ([#2257](https://github.com/Selleo/mentingo/issues/2257))
+
+- allow testing PR videos from staging ([#2263](https://github.com/Selleo/mentingo/issues/2263))
+
+- make quiz answers easier to follow with screen readers ([#2256](https://github.com/Selleo/mentingo/issues/2256))
+
+- label icon buttons in lessons and certificate preview for screen readers ([#2245](https://github.com/Selleo/mentingo/issues/2245))
+
+### Chores:
+
+- allow multiple integration keys per organization and enforce organization access end ([#2276](https://github.com/Selleo/mentingo/issues/2276))
+
+- clean up course, enrollment, curriculum and learning-path e2e specs ([#2259](https://github.com/Selleo/mentingo/issues/2259))
+
+- give course discussions their own dedicated forum pages ([#2241](https://github.com/Selleo/mentingo/issues/2241))
+
+- improve automated testing to catch issues earlier ([#2254](https://github.com/Selleo/mentingo/issues/2254))
+
+### Tests:
+
+- catch broken news, articles, Q&A, announcements and email templates earlier ([#2266](https://github.com/Selleo/mentingo/issues/2266))
+
+- catch broken sign-in, access control and user management earlier ([#2260](https://github.com/Selleo/mentingo/issues/2260))
+
+- cover quiz feedback ranges in duplication, transfer and translation ([#2129](https://github.com/Selleo/mentingo/issues/2129)) ([#2237](https://github.com/Selleo/mentingo/issues/2237))
+
+- move self-onboarding recording language checks to vitest ([#2253](https://github.com/Selleo/mentingo/issues/2253))
+
 <a name="v4.33.0"></a>
 
 ## [v4.33.0] - 17.11.2026
@@ -43,6 +105,10 @@
 - align registration with password login settings ([#2207](https://github.com/Selleo/mentingo/issues/2207))
 
 - include audio playback in content lesson learning time calculations ([#2191](https://github.com/Selleo/mentingo/issues/2191))
+
+### Documentation:
+
+- update changelog for version v4.33.0
 
 ### Tests:
 
@@ -3854,7 +3920,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.33.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.34.0...HEAD
+[v4.34.0]: https://github.com/Selleo/mentingo/compare/v4.33.0...v4.34.0
 [v4.33.0]: https://github.com/Selleo/mentingo/compare/v4.32.0...v4.33.0
 [v4.32.0]: https://github.com/Selleo/mentingo/compare/v4.31.1...v4.32.0
 [v4.31.1]: https://github.com/Selleo/mentingo/compare/v4.31.0...v4.31.1

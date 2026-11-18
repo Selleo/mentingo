@@ -4,13 +4,13 @@ import {
   ASSISTANT_RUN_ACTIVITIES,
   ASSISTANT_RUN_STATUSES,
   ASSISTANT_RUN_ERROR_CODES,
-  TENANT_STATUSES,
   type AssistantRunActivity,
 } from "@repo/shared";
 
 import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { PromptService } from "src/ai/services/prompt.service";
 import { TenantBoundLanguageModel } from "src/ai/utils/tenant-bound-language-model";
+import { isTenantAccessActive } from "src/common/utils/tenantAccess";
 import { McpHttpService } from "src/mcp/mcp-http.service";
 import { isMcpNativeFeatureCapabilities } from "src/mcp/mcp-native-read.types";
 import { MCP_HELPDESK_TOOL_NAMES } from "src/mcp/mcp-self-onboarding.constants";
@@ -49,7 +49,7 @@ export class AssistantExecutionService {
     )
       throw new ForbiddenException("assistant.errors.responseInactive");
     const tenant = await this.assistantRepository.findTenantState(input.tenantId);
-    if (tenant?.status !== TENANT_STATUSES.ACTIVE) {
+    if (!tenant || !isTenantAccessActive(tenant)) {
       // Background steps bypass HTTP tenant resolution. Suspension is terminal for this run,
       // so reactivation cannot resume a previously authorized generation or overwrite its result.
       await this.assistantRepository.updateRun(input, {

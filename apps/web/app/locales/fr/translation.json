@@ -5938,7 +5938,9 @@
     "edit": {
       "title": "Modifier l'organisation",
       "description": "Mettre à jour les détails et le statut de l'organisation.",
-      "submit": "Enregistrer les modifications"
+      "submit": "Enregistrer les modifications",
+      "accessEndsOn": "L'accès se termine le {{date}}",
+      "unlimitedAccess": "Accès illimité"
     },
     "form": {
       "tenantName": "Nom de l'organisation",
@@ -5948,7 +5950,15 @@
       "statusPlaceholder": "Sélectionnez le statut",
       "adminFirstName": "Prénom de l'administrateur",
       "adminLastName": "Nom de famille de l'administrateur",
-      "adminEmail": "E-mail de l'administrateur"
+      "adminEmail": "E-mail de l'administrateur",
+      "accessEndsAt": "Fin de l'accès",
+      "accessEndsAtHint": "L'accès dure jusqu'à la fin du jour sélectionné. Laissez vide pour un accès illimité.",
+      "sections": {
+        "organization": "Organisation",
+        "firstAdmin": "Premier administrateur"
+      },
+      "accessEndsAtPlaceholder": "Accès illimité",
+      "accessEndsAtClear": "Supprimer la date de fin"
     },
     "validation": {
       "nameRequired": "Le nom est requis",
@@ -5961,6 +5971,11 @@
       "tenantCreatedSuccessfully": "Organisation créée avec succès",
       "tenantUpdatedSuccessfully": "Organisation mise à jour avec succès",
       "tenantDeletedSuccessfully": "Organisation supprimée définitivement"
+    },
+    "standing": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "accessEnded": "Accès terminé"
     }
   },
   "superAdminTenants": {
@@ -6025,42 +6040,55 @@
     "description": "Cet espace de travail est actuellement inactif. Si vous pensez qu'il s'agit d'une erreur, contactez votre administrateur pour restaurer l'accès."
   },
   "integrationApiKey": {
-    "title": "Clé API d'intégration",
-    "description": "Générez une clé longue durée pour les intégrations externes. Le remplacement de la clé révoque immédiatement la précédente.",
-    "status": "Statut",
-    "active": "Actif",
-    "inactive": "Non généré",
-    "prefix": "Préfixe de clé",
-    "createdAt": "Date de création",
-    "lastUsedAt": "Dernière utilisation à",
-    "loading": "Chargement des métadonnées clés...",
-    "generate": "Générer une clé",
-    "override": "Remplacer la clé",
+    "title": "Clés API d'intégration",
+    "description": "Les clés permettent à des systèmes externes d'appeler l'API d'intégration avec un accès administrateur. Créez une clé distincte pour chaque intégration afin de pouvoir la révoquer séparément.",
+    "loading": "Chargement des clés...",
     "copy": "Copier la clé",
     "generated": {
-      "title": "Copiez cette clé maintenant. Il ne sera plus affiché."
+      "title": "Copiez cette clé maintenant. Elle ne sera plus affichée.",
+      "dismiss": "Terminé"
     },
-    "confirm": {
-      "title": "Remplacer la clé API actuelle ?",
-      "description": "Cette action révoque immédiatement la clé actuelle. Les intégrations qui l'utilisent cesseront de fonctionner.",
-      "action": "Remplacer la clé"
+    "create": {
+      "button": "Créer une clé",
+      "title": "Créer une clé API d'intégration",
+      "description": "Nommez la clé d'après le système qui l'utilisera.",
+      "nameLabel": "Nom",
+      "namePlaceholder": "p. ex. Synchronisation CRM",
+      "action": "Créer la clé"
+    },
+    "revoke": {
+      "button": "Révoquer",
+      "title": "Révoquer « {{name}} » ?",
+      "description": "Les intégrations utilisant cette clé cesseront immédiatement de fonctionner. Cette action est irréversible.",
+      "action": "Révoquer la clé"
+    },
+    "table": {
+      "key": "Clé",
+      "created": "Créée",
+      "createdBy": "par {{email}}",
+      "lastUsedAt": "Dernière utilisation",
+      "actions": "Actions",
+      "empty": "Aucune clé API d'intégration pour le moment",
+      "emptyHint": "Créez une clé pour chaque système qui doit accéder à l'API d'intégration."
     },
     "toast": {
-      "fetchSuccess": "Clé API d'intégration chargée avec succès",
-      "rotateSuccess": "Clé API d'intégration mise à jour avec succès",
-      "rotateError": "Échec de la mise à jour de la clé API d'intégration",
+      "createSuccess": "Clé API d'intégration créée",
+      "createError": "Échec de la création de la clé API d'intégration",
+      "revokeSuccess": "Clé API d'intégration révoquée",
+      "revokeError": "Échec de la révocation de la clé API d'intégration",
       "copySuccess": "Clé API d'intégration copiée",
       "copyError": "Échec de la copie de la clé API d'intégration"
     },
     "errors": {
-      "rotateFailed": "Échec de la rotation de la clé API d'intégration",
       "invalidApiKey": "Clé API d'intégration non valide",
       "ownerInactive": "Le propriétaire de la clé API n'est plus actif",
       "ownerNotAdmin": "Le propriétaire de la clé API ne dispose plus des autorisations d'administrateur",
       "missingApiKeyHeader": "En-tête X-API-Key manquant",
       "missingTenantIdHeader": "En-tête X-Tenant-Id manquant",
       "invalidPluginOrigin": "Utilisez une origine de plugin HTTPS sans chemin (HTTP localhost est autorisé en développement)",
-      "pluginAddressUnavailable": "Impossible de vérifier l'adresse du module. Réessayez."
+      "pluginAddressUnavailable": "Impossible de vérifier l'adresse du module. Réessayez.",
+      "createFailed": "Impossible de créer la clé API d'intégration",
+      "notFound": "Clé API d'intégration introuvable"
     }
   },
   "courseDuplication": {

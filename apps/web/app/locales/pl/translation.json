@@ -6256,7 +6256,9 @@
     "edit": {
       "title": "Edytuj organizację",
       "description": "Zaktualizuj szczegóły i status organizacji.",
-      "submit": "Zapisz zmiany"
+      "submit": "Zapisz zmiany",
+      "accessEndsOn": "Dostęp kończy się {{date}}",
+      "unlimitedAccess": "Dostęp nieograniczony"
     },
     "form": {
       "tenantName": "Nazwa organizacji",
@@ -6266,7 +6268,15 @@
       "statusPlaceholder": "Wybierz status",
       "adminFirstName": "Imię administratora",
       "adminLastName": "Nazwisko administratora",
-      "adminEmail": "E-mail administratora"
+      "adminEmail": "E-mail administratora",
+      "accessEndsAt": "Koniec dostępu",
+      "accessEndsAtHint": "Dostęp trwa do końca wybranego dnia. Pozostaw puste, aby dostęp był nieograniczony.",
+      "sections": {
+        "organization": "Organizacja",
+        "firstAdmin": "Pierwszy administrator"
+      },
+      "accessEndsAtPlaceholder": "Dostęp nieograniczony",
+      "accessEndsAtClear": "Usuń datę końcową"
     },
     "validation": {
       "nameRequired": "Nazwa jest wymagana",
@@ -6279,6 +6289,11 @@
       "tenantCreatedSuccessfully": "Organizacja została utworzona pomyślnie",
       "tenantUpdatedSuccessfully": "Organizacja została zaktualizowana pomyślnie",
       "tenantDeletedSuccessfully": "Organizacja została trwale usunięta"
+    },
+    "standing": {
+      "active": "Aktywna",
+      "inactive": "Nieaktywna",
+      "accessEnded": "Dostęp wygasł"
     }
   },
   "superAdminTenants": {
@@ -6343,42 +6358,55 @@
     "description": "Ta przestrzeń jest obecnie nieaktywna. Jeśli uważasz, że to błąd, skontaktuj się z administratorem, aby przywrócić dostęp."
   },
   "integrationApiKey": {
-    "title": "Klucz API integracji",
-    "description": "Wygeneruj długoterminowy klucz dla integracji zewnętrznych. Zastąpienie klucza natychmiast unieważnia poprzedni.",
-    "status": "Status",
-    "active": "Aktywny",
-    "inactive": "Nie wygenerowano",
-    "prefix": "Prefiks klucza",
-    "createdAt": "Utworzono",
-    "lastUsedAt": "Ostatnie użycie",
-    "loading": "Ładowanie metadanych klucza...",
-    "generate": "Wygeneruj klucz",
-    "override": "Zastąp klucz",
+    "title": "Klucze API integracji",
+    "description": "Klucze pozwalają systemom zewnętrznym korzystać z API integracji z uprawnieniami administratora. Utwórz osobny klucz dla każdej integracji, aby móc go unieważnić niezależnie.",
+    "loading": "Ładowanie kluczy...",
     "copy": "Skopiuj klucz",
     "generated": {
-      "title": "Skopiuj ten klucz teraz. Nie zostanie wyświetlony ponownie."
+      "title": "Skopiuj ten klucz teraz. Nie zostanie wyświetlony ponownie.",
+      "dismiss": "Gotowe"
     },
-    "confirm": {
-      "title": "Zastąpić bieżący klucz API?",
-      "description": "Ta operacja natychmiast unieważni bieżący klucz. Integracje korzystające z niego przestaną działać.",
-      "action": "Zastąp klucz"
+    "create": {
+      "button": "Utwórz klucz",
+      "title": "Utwórz klucz API integracji",
+      "description": "Nazwij klucz od systemu, który będzie go używał.",
+      "nameLabel": "Nazwa",
+      "namePlaceholder": "np. Synchronizacja CRM",
+      "action": "Utwórz klucz"
+    },
+    "revoke": {
+      "button": "Unieważnij",
+      "title": "Unieważnić „{{name}}”?",
+      "description": "Integracje korzystające z tego klucza natychmiast przestaną działać. Tej operacji nie można cofnąć.",
+      "action": "Unieważnij klucz"
+    },
+    "table": {
+      "key": "Klucz",
+      "created": "Utworzono",
+      "createdBy": "przez {{email}}",
+      "lastUsedAt": "Ostatnie użycie",
+      "actions": "Akcje",
+      "empty": "Brak kluczy API integracji",
+      "emptyHint": "Utwórz klucz dla każdego systemu, który potrzebuje dostępu do API integracji."
     },
     "toast": {
-      "fetchSuccess": "Pobrano klucz API integracji",
-      "rotateSuccess": "Klucz API integracji został zaktualizowany",
-      "rotateError": "Nie udało się zaktualizować klucza API integracji",
+      "createSuccess": "Utworzono klucz API integracji",
+      "createError": "Nie udało się utworzyć klucza API integracji",
+      "revokeSuccess": "Unieważniono klucz API integracji",
+      "revokeError": "Nie udało się unieważnić klucza API integracji",
       "copySuccess": "Skopiowano klucz API integracji",
       "copyError": "Nie udało się skopiować klucza API integracji"
     },
     "errors": {
-      "rotateFailed": "Nie udało się obrócić klucza API integracji",
       "invalidApiKey": "Nieprawidłowy klucz API integracji",
       "ownerInactive": "Właściciel klucza API nie jest już aktywny",
       "ownerNotAdmin": "Właściciel klucza API nie ma już uprawnień administratora",
       "missingApiKeyHeader": "Brak nagłówka X-API-Key",
       "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id",
       "invalidPluginOrigin": "Użyj adresu wtyczki HTTPS bez ścieżki (HTTP localhost jest dozwolony w środowisku deweloperskim)",
-      "pluginAddressUnavailable": "Nie udało się sprawdzić adresu wtyczki. Spróbuj ponownie."
+      "pluginAddressUnavailable": "Nie udało się sprawdzić adresu wtyczki. Spróbuj ponownie.",
+      "createFailed": "Nie udało się utworzyć klucza API integracji",
+      "notFound": "Nie znaleziono klucza API integracji"
     }
   },
   "courseDuplication": {

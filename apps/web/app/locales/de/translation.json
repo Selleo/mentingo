@@ -6386,7 +6386,9 @@
     "edit": {
       "title": "Organisation bearbeiten",
       "description": "Aktualisieren Sie Organisationsdetails und den Status.",
-      "submit": "Änderungen speichern"
+      "submit": "Änderungen speichern",
+      "accessEndsOn": "Zugriff endet am {{date}}",
+      "unlimitedAccess": "Unbegrenzter Zugriff"
     },
     "form": {
       "tenantName": "Organisationsname",
@@ -6396,7 +6398,15 @@
       "statusPlaceholder": "Status auswählen",
       "adminFirstName": "Vorname des Administrators",
       "adminLastName": "Nachname des Administrators",
-      "adminEmail": "Admin-E-Mail"
+      "adminEmail": "Admin-E-Mail",
+      "accessEndsAt": "Zugriff endet",
+      "accessEndsAtHint": "Der Zugriff gilt bis zum Ende des ausgewählten Tages. Leer lassen für unbegrenzten Zugriff.",
+      "sections": {
+        "organization": "Organisation",
+        "firstAdmin": "Erster Administrator"
+      },
+      "accessEndsAtPlaceholder": "Unbegrenzter Zugriff",
+      "accessEndsAtClear": "Enddatum entfernen"
     },
     "validation": {
       "nameRequired": "Name ist erforderlich",
@@ -6409,6 +6419,11 @@
       "tenantCreatedSuccessfully": "Organisation erfolgreich erstellt",
       "tenantUpdatedSuccessfully": "Organisation erfolgreich aktualisiert",
       "tenantDeletedSuccessfully": "Organisation dauerhaft gelöscht"
+    },
+    "standing": {
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "accessEnded": "Zugriff beendet"
     }
   },
   "superAdminTenants": {
@@ -6474,41 +6489,54 @@
   },
   "integrationApiKey": {
     "title": "Integrations-API-Schlüssel",
-    "description": "Generieren Sie einen langlebigen Schlüssel für externe Integrationen. Durch Ersetzen des Schlüssels wird der vorherige sofort widerrufen.",
-    "status": "Status",
-    "active": "Aktiv",
-    "inactive": "Nicht generiert",
-    "prefix": "Schlüsselpräfix",
-    "createdAt": "Erstellt bei",
-    "lastUsedAt": "Zuletzt verwendet um",
-    "loading": "Wichtige Metadaten werden geladen...",
-    "generate": "Schlüssel generieren",
-    "override": "Override-Taste",
+    "description": "Mit Schlüsseln können externe Systeme die Integrations-API mit Administratorrechten aufrufen. Erstellen Sie für jede Integration einen eigenen Schlüssel, damit Sie ihn einzeln widerrufen können.",
+    "loading": "Schlüssel werden geladen...",
     "copy": "Schlüssel kopieren",
     "generated": {
-      "title": "Kopieren Sie diesen Schlüssel jetzt. Es wird nicht erneut angezeigt."
+      "title": "Kopieren Sie diesen Schlüssel jetzt. Er wird nicht erneut angezeigt.",
+      "dismiss": "Fertig"
     },
-    "confirm": {
-      "title": "Aktuellen API-Schlüssel überschreiben?",
-      "description": "Durch diese Aktion wird der aktuelle Schlüssel sofort widerrufen. Integrationen, die es verwenden, funktionieren nicht mehr.",
-      "action": "Override-Taste"
+    "create": {
+      "button": "Schlüssel erstellen",
+      "title": "Integrations-API-Schlüssel erstellen",
+      "description": "Benennen Sie den Schlüssel nach dem System, das ihn verwendet.",
+      "nameLabel": "Name",
+      "namePlaceholder": "z. B. CRM-Synchronisierung",
+      "action": "Schlüssel erstellen"
+    },
+    "revoke": {
+      "button": "Widerrufen",
+      "title": "„{{name}}“ widerrufen?",
+      "description": "Integrationen, die diesen Schlüssel verwenden, funktionieren sofort nicht mehr. Dies kann nicht rückgängig gemacht werden.",
+      "action": "Schlüssel widerrufen"
+    },
+    "table": {
+      "key": "Schlüssel",
+      "created": "Erstellt",
+      "createdBy": "von {{email}}",
+      "lastUsedAt": "Zuletzt verwendet",
+      "actions": "Aktionen",
+      "empty": "Noch keine Integrations-API-Schlüssel",
+      "emptyHint": "Erstellen Sie einen Schlüssel für jedes System, das Zugriff auf die Integrations-API benötigt."
     },
     "toast": {
-      "fetchSuccess": "Integrations-API-Schlüssel erfolgreich geladen",
-      "rotateSuccess": "Integrations-API-Schlüssel erfolgreich aktualisiert",
-      "rotateError": "Der Integrations-API-Schlüssel konnte nicht aktualisiert werden",
+      "createSuccess": "Integrations-API-Schlüssel erstellt",
+      "createError": "Der Integrations-API-Schlüssel konnte nicht erstellt werden",
+      "revokeSuccess": "Integrations-API-Schlüssel widerrufen",
+      "revokeError": "Der Integrations-API-Schlüssel konnte nicht widerrufen werden",
       "copySuccess": "Integrations-API-Schlüssel kopiert",
       "copyError": "Der Integrations-API-Schlüssel konnte nicht kopiert werden"
     },
     "errors": {
-      "rotateFailed": "Der Integrations-API-Schlüssel konnte nicht rotiert werden",
       "invalidApiKey": "Ungültiger Integrations-API-Schlüssel",
       "ownerInactive": "Der Besitzer des API-Schlüssels ist nicht mehr aktiv",
       "ownerNotAdmin": "Der Besitzer des API-Schlüssels verfügt nicht mehr über Administratorberechtigungen",
       "missingApiKeyHeader": "Fehlender X-API-Key-Header",
       "missingTenantIdHeader": "Fehlender X-Tenant-Id-Header",
       "invalidPluginOrigin": "Verwenden Sie einen HTTPS-Plugin-Ursprung ohne Pfad (HTTP localhost ist in der Entwicklung erlaubt)",
-      "pluginAddressUnavailable": "Die Plugin-Adresse konnte nicht überprüft werden. Versuchen Sie es erneut."
+      "pluginAddressUnavailable": "Die Plugin-Adresse konnte nicht überprüft werden. Versuchen Sie es erneut.",
+      "createFailed": "Integrations-API-Schlüssel konnte nicht erstellt werden",
+      "notFound": "Integrations-API-Schlüssel nicht gefunden"
     }
   },
   "luma": {

@@ -1,47 +1,31 @@
-import { type MetaFunction, Outlet, useLocation } from "@remix-run/react";
-import { useEffect, useRef } from "react";
+import { type MetaFunction, Outlet, useRevalidator } from "@remix-run/react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { companyInformationQueryOptions } from "~/api/queries/useCompanyInformation";
 import { useCompanyInformationSuspense } from "~/api/queries/useCompanyInformationSuspense";
 import { queryClient } from "~/api/queryClient";
 import { SkipToContentLink } from "~/components/SkipToContentLink";
+import { formatPageTitle, getPlatformName } from "~/utils/setPageTitle";
 
 export const meta: MetaFunction = () => {
-  const companyShortName = queryClient.getQueryData(companyInformationQueryOptions.queryKey)?.data
-    ?.companyShortName;
-  const title = companyShortName ? `${companyShortName}` : "Mentingo";
+  const companyInformation = queryClient.getQueryData(companyInformationQueryOptions.queryKey);
 
-  return [{ title }];
+  return [{ title: formatPageTitle([], getPlatformName(companyInformation?.data)) }];
 };
 
 export default function Layout() {
   const { data: companyInfo } = useCompanyInformationSuspense();
-  const { pathname } = useLocation();
   const { i18n } = useTranslation();
-  const companyShortName = companyInfo.data.companyShortName;
-  const previousCompanyName = useRef<string | null>(null);
+  const { revalidate } = useRevalidator();
+  const platformName = getPlatformName(companyInfo.data);
 
-  // Remix metadata cannot subscribe to Query state. Brand the initial title
-  // once the suspense query resolves; later route metadata reads the warm cache.
+  // Remix metadata cannot subscribe to Query or i18n state. Route metadata ran before the company
+  // information and the user's language were known, so re-render it. Only redirect-only
+  // clientLoaders exist, so revalidation is cheap.
   useEffect(() => {
-    const previousName = previousCompanyName.current;
-    previousCompanyName.current = companyShortName ?? null;
-    let pageTitle = document.title;
-    if (previousName && previousName !== companyShortName) {
-      if (pageTitle === previousName) pageTitle = "Mentingo";
-      if (pageTitle.startsWith(`${previousName} - `)) {
-        pageTitle = pageTitle.slice(previousName.length + 3);
-      }
-    }
-    if (!companyShortName) {
-      document.title = pageTitle;
-      return;
-    }
-    if (pageTitle === companyShortName || pageTitle.startsWith(`${companyShortName} - `)) return;
-    document.title =
-      pageTitle === "Mentingo" ? companyShortName : `${companyShortName} - ${pageTitle}`;
-  }, [companyShortName, pathname, i18n.language]);
+    revalidate();
+  }, [platformName, i18n.language, revalidate]);
 
   return (
     <>

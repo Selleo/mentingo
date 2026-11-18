@@ -53,6 +53,7 @@ export function NotificationsNavigationItem({
             "absolute top-1/2 grid aspect-square min-w-5 -translate-y-1/2 place-items-center rounded-full bg-error-500 text-center text-[10px] font-semibold leading-4 text-white",
             isSidebarCollapsed ? "-right-px -translate-y-[90%]" : "right-2",
           )}
+          data-testid={NOTIFICATIONS_HANDLES.UNREAD_BADGE}
         >
           <span>{Math.min(unreadCount, 99)}</span>
         </span>

@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { TEST_DATA } from "../data/test-data/entity-name.data";
+import { nullIfNotFound } from "../utils/not-found";
 import { getSelfOnboardingLanguage } from "../utils/self-onboarding-context";
 
 import type { FixtureApiClient } from "../utils/api-client";
@@ -87,6 +88,11 @@ export class NewsFactory {
     return this.getById(id, language);
   }
 
+  /** Cleanup helper: deletes the entry unless the test already removed it. */
+  async safeDelete(id: string): Promise<void> {
+    if (await this.safeGetByIdAnyLanguage(id)) await this.delete(id);
+  }
+
   async delete(id: string): Promise<void> {
     await this.apiClient.api.newsControllerDeleteNews(id);
   }
@@ -95,11 +101,7 @@ export class NewsFactory {
     id: string,
     language: SupportedLanguages = getSelfOnboardingLanguage(),
   ): Promise<NewsFactoryRecord | null> {
-    try {
-      return await this.getById(id, language);
-    } catch {
-      return null;
-    }
+    return nullIfNotFound(this.getById(id, language));
   }
 
   async safeGetByIdAnyLanguage(id: string): Promise<NewsFactoryRecord | null> {

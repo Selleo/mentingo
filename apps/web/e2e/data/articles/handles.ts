@@ -4,6 +4,7 @@ export const ARTICLES_PAGE_HANDLES = {
 
 export const ARTICLE_DETAILS_PAGE_HANDLES = {
   PAGE: "article-details-page",
+  NOT_FOUND: "article-details-not-found",
   TITLE: "article-details-title",
   SUMMARY: "article-details-summary",
   EDIT_BUTTON: "article-details-edit-button",

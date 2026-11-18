@@ -1,5 +1,5 @@
 {
-  "id": "78cc7355-041f-4e7e-a1c4-8f87c87b180c",
+  "id": "d176e365-dd4d-4bf2-ab64-abc76bed0882",
   "prevId": "23ff62da-8f45-453b-815c-9d31c4615be7",
   "version": "7",
   "dialect": "postgresql",
@@ -4056,12 +4056,6 @@
         "source_id": {
           "name": "source_id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "link_path": {
-          "name": "link_path",
-          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -11482,6 +11476,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "key_prefix": {
           "name": "key_prefix",
@@ -20477,6 +20477,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": false
+        },
+        "access_ends_at": {
+          "name": "access_ends_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {

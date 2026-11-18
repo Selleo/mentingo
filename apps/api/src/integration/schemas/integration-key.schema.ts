@@ -4,21 +4,31 @@ import { UUIDSchema } from "src/common";
 
 export const integrationKeyMetadataSchema = Type.Object({
   id: UUIDSchema,
+  name: Type.String(),
   keyPrefix: Type.String(),
   createdAt: Type.String(),
-  updatedAt: Type.String(),
   lastUsedAt: Type.Union([Type.String(), Type.Null()]),
+  createdBy: Type.Object({
+    id: UUIDSchema,
+    email: Type.String(),
+  }),
 });
 
-export const integrationCurrentKeyResponseSchema = Type.Object({
-  key: Type.Union([integrationKeyMetadataSchema, Type.Null()]),
-});
+export const integrationKeysResponseSchema = Type.Array(integrationKeyMetadataSchema);
 
-export const rotateIntegrationKeyResponseSchema = Type.Object({
+export const createIntegrationKeySchema = Type.Object(
+  {
+    name: Type.String({ minLength: 1, maxLength: 100, pattern: "\\S" }),
+  },
+  { additionalProperties: false },
+);
+
+export const createIntegrationKeyResponseSchema = Type.Object({
   key: Type.String(),
   metadata: integrationKeyMetadataSchema,
 });
 
 export type IntegrationKeyMetadata = Static<typeof integrationKeyMetadataSchema>;
-export type IntegrationCurrentKeyResponse = Static<typeof integrationCurrentKeyResponseSchema>;
-export type RotateIntegrationKeyResponse = Static<typeof rotateIntegrationKeyResponseSchema>;
+export type IntegrationKeysResponse = Static<typeof integrationKeysResponseSchema>;
+export type CreateIntegrationKeyBody = Static<typeof createIntegrationKeySchema>;
+export type CreateIntegrationKeyResponse = Static<typeof createIntegrationKeyResponseSchema>;

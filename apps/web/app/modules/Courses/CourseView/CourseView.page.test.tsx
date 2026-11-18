@@ -26,6 +26,9 @@ vi.mock("~/api/queries/useCourseLookup", () => ({ useCourseLookupSuspense: mocks
 vi.mock("~/api/queries/useCourseAvailabilitySuspense", () => ({
   useCourseAvailabilitySuspense: mocks.course,
 }));
+vi.mock("~/api/queries/useCompanyInformation", () => ({
+  useCompanyInformation: () => ({ data: { data: { companyName: "Acme Academy" } } }),
+}));
 vi.mock("./CourseUnavailable", () => ({
   default: ({ reason, canAccessCourseList }: { reason: string; canAccessCourseList: boolean }) => (
     <div>
@@ -110,5 +113,13 @@ describe("course route access and suspense orchestration", () => {
     renderCourse();
     expect(await screen.findByText("Localized course")).toBeInTheDocument();
     expect(mocks.course).not.toHaveBeenCalled();
+  });
+
+  it("titles the page with the course and platform name", () => {
+    mocks.course.mockReturnValue({
+      data: { title: "Course A", slug: "example", availableLocales: [SUPPORTED_LANGUAGES.PL] },
+    });
+    renderCourse();
+    expect(document.title).toBe("Course A – Acme Academy");
   });
 });
