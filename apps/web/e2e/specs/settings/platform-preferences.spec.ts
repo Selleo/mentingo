@@ -1,13 +1,19 @@
 import { USER_ROLE } from "~/config/userRoles";
 import { COURSE_LIST_LAYOUT_VARIANT } from "~/modules/Dashboard/Settings/components/admin/courseListLayout";
 
-import { COURSE_DISCUSSION_HANDLES, COURSES_PAGE_HANDLES } from "../../data/courses/handles";
+import { LOGIN_PAGE_HANDLES } from "../../data/auth/handles";
+import {
+  COURSE_DISCUSSION_HANDLES,
+  COURSE_OVERVIEW_HANDLES,
+  COURSES_PAGE_HANDLES,
+} from "../../data/courses/handles";
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { createFixtureFactories } from "../../factories";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { openFeaturesSettingsFlow } from "../../flows/settings/open-features-settings.flow";
 import { togglePlatformFeatureFlow } from "../../flows/settings/toggle-platform-feature.flow";
+import { waitForApiResponse } from "../../utils/api-requests";
 import { setCourseSettings } from "../../utils/course-settings";
 import { getGlobalSettings } from "../../utils/global-settings";
 
@@ -29,7 +35,7 @@ test("admin opens courses to visitors, switches the course list layout and enabl
   // Settings, data and cleanup go through the tenant admin client, which outlives the role switches.
   const factories = createFixtureFactories(adminApiClient);
 
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async () => {
     const originalSettings = await getGlobalSettings(adminApiClient);
     cleanup.add(() => setCourseSettings(adminApiClient, originalSettings));
     await setCourseSettings(adminApiClient, {
@@ -50,7 +56,26 @@ test("admin opens courses to visitors, switches the course list layout and enabl
     cleanup.add(() => courseFactory.delete(course.id));
     await factories.createEnrollmentFactory().enrollUsers(course.id, [studentId]);
     courseId = course.id;
+  });
 
+  const visitor = await createWorkspacePage();
+  cleanup.add(() => visitor.context.close());
+
+  await visitor.page.goto("/courses");
+  await expect(visitor.page.getByTestId(LOGIN_PAGE_HANDLES.PAGE)).toBeVisible();
+
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
+    await page.goto("/courses");
+    await expect(page.getByTestId(COURSES_PAGE_HANDLES.LEGACY_VIEW)).toBeVisible();
+
+    const globalSettingsLoaded = waitForApiResponse(page, "GET", "/api/settings/global");
+    await openCourseOverviewFlow(page, courseId);
+    await globalSettingsLoaded;
+    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.HERO)).toBeVisible();
+    await expect(page.getByTestId(COURSE_DISCUSSION_HANDLES.TAB)).toHaveCount(0);
+  });
+
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openFeaturesSettingsFlow(page);
     await togglePlatformFeatureFlow(page, SETTINGS_PAGE_HANDLES.COURSES_VISIBILITY_SWITCH);
     await togglePlatformFeatureFlow(page, SETTINGS_PAGE_HANDLES.COURSE_DISCUSSIONS_SWITCH);
@@ -76,9 +101,6 @@ test("admin opens courses to visitors, switches the course list layout and enabl
         unregisteredUserCoursesAccessibility: true,
       });
   });
-
-  const visitor = await createWorkspacePage();
-  cleanup.add(() => visitor.context.close());
 
   await visitor.page.goto("/courses");
   await expect(visitor.page.getByTestId(COURSES_PAGE_HANDLES.MODERN_VIEW)).toBeVisible();

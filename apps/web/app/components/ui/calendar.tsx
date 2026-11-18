@@ -3,7 +3,7 @@
 import { format, getDate } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { createContext, useContext } from "react";
-import { DayPicker } from "react-day-picker";
+import { DayContent, DayPicker } from "react-day-picker";
 import { match } from "ts-pattern";
 
 import { Checkmark } from "~/assets/svgs";
@@ -11,7 +11,7 @@ import { buttonVariants } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 import type { ComponentProps } from "react";
-import type { DayProps } from "react-day-picker";
+import type { DayContentProps, DayProps } from "react-day-picker";
 
 export type CalendarProps = ComponentProps<typeof DayPicker> & {
   dates?: string[] | undefined;
@@ -19,13 +19,18 @@ export type CalendarProps = ComponentProps<typeof DayPicker> & {
   /** Adds a `data-testid` to each day of the default variant. */
   getDayTestId?: (date: Date) => string;
 };
-// Module-level component, so DayPicker keeps the same day cells across renders.
+
 const DayTestIdContext = createContext<((date: Date) => string) | undefined>(undefined);
 
-function TestIdDayContent({ date }: { date: Date }) {
+// Module-level component, so DayPicker keeps the same day cells across renders.
+function TestIdDayContent(props: DayContentProps) {
   const getDayTestId = useContext(DayTestIdContext);
 
-  return <span data-testid={getDayTestId?.(date)}>{getDate(date)}</span>;
+  return (
+    <span data-testid={getDayTestId?.(props.date)}>
+      <DayContent {...props} />
+    </span>
+  );
 }
 
 type CustomDayContentProps = DayProps & {
@@ -79,7 +84,8 @@ function Calendar({
       weekday: "text-muted-foreground w-8 font-normal text-[0.8rem]",
       month:
         "gap-y-4 overflow-x-hidden w-full border border-primary-500 rounded-2xl pt-1.5 pb-4 lg:pb-6 px-2.5 lg:px-6",
-      caption: "border-primary-500 border-b h-10 flex justify-center pt-1 relative items-center",
+      caption:
+        "border-primary-500 border-b h-10 flex justify-center pt-1 relative items-center",
       caption_label: "truncate body-lg-md",
       button_next: cn(
         buttonVariants({
@@ -112,8 +118,7 @@ function Calendar({
       range_middle:
         "aria-selected:bg-accent hover:aria-selected:!bg-accent rounded-none aria-selected:text-accent-foreground hover:aria-selected:text-accent-foreground",
       hidden: "invisible",
-    }))
-    .otherwise(() => ({
+    })).otherwise(() => ( {
       months: "flex flex-col sm:flex-row gap-4",
       month: "space-y-4 rounded-xl border border-neutral-200 bg-white p-3 shadow-sm",
       caption_dropdowns:
@@ -148,23 +153,22 @@ function Calendar({
       day_today: "bg-neutral-100 text-neutral-900 rounded-md",
       day_outside: "text-neutral-400 opacity-50",
       day_disabled: "text-neutral-300 opacity-50",
-      day_range_middle: "aria-selected:bg-neutral-100 aria-selected:text-neutral-900 rounded-none",
+      day_range_middle:
+        "aria-selected:bg-neutral-100 aria-selected:text-neutral-900 rounded-none",
       day_hidden: "invisible",
     }));
 
-  const components = match(variant)
-    .with("streak", () => ({
-      DayContent: ({ ...props }) => {
-        return <CustomDayContent dates={dates} {...props} />;
-      },
-      IconLeft: () => <div className="sr-only" />,
-      IconRight: () => <div className="sr-only" />,
-    }))
-    .otherwise(() => ({
-      IconLeft: () => <ChevronLeft className="size-4" />,
-      IconRight: () => <ChevronRight className="size-4" />,
-      ...(getDayTestId && { DayContent: TestIdDayContent }),
-    }));
+  const components = match(variant).with("streak", () => ({
+    DayContent: ({ ...props }) => {
+      return <CustomDayContent dates={dates} {...props} />;
+    },
+    IconLeft: () => <div className="sr-only" />,
+    IconRight: () => <div className="sr-only" />,
+  })).otherwise(() => ({
+    IconLeft: () => <ChevronLeft className="size-4" />,
+    IconRight: () => <ChevronRight className="size-4" />,
+    ...(getDayTestId && { DayContent: TestIdDayContent }),
+  }));
 
   return (
     <DayTestIdContext.Provider value={getDayTestId}>

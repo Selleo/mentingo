@@ -47,10 +47,16 @@ export const PlatformLogo = memo(({ className, variant = "full", alt }: Platform
   }
 
   if (variant === "signet") {
-    return <Icon name="AppSignet" className={className} />;
+    return (
+      <Icon
+        name="AppSignet"
+        className={className}
+        data-testid={isSimpleLogoLoading ? undefined : PLATFORM_LOGO_HANDLES.DEFAULT_SIGNET}
+      />
+    );
   }
 
-  return <Icon name="AppLogo" className={className} />;
+  return <Icon name="AppLogo" className={className} data-testid={PLATFORM_LOGO_HANDLES.DEFAULT} />;
 });
 
 PlatformLogo.displayName = "PlatformLogo";

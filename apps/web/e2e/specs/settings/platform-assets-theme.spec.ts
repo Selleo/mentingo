@@ -8,8 +8,10 @@ import { expect, test } from "../../fixtures/test.fixture";
 import { openLoginPageFlow } from "../../flows/auth/open-login-page.flow";
 import { prepareNavigationPageFlow } from "../../flows/navigation/prepare-navigation-page.flow";
 import { openPlatformCustomizationSettingsFlow } from "../../flows/settings/open-platform-customization-settings.flow";
+import { openSettingsPageAtOriginFlow } from "../../flows/settings/open-settings-page.flow";
+import { recordApiRequests } from "../../utils/api-requests";
 import { getGlobalSettings } from "../../utils/global-settings";
-import { PLATFORM_IMAGE_SETTINGS, restorePlatformImage } from "../../utils/platform-images";
+import { captureOriginalPlatformImage, PLATFORM_IMAGE_SETTINGS } from "../../utils/platform-images";
 
 const imageSettings = Object.values(PLATFORM_IMAGE_SETTINGS);
 
@@ -23,12 +25,11 @@ test("admin uploads branding images that visitors and users see, then removes th
   cleanup.add(() => visitor.context.close());
 
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const originalSettings = await getGlobalSettings(apiClient);
-
     for (const imageSetting of imageSettings) {
-      cleanup.add(() =>
-        restorePlatformImage(apiClient, imageSetting, originalSettings[imageSetting.field]),
-      );
+      const originalImage = await captureOriginalPlatformImage(apiClient, imageSetting);
+      cleanup.add(async () => {
+        await imageSetting.update(apiClient, originalImage);
+      });
     }
 
     await openPlatformCustomizationSettingsFlow(page);
@@ -63,38 +64,28 @@ test("admin uploads branding images that visitors and users see, then removes th
     }
 
     await openLoginPageFlow(visitor.page);
+    await expect(visitor.page.getByTestId(PLATFORM_LOGO_HANDLES.DEFAULT)).toBeVisible();
     await expect(visitor.page.getByTestId(PLATFORM_LOGO_HANDLES.CUSTOM)).toHaveCount(0);
+    // The login page renders after the suspense global-settings query, which holds the background.
     await expect(visitor.page.getByTestId(LOGIN_PAGE_HANDLES.BACKGROUND)).toHaveCount(0);
 
     await page.setViewportSize({ width: 1280, height: 800 });
     await prepareNavigationPageFlow(page);
+    await expect(page.getByTestId(PLATFORM_LOGO_HANDLES.DEFAULT_SIGNET)).toBeVisible();
     await expect(page.getByTestId(PLATFORM_LOGO_HANDLES.CUSTOM_SIGNET)).toHaveCount(0);
   });
 });
 
 test("admin can change theme colors and see them after reload", async ({
-  apiClient,
-  cleanup,
-  withWorkerPage,
+  withIsolatedWorkerPage,
 }) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await openPlatformCustomizationSettingsFlow(page);
-
-    const originalPrimary = await page
-      .getByTestId(SETTINGS_PAGE_HANDLES.THEME_PRIMARY_INPUT)
-      .inputValue();
-    const originalContrast = await page
-      .getByTestId(SETTINGS_PAGE_HANDLES.THEME_CONTRAST_INPUT)
-      .inputValue();
+  // The color endpoint cannot reset primary/contrast to their default (null), so the change is made on an isolated tenant.
+  await withIsolatedWorkerPage(USER_ROLE.admin, async ({ apiClient, origin, page }) => {
     const targetPrimary = "2563eb";
     const targetContrast = "ffffff";
 
-    cleanup.add(async () => {
-      await apiClient.api.settingsControllerUpdateColorSchema({
-        primaryColor: `#${originalPrimary}`,
-        contrastColor: `#${originalContrast}`,
-      });
-    });
+    await openSettingsPageAtOriginFlow(page, origin);
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB).click();
 
     await page.getByTestId(SETTINGS_PAGE_HANDLES.THEME_PRIMARY_INPUT).fill(targetPrimary);
     await page.getByTestId(SETTINGS_PAGE_HANDLES.THEME_CONTRAST_INPUT).fill(targetContrast);
@@ -133,7 +124,6 @@ test("admin can change theme colors and see them after reload", async ({
 });
 
 test("theme color cancel restores the last saved colors without persisting draft changes", async ({
-  apiClient,
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
@@ -150,6 +140,7 @@ test("theme color cancel restores the last saved colors without persisting draft
 
     await page.getByTestId(SETTINGS_PAGE_HANDLES.THEME_PRIMARY_INPUT).fill(draftPrimary);
     await page.getByTestId(SETTINGS_PAGE_HANDLES.THEME_CONTRAST_INPUT).fill(draftContrast);
+    const colorSaveRequests = recordApiRequests(page, "PATCH", "/api/settings/admin/color-schema");
     await page.getByTestId(SETTINGS_PAGE_HANDLES.THEME_CANCEL).click();
 
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.THEME_PRIMARY_INPUT)).toHaveValue(
@@ -159,13 +150,14 @@ test("theme color cancel restores the last saved colors without persisting draft
       originalContrast,
     );
 
-    const settings = await getGlobalSettings(apiClient);
-
-    expect(settings.primaryColor?.toLowerCase() ?? `#${originalPrimary}`).not.toBe(
-      `#${draftPrimary}`,
+    await page.reload();
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB).click();
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.THEME_PRIMARY_INPUT)).toHaveValue(
+      originalPrimary,
     );
-    expect(settings.contrastColor?.toLowerCase() ?? `#${originalContrast}`).not.toBe(
-      `#${draftContrast}`,
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.THEME_CONTRAST_INPUT)).toHaveValue(
+      originalContrast,
     );
+    expect(colorSaveRequests).toHaveLength(0);
   });
 });

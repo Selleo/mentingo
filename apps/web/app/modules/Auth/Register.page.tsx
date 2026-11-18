@@ -321,6 +321,9 @@ export default function RegisterPage() {
                                   <div className="flex items-start gap-2">
                                     <Checkbox
                                       id={field.id}
+                                      data-testid={REGISTER_PAGE_HANDLES.formFieldCheckbox(
+                                        field.id,
+                                      )}
                                       checked={Boolean(controllerField.value)}
                                       onCheckedChange={(checked) =>
                                         controllerField.onChange(Boolean(checked))
@@ -343,7 +346,10 @@ export default function RegisterPage() {
                                 )}
                               />
                             </div>
-                            <FormValidationError message={fieldError} />
+                            <FormValidationError
+                              message={fieldError}
+                              testId={REGISTER_PAGE_HANDLES.formFieldError(field.id)}
+                            />
                           </div>
                         );
                       })}

@@ -1,12 +1,12 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { TOAST_HANDLES } from "../../data/common/handles";
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { login } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
 import { createFixtureApiClient } from "../../utils/api-client";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 import { markAllOnboardingComplete } from "../../utils/onboarding";
 import { requireOrigin } from "../../utils/tenant-host";
 
@@ -130,7 +130,7 @@ test("user can change password with valid current password and matching new pass
   await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_NEW).fill(newPassword);
   await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_CONFIRM).fill(newPassword);
   await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_SAVE).click();
-  await expect(page.getByTestId(TOAST_HANDLES.ROOT)).toBeVisible();
+  await assertToastVariantVisible(page, "default");
 
   await login(page, email, newPassword);
   await expect(page).toHaveURL("/dashboard");

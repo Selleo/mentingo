@@ -1,5 +1,7 @@
 import { SETTINGS_PAGE_HANDLES } from "../data/settings/handles";
 
+import { getGlobalSettings } from "./global-settings";
+
 import type { FixtureApiClient } from "./api-client";
 import type { AxiosResponse } from "axios";
 import type { GetPublicGlobalSettingsResponse } from "~/api/generated-api";
@@ -67,22 +69,20 @@ export const PLATFORM_IMAGE_SETTINGS = {
 } as const satisfies Record<string, PlatformImageSetting>;
 
 /**
- * Puts back the image a setting had before the test. A non-empty original is downloaded through
- * the API and uploaded again; the file name keeps an extension because the API stores it in the key.
+ * Reads the image a setting has before the test changes it, so cleanup can upload it again
+ * (`null` when none is set; the download endpoint returns 404 then). The file name keeps an
+ * extension because the API stores it in the key.
  */
-export const restorePlatformImage = async (
+export const captureOriginalPlatformImage = async (
   apiClient: FixtureApiClient,
   setting: PlatformImageSetting,
-  originalUrl: string | null,
-) => {
-  if (!originalUrl) {
-    await setting.update(apiClient, null);
-    return;
-  }
+): Promise<File | null> => {
+  const settings = await getGlobalSettings(apiClient);
+  if (!settings[setting.field]) return null;
 
   const response = await setting.download(apiClient);
   const type = String(response.headers["content-type"] ?? "image/png").split(";")[0];
   const extension = type.split("/")[1]?.replace("+xml", "") ?? "png";
 
-  await setting.update(apiClient, new File([response.data], `original.${extension}`, { type }));
+  return new File([response.data], `original.${extension}`, { type });
 };

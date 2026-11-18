@@ -11,6 +11,9 @@ export const errorPageActionTestId = (testId: string) => `${testId}-action`;
 export const PLATFORM_LOGO_HANDLES = {
   CUSTOM: "platform-logo-custom",
   CUSTOM_SIGNET: "platform-logo-custom-signet",
+  DEFAULT: "platform-logo-default",
+  /** Set only once the simple logo has loaded, so it proves no custom signet is configured. */
+  DEFAULT_SIGNET: "platform-logo-default-signet",
 } as const;
 
 export const PRICE_INPUT_HANDLES = {

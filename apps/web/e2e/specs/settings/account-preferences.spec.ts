@@ -2,11 +2,11 @@ import { randomUUID } from "node:crypto";
 
 import { USER_ROLE } from "~/config/userRoles";
 
-import { TOAST_HANDLES } from "../../data/common/handles";
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 import { markAllOnboardingComplete } from "../../utils/onboarding";
 
 test("password form blocks submit for missing current password weak password and mismatch", async ({
@@ -123,7 +123,7 @@ test("user with onboarding reset permission can reset onboarding", async ({
     await markAllOnboardingComplete(apiClient);
     await openSettingsPageFlow(page);
     await page.getByTestId(SETTINGS_PAGE_HANDLES.RESET_ONBOARDING_BUTTON).click();
-    await expect(page.getByTestId(TOAST_HANDLES.ROOT)).toBeVisible();
+    await assertToastVariantVisible(page, "default");
 
     await expect
       .poll(async () => {

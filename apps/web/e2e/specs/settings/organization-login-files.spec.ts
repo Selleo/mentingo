@@ -9,6 +9,7 @@ import { expect, test } from "../../fixtures/test.fixture";
 import { openLoginPageFlow } from "../../flows/auth/open-login-page.flow";
 import { openOrganizationSettingsFlow } from "../../flows/settings/open-organization-settings.flow";
 import { uploadLoginPageDocumentFlow } from "../../flows/settings/upload-login-page-document.flow";
+import { waitForApiResponse } from "../../utils/api-requests";
 import {
   getLoginPageFiles,
   removeLoginPageFilesByPrefix,
@@ -62,7 +63,13 @@ test("admin uploads, previews and deletes a login-page document that visitors se
       page.getByTestId(SETTINGS_PAGE_HANDLES.loginPageFileItem(displayName)),
     ).toHaveCount(0);
 
+    const loginPageFilesLoaded = waitForApiResponse(
+      visitor.page,
+      "GET",
+      "/api/settings/login-page-files",
+    );
     await openLoginPageFlow(visitor.page);
+    await loginPageFilesLoaded;
     await expect(visitor.page.getByTestId(LOGIN_PAGE_HANDLES.resource(resourceId))).toHaveCount(0);
   });
 });

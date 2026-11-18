@@ -29,6 +29,8 @@ export const REGISTER_PAGE_HANDLES = {
   INVITE_ONLY: REGISTER_INVITE_ONLY,
   INVITE_ONLY_SIGN_IN_LINK: errorPageActionTestId(REGISTER_INVITE_ONLY),
   formField: (fieldId: string) => `register-form-field-${fieldId}`,
+  formFieldCheckbox: (fieldId: string) => `register-form-field-${fieldId}-checkbox`,
+  formFieldError: (fieldId: string) => `register-form-field-${fieldId}-error`,
 } as const;
 
 export const CREATE_NEW_PASSWORD_PAGE_HANDLES = {

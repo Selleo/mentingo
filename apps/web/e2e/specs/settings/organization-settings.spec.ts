@@ -18,7 +18,7 @@ import { mockStripeEnabledFlow } from "../../flows/settings/mock-settings-env.fl
 import { openOrganizationSettingsFlow } from "../../flows/settings/open-organization-settings.flow";
 import { saveMfaEnforcementFlow } from "../../flows/settings/save-mfa-enforcement.flow";
 import { toggleMfaEnforcementRoleFlow } from "../../flows/settings/toggle-mfa-enforcement-role.flow";
-import { getGlobalSettings } from "../../utils/global-settings";
+import { getGlobalSettings, getMfaEnforcedRoles } from "../../utils/global-settings";
 
 test("admin enforces MFA for a role and a user of that role must enroll on login", async ({
   apiClient,
@@ -35,47 +35,35 @@ test("admin enforces MFA for a role and a user of that role must enroll on login
     studentEmail = student.email;
     cleanup.add(() => userFactory.delete(student.id));
 
-    const originalRoles = new Set((await getGlobalSettings(apiClient)).MFAEnforcedRoles);
-    const readEnforcedRoles = async () => {
-      const enforcedRoles = new Set((await getGlobalSettings(apiClient)).MFAEnforcedRoles);
-
-      return {
-        admin: enforcedRoles.has(USER_ROLE.admin),
-        student: enforcedRoles.has(USER_ROLE.student),
-        content_creator: enforcedRoles.has(USER_ROLE.contentCreator),
-        trainer: enforcedRoles.has(SYSTEM_ROLE_SLUGS.TRAINER),
-      };
-    };
-
+    const originalRoles = await getMfaEnforcedRoles(apiClient);
     cleanup.add(async () => {
-      await apiClient.api.settingsControllerUpdateMfaEnforcedRoles({
-        admin: originalRoles.has(USER_ROLE.admin),
-        student: originalRoles.has(USER_ROLE.student),
-        content_creator: originalRoles.has(USER_ROLE.contentCreator),
-        trainer: originalRoles.has(SYSTEM_ROLE_SLUGS.TRAINER),
-      });
+      await apiClient.api.settingsControllerUpdateMfaEnforcedRoles(originalRoles);
     });
 
     await apiClient.api.settingsControllerUpdateMfaEnforcedRoles({
       student: false,
       content_creator: false,
+      trainer: false,
     });
 
     await openOrganizationSettingsFlow(page);
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_SAVE)).toBeDisabled();
 
-    await toggleMfaEnforcementRoleFlow(page, USER_ROLE.student);
-    await toggleMfaEnforcementRoleFlow(page, USER_ROLE.contentCreator);
+    for (const role of [USER_ROLE.student, USER_ROLE.contentCreator, SYSTEM_ROLE_SLUGS.TRAINER]) {
+      await toggleMfaEnforcementRoleFlow(page, role);
+    }
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_SAVE)).toBeEnabled();
     await saveMfaEnforcementFlow(page);
 
-    // Roles the admin did not toggle keep their original setting.
-    await expect.poll(readEnforcedRoles).toEqual({
-      admin: originalRoles.has(USER_ROLE.admin),
-      student: true,
-      content_creator: true,
-      trainer: originalRoles.has(SYSTEM_ROLE_SLUGS.TRAINER),
-    });
+    // The admin role, which was not toggled, keeps its original setting.
+    await expect
+      .poll(() => getMfaEnforcedRoles(apiClient))
+      .toEqual({
+        admin: originalRoles.admin,
+        student: true,
+        content_creator: true,
+        trainer: true,
+      });
   });
 
   const visitor = await createWorkspacePage();
