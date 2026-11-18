@@ -16,6 +16,8 @@ import {
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 
+import { REPORTS_HANDLES } from "../../../../e2e/data/reports/handles";
+
 import { getReportResultColumns } from "./ReportResultsTable.columns";
 
 import type { ReportSort } from "../reports-api.types";
@@ -109,7 +111,7 @@ export function ReportResultsTable({
           {t("reports.help.timezone", { timezone })} {t("reports.scope.boundaryNote")}
         </p>
       </div>
-      <Table className="bg-neutral-50">
+      <Table className="bg-neutral-50" data-testid={REPORTS_HANDLES.RESULTS_TABLE}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -154,7 +156,11 @@ export function ReportResultsTable({
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} className="hover:bg-neutral-100">
+            <TableRow
+              key={row.id}
+              className="hover:bg-neutral-100"
+              data-testid={REPORTS_HANDLES.resultRow(row.id)}
+            >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -21,6 +21,7 @@ type SplitButtonProps = {
   secondaryDisabled?: boolean;
   menuAriaLabel: string;
   className?: string;
+  testId?: string;
   onClick: () => void;
   onSecondaryClick: () => void;
 };
@@ -34,6 +35,7 @@ export function SplitButton({
   secondaryDisabled,
   menuAriaLabel,
   className,
+  testId,
   onClick,
   onSecondaryClick,
 }: SplitButtonProps) {
@@ -60,6 +62,7 @@ export function SplitButton({
           "rounded-bl-none": isMenuOpen,
         })}
         disabled={disabled}
+        data-testid={testId}
         onClick={onClick}
       >
         {icon}

@@ -73,7 +73,10 @@ export function WidgetStudentCourseCompletion({
           onRetry={() => void refetch()}
         />
         {!isLoading && !isError && completion?.total === 0 && (
-          <div className="flex flex-1 items-center justify-center text-center text-neutral-600">
+          <div
+            data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE}
+            className="flex flex-1 items-center justify-center text-center text-neutral-600"
+          >
             {t("dashboardHome.widgets.studentTiles.courseCompletion.empty")}
           </div>
         )}
@@ -82,6 +85,7 @@ export function WidgetStudentCourseCompletion({
             <span className="sr-only">{completion.percentage}%</span>
             <ChartContainer
               config={chartConfig}
+              data-testid={DASHBOARD_WIDGET_HANDLES.CHART}
               role="img"
               aria-label={t(
                 "dashboardHome.widgets.studentTiles.courseCompletion.completedOfTotal",

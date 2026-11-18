@@ -1,122 +1,110 @@
-import { DASHBOARD_WIDGET_SIZES, DASHBOARD_WIDGET_TYPES } from "@repo/shared";
+import {
+  DASHBOARD_WIDGET_SIZES,
+  DASHBOARD_WIDGET_TYPES,
+  STUDENT_COURSE_URGENCY,
+} from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
-import { DASHBOARD_WIDGET_HANDLES } from "../../data/dashboard/handles";
+import { DASHBOARD_STUDENT_HANDLES, DASHBOARD_WIDGET_HANDLES } from "../../data/dashboard/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openDashboardFlow } from "../../flows/dashboard/open-dashboard.flow";
 import { setDashboardWidgets } from "../../utils/dashboard-settings";
 
-import type { CreateIsolatedWorkspace } from "../../fixtures/test.fixture";
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-const createStudentDashboardScenario = async (createIsolatedWorkspace: CreateIsolatedWorkspace) => {
+test("student dashboard widgets reflect real enrollment progress, deadlines and certificates", async ({
+  createIsolatedWorkspace,
+}) => {
   const workspace = await createIsolatedWorkspace();
-  const student = await workspace.createTenantUserWithPasswordAndRole({
-    role: USER_ROLE.student,
-    firstName: "Dashboard",
-    lastName: "Student",
-  });
-  const categoryFactory = workspace.factories.createCategoryFactory();
+  const student = await workspace.createTenantUserWithPasswordAndRole({ role: USER_ROLE.student });
   const courseFactory = workspace.factories.createCourseFactory();
   const curriculumFactory = workspace.factories.createCurriculumFactory();
   const groupFactory = workspace.factories.createGroupFactory();
   const enrollmentFactory = workspace.factories.createEnrollmentFactory();
-  const category = await categoryFactory.create(`Dashboard category ${Date.now()}`);
-  const course = await courseFactory.create({
-    title: `Dashboard course ${Date.now()}`,
+  const category = await workspace.factories
+    .createCategoryFactory()
+    .create(`Dashboard category ${Date.now()}`);
+  const group = await groupFactory.create({ name: `Dashboard group ${Date.now()}` });
+  await workspace.factories.createUserFactory().update(student.user.id, { groups: [group.id] });
+
+  const requiredCourse = await courseFactory.create({
+    title: `Dashboard required course ${Date.now()}`,
     categoryId: category.id,
-    hasCertificate: true,
   });
-  const chapter = await curriculumFactory.createChapter({
-    courseId: course.id,
+  const requiredChapter = await curriculumFactory.createChapter({
+    courseId: requiredCourse.id,
     title: "Dashboard chapter",
   });
-  const firstLesson = await curriculumFactory.createContentLesson(course.id, {
-    chapterId: chapter.id,
+  const firstLesson = await curriculumFactory.createContentLesson(requiredCourse.id, {
+    chapterId: requiredChapter.id,
     title: "First dashboard lesson",
   });
-  const nextLesson = await curriculumFactory.createContentLesson(course.id, {
-    chapterId: chapter.id,
+  const nextLesson = await curriculumFactory.createContentLesson(requiredCourse.id, {
+    chapterId: requiredChapter.id,
     title: "Next dashboard lesson",
   });
-  await courseFactory.update(course.id, { status: "published", language: "en" });
-  const group = await groupFactory.create({ name: `Dashboard group ${Date.now()}` });
-  await workspace.factories.createUserFactory().update(student.user.id, {
-    groups: [group.id],
+  await courseFactory.update(requiredCourse.id, { status: "published", language: "en" });
+
+  const certifiedCourse = await courseFactory.create({
+    title: `Dashboard certified course ${Date.now()}`,
+    categoryId: category.id,
   });
-  await enrollmentFactory.enrollGroups(course.id, [
-    {
-      id: group.id,
-      isMandatory: true,
-      dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-    },
+  await courseFactory.updateHasCertificate(certifiedCourse.id, true);
+  const certifiedChapter = await curriculumFactory.createChapter({
+    courseId: certifiedCourse.id,
+    title: "Certified chapter",
+  });
+  const certifiedLesson = await curriculumFactory.createContentLesson(certifiedCourse.id, {
+    chapterId: certifiedChapter.id,
+    title: "Only certified lesson",
+  });
+  await courseFactory.update(certifiedCourse.id, { status: "published", language: "en" });
+
+  await enrollmentFactory.enrollGroups(requiredCourse.id, [
+    { id: group.id, isMandatory: true, dueDate: new Date(Date.now() + 2 * DAY_MS).toISOString() },
   ]);
-  await student.apiClient.api.studentLessonProgressControllerMarkLessonAsCompleted({
-    id: firstLesson.id,
-    language: "en",
-  });
+  await enrollmentFactory.enrollGroups(certifiedCourse.id, [{ id: group.id, isMandatory: false }]);
+  for (const lesson of [firstLesson, certifiedLesson]) {
+    await student.apiClient.api.studentLessonProgressControllerMarkLessonAsCompleted({
+      id: lesson.id,
+      language: "en",
+    });
+  }
+  await setDashboardWidgets(student.apiClient, [
+    { type: DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING, size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO },
+    { type: DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES, size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO },
+    { type: DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION, size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO },
+    { type: DASHBOARD_WIDGET_TYPES.CERTIFICATES, size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO },
+  ]);
 
-  return { course, nextLesson, student };
-};
+  await openDashboardFlow(student.page, student.origin);
 
-test.describe("student dashboard widgets", () => {
-  test("shows continue learning and the next lesson from real enrollment progress", async ({
-    createIsolatedWorkspace,
-  }) => {
-    const { course, nextLesson, student } =
-      await createStudentDashboardScenario(createIsolatedWorkspace);
-    await setDashboardWidgets(student.apiClient, [
-      {
-        type: DASHBOARD_WIDGET_TYPES.CONTINUE_LEARNING,
-        size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
-      },
-    ]);
+  const continueCourse = student.page.getByTestId(
+    DASHBOARD_STUDENT_HANDLES.continueCourse(requiredCourse.id),
+  );
+  await expect(continueCourse).toContainText(requiredCourse.title);
+  await expect(
+    continueCourse.getByTestId(DASHBOARD_STUDENT_HANDLES.CONTINUE_NEXT_LESSON),
+  ).toContainText(nextLesson.title);
 
-    await openDashboardFlow(student.page, student.origin);
+  const required = student.page.getByTestId(
+    DASHBOARD_STUDENT_HANDLES.requiredCourse(requiredCourse.id),
+  );
+  await expect(required).toContainText(requiredCourse.title);
+  await expect(
+    required.getByTestId(
+      DASHBOARD_STUDENT_HANDLES.requiredCourseUrgency(STUDENT_COURSE_URGENCY.DUE_SOON),
+    ),
+  ).toBeVisible();
 
-    const widget = student.page.getByTestId(DASHBOARD_WIDGET_HANDLES.STUDENT_CONTINUE_LEARNING);
-    await expect(widget).toBeVisible();
-    await expect(widget.getByRole("heading", { name: "Continue learning" })).toBeVisible();
-    await expect(widget.getByRole("heading", { name: course.title })).toBeVisible();
-    await expect(widget.getByText(`Next: ${nextLesson.title}`)).toBeVisible();
-  });
+  await expect(
+    student.page
+      .getByTestId(DASHBOARD_WIDGET_HANDLES.STUDENT_COURSE_COMPLETION)
+      .getByTestId(DASHBOARD_WIDGET_HANDLES.CHART),
+  ).toContainText("1/2");
 
-  test("shows required-course urgency from a real mandatory group deadline", async ({
-    createIsolatedWorkspace,
-  }) => {
-    const { course, student } = await createStudentDashboardScenario(createIsolatedWorkspace);
-    await setDashboardWidgets(student.apiClient, [
-      {
-        type: DASHBOARD_WIDGET_TYPES.REQUIRED_COURSES,
-        size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
-      },
-    ]);
-
-    await openDashboardFlow(student.page, student.origin);
-
-    const widget = student.page.getByTestId(DASHBOARD_WIDGET_HANDLES.STUDENT_REQUIRED_COURSE);
-    await expect(widget).toBeVisible();
-    await expect(widget.getByRole("heading", { name: "Required courses" })).toBeVisible();
-    await expect(widget.getByRole("heading", { name: course.title })).toBeVisible();
-    await expect(widget.getByText("Due soon", { exact: true })).toBeVisible();
-  });
-
-  test("shows course-completion totals from the real student enrollment", async ({
-    createIsolatedWorkspace,
-  }) => {
-    const { student } = await createStudentDashboardScenario(createIsolatedWorkspace);
-    await setDashboardWidgets(student.apiClient, [
-      {
-        type: DASHBOARD_WIDGET_TYPES.COURSE_COMPLETION,
-        size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
-      },
-    ]);
-
-    await openDashboardFlow(student.page, student.origin);
-
-    const widget = student.page.getByTestId(DASHBOARD_WIDGET_HANDLES.STUDENT_COURSE_COMPLETION);
-    await expect(widget).toBeVisible();
-    await expect(widget.getByRole("heading", { name: "Course progress" })).toBeVisible();
-    await expect(widget.getByRole("img", { name: "0 of 1 completed" })).toBeVisible();
-  });
+  await expect(
+    student.page.getByTestId(DASHBOARD_WIDGET_HANDLES.STUDENT_CERTIFICATES),
+  ).toContainText(certifiedCourse.title);
 });

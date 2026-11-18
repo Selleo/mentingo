@@ -1,7 +1,14 @@
+import { stat } from "node:fs/promises";
+
 import { USER_ROLE } from "~/config/userRoles";
+import { formatReportDate } from "~/modules/Reports/reports.utils";
 
 import { REPORTS_HANDLES } from "../../data/reports/handles";
-import { REPORTS_IDS, REPORTS_INACCESSIBLE_CONFIGURATION } from "../../data/reports/reports.data";
+import {
+  REPORTS_IDS,
+  REPORTS_INACCESSIBLE_CONFIGURATION,
+  REPORTS_RESULT,
+} from "../../data/reports/reports.data";
 import { expect, test } from "../../fixtures/test.fixture";
 import { applyReportFlow } from "../../flows/reports/apply-report.flow";
 import { chooseReportOptionFlow } from "../../flows/reports/choose-report-option.flow";
@@ -20,59 +27,70 @@ import {
 } from "../../flows/reports/save-report-configuration.flow";
 import { selectReportSubjectFlow } from "../../flows/reports/select-report-subject.flow";
 
-import type { Page } from "@playwright/test";
-
-const LEARNER_SUBJECT = {
-  tab: /Learner progress/,
-  subjectLabel: "Learner",
-  subjectName: "Mina Shah",
-};
-
-const openMockedReportsPage = async (page: Page) => {
-  const reportsApi = await mockReportsApiFlow(page);
-  const lastSubmittedQuery = () => reportsApi.submittedQueries.at(-1);
-
-  await openReportsPageFlow(page);
-
-  return { reportsApi, lastSubmittedQuery };
-};
+const LEARNER_SUBJECT = { view: "learner", subjectId: REPORTS_IDS.learner } as const;
+const [RESULT_ROW] = REPORTS_RESULT.rows;
 
 test("reports render learner results", async ({ withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await openMockedReportsPage(page);
+    await mockReportsApiFlow(page);
+    await openReportsPageFlow(page);
 
-    const learnerRow = page.getByRole("row").filter({ hasText: "Mina Shah" });
-    await expect(learnerRow).toContainText("Security Essentials");
-    await expect(learnerRow).toContainText("Customer journey");
-    await expect(learnerRow).toContainText("87%");
-    await expect(learnerRow).toContainText("2026");
-    await expect(page.getByText("1", { exact: true }).first()).toBeVisible();
+    const learnerRow = page.getByTestId(REPORTS_HANDLES.resultRow(RESULT_ROW.id));
+    await expect(learnerRow).toContainText(RESULT_ROW.learner.name);
+    await expect(learnerRow).toContainText(RESULT_ROW.course.title);
+    await expect(learnerRow).toContainText(RESULT_ROW.path.title);
+    await expect(learnerRow).toContainText(`${RESULT_ROW.score}%`);
+    await expect(learnerRow).toContainText(
+      formatReportDate(
+        RESULT_ROW.lastActivityAt,
+        "en",
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+      ),
+    );
+    await expect(
+      page
+        .getByTestId(REPORTS_HANDLES.metric("learners"))
+        .getByTestId(REPORTS_HANDLES.METRIC_VALUE),
+    ).toHaveText(String(REPORTS_RESULT.metrics.learners));
   });
 });
 
 test("reports filter by learner condition and nested groups", async ({ withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { lastSubmittedQuery } = await openMockedReportsPage(page);
+    const reportsApi = await mockReportsApiFlow(page);
+    await openReportsPageFlow(page);
 
     await openReportFiltersFlow(page);
     await addReportConditionFlow(page);
-    const rootField = page.getByRole("combobox", { name: "Field" }).first();
-    const rootOperator = page.getByRole("combobox", { name: "Operator" }).first();
-    await chooseReportOptionFlow(page, rootField, "Learner name or email");
-    await chooseReportOptionFlow(page, rootOperator, "Contains");
-    await page.getByRole("textbox", { name: "Value" }).fill("mina@exa");
+    const condition = page.getByTestId(REPORTS_HANDLES.CONDITION).first();
+    const operator = condition.getByTestId(REPORTS_HANDLES.CONDITION_OPERATOR);
+    await chooseReportOptionFlow(
+      page,
+      condition.getByTestId(REPORTS_HANDLES.CONDITION_FIELD),
+      REPORTS_HANDLES.option("learner"),
+    );
+    await chooseReportOptionFlow(
+      page,
+      operator,
+      REPORTS_HANDLES.conditionOperatorOption("contains"),
+    );
+    await condition.getByTestId(REPORTS_HANDLES.CONDITION_VALUE_INPUT).fill("mina@exa");
     await applyReportFlow(page);
-    await expect.poll(lastSubmittedQuery).toMatchObject({
+    await expect.poll(reportsApi.lastSubmittedQuery).toMatchObject({
       filter: {
         match: "all",
         rules: [{ field: "learner", operator: "contains", value: "mina@exa" }],
       },
     });
 
-    await chooseReportOptionFlow(page, rootOperator, "Is");
-    await chooseReportOptionFlow(page, page.getByRole("combobox", { name: "Value" }), "Mina Shah");
+    await chooseReportOptionFlow(page, operator, REPORTS_HANDLES.conditionOperatorOption("eq"));
+    await chooseReportOptionFlow(
+      page,
+      condition.getByTestId(REPORTS_HANDLES.CONDITION_VALUE_PICKER),
+      REPORTS_HANDLES.option(REPORTS_IDS.learner),
+    );
     await applyReportFlow(page);
-    await expect.poll(lastSubmittedQuery).toMatchObject({
+    await expect.poll(reportsApi.lastSubmittedQuery).toMatchObject({
       filter: {
         match: "all",
         rules: [{ field: "learner", operator: "eq", value: REPORTS_IDS.learner }],
@@ -80,16 +98,20 @@ test("reports filter by learner condition and nested groups", async ({ withWorke
     });
     await removeReportConditionFlow(page);
 
-    await page.getByRole("button", { name: "Add nested group" }).click();
+    await page.getByTestId(REPORTS_HANDLES.ADD_NESTED_GROUP).click();
     const nestedGroup = page.getByTestId(REPORTS_HANDLES.NESTED_GROUP);
-    await expect(nestedGroup).toBeVisible();
-    await nestedGroup.getByRole("button", { name: "Add condition" }).click();
-    const nestedMatching = nestedGroup.getByRole("combobox", { name: "Condition matching" });
-    await chooseReportOptionFlow(page, nestedMatching, "any");
-    await expect(nestedMatching).toHaveText(/any/);
-    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveText(/2.*30/);
+    await nestedGroup.getByTestId(REPORTS_HANDLES.NESTED_ADD_CONDITION).click();
+    await chooseReportOptionFlow(
+      page,
+      nestedGroup.getByTestId(REPORTS_HANDLES.MATCHING),
+      REPORTS_HANDLES.matchingOption("or"),
+    );
+    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveAttribute(
+      "data-count",
+      "2",
+    );
     await applyReportFlow(page);
-    await expect.poll(lastSubmittedQuery).toMatchObject({
+    await expect.poll(reportsApi.lastSubmittedQuery).toMatchObject({
       filter: {
         match: "all",
         rules: [
@@ -110,55 +132,48 @@ test("reports switch between course, development path and learner subjects", asy
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { lastSubmittedQuery } = await openMockedReportsPage(page);
+    const reportsApi = await mockReportsApiFlow(page);
+    await openReportsPageFlow(page);
+    const resultTitle = page.getByTestId(REPORTS_HANDLES.RESULT_TITLE);
 
-    await selectReportSubjectFlow(page, {
-      tab: /Course performance/,
-      subjectLabel: "Course",
-      subjectName: "Security Essentials",
-    });
-    await expect(page.locator("h2").filter({ hasText: "Security Essentials" })).toBeVisible();
+    await selectReportSubjectFlow(page, { view: "course", subjectId: REPORTS_IDS.course });
+    await expect(resultTitle).toContainText(RESULT_ROW.course.title);
     await expect
-      .poll(lastSubmittedQuery)
+      .poll(reportsApi.lastSubmittedQuery)
       .toMatchObject({ view: "course", subjectId: REPORTS_IDS.course });
 
-    await selectReportSubjectFlow(page, {
-      tab: /Development paths/,
-      subjectLabel: "Development path",
-      subjectName: "Customer journey",
-    });
-    await expect(page.locator("h2").filter({ hasText: "Customer journey" })).toBeVisible();
-    await expect(
-      page.locator("table thead th").filter({ hasText: /Security Essentials/i }),
-    ).toBeVisible();
+    await selectReportSubjectFlow(page, { view: "developmentPaths", subjectId: REPORTS_IDS.path });
+    await expect(resultTitle).toContainText(RESULT_ROW.path.title);
+    await expect(page.getByTestId(REPORTS_HANDLES.RESULTS_TABLE)).toContainText(
+      RESULT_ROW.course.title,
+    );
     await expect
-      .poll(lastSubmittedQuery)
+      .poll(reportsApi.lastSubmittedQuery)
       .toMatchObject({ view: "developmentPaths", subjectId: REPORTS_IDS.path });
 
     await selectReportSubjectFlow(page, LEARNER_SUBJECT);
-    await expect(page.locator("h2").filter({ hasText: "Mina Shah" })).toBeVisible();
+    await expect(resultTitle).toContainText(RESULT_ROW.learner.name);
     await expect
-      .poll(lastSubmittedQuery)
+      .poll(reportsApi.lastSubmittedQuery)
       .toMatchObject({ view: "learner", subjectId: REPORTS_IDS.learner });
   });
 });
 
 test("reports save a configuration and download the spreadsheet", async ({ withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { reportsApi } = await openMockedReportsPage(page);
+    const reportsApi = await mockReportsApiFlow(page);
+    await openReportsPageFlow(page);
     await selectReportSubjectFlow(page, LEARNER_SUBJECT);
 
     await saveReportConfigurationFlow(page, "Quarterly learner review");
     await openSavedReportConfigurationsFlow(page);
     await expect(
-      page.getByRole("button", { name: /Quarterly learner review Personal/ }),
-    ).toBeVisible();
+      page.getByTestId(REPORTS_HANDLES.savedConfiguration(REPORTS_IDS.config)),
+    ).toContainText("Quarterly learner review");
     await page.keyboard.press("Escape");
 
     const download = await exportReportSpreadsheetFlow(page);
-    await expect(
-      page.locator('[role="status"]').filter({ hasText: "XLSX report is ready." }),
-    ).toBeVisible();
+    await expect(page.getByTestId(REPORTS_HANDLES.EXPORT_DOWNLOAD)).toBeVisible();
     expect(reportsApi.getExportRequest()).toMatchObject({
       format: "xlsx",
       query: { view: "learner", subjectId: REPORTS_IDS.learner, page: 1, pageSize: 100 },
@@ -169,17 +184,21 @@ test("reports save a configuration and download the spreadsheet", async ({ withW
 
 test("reports reset filters while keeping the selected subject", async ({ withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { lastSubmittedQuery } = await openMockedReportsPage(page);
+    const reportsApi = await mockReportsApiFlow(page);
+    await openReportsPageFlow(page);
     await selectReportSubjectFlow(page, LEARNER_SUBJECT);
     await openReportFiltersFlow(page);
     await addReportConditionFlow(page);
     await applyReportFlow(page);
     await expect
-      .poll(lastSubmittedQuery)
+      .poll(reportsApi.lastSubmittedQuery)
       .toMatchObject({ filter: { match: "all", rules: [{ field: "status", operator: "eq" }] } });
 
     await resetReportFlow(page);
-    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveText(/0.*30/);
+    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveAttribute(
+      "data-count",
+      "0",
+    );
     await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeDisabled();
     await expect
       .poll(() => {
@@ -192,13 +211,13 @@ test("reports reset filters while keeping the selected subject", async ({ withWo
         filters: { conditions: [], groups: [] },
       });
     await expect
-      .poll(lastSubmittedQuery)
+      .poll(reportsApi.lastSubmittedQuery)
       .toMatchObject({ view: "learner", subjectId: REPORTS_IDS.learner, groupIds: [] });
 
     await addReportConditionFlow(page);
     await applyReportFlow(page);
     await expect
-      .poll(lastSubmittedQuery)
+      .poll(reportsApi.lastSubmittedQuery)
       .toMatchObject({ filter: { match: "all", rules: [{ field: "status", operator: "eq" }] } });
   });
 });
@@ -207,21 +226,96 @@ test("reports recover from a saved configuration with inaccessible references", 
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { reportsApi, lastSubmittedQuery } = await openMockedReportsPage(page);
+    const reportsApi = await mockReportsApiFlow(page);
     reportsApi.savedConfigurations.push(REPORTS_INACCESSIBLE_CONFIGURATION);
-    await page.reload();
+    await openReportsPageFlow(page);
 
     await openSavedReportConfigurationsFlow(page);
-    await page.getByRole("button", { name: /Inaccessible course filter Personal/ }).click();
-    await expect(page.getByRole("alert")).toContainText("no longer access");
-    await expect(page.getByRole("combobox", { name: "Learner" })).toHaveText(/Mina Shah/);
-    await expect(page.getByRole("combobox", { name: "Groups" })).toHaveText(/All groups/);
+    await page
+      .getByTestId(REPORTS_HANDLES.savedConfiguration(REPORTS_INACCESSIBLE_CONFIGURATION.id))
+      .click();
+    await expect(page.getByTestId(REPORTS_HANDLES.WARNING)).toBeVisible();
+    await expect(page.getByTestId(REPORTS_HANDLES.SUBJECT_PICKER)).toContainText(
+      RESULT_ROW.learner.name,
+    );
+    // The inaccessible group is dropped, so the picker is back on "all groups".
+    await expect(page.getByTestId(REPORTS_HANDLES.GROUPS_PICKER)).toHaveAttribute(
+      "data-selected-count",
+      "0",
+    );
     await removeReportConditionFlow(page);
-    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveText(/0.*30/);
+    await expect(page.getByTestId(REPORTS_HANDLES.CONDITION_COUNT)).toHaveAttribute(
+      "data-count",
+      "0",
+    );
     await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeEnabled();
     await applyReportFlow(page);
     await expect
-      .poll(lastSubmittedQuery)
+      .poll(reportsApi.lastSubmittedQuery)
       .toMatchObject({ view: "learner", subjectId: REPORTS_IDS.learner, groupIds: [] });
+  });
+});
+
+test("reports run a real course report and export it as a spreadsheet", async ({
+  cleanup,
+  factories,
+  withWorkerPage,
+}) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+    const categoryFactory = factories.createCategoryFactory();
+    const courseFactory = factories.createCourseFactory();
+    const userFactory = factories.createUserFactory();
+    const prefix = `reports-smoke-${Date.now()}`;
+    const category = await categoryFactory.create(`${prefix}-category`);
+    cleanup.add(() => categoryFactory.delete(category.id));
+    const course = await courseFactory.create({
+      title: `${prefix}-course`,
+      categoryId: category.id,
+    });
+    cleanup.add(() => courseFactory.delete(course.id));
+    await courseFactory.update(course.id, { status: "published", language: "en" });
+    const learner = await userFactory.create({ email: `${prefix}@example.com` });
+    cleanup.add(() => userFactory.delete(learner.id));
+    await factories.createEnrollmentFactory().enrollUsers(course.id, [learner.id]);
+
+    await openReportsPageFlow(page);
+    await selectReportSubjectFlow(page, {
+      view: "course",
+      subjectId: course.id,
+      search: course.title,
+    });
+
+    await expect(page.getByTestId(REPORTS_HANDLES.RESULT_TITLE)).toContainText(course.title);
+    await expect(page.getByTestId(REPORTS_HANDLES.RESULTS_TABLE)).toContainText(learner.email);
+    await expect(
+      page
+        .getByTestId(REPORTS_HANDLES.metric("learners"))
+        .getByTestId(REPORTS_HANDLES.METRIC_VALUE),
+    ).toHaveText("1");
+
+    // A new condition filters on status "completed"; the enrolled learner has not started yet.
+    const learnersMetric = page
+      .getByTestId(REPORTS_HANDLES.metric("learners"))
+      .getByTestId(REPORTS_HANDLES.METRIC_VALUE);
+    await openReportFiltersFlow(page);
+    await addReportConditionFlow(page);
+    await applyReportFlow(page);
+    await expect(learnersMetric).toHaveText("0");
+    await expect(page.getByTestId(REPORTS_HANDLES.RESULTS_TABLE)).not.toContainText(learner.email);
+    await chooseReportOptionFlow(
+      page,
+      page
+        .getByTestId(REPORTS_HANDLES.CONDITION)
+        .getByTestId(REPORTS_HANDLES.CONDITION_VALUE_PICKER),
+      REPORTS_HANDLES.option("notStarted"),
+    );
+    await applyReportFlow(page);
+    await expect(learnersMetric).toHaveText("1");
+    await expect(page.getByTestId(REPORTS_HANDLES.RESULTS_TABLE)).toContainText(learner.email);
+
+    const download = await exportReportSpreadsheetFlow(page);
+    await expect(page.getByTestId(REPORTS_HANDLES.EXPORT_DOWNLOAD)).toBeVisible();
+    expect(download.suggestedFilename()).toMatch(/\.xlsx$/);
+    expect((await stat(await download.path())).size).toBeGreaterThan(0);
   });
 });

@@ -113,6 +113,7 @@ function ScenarioComposer({
               variant="ghost"
               size="icon"
               className="size-8 rounded-lg text-neutral-600 hover:bg-primary-50 hover:text-primary-700"
+              data-testid={AI_MENTOR_PRACTICE_HANDLES.SUGGESTIONS_TRIGGER}
               aria-label={t("aiMentorPractice.form.suggestions.title")}
             >
               <Plus className="size-4" aria-hidden="true" />
@@ -130,6 +131,7 @@ function ScenarioComposer({
             {PRACTICE_SUGGESTIONS.map(({ labelKey, valueKey }) => (
               <DropdownMenuItem
                 key={valueKey}
+                data-testid={AI_MENTOR_PRACTICE_HANDLES.SUGGESTION}
                 className="cursor-pointer rounded-lg px-2.5 py-2.5 outline-none transition-colors focus:bg-primary-50"
                 onSelect={() => onScenarioChange(t(valueKey))}
               >
@@ -201,6 +203,7 @@ function ConversationComposer({
         onInputChange={(event) => onMessageChange(event.target.value)}
         onSubmit={onSubmit}
         ariaLabel={t("aiMentorPractice.message")}
+        textInputTestId={AI_MENTOR_PRACTICE_HANDLES.WIDGET_MESSAGE_INPUT}
       />
       <Button
         type="submit"
@@ -338,7 +341,11 @@ export function WidgetStudentAiMentorPractice({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge variant="secondary" className="uppercase">
+                <Badge
+                  variant="secondary"
+                  className="uppercase"
+                  data-testid={AI_MENTOR_PRACTICE_HANDLES.WIDGET_BETA_BADGE}
+                >
                   Beta
                 </Badge>
               </TooltipTrigger>
@@ -405,7 +412,10 @@ export function WidgetStudentAiMentorPractice({
             className="py-5"
           />
         ) : data.status === AI_MENTOR_PRACTICE_STATUSES.FAILED ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 px-5 text-center">
+          <div
+            data-testid={AI_MENTOR_PRACTICE_HANDLES.WIDGET_FAILED}
+            className="flex flex-1 flex-col items-center justify-center gap-3 px-5 text-center"
+          >
             <p className="body-sm text-neutral-600">
               {t("dashboardHome.widgets.studentTiles.aiMentorPractice.status.failed")}
             </p>
@@ -414,6 +424,7 @@ export function WidgetStudentAiMentorPractice({
               variant="outline"
               size="sm"
               disabled={isRetrying}
+              data-testid={AI_MENTOR_PRACTICE_HANDLES.WIDGET_RETRY}
               onClick={() => void retryPractice(data.id)}
             >
               {isRetrying ? t("common.button.loading") : t("aiMentorPractice.retry")}

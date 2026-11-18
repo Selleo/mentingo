@@ -79,7 +79,7 @@ export function WidgetAdminTrainingCompletion({
           />
         ) : total === 0 ? (
           <div className="flex flex-1 flex-col items-start justify-center gap-3">
-            <p className="text-neutral-600">
+            <p data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE} className="text-neutral-600">
               {t("dashboardHome.widgets.training_completion.empty")}
             </p>
             <Button asChild size="sm">
@@ -92,6 +92,7 @@ export function WidgetAdminTrainingCompletion({
           <>
             <ChartContainer
               config={chartConfig}
+              data-testid={DASHBOARD_WIDGET_HANDLES.CHART}
               role="img"
               aria-label={t("dashboardHome.widgets.trainingCompletionChartLabel", {
                 completed: stats?.completed ?? 0,
@@ -134,6 +135,7 @@ export function WidgetAdminTrainingCompletion({
                             x={viewBox.cx}
                             y={(viewBox.cy ?? 0) + (isCompact ? 5 : -8)}
                             className={cn("fill-neutral-950", isCompact ? "body-base-md" : "h4")}
+                            data-testid={DASHBOARD_WIDGET_HANDLES.CHART_PERCENTAGE}
                           >
                             {percentage}%
                           </tspan>
@@ -142,6 +144,7 @@ export function WidgetAdminTrainingCompletion({
                               x={viewBox.cx}
                               y={(viewBox.cy ?? 0) + 16}
                               className="details fill-neutral-500"
+                              data-testid={DASHBOARD_WIDGET_HANDLES.CHART_COMPLETED_OF_TOTAL}
                             >
                               {stats?.completed}/{total}
                             </tspan>
