@@ -60,6 +60,20 @@ export interface NotificationAccountActionPreparation {
   purgeUnusedNotificationAccountActionIntents(): Promise<void>;
 }
 
+export type NotificationRecipientFieldsRequest = {
+  eventKind: string;
+  eventFields: Record<string, unknown> | null;
+  mappedFields: string[];
+  recipientEmail: string;
+  tenantId: UUIDType;
+};
+
+export interface NotificationRecipientFieldsPreparation {
+  prepareRecipientFields(
+    request: NotificationRecipientFieldsRequest,
+  ): Promise<Record<string, AutomationPlaceholderValue>>;
+}
+
 export type InterruptedAutomationEmailDelivery = Pick<
   typeof automationEmailDeliveries.$inferSelect,
   "id" | "runId" | "attemptCount" | "status" | "template" | "templateVersion"

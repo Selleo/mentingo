@@ -9978,7 +9978,8 @@
         "replies": "You will no longer get emails about replies in discussions.",
         "mentions": "You will no longer get emails about mentions.",
         "thread": "You no longer follow this discussion."
-      }
+      },
+      "tryAgain": "Something went wrong. Try again in a moment."
     },
     "errors": {
       "invalidUnsubscribeLink": "This link is invalid or has expired."

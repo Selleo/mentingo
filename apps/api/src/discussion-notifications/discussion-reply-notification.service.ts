@@ -54,19 +54,15 @@ export class DiscussionReplyNotificationService {
     const announcementId = inAppRecipientIds.length
       ? await this.createReplyAnnouncement(reply, actorFullName, inAppRecipientIds)
       : null;
-    const sendAfter = addMinutes(new Date(), DISCUSSION_REPLY_DIGEST_DELAY_MINUTES).toISOString();
-    const queueEmails = (inAppEnabled: boolean) =>
-      this.discussionNotificationsRepository.queueReplyDigests({
-        userIds: emailRecipients
-          .filter((recipient) => recipient.inAppEnabled === inAppEnabled)
-          .map(({ userId }) => userId),
-        threadId: reply.threadId,
-        reply: { replyId: reply.replyId, announcementId: inAppEnabled ? announcementId : null },
-        sendAfter,
-      });
 
-    await queueEmails(true);
-    await queueEmails(false);
+    await this.discussionNotificationsRepository.queueReplyDigests({
+      recipients: emailRecipients.map(({ userId, inAppEnabled }) => ({
+        userId,
+        reply: { replyId: reply.replyId, announcementId: inAppEnabled ? announcementId : null },
+      })),
+      threadId: reply.threadId,
+      sendAfter: addMinutes(new Date(), DISCUSSION_REPLY_DIGEST_DELAY_MINUTES).toISOString(),
+    });
 
     if (inAppRecipientIds.length) {
       await this.outboxPublisher.publish(

@@ -10005,7 +10005,8 @@
         "replies": "El. laiškų apie atsakymus diskusijose nebegausite.",
         "mentions": "El. laiškų apie paminėjimus nebegausite.",
         "thread": "Šios diskusijos nebesekate."
-      }
+      },
+      "tryAgain": "Kažkas nepavyko. Pabandykite dar kartą po akimirkos."
     },
     "errors": {
       "invalidUnsubscribeLink": "Ši nuoroda neteisinga arba nebegalioja."

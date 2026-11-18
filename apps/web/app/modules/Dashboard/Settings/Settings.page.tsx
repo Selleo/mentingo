@@ -39,8 +39,12 @@ export default function SettingsPage() {
     canUpdateLearningProgress,
     canManageUsers,
     canManageSettings,
+    canReadForum,
+    canReadCourseDiscussions,
   } = useMemo(() => {
     return {
+      canReadForum: hasPermission(permissions, PERMISSIONS.FORUM_READ),
+      canReadCourseDiscussions: hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_READ),
       canManageEnvs: hasPermission(permissions, PERMISSIONS.ENV_MANAGE),
       canManageCourses: hasAnyPermission(permissions, [
         PERMISSIONS.COURSE_UPDATE,
@@ -112,9 +116,10 @@ export default function SettingsPage() {
                 canManageCourses={canManageCourses}
                 canResetOnboarding={canUpdateLearningProgress}
                 canManageUsers={canManageUsers}
-                hasDiscussions={Boolean(
-                  globalSettings?.forumEnabled || globalSettings?.courseDiscussionsEnabled,
-                )}
+                hasDiscussions={
+                  Boolean(globalSettings?.forumEnabled && canReadForum) ||
+                  Boolean(globalSettings?.courseDiscussionsEnabled && canReadCourseDiscussions)
+                }
                 settings={isUserSettings(userSettings) ? userSettings : { language: "en" }}
               />
             )

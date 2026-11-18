@@ -10091,7 +10091,8 @@
         "replies": "Nie będziesz już otrzymywać e-maili o odpowiedziach w dyskusjach.",
         "mentions": "Nie będziesz już otrzymywać e-maili o wzmiankach.",
         "thread": "Nie obserwujesz już tej dyskusji."
-      }
+      },
+      "tryAgain": "Coś poszło nie tak. Spróbuj ponownie za chwilę."
     },
     "errors": {
       "invalidUnsubscribeLink": "Ten link jest nieprawidłowy lub wygasł."

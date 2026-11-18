@@ -65,6 +65,28 @@ describe("NotificationUnsubscribePage", () => {
     expect(await screen.findByText("This link is invalid or has expired.")).toBeVisible();
   });
 
+  it("lets the visitor try again when the request fails for another reason", async () => {
+    vi.mocked(ApiClient.api.discussionNotificationsControllerUnsubscribe).mockRejectedValueOnce(
+      new AxiosError("Too many requests", undefined, undefined, undefined, {
+        status: 429,
+      } as never),
+    );
+    vi.mocked(ApiClient.api.discussionNotificationsControllerUnsubscribe).mockResolvedValueOnce({
+      data: { data: { type: DISCUSSION_UNSUBSCRIBE_TYPES.REPLIES } },
+    } as never);
+
+    renderPage("/notifications/unsubscribe?token=signed-token");
+    fireEvent.click(screen.getByTestId(NOTIFICATIONS_HANDLES.UNSUBSCRIBE_CONFIRM_BUTTON));
+
+    expect(await screen.findByText("Something went wrong. Try again in a moment.")).toBeVisible();
+
+    fireEvent.click(screen.getByTestId(NOTIFICATIONS_HANDLES.UNSUBSCRIBE_CONFIRM_BUTTON));
+
+    expect(
+      await screen.findByText("You will no longer get emails about replies in discussions."),
+    ).toBeVisible();
+  });
+
   it("offers nothing to confirm when the link carries no token", () => {
     renderPage("/notifications/unsubscribe");
 

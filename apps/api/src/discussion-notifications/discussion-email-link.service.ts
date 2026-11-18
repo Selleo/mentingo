@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  ACCOUNT_SETTINGS_PATH,
   AUTOMATION_EVENT_KINDS,
   DISCUSSION_EMAIL_LINK_FIELDS,
   DISCUSSION_UNSUBSCRIBE_TYPES,
@@ -9,16 +10,21 @@ import {
 import { DatabasePg } from "src/common";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { DiscussionEmailLinksRepository } from "src/discussion-notifications/discussion-email-links.repository";
-import {
-  ACCOUNT_SETTINGS_PATH,
-  DISCUSSION_REPLY_THREAD_FIELD,
-} from "src/discussion-notifications/discussion-notifications.constants";
+import { DISCUSSION_REPLY_THREAD_FIELD } from "src/discussion-notifications/discussion-notifications.constants";
 import { DiscussionUnsubscribeTokenService } from "src/discussion-notifications/discussion-unsubscribe-token.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
-import type { DiscussionEmailLinkRequest } from "src/discussion-notifications/discussion-notifications.types";
+import type {
+  NotificationRecipientFieldsPreparation,
+  NotificationRecipientFieldsRequest,
+} from "src/automation-execution/automation-execution.types";
 import type { DiscussionUnsubscribeClaims } from "src/discussion-notifications/schemas/discussion-unsubscribe.schema";
+
+type DiscussionEmailLink = {
+  field: string;
+  target: Pick<DiscussionUnsubscribeClaims, "type" | "threadId"> | null;
+};
 
 const MENTION_EVENT_KINDS: string[] = [
   AUTOMATION_EVENT_KINDS.FORUM_MENTION,
@@ -26,7 +32,7 @@ const MENTION_EVENT_KINDS: string[] = [
 ];
 
 @Injectable()
-export class DiscussionEmailLinkService {
+export class DiscussionEmailLinkService implements NotificationRecipientFieldsPreparation {
   constructor(
     private readonly discussionEmailLinksRepository: DiscussionEmailLinksRepository,
     private readonly discussionUnsubscribeTokenService: DiscussionUnsubscribeTokenService,
@@ -34,11 +40,15 @@ export class DiscussionEmailLinkService {
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {}
 
-  async buildLinkFields(request: DiscussionEmailLinkRequest): Promise<Record<string, string>> {
-    const { eventKind, eventFields, recipientEmail, tenantId } = request;
-    const isReplyEmail = eventKind === AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY;
+  async prepareRecipientFields(
+    request: NotificationRecipientFieldsRequest,
+  ): Promise<Record<string, string>> {
+    const { eventKind, eventFields, mappedFields, recipientEmail, tenantId } = request;
+    const links = this.getEmailLinks(eventKind, eventFields).filter(({ field }) =>
+      mappedFields.includes(field),
+    );
 
-    if (!isReplyEmail && !MENTION_EVENT_KINDS.includes(eventKind)) return {};
+    if (!links.length) return {};
 
     const [tenantOrigin, userId] = await Promise.all([
       resolveTenantOrigin(this.dbAdmin, tenantId),
@@ -46,9 +56,8 @@ export class DiscussionEmailLinkService {
         this.discussionEmailLinksRepository.findActiveUserIdByEmail(recipientEmail),
       ),
     ]);
-    const settingsUrl = `${tenantOrigin}${ACCOUNT_SETTINGS_PATH}`;
-    const buildLink = async (target: Pick<DiscussionUnsubscribeClaims, "type" | "threadId">) => {
-      if (!userId) return settingsUrl;
+    const buildUrl = async ({ target }: DiscussionEmailLink) => {
+      if (!target || !userId) return `${tenantOrigin}${ACCOUNT_SETTINGS_PATH}`;
 
       const token = await this.discussionUnsubscribeTokenService.sign({
         tenantId,
@@ -59,24 +68,40 @@ export class DiscussionEmailLinkService {
       return `${tenantOrigin}${getDiscussionUnsubscribePath(token)}`;
     };
 
-    if (!isReplyEmail) {
-      return {
-        [DISCUSSION_EMAIL_LINK_FIELDS.UNSUBSCRIBE]: await buildLink({
-          type: DISCUSSION_UNSUBSCRIBE_TYPES.MENTIONS,
-        }),
-      };
+    return Object.fromEntries(
+      await Promise.all(links.map(async (link) => [link.field, await buildUrl(link)])),
+    );
+  }
+
+  private getEmailLinks(
+    eventKind: string,
+    eventFields: Record<string, unknown> | null,
+  ): DiscussionEmailLink[] {
+    if (MENTION_EVENT_KINDS.includes(eventKind)) {
+      return [
+        {
+          field: DISCUSSION_EMAIL_LINK_FIELDS.UNSUBSCRIBE,
+          target: { type: DISCUSSION_UNSUBSCRIBE_TYPES.MENTIONS },
+        },
+      ];
     }
+
+    if (eventKind !== AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY) return [];
 
     const threadId = eventFields?.[DISCUSSION_REPLY_THREAD_FIELD];
 
-    return {
-      [DISCUSSION_EMAIL_LINK_FIELDS.UNSUBSCRIBE]: await buildLink({
-        type: DISCUSSION_UNSUBSCRIBE_TYPES.REPLIES,
-      }),
-      [DISCUSSION_EMAIL_LINK_FIELDS.UNFOLLOW]:
-        typeof threadId === "string"
-          ? await buildLink({ type: DISCUSSION_UNSUBSCRIBE_TYPES.THREAD, threadId })
-          : settingsUrl,
-    };
+    return [
+      {
+        field: DISCUSSION_EMAIL_LINK_FIELDS.UNSUBSCRIBE,
+        target: { type: DISCUSSION_UNSUBSCRIBE_TYPES.REPLIES },
+      },
+      {
+        field: DISCUSSION_EMAIL_LINK_FIELDS.UNFOLLOW,
+        target:
+          typeof threadId === "string"
+            ? { type: DISCUSSION_UNSUBSCRIBE_TYPES.THREAD, threadId }
+            : null,
+      },
+    ];
   }
 }

@@ -10007,7 +10007,8 @@
         "replies": "E-maily o odpovědích v diskusích už nebudete dostávat.",
         "mentions": "E-maily o zmínkách už nebudete dostávat.",
         "thread": "Tuto diskusi již nesledujete."
-      }
+      },
+      "tryAgain": "Něco se pokazilo. Zkuste to za chvíli znovu."
     },
     "errors": {
       "invalidUnsubscribeLink": "Tento odkaz je neplatný nebo vypršel."

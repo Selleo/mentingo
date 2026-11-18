@@ -15,6 +15,7 @@ import {
   SUPPORTED_LANGUAGES,
   type AutomationPlaceholderMappings,
   type BuiltInEmailTemplateKey,
+  ACCOUNT_SETTINGS_PATH,
   type LocalizedText,
 } from "@repo/shared";
 import { isEqual } from "lodash";
@@ -27,7 +28,6 @@ import {
 import { AutomationDefinitionStorageService } from "src/automations/services/automation-definition-storage.service";
 import { DatabasePg } from "src/common";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
-import { ACCOUNT_SETTINGS_PATH } from "src/discussion-notifications/discussion-notifications.constants";
 import { EmailTemplateValidationService } from "src/email-templates/services/email-template-validation.service";
 import { dbAls } from "src/storage/db/db-als.store";
 import { DB_ADMIN } from "src/storage/db/db.providers";
@@ -60,6 +60,7 @@ export class DefaultAutomationSetupService {
           transaction,
         );
         await this.ensureTenantDefaultAutomations(transaction);
+        await this.addMissingDiscussionEmailLinkMappings(transaction);
         await this.validateTenantBuiltInAutomationDependencies(transaction);
       }),
     );
@@ -82,7 +83,6 @@ export class DefaultAutomationSetupService {
 
     await this.backfillLegacyPublishedEmailTemplates(transaction);
     await this.populateMissingDefaultAutomationTranslations(transaction);
-    await this.addMissingDiscussionEmailLinkMappings(transaction);
 
     const builtInKeys =
       await this.defaultAutomationSetupRepository.listTenantDefaultAutomationScenarios(transaction);

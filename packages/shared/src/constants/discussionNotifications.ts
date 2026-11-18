@@ -21,6 +21,8 @@ export const DISCUSSION_EMAIL_LINK_FIELDS = {
   UNFOLLOW: "unfollow_link",
 } as const;
 
+export const ACCOUNT_SETTINGS_PATH = "/settings";
+
 export const DISCUSSION_UNSUBSCRIBE_PATH = "/notifications/unsubscribe";
 export const DISCUSSION_UNSUBSCRIBE_TOKEN_PARAM = "token";
 

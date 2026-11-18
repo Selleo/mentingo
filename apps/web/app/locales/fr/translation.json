@@ -9472,7 +9472,8 @@
         "replies": "Vous ne recevrez plus d'e-mails sur les réponses dans les discussions.",
         "mentions": "Vous ne recevrez plus d'e-mails sur les mentions.",
         "thread": "Vous ne suivez plus cette discussion."
-      }
+      },
+      "tryAgain": "Une erreur s'est produite. Réessayez dans un instant."
     },
     "errors": {
       "invalidUnsubscribeLink": "Ce lien est invalide ou a expiré."

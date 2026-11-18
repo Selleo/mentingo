@@ -1,5 +1,10 @@
 import { Link, useSearchParams } from "@remix-run/react";
-import { DISCUSSION_UNSUBSCRIBE_TOKEN_PARAM, DISCUSSION_UNSUBSCRIBE_TYPES } from "@repo/shared";
+import {
+  ACCOUNT_SETTINGS_PATH,
+  DISCUSSION_UNSUBSCRIBE_TOKEN_PARAM,
+  DISCUSSION_UNSUBSCRIBE_TYPES,
+} from "@repo/shared";
+import { isAxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
@@ -23,11 +28,17 @@ export default function NotificationUnsubscribePage() {
     mutate: unsubscribe,
     data: result,
     isPending,
-    isError,
+    error,
   } = useUnsubscribeFromDiscussionEmails();
+  const isLinkRejected = isAxiosError(error) && error.response?.status === 400;
 
-  const description = match({ result, isInvalid: isError || !token })
+  const description = match({
+    result,
+    isInvalid: isLinkRejected || !token,
+    hasFailed: Boolean(error),
+  })
     .with({ isInvalid: true }, () => t("discussionNotifications.unsubscribe.invalidLink"))
+    .with({ hasFailed: true }, () => t("discussionNotifications.unsubscribe.tryAgain"))
     .with({ result: { type: DISCUSSION_UNSUBSCRIBE_TYPES.REPLIES } }, () =>
       t("discussionNotifications.unsubscribe.done.replies"),
     )
@@ -38,7 +49,7 @@ export default function NotificationUnsubscribePage() {
       t("discussionNotifications.unsubscribe.done.thread"),
     )
     .otherwise(() => t("discussionNotifications.unsubscribe.confirmDescription"));
-  const canConfirm = Boolean(token) && !result && !isError;
+  const canConfirm = Boolean(token) && !result && !isLinkRejected;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
@@ -68,7 +79,7 @@ export default function NotificationUnsubscribePage() {
               {t("discussionNotifications.unsubscribe.confirm")}
             </Button>
           )}
-          <Link to="/settings" className="body-sm-md text-primary-700 hover:underline">
+          <Link to={ACCOUNT_SETTINGS_PATH} className="body-sm-md text-primary-700 hover:underline">
             {t("discussionNotifications.unsubscribe.manageInSettings")}
           </Link>
         </CardContent>

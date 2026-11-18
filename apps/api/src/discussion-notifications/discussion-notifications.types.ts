@@ -37,10 +37,3 @@ export type DiscussionDigestThread = {
 };
 
 export type DiscussionDigestReply = { authorFullName: string; content: string };
-
-export type DiscussionEmailLinkRequest = {
-  eventKind: string;
-  eventFields: Record<string, unknown> | null;
-  recipientEmail: string;
-  tenantId: UUIDType;
-};

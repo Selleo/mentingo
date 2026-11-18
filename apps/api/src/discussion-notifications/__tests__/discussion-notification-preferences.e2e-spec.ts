@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { JwtService } from "@nestjs/jwt";
 import {
   COURSE_ENROLLMENT,
@@ -18,7 +21,7 @@ import {
 import { DiscussionReplyDigestService } from "src/discussion-notifications/discussion-reply-digest.service";
 import { DiscussionUnsubscribeTokenService } from "src/discussion-notifications/discussion-unsubscribe-token.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { settings, studentCourses } from "src/storage/schema";
+import { discussionThreadFollowers, settings, studentCourses } from "src/storage/schema";
 import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -293,6 +296,24 @@ describe("Discussion notification preferences, following and unsubscribing (e2e)
       await sendEmailsDueAfterTheDelay();
 
       expect((await getTopic(topicAuthor, topic.id)).isFollowing).toBe(true);
+      expect(await countNotifications(topicAuthor)).toBe(1);
+    });
+
+    it("notifies people who posted before following existed about a reply still waiting", async () => {
+      const [topicAuthor, replier] = await createStudents(2);
+      const topic = await createTopic(topicAuthor, "Release notes");
+      await replyInTopic(replier, topic.id, { content: "First answer" });
+      const backfill = readFileSync(
+        join(__dirname, "../../storage/migrations/0257_backfill_discussion_thread_followers.sql"),
+        "utf8",
+      );
+
+      await runAsTenant(defaultTenantId, async () => {
+        await db.delete(discussionThreadFollowers);
+        await db.execute(sql.raw(backfill));
+      });
+      await dispatchOutbox(app);
+
       expect(await countNotifications(topicAuthor)).toBe(1);
     });
 

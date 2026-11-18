@@ -66,18 +66,19 @@ export class DiscussionNotificationsRepository {
   }
 
   async queueReplyDigests(params: {
-    userIds: UUIDType[];
+    recipients: { userId: UUIDType; reply: DiscussionReplyDigestEntry }[];
     threadId: UUIDType;
-    reply: DiscussionReplyDigestEntry;
     sendAfter: string;
   }) {
-    const { userIds, threadId, reply, sendAfter } = params;
+    const { recipients, threadId, sendAfter } = params;
 
-    if (!userIds.length) return;
+    if (!recipients.length) return;
 
     await this.db
       .insert(discussionReplyDigests)
-      .values(userIds.map((userId) => ({ userId, threadId, sendAfter, replies: [reply] })))
+      .values(
+        recipients.map(({ userId, reply }) => ({ userId, threadId, sendAfter, replies: [reply] })),
+      )
       .onConflictDoUpdate({
         target: [discussionReplyDigests.userId, discussionReplyDigests.threadId],
         set: { replies: sql`${discussionReplyDigests.replies} || excluded.replies` },

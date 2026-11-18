@@ -9,5 +9,3 @@ export const DISCUSSION_UNSUBSCRIBE_TOKEN_PURPOSE = "discussion_unsubscribe";
 export const DISCUSSION_UNSUBSCRIBE_TOKEN_TTL = "30d";
 
 export const DISCUSSION_REPLY_THREAD_FIELD = "thread_id";
-
-export const ACCOUNT_SETTINGS_PATH = "/settings";
