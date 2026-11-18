@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 
 import { AnnouncementsModule } from "src/announcements/announcements.module";
+import { EmailModule } from "src/common/emails/emails.module";
 import { CourseChatModule } from "src/course-chat/course-chat.module";
 import { ForumController } from "src/forum/forum.controller";
 import { ForumGateway } from "src/forum/forum.gateway";
@@ -11,7 +12,7 @@ import { LocalizationModule } from "src/localization/localization.module";
 import { SettingsModule } from "src/settings/settings.module";
 
 @Module({
-  imports: [AnnouncementsModule, CourseChatModule, LocalizationModule, SettingsModule],
+  imports: [AnnouncementsModule, CourseChatModule, EmailModule, LocalizationModule, SettingsModule],
   controllers: [ForumController],
   providers: [ForumService, ForumRepository, ForumGateway, ForumMentionNotificationHandler],
   exports: [ForumRepository],

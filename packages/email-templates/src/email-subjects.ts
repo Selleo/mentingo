@@ -192,6 +192,24 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     es: "Hay nuevas respuestas pendientes de revisión",
     fr: "De nouvelles réponses attendent une évaluation",
   },
+  forumMentionEmail: {
+    en: "You were mentioned in {{topicTitle}}",
+    pl: "Oznaczono Cię w temacie {{topicTitle}}",
+    de: "Du wurdest in {{topicTitle}} erwähnt",
+    lt: "Buvote paminėti temoje {{topicTitle}}",
+    cs: "Byl(a) jste zmíněn(a) v tématu {{topicTitle}}",
+    es: "Te han mencionado en {{topicTitle}}",
+    fr: "Vous avez été mentionné(e) dans {{topicTitle}}",
+  },
+  discussionReplyEmail: {
+    en: "New replies in {{discussionName}}",
+    pl: "Nowe odpowiedzi w dyskusji {{discussionName}}",
+    de: "Neue Antworten in {{discussionName}}",
+    lt: "Nauji atsakymai diskusijoje {{discussionName}}",
+    cs: "Nové odpovědi v diskusi {{discussionName}}",
+    es: "Nuevas respuestas en {{discussionName}}",
+    fr: "Nouvelles réponses dans {{discussionName}}",
+  },
 } as const;
 
 export const getEmailSubject = (

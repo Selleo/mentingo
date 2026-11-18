@@ -13438,6 +13438,14 @@
                 {
                   "const": "quiz_grading_digest",
                   "type": "string"
+                },
+                {
+                  "const": "forum_mention",
+                  "type": "string"
+                },
+                {
+                  "const": "discussion_reply",
+                  "type": "string"
                 }
               ]
             }
@@ -13588,6 +13596,14 @@
                 },
                 {
                   "const": "quiz_grading_digest",
+                  "type": "string"
+                },
+                {
+                  "const": "forum_mention",
+                  "type": "string"
+                },
+                {
+                  "const": "discussion_reply",
                   "type": "string"
                 }
               ]
@@ -14528,6 +14544,14 @@
                 },
                 {
                   "const": "quiz_grading_digest",
+                  "type": "string"
+                },
+                {
+                  "const": "forum_mention",
+                  "type": "string"
+                },
+                {
+                  "const": "discussion_reply",
                   "type": "string"
                 }
               ]
@@ -74591,6 +74615,14 @@
                     {
                       "const": "quiz_grading_digest",
                       "type": "string"
+                    },
+                    {
+                      "const": "forum_mention",
+                      "type": "string"
+                    },
+                    {
+                      "const": "discussion_reply",
+                      "type": "string"
                     }
                   ]
                 },
@@ -78965,6 +78997,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -79099,6 +79139,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -83290,6 +83338,14 @@
                         {
                           "const": "quiz_grading_digest",
                           "type": "string"
+                        },
+                        {
+                          "const": "forum_mention",
+                          "type": "string"
+                        },
+                        {
+                          "const": "discussion_reply",
+                          "type": "string"
                         }
                       ]
                     },
@@ -83424,6 +83480,14 @@
                         },
                         {
                           "const": "quiz_grading_digest",
+                          "type": "string"
+                        },
+                        {
+                          "const": "forum_mention",
+                          "type": "string"
+                        },
+                        {
+                          "const": "discussion_reply",
                           "type": "string"
                         }
                       ]
@@ -87640,6 +87704,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -87774,6 +87846,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -91963,6 +92043,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -92097,6 +92185,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -96286,6 +96382,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -96420,6 +96524,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -100500,6 +100612,14 @@
               {
                 "const": "quiz_grading_digest",
                 "type": "string"
+              },
+              {
+                "const": "forum_mention",
+                "type": "string"
+              },
+              {
+                "const": "discussion_reply",
+                "type": "string"
               }
             ]
           },
@@ -104532,6 +104652,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -104666,6 +104794,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -108748,6 +108884,14 @@
                   {
                     "const": "quiz_grading_digest",
                     "type": "string"
+                  },
+                  {
+                    "const": "forum_mention",
+                    "type": "string"
+                  },
+                  {
+                    "const": "discussion_reply",
+                    "type": "string"
                   }
                 ]
               },
@@ -112745,6 +112889,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -112879,6 +113031,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -117110,6 +117270,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -117244,6 +117412,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -121479,6 +121655,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -121613,6 +121797,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -125802,6 +125994,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -125936,6 +126136,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -130136,6 +130344,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -130270,6 +130486,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -134459,6 +134683,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -134593,6 +134825,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -142497,6 +142737,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -142799,6 +143047,14 @@
                                           {
                                             "const": "quiz_grading_digest",
                                             "type": "string"
+                                          },
+                                          {
+                                            "const": "forum_mention",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "discussion_reply",
+                                            "type": "string"
                                           }
                                         ]
                                       },
@@ -142989,6 +143245,14 @@
                                                   },
                                                   {
                                                     "const": "quiz_grading_digest",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "forum_mention",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "discussion_reply",
                                                     "type": "string"
                                                   }
                                                 ]
@@ -143466,6 +143730,14 @@
                                                   {
                                                     "const": "quiz_grading_digest",
                                                     "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "forum_mention",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "discussion_reply",
+                                                    "type": "string"
                                                   }
                                                 ]
                                               },
@@ -143656,6 +143928,14 @@
                                                           },
                                                           {
                                                             "const": "quiz_grading_digest",
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "const": "forum_mention",
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "const": "discussion_reply",
                                                             "type": "string"
                                                           }
                                                         ]
@@ -144105,6 +144385,14 @@
                     {
                       "const": "quiz_grading_digest",
                       "type": "string"
+                    },
+                    {
+                      "const": "forum_mention",
+                      "type": "string"
+                    },
+                    {
+                      "const": "discussion_reply",
+                      "type": "string"
                     }
                   ]
                 },
@@ -144508,6 +144796,14 @@
                             {
                               "const": "quiz_grading_digest",
                               "type": "string"
+                            },
+                            {
+                              "const": "forum_mention",
+                              "type": "string"
+                            },
+                            {
+                              "const": "discussion_reply",
+                              "type": "string"
                             }
                           ]
                         }
@@ -144803,6 +145099,14 @@
                     {
                       "const": "quiz_grading_digest",
                       "type": "string"
+                    },
+                    {
+                      "const": "forum_mention",
+                      "type": "string"
+                    },
+                    {
+                      "const": "discussion_reply",
+                      "type": "string"
                     }
                   ]
                 },
@@ -145033,6 +145337,14 @@
                                               {
                                                 "const": "quiz_grading_digest",
                                                 "type": "string"
+                                              },
+                                              {
+                                                "const": "forum_mention",
+                                                "type": "string"
+                                              },
+                                              {
+                                                "const": "discussion_reply",
+                                                "type": "string"
                                               }
                                             ]
                                           },
@@ -145223,6 +145535,14 @@
                                                       },
                                                       {
                                                         "const": "quiz_grading_digest",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "forum_mention",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "discussion_reply",
                                                         "type": "string"
                                                       }
                                                     ]
@@ -145682,6 +146002,14 @@
                                     {
                                       "const": "quiz_grading_digest",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "forum_mention",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "discussion_reply",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -145872,6 +146200,14 @@
                                             },
                                             {
                                               "const": "quiz_grading_digest",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "forum_mention",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "discussion_reply",
                                               "type": "string"
                                             }
                                           ]
@@ -146592,6 +146928,14 @@
                                 {
                                   "const": "quiz_grading_digest",
                                   "type": "string"
+                                },
+                                {
+                                  "const": "forum_mention",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "discussion_reply",
+                                  "type": "string"
                                 }
                               ]
                             }
@@ -146911,6 +147255,14 @@
                                     {
                                       "const": "quiz_grading_digest",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "forum_mention",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "discussion_reply",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -147101,6 +147453,14 @@
                                             },
                                             {
                                               "const": "quiz_grading_digest",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "forum_mention",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "discussion_reply",
                                               "type": "string"
                                             }
                                           ]
@@ -147556,6 +147916,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -147746,6 +148114,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -148223,6 +148599,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -148413,6 +148797,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -148898,6 +149290,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -149088,6 +149488,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -149565,6 +149973,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -149755,6 +150171,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -150240,6 +150664,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -150430,6 +150862,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -150907,6 +151347,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -151097,6 +151545,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -151579,6 +152035,14 @@
                                     {
                                       "const": "quiz_grading_digest",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "forum_mention",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "discussion_reply",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -151769,6 +152233,14 @@
                                             },
                                             {
                                               "const": "quiz_grading_digest",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "forum_mention",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "discussion_reply",
                                               "type": "string"
                                             }
                                           ]
@@ -152220,6 +152692,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -152410,6 +152890,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -152887,6 +153375,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -153077,6 +153573,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -153583,6 +154087,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -153773,6 +154285,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -154250,6 +154770,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -154440,6 +154968,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -154926,6 +155462,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -155116,6 +155660,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -155573,6 +156125,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -155763,6 +156323,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -156240,6 +156808,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -156430,6 +157006,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -156915,6 +157499,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -157105,6 +157697,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -157582,6 +158182,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -157772,6 +158380,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -158257,6 +158873,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -158447,6 +159071,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -158924,6 +159556,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -159114,6 +159754,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -159599,6 +160247,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -159789,6 +160445,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -160266,6 +160930,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -160456,6 +161128,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -160911,6 +161591,14 @@
                     {
                       "const": "quiz_grading_digest",
                       "type": "string"
+                    },
+                    {
+                      "const": "forum_mention",
+                      "type": "string"
+                    },
+                    {
+                      "const": "discussion_reply",
+                      "type": "string"
                     }
                   ]
                 },
@@ -161216,6 +161904,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -161448,6 +162144,14 @@
                                 },
                                 {
                                   "const": "quiz_grading_digest",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "forum_mention",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "discussion_reply",
                                   "type": "string"
                                 }
                               ]

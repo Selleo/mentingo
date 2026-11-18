@@ -347,7 +347,9 @@
       "live_training_reminder": "Szkolenie na żywo rozpocznie się za 15 minut",
       "live_training_ended": "Zakończyło się szkolenie na żywo",
       "quiz_attempt_graded": "Quiz oceniony przez osobę oceniającą",
-      "quiz_grading_digest": "Nowe odpowiedzi czekają na ocenę (codziennie)"
+      "quiz_grading_digest": "Nowe odpowiedzi czekają na ocenę (codziennie)",
+      "forum_mention": "Użytkownik oznaczony w temacie na forum",
+      "discussion_reply": "Nowe odpowiedzi w dyskusji (zbiorczo)"
     },
     "errors": {
       "incompleteButton": "Wpisz tekst przycisku i adres URL.",
@@ -7998,7 +8000,9 @@
         "live_training_reminder": "Uczestnicy zapisani na kursy powiązane z nadchodzącym szkoleniem na żywo.",
         "live_training_ended": "Uczestnicy zapisani na kursy powiązane z zakończonym szkoleniem na żywo.",
         "quiz_attempt_graded": "Uczestnik, którego odpowiedzi w quizie zostały ocenione.",
-        "quiz_grading_digest": "Użytkownicy, którzy mogą oceniać odpowiedzi w quizach."
+        "quiz_grading_digest": "Użytkownicy, którzy mogą oceniać odpowiedzi w quizach.",
+        "forum_mention": "Użytkownicy oznaczeni we wpisie na forum.",
+        "discussion_reply": "Uczestnicy wątku lub tematu, którzy nie przeczytali odpowiedzi w aplikacji."
       }
     },
     "mapping": {
@@ -8098,7 +8102,9 @@
       "courseChatUserMentioned": "Użytkownik wspomniany na czacie",
       "courseDueDateReminder": "Przypomnienie o terminie kursu",
       "quizAttemptGraded": "Quiz oceniony",
-      "quizGradingDigest": "Podsumowanie kolejki ocen"
+      "quizGradingDigest": "Podsumowanie kolejki ocen",
+      "forumUserMentioned": "Wzmianka na forum",
+      "discussionReply": "Nowe odpowiedzi w dyskusji"
     },
     "canvas": {
       "emptyTitle": "Płótno automatyzacji jest puste",
@@ -8260,7 +8266,14 @@
       "lessonUrl": "Link do lekcji",
       "newAnswersCount": "Nowe odpowiedzi",
       "pendingAnswersCount": "Odpowiedzi czekające na ocenę",
-      "gradingQueueUrl": "Link do kolejki ocen"
+      "gradingQueueUrl": "Link do kolejki ocen",
+      "topicTitle": "Tytuł tematu",
+      "topicUrl": "Link do tematu",
+      "discussionName": "Nazwa dyskusji",
+      "replyCount": "Liczba nowych odpowiedzi",
+      "replyAuthors": "Autorzy odpowiedzi",
+      "latestReply": "Ostatnia odpowiedź",
+      "discussionUrl": "Link do dyskusji"
     },
     "simulation": {
       "title": "Wynik symulacji",

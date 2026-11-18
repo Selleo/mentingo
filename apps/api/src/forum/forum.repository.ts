@@ -20,6 +20,7 @@ import type { UUIDType } from "src/common";
 import type { CourseChatUserProfileRow } from "src/course-chat/course-chat.repository.types";
 import type {
   ForumCourseDiscussionRow,
+  ForumMentionEmailRecipient,
   ForumPostContext,
   ForumPostRow,
   ForumThreadContext,
@@ -218,15 +219,22 @@ export class ForumRepository {
         avatarReference: users.avatarReference,
       })
       .from(users)
-      .where(
-        and(
-          isNull(users.deletedAt),
-          eq(users.archived, false),
-          userHasPermissionCondition(this.db, users.id, users.tenantId, PERMISSIONS.FORUM_READ),
-          userIds ? inArray(users.id, userIds) : undefined,
-        ),
-      )
+      .where(this.forumReaderCondition(userIds))
       .orderBy(users.firstName, users.lastName);
+  }
+
+  async findMentionEmailRecipients(userIds: UUIDType[]): Promise<ForumMentionEmailRecipient[]> {
+    if (!userIds.length) return [];
+
+    return this.db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+      })
+      .from(users)
+      .where(this.forumReaderCondition(userIds));
   }
 
   async findCourseDiscussions(
@@ -410,6 +418,15 @@ export class ForumRepository {
         AND forum_replies.parent_message_id IS NOT NULL
         AND forum_replies.deleted_at IS NULL
     )`;
+  }
+
+  private forumReaderCondition(userIds?: UUIDType[]) {
+    return and(
+      isNull(users.deletedAt),
+      eq(users.archived, false),
+      userHasPermissionCondition(this.db, users.id, users.tenantId, PERMISSIONS.FORUM_READ),
+      userIds ? inArray(users.id, userIds) : undefined,
+    );
   }
 
   private forumTopicCondition() {

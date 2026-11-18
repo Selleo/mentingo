@@ -347,7 +347,9 @@
       "live_training_reminder": "Tiesioginis mokymas prasidės po 15 minučių",
       "live_training_ended": "Tiesioginis mokymas baigėsi",
       "quiz_attempt_graded": "Testą įvertino vertintojas",
-      "quiz_grading_digest": "Nauji atsakymai laukia įvertinimo (kasdien)"
+      "quiz_grading_digest": "Nauji atsakymai laukia įvertinimo (kasdien)",
+      "forum_mention": "Naudotojas paminėtas forumo temoje",
+      "discussion_reply": "Nauji atsakymai diskusijoje (sugrupuoti)"
     },
     "errors": {
       "incompleteButton": "Įveskite mygtuko tekstą ir URL.",
@@ -7932,7 +7934,9 @@
         "live_training_reminder": "Besimokantieji, užsiregistravę į kursus, susietus su artėjančiais tiesioginiais mokymais.",
         "live_training_ended": "Besimokantieji, užsiregistravę į kursus, susietus su pasibaigusiais tiesioginiais mokymais.",
         "quiz_attempt_graded": "Besimokantysis, kurio testo atsakymai buvo įvertinti.",
-        "quiz_grading_digest": "Naudotojai, galintys vertinti testų atsakymus."
+        "quiz_grading_digest": "Naudotojai, galintys vertinti testų atsakymus.",
+        "forum_mention": "Forumo įraše paminėti naudotojai.",
+        "discussion_reply": "Gijos arba temos dalyviai, kurie neperskaitė atsakymų programoje."
       }
     },
     "mapping": {
@@ -8033,7 +8037,9 @@
       "courseChatUserMentioned": "Vartotojas paminėtas pokalbyje",
       "courseDueDateReminder": "Kurso termino priminimas",
       "quizAttemptGraded": "Testas įvertintas",
-      "quizGradingDigest": "Vertinimo eilės suvestinė"
+      "quizGradingDigest": "Vertinimo eilės suvestinė",
+      "forumUserMentioned": "Paminėjimas forume",
+      "discussionReply": "Nauji atsakymai diskusijoje"
     },
     "canvas": {
       "emptyTitle": "Jūsų automatizavimo drobė tuščia",
@@ -8192,7 +8198,14 @@
       "lessonUrl": "Pamokos nuoroda",
       "newAnswersCount": "Nauji atsakymai",
       "pendingAnswersCount": "Atsakymai, laukiantys įvertinimo",
-      "gradingQueueUrl": "Vertinimo eilės nuoroda"
+      "gradingQueueUrl": "Vertinimo eilės nuoroda",
+      "topicTitle": "Temos pavadinimas",
+      "topicUrl": "Temos nuoroda",
+      "discussionName": "Diskusijos pavadinimas",
+      "replyCount": "Naujų atsakymų skaičius",
+      "replyAuthors": "Atsakymų autoriai",
+      "latestReply": "Naujausias atsakymas",
+      "discussionUrl": "Diskusijos nuoroda"
     },
     "simulation": {
       "title": "Simuliacijos rezultatas",

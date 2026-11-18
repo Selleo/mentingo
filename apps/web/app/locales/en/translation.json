@@ -347,7 +347,9 @@
       "live_training_reminder": "Live training starts in 15 minutes",
       "live_training_ended": "Live training ended",
       "quiz_attempt_graded": "Quiz graded by a reviewer",
-      "quiz_grading_digest": "New answers waiting for review (daily)"
+      "quiz_grading_digest": "New answers waiting for review (daily)",
+      "forum_mention": "User mentioned in a forum topic",
+      "discussion_reply": "New replies in a discussion (grouped)"
     },
     "errors": {
       "incompleteButton": "Enter a button label and URL.",
@@ -8174,7 +8176,9 @@
         "live_training_reminder": "Learners enrolled in courses linked to the upcoming live training.",
         "live_training_ended": "Learners enrolled in courses linked to the live training that ended.",
         "quiz_attempt_graded": "The learner whose quiz answers were graded.",
-        "quiz_grading_digest": "Users who can grade quiz answers."
+        "quiz_grading_digest": "Users who can grade quiz answers.",
+        "forum_mention": "The users mentioned in the forum post.",
+        "discussion_reply": "Participants of the thread or topic who have not read the replies in the application."
       }
     },
     "mapping": {
@@ -8274,7 +8278,9 @@
       "courseChatUserMentioned": "User mentioned in chat",
       "courseDueDateReminder": "Course due date reminder",
       "quizAttemptGraded": "Quiz graded",
-      "quizGradingDigest": "Grading queue digest"
+      "quizGradingDigest": "Grading queue digest",
+      "forumUserMentioned": "Forum mention",
+      "discussionReply": "New replies in a discussion"
     },
     "canvas": {
       "emptyTitle": "Your automation canvas is empty",
@@ -8436,7 +8442,14 @@
       "lessonUrl": "Lesson link",
       "newAnswersCount": "New answers",
       "pendingAnswersCount": "Answers waiting for review",
-      "gradingQueueUrl": "Grading queue link"
+      "gradingQueueUrl": "Grading queue link",
+      "topicTitle": "Topic title",
+      "topicUrl": "Topic link",
+      "discussionName": "Discussion name",
+      "replyCount": "Number of new replies",
+      "replyAuthors": "Reply authors",
+      "latestReply": "Latest reply",
+      "discussionUrl": "Discussion link"
     },
     "simulation": {
       "title": "Simulation Result",

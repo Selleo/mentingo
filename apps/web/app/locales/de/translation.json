@@ -347,7 +347,9 @@
       "live_training_reminder": "Live-Schulung beginnt in 15 Minuten",
       "live_training_ended": "Live-Schulung beendet",
       "quiz_attempt_graded": "Quiz von einer prüfenden Person bewertet",
-      "quiz_grading_digest": "Neue Antworten warten auf Bewertung (täglich)"
+      "quiz_grading_digest": "Neue Antworten warten auf Bewertung (täglich)",
+      "forum_mention": "Benutzer in einem Forenthema erwähnt",
+      "discussion_reply": "Neue Antworten in einer Diskussion (gesammelt)"
     },
     "errors": {
       "incompleteButton": "Geben Sie eine Schaltflächenbeschriftung und URL ein.",
@@ -7915,7 +7917,9 @@
         "live_training_reminder": "Lernende, die in Kursen eingeschrieben sind, die mit dem bevorstehenden Live-Training verknüpft sind.",
         "live_training_ended": "Lernende, die in Kursen eingeschrieben sind, die mit dem beendeten Live-Training verknüpft sind.",
         "quiz_attempt_graded": "Die lernende Person, deren Quizantworten bewertet wurden.",
-        "quiz_grading_digest": "Nutzer, die Quizantworten bewerten dürfen."
+        "quiz_grading_digest": "Nutzer, die Quizantworten bewerten dürfen.",
+        "forum_mention": "Die im Forenbeitrag erwähnten Benutzer.",
+        "discussion_reply": "Teilnehmer des Threads oder Themas, die die Antworten in der Anwendung noch nicht gelesen haben."
       }
     },
     "mapping": {
@@ -8016,7 +8020,9 @@
       "courseChatUserMentioned": "Benutzer im Chat erwähnt",
       "courseDueDateReminder": "Kurs-Fälligkeitserinnerung",
       "quizAttemptGraded": "Quiz bewertet",
-      "quizGradingDigest": "Übersicht der Bewertungswarteschlange"
+      "quizGradingDigest": "Übersicht der Bewertungswarteschlange",
+      "forumUserMentioned": "Erwähnung im Forum",
+      "discussionReply": "Neue Antworten in einer Diskussion"
     },
     "canvas": {
       "emptyTitle": "Ihre Automatisierungsleinwand ist leer",
@@ -8175,7 +8181,14 @@
       "lessonUrl": "Lektionslink",
       "newAnswersCount": "Neue Antworten",
       "pendingAnswersCount": "Antworten in Bewertung",
-      "gradingQueueUrl": "Link zur Bewertungswarteschlange"
+      "gradingQueueUrl": "Link zur Bewertungswarteschlange",
+      "topicTitle": "Thementitel",
+      "topicUrl": "Link zum Thema",
+      "discussionName": "Name der Diskussion",
+      "replyCount": "Anzahl neuer Antworten",
+      "replyAuthors": "Autoren der Antworten",
+      "latestReply": "Letzte Antwort",
+      "discussionUrl": "Link zur Diskussion"
     },
     "simulation": {
       "title": "Simulationsergebnis",

@@ -6,6 +6,8 @@ import { certificateExpirationWarningAutomation } from "./certificate-expiration
 import { certificateExpiredAutomation } from "./certificate-expired.automation";
 import { courseChatMentionAutomation } from "./course-chat-mention.automation";
 import { courseDueDateReminderAutomation } from "./course-due-date-reminder.automation";
+import { discussionReplyAutomation } from "./discussion-reply.automation";
+import { forumMentionAutomation } from "./forum-mention.automation";
 import { liveTrainingEndedAutomation } from "./live-training-ended.automation";
 import { liveTrainingReminderAutomation } from "./live-training-reminder.automation";
 import { liveTrainingStartedAutomation } from "./live-training-started.automation";
@@ -48,4 +50,6 @@ export const BUILT_IN_AUTOMATIONS = [
   liveTrainingEndedAutomation,
   quizAttemptGradedAutomation,
   quizGradingDigestAutomation,
+  forumMentionAutomation,
+  discussionReplyAutomation,
 ];

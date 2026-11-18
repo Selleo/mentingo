@@ -29,6 +29,7 @@ type TenantTopic = {
   tenantId: UUIDType;
   topicId: UUIDType;
   firstPostId: UUIDType;
+  replyId: UUIDType;
   authorId: UUIDType;
   replierId: UUIDType;
 };
@@ -45,7 +46,7 @@ describe("Discussion reply notifications tenant isolation (e2e)", () => {
       app.get(OutboxPublisher).publish(
         new ForumReplyCreatedEvent({
           topicId: topic.topicId,
-          postId: topic.firstPostId,
+          postId: topic.replyId,
           firstPostId: topic.firstPostId,
           actorUserId: publishingTenant.replierId,
           mentionedUserIds: [],
@@ -98,7 +99,25 @@ describe("Discussion reply notifications tenant isolation (e2e)", () => {
         .values({ threadId: thread.id, userId: authorId, content: "First post" })
         .returning({ id: courseChatMessages.id });
 
-      return { tenantId, topicId: thread.id, firstPostId: firstPost.id, authorId, replierId };
+      const [reply] = await db
+        .insert(courseChatMessages)
+        .values({
+          threadId: thread.id,
+          userId: replierId,
+          content: "A reply",
+          parentMessageId: firstPost.id,
+          createdAt: sql`CURRENT_TIMESTAMP + interval '1 second'`,
+        })
+        .returning({ id: courseChatMessages.id });
+
+      return {
+        tenantId,
+        topicId: thread.id,
+        firstPostId: firstPost.id,
+        replyId: reply.id,
+        authorId,
+        replierId,
+      };
     };
 
     ownTopic = await runAsTenant(testContext.defaultTenantId, async () => {

@@ -1431,6 +1431,30 @@ export const courseChatMessageReactions = pgTable(
   })),
 );
 
+export const discussionReplyDigests = pgTable(
+  "discussion_reply_digests",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    threadId: uuid("thread_id")
+      .references(() => courseChatThreads.id, { onDelete: "cascade" })
+      .notNull(),
+    sendAfter: timestampWithTimezone({ name: "send_after" }).notNull(),
+    announcementIds: uuid("announcement_ids").array().notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("discussion_reply_digests", (table) => ({
+    userThreadUniqueIdx: uniqueIndex("discussion_reply_digests_user_id_thread_id_unique_idx").on(
+      table.userId,
+      table.threadId,
+    ),
+    sendAfterIdx: index("discussion_reply_digests_send_after_idx").on(table.sendAfter),
+  })),
+);
+
 export const studentCourses = pgTable(
   "student_courses",
   {
