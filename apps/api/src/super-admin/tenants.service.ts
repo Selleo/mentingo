@@ -90,6 +90,7 @@ export class TenantsService {
       name: input.name,
       host,
       status: input.status ?? TENANT_STATUSES.ACTIVE,
+      accessEndsAt: input.accessEndsAt ?? null,
     });
 
     const { adminFirstName, adminLastName } = input;
@@ -164,6 +165,16 @@ export class TenantsService {
     await invalidateCorsCache();
 
     return updatedTenant;
+  }
+
+  async deactivateTenantsWithEndedAccess(): Promise<number> {
+    const deactivatedCount = await this.tenantsRepository.deactivateTenantsWithEndedAccess(
+      new Date().toISOString(),
+    );
+
+    if (deactivatedCount > 0) await invalidateCorsCache();
+
+    return deactivatedCount;
   }
 
   async deleteTenantById(id: string, currentTenantId: string): Promise<void> {

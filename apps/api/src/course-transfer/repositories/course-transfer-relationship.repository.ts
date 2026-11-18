@@ -1,9 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import {
-  COURSE_ORIGIN_TYPES,
-  MASTER_COURSE_EXPORT_SYNC_STATUSES,
-  TENANT_STATUSES,
-} from "@repo/shared";
+import { COURSE_ORIGIN_TYPES, MASTER_COURSE_EXPORT_SYNC_STATUSES } from "@repo/shared";
 import {
   and,
   asc,
@@ -21,6 +17,7 @@ import {
 import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
+import { tenantAccessActiveCondition } from "src/common/utils/tenantAccess";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import {
   courses,
@@ -364,7 +361,7 @@ export class CourseTransferRelationshipRepository {
         and(
           inArray(tenants.id, targetTenantIds),
           ne(tenants.id, sourceTenantId),
-          eq(tenants.status, TENANT_STATUSES.ACTIVE),
+          tenantAccessActiveCondition(),
         ),
       );
 
@@ -393,7 +390,7 @@ export class CourseTransferRelationshipRepository {
     const searchPattern = query.search ? `%${query.search}%` : undefined;
     return and(
       ne(tenants.id, query.sourceTenantId),
-      eq(tenants.status, TENANT_STATUSES.ACTIVE),
+      tenantAccessActiveCondition(),
       searchPattern
         ? or(ilike(tenants.name, searchPattern), ilike(tenants.host, searchPattern))
         : undefined,

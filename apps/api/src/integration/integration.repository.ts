@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { CERTIFICATE_STATUSES, COURSE_ENROLLMENT } from "@repo/shared";
-import { and, countDistinct, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
+import { and, countDistinct, desc, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import { P, match } from "ts-pattern";
 import { validate as uuidValidate } from "uuid";
 
@@ -24,14 +24,16 @@ import {
 import type {
   FindIntegrationKeyCandidateParams,
   IntegrationApiKeyCandidate,
-  IntegrationKeyMetadataRecord,
+  CreateIntegrationKeyParams,
+  CreatedIntegrationKeyRecord,
   IntegrationTrainingResultCourse,
   IntegrationTrainingResultsData,
   IntegrationTrainingResultRow,
   IntegrationTrainingResultsQuery,
   IntegrationTrainingResultsScope,
-  RotateIntegrationKeyParams,
+  RevokeIntegrationKeyParams,
 } from "./integration.types";
+import type { IntegrationKeyMetadata } from "./schemas/integration-key.schema";
 
 type NormalizedTrainingResultsQuery = {
   scope: IntegrationTrainingResultsQuery["scope"];
@@ -49,56 +51,60 @@ export class IntegrationRepository {
     private readonly localizationService: LocalizationService,
   ) {}
 
-  async getCurrentActiveKeyByCreator(userId: string): Promise<IntegrationKeyMetadataRecord | null> {
-    const [key] = await this.dbAdmin
+  async findActiveKeysByTenant(tenantId: string): Promise<IntegrationKeyMetadata[]> {
+    return this.dbAdmin
       .select({
         id: integrationApiKeys.id,
+        name: integrationApiKeys.name,
         keyPrefix: integrationApiKeys.keyPrefix,
         createdAt: integrationApiKeys.createdAt,
-        updatedAt: integrationApiKeys.updatedAt,
         lastUsedAt: integrationApiKeys.lastUsedAt,
+        createdBy: {
+          id: users.id,
+          email: users.email,
+        },
       })
       .from(integrationApiKeys)
-      .where(
-        and(eq(integrationApiKeys.createdByUserId, userId), isNull(integrationApiKeys.revokedAt)),
-      )
-      .limit(1);
-
-    return key ?? null;
+      .innerJoin(users, eq(users.id, integrationApiKeys.createdByUserId))
+      .where(and(eq(integrationApiKeys.tenantId, tenantId), isNull(integrationApiKeys.revokedAt)))
+      .orderBy(desc(integrationApiKeys.createdAt));
   }
 
-  async rotateAdminKey(
-    params: RotateIntegrationKeyParams,
-  ): Promise<IntegrationKeyMetadataRecord | null> {
-    const [createdKey] = await this.db.transaction(async (trx) => {
-      await trx
-        .update(integrationApiKeys)
-        .set({ revokedAt: sql`NOW()` })
-        .where(
-          and(
-            eq(integrationApiKeys.createdByUserId, params.userId),
-            isNull(integrationApiKeys.revokedAt),
-          ),
-        );
+  async createKey(params: CreateIntegrationKeyParams): Promise<CreatedIntegrationKeyRecord> {
+    const [createdKey] = await this.db
+      .insert(integrationApiKeys)
+      .values({
+        tenantId: params.tenantId,
+        createdByUserId: params.createdByUserId,
+        name: params.name,
+        keyPrefix: params.keyPrefix,
+        keyHash: params.keyHash,
+      })
+      .returning({
+        id: integrationApiKeys.id,
+        name: integrationApiKeys.name,
+        keyPrefix: integrationApiKeys.keyPrefix,
+        createdAt: integrationApiKeys.createdAt,
+        lastUsedAt: integrationApiKeys.lastUsedAt,
+      });
 
-      return trx
-        .insert(integrationApiKeys)
-        .values({
-          keyPrefix: params.keyPrefix,
-          keyHash: params.keyHash,
-          tenantId: params.tenantId,
-          createdByUserId: params.userId,
-        })
-        .returning({
-          id: integrationApiKeys.id,
-          keyPrefix: integrationApiKeys.keyPrefix,
-          createdAt: integrationApiKeys.createdAt,
-          updatedAt: integrationApiKeys.updatedAt,
-          lastUsedAt: integrationApiKeys.lastUsedAt,
-        });
-    });
+    return createdKey;
+  }
 
-    return createdKey ?? null;
+  async revokeKey(params: RevokeIntegrationKeyParams): Promise<{ id: string } | null> {
+    const [revokedKey] = await this.db
+      .update(integrationApiKeys)
+      .set({ revokedAt: sql`NOW()` })
+      .where(
+        and(
+          eq(integrationApiKeys.id, params.keyId),
+          eq(integrationApiKeys.tenantId, params.tenantId),
+          isNull(integrationApiKeys.revokedAt),
+        ),
+      )
+      .returning({ id: integrationApiKeys.id });
+
+    return revokedKey ?? null;
   }
 
   async getActiveKeyCandidate(
@@ -134,6 +140,8 @@ export class IntegrationRepository {
         id: tenants.id,
         name: tenants.name,
         host: tenants.host,
+        status: tenants.status,
+        accessEndsAt: tenants.accessEndsAt,
       })
       .from(tenants)
       .orderBy(tenants.name);
@@ -145,6 +153,8 @@ export class IntegrationRepository {
         id: tenants.id,
         name: tenants.name,
         host: tenants.host,
+        status: tenants.status,
+        accessEndsAt: tenants.accessEndsAt,
         isManaging: tenants.isManaging,
       })
       .from(tenants)

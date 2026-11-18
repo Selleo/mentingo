@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { LEGACY_SSO_ENFORCEMENT_SETTING } from "src/env/login-methods.constants";
@@ -72,6 +72,12 @@ export class EnvRepository {
           alg: sql.raw(`excluded.${secrets.alg.name}`),
         },
       });
+  }
+
+  async deleteEnvs(envNames: string[]) {
+    if (!envNames.length) return;
+
+    await this.db.delete(secrets).where(inArray(secrets.secretName, envNames));
   }
 
   async getEnv(envName: string) {

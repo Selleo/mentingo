@@ -20665,6 +20665,51 @@
           "Integration"
         ]
       },
+      "delete": {
+        "operationId": "IntegrationController_clearPhishingConnection",
+        "summary": "Disconnect a tenant from the phishing platform",
+        "description": "Removes the phishing platform plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClearPhishingConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
       "get": {
         "operationId": "IntegrationController_phishingConnectionStatus",
         "summary": "Verify tenant phishing connectivity",
@@ -20750,6 +20795,51 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ConfigureCompetenciesConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
+      "delete": {
+        "operationId": "IntegrationController_clearCompetenciesConnection",
+        "summary": "Disconnect a tenant from the competencies platform",
+        "description": "Removes the competencies platform plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClearCompetenciesConnectionResponse"
                 }
               }
             }
@@ -20912,7 +21002,7 @@
       "post": {
         "operationId": "IntegrationController_createTenant",
         "summary": "Create tenant via integration API",
-        "description": "Creates a new tenant and invites its initial admin user.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "description": "Creates a new tenant and invites its initial admin user. Optional accessEndsAt blocks the tenant from that moment, like an inactive status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
         "parameters": [
           {
             "name": "X-API-Key",
@@ -20969,7 +21059,7 @@
       "patch": {
         "operationId": "IntegrationController_updateTenant",
         "summary": "Update tenant via integration API",
-        "description": "Updates the target tenant's name, host, or status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "description": "Updates the target tenant's name, host, status, or access end date. Send accessEndsAt as null to clear it.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
         "parameters": [
           {
             "name": "X-API-Key",
@@ -21132,6 +21222,185 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/tenants/{tenantId}/integration-keys": {
+      "get": {
+        "operationId": "IntegrationController_getTenantIntegrationKeys",
+        "summary": "List integration API keys of a tenant",
+        "description": "Lists active integration API keys of the target tenant without their secret values. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Not required; the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTenantIntegrationKeysResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
+      "post": {
+        "operationId": "IntegrationController_createTenantIntegrationKey",
+        "summary": "Create an integration API key for a tenant",
+        "description": "Creates an integration API key for the target tenant, recorded as created by the calling key's user. The raw key is returned only once, in this response. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Not required; the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTenantIntegrationKeyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTenantIntegrationKeyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/tenants/{tenantId}/integration-keys/{keyId}": {
+      "delete": {
+        "operationId": "IntegrationController_revokeTenantIntegrationKey",
+        "summary": "Revoke an integration API key of a tenant",
+        "description": "Revokes an active integration API key of the target tenant. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Not required; the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
           },
           "401": {
             "description": "Missing or invalid integration API key."
@@ -22615,6 +22884,51 @@
           "Integration"
         ]
       },
+      "delete": {
+        "operationId": "IntegrationContentMarketplaceController_clearContentMarketplaceConnection",
+        "summary": "Disconnect a tenant from the content marketplace",
+        "description": "Removes the content marketplace plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClearContentMarketplaceConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
       "get": {
         "operationId": "IntegrationContentMarketplaceController_checkContentMarketplaceConnection",
         "summary": "Verify tenant content marketplace connectivity",
@@ -22661,17 +22975,17 @@
         ]
       }
     },
-    "/api/integration/key": {
+    "/api/integration/keys": {
       "get": {
-        "operationId": "IntegrationAdminController_getCurrentKey",
-        "summary": "Get current integration API key metadata for admin",
+        "operationId": "IntegrationAdminController_getKeys",
+        "summary": "List active integration API keys of the current organization",
         "parameters": [],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetCurrentKeyResponse"
+                  "$ref": "#/components/schemas/GetKeysResponse"
                 }
               }
             }
@@ -22688,18 +23002,60 @@
         ]
       },
       "post": {
-        "operationId": "IntegrationAdminController_rotateKey",
-        "summary": "Rotate integration API key for admin",
+        "operationId": "IntegrationAdminController_createKey",
+        "summary": "Create an integration API key for the current organization",
+        "description": "The raw key is returned only once, in this response.",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKeyBody"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RotateKeyResponse"
+                  "$ref": "#/components/schemas/CreateKeyResponse"
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Admin role required."
+          }
+        },
+        "tags": [
+          "Integration Admin"
+        ]
+      }
+    },
+    "/api/integration/keys/{keyId}": {
+      "delete": {
+        "operationId": "IntegrationAdminController_revokeKey",
+        "summary": "Revoke an integration API key of the current organization",
+        "parameters": [
+          {
+            "name": "keyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
           },
           "401": {
             "description": "Authentication required."
@@ -176344,12 +176700,37 @@
                     },
                     "host": {
                       "type": "string"
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "active",
+                          "type": "string"
+                        },
+                        {
+                          "const": "inactive",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "accessEndsAt": {
+                      "anyOf": [
+                        {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
                     "id",
                     "name",
-                    "host"
+                    "host",
+                    "status",
+                    "accessEndsAt"
                   ]
                 }
               },
@@ -176396,6 +176777,26 @@
         ]
       },
       "ConfigurePhishingConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tenantId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ClearPhishingConnectionResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -176465,6 +176866,26 @@
         ]
       },
       "ConfigureCompetenciesConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tenantId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ClearCompetenciesConnectionResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -176641,12 +177062,37 @@
                 },
                 "host": {
                   "type": "string"
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "active",
+                      "type": "string"
+                    },
+                    {
+                      "const": "inactive",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "accessEndsAt": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
                 "id",
                 "name",
-                "host"
+                "host",
+                "status",
+                "accessEndsAt"
               ]
             }
           }
@@ -176676,6 +177122,17 @@
               {
                 "const": "inactive",
                 "type": "string"
+              }
+            ]
+          },
+          "accessEndsAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
             ]
           },
@@ -176763,6 +177220,17 @@
               "isManaging": {
                 "type": "boolean"
               },
+              "accessEndsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -176776,6 +177244,7 @@
               "host",
               "status",
               "isManaging",
+              "accessEndsAt",
               "createdAt",
               "updatedAt"
             ]
@@ -176806,6 +177275,17 @@
               {
                 "const": "inactive",
                 "type": "string"
+              }
+            ]
+          },
+          "accessEndsAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
             ]
           }
@@ -176842,6 +177322,17 @@
               "isManaging": {
                 "type": "boolean"
               },
+              "accessEndsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -176855,6 +177346,7 @@
               "host",
               "status",
               "isManaging",
+              "accessEndsAt",
               "createdAt",
               "updatedAt"
             ]
@@ -177144,6 +177636,156 @@
           "data"
         ]
       },
+      "GetTenantIntegrationKeysResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "keyPrefix": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "lastUsedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdBy": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "email"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "keyPrefix",
+                "createdAt",
+                "lastUsedAt",
+                "createdBy"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateTenantIntegrationKeyBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "\\S",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateTenantIntegrationKeyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "keyPrefix": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "lastUsedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdBy": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "email"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "keyPrefix",
+                  "createdAt",
+                  "lastUsedAt",
+                  "createdBy"
+                ]
+              }
+            },
+            "required": [
+              "key",
+              "metadata"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "DeactivateTenantResponse": {
         "type": "object",
         "properties": {
@@ -177175,6 +177817,17 @@
               "isManaging": {
                 "type": "boolean"
               },
+              "accessEndsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -177188,6 +177841,7 @@
               "host",
               "status",
               "isManaging",
+              "accessEndsAt",
               "createdAt",
               "updatedAt"
             ]
@@ -178392,6 +179046,26 @@
           "data"
         ]
       },
+      "ClearContentMarketplaceConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tenantId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "CheckContentMarketplaceConnectionResponse": {
         "type": "object",
         "properties": {
@@ -178420,65 +179094,85 @@
           "data"
         ]
       },
-      "GetCurrentKeyResponse": {
+      "GetKeysResponse": {
         "type": "object",
         "properties": {
           "data": {
-            "type": "object",
-            "properties": {
-              "key": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "keyPrefix": {
-                        "type": "string"
-                      },
-                      "createdAt": {
-                        "type": "string"
-                      },
-                      "updatedAt": {
-                        "type": "string"
-                      },
-                      "lastUsedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "keyPrefix": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "lastUsedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
                     },
-                    "required": [
-                      "id",
-                      "keyPrefix",
-                      "createdAt",
-                      "updatedAt",
-                      "lastUsedAt"
-                    ]
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdBy": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    }
                   },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "key"
-            ]
+                  "required": [
+                    "id",
+                    "email"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "keyPrefix",
+                "createdAt",
+                "lastUsedAt",
+                "createdBy"
+              ]
+            }
           }
         },
         "required": [
           "data"
         ]
       },
-      "RotateKeyResponse": {
+      "CreateKeyBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "\\S",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateKeyResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -178494,13 +179188,13 @@
                     "format": "uuid",
                     "type": "string"
                   },
+                  "name": {
+                    "type": "string"
+                  },
                   "keyPrefix": {
                     "type": "string"
                   },
                   "createdAt": {
-                    "type": "string"
-                  },
-                  "updatedAt": {
                     "type": "string"
                   },
                   "lastUsedAt": {
@@ -178512,14 +179206,31 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "createdBy": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "email"
+                    ]
                   }
                 },
                 "required": [
                   "id",
+                  "name",
                   "keyPrefix",
                   "createdAt",
-                  "updatedAt",
-                  "lastUsedAt"
+                  "lastUsedAt",
+                  "createdBy"
                 ]
               }
             },
@@ -178569,6 +179280,17 @@
                     "isManaging": {
                       "type": "boolean"
                     },
+                    "accessEndsAt": {
+                      "anyOf": [
+                        {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "createdAt": {
                       "type": "string"
                     },
@@ -178582,6 +179304,7 @@
                     "host",
                     "status",
                     "isManaging",
+                    "accessEndsAt",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -178903,6 +179626,17 @@
               "isManaging": {
                 "type": "boolean"
               },
+              "accessEndsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -178916,6 +179650,7 @@
               "host",
               "status",
               "isManaging",
+              "accessEndsAt",
               "createdAt",
               "updatedAt"
             ]
@@ -178946,6 +179681,17 @@
               {
                 "const": "inactive",
                 "type": "string"
+              }
+            ]
+          },
+          "accessEndsAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
             ]
           }
@@ -178982,6 +179728,17 @@
               "isManaging": {
                 "type": "boolean"
               },
+              "accessEndsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -178995,6 +179752,7 @@
               "host",
               "status",
               "isManaging",
+              "accessEndsAt",
               "createdAt",
               "updatedAt"
             ]

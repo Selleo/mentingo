@@ -7,6 +7,7 @@ export const createTenantFormSchema = (t: typeof i18next.t) =>
     name: z.string().min(1, t("superAdminTenantsView.validation.nameRequired")),
     host: z.string().url(t("superAdminTenantsView.validation.hostInvalid")),
     status: z.enum(["active", "inactive"]).default("active"),
+    accessEndsAt: z.string().optional(),
     adminEmail: z.string().email(t("superAdminTenantsView.validation.adminEmailRequired")),
     adminFirstName: z.string().min(1, t("superAdminTenantsView.validation.adminFirstNameRequired")),
     adminLastName: z.string().min(1, t("superAdminTenantsView.validation.adminLastNameRequired")),
@@ -19,6 +20,7 @@ export const editTenantFormSchema = (t: typeof i18next.t) =>
     name: z.string().min(1, t("superAdminTenantsView.validation.nameRequired")),
     host: z.string().url(t("superAdminTenantsView.validation.hostInvalid")),
     status: z.enum(["active", "inactive"]),
+    accessEndsAt: z.string().optional(),
   });
 
 export type EditTenantFormValues = z.infer<ReturnType<typeof editTenantFormSchema>>;
