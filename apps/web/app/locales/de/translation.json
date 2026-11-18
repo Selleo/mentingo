@@ -4425,7 +4425,8 @@
       "dndOnStart": "Wort {{word}} aufgenommen.",
       "dndOnOver": "Wort {{word}} befindet sich über {{blank}}.",
       "dndOnEnd": "Wort {{word}} wurde in {{blank}} platziert.",
-      "dndOnCancel": "Ziehen abgebrochen. Wort {{word}} ist an seine vorherige Position zurückgekehrt."
+      "dndOnCancel": "Ziehen abgebrochen. Wort {{word}} ist an seine vorherige Position zurückgekehrt.",
+      "questionTitleNotProvided": "Kein Fragentitel angegeben"
     },
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",
@@ -9877,5 +9878,37 @@
       "emptyContent": "Geben Sie eine Nachricht ein.",
       "invalidReaction": "Wähle eine der verfügbaren Reaktionen."
     }
+  },
+  "a11y": {
+    "goToHomepage": "Zur Startseite",
+    "platformLogo": "Plattformlogo",
+    "uploadedImage": "Hochgeladenes Bild",
+    "uploadQueue": "Upload-Warteschlange",
+    "formattingOptions": "Formatierungsoptionen",
+    "switchToLightMode": "Zum hellen Modus wechseln",
+    "switchToDarkMode": "Zum dunklen Modus wechseln",
+    "videoPlayer": "Videoplayer",
+    "videoQuality": "Videoqualität",
+    "breadcrumb": "Brotkrümelnavigation",
+    "more": "Mehr",
+    "carousel": "Karussell",
+    "slide": "Folie",
+    "previousSlide": "Vorherige Folie",
+    "nextSlide": "Nächste Folie",
+    "remove": "Entfernen",
+    "clearAll": "Alle löschen",
+    "expandOptions": "Optionen ausklappen",
+    "collapseOptions": "Optionen einklappen",
+    "selectAll": "Alle auswählen",
+    "selectRow": "Zeile auswählen",
+    "deleteChapter": "Kapitel löschen",
+    "cancelEditing": "Bearbeitung abbrechen",
+    "removeFile": "Datei entfernen",
+    "editSection": "Abschnitt bearbeiten",
+    "deleteSection": "Abschnitt löschen",
+    "avatar": "Avatar",
+    "avatarFor": "Avatar von {{name}}",
+    "selectGroup": "Gruppe {{name}} auswählen",
+    "lessonWithTitle": "Lektion: {{title}}"
   }
 }

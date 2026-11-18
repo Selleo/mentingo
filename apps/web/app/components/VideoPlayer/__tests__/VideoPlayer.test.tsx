@@ -2,6 +2,7 @@ import { VIDEO_EMBED_PROVIDERS } from "@repo/shared";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import i18next from "~/utils/mocks/i18next.mock";
 import { renderWith } from "~/utils/testUtils";
 
 import { VideoPlayer } from "../VideoPlayer";
@@ -21,6 +22,7 @@ class FakeVideoJsPlayer {
   private disposedValue = false;
 
   controls = vi.fn();
+  language = vi.fn();
   removeClass = vi.fn();
   addClass = vi.fn();
   userActive = vi.fn();
@@ -138,10 +140,13 @@ vi.mock("../hlsQualityControlComponent", () => ({
   addHlsQualityControlComponent: () => addHlsQualityControlComponent(),
 }));
 vi.mock("video.js", () => ({
-  default: vi.fn((element: HTMLElement) => {
-    player.element = element;
-    return player;
-  }),
+  default: Object.assign(
+    vi.fn((element: HTMLElement) => {
+      player.element = element;
+      return player;
+    }),
+    { addLanguage: vi.fn() },
+  ),
 }));
 
 const renderPlayer = async () => {
@@ -157,6 +162,40 @@ const renderPlayer = async () => {
     playerContainer: view.container.querySelector("[data-vjs-player]") as HTMLElement,
   };
 };
+
+describe("VideoPlayer language", () => {
+  beforeEach(() => {
+    player = new FakeVideoJsPlayer();
+  });
+
+  afterEach(async () => {
+    vi.clearAllMocks();
+    await act(async () => {
+      await i18next.changeLanguage("en");
+    });
+  });
+
+  it("names the player and its controls in the current UI language", async () => {
+    await act(async () => {
+      await i18next.changeLanguage("pl");
+    });
+    await renderPlayer();
+
+    expect(screen.getByRole("button", { name: "Odtwarzacz wideo" })).toBeInTheDocument();
+    expect(player.language).toHaveBeenLastCalledWith("pl");
+  });
+
+  it("switches the controls language when the UI language changes", async () => {
+    await renderPlayer();
+    expect(player.language).toHaveBeenLastCalledWith("en");
+
+    await act(async () => {
+      await i18next.changeLanguage("pl");
+    });
+
+    expect(player.language).toHaveBeenLastCalledWith("pl");
+  });
+});
 
 describe("VideoPlayer keyboard shortcuts", () => {
   beforeEach(() => {

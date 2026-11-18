@@ -60,7 +60,7 @@ const CourseCard = ({
       <div className="relative">
         <img
           src={thumbnailUrl || DefaultPhotoCourse}
-          alt="Course"
+          alt=""
           loading="eager"
           decoding="async"
           className="aspect-video w-full rounded-t-lg object-cover"
@@ -96,7 +96,7 @@ const CourseCard = ({
         <div className="flex flex-grow flex-col">
           {enrolled && (
             <CourseProgress
-              label="Course progress:"
+              label={t("studentLessonView.sideSection.other.courseProgress")}
               courseLessonCount={courseChapterCount}
               completedLessonCount={completedChapterCount}
             />

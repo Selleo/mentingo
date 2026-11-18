@@ -4370,7 +4370,8 @@
       "dndOnStart": "Palabra {{word}} tomada.",
       "dndOnOver": "La palabra {{word}} está sobre {{blank}}.",
       "dndOnEnd": "La palabra {{word}} se colocó en {{blank}}.",
-      "dndOnCancel": "Arrastre cancelado. La palabra {{word}} volvió a su posición anterior."
+      "dndOnCancel": "Arrastre cancelado. La palabra {{word}} volvió a su posición anterior.",
+      "questionTitleNotProvided": "No se ha indicado el título de la pregunta"
     },
     "aiMentor": {
       "title": "Sesión de mentores de IA",
@@ -9829,5 +9830,37 @@
       "emptyContent": "Escribe un mensaje.",
       "invalidReaction": "Elige una de las reacciones disponibles."
     }
+  },
+  "a11y": {
+    "goToHomepage": "Ir a la página de inicio",
+    "platformLogo": "Logotipo de la plataforma",
+    "uploadedImage": "Imagen subida",
+    "uploadQueue": "Cola de subida",
+    "formattingOptions": "Opciones de formato",
+    "switchToLightMode": "Cambiar al modo claro",
+    "switchToDarkMode": "Cambiar al modo oscuro",
+    "videoPlayer": "Reproductor de vídeo",
+    "videoQuality": "Calidad de vídeo",
+    "breadcrumb": "Ruta de navegación",
+    "more": "Más",
+    "carousel": "carrusel",
+    "slide": "diapositiva",
+    "previousSlide": "Diapositiva anterior",
+    "nextSlide": "Diapositiva siguiente",
+    "remove": "Quitar",
+    "clearAll": "Borrar todo",
+    "expandOptions": "Expandir opciones",
+    "collapseOptions": "Contraer opciones",
+    "selectAll": "Seleccionar todo",
+    "selectRow": "Seleccionar fila",
+    "deleteChapter": "Eliminar capítulo",
+    "cancelEditing": "Cancelar edición",
+    "removeFile": "Quitar archivo",
+    "editSection": "Editar sección",
+    "deleteSection": "Eliminar sección",
+    "avatar": "Avatar",
+    "avatarFor": "Avatar de {{name}}",
+    "selectGroup": "Seleccionar grupo {{name}}",
+    "lessonWithTitle": "Lección: {{title}}"
   }
 }

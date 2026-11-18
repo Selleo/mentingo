@@ -274,7 +274,6 @@ const CreatePromotionCode = () => {
                         }
                         onClick={(e) => e.stopPropagation()}
                         name={field.name}
-                        aria-label="Checkbox"
                         id="checkAll"
                       />
                     </FormControl>
@@ -309,7 +308,6 @@ const CreatePromotionCode = () => {
                             }
                             onClick={(e) => e.stopPropagation()}
                             name={field.name}
-                            aria-label="Checkbox"
                             id={id}
                           />
                         </FormControl>

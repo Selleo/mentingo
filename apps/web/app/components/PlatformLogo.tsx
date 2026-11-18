@@ -1,4 +1,6 @@
 import { memo } from "react";
+import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { usePlatformSimpleLogo } from "~/api/queries";
 import { Icon } from "~/components/Icon";
@@ -11,45 +13,37 @@ interface PlatformLogoProps {
   alt?: string;
 }
 
-export const PlatformLogo = memo(
-  ({ className, variant = "full", alt = "Platform Logo" }: PlatformLogoProps) => {
-    const { data: customLogoUrl, isLoading } = usePlatformLogo();
-    const { data: customSimpleLogoUrl, isLoading: isSimpleLogoLoading } = usePlatformSimpleLogo();
+export const PlatformLogo = memo(({ className, variant = "full", alt }: PlatformLogoProps) => {
+  const { t } = useTranslation();
+  const { data: customLogoUrl, isLoading } = usePlatformLogo();
+  const { data: customSimpleLogoUrl, isLoading: isSimpleLogoLoading } = usePlatformSimpleLogo();
 
-    if (isLoading) {
-      return <div className={className}></div>;
-    }
+  if (isLoading) {
+    return <div className={className}></div>;
+  }
 
-    if (customLogoUrl && !isLoading && variant === "full") {
-      return (
-        <img
-          src={customLogoUrl}
-          alt={alt}
-          className={cn("object-contain", className)}
-          loading="eager"
-          decoding="async"
-        />
-      );
-    }
+  const customLogoSrc = match(variant)
+    .with("full", () => customLogoUrl)
+    .with("signet", () => (isSimpleLogoLoading ? null : customSimpleLogoUrl))
+    .exhaustive();
 
-    if (customSimpleLogoUrl && !isSimpleLogoLoading && variant === "signet") {
-      return (
-        <img
-          src={customSimpleLogoUrl}
-          alt={alt}
-          className={cn("object-contain", className)}
-          loading="eager"
-          decoding="async"
-        />
-      );
-    }
+  if (customLogoSrc) {
+    return (
+      <img
+        src={customLogoSrc}
+        alt={alt ?? t("a11y.platformLogo")}
+        className={cn("object-contain", className)}
+        loading="eager"
+        decoding="async"
+      />
+    );
+  }
 
-    if (variant === "signet") {
-      return <Icon name="AppSignet" className={className} />;
-    }
+  if (variant === "signet") {
+    return <Icon name="AppSignet" className={className} />;
+  }
 
-    return <Icon name="AppLogo" className={className} />;
-  },
-);
+  return <Icon name="AppLogo" className={className} />;
+});
 
 PlatformLogo.displayName = "PlatformLogo";

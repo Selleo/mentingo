@@ -4427,7 +4427,8 @@
       "dndOnStart": "Paimtas žodis {{word}}.",
       "dndOnOver": "Žodis {{word}} yra virš {{blank}}.",
       "dndOnEnd": "Žodis {{word}} įdėtas į {{blank}}.",
-      "dndOnCancel": "Vilkimas atšauktas. Žodis {{word}} grįžo į ankstesnę vietą."
+      "dndOnCancel": "Vilkimas atšauktas. Žodis {{word}} grįžo į ankstesnę vietą.",
+      "questionTitleNotProvided": "Klausimo pavadinimas nepateiktas"
     },
     "aiMentor": {
       "title": "AI mentoriaus sesija",
@@ -9946,5 +9947,37 @@
       "emptyContent": "Įveskite žinutę.",
       "invalidReaction": "Pasirinkite vieną iš galimų reakcijų."
     }
+  },
+  "a11y": {
+    "goToHomepage": "Eiti į pagrindinį puslapį",
+    "platformLogo": "Platformos logotipas",
+    "uploadedImage": "Įkeltas paveikslėlis",
+    "uploadQueue": "Įkėlimo eilė",
+    "formattingOptions": "Formatavimo parinktys",
+    "switchToLightMode": "Perjungti į šviesų režimą",
+    "switchToDarkMode": "Perjungti į tamsų režimą",
+    "videoPlayer": "Vaizdo grotuvas",
+    "videoQuality": "Vaizdo kokybė",
+    "breadcrumb": "Naršymo kelias",
+    "more": "Daugiau",
+    "carousel": "karuselė",
+    "slide": "skaidrė",
+    "previousSlide": "Ankstesnė skaidrė",
+    "nextSlide": "Kita skaidrė",
+    "remove": "Pašalinti",
+    "clearAll": "Išvalyti viską",
+    "expandOptions": "Išskleisti parinktis",
+    "collapseOptions": "Suskleisti parinktis",
+    "selectAll": "Pažymėti viską",
+    "selectRow": "Pažymėti eilutę",
+    "deleteChapter": "Ištrinti skyrių",
+    "cancelEditing": "Atšaukti redagavimą",
+    "removeFile": "Pašalinti failą",
+    "editSection": "Redaguoti skyrelį",
+    "deleteSection": "Ištrinti skyrelį",
+    "avatar": "Avataras",
+    "avatarFor": "Avataras: {{name}}",
+    "selectGroup": "Pažymėti grupę {{name}}",
+    "lessonWithTitle": "Pamoka: {{title}}"
   }
 }

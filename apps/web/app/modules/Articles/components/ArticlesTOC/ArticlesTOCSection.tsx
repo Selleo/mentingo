@@ -77,7 +77,7 @@ export function ArticlesTOCSection({
               variant="ghost"
               size="icon"
               className="size-7 shrink-0 text-neutral-500 hover:bg-white/50 hover:text-primary-700"
-              aria-label="Edit section"
+              aria-label={t("a11y.editSection")}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit();
@@ -91,7 +91,7 @@ export function ArticlesTOCSection({
               variant="ghost"
               size="icon"
               className="size-7 shrink-0 text-neutral-500 hover:bg-destructive/10 hover:text-destructive"
-              aria-label="Delete section"
+              aria-label={t("a11y.deleteSection")}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();

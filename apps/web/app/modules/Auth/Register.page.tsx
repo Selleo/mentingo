@@ -179,7 +179,7 @@ export default function RegisterPage() {
             <Card className="w-full max-w-md" data-testid={REGISTER_PAGE_HANDLES.PAGE}>
               <CardHeader>
                 <div className="mb-2 flex justify-center">
-                  <PlatformLogo className="h-16 w-auto py-2" alt="Platform Logo" />
+                  <PlatformLogo className="h-16 w-auto py-2" />
                 </div>
                 <CardTitle className="text-xl">{t("registerView.header")}</CardTitle>
                 <CardDescription className="max-w-md text-sm leading-6">

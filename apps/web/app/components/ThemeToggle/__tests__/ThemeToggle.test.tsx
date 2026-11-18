@@ -18,13 +18,11 @@ describe("ThemeToggle", () => {
       withTheme: true,
     }).render(<ThemeToggle />);
 
-    const button = screen.getByRole("button");
-
-    expect(button).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: "Switch to dark mode" });
 
     fireEvent.click(button);
-    expect(await screen.findByLabelText(/dark/)).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Switch to light mode" })).toBe(button);
     fireEvent.click(button);
-    expect(await screen.findByLabelText(/light/)).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Switch to dark mode" })).toBe(button);
   });
 });

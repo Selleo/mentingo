@@ -4432,7 +4432,8 @@
       "dndOnStart": "Zvednuto slovo {{word}}.",
       "dndOnOver": "Slovo {{word}} je nad {{blank}}.",
       "dndOnEnd": "Slovo {{word}} bylo umístěno do {{blank}}.",
-      "dndOnCancel": "Přetažení zrušeno. Slovo {{word}} se vrátilo na předchozí místo."
+      "dndOnCancel": "Přetažení zrušeno. Slovo {{word}} se vrátilo na předchozí místo.",
+      "questionTitleNotProvided": "Název otázky nebyl zadán"
     },
     "aiMentor": {
       "title": "Sezení AI Mentor",
@@ -9948,5 +9949,37 @@
       "emptyContent": "Zadejte zprávu.",
       "invalidReaction": "Vyberte jednu z dostupných reakcí."
     }
+  },
+  "a11y": {
+    "goToHomepage": "Přejít na domovskou stránku",
+    "platformLogo": "Logo platformy",
+    "uploadedImage": "Nahraný obrázek",
+    "uploadQueue": "Fronta nahrávání",
+    "formattingOptions": "Možnosti formátování",
+    "switchToLightMode": "Přepnout na světlý režim",
+    "switchToDarkMode": "Přepnout na tmavý režim",
+    "videoPlayer": "Přehrávač videa",
+    "videoQuality": "Kvalita videa",
+    "breadcrumb": "Drobečková navigace",
+    "more": "Více",
+    "carousel": "karusel",
+    "slide": "snímek",
+    "previousSlide": "Předchozí snímek",
+    "nextSlide": "Další snímek",
+    "remove": "Odebrat",
+    "clearAll": "Vymazat vše",
+    "expandOptions": "Rozbalit možnosti",
+    "collapseOptions": "Sbalit možnosti",
+    "selectAll": "Vybrat vše",
+    "selectRow": "Vybrat řádek",
+    "deleteChapter": "Smazat kapitolu",
+    "cancelEditing": "Zrušit úpravy",
+    "removeFile": "Odebrat soubor",
+    "editSection": "Upravit sekci",
+    "deleteSection": "Smazat sekci",
+    "avatar": "Avatar",
+    "avatarFor": "Avatar: {{name}}",
+    "selectGroup": "Vybrat skupinu {{name}}",
+    "lessonWithTitle": "Lekce: {{title}}"
   }
 }

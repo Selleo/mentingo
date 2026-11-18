@@ -119,7 +119,7 @@ const EditorToolbar = ({
   return (
     <Toolbar
       className="m-0 flex w-full max-w-full flex-wrap items-center justify-between gap-y-2 p-2"
-      aria-label="Formatting options"
+      aria-label={t("a11y.formattingOptions")}
     >
       <TooltipProvider>
         <ToggleGroup className="flex flex-row flex-wrap items-center gap-2" type="multiple">
