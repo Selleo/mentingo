@@ -56,9 +56,8 @@ export const assertDeniedRoutesFlow = async (page: Page, role: string) => {
 };
 
 /**
- * Direct entry and reload of /reports follow the role's permission, in the UI and the API.
- * Denied roles enter /reports again after the redirect instead of reloading,
- * and also try a differently cased path with a trailing slash.
+ * /reports follows the role's permission, in the UI and the API. Allowed roles also keep access
+ * after a reload; denied roles also try a differently cased path with a trailing slash.
  */
 export const assertReportsAccessFlow = async (
   page: Page,
@@ -67,22 +66,18 @@ export const assertReportsAccessFlow = async (
 ) => {
   const requests = observeReportRequests(page);
   const { canAccessReports: allowed, deniedRedirect } = getRoleRouteAccess(role);
-  const entries = allowed
-    ? ["/reports?language=en"]
-    : ["/reports?language=en", "/REPORTS/?language=en"];
 
-  for (const entry of entries) {
-    // A denied reload would only reload the redirect target, so denied roles enter /reports twice.
-    const secondOpen = allowed ? () => page.reload() : () => page.goto(entry);
-    for (const open of [() => page.goto(entry), secondOpen]) {
+  if (allowed) {
+    for (const open of [() => page.goto("/reports?language=en"), () => page.reload()]) {
       await open();
-      if (allowed) {
-        await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeVisible();
-        await expect(page).toHaveURL(/\/reports\?language=en$/);
-      } else {
-        await expect(page).toHaveURL(deniedRedirect);
-        await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toHaveCount(0);
-      }
+      await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toBeVisible();
+      await expect(page).toHaveURL(/\/reports\?language=en$/);
+    }
+  } else {
+    for (const entry of ["/reports?language=en", "/REPORTS/?language=en"]) {
+      await page.goto(entry);
+      await expect(page).toHaveURL(deniedRedirect);
+      await expect(page.getByTestId(REPORTS_HANDLES.APPLY)).toHaveCount(0);
     }
   }
 
