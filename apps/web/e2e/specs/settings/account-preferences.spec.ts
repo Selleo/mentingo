@@ -81,11 +81,12 @@ test("admin must confirm before an integration API key is revoked", async ({
   apiClient,
   withWorkerPage,
 }) => {
-  const keyName = uniqueKeyName();
-  const createdKey = await apiClient.api.integrationAdminControllerCreateKey({ name: keyName });
-  const keyId = createdKey.data.data.metadata.id;
-
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+    const createdKey = await apiClient.api.integrationAdminControllerCreateKey({
+      name: uniqueKeyName(),
+    });
+    const keyId = createdKey.data.data.metadata.id;
+
     await openSettingsPageFlow(page);
     await page.getByTestId(SETTINGS_PAGE_HANDLES.INTEGRATIONS_TAB).click();
 
