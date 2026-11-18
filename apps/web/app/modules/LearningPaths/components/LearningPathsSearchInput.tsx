@@ -17,8 +17,16 @@ export function LearningPathsSearchInput() {
   const debouncedValue = useDebounce(value, 300);
 
   const isHydratingFromUrlRef = useRef(false);
+  const pendingSearch = useRef<string[]>([]);
 
   useEffect(() => {
+    // The URL can finish navigating after the user has already continued typing.
+    const acknowledgedIndex = pendingSearch.current.indexOf(searchQuery);
+    if (acknowledgedIndex !== -1) {
+      pendingSearch.current.splice(0, acknowledgedIndex + 1);
+      return;
+    }
+    pendingSearch.current = [];
     isHydratingFromUrlRef.current = true;
 
     setValue(searchQuery);
@@ -44,6 +52,7 @@ export function LearningPathsSearchInput() {
       nextParams.delete("searchQuery");
     }
 
+    pendingSearch.current.push(nextSearchQuery);
     setSearchParams(nextParams, { replace: true });
   }, [debouncedValue, searchParams, searchQuery, setSearchParams, value]);
 

@@ -119,20 +119,35 @@ export function useUrlTableState<TFilterKey extends string, TSortField extends s
     updateUrlParams({ ...values, [TABLE_URL_PARAMS.PAGE]: undefined });
 
   const lastUrlSearch = useRef(search);
+  const isHydratingFromUrl = useRef(false);
+  // Acknowledging our own navigation must not overwrite text typed while it was pending.
+  const pendingSearch = useRef<string[]>([]);
 
   useEffect(() => {
     if (lastUrlSearch.current === search) return;
 
     lastUrlSearch.current = search;
+    const acknowledgedIndex = pendingSearch.current.indexOf(search);
+    if (acknowledgedIndex !== -1) {
+      pendingSearch.current.splice(0, acknowledgedIndex + 1);
+      return;
+    }
+    pendingSearch.current = [];
+    isHydratingFromUrl.current = true;
     setSearchInput((currentInput) => (currentInput.trim() === search ? currentInput : search));
   }, [search]);
 
   useEffect(() => {
-    if (debouncedSearch === search) return;
+    if (isHydratingFromUrl.current) {
+      isHydratingFromUrl.current = false;
+      return;
+    }
+    if (debouncedSearch !== searchInput.trim() || debouncedSearch === search) return;
 
+    pendingSearch.current.push(debouncedSearch);
     updateListParams({ [searchParam]: debouncedSearch });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
+  }, [debouncedSearch, search, searchInput]);
 
   const activeFilterCount = [search, ...filterValues].filter(Boolean).length;
 

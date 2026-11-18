@@ -108,14 +108,26 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const pendingText = useRef<FilterValue[]>([]);
   const debouncedSearchTitle = useMemo(
-    () => debounce((name: string, value: FilterValue) => onChangeRef.current(name, value), 300),
+    () =>
+      debounce((name: string, value: FilterValue) => {
+        pendingText.current.push(value);
+        onChangeRef.current(name, value);
+      }, 300),
     [],
   );
   useEffect(() => () => debouncedSearchTitle.cancel(), [debouncedSearchTitle]);
   const textFilter = filters.find((filter) => filter.type === "text");
   const textValue = textFilter ? values[textFilter.name] : undefined;
   useEffect(() => {
+    // This is an acknowledgment, not a reset: keep newer text, caret and pending debounce.
+    const acknowledgedIndex = pendingText.current.indexOf(textValue);
+    if (acknowledgedIndex !== -1) {
+      pendingText.current.splice(0, acknowledgedIndex + 1);
+      return;
+    }
+    pendingText.current = [];
     debouncedSearchTitle.cancel();
     if (inputRef.current) inputRef.current.value = typeof textValue === "string" ? textValue : "";
   }, [textValue, debouncedSearchTitle]);
