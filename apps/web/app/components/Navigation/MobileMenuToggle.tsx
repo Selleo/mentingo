@@ -1,23 +1,28 @@
 import { useTranslation } from "react-i18next";
 
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, RefObject, SetStateAction } from "react";
 
 type MobileMenuToggleProps = {
   isMobileNavOpen: boolean;
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
   hasConfigurationIssues?: boolean;
+  buttonRef?: RefObject<HTMLButtonElement>;
 };
 
 export function MobileMenuToggle({
   isMobileNavOpen,
   setIsMobileNavOpen,
   hasConfigurationIssues,
+  buttonRef,
 }: MobileMenuToggleProps) {
   const { t } = useTranslation();
   return (
     <button
+      ref={buttonRef}
+      type="button"
+      aria-expanded={isMobileNavOpen}
       onClick={() => setIsMobileNavOpen((prevState) => !prevState)}
-      className="relative flex w-min gap-x-2 rounded-lg bg-neutral-50 px-3 py-2 2xl:sr-only"
+      className="relative flex w-min gap-x-2 rounded-lg bg-neutral-50 px-3 py-2 2xl:hidden"
     >
       {hasConfigurationIssues && (
         <span className="absolute right-1 top-1 size-2 rounded-full bg-red-500" />

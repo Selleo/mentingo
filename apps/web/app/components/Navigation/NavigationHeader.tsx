@@ -7,7 +7,7 @@ import { PlatformLogo } from "../PlatformLogo";
 
 import { NavigationGlobalSearchWrapper } from "./NavigationGlobalSearchWrapper";
 
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, RefObject, SetStateAction } from "react";
 
 type NavigationHeaderProps = {
   isMobileNavOpen: boolean;
@@ -15,6 +15,7 @@ type NavigationHeaderProps = {
   is2xlBreakpoint: boolean;
   isSidebarCollapsed: boolean;
   hasConfigurationIssues?: boolean;
+  menuToggleRef?: RefObject<HTMLButtonElement>;
 };
 
 export function NavigationHeader({
@@ -23,6 +24,7 @@ export function NavigationHeader({
   is2xlBreakpoint,
   isSidebarCollapsed,
   hasConfigurationIssues,
+  menuToggleRef,
 }: NavigationHeaderProps) {
   return (
     <div
@@ -52,6 +54,7 @@ export function NavigationHeader({
           isMobileNavOpen={isMobileNavOpen}
           setIsMobileNavOpen={setIsMobileNavOpen}
           hasConfigurationIssues={hasConfigurationIssues}
+          buttonRef={menuToggleRef}
         />
       </div>
     </div>

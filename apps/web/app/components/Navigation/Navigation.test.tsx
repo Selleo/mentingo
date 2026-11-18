@@ -1,5 +1,5 @@
 import { matchesRequirement, PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useCompetenciesConfiguration } from "~/api/queries/useCompetenciesConfiguration";
@@ -8,6 +8,7 @@ import { usePhishingConfiguration } from "~/api/queries/usePhishingConfiguration
 import { Navigation } from "./Navigation";
 import { useNavigationStore } from "./stores/navigationStore";
 
+import type { Dispatch, RefObject, SetStateAction } from "react";
 import type { PermissionKey } from "~/common/permissions/permission.utils";
 import type { LeafMenuItem } from "~/config/navigationConfig";
 
@@ -39,9 +40,23 @@ vi.mock("~/modules/Dashboard/Settings/Language/LanguageStore", () => ({
 }));
 vi.mock("~/components/Icon", () => ({ Icon: () => null }));
 vi.mock("./NavigationHeader", () => ({
-  // Mirrors the real header: it renders its own search below the 2xl breakpoint.
-  NavigationHeader: ({ is2xlBreakpoint }: { is2xlBreakpoint: boolean }) =>
-    is2xlBreakpoint ? null : <div data-testid="global-search" />,
+  // Mirrors the real header: search below the 2xl breakpoint, a menu toggle that CSS hides at 2xl.
+  NavigationHeader: ({
+    is2xlBreakpoint,
+    setIsMobileNavOpen,
+    menuToggleRef,
+  }: {
+    is2xlBreakpoint: boolean;
+    setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
+    menuToggleRef: RefObject<HTMLButtonElement>;
+  }) => (
+    <>
+      {!is2xlBreakpoint && <div data-testid="global-search" />}
+      <button ref={menuToggleRef} onClick={() => setIsMobileNavOpen((isOpen) => !isOpen)}>
+        navigationSideBar.menu
+      </button>
+    </>
+  ),
 }));
 vi.mock("./NavigationFooter", () => ({ NavigationFooter: () => null }));
 vi.mock("./NavigationGlobalSearchWrapper", () => ({
@@ -51,6 +66,7 @@ vi.mock("./NavigationMenu", () => ({
   NavigationMenu: ({
     menuItems,
     permissions,
+    setIsMobileNavOpen,
     isExpandable,
     expandableLabel,
     showNavigationLabels,
@@ -58,6 +74,7 @@ vi.mock("./NavigationMenu", () => ({
   }: {
     menuItems: LeafMenuItem[];
     permissions: PermissionKey[];
+    setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
     isExpandable?: boolean;
     expandableLabel?: string;
     showNavigationLabels: boolean;
@@ -73,7 +90,14 @@ vi.mock("./NavigationMenu", () => ({
       {menuItems
         .filter((item) => matchesRequirement(permissions, item.accessRequirement))
         .map((item) => (
-          <a key={item.link} href={item.link}>
+          <a
+            key={item.link}
+            href={item.link}
+            onClick={(event) => {
+              event.preventDefault();
+              setIsMobileNavOpen(false);
+            }}
+          >
             {item.label}
           </a>
         ))}
@@ -282,6 +306,23 @@ describe("sidebar collapse toggle", () => {
     ).toBeInTheDocument();
   });
 
+  it("exposes the sidebar state with aria-expanded and keeps the nav focusable", async () => {
+    useNavigationStore.setState({ isSidebarCollapsed: true });
+
+    render(<Navigation />);
+
+    const toggle = await screen.findByRole("button", {
+      name: "navigationSideBar.ariaLabels.expandSidebar",
+    });
+
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("navigation")).not.toHaveAttribute("inert");
+
+    fireEvent.click(toggle);
+
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+  });
+
   it("offers to expand a collapsed sidebar and to collapse it again after expanding", async () => {
     useNavigationStore.setState({ isSidebarCollapsed: true });
 
@@ -296,5 +337,101 @@ describe("sidebar collapse toggle", () => {
     expect(
       screen.getByRole("button", { name: "navigationSideBar.ariaLabels.collapseSidebar" }),
     ).toBeInTheDocument();
+  });
+});
+
+describe("mobile menu below the 2xl breakpoint", () => {
+  beforeEach(() => {
+    vi.spyOn(window, "innerWidth", "get").mockReturnValue(1366);
+    state.permissions = [];
+    state.roleSlugs = [SYSTEM_ROLE_SLUGS.STUDENT];
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("keeps the closed menu out of the focus order and opens it for keyboard users", () => {
+    render(<Navigation />);
+
+    const nav = screen.getByRole("navigation", { hidden: true });
+
+    expect(nav).toHaveAttribute("inert");
+
+    fireEvent.click(screen.getByRole("button", { name: "navigationSideBar.menu" }));
+
+    expect(nav).not.toHaveAttribute("inert");
+  });
+
+  it("returns focus to the menu button when choosing an item closes the menu", () => {
+    render(<Navigation />);
+    const menuButton = screen.getByRole("button", { name: "navigationSideBar.menu" });
+
+    fireEvent.click(menuButton);
+    const item = screen.getAllByRole("link")[0];
+
+    item.focus();
+    fireEvent.click(item);
+
+    expect(screen.getByRole("navigation", { hidden: true })).toHaveAttribute("inert");
+    expect(menuButton).toHaveFocus();
+  });
+
+  it("keeps the page content out of the Tab order while the menu covers it", () => {
+    render(
+      <>
+        <Navigation />
+        <main data-testid="content" />
+      </>,
+    );
+    const content = screen.getByTestId("content");
+
+    expect(content).not.toHaveAttribute("inert");
+
+    fireEvent.click(screen.getByRole("button", { name: "navigationSideBar.menu" }));
+
+    expect(content).toHaveAttribute("inert");
+
+    fireEvent.click(screen.getByRole("button", { name: "navigationSideBar.menu" }));
+
+    expect(content).not.toHaveAttribute("inert");
+  });
+
+  it("leaves focus alone when another surface took it before the menu closed", () => {
+    render(
+      <>
+        <Navigation />
+        <button type="button">helpdesk</button>
+      </>,
+    );
+    const menuButton = screen.getByRole("button", { name: "navigationSideBar.menu" });
+
+    fireEvent.click(menuButton);
+    const helpdesk = screen.getByRole("button", { name: "helpdesk" });
+
+    helpdesk.focus();
+    fireEvent.click(menuButton);
+
+    expect(helpdesk).toHaveFocus();
+  });
+
+  it("does not move focus to the hidden toggle when resizing to desktop closes the menu", () => {
+    render(<Navigation />);
+    const menuButton = screen.getByRole("button", { name: "navigationSideBar.menu" });
+
+    fireEvent.click(menuButton);
+    const item = screen.getAllByRole("link")[0];
+
+    item.focus();
+    vi.spyOn(window, "innerWidth", "get").mockReturnValue(1500);
+    act(() => {
+      window.dispatchEvent(new Event("resize"));
+    });
+
+    const nav = screen.getByRole("navigation");
+
+    expect(nav).not.toHaveAttribute("inert");
+    expect(menuButton).not.toHaveFocus();
+    expect(item).toHaveFocus();
   });
 });

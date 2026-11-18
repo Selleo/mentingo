@@ -104,8 +104,9 @@ export const MobileNavigationFooterItems = ({
 
       <li className="col-span-1 md:col-span-2 2xl:hidden">
         <Tooltip>
-          <TooltipTrigger className="w-full">
+          <TooltipTrigger asChild>
             <button
+              type="button"
               onClick={() => {
                 startTransition(() => {
                   logout();

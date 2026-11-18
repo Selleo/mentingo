@@ -1104,6 +1104,7 @@
     "notifications": "Pranešimai",
     "promotionCodes": "Reklamos kodai",
     "manage": "Tvarkyti",
+    "skipToContent": "Pereiti prie turinio",
     "ariaLabels": {
       "goToAvailableCourses": "Eikite į galimus kursus",
       "collapseSidebar": "Sutraukti šoninę juostą",

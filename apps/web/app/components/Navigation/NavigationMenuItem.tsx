@@ -29,47 +29,50 @@ export function NavigationMenuItem({
   return (
     <li key={item.label} className={className}>
       <Tooltip>
-        <TooltipTrigger className="w-full">
-          <NavLink
-            data-testid={item.testId}
-            to={item.link}
-            onClick={() => setIsMobileNavOpen(false)}
-            className={({ isActive }) =>
-              cn(
-                "relative flex items-center gap-x-3 rounded-lg border border-transparent px-4 py-3.5 hover:border-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
-                {
-                  "border-primary-200 bg-white text-primary-800 2xl:bg-primary-50": isActive,
-                  "bg-white text-neutral-900": !isActive,
-                  "flex-col sm:flex-row gap-y-1 sm:gap-y-0": isFooter,
-                  "justify-center": !showLabel,
-                },
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <Icon
-                  name={item.iconName}
-                  className={cn("size-6", {
-                    "text-primary-700": isActive,
-                  })}
-                />
-                <span
-                  className={cn(
-                    "line-clamp-1 overflow-hidden truncate whitespace-nowrap capitalize",
-                    {
-                      "sr-only": !showLabel,
-                    },
+        <TooltipTrigger asChild>
+          {/* A wrapper, not asChild on NavLink: Slot can't merge NavLink's function className. */}
+          <div className="w-full">
+            <NavLink
+              data-testid={item.testId}
+              to={item.link}
+              onClick={() => setIsMobileNavOpen(false)}
+              className={({ isActive }) =>
+                cn(
+                  "relative flex items-center gap-x-3 rounded-lg border border-transparent px-4 py-3.5 hover:border-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
+                  {
+                    "border-primary-200 bg-white text-primary-800 2xl:bg-primary-50": isActive,
+                    "bg-white text-neutral-900": !isActive,
+                    "flex-col sm:flex-row gap-y-1 sm:gap-y-0": isFooter,
+                    "justify-center": !showLabel,
+                  },
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon
+                    name={item.iconName}
+                    className={cn("size-6", {
+                      "text-primary-700": isActive,
+                    })}
+                  />
+                  <span
+                    className={cn(
+                      "line-clamp-1 overflow-hidden truncate whitespace-nowrap capitalize",
+                      {
+                        "sr-only": !showLabel,
+                      },
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                  {showBadge && (
+                    <span className="absolute right-2 top-2 size-2 rounded-full bg-red-500" />
                   )}
-                >
-                  {item.label}
-                </span>
-                {showBadge && (
-                  <span className="absolute right-2 top-2 size-2 rounded-full bg-red-500" />
-                )}
-              </>
-            )}
-          </NavLink>
+                </>
+              )}
+            </NavLink>
+          </div>
         </TooltipTrigger>
         <TooltipContent
           side="right"

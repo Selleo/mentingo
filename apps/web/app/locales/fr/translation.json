@@ -1103,6 +1103,7 @@
     "notifications": "Centre de notifications",
     "promotionCodes": "Codes promotionnels",
     "manage": "Gérer",
+    "skipToContent": "Aller au contenu",
     "ariaLabels": {
       "goToAvailableCourses": "Aller aux cours disponibles",
       "collapseSidebar": "Réduire la barre latérale",
