@@ -47,6 +47,10 @@ test("managing admin can update tenant details", async ({ cleanup, factories, wi
           host: updatedHost,
           status: "inactive",
         });
+
+      await openTenantPageFlow(page, tenant.id);
+      await expect(page.getByTestId(TENANT_FORM_HANDLES.NAME_INPUT)).toHaveValue(updatedName);
+      await expect(page.getByTestId(TENANT_FORM_HANDLES.HOST_INPUT)).toHaveValue(updatedHost);
     },
     { root: true },
   );
@@ -77,9 +81,12 @@ test("managing admin cannot submit invalid tenant updates", async ({
       await expect(page).toHaveURL(new RegExp(`/super-admin/tenants/${tenant.id}$`));
       await expect(page.getByTestId(TENANT_PAGE_HANDLES.PAGE)).toBeVisible();
 
-      const persistedTenant = await tenantFactory.getById(tenant.id);
-      expect(persistedTenant.name).toBe(tenant.name);
-      expect(persistedTenant.host).toBe(tenant.host);
+      await expect
+        .poll(async () => {
+          const persistedTenant = await tenantFactory.getById(tenant.id);
+          return { name: persistedTenant.name, host: persistedTenant.host };
+        })
+        .toEqual({ name: tenant.name, host: tenant.host });
     },
     { root: true },
   );

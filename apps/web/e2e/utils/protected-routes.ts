@@ -2,6 +2,9 @@ import { getRouteLeaves } from "../../routeInventory";
 
 const PLACEHOLDER_ROUTE_PARAM = "00000000-0000-4000-8000-000000000001";
 
+/** The route pattern of a protected route path, with params written as `:id`. */
+export const toRoutePattern = (path: string) => path.replaceAll(PLACEHOLDER_ROUTE_PARAM, ":id");
+
 export const protectedRoutes = getRouteLeaves().flatMap(
   ({ path, requiresSession, requirement }) => {
     if (!requirement) return [];

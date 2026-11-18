@@ -99,7 +99,11 @@ export function SettingsNavigationTabs({
     >
       {header}
 
-      <div id="settings-tabs" className="overflow-x-auto border-b">
+      <div
+        id="settings-tabs"
+        data-testid={SETTINGS_PAGE_HANDLES.TABS}
+        className="overflow-x-auto border-b"
+      >
         <TabsList className="h-auto min-w-max justify-start gap-2 rounded-none bg-transparent p-0">
           {allTabs.map(({ value, label, icon: Icon }) => (
             <TabsTrigger

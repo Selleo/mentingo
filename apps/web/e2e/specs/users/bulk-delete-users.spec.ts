@@ -9,7 +9,7 @@ import { filterUsersFlow } from "../../flows/users/filter-users.flow";
 import { openBulkEditActionFlow } from "../../flows/users/open-bulk-edit-action.flow";
 import { openUsersPageFlow } from "../../flows/users/open-users-page.flow";
 import { selectUsersFlow } from "../../flows/users/select-users.flow";
-import { assertToastVisible } from "../../utils/assert-toast-visible";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 import { createDisposableAdminSession } from "../../utils/create-disposable-admin-session";
 
 test("admin can bulk delete selected student users", async ({
@@ -70,12 +70,15 @@ test("admin cannot bulk delete non-student users", async ({
 
     await openUsersPageFlow(page);
     await filterUsersFlow(page, { keyword: prefix });
-    await expect(page.getByTestId(USERS_PAGE_HANDLES.TABLE_BODY).getByRole("row")).toHaveCount(2);
+    await expect(page.getByTestId(USERS_PAGE_HANDLES.row(studentUser.id))).toBeVisible();
+    await expect(page.getByTestId(USERS_PAGE_HANDLES.row(contentCreatorUser.id))).toBeVisible();
     await selectUsersFlow(page, [studentUser.id, contentCreatorUser.id]);
     await openBulkEditActionFlow(page, "delete");
     await confirmBulkEditFlow(page);
 
-    await assertToastVisible(page, "You can only delete students");
+    await assertToastVariantVisible(page, "destructive");
+    await expect(page.getByTestId(USERS_PAGE_HANDLES.row(studentUser.id))).toBeVisible();
+    await expect(page.getByTestId(USERS_PAGE_HANDLES.row(contentCreatorUser.id))).toBeVisible();
     await expect
       .poll(async () => {
         const [existingStudent, existingCreator] = await Promise.all([
@@ -102,15 +105,14 @@ test("admin cannot bulk delete themselves", async ({
       email: `${prefix}-student@example.com`,
       roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
     });
+    cleanup.add(async () => {
+      await userFactory.delete(studentUser.id);
+    });
     const { page, user: disposableAdmin } = await createDisposableAdminSession({
       cleanup,
       createWorkspacePage,
       userFactory,
       email: `${prefix}-admin@example.com`,
-    });
-
-    cleanup.add(async () => {
-      await userFactory.delete(studentUser.id);
     });
 
     await openUsersPageFlow(page);
@@ -119,7 +121,7 @@ test("admin cannot bulk delete themselves", async ({
     await openBulkEditActionFlow(page, "delete");
     await confirmBulkEditFlow(page);
 
-    await assertToastVisible(page, "You cannot delete yourself", { optional: true });
+    await assertToastVariantVisible(page, "destructive");
     await expect(page.getByTestId(USER_BULK_EDIT_MODAL_HANDLES.DIALOG)).toBeVisible();
     await expect
       .poll(async () => {

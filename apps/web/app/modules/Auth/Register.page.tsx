@@ -148,6 +148,7 @@ export default function RegisterPage() {
   if (inviteOnlyRegistration) {
     return (
       <ErrorPage
+        testId={REGISTER_PAGE_HANDLES.INVITE_ONLY}
         title={t("inviteOnlyRegistrationView.toast.registerRedirect")}
         actionLabel={t("registerView.button.signIn")}
         actionIcon="ArrowRight"

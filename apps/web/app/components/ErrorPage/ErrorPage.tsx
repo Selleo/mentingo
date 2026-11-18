@@ -1,5 +1,6 @@
 import { Link } from "@remix-run/react";
 
+import { errorPageActionTestId } from "../../../e2e/data/common/handles";
 import { cn } from "../../lib/utils";
 import { Icon } from "../Icon";
 import { Button } from "../ui/button";
@@ -17,6 +18,7 @@ type ErrorPageProps = {
   actionIcon?: IconName;
   className?: string;
   children?: React.ReactNode;
+  testId?: string;
 };
 
 export default function ErrorPage({
@@ -30,9 +32,11 @@ export default function ErrorPage({
   actionIcon,
   className,
   children,
+  testId,
 }: ErrorPageProps) {
   return (
     <div
+      data-testid={testId}
       className={cn(
         "relative flex min-h-screen w-full items-center justify-center bg-primary-50 px-4 py-10",
         className,
@@ -54,12 +58,20 @@ export default function ErrorPage({
         {showAction && (
           <div className="mt-8">
             {onAction ? (
-              <Button onClick={onAction} className="gap-2">
+              <Button
+                onClick={onAction}
+                className="gap-2"
+                data-testid={testId && errorPageActionTestId(testId)}
+              >
                 {actionLabel}
                 {actionIcon && <Icon name={actionIcon} className="size-4" aria-hidden="true" />}
               </Button>
             ) : (
-              <Link to={to ?? "/"} prefetch="intent">
+              <Link
+                to={to ?? "/"}
+                prefetch="intent"
+                data-testid={testId && errorPageActionTestId(testId)}
+              >
                 <Button className="gap-2">
                   {actionLabel}
                   {actionIcon && <Icon name={actionIcon} className="size-4" aria-hidden="true" />}

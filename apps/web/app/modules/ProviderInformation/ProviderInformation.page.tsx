@@ -9,6 +9,7 @@ import { Button } from "~/components/ui/button";
 import { usePermissions } from "~/hooks/usePermissions";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { PROVIDER_INFORMATION_PAGE_HANDLES } from "../../../e2e/data/navigation/handles";
 import Loader from "../common/Loader/Loader";
 import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
 import { studentProviderInformationSteps } from "../Onboarding/routes/student";
@@ -86,7 +87,11 @@ export default function ProviderInformationPage() {
     >
       <div className="flex flex-col items-center gap-6">
         <section className="flex w-full max-w-[720px] justify-between">
-          <h2 id="provider-information" className="h5 md:h3 text-neutral-950">
+          <h2
+            id="provider-information"
+            data-testid={PROVIDER_INFORMATION_PAGE_HANDLES.HEADING}
+            className="h5 md:h3 text-neutral-950"
+          >
             {t("providerInformation.title")}
           </h2>
           {canManageSettings && (

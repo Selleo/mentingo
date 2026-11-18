@@ -1,6 +1,10 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { CREATE_GROUP_PAGE_HANDLES, GROUPS_PAGE_HANDLES } from "../../data/groups/handles";
+import {
+  CREATE_GROUP_PAGE_HANDLES,
+  GROUP_FORM_HANDLES,
+  GROUPS_PAGE_HANDLES,
+} from "../../data/groups/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { cancelGroupFormFlow } from "../../flows/groups/cancel-group-form.flow";
 import { fillGroupFormFlow } from "../../flows/groups/fill-group-form.flow";
@@ -17,27 +21,23 @@ test("admin can create a group from the create page", async ({
     const name = `create-group-${Date.now()}`;
     const characteristic = `Characteristic for ${name}`;
 
+    cleanup.add(async () => {
+      const createdGroup = await groupFactory.findByName(name);
+
+      if (createdGroup) await groupFactory.delete(createdGroup.id);
+    });
+
     await openCreateGroupPageFlow(page);
     await fillGroupFormFlow(page, { name, characteristic });
     await submitGroupFormFlow(page);
 
-    await expect
-      .poll(async () => {
-        const createdGroup = await groupFactory.findByName(name);
-        return createdGroup?.id ?? null;
-      })
-      .not.toBeNull();
-
+    await expect(page).toHaveURL(/\/admin\/groups$/);
+    await expect.poll(async () => (await groupFactory.findByName(name))?.id).toBeTruthy();
     const createdGroup = await groupFactory.findByName(name);
 
-    cleanup.add(async () => {
-      if (createdGroup) {
-        await groupFactory.delete(createdGroup.id);
-      }
-    });
+    if (!createdGroup) throw new Error(`Expected group ${name} to exist`);
 
-    await expect(page).toHaveURL(/\/admin\/groups$/);
-    await expect(page.getByTestId(GROUPS_PAGE_HANDLES.row(createdGroup!.id))).toBeVisible();
+    await expect(page.getByTestId(GROUPS_PAGE_HANDLES.row(createdGroup.id))).toBeVisible();
   });
 });
 
@@ -51,8 +51,8 @@ test("admin cannot submit invalid group data", async ({ withWorkerPage }) => {
     await submitGroupFormFlow(page);
 
     await expect(page).toHaveURL(/\/admin\/groups\/new$/);
-    await expect(page.getByText("Name must be at least 2 characters.")).toBeVisible();
-    await expect(page.getByText("Name cannot be longer than 1024 characters.")).toBeVisible();
+    await expect(page.getByTestId(GROUP_FORM_HANDLES.NAME_ERROR)).toBeVisible();
+    await expect(page.getByTestId(GROUP_FORM_HANDLES.CHARACTERISTIC_ERROR)).toBeVisible();
     await expect(page.getByTestId(CREATE_GROUP_PAGE_HANDLES.PAGE)).toBeVisible();
   });
 });
@@ -74,6 +74,6 @@ test("admin can cancel group creation without persisting data", async ({
 
     await expect(page).toHaveURL(/\/admin\/groups$/);
     await expect(page.getByTestId(GROUPS_PAGE_HANDLES.PAGE)).toBeVisible();
-    await expect(await groupFactory.findByName(name)).toBeNull();
+    await expect.poll(() => groupFactory.findByName(name)).toBeNull();
   });
 });

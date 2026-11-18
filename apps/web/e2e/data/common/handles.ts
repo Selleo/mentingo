@@ -5,6 +5,9 @@ export const TOAST_HANDLES = {
   DESCRIPTION: "toast-description",
 } as const;
 
+/** ErrorPage renders its action button/link with this test id. */
+export const errorPageActionTestId = (testId: string) => `${testId}-action`;
+
 export const RICH_TEXT_HANDLES = {
   ROOT: "rich-text-editor",
   CONTENT: "rich-text-editor-content",

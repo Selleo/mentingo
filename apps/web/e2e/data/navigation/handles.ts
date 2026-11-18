@@ -29,3 +29,7 @@ export const NAVIGATION_HANDLES = {
   ACTIVITY_LOGS_LINK: "navigation-activity-logs-link",
   AI_CONVERSATIONS_LINK: "navigation-ai-conversations-link",
 };
+
+export const PROVIDER_INFORMATION_PAGE_HANDLES = {
+  HEADING: "provider-information-heading",
+} as const;

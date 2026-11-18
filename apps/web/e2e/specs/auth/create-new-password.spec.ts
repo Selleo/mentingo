@@ -41,21 +41,18 @@ test("visitor can create a password from the invite email", async ({
   const inviteLink = extractLinkFromMailhogMessage(message, "/auth/create-new-password");
 
   const { context, page } = await createWorkspacePage();
+  cleanup.add(() => context.close());
 
-  try {
-    await openCreateNewPasswordPageFlow(page, {
-      email,
-      resetToken: new URL(inviteLink).searchParams.get("resetToken") ?? undefined,
-      createToken: new URL(inviteLink).searchParams.get("createToken") ?? undefined,
-    });
+  await openCreateNewPasswordPageFlow(page, {
+    email,
+    resetToken: new URL(inviteLink).searchParams.get("resetToken") ?? undefined,
+    createToken: new URL(inviteLink).searchParams.get("createToken") ?? undefined,
+  });
 
-    await fillCreateNewPasswordFormFlow(page, {
-      newPassword: NEW_PASSWORD,
-    });
-    await submitCreateNewPasswordFormFlow(page);
+  await fillCreateNewPasswordFormFlow(page, {
+    newPassword: NEW_PASSWORD,
+  });
+  await submitCreateNewPasswordFormFlow(page);
 
-    await expect(page).toHaveURL("/dashboard");
-  } finally {
-    await context.close();
-  }
+  await expect(page).toHaveURL("/dashboard");
 });

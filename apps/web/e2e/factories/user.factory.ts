@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
+import { TEST_PASSWORD } from "../data/test-data/credentials.data";
 import { TEST_DATA } from "../data/test-data/entity-name.data";
 
 import type { FixtureApiClient } from "../utils/api-client";
@@ -38,7 +39,7 @@ export class UserFactory {
 
   async register(input: UserFactoryRegisterInput = {}): Promise<UserFactoryRecord> {
     const defaults = createUserDefaults();
-    const password = input.password ?? "Password123@";
+    const password = input.password ?? TEST_PASSWORD;
     const language: RegisterBody["language"] = input.language ?? "en";
 
     const response = await this.apiClient.api.authControllerRegister({

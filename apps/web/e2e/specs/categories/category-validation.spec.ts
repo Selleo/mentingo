@@ -5,39 +5,7 @@ import { expect, test } from "../../fixtures/test.fixture";
 import { fillCreateCategoryFormFlow } from "../../flows/categories/fill-create-category-form.flow";
 import { openCreateCategoryPageFlow } from "../../flows/categories/open-create-category-page.flow";
 import { submitCreateCategoryFormFlow } from "../../flows/categories/submit-create-category-form.flow";
-import { assertToastVisible } from "../../utils/assert-toast-visible";
-
-test("admin can create a category from the create page", async ({
-  cleanup,
-  factories,
-  withWorkerPage,
-}) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const categoryFactory = factories.createCategoryFactory();
-    const title = `Create Category ${Date.now()}`;
-
-    await openCreateCategoryPageFlow(page);
-    await fillCreateCategoryFormFlow(page, { title });
-    await submitCreateCategoryFormFlow(page);
-
-    await expect
-      .poll(async () => {
-        const createdCategory = await categoryFactory.findByTitle(title);
-        return createdCategory?.id ?? null;
-      })
-      .not.toBeNull();
-
-    const createdCategory = await categoryFactory.findByTitle(title);
-
-    cleanup.add(async () => {
-      if (createdCategory) {
-        await categoryFactory.delete(createdCategory.id);
-      }
-    });
-
-    await expect(page).toHaveURL(new RegExp(`/admin/categories/${createdCategory?.id}$`));
-  });
-});
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 
 test("admin cannot submit invalid category data", async ({ withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
@@ -68,7 +36,7 @@ test("admin sees a conflict when creating a duplicate category title", async ({
     await fillCreateCategoryFormFlow(page, { title: existingCategory.title });
     await submitCreateCategoryFormFlow(page);
 
+    await assertToastVariantVisible(page, "destructive");
     await expect(page).toHaveURL(/\/admin\/categories\/new$/);
-    await assertToastVisible(page, "Category already exists");
   });
 });

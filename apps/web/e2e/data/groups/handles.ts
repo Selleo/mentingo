@@ -21,7 +21,9 @@ export const GROUPS_PAGE_HANDLES = {
 
 export const GROUP_FORM_HANDLES = {
   NAME_INPUT: "group-form-name-input",
+  NAME_ERROR: "group-form-name-error",
   CHARACTERISTIC_INPUT: "group-form-characteristic-input",
+  CHARACTERISTIC_ERROR: "group-form-characteristic-error",
   LANGUAGE_SELECT: "group-form-language-select",
   CANCEL_BUTTON: "group-form-cancel-button",
   SUBMIT_BUTTON: "group-form-submit-button",

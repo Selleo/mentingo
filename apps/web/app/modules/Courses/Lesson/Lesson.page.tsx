@@ -22,6 +22,8 @@ import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { CONTENT_ACCESS_HANDLES } from "../../../../e2e/data/auth/handles";
+
 import type { MetaFunction } from "@remix-run/react";
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -103,6 +105,7 @@ export default function LessonPage() {
     if (!user) {
       return (
         <ErrorPage
+          testId={CONTENT_ACCESS_HANDLES.LESSON_LOGIN_REQUIRED}
           iconName="LogIn"
           title={t("studentLessonView.error.loginTitle")}
           description={t("studentLessonView.error.loginDescription")}
@@ -115,6 +118,7 @@ export default function LessonPage() {
 
     return (
       <ErrorPage
+        testId={CONTENT_ACCESS_HANDLES.LESSON_NOT_AUTHORIZED}
         title={t("studentLessonView.error.notAuthorizedTitle")}
         description={t("studentLessonView.error.notAuthorizedDescription")}
         actionLabel={t("studentLessonView.error.goBackToCourse")}

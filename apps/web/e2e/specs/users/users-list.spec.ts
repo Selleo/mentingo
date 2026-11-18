@@ -37,6 +37,7 @@ test("admin can browse, filter, sort, paginate, select, and open user details", 
     await Promise.all(users.map((user) => userFactory.update(user.id, { groups: [group.id] })));
 
     await openUsersPageFlow(page);
+    await expect(page.getByTestId(USERS_PAGE_HANDLES.BULK_EDIT_TRIGGER)).toBeDisabled();
     await filterUsersFlow(page, { groupIds: [group.id] });
 
     const visibleRows = page.getByTestId(USERS_PAGE_HANDLES.TABLE_BODY).getByRole("row");
