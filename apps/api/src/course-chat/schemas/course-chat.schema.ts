@@ -38,6 +38,7 @@ export const courseChatMessageSchema = Type.Composite([
     replyCount: Type.Number(),
     latestReply: Type.Union([courseChatMessagePreviewSchema, Type.Null()]),
     replyParticipants: Type.Array(userSchema),
+    isFollowing: Type.Boolean(),
   }),
 ]);
 
@@ -73,6 +74,11 @@ export const deleteCourseChatMessageResponseSchema = Type.Object({
   deletedAt: Type.Union([Type.String(), Type.Null()]),
 });
 
+export const courseChatThreadFollowingSchema = Type.Object({
+  messageId: UUIDSchema,
+  isFollowing: Type.Boolean(),
+});
+
 export const courseChatPaginationQuerySchema = Type.Optional(Type.Number({ minimum: 1 }));
 
 export const courseChatMessagesResponseSchema = Type.Array(courseChatMessageSchema);
@@ -86,6 +92,7 @@ export type CourseChatMessageReactionsUpdatedResponse = Static<
   typeof courseChatMessageReactionsUpdatedSchema
 >;
 export type DeleteCourseChatMessageResponse = Static<typeof deleteCourseChatMessageResponseSchema>;
+export type CourseChatThreadFollowingResponse = Static<typeof courseChatThreadFollowingSchema>;
 export type CourseChatUserResponse = Static<typeof courseChatUserSchema>;
 export type CreateCourseChatMessageBody = Static<typeof createCourseChatMessageSchema>;
 export type ToggleCourseChatMessageReactionBody = Static<

@@ -24,7 +24,8 @@ For HR and L&D teams, discussions add peer learning and course-specific collabor
 - Show online presence for course discussion participants.
 - Soft-delete messages and preserve deleted placeholders when replies remain.
 - Broadcast new messages, replies, reactions, deletions, mentions, and presence updates in realtime.
-- Notify the thread author and earlier repliers when someone replies, in the application and by a grouped email; both open that thread.
+- Notify the people who follow a thread when someone replies, in the application and by a grouped email; both open that thread. The author and the repliers follow it automatically.
+- Follow or stop following a thread with the button under it.
 - Follow the discussion from the organization-wide forum, which shows it as one entry per enrolled course when the forum is enabled.
 
 ## End-User Value
@@ -39,7 +40,7 @@ When course discussions are enabled, enrolled learners with discussion access se
 
 Learners can post a thread or open a thread to reply. Mentions are limited to users enrolled in the same course. Reactions and deletions are broadcast to other open course discussion sessions so the page updates without a full reload.
 
-When someone replies in a thread, its author and the learners who replied earlier get a notification in the application, unless they wrote the reply themselves, were mentioned in it, or are no longer enrolled. Opening the notification shows the course's Discussion tab on the page that holds the thread, with the thread open. The same link format, `?tab=Discussion`, is used by the mention e-mail and now opens the tab as well.
+When someone replies in a thread, the learners who follow it get a notification in the application, unless they wrote the reply themselves, were mentioned in it, are no longer enrolled, or turned these notifications off in their account settings. The author of a thread and everyone who replies in it follow it automatically; the button under the thread lets any enrolled learner follow it or stop following. Opening the notification shows the course's Discussion tab on the page that holds the thread, with the thread open. The same link format, `?tab=Discussion`, is used by the mention e-mail and now opens the tab as well.
 
 Discussion APIs are feature-gated and permission-gated. Reading, posting, reacting, deleting, and joining realtime rooms all check course access so users cannot participate in discussions for courses they are not allowed to access.
 

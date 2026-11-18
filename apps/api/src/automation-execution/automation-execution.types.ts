@@ -5,6 +5,7 @@ import type {
   AutomationStepTrace,
   AutomationPlaceholderValue,
   AutomationRunStatus,
+  AutomationDefinitionKind,
   AutomationEventKind,
   AutomationPlaceholderMappings,
   AutomationRecipientSelection,
@@ -92,6 +93,15 @@ export type DefaultAutomationTranslationUpdate = Omit<
   DefaultAutomationTranslations,
   "id" | "builtInKey"
 >;
+
+export type BuiltInTemplateEmailStep = {
+  id: UUIDType;
+  automationId: UUIDType;
+  definitionKind: AutomationDefinitionKind;
+  templateKey: string;
+  mappings: AutomationPlaceholderMappings;
+  triggerEventKind: string | null;
+};
 
 export type PublishedDefaultCustomization = Pick<
   typeof emailTemplates.$inferSelect,

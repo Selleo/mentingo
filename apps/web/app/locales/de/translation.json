@@ -5611,7 +5611,8 @@
     "learningPaths": "Entwicklungspfade",
     "adminLearningPaths": "Entwicklungspfade",
     "adminLearningPathEditor": "Entwicklungspfad Editor",
-    "gamification": "Gamification"
+    "gamification": "Gamification",
+    "notificationUnsubscribe": "Benachrichtigungseinstellungen"
   },
   "courseDuplication": {
     "error": {
@@ -8188,7 +8189,9 @@
       "replyCount": "Anzahl neuer Antworten",
       "replyAuthors": "Autoren der Antworten",
       "latestReply": "Letzte Antwort",
-      "discussionUrl": "Link zur Diskussion"
+      "discussionUrl": "Link zur Diskussion",
+      "unsubscribeUrl": "Abmeldelink",
+      "unfollowUrl": "Link zum Entfolgen"
     },
     "simulation": {
       "title": "Simulationsergebnis",
@@ -9889,6 +9892,54 @@
       "emptyTitle": "Geben Sie einen Titel ein.",
       "emptyContent": "Geben Sie eine Nachricht ein.",
       "invalidReaction": "Wähle eine der verfügbaren Reaktionen."
+    }
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Benachrichtigungen zu Diskussionen",
+      "saving": "Wird gespeichert…",
+      "replyInApp": {
+        "label": "Antworten – in der Anwendung",
+        "description": "Eine Benachrichtigung anzeigen, wenn jemand in einer Diskussion antwortet, der du folgst."
+      },
+      "replyEmails": {
+        "label": "Antworten – per E-Mail",
+        "description": "Eine E-Mail mit den neuen Antworten in einer Diskussion senden, der du folgst."
+      },
+      "mentionEmails": {
+        "label": "Erwähnungen – per E-Mail",
+        "description": "Eine E-Mail senden, wenn dich jemand in einer Diskussion erwähnt."
+      },
+      "toast": {
+        "saved": "Benachrichtigungseinstellungen gespeichert.",
+        "error": "Die Benachrichtigungseinstellungen konnten nicht gespeichert werden."
+      }
+    },
+    "following": {
+      "follow": "Folgen",
+      "following": "Du folgst",
+      "followHint": "Benachrichtigungen über neue Antworten in dieser Diskussion erhalten.",
+      "unfollowHint": "Benachrichtigungen über neue Antworten in dieser Diskussion beenden.",
+      "toast": {
+        "followed": "Du folgst dieser Diskussion.",
+        "unfollowed": "Du folgst dieser Diskussion nicht mehr.",
+        "error": "Das Folgen konnte nicht geändert werden."
+      }
+    },
+    "unsubscribe": {
+      "title": "Benachrichtigungen zu Diskussionen",
+      "confirmDescription": "Bestätige, dass du diese Benachrichtigungen deaktivieren möchtest.",
+      "confirm": "Bestätigen",
+      "invalidLink": "Dieser Link ist ungültig oder abgelaufen.",
+      "manageInSettings": "Benachrichtigungen in den Einstellungen verwalten",
+      "done": {
+        "replies": "Du erhältst keine E-Mails mehr über Antworten in Diskussionen.",
+        "mentions": "Du erhältst keine E-Mails mehr über Erwähnungen.",
+        "thread": "Du folgst dieser Diskussion nicht mehr."
+      }
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "Dieser Link ist ungültig oder abgelaufen."
     }
   }
 }

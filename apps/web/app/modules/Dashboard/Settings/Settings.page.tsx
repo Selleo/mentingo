@@ -112,6 +112,9 @@ export default function SettingsPage() {
                 canManageCourses={canManageCourses}
                 canResetOnboarding={canUpdateLearningProgress}
                 canManageUsers={canManageUsers}
+                hasDiscussions={Boolean(
+                  globalSettings?.forumEnabled || globalSettings?.courseDiscussionsEnabled,
+                )}
                 settings={isUserSettings(userSettings) ? userSettings : { language: "en" }}
               />
             )

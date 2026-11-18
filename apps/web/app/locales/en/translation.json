@@ -5631,7 +5631,8 @@
     "learningPaths": "Development Paths",
     "adminLearningPaths": "Development Paths",
     "adminLearningPathEditor": "Development Path Editor",
-    "gamification": "Gamification"
+    "gamification": "Gamification",
+    "notificationUnsubscribe": "Notification settings"
   },
   "learningPathsView": {
     "hero": {
@@ -8449,7 +8450,9 @@
       "replyCount": "Number of new replies",
       "replyAuthors": "Reply authors",
       "latestReply": "Latest reply",
-      "discussionUrl": "Discussion link"
+      "discussionUrl": "Discussion link",
+      "unsubscribeUrl": "Unsubscribe link",
+      "unfollowUrl": "Stop following link"
     },
     "simulation": {
       "title": "Simulation Result",
@@ -9931,6 +9934,54 @@
       "emptyTitle": "Enter a title.",
       "emptyContent": "Enter a message.",
       "invalidReaction": "Choose one of the available reactions."
+    }
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Discussion notifications",
+      "saving": "Saving…",
+      "replyInApp": {
+        "label": "Replies – in the application",
+        "description": "Show a notification when someone replies in a discussion you follow."
+      },
+      "replyEmails": {
+        "label": "Replies – by email",
+        "description": "Send one email with the new replies in a discussion you follow."
+      },
+      "mentionEmails": {
+        "label": "Mentions – by email",
+        "description": "Send an email when someone mentions you in a discussion."
+      },
+      "toast": {
+        "saved": "Notification settings saved.",
+        "error": "Could not save the notification settings."
+      }
+    },
+    "following": {
+      "follow": "Follow",
+      "following": "Following",
+      "followHint": "Get notified about new replies in this discussion.",
+      "unfollowHint": "Stop notifications about new replies in this discussion.",
+      "toast": {
+        "followed": "You follow this discussion.",
+        "unfollowed": "You no longer follow this discussion.",
+        "error": "Could not change following."
+      }
+    },
+    "unsubscribe": {
+      "title": "Discussion notifications",
+      "confirmDescription": "Confirm that you want to turn these notifications off.",
+      "confirm": "Confirm",
+      "invalidLink": "This link is invalid or has expired.",
+      "manageInSettings": "Manage notifications in settings",
+      "done": {
+        "replies": "You will no longer get emails about replies in discussions.",
+        "mentions": "You will no longer get emails about mentions.",
+        "thread": "You no longer follow this discussion."
+      }
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "This link is invalid or has expired."
     }
   }
 }

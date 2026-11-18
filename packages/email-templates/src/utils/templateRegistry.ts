@@ -7,13 +7,14 @@ import {
   EMAIL_TEMPLATE_BLOCK_TYPES,
   EMAIL_TEMPLATE_HEADER_SOURCES,
   EMAIL_TEMPLATE_DOCUMENT_VERSION,
+  EMAIL_TEMPLATE_INLINE_MARK_TYPES,
   type CreateEmailTemplateDefinitionInput,
   type EmailTemplateDefinition,
   type EmailTemplateDocument,
   type EmailTemplateVariableDefinition,
   type LocalizedEmailValue,
 } from "../template-registry.types";
-import type { EmailContent } from "../types";
+import type { EmailContent, EmailContentLink } from "../types";
 
 export const buildLocalizedValuesForSupportedLanguages = <T>(
   factory: (language: SupportedLanguages) => T,
@@ -50,6 +51,17 @@ const createParagraphNode = (text: string) => ({
   content: text ? [{ type: "text" as const, text }] : undefined,
 });
 
+const createLinkParagraphNode = ({ text, url }: EmailContentLink) => ({
+  type: "paragraph" as const,
+  content: [
+    {
+      type: "text" as const,
+      text,
+      marks: [{ type: EMAIL_TEMPLATE_INLINE_MARK_TYPES.LINK, attrs: { href: url } }],
+    },
+  ],
+});
+
 export const createDocumentFromEmailContent = (
   content: EmailContent,
   buttonUrl: string,
@@ -73,6 +85,14 @@ export const createDocumentFromEmailContent = (
       type: EMAIL_TEMPLATE_BLOCK_TYPES.BUTTON,
       attrs: { label: content.buttonText, url: buttonUrl },
     },
+    ...(content.links?.length
+      ? [
+          {
+            type: EMAIL_TEMPLATE_BLOCK_TYPES.TEXT,
+            content: content.links.map(createLinkParagraphNode),
+          },
+        ]
+      : []),
     {
       type: EMAIL_TEMPLATE_BLOCK_TYPES.FOOTER,
       attrs: { text: "Powered by {{ company_name }}" },

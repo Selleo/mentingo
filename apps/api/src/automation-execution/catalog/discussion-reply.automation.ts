@@ -41,5 +41,7 @@ export const discussionReplyAutomation: BuiltInAutomationDefinition = {
     reply_authors: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "reply_authors" },
     latest_reply: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "latest_reply" },
     discussion_link: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "discussion_link" },
+    unfollow_link: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "unfollow_link" },
+    unsubscribe_link: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "unsubscribe_link" },
   },
 };

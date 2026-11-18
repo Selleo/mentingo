@@ -115,6 +115,7 @@ export const routeAccessConfig = createRouteConfig({
   "auth/mfa": PUBLIC,
   "auth/change-password": PUBLIC,
   "tenant-inactive": PUBLIC,
+  "notifications/unsubscribe": PUBLIC,
   "oauth/connect": PUBLIC,
 
   "helpdesk/tutorials/:key": AUTHENTICATED_USER_ACCESS,

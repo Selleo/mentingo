@@ -14,6 +14,7 @@ import { UserNotificationsCreatedEvent } from "src/events/announcement/user-noti
 import { ForumRepository } from "src/forum/forum.repository";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 
+import type { UUIDType } from "src/common";
 import type {
   DiscussionRecipientFilter,
   DiscussionReply,
@@ -30,20 +31,55 @@ export class DiscussionReplyNotificationService {
 
   async notifyParticipants(reply: DiscussionReply, filterRecipients: DiscussionRecipientFilter) {
     const notNotified = new Set([...reply.mentionedUserIds, reply.actorUserId]);
-    const participantIds = await this.discussionNotificationsRepository.findEarlierParticipantIds(
+    const followerIds = await this.discussionNotificationsRepository.findFollowerIds(
       reply.threadId,
       reply.replyId,
     );
     const recipientIds = await filterRecipients(
-      participantIds.filter((participantId) => !notNotified.has(participantId)),
+      followerIds.filter((followerId) => !notNotified.has(followerId)),
     );
+    const preferences =
+      await this.discussionNotificationsRepository.findReplyPreferences(recipientIds);
+    const inAppRecipientIds = preferences
+      .filter(({ inAppEnabled }) => inAppEnabled)
+      .map(({ userId }) => userId);
+    const emailRecipients = preferences.filter(({ emailsEnabled }) => emailsEnabled);
 
-    if (!recipientIds.length) return;
+    if (!inAppRecipientIds.length && !emailRecipients.length) return;
 
     const actorFullName = await this.forumRepository.findUserFullName(reply.actorUserId);
 
     if (!actorFullName) return;
 
+    const announcementId = inAppRecipientIds.length
+      ? await this.createReplyAnnouncement(reply, actorFullName, inAppRecipientIds)
+      : null;
+    const sendAfter = addMinutes(new Date(), DISCUSSION_REPLY_DIGEST_DELAY_MINUTES).toISOString();
+    const queueEmails = (inAppEnabled: boolean) =>
+      this.discussionNotificationsRepository.queueReplyDigests({
+        userIds: emailRecipients
+          .filter((recipient) => recipient.inAppEnabled === inAppEnabled)
+          .map(({ userId }) => userId),
+        threadId: reply.threadId,
+        reply: { replyId: reply.replyId, announcementId: inAppEnabled ? announcementId : null },
+        sendAfter,
+      });
+
+    await queueEmails(true);
+    await queueEmails(false);
+
+    if (inAppRecipientIds.length) {
+      await this.outboxPublisher.publish(
+        new UserNotificationsCreatedEvent({ userIds: inAppRecipientIds }),
+      );
+    }
+  }
+
+  private async createReplyAnnouncement(
+    reply: DiscussionReply,
+    actorFullName: string,
+    recipientIds: UUIDType[],
+  ) {
     const announcement = await this.announcementsRepository.createAnnouncement({
       groupId: null,
       title: getLocalizedDiscussionReplyTitleAnnouncement(actorFullName),
@@ -62,14 +98,6 @@ export class DiscussionReplyNotificationService {
       usersToNotify: recipientIds,
     });
 
-    await this.discussionNotificationsRepository.queueReplyDigests({
-      userIds: recipientIds,
-      threadId: reply.threadId,
-      reply: { replyId: reply.replyId, announcementId: announcement.id },
-      sendAfter: addMinutes(new Date(), DISCUSSION_REPLY_DIGEST_DELAY_MINUTES).toISOString(),
-    });
-    await this.outboxPublisher.publish(
-      new UserNotificationsCreatedEvent({ userIds: recipientIds }),
-    );
+    return announcement.id;
   }
 }

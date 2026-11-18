@@ -5929,7 +5929,8 @@
     "tenant": "Szczegóły organizacji",
     "createTenant": "Utwórz organizację",
     "tenants": "Organizacje",
-    "gamification": "Grywalizacja"
+    "gamification": "Grywalizacja",
+    "notificationUnsubscribe": "Ustawienia powiadomień"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -8273,7 +8274,9 @@
       "replyCount": "Liczba nowych odpowiedzi",
       "replyAuthors": "Autorzy odpowiedzi",
       "latestReply": "Ostatnia odpowiedź",
-      "discussionUrl": "Link do dyskusji"
+      "discussionUrl": "Link do dyskusji",
+      "unsubscribeUrl": "Link wypisania",
+      "unfollowUrl": "Link do zakończenia obserwowania"
     },
     "simulation": {
       "title": "Wynik symulacji",
@@ -10044,6 +10047,54 @@
       "emptyTitle": "Wpisz tytuł.",
       "emptyContent": "Wpisz wiadomość.",
       "invalidReaction": "Wybierz jedną z dostępnych reakcji."
+    }
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Powiadomienia o dyskusjach",
+      "saving": "Zapisywanie…",
+      "replyInApp": {
+        "label": "Odpowiedzi – w aplikacji",
+        "description": "Pokazuj powiadomienie, gdy ktoś odpowie w obserwowanej dyskusji."
+      },
+      "replyEmails": {
+        "label": "Odpowiedzi – e-mailem",
+        "description": "Wysyłaj jeden e-mail z nowymi odpowiedziami w obserwowanej dyskusji."
+      },
+      "mentionEmails": {
+        "label": "Wzmianki – e-mailem",
+        "description": "Wysyłaj e-mail, gdy ktoś oznaczy Cię w dyskusji."
+      },
+      "toast": {
+        "saved": "Zapisano ustawienia powiadomień.",
+        "error": "Nie udało się zapisać ustawień powiadomień."
+      }
+    },
+    "following": {
+      "follow": "Obserwuj",
+      "following": "Obserwujesz",
+      "followHint": "Otrzymuj powiadomienia o nowych odpowiedziach w tej dyskusji.",
+      "unfollowHint": "Wyłącz powiadomienia o nowych odpowiedziach w tej dyskusji.",
+      "toast": {
+        "followed": "Obserwujesz tę dyskusję.",
+        "unfollowed": "Nie obserwujesz już tej dyskusji.",
+        "error": "Nie udało się zmienić obserwowania."
+      }
+    },
+    "unsubscribe": {
+      "title": "Powiadomienia o dyskusjach",
+      "confirmDescription": "Potwierdź, że chcesz wyłączyć te powiadomienia.",
+      "confirm": "Potwierdź",
+      "invalidLink": "Ten link jest nieprawidłowy lub wygasł.",
+      "manageInSettings": "Zarządzaj powiadomieniami w ustawieniach",
+      "done": {
+        "replies": "Nie będziesz już otrzymywać e-maili o odpowiedziach w dyskusjach.",
+        "mentions": "Nie będziesz już otrzymywać e-maili o wzmiankach.",
+        "thread": "Nie obserwujesz już tej dyskusji."
+      }
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "Ten link jest nieprawidłowy lub wygasł."
     }
   }
 }

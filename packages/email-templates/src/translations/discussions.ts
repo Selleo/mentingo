@@ -1,5 +1,60 @@
 import { SupportedLanguages } from "@repo/shared";
-import { EmailContent } from "types";
+import { EmailContent, EmailContentLink } from "types";
+
+const UNSUBSCRIBE_LINK_TEXTS: Record<
+  SupportedLanguages,
+  { mentions: string; replies: string; thread: string }
+> = {
+  en: {
+    mentions: "Turn off emails about mentions",
+    replies: "Turn off emails about replies",
+    thread: "Stop following this discussion",
+  },
+  pl: {
+    mentions: "Wyłącz e-maile o wzmiankach",
+    replies: "Wyłącz e-maile o odpowiedziach",
+    thread: "Przestań obserwować tę dyskusję",
+  },
+  de: {
+    mentions: "E-Mails über Erwähnungen deaktivieren",
+    replies: "E-Mails über Antworten deaktivieren",
+    thread: "Dieser Diskussion nicht mehr folgen",
+  },
+  lt: {
+    mentions: "Išjungti el. laiškus apie paminėjimus",
+    replies: "Išjungti el. laiškus apie atsakymus",
+    thread: "Nebesekti šios diskusijos",
+  },
+  cs: {
+    mentions: "Vypnout e-maily o zmínkách",
+    replies: "Vypnout e-maily o odpovědích",
+    thread: "Přestat sledovat tuto diskusi",
+  },
+  es: {
+    mentions: "Desactivar los correos sobre menciones",
+    replies: "Desactivar los correos sobre respuestas",
+    thread: "Dejar de seguir esta discusión",
+  },
+  fr: {
+    mentions: "Désactiver les e-mails sur les mentions",
+    replies: "Désactiver les e-mails sur les réponses",
+    thread: "Ne plus suivre cette discussion",
+  },
+};
+
+export const getMentionUnsubscribeEmailLinks = (
+  language: SupportedLanguages,
+  unsubscribeUrl: string,
+): EmailContentLink[] => [{ text: UNSUBSCRIBE_LINK_TEXTS[language].mentions, url: unsubscribeUrl }];
+
+export const getReplyUnsubscribeEmailLinks = (
+  language: SupportedLanguages,
+  unfollowUrl: string,
+  unsubscribeUrl: string,
+): EmailContentLink[] => [
+  { text: UNSUBSCRIBE_LINK_TEXTS[language].thread, url: unfollowUrl },
+  { text: UNSUBSCRIBE_LINK_TEXTS[language].replies, url: unsubscribeUrl },
+];
 
 export const getForumMentionEmailTranslations = (
   language: SupportedLanguages,

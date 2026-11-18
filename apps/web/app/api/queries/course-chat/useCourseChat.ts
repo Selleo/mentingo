@@ -8,3 +8,4 @@ export * from "./useCourseChatUsers";
 export * from "./useCreateCourseChatMessage";
 export * from "./useToggleCourseChatMessageReaction";
 export * from "./useDeleteCourseChatMessage";
+export * from "./useSetCourseChatThreadFollowing";

@@ -659,6 +659,12 @@ export const AUTOMATION_TRIGGER_DEFINITIONS: AutomationTriggerDefinition[] = [
         AUTOMATION_PLACEHOLDER_TYPES.URL,
         "course_link",
       ),
+      variable(
+        "unsubscribeUrl",
+        "automationBuilder.variables.unsubscribeUrl",
+        AUTOMATION_PLACEHOLDER_TYPES.URL,
+        "unsubscribe_link",
+      ),
     ],
   },
   {
@@ -918,6 +924,12 @@ export const AUTOMATION_TRIGGER_DEFINITIONS: AutomationTriggerDefinition[] = [
         AUTOMATION_PLACEHOLDER_TYPES.URL,
         "topic_link",
       ),
+      variable(
+        "unsubscribeUrl",
+        "automationBuilder.variables.unsubscribeUrl",
+        AUTOMATION_PLACEHOLDER_TYPES.URL,
+        "unsubscribe_link",
+      ),
     ],
   },
   {
@@ -966,6 +978,18 @@ export const AUTOMATION_TRIGGER_DEFINITIONS: AutomationTriggerDefinition[] = [
         "automationBuilder.variables.discussionUrl",
         AUTOMATION_PLACEHOLDER_TYPES.URL,
         "discussion_link",
+      ),
+      variable(
+        "unfollowUrl",
+        "automationBuilder.variables.unfollowUrl",
+        AUTOMATION_PLACEHOLDER_TYPES.URL,
+        "unfollow_link",
+      ),
+      variable(
+        "unsubscribeUrl",
+        "automationBuilder.variables.unsubscribeUrl",
+        AUTOMATION_PLACEHOLDER_TYPES.URL,
+        "unsubscribe_link",
       ),
     ],
   },

@@ -237,6 +237,7 @@ export const COURSE_DISCUSSION_HANDLES = {
   message: (messageId: string) => `course-discussion-message-${messageId}`,
   messageContent: (messageId: string) => `course-discussion-message-content-${messageId}`,
   messageReplyAction: (messageId: string) => `course-discussion-message-reply-${messageId}`,
+  threadFollowButton: (messageId: string) => `course-discussion-thread-follow-${messageId}`,
   messageDeleteAction: (messageId: string) => `course-discussion-message-delete-${messageId}`,
   messageReactionAction: (messageId: string, reaction: string) =>
     `course-discussion-message-reaction-action-${messageId}-${reactionHandleValue(reaction)}`,

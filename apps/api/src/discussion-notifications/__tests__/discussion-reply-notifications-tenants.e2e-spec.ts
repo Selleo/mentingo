@@ -9,6 +9,7 @@ import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   courseChatMessages,
   courseChatThreads,
+  discussionThreadFollowers,
   settings,
   tenants,
   userAnnouncements,
@@ -98,6 +99,7 @@ describe("Discussion reply notifications tenant isolation (e2e)", () => {
         .insert(courseChatMessages)
         .values({ threadId: thread.id, userId: authorId, content: "First post" })
         .returning({ id: courseChatMessages.id });
+      await db.insert(discussionThreadFollowers).values({ threadId: thread.id, userId: authorId });
 
       const [reply] = await db
         .insert(courseChatMessages)

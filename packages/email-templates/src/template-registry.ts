@@ -10,6 +10,8 @@ import { getCreatePasswordReminderEmailTranslations } from "./translations/creat
 import {
   getDiscussionReplyEmailTranslations,
   getForumMentionEmailTranslations,
+  getMentionUnsubscribeEmailLinks,
+  getReplyUnsubscribeEmailLinks,
 } from "./translations/discussions";
 import { getFinishedCourseEmailTranslations } from "./translations/finishedCourse";
 import { getLiveTrainingEmailButtonText } from "./translations/liveTrainingEmail";
@@ -512,11 +514,19 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
           required: true,
         },
       ),
+      defineEmailTemplateVariable(
+        "unsubscribe_link",
+        "Unsubscribe link",
+        "url",
+        "https://example.com/notifications/unsubscribe",
+        { required: true },
+      ),
     ],
     getContent: (language) => ({
       heading: "{{ course_name }}",
       paragraphs: ["{{ message }}"],
       buttonText: getLiveTrainingEmailButtonText(language),
+      links: getMentionUnsubscribeEmailLinks(language, "{{ unsubscribe_link }}"),
     }),
     buttonUrl: "{{ course_link }}",
   }),
@@ -607,14 +617,23 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         "https://example.com/forum/topics/onboarding-tips",
         { required: true },
       ),
+      defineEmailTemplateVariable(
+        "unsubscribe_link",
+        "Unsubscribe link",
+        "url",
+        "https://example.com/notifications/unsubscribe",
+        { required: true },
+      ),
     ],
-    getContent: (language) =>
-      getForumMentionEmailTranslations(
+    getContent: (language) => ({
+      ...getForumMentionEmailTranslations(
         language,
         "{{ authorFullName }}",
         "{{ topic_title }}",
         "{{ message }}",
       ),
+      links: getMentionUnsubscribeEmailLinks(language, "{{ unsubscribe_link }}"),
+    }),
     buttonUrl: "{{ topic_link }}",
   }),
   createEmailTemplateDefinition({
@@ -656,15 +675,35 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         "https://example.com/course/leadership?tab=Discussion",
         { required: true },
       ),
+      defineEmailTemplateVariable(
+        "unfollow_link",
+        "Stop following link",
+        "url",
+        "https://example.com/notifications/unsubscribe",
+        { required: true },
+      ),
+      defineEmailTemplateVariable(
+        "unsubscribe_link",
+        "Unsubscribe link",
+        "url",
+        "https://example.com/notifications/unsubscribe",
+        { required: true },
+      ),
     ],
-    getContent: (language) =>
-      getDiscussionReplyEmailTranslations(
+    getContent: (language) => ({
+      ...getDiscussionReplyEmailTranslations(
         language,
         "{{ discussion_name }}",
         "{{ reply_count }}",
         "{{ reply_authors }}",
         "{{ latest_reply }}",
       ),
+      links: getReplyUnsubscribeEmailLinks(
+        language,
+        "{{ unfollow_link }}",
+        "{{ unsubscribe_link }}",
+      ),
+    }),
     buttonUrl: "{{ discussion_link }}",
   }),
   createEmailTemplateDefinition({

@@ -804,6 +804,33 @@
         }
       }
     },
+    "/api/settings/notifications": {
+      "patch": {
+        "operationId": "SettingsController_updateNotificationPreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationPreferencesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateNotificationPreferencesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/dashboard": {
       "get": {
         "operationId": "SettingsController_getDashboardSettings",
@@ -15908,6 +15935,58 @@
         }
       }
     },
+    "/api/course-chat/messages/{messageId}/follow": {
+      "put": {
+        "operationId": "CourseChatController_followThread",
+        "parameters": [
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "CourseChatController_unfollowThread",
+        "parameters": [
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnfollowThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course-chat/messages/{messageId}": {
       "delete": {
         "operationId": "CourseChatController_deleteMessage",
@@ -16203,6 +16282,58 @@
         }
       }
     },
+    "/api/forum/topics/{topicId}/follow": {
+      "put": {
+        "operationId": "ForumController_followTopic",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowTopicResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "ForumController_unfollowTopic",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnfollowTopicResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/forum/topics/{topicId}/posts": {
       "get": {
         "operationId": "ForumController_getTopicPosts",
@@ -16358,6 +16489,33 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeletePostResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/discussion-notifications/unsubscribe": {
+      "post": {
+        "operationId": "DiscussionNotificationsController_unsubscribe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnsubscribeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnsubscribeResponse"
                 }
               }
             }
@@ -29440,6 +29598,15 @@
                   "isMFAEnabled": {
                     "default": false,
                     "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -29484,6 +29651,15 @@
                   },
                   "isMFAEnabled": {
                     "default": false,
+                    "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
                     "type": "boolean"
                   },
                   "adminNewUserNotification": {
@@ -29601,6 +29777,15 @@
                   "isMFAEnabled": {
                     "default": false,
                     "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -29645,6 +29830,163 @@
                   },
                   "isMFAEnabled": {
                     "default": false,
+                    "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
+                    "type": "boolean"
+                  },
+                  "adminNewUserNotification": {
+                    "type": "boolean"
+                  },
+                  "adminFinishedCourseNotification": {
+                    "type": "boolean"
+                  },
+                  "configWarningDismissed": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled",
+                  "adminNewUserNotification",
+                  "adminFinishedCourseNotification",
+                  "configWarningDismissed"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateNotificationPreferencesBody": {
+        "additionalProperties": false,
+        "minProperties": 1,
+        "type": "object",
+        "properties": {
+          "discussionReplyEmails": {
+            "type": "boolean"
+          },
+          "discussionReplyInApp": {
+            "type": "boolean"
+          },
+          "mentionEmails": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateNotificationPreferencesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
                     "type": "boolean"
                   },
                   "adminNewUserNotification": {
@@ -30637,6 +30979,15 @@
               },
               "isMFAEnabled": {
                 "default": false,
+                "type": "boolean"
+              },
+              "discussionReplyEmails": {
+                "type": "boolean"
+              },
+              "discussionReplyInApp": {
+                "type": "boolean"
+              },
+              "mentionEmails": {
                 "type": "boolean"
               },
               "adminNewUserNotification": {
@@ -34104,6 +34455,15 @@
                 "default": false,
                 "type": "boolean"
               },
+              "discussionReplyEmails": {
+                "type": "boolean"
+              },
+              "discussionReplyInApp": {
+                "type": "boolean"
+              },
+              "mentionEmails": {
+                "type": "boolean"
+              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -34167,6 +34527,15 @@
               },
               "isMFAEnabled": {
                 "default": false,
+                "type": "boolean"
+              },
+              "discussionReplyEmails": {
+                "type": "boolean"
+              },
+              "discussionReplyInApp": {
+                "type": "boolean"
+              },
+              "mentionEmails": {
                 "type": "boolean"
               },
               "adminNewUserNotification": {
@@ -35224,6 +35593,15 @@
               },
               "isMFAEnabled": {
                 "default": false,
+                "type": "boolean"
+              },
+              "discussionReplyEmails": {
+                "type": "boolean"
+              },
+              "discussionReplyInApp": {
+                "type": "boolean"
+              },
+              "mentionEmails": {
                 "type": "boolean"
               },
               "adminNewUserNotification": {
@@ -163115,6 +163493,9 @@
                       "avatarReference"
                     ]
                   }
+                },
+                "isFollowing": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -163130,7 +163511,8 @@
                 "reactions",
                 "replyCount",
                 "latestReply",
-                "replyParticipants"
+                "replyParticipants",
+                "isFollowing"
               ]
             }
           },
@@ -163491,6 +163873,9 @@
                     "avatarReference"
                   ]
                 }
+              },
+              "isFollowing": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -163506,7 +163891,8 @@
               "reactions",
               "replyCount",
               "latestReply",
-              "replyParticipants"
+              "replyParticipants",
+              "isFollowing"
             ]
           }
         },
@@ -163772,6 +164158,9 @@
                       "avatarReference"
                     ]
                   }
+                },
+                "isFollowing": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -163787,7 +164176,8 @@
                 "reactions",
                 "replyCount",
                 "latestReply",
-                "replyParticipants"
+                "replyParticipants",
+                "isFollowing"
               ]
             }
           },
@@ -163876,6 +164266,54 @@
               "courseId",
               "messageId",
               "reactions"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FollowThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "messageId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isFollowing": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "messageId",
+              "isFollowing"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UnfollowThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "messageId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isFollowing": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "messageId",
+              "isFollowing"
             ]
           }
         },
@@ -164330,6 +164768,9 @@
                   "user",
                   "reactions"
                 ]
+              },
+              "isFollowing": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -164339,7 +164780,8 @@
               "replyCount",
               "lastActivityAt",
               "createdAt",
-              "firstPost"
+              "firstPost",
+              "isFollowing"
             ]
           }
         },
@@ -164503,6 +164945,9 @@
                   "user",
                   "reactions"
                 ]
+              },
+              "isFollowing": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -164512,7 +164957,56 @@
               "replyCount",
               "lastActivityAt",
               "createdAt",
-              "firstPost"
+              "firstPost",
+              "isFollowing"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FollowTopicResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "topicId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isFollowing": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "topicId",
+              "isFollowing"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UnfollowTopicResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "topicId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isFollowing": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "topicId",
+              "isFollowing"
             ]
           }
         },
@@ -164938,6 +165432,51 @@
               "removed",
               "deletedAt",
               "topicRemoved"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UnsubscribeBody": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "minLength": 1,
+            "maxLength": 2048,
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "UnsubscribeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "replies",
+                    "type": "string"
+                  },
+                  {
+                    "const": "mentions",
+                    "type": "string"
+                  },
+                  {
+                    "const": "thread",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type"
             ]
           }
         },

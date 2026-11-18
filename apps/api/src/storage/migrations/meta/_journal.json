@@ -1793,6 +1793,27 @@
       "when": 1795019251324,
       "tag": "0255_enable_discussion_reply_digests_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 256,
+      "version": "7",
+      "when": 1795021819625,
+      "tag": "0256_add_discussion_thread_followers",
+      "breakpoints": true
+    },
+    {
+      "idx": 257,
+      "version": "7",
+      "when": 1795021825812,
+      "tag": "0257_backfill_discussion_thread_followers",
+      "breakpoints": true
+    },
+    {
+      "idx": 258,
+      "version": "7",
+      "when": 1795021830114,
+      "tag": "0258_enable_discussion_thread_followers_rls",
+      "breakpoints": true
     }
   ]
 }

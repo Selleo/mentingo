@@ -32,5 +32,6 @@ export const courseChatMentionAutomation: BuiltInAutomationDefinition = {
     course_name: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "course_name" },
     message: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "message" },
     course_link: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "course_link" },
+    unsubscribe_link: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "unsubscribe_link" },
   },
 };

@@ -17,6 +17,7 @@ import {
   resolveAutomationMappings,
 } from "src/automations/mappers/automation-mapping";
 import { EmailService } from "src/common/emails/emails.service";
+import { DiscussionEmailLinkService } from "src/discussion-notifications/discussion-email-link.service";
 import { EmailTemplateRenderingService } from "src/email-templates/services/email-template-rendering.service";
 import { EmailTemplateValidationService } from "src/email-templates/services/email-template-validation.service";
 
@@ -37,6 +38,7 @@ export class AutomationEmailDeliveryService {
     private readonly emailTemplateRenderingService: EmailTemplateRenderingService,
     private readonly emailTemplateValidationService: EmailTemplateValidationService,
     private readonly emailService: EmailService,
+    private readonly discussionEmailLinkService: DiscussionEmailLinkService,
     @Inject(NOTIFICATION_ACCOUNT_ACTION_PREPARATION)
     private readonly notificationAccountActionService: NotificationAccountActionPreparation,
   ) {}
@@ -52,7 +54,7 @@ export class AutomationEmailDeliveryService {
     const { delivery } = claim;
 
     try {
-      const fields = await this.prepareAutomationRecipientFields(claim);
+      const fields = await this.prepareAutomationRecipientFields(claim, tenantId);
 
       if (!fields) {
         await this.automationEmailDeliveryStateService.recordAutomationEmailDeliveryResult(
@@ -113,10 +115,19 @@ export class AutomationEmailDeliveryService {
     }
   }
 
-  private async prepareAutomationRecipientFields({
-    delivery,
-  }: ClaimedAutomationEmailDelivery): Promise<Record<string, AutomationPlaceholderValue> | null> {
-    const fields = { ...(delivery.eventFields ?? {}) };
+  private async prepareAutomationRecipientFields(
+    { delivery, run }: ClaimedAutomationEmailDelivery,
+    tenantId: UUIDType,
+  ): Promise<Record<string, AutomationPlaceholderValue> | null> {
+    const fields = {
+      ...(delivery.eventFields ?? {}),
+      ...(await this.discussionEmailLinkService.buildLinkFields({
+        eventKind: run.eventKind,
+        eventFields: delivery.eventFields,
+        recipientEmail: delivery.recipientEmail,
+        tenantId,
+      })),
+    };
 
     if (!delivery.accountActionIntentId) {
       return fields;

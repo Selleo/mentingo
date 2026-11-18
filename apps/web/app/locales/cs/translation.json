@@ -5620,7 +5620,8 @@
     "learningPaths": "Rozvojové cesty",
     "adminLearningPaths": "Rozvojové cesty",
     "adminLearningPathEditor": "Editor rozvojové cesty",
-    "gamification": "Gamifikace"
+    "gamification": "Gamifikace",
+    "notificationUnsubscribe": "Nastavení oznámení"
   },
   "courseDuplication": {
     "error": {
@@ -8444,7 +8445,9 @@
       "replyCount": "Počet nových odpovědí",
       "replyAuthors": "Autoři odpovědí",
       "latestReply": "Poslední odpověď",
-      "discussionUrl": "Odkaz na diskusi"
+      "discussionUrl": "Odkaz na diskusi",
+      "unsubscribeUrl": "Odkaz pro odhlášení",
+      "unfollowUrl": "Odkaz pro ukončení sledování"
     },
     "simulation": {
       "title": "Výsledek simulace",
@@ -9960,6 +9963,54 @@
       "emptyTitle": "Zadejte název.",
       "emptyContent": "Zadejte zprávu.",
       "invalidReaction": "Vyberte jednu z dostupných reakcí."
+    }
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Oznámení o diskusích",
+      "saving": "Ukládání…",
+      "replyInApp": {
+        "label": "Odpovědi – v aplikaci",
+        "description": "Zobrazit oznámení, když někdo odpoví v diskusi, kterou sledujete."
+      },
+      "replyEmails": {
+        "label": "Odpovědi – e-mailem",
+        "description": "Poslat jeden e-mail s novými odpověďmi v diskusi, kterou sledujete."
+      },
+      "mentionEmails": {
+        "label": "Zmínky – e-mailem",
+        "description": "Poslat e-mail, když vás někdo zmíní v diskusi."
+      },
+      "toast": {
+        "saved": "Nastavení oznámení bylo uloženo.",
+        "error": "Nastavení oznámení se nepodařilo uložit."
+      }
+    },
+    "following": {
+      "follow": "Sledovat",
+      "following": "Sledujete",
+      "followHint": "Dostávat oznámení o nových odpovědích v této diskusi.",
+      "unfollowHint": "Vypnout oznámení o nových odpovědích v této diskusi.",
+      "toast": {
+        "followed": "Sledujete tuto diskusi.",
+        "unfollowed": "Tuto diskusi již nesledujete.",
+        "error": "Sledování se nepodařilo změnit."
+      }
+    },
+    "unsubscribe": {
+      "title": "Oznámení o diskusích",
+      "confirmDescription": "Potvrďte, že chcete tato oznámení vypnout.",
+      "confirm": "Potvrdit",
+      "invalidLink": "Tento odkaz je neplatný nebo vypršel.",
+      "manageInSettings": "Spravovat oznámení v nastavení",
+      "done": {
+        "replies": "E-maily o odpovědích v diskusích už nebudete dostávat.",
+        "mentions": "E-maily o zmínkách už nebudete dostávat.",
+        "thread": "Tuto diskusi již nesledujete."
+      }
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "Tento odkaz je neplatný nebo vypršel."
     }
   }
 }

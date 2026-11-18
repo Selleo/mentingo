@@ -14,7 +14,13 @@ export type DiscussionReply = {
 
 export type DiscussionRecipientFilter = (userIds: UUIDType[]) => Promise<UUIDType[]>;
 
-export type DiscussionReplyDigestEntry = { replyId: UUIDType; announcementId: UUIDType };
+export type DiscussionReplyDigestEntry = { replyId: UUIDType; announcementId: UUIDType | null };
+
+export type DiscussionReplyPreferences = {
+  userId: UUIDType;
+  inAppEnabled: boolean;
+  emailsEnabled: boolean;
+};
 
 export type DiscussionReplyDigest = {
   id: UUIDType;
@@ -31,3 +37,10 @@ export type DiscussionDigestThread = {
 };
 
 export type DiscussionDigestReply = { authorFullName: string; content: string };
+
+export type DiscussionEmailLinkRequest = {
+  eventKind: string;
+  eventFields: Record<string, unknown> | null;
+  recipientEmail: string;
+  tenantId: UUIDType;
+};

@@ -5568,7 +5568,8 @@
     "learningPaths": "Rutas de desarrollo",
     "adminLearningPaths": "Rutas de desarrollo",
     "adminLearningPathEditor": "Editor de ruta de desarrollo",
-    "gamification": "Gamificación"
+    "gamification": "Gamificación",
+    "notificationUnsubscribe": "Ajustes de notificaciones"
   },
   "learningPathsView": {
     "hero": {
@@ -8378,7 +8379,9 @@
       "replyCount": "Número de respuestas nuevas",
       "replyAuthors": "Autores de las respuestas",
       "latestReply": "Última respuesta",
-      "discussionUrl": "Enlace a la discusión"
+      "discussionUrl": "Enlace a la discusión",
+      "unsubscribeUrl": "Enlace para darse de baja",
+      "unfollowUrl": "Enlace para dejar de seguir"
     },
     "simulation": {
       "title": "Resultado de la simulación",
@@ -9841,6 +9844,54 @@
       "emptyTitle": "Escribe un título.",
       "emptyContent": "Escribe un mensaje.",
       "invalidReaction": "Elige una de las reacciones disponibles."
+    }
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Notificaciones de discusiones",
+      "saving": "Guardando…",
+      "replyInApp": {
+        "label": "Respuestas – en la aplicación",
+        "description": "Mostrar una notificación cuando alguien responda en una discusión que sigues."
+      },
+      "replyEmails": {
+        "label": "Respuestas – por correo",
+        "description": "Enviar un correo con las nuevas respuestas de una discusión que sigues."
+      },
+      "mentionEmails": {
+        "label": "Menciones – por correo",
+        "description": "Enviar un correo cuando alguien te mencione en una discusión."
+      },
+      "toast": {
+        "saved": "Ajustes de notificaciones guardados.",
+        "error": "No se pudieron guardar los ajustes de notificaciones."
+      }
+    },
+    "following": {
+      "follow": "Seguir",
+      "following": "Siguiendo",
+      "followHint": "Recibir notificaciones sobre nuevas respuestas en esta discusión.",
+      "unfollowHint": "Dejar de recibir notificaciones sobre nuevas respuestas en esta discusión.",
+      "toast": {
+        "followed": "Sigues esta discusión.",
+        "unfollowed": "Ya no sigues esta discusión.",
+        "error": "No se pudo cambiar el seguimiento."
+      }
+    },
+    "unsubscribe": {
+      "title": "Notificaciones de discusiones",
+      "confirmDescription": "Confirma que quieres desactivar estas notificaciones.",
+      "confirm": "Confirmar",
+      "invalidLink": "Este enlace no es válido o ha caducado.",
+      "manageInSettings": "Gestionar las notificaciones en los ajustes",
+      "done": {
+        "replies": "Ya no recibirás correos sobre respuestas en discusiones.",
+        "mentions": "Ya no recibirás correos sobre menciones.",
+        "thread": "Ya no sigues esta discusión."
+      }
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "Este enlace no es válido o ha caducado."
     }
   }
 }

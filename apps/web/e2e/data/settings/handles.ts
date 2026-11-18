@@ -5,6 +5,9 @@ export const SETTINGS_PAGE_SELECTORS = {
 
 export const SETTINGS_PAGE_HANDLES = {
   TABS: "settings-tabs",
+  DISCUSSION_NOTIFICATIONS_CARD: "settings-discussion-notifications-card",
+  discussionNotificationSwitch: (preference: string) =>
+    `settings-discussion-notification-switch-${preference}`,
   ACCOUNT_TAB: "settings-account-tab",
   INTEGRATIONS_TAB: "settings-integrations-tab",
   PUBLIC_COURSE_PREVIEW_SWITCH: "settings-public-course-preview-switch",

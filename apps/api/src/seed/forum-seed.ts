@@ -19,6 +19,7 @@ import {
   courseChatMessages,
   courseChatThreads,
   courses,
+  discussionThreadFollowers,
   settings,
   studentCourses,
   tenants,
@@ -146,6 +147,10 @@ async function seedTenantData(db: DatabasePg, origin: string, tenantId: UUIDType
 
   const posts = [...coursePosts, ...topics.flatMap((topic) => topic.posts)];
   await insertInBatches(posts, (batch) => db.insert(courseChatMessages).values(batch));
+  await insertInBatches(
+    posts.map(({ threadId, userId }) => ({ threadId, userId, tenantId })),
+    (batch) => db.insert(discussionThreadFollowers).values(batch).onConflictDoNothing(),
+  );
   await insertInBatches(buildReactions(tenantId, posts, posterIds), (batch) =>
     db.insert(courseChatMessageReactions).values(batch),
   );
