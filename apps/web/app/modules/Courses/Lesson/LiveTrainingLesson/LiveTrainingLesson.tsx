@@ -41,7 +41,7 @@ export function LiveTrainingLesson({ lesson }: LiveTrainingLessonProps) {
 
   if (!liveTraining) {
     return (
-      <div className="rounded-md border border-dashed border-neutral-200 bg-neutral-50 p-6 text-sm text-neutral-600">
+      <div className="rounded-md border border-dashed border-neutral-200 bg-neutral-50 p-6 text-sm text-neutral-800">
         {t("studentLessonView.liveTraining.notAvailable")}
       </div>
     );

@@ -71,7 +71,7 @@ export const DraggableWord = ({
         wrapText && (stretchToContainer ? "text-center" : "w-auto text-left"),
         !isDragging
           ? quizWordStyle
-          : "rounded-md bg-gray-100 px-2 py-1 text-neutral-700 blur-[0.3px]",
+          : "rounded-md bg-gray-100 px-2 py-1 text-neutral-800 blur-[0.3px]",
         !isDragging && "translate-y-0 scale-100 opacity-100",
         { "-rotate-[6deg]": isOverlay },
       )}

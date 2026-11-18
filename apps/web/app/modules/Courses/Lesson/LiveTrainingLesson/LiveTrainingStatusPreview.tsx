@@ -86,13 +86,13 @@ export function LiveTrainingStatusPreview({
             <CheckCircle2 className="size-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <p className="text-xs font-medium uppercase tracking-wide text-neutral-800">
               {t("studentLessonView.liveTraining.endedLabel")}
             </p>
             <h2 className="text-base font-semibold text-neutral-950">
               {t("studentLessonView.liveTraining.endedTitle")}
             </h2>
-            <p className="mt-1 text-sm text-neutral-600">{scheduleLabel}</p>
+            <p className="mt-1 text-sm text-neutral-800">{scheduleLabel}</p>
           </div>
         </div>
         {location && <LiveTrainingLocationNotice location={location} />}
@@ -111,13 +111,13 @@ export function LiveTrainingStatusPreview({
             <CalendarClock className="size-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <p className="text-xs font-medium uppercase tracking-wide text-neutral-800">
               {t("studentLessonView.liveTraining.scheduledLabel")}
             </p>
             <h2 className="text-base font-semibold text-neutral-950">
               {t("studentLessonView.liveTraining.scheduledTitle")}
             </h2>
-            <p className="mt-1 text-sm text-neutral-600">{scheduleLabel}</p>
+            <p className="mt-1 text-sm text-neutral-800">{scheduleLabel}</p>
           </div>
         </div>
         {location && <LiveTrainingLocationNotice location={location} />}
@@ -135,13 +135,13 @@ export function LiveTrainingStatusPreview({
           <Video className="size-5" />
         </div>
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-neutral-800">
             {t("studentLessonView.liveTraining.inactiveLabel")}
           </p>
           <h2 className="text-base font-semibold text-neutral-950">
             {t("studentLessonView.liveTraining.inactiveTitle")}
           </h2>
-          <p className="mt-1 text-sm text-neutral-600">{scheduleLabel}</p>
+          <p className="mt-1 text-sm text-neutral-800">{scheduleLabel}</p>
         </div>
       </div>
     </section>

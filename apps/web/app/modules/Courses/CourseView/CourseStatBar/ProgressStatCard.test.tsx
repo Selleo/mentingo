@@ -60,6 +60,8 @@ describe("ProgressStatCard", () => {
     );
 
     expect(screen.queryByText("1 / 3 chapters")).not.toBeInTheDocument();
+    // WCAG 1.4.3: the empty state stays readable instead of being faded with opacity.
+    expect(screen.getByText("Your progress").closest("[class*='opacity-']")).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Enter learning mode" }));
 

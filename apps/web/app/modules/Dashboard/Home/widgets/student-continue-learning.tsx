@@ -52,7 +52,7 @@ export function WidgetStudentContinueLearning({
           <div
             data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE}
             className={cn(
-              "flex h-full items-center justify-center text-center text-neutral-600",
+              "flex h-full items-center justify-center text-center text-neutral-800",
               !isCompact && "min-h-32",
             )}
           >
@@ -75,7 +75,7 @@ export function WidgetStudentContinueLearning({
                   to={destination}
                   data-testid={DASHBOARD_STUDENT_HANDLES.continueCourse(course.courseId)}
                   className={cn(
-                    "group grid items-center rounded-lg border border-neutral-100 transition-colors hover:border-primary-200 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300",
+                    "group grid items-center rounded-lg border border-neutral-100 transition-colors hover:border-primary-200 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     isCompact
                       ? "grid-cols-[3rem_minmax(0,1fr)_auto] gap-2 p-2"
                       : "grid-cols-[5rem_minmax(0,1fr)_auto] gap-3 p-3",
@@ -94,7 +94,7 @@ export function WidgetStudentContinueLearning({
                       <h3 className="body-sm-md min-w-0 line-clamp-1 text-neutral-950">
                         {course.title}
                       </h3>
-                      <span className="details-md whitespace-nowrap text-neutral-700">
+                      <span className="details-md whitespace-nowrap text-neutral-800">
                         {progress}%
                       </span>
                     </div>
@@ -112,7 +112,7 @@ export function WidgetStudentContinueLearning({
                     {!isCompact && (
                       <p
                         data-testid={DASHBOARD_STUDENT_HANDLES.CONTINUE_NEXT_LESSON}
-                        className="details mt-1.5 line-clamp-1 text-neutral-500"
+                        className="details mt-1.5 line-clamp-1 text-neutral-800"
                       >
                         {course.lesson?.title
                           ? t("dashboardHome.widgets.studentTiles.continueLearning.nextLesson", {

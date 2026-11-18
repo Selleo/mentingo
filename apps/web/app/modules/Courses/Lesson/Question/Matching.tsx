@@ -176,7 +176,7 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
       questionNumber={question.displayOrder ?? 0}
     >
       {!isCompleted && (
-        <p className="body-sm text-neutral-700">
+        <p className="body-sm text-neutral-800">
           {t("studentLessonView.other.matchingInstruction")}
         </p>
       )}
@@ -242,7 +242,7 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
           );
         })}
         {!isCompleted && targets.length === 0 && (
-          <span className="body-sm text-neutral-600">
+          <span className="body-sm text-neutral-800">
             {t("studentLessonView.other.noMatchesAvailable")}
           </span>
         )}

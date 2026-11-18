@@ -124,7 +124,7 @@ function ScenarioComposer({
             side="top"
             className="w-[min(22rem,calc(100vw-3rem))] rounded-xl border-neutral-200 p-1.5 shadow-lg"
           >
-            <DropdownMenuLabel className="px-2.5 py-2 text-xs font-semibold text-neutral-500">
+            <DropdownMenuLabel className="px-2.5 py-2 text-xs font-semibold text-neutral-800">
               {t("aiMentorPractice.form.suggestions.title")}
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-neutral-100" />
@@ -362,7 +362,7 @@ export function WidgetStudentAiMentorPractice({
             <Link
               to={`/ai-mentor/practice/${data.id}`}
               data-testid={AI_MENTOR_PRACTICE_HANDLES.CONTINUE_LINK}
-              className="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 transition-[color,transform] duration-75 hover:text-neutral-700 active:scale-95 active:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1 motion-reduce:transition-none"
+              className="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 transition-[color,transform] duration-75 hover:text-neutral-700 active:scale-95 active:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 motion-reduce:transition-none"
               aria-label={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
               title={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
             >
@@ -384,7 +384,7 @@ export function WidgetStudentAiMentorPractice({
               <p className="body-base-md text-neutral-950">
                 {t("dashboardHome.widgets.studentTiles.aiMentorPractice.emptyPrompt")}
               </p>
-              <p className="body-sm mt-1 text-neutral-500">
+              <p className="body-sm mt-1 text-neutral-800">
                 {t("aiMentorPractice.form.scenarioHint")}
               </p>
             </div>
@@ -416,7 +416,7 @@ export function WidgetStudentAiMentorPractice({
             data-testid={AI_MENTOR_PRACTICE_HANDLES.WIDGET_FAILED}
             className="flex flex-1 flex-col items-center justify-center gap-3 px-5 text-center"
           >
-            <p className="body-sm text-neutral-600">
+            <p className="body-sm text-neutral-800">
               {t("dashboardHome.widgets.studentTiles.aiMentorPractice.status.failed")}
             </p>
             <Button

@@ -88,7 +88,7 @@ const buildCourseTypeColumn = (t: TFunction): ColumnDef<CoursesTableCourse> => (
     if (courseType !== COURSE_TYPE.SCORM) {
       return (
         <span
-          className="text-neutral-500"
+          className="text-neutral-800"
           data-testid={COURSES_PAGE_HANDLES.rowTypeBadge(row.original.id)}
           data-course-type={courseType}
         >

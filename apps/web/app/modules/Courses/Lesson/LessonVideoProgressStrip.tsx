@@ -96,7 +96,7 @@ const LessonMediaProgressSummary = ({ segments }: LessonMediaProgressSummaryProp
 
   if (mediaKindCounts.length === 1 && singleMediaKindCount) {
     return (
-      <span className="text-xs font-medium text-neutral-600">
+      <span className="text-xs font-medium text-neutral-800">
         {t(getMediaProgressTranslationKeys(singleMediaKindCount.mediaKind).completedSummary, {
           completed: singleMediaKindCount.completed,
           total: singleMediaKindCount.total,
@@ -106,7 +106,7 @@ const LessonMediaProgressSummary = ({ segments }: LessonMediaProgressSummaryProp
   }
 
   return (
-    <span className="flex items-center gap-3 text-xs font-medium text-neutral-600">
+    <span className="flex items-center gap-3 text-xs font-medium text-neutral-800">
       {mediaKindCounts.map(({ mediaKind, completed, total }) => {
         const MediaKindIcon = MEDIA_KIND_ICONS[mediaKind];
 

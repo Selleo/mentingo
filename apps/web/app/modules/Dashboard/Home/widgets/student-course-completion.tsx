@@ -75,7 +75,7 @@ export function WidgetStudentCourseCompletion({
         {!isLoading && !isError && completion?.total === 0 && (
           <div
             data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE}
-            className="flex flex-1 items-center justify-center text-center text-neutral-600"
+            className="flex flex-1 items-center justify-center text-center text-neutral-800"
           >
             {t("dashboardHome.widgets.studentTiles.courseCompletion.empty")}
           </div>
@@ -137,7 +137,7 @@ export function WidgetStudentCourseCompletion({
                             <tspan
                               x={viewBox.cx}
                               y={(viewBox.cy ?? 0) + 16}
-                              className="details fill-neutral-500"
+                              className="details fill-neutral-800"
                             >
                               {completion.completed}/{completion.total}
                             </tspan>

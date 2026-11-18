@@ -92,7 +92,7 @@ export function ScormLesson({ lessonId, learningStateId, isPreview = false }: Sc
   if (isLoading) {
     return (
       <div className="grid min-h-[28rem] place-items-center rounded-lg border border-neutral-200 bg-neutral-50">
-        <div className="flex items-center gap-3 text-neutral-700">
+        <div className="flex items-center gap-3 text-neutral-800">
           <Loader2 className="size-5 animate-spin" />
           <span className="body-sm-md">{t("studentLessonView.scorm.loading")}</span>
         </div>

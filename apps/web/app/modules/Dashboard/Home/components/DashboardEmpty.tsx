@@ -16,7 +16,7 @@ export function DashboardEmpty({ isEditing }: DashboardEmptyProps) {
       <h2 className="mt-4 text-lg font-semibold text-neutral-950">
         {t("dashboardHome.empty.title")}
       </h2>
-      <p className="mt-1 max-w-md text-sm leading-6 text-neutral-600">
+      <p className="mt-1 max-w-md text-sm leading-6 text-neutral-800">
         {t(isEditing ? "dashboardHome.empty.editDescription" : "dashboardHome.empty.description")}
       </p>
     </div>

@@ -84,8 +84,7 @@ function Calendar({
       weekday: "text-muted-foreground w-8 font-normal text-[0.8rem]",
       month:
         "gap-y-4 overflow-x-hidden w-full border border-primary-500 rounded-2xl pt-1.5 pb-4 lg:pb-6 px-2.5 lg:px-6",
-      caption:
-        "border-primary-500 border-b h-10 flex justify-center pt-1 relative items-center",
+      caption: "border-primary-500 border-b h-10 flex justify-center pt-1 relative items-center",
       caption_label: "truncate body-lg-md",
       button_next: cn(
         buttonVariants({
@@ -118,7 +117,8 @@ function Calendar({
       range_middle:
         "aria-selected:bg-accent hover:aria-selected:!bg-accent rounded-none aria-selected:text-accent-foreground hover:aria-selected:text-accent-foreground",
       hidden: "invisible",
-    })).otherwise(() => ( {
+    }))
+    .otherwise(() => ({
       months: "flex flex-col sm:flex-row gap-4",
       month: "space-y-4 rounded-xl border border-neutral-200 bg-white p-3 shadow-sm",
       caption_dropdowns:
@@ -140,7 +140,7 @@ function Calendar({
       nav_button_next: "order-3",
       table: "w-full border-collapse",
       head_row: "flex",
-      head_cell: "flex-1 text-center text-[0.75rem] font-medium text-neutral-500",
+      head_cell: "flex-1 text-center text-xs font-medium text-neutral-800",
       row: "flex w-full mt-1",
       cell: "flex-1 text-center text-sm p-0 relative",
       day: "h-9 w-full p-0 font-normal aria-selected:opacity-100",
@@ -151,24 +151,25 @@ function Calendar({
       day_selected:
         "bg-primary-700 !text-white hover:bg-primary-600 hover:!text-white focus:bg-primary-700 focus:!text-white rounded-md",
       day_today: "bg-neutral-100 text-neutral-900 rounded-md",
-      day_outside: "text-neutral-400 opacity-50",
+      day_outside: "text-neutral-800",
       day_disabled: "text-neutral-300 opacity-50",
-      day_range_middle:
-        "aria-selected:bg-neutral-100 aria-selected:text-neutral-900 rounded-none",
+      day_range_middle: "aria-selected:bg-neutral-100 aria-selected:text-neutral-900 rounded-none",
       day_hidden: "invisible",
     }));
 
-  const components = match(variant).with("streak", () => ({
-    DayContent: ({ ...props }) => {
-      return <CustomDayContent dates={dates} {...props} />;
-    },
-    IconLeft: () => <div className="sr-only" />,
-    IconRight: () => <div className="sr-only" />,
-  })).otherwise(() => ({
-    IconLeft: () => <ChevronLeft className="size-4" />,
-    IconRight: () => <ChevronRight className="size-4" />,
-    ...(getDayTestId && { DayContent: TestIdDayContent }),
-  }));
+  const components = match(variant)
+    .with("streak", () => ({
+      DayContent: ({ ...props }) => {
+        return <CustomDayContent dates={dates} {...props} />;
+      },
+      IconLeft: () => <div className="sr-only" />,
+      IconRight: () => <div className="sr-only" />,
+    }))
+    .otherwise(() => ({
+      IconLeft: () => <ChevronLeft className="size-4" />,
+      IconRight: () => <ChevronRight className="size-4" />,
+      ...(getDayTestId && { DayContent: TestIdDayContent }),
+    }));
 
   return (
     <DayTestIdContext.Provider value={getDayTestId}>

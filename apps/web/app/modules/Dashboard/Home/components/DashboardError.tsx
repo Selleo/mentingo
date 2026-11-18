@@ -16,7 +16,7 @@ export function DashboardError({ onRetry }: DashboardErrorProps) {
       <h2 className="mt-3 text-lg font-semibold text-neutral-950">
         {t("dashboardHome.error.title")}
       </h2>
-      <p className="mt-1 max-w-md text-sm text-neutral-700">
+      <p className="mt-1 max-w-md text-sm text-neutral-800">
         {t("dashboardHome.error.description")}
       </p>
       <Button type="button" variant="outline" className="mt-4" onClick={onRetry}>

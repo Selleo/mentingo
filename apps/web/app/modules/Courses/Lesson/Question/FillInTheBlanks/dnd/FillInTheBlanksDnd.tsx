@@ -476,7 +476,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
       </div>
       <div className="h6 my-4 text-neutral-950">{t("studentLessonView.other.fillInTheBlanks")}</div>
       {!isCompleted && (
-        <p className="body-sm mb-4 text-neutral-700">
+        <p className="body-sm mb-4 text-neutral-800">
           {t("studentLessonView.other.fillInTheBlanksInstruction")}
         </p>
       )}

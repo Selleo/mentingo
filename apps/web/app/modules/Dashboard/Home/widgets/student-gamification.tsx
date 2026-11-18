@@ -40,7 +40,7 @@ export function WidgetStudentGamification() {
         />
         {data && <LevelProgress profile={data} />}
         {data && rewards.length === 0 && (
-          <p className="body-sm text-neutral-600">
+          <p className="body-sm text-neutral-800">
             {t("dashboardHome.widgets.studentTiles.gamification.empty")}
           </p>
         )}

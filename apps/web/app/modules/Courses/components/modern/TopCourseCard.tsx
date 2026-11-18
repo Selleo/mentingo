@@ -196,7 +196,7 @@ const TopCourseCard = ({
 
         <div className="space-y-3 rounded-b-xl bg-white p-4">
           {(durationLabel || lessonsLabel) && (
-            <div className="flex items-center gap-4 text-xs text-neutral-700">
+            <div className="flex items-center gap-4 text-xs text-neutral-800">
               {durationLabel && (
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5" />
@@ -212,7 +212,7 @@ const TopCourseCard = ({
             </div>
           )}
 
-          {description && <p className="line-clamp-3 text-sm text-neutral-700">{description}</p>}
+          {description && <p className="line-clamp-3 text-sm text-neutral-800">{description}</p>}
 
           <div className="flex items-center justify-between">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-white shadow-md">
