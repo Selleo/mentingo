@@ -1,5 +1,6 @@
 import { useSearchParams } from "@remix-run/react";
 import { DEFAULT_REPORT_SORT, PERMISSIONS } from "@repo/shared";
+import { format, subDays } from "date-fns";
 import {
   AlertTriangle,
   BookOpen,
@@ -35,6 +36,7 @@ import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { ReportBreakdownChart } from "~/modules/Reports/components/ReportBreakdownChart";
+import { ReportCourseActivity } from "~/modules/Reports/components/ReportCourseActivity";
 import { ReportExportMenu } from "~/modules/Reports/components/ReportExportMenu";
 import { ReportExportStatus } from "~/modules/Reports/components/ReportExportStatus";
 import {
@@ -281,6 +283,10 @@ export default function ReportsPage() {
   const [isInvalidURLConfiguration, setIsInvalidURLConfiguration] = useState(
     initialConfiguration === null,
   );
+  const [activityPeriod, setActivityPeriod] = useState(() => ({
+    from: format(subDays(new Date(), 29), "yyyy-MM-dd"),
+    to: format(new Date(), "yyyy-MM-dd"),
+  }));
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<ReportSort>(DEFAULT_REPORT_SORT);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -305,8 +311,11 @@ export default function ReportsPage() {
   const configurationsQuery = useReportConfigurations();
   const currentTimezone = applied.timezone;
   const reportQuery = useMemo(
-    () => toReportsQuery(applied, language, currentTimezone, page, pageSize, sort),
-    [applied, currentTimezone, language, page, pageSize, sort],
+    () => ({
+      ...toReportsQuery(applied, language, currentTimezone, page, pageSize, sort),
+      activityPeriod,
+    }),
+    [applied, currentTimezone, language, page, pageSize, sort, activityPeriod],
   );
   const isResultEnabled =
     canUseReports &&
@@ -576,6 +585,15 @@ export default function ReportsPage() {
           <ReportBreakdownChart className="min-w-0 lg:col-span-2" breakdowns={result.breakdowns} />
           <ReportOutcomeMetrics metrics={result.metrics} />
         </div>
+        <ReportCourseActivity
+          period={activityPeriod}
+          onPeriodChange={(nextPeriod) => {
+            setActivityPeriod(nextPeriod);
+            setPage(1);
+          }}
+          data={resultQuery.isPlaceholderData ? undefined : result.courseActivity}
+          isFetching={resultQuery.isFetching}
+        />
         <ReportResultsTable
           result={result}
           view={applied.view}

@@ -41,6 +41,7 @@ export type ReportSort = {
 
 export type ReportsQuery = ReportDefinition &
   Partial<ReportSort> & {
+    activityPeriod?: { from: string; to: string };
     language: SupportedLanguages;
     page: number;
     pageSize: number;

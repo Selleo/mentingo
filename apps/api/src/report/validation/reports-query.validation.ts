@@ -23,7 +23,17 @@ import type { ReportFilterValue } from "../reports-filter.types";
 import type { ReportDefinition, ReportFilterCondition } from "../schemas/reports.schema";
 
 /** Structural input validation lives in TypeBox; these checks enforce report meaning. */
-export function validateReportsQuerySemantics(query: ReportDefinition): void {
+export function validateReportsQuerySemantics(
+  query: ReportDefinition & { activityPeriod?: { from: string; to: string } },
+): void {
+  if (query.activityPeriod) {
+    const { from, to } = query.activityPeriod;
+    assertValid(
+      [from, to].every((value) => value.length === 10 && isValidDate(value)),
+      REPORT_ERRORS.INVALID_DATE,
+    );
+    assertValid(from <= to, REPORT_ERRORS.REVERSED_RANGE);
+  }
   assertTimezone(query.timezone);
   assertSubject(query);
   const conditions = flattenFilterConditions(query.filter);

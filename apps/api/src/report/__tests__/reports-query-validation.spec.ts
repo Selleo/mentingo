@@ -14,6 +14,22 @@ const baseQuery = (overrides: Partial<ReportsQuery> = {}): ReportsQuery => ({
 });
 
 describe("reports query semantic validation", () => {
+  it("validates the optional inclusive course activity period", () => {
+    for (const activityPeriod of [
+      { from: "2026-02-30", to: "2026-03-01" },
+      { from: "2026-03-02", to: "2026-03-01" },
+      { from: "bad", to: "2026-03-01" },
+    ]) {
+      expect(() => validateReportsQuerySemantics(baseQuery({ activityPeriod }))).toThrow();
+    }
+    expect(() =>
+      validateReportsQuerySemantics(
+        baseQuery({
+          activityPeriod: { from: "2026-03-01", to: "2026-03-01" },
+        }),
+      ),
+    ).not.toThrow();
+  });
   it("requires a subject for specific views and rejects invalid timezones", () => {
     expect(() => validateReportsQuerySemantics(baseQuery({ view: REPORT_VIEWS.COURSE }))).toThrow(
       REPORT_ERRORS.SUBJECT_REQUIRED,

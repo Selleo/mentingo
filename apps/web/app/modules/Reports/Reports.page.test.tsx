@@ -68,6 +68,31 @@ vi.mock("~/modules/Reports/components/ReportResultsTable", () => ({
   ),
 }));
 
+it("sends the selected activity period with the existing applied scope and keeps it when paging", async () => {
+  const Stub = createRemixStub([{ path: "/reports", Component: ReportsPage }]);
+  render(<Stub initialEntries={["/reports"]} />);
+  const user = userEvent.setup();
+  await user.clear(screen.getByLabelText("reports.activity.from"));
+  await user.type(screen.getByLabelText("reports.activity.from"), "2026-01-01");
+  await user.clear(screen.getByLabelText("reports.activity.to"));
+  await user.type(screen.getByLabelText("reports.activity.to"), "2026-01-31");
+  await user.click(screen.getByRole("button", { name: "reports.activity.apply" }));
+  expect(report).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      activityPeriod: { from: "2026-01-01", to: "2026-01-31" },
+      groupIds: [],
+      page: 1,
+    }),
+  );
+  await user.click(screen.getByRole("button", { name: "third page" }));
+  expect(report).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      activityPeriod: { from: "2026-01-01", to: "2026-01-31" },
+      page: 3,
+    }),
+  );
+});
+
 it("requests latest activity initially, resets pagination on sort and exports the active server order", async () => {
   const Stub = createRemixStub([{ path: "/reports", Component: ReportsPage }]);
   render(<Stub initialEntries={["/reports"]} />);

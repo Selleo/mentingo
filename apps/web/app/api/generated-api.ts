@@ -32308,6 +32308,12 @@ export interface RunReportBody {
         }
     )[];
   };
+  activityPeriod?: {
+    /** @format date */
+    from: string;
+    /** @format date */
+    to: string;
+  };
   sortBy?:
     | "learner"
     | "course"
@@ -32334,6 +32340,26 @@ export interface RunReportBody {
 
 export interface RunReportResponse {
   data: {
+    courseActivity?: {
+      popular: {
+        /** @format uuid */
+        id: string;
+        label: string;
+        /** @min 0 */
+        activeLearners: number;
+        lastActivityAt: string | null;
+        inactiveDays: number | null;
+      }[];
+      inactive: {
+        /** @format uuid */
+        id: string;
+        label: string;
+        /** @min 0 */
+        activeLearners: number;
+        lastActivityAt: string | null;
+        inactiveDays: number | null;
+      }[];
+    };
     rows: {
       id: string;
       learner: {
@@ -33039,6 +33065,12 @@ export interface CreateReportExportBody {
             }[];
           }
       )[];
+    };
+    activityPeriod?: {
+      /** @format date */
+      from: string;
+      /** @format date */
+      to: string;
     };
     sortBy?:
       | "learner"

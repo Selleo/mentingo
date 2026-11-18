@@ -7747,6 +7747,21 @@
     }
   },
   "reports": {
+    "activity": {
+      "title": "Course activity",
+      "popular": "Most popular courses · top 8",
+      "inactive": "Longest inactive courses · top 8",
+      "learners": "Unique active learners in the period",
+      "days": "Full days since last learner activity",
+      "never": "No recorded learner activity",
+      "empty": "No matching courses",
+      "from": "From",
+      "to": "To",
+      "apply": "Apply period",
+      "period": "Popularity period: {{from}} – {{to}} (report timezone).",
+      "definition": "Popularity counts each matching learner once per course. Inactivity uses the latest recorded learner activity across all dates, within the selected scope. Content edits are not learner activity. No automatic archiving.",
+      "limitation": "Recorded activity includes the latest course opening, course and lesson completions, and submitted quizzes (including previous learning cycles). Older openings are not retained, so past-period popularity may be understated. Drafts and archived courses are excluded. Unenrolled courses appear only without group, learner or learning filters. Period selection applies only to these charts; it is not saved or exported."
+    },
     "errors": {
       "invalidQuery": "The report criteria are invalid.",
       "invalidConfigurationQuery": "The saved report configuration is invalid.",

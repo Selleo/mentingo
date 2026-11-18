@@ -78,6 +78,15 @@ export const reportDefinitionSchema = Type.Object(reportDefinitionProperties, {
 export const reportsQuerySchema = Type.Object(
   {
     ...reportDefinitionProperties,
+    activityPeriod: Type.Optional(
+      Type.Object(
+        {
+          from: Type.String({ format: "date" }),
+          to: Type.String({ format: "date" }),
+        },
+        { additionalProperties: false },
+      ),
+    ),
     sortBy: Type.Optional(Type.Enum(REPORT_SORT_FIELDS)),
     sortDirection: Type.Optional(Type.Enum(REPORT_SORT_DIRECTIONS)),
     language: Type.Enum(SUPPORTED_LANGUAGES),
@@ -152,7 +161,21 @@ export const reportBreakdownSchema = Type.Object({
   completionRate: Type.Union([Type.Number({ minimum: 0, maximum: 100 }), Type.Null()]),
 });
 
+export const reportCourseActivityItemSchema = Type.Object({
+  id: UUIDSchema,
+  label: Type.String(),
+  activeLearners: Type.Integer({ minimum: 0 }),
+  lastActivityAt: Type.Union([Type.String({ format: "date-time" }), Type.Null()]),
+  inactiveDays: Type.Union([Type.Integer({ minimum: 0 }), Type.Null()]),
+});
+
 export const reportsResultSchema = Type.Object({
+  courseActivity: Type.Optional(
+    Type.Object({
+      popular: Type.Array(reportCourseActivityItemSchema),
+      inactive: Type.Array(reportCourseActivityItemSchema),
+    }),
+  ),
   rows: Type.Array(reportRowSchema),
   metrics: reportMetricsSchema,
   breakdowns: Type.Object({

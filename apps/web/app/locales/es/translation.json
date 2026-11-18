@@ -7685,6 +7685,21 @@
     }
   },
   "reports": {
+    "activity": {
+      "title": "Actividad de cursos",
+      "popular": "Cursos más populares · top 8",
+      "inactive": "Cursos inactivos desde hace más tiempo · top 8",
+      "learners": "Participantes activos únicos en el período",
+      "days": "Días completos desde la última actividad del participante",
+      "never": "Sin actividad registrada de participantes",
+      "empty": "No hay cursos coincidentes",
+      "from": "Desde",
+      "to": "Hasta",
+      "apply": "Aplicar período",
+      "period": "Período de popularidad: {{from}} – {{to}} (zona horaria del informe).",
+      "definition": "La popularidad cuenta a cada participante coincidente una vez por curso. La inactividad usa la última actividad registrada de cualquier fecha dentro del alcance seleccionado. Editar contenido no es actividad del participante. Sin archivado automático.",
+      "limitation": "La actividad incluye la última apertura del curso, finalizaciones de cursos y lecciones y cuestionarios enviados (incluidos ciclos anteriores). No se conservan aperturas anteriores, por lo que la popularidad histórica puede estar subestimada. Se excluyen borradores y cursos archivados. Los cursos sin inscripciones solo aparecen sin filtros de grupos, participantes o aprendizaje. El período solo se aplica a estos gráficos; no se guarda ni exporta."
+    },
     "errors": {
       "invalidQuery": "Los criterios del informe no son válidos.",
       "invalidConfigurationQuery": "La configuración guardada del informe no es válida.",

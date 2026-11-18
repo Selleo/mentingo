@@ -7479,6 +7479,21 @@
     }
   },
   "reports": {
+    "activity": {
+      "title": "Activité des cours",
+      "popular": "Cours les plus populaires · top 8",
+      "inactive": "Cours inactifs depuis le plus longtemps · top 8",
+      "learners": "Participants actifs uniques sur la période",
+      "days": "Jours complets depuis la dernière activité apprenant",
+      "never": "Aucune activité apprenant enregistrée",
+      "empty": "Aucun cours correspondant",
+      "from": "Du",
+      "to": "Au",
+      "apply": "Appliquer la période",
+      "period": "Période de popularité : {{from}} – {{to}} (fuseau horaire du rapport).",
+      "definition": "La popularité compte chaque participant correspondant une fois par cours. L’inactivité utilise la dernière activité apprenant enregistrée, toutes dates confondues, dans le périmètre sélectionné. La modification du contenu n’est pas une activité apprenant. Aucun archivage automatique.",
+      "limitation": "L’activité inclut la dernière ouverture du cours, les cours et leçons terminés et les quiz soumis (y compris les cycles précédents). Les anciennes ouvertures ne sont pas conservées : la popularité passée peut être sous-estimée. Les brouillons et cours archivés sont exclus. Les cours sans inscription n’apparaissent que sans filtres de groupes, participants ou apprentissage. La période ne concerne que ces graphiques ; elle n’est ni enregistrée ni exportée."
+    },
     "errors": {
       "invalidQuery": "Les critères du rapport sont invalides.",
       "invalidConfigurationQuery": "La configuration de rapport enregistrée est invalide.",

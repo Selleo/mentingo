@@ -61,6 +61,39 @@ export async function executeReportQuery(
   return mapSummary(result as QueryRow, query, capturedAt, platformCourses);
 }
 
+/** Never infer a zero-activity course outside the viewer's authorized catalog. */
+function buildActivityCourseCandidates(
+  transaction: ReportTransaction,
+  localizationService: LocalizationService,
+  context: ReportQueryExecutionContext,
+): SQL {
+  const { query } = context;
+  const includeUnenrolled =
+    !query.filter &&
+    query.groupIds.length === 0 &&
+    (query.view === REPORT_VIEWS.ORGANISATION || query.view === REPORT_VIEWS.COURSE);
+  return transaction
+    .select({
+      tenant_id: courses.tenantId,
+      course_id: sql`${courses.id}`.as("course_id"),
+      label: localizationService
+        .getLocalizedSqlField(courses.title, query.language, courses)
+        .as("label"),
+    })
+    .from(courses)
+    .where(
+      and(
+        courseIsVisible(transaction, context),
+        ne(courses.status, "draft"),
+        query.view === REPORT_VIEWS.COURSE
+          ? sql`${courses.id} = ${query.subjectId}::uuid`
+          : undefined,
+        includeUnenrolled ? undefined : sql`${courses.id} IN (SELECT course_id FROM activity_keys)`,
+      ),
+    )
+    .getSQL();
+}
+
 /** Courses on the platform the viewer may report on, leaving out drafts and archived courses. */
 async function countPlatformCourses(
   transaction: ReportTransaction,
@@ -125,6 +158,13 @@ function buildStatementContext(
     managedGroupIds,
     authorizedGroupIds,
     filterSql,
+    activityCourseCandidates: buildActivityCourseCandidates(transaction, localizationService, {
+      query,
+      access,
+      managedGroupIds,
+      authorizedGroupIds,
+      allRows,
+    }),
     includeNoEnrollmentLearners,
     pageLimit,
     pageOffset,
@@ -154,6 +194,9 @@ function mapSummary(
   const courseCompletions = Number(record.course_completions ?? 0);
 
   return {
+    ...(query.activityPeriod
+      ? { courseActivity: record.course_activity as ReportData["courseActivity"] }
+      : {}),
     rows: (record.rows ?? []) as ReportData["rows"],
     metrics: {
       learners: Number(record.learners ?? 0),
