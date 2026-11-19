@@ -1,7 +1,7 @@
 /** Provides the compact course-authoring composer and controlled optional configuration surfaces. */
 import { COURSE_AUTHORING_EXECUTION_MODES, type CourseAuthoringExecutionMode } from "@repo/shared";
 import { FileText, LoaderCircle, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { COURSE_AUTHORING_HANDLES } from "../../../../e2e/data/curriculum/handles";
@@ -10,6 +10,7 @@ import { AuthoringComposer } from "./AuthoringComposer";
 import { AuthoringReasoningControl } from "./AuthoringReasoningControl";
 import { getCourseAuthoringSourceError } from "./AuthoringSourcePopover";
 import { AuthoringToolsPopover } from "./AuthoringToolsPopover";
+import { CourseGenerationFileDropContext } from "./CourseGenerationFileDropContext";
 
 import type {
   AuthoringRequest,
@@ -332,16 +333,30 @@ export const AuthoringBriefPanel = ({
     }
   };
 
-  /** Validates a pasted file the same way the attach-file control does and uploads it if valid. */
-  const handlePasteFile = (file: File) => {
-    const error = getCourseAuthoringSourceError(file);
+  /** Shares picker validation and attachment tracking for pasted and dropped files. */
+  const handleFiles = async (files: File[]) => {
+    const validated = files.map((file) => ({ file, error: getCourseAuthoringSourceError(file) }));
+    const error = validated.find(({ error }) => error)?.error ?? null;
     setSourceUploadError(error);
-    if (error) {
-      setToolsOpen(true);
-      return;
-    }
-    void uploadSource(file);
+    if (error) setToolsOpen(true);
+    // The upload mutation reports failures; one failed file must not reject its siblings.
+    await Promise.allSettled(
+      validated.filter(({ error }) => !error).map(({ file }) => uploadSource(file)),
+    );
   };
+
+  const registerDropHandler = useContext(CourseGenerationFileDropContext);
+  // Refresh the registered closure after every render without clearing an active drag.
+  useEffect(() => {
+    registerDropHandler?.(
+      disabled || isUploadingSource || !onUploadSource
+        ? null
+        : (files) => {
+            void handleFiles(files);
+          },
+    );
+  });
+  useEffect(() => () => registerDropHandler?.(null), [registerDropHandler]);
 
   /** Disconnects an uploaded source from future requests while retaining the session source. */
   const removeAttachment = (attachmentId: string) => {
@@ -467,7 +482,7 @@ export const AuthoringBriefPanel = ({
         onStopGeneration={onStopGeneration}
         onInstructionChange={setInstruction}
         onSubmit={() => void submitRequest()}
-        onPasteFile={handlePasteFile}
+        onPasteFile={(file) => void handleFiles([file])}
         showExamples={showExamples}
         reasoningControl={
           reasoningControlAvailable && (
