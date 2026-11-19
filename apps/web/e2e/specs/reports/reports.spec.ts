@@ -213,10 +213,13 @@ test("reports reset clears the subject, groups and conditions while keeping the 
         groupIds: [],
         filters: { conditions: [], groups: [] },
       });
-    await expect
-      .poll(reportsApi.lastSubmittedQuery)
-      .toMatchObject({ view: "learner", groupIds: [] });
-    expect(reportsApi.lastSubmittedQuery()).not.toHaveProperty("subjectId");
+    // The cleared learner report was already loaded when the tab opened, so it may come from cache.
+    await expect(page.getByTestId(REPORTS_HANDLES.RESULT_TITLE)).not.toContainText(
+      RESULT_ROW.learner.name,
+    );
+    await expect(page.getByTestId(REPORTS_HANDLES.SUBJECT_PICKER)).not.toContainText(
+      RESULT_ROW.learner.name,
+    );
 
     await addReportConditionFlow(page);
     await applyReportFlow(page);
