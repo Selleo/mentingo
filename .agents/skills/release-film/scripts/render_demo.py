@@ -221,7 +221,7 @@ def load_plan(path, enforce_duration=True, strict=True):
             duration = round(duration * 30) / 30
             segment.update(start=cursor, duration=duration)
             segments.append(segment)
-            if start == 0 and 'opening' not in card:
+            if (start == 0 or mode == 'pull-request') and 'opening' not in card:
                 # Hold the first demonstrated screen under the title, fully visible from frame zero.
                 info = next(stream for stream in input_probe(source)['streams'] if stream['codec_type'] == 'video')
                 card['source'] = source

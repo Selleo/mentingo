@@ -156,7 +156,11 @@ class RenderTest(unittest.TestCase):
         data.update(mode='pull-request', frameTheme='mentingo', captionFont=self.data['font'])
         chapter = data['chapters'][0]
         chapter['prs'] = ['https://github.com/Selleo/mentingo/pull/2310']
+        data['chapters'].append(dict(copy.deepcopy(chapter), title='Confirm the result'))
         plan = load_plan(self.plan(data, 'pr-video-input.json'), enforce_duration=False)
+        cards = [segment for segment in plan['segments'] if segment['kind'] == 'card']
+        self.assertEqual(len(cards), 2)
+        self.assertTrue(all(card['source'] == self.root/'capture.mp4' for card in cards))
         self.assertEqual(plan['frame_theme'], 'mentingo')
         self.assertEqual(plan['caption_font'], plan['font'])
         self.assertEqual(plan['chapters'][0]['prs'], chapter['prs'])
