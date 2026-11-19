@@ -674,8 +674,7 @@ def render_flow(run, flow, domain, code, commit, repo_slug, addon, cache, captur
     if work.exists():
         shutil.rmtree(work)
     core.save(work / 'authored.json', {'mode': 'tutorial', 'language': code, 'font': font, 'chapters': [entry],
-                                     **({'frameTheme': 'mentingo', 'captionFont': font}
-                                        if repo_slug == 'Selleo/mentingo' else {}),
+                                     **cut.mentingo_presentation(repo_slug, font),
                                      **({'colors': colors} if colors else {})})
     render_demo.FFMPEG, render_demo.FFPROBE = core.tool('ffmpeg'), core.tool('ffprobe') or 'ffprobe'
     render_demo.prepare(work / 'authored.json', work / 'prepared', enforce_duration=False, strict=True)

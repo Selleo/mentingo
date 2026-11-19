@@ -458,6 +458,10 @@ temporary policy after the test. Normal readiness runs omit the flag and continu
 on staging/main. Test mode never starts release recording/publication.
 
 
+Mentingo PR videos share the self-onboarding frame, rounded viewport, caption
+font, and narration-aligned focus. The browser records the pinned PR head with
+demo data. Its chapters cite the PR and open directly on the visible change.
+
 A PR video is one MP4 with one chapter per selected flow (up to four). All these
 chapters may cite the same single PR; release films retain their one-PR-per-chapter
 rule. The PR publisher refuses a reviewed story that silently drops or duplicates

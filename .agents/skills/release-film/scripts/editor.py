@@ -912,7 +912,8 @@ def adopt(run, sources, films, scenes=None, reviewed=None):
     # the opening and closing lines added below counted in
     name = sources['repo'].split('/')[-1]
     intro = said['intro'].format(name=name.upper() if any(c.isdigit() for c in name) else name.capitalize())
-    framing = len(intro.split()) + len(said['closing'].split())
+    is_release = sources.get('mode') != 'pull-request'
+    framing = (len(intro.split()) + len(said['closing'].split())) if is_release else 0
     count = lambda: sum(len((t.get('text') or '').split()) for c in story['chapters'] for t in c.get('sentences') or [])
     while len(story['chapters']) > 3 and (len(story['chapters']) > MOST_CHAPTERS or count() + framing > WORDS[1]):
         extra = story['chapters'].pop()
@@ -925,10 +926,10 @@ def adopt(run, sources, films, scenes=None, reviewed=None):
             story['chapters'].remove(full[-1])
             story['chapters'].append(full[-1])
     first = (story['chapters'] or [{}])[0]
-    if first.get('sentences') and not opens(first['sentences'][0].get('text'), said):
+    if is_release and first.get('sentences') and not opens(first['sentences'][0].get('text'), said):
         first['sentences'].insert(0, {'text': intro, 'action': None, 'added': True})  # in no file: the review leaves it be
     last = (story['chapters'] or [{}])[-1].get('sentences')
-    if last is not None and len(story['chapters']) > 1 and last[-1].get('text') != said['closing']:
+    if is_release and last is not None and len(story['chapters']) > 1 and last[-1].get('text') != said['closing']:
         last.append({'text': said['closing'], 'action': None, 'added': True})  # a film ending on a scene gets a last line
     story = tidy(story, {pr['number'] for pr in sources['prs']}, said['quotes'])
     mend_proofs(story, keys)  # first: repin pins the last sentence where the proofs that stay show

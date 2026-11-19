@@ -277,6 +277,8 @@ def project_environ():
     return {k: v for k, v in os.environ.items() if k in PROJECT_ENV or re.fullmatch(r'LC_[A-Z_]+', k)}
 
 
+TUTORIAL_PRESENTATION_MODES = ('tutorial', 'pull-request')
+
 JOBS_MOST = 8  # render_demo.render_segments' most parallel encodes
 
 

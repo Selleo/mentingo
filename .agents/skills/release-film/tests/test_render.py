@@ -151,6 +151,23 @@ class RenderTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'only for tutorial'):
             load_plan(self.plan(data,'invalid-brand.json'),enforce_duration=False)
 
+    def test_pr_film_uses_the_mentingo_frame_with_pr_provenance(self):
+        data = copy.deepcopy(self.data)
+        data.update(mode='pull-request', frameTheme='mentingo', captionFont=self.data['font'])
+        chapter = data['chapters'][0]
+        chapter['prs'] = ['https://github.com/Selleo/mentingo/pull/2310']
+        plan = load_plan(self.plan(data, 'pr-video-input.json'), enforce_duration=False)
+        self.assertEqual(plan['frame_theme'], 'mentingo')
+        self.assertEqual(plan['caption_font'], plan['font'])
+        self.assertEqual(plan['chapters'][0]['prs'], chapter['prs'])
+        output = self.root/'pr-video-render'
+        render(plan, output)
+        corner = self.frame(output/'demo.mp4', 2.5, 'crop=8:8:24:24', 'rgb24')
+        self.assertGreater(min(corner), 170)
+        chapter['prs'] = ['https://github.com/Selleo/mentingo/blob/abc/docs/spec.md']
+        with self.assertRaisesRegex(ValueError, 'real GitHub PR URLs'):
+            load_plan(self.plan(data, 'pr-with-spec-source.json'), enforce_duration=False)
+
     def test_tutorial_mode_preserves_stable_ids_and_spec_provenance(self):
         data = copy.deepcopy(self.data)
         data['mode'] = 'tutorial'

@@ -604,8 +604,10 @@ def measure(args):
     story = core.load(run / 'story.json')
     if not story:
         raise SystemExit('no adopted story in the run')
-    code = language.texts(core.load(run / 'sources.json') or {})['code']
-    chapters = [dict(cut.chapter_metrics(c, story['keys'][c['film']], run / 'voice' / f'c{n}', n == len(story['chapters']), code),
+    sources = core.load(run / 'sources.json') or {}
+    code = language.texts(sources)['code']
+    chapters = [dict(cut.chapter_metrics(c, story['keys'][c['film']], run / 'voice' / f'c{n}',
+                                         n == len(story['chapters']), code, mode=sources.get('mode', 'release')),
                      title=c['title']) for n, c in enumerate(story['chapters'], 1)]
     return {'film': metrics.summary(chapters), 'chapters': chapters, 'scenes': metrics.scenes(run, story),
             'cost': costs(run), 'seat': metrics.seat_usage(run), 'stages': core.timings(run)}
