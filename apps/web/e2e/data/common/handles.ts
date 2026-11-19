@@ -8,6 +8,23 @@ export const TOAST_HANDLES = {
 /** ErrorPage renders its action button/link with this test id. */
 export const errorPageActionTestId = (testId: string) => `${testId}-action`;
 
+export const PLATFORM_LOGO_HANDLES = {
+  CUSTOM: "platform-logo-custom",
+  CUSTOM_SIGNET: "platform-logo-custom-signet",
+  DEFAULT: "platform-logo-default",
+  /** Set only once the simple logo has loaded, so it proves no custom signet is configured. */
+  DEFAULT_SIGNET: "platform-logo-default-signet",
+} as const;
+
+export const PRICE_INPUT_HANDLES = {
+  CURRENCY: "price-input-currency",
+} as const;
+
+export const DATE_PICKER_HANDLES = {
+  /** `day` is `yyyy-MM-dd`. */
+  day: (pickerTestId: string, day: string) => `${pickerTestId}-day-${day}`,
+} as const;
+
 export const RICH_TEXT_HANDLES = {
   ROOT: "rich-text-editor",
   CONTENT: "rich-text-editor-content",

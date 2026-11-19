@@ -9,6 +9,8 @@ import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { getDateLocale } from "~/utils/getDateLocale";
 
+import { DATE_PICKER_HANDLES } from "../../e2e/data/common/handles";
+
 const DATE_FORMAT = "yyyy-MM-dd";
 
 type DatePickerProps = {
@@ -85,6 +87,11 @@ export function DatePicker({
           initialFocus
           weekStartsOn={1}
           locale={calendarLocale}
+          getDayTestId={
+            testId
+              ? (date: Date) => DATE_PICKER_HANDLES.day(testId, format(date, DATE_FORMAT))
+              : undefined
+          }
         />
       </PopoverContent>
     </Popover>

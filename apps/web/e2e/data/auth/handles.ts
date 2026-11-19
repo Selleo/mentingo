@@ -11,6 +11,8 @@ export const LOGIN_PAGE_HANDLES = {
   MAGIC_LINK_LINK: "login-page-magic-link-link",
   REGISTER_LINK: "login-page-register-link",
   VERSION_CHANGELOG_LINK: "login-page-version-changelog-link",
+  BACKGROUND: "login-page-background",
+  resource: (id: string) => `login-page-resource-${id}`,
 } as const;
 
 const REGISTER_INVITE_ONLY = "register-invite-only";
@@ -26,6 +28,9 @@ export const REGISTER_PAGE_HANDLES = {
   SIGN_IN_LINK: "register-sign-in-link",
   INVITE_ONLY: REGISTER_INVITE_ONLY,
   INVITE_ONLY_SIGN_IN_LINK: errorPageActionTestId(REGISTER_INVITE_ONLY),
+  formField: (fieldId: string) => `register-form-field-${fieldId}`,
+  formFieldCheckbox: (fieldId: string) => `register-form-field-${fieldId}-checkbox`,
+  formFieldError: (fieldId: string) => `register-form-field-${fieldId}-error`,
 } as const;
 
 export const CREATE_NEW_PASSWORD_PAGE_HANDLES = {

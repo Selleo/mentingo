@@ -3,8 +3,10 @@ import { randomUUID } from "node:crypto";
 import { USER_ROLE } from "~/config/userRoles";
 
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
+import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 import { markAllOnboardingComplete } from "../../utils/onboarding";
 
 test("password form blocks submit for missing current password weak password and mismatch", async ({
@@ -15,16 +17,16 @@ test("password form blocks submit for missing current password weak password and
 
     const saveButton = page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_SAVE);
 
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_NEW).fill("Password123@");
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_CONFIRM).fill("Password123@");
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_NEW).fill(TEST_PASSWORD);
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_CONFIRM).fill(TEST_PASSWORD);
     await expect(saveButton).toBeDisabled();
 
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_OLD).fill("Password123@");
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_OLD).fill(TEST_PASSWORD);
     await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_NEW).fill("short");
     await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_CONFIRM).fill("short");
     await expect(saveButton).toBeDisabled();
 
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_NEW).fill("Password123@");
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_NEW).fill(TEST_PASSWORD);
     await page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_CONFIRM).fill("Different123@");
     await expect(saveButton).toBeDisabled();
   });
@@ -121,6 +123,7 @@ test("user with onboarding reset permission can reset onboarding", async ({
     await markAllOnboardingComplete(apiClient);
     await openSettingsPageFlow(page);
     await page.getByTestId(SETTINGS_PAGE_HANDLES.RESET_ONBOARDING_BUTTON).click();
+    await assertToastVariantVisible(page, "default");
 
     await expect
       .poll(async () => {

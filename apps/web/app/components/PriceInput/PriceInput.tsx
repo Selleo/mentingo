@@ -1,6 +1,8 @@
 import { Input } from "~/components/ui/input";
 import { formatPrice, type CurrencyCode } from "~/lib/formatters/priceFormatter";
 
+import { PRICE_INPUT_HANDLES } from "../../../e2e/data/common/handles";
+
 import type { ChangeEvent, InputHTMLAttributes, FocusEvent } from "react";
 
 type PriceInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> & {
@@ -111,7 +113,10 @@ export const PriceInput = ({
         {...props}
       />
       {currency && (
-        <span className="absolute right-0 top-1/2 -translate-x-4 -translate-y-1/2 cursor-default uppercase">
+        <span
+          className="absolute right-0 top-1/2 -translate-x-4 -translate-y-1/2 cursor-default uppercase"
+          data-testid={PRICE_INPUT_HANDLES.CURRENCY}
+        >
           {currency}
         </span>
       )}

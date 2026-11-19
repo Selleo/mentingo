@@ -147,6 +147,7 @@ export default function LoginPage() {
       {loginBackgroundImageS3Key && (
         <div
           className="fixed inset-0 -z-10"
+          data-testid={LOGIN_PAGE_HANDLES.BACKGROUND}
           style={{
             backgroundImage: `url(${loginBackgroundImageS3Key}) `,
             backgroundSize: "cover",
@@ -247,6 +248,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => handlePreviewClick(resource)}
+                    data-testid={LOGIN_PAGE_HANDLES.resource(resource.id)}
                     className="text-sm truncate underline"
                   >
                     {resource.name}

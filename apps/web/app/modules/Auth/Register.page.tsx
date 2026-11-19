@@ -308,7 +308,11 @@ export default function RegisterPage() {
                         const fieldError = errors.formAnswers?.[field.id]?.message;
 
                         return (
-                          <div key={field.id} className="space-y-2">
+                          <div
+                            key={field.id}
+                            className="space-y-2"
+                            data-testid={REGISTER_PAGE_HANDLES.formField(field.id)}
+                          >
                             <div className="flex items-start gap-3">
                               <Controller
                                 control={control}
@@ -317,6 +321,9 @@ export default function RegisterPage() {
                                   <div className="flex items-start gap-2">
                                     <Checkbox
                                       id={field.id}
+                                      data-testid={REGISTER_PAGE_HANDLES.formFieldCheckbox(
+                                        field.id,
+                                      )}
                                       checked={Boolean(controllerField.value)}
                                       onCheckedChange={(checked) =>
                                         controllerField.onChange(Boolean(checked))
@@ -339,7 +346,10 @@ export default function RegisterPage() {
                                 )}
                               />
                             </div>
-                            <FormValidationError message={fieldError} />
+                            <FormValidationError
+                              message={fieldError}
+                              testId={REGISTER_PAGE_HANDLES.formFieldError(field.id)}
+                            />
                           </div>
                         );
                       })}
