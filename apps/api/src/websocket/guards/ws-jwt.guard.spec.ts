@@ -1,6 +1,7 @@
 import { ForbiddenException, UnauthorizedException } from "@nestjs/common";
 import { WsException } from "@nestjs/websockets";
 
+import { WsAuthenticationException } from "./ws-authentication.exception";
 import { WsJwtGuard } from "./ws-jwt.guard";
 
 import type { ExecutionContext } from "@nestjs/common";
@@ -13,7 +14,8 @@ describe("WebSocket credential expiry", () => {
     [Object.assign(new Error("expired"), { name: "TokenExpiredError" }), true],
     [new UnauthorizedException("auth.error.sessionRevoked"), false],
     [new ForbiddenException("auth.error.mfaRequired"), false],
-    [new Error("Redis unavailable"), false],
+    [Object.assign(new Error("invalid"), { name: "JsonWebTokenError" }), false],
+    [Object.assign(new Error("future token"), { name: "NotBeforeError" }), false],
   ])("only offers refresh recovery for JWT expiry: %s", async (error, recoverable) => {
     const client = {
       handshake: { headers: { cookie: "access_token=old-token" } },
@@ -37,6 +39,39 @@ describe("WebSocket credential expiry", () => {
     } else {
       expect(client.emit).not.toHaveBeenCalled();
     }
+  });
+
+  it("fails closed without disconnecting or offering token refresh during a transient verification outage", async () => {
+    const unavailable = new Error("Redis unavailable");
+    const verifySessionToken = jest.fn().mockRejectedValueOnce(unavailable).mockResolvedValue({
+      userId: "verified-user",
+      sessionId: "verified-session",
+      tenantId: "verified-tenant",
+    });
+    const client = {
+      connected: true,
+      handshake: { auth: { token: "synthetic-token" } },
+      data: { user: { userId: "cached-user" } },
+      join: jest.fn(),
+      emit: jest.fn(),
+      disconnect: jest.fn(),
+    };
+    const guard = new WsJwtGuard({ verifySessionToken } as unknown as SessionService);
+    const context = {
+      switchToWs: () => ({ getClient: () => client }),
+    } as unknown as ExecutionContext;
+
+    const rejection = guard.canActivate(context);
+    await expect(rejection).rejects.toBeInstanceOf(WsException);
+    await expect(rejection).rejects.not.toBeInstanceOf(WsAuthenticationException);
+    await expect(rejection).rejects.toThrow("Authentication temporarily unavailable");
+    expect(client.disconnect).not.toHaveBeenCalled();
+    expect(client.emit).not.toHaveBeenCalled();
+    expect(client.join).not.toHaveBeenCalled();
+    expect(client.data.user.userId).toBe("cached-user");
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+    expect(client.data.user.userId).toBe("verified-user");
   });
 });
 

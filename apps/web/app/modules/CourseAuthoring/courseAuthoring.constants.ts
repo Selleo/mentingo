@@ -137,6 +137,8 @@ export const AUTHORING_CONNECTION_STATE = {
   LIVE: "live",
   RECOVERING: "recovering",
   OFFLINE: "offline",
+  PERMISSION_REVOKED: "permission_revoked",
+  SESSION_UNAVAILABLE: "session_unavailable",
 } as const;
 
 export const AUTHORING_WORK_OUTCOME = {

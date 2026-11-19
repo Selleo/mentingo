@@ -1,4 +1,4 @@
-import { NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Logger, NotFoundException } from "@nestjs/common";
 import { FormatRegistry } from "@sinclair/typebox";
 import { validate } from "uuid";
 
@@ -18,6 +18,8 @@ const tenantId = "00000000-0000-4000-8000-000000000003";
 
 describe("CourseAuthoringGateway durable subscriptions", () => {
   beforeAll(() => FormatRegistry.Set("uuid", validate));
+  beforeEach(() => jest.spyOn(Logger.prototype, "warn").mockImplementation(() => undefined));
+  afterEach(() => jest.restoreAllMocks());
 
   async function waitFor(predicate: () => boolean, timeout = 1500) {
     const deadline = Date.now() + timeout;
@@ -39,11 +41,13 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
   function setup() {
     const options: SubscribeAuthoringEventsOptions[] = [];
     const resolvers: Array<() => void> = [];
+    const rejectors: Array<(error: unknown) => void> = [];
     const get = jest.fn().mockResolvedValue({ courseId, sessionId, snapshotSequence: 4 });
     const subscribeEvents = jest.fn((input: SubscribeAuthoringEventsOptions) => {
       options.push(input);
-      return new Promise<void>((resolve) => {
+      return new Promise<void>((resolve, reject) => {
         resolvers.push(resolve);
+        rejectors.push(reject);
         input.signal?.addEventListener("abort", () => resolve(), { once: true });
       });
     });
@@ -74,6 +78,7 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
       getOptions: (index = options.length - 1) => options[index],
       getOptionCount: () => options.length,
       disconnect: (index: number) => resolvers[index]?.(),
+      fail: (index: number, error: unknown) => rejectors[index]?.(error),
     };
   }
 
@@ -193,11 +198,11 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
   it("delivers reconciliation to members that join while recovery is in progress", async () => {
     const test = setup();
     await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
-    let resolveRecovery!: (snapshot: {
+    let resolveRecovery: (snapshot: {
       courseId: string;
       sessionId: string;
       snapshotSequence: number;
-    }) => void;
+    }) => void = () => undefined;
     const recovery = new Promise<{ courseId: string; sessionId: string; snapshotSequence: number }>(
       (resolve) => {
         resolveRecovery = resolve;
@@ -235,7 +240,7 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
     await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
     await test.gateway.join(secondSocket, { courseId, sessionId, afterSequence: 0 });
     test.get.mockResolvedValueOnce({ courseId, sessionId, snapshotSequence: 8 });
-    test.authorize.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error("revoked"));
+    test.authorize.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new ForbiddenException());
 
     await test.getOptions(0)?.onEvent({
       schemaVersion: 1,
@@ -263,7 +268,7 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
   it("rechecks authorization before delivery and excludes a revoked editor", async () => {
     const test = setup();
     await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
-    test.authorize.mockRejectedValueOnce(new Error("revoked"));
+    test.authorize.mockRejectedValueOnce(new ForbiddenException());
     await test.getOptions(0)?.onEvent({
       schemaVersion: 1,
       eventId: courseId,
@@ -300,5 +305,154 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
       code: "session_not_found",
     });
     expect(test.subscribeEvents).not.toHaveBeenCalled();
+  });
+
+  it.each(["authenticateCurrent", "authorize"] as const)(
+    "reconciles without revoking access after a transient %s failure during delivery",
+    async (verification) => {
+      const test = setup();
+      await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
+      test[verification].mockRejectedValueOnce(new Error("database unavailable"));
+      const completed = {
+        courseId,
+        sessionId,
+        snapshotSequence: 6,
+        turns: [{ requestId: courseId, status: "completed" }],
+      };
+      test.get.mockResolvedValueOnce(completed);
+
+      await test.getOptions(0)?.onEvent({
+        schemaVersion: 1,
+        eventId: courseId,
+        sessionId,
+        sequence: 5,
+        occurredAt: new Date().toISOString(),
+        type: "task.updated",
+        payload: {},
+      });
+
+      expect(test.socket.emit).not.toHaveBeenCalledWith("authoring.event", expect.anything());
+      expect(test.socket.emit).not.toHaveBeenCalledWith("authoring.error", expect.anything());
+      expect(test.getOptions(0)?.signal?.aborted).toBe(true);
+      await waitFor(() => test.getOptionCount() === 2);
+      expect(test.socket.emit).toHaveBeenCalledWith("authoring.snapshot", completed);
+      expect(test.getOptions(1)?.afterSequence).toBe(6);
+      test.gateway.onModuleDestroy();
+    },
+  );
+
+  it("refreshes completion state across repeated stream closures without recreating the session", async () => {
+    const test = setup();
+    await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
+    for (const streamIndex of [0, 1]) {
+      const sequence = 5 + streamIndex;
+      const snapshot = {
+        courseId,
+        sessionId,
+        snapshotSequence: sequence,
+        turns: [{ requestId: courseId, status: streamIndex === 1 ? "completed" : "running" }],
+      };
+      test.get.mockResolvedValueOnce(snapshot);
+      test.disconnect(streamIndex);
+      await waitFor(() => test.getOptionCount() === streamIndex + 2, 2500);
+      expect(test.getOptions(streamIndex + 1)?.afterSequence).toBe(sequence);
+      expect(test.socket.emit).toHaveBeenCalledWith("authoring.snapshot", snapshot);
+    }
+    expect(test.get).toHaveBeenCalledTimes(3);
+    expect(test.socket.emit).not.toHaveBeenCalledWith("authoring.error", expect.anything());
+    test.gateway.onModuleDestroy();
+  });
+
+  it("retries snapshot recovery after a transient outage before opening the next stream", async () => {
+    const test = setup();
+    await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
+    test.get.mockRejectedValueOnce(new Error("database unavailable"));
+    test.get.mockResolvedValueOnce({ courseId, sessionId, snapshotSequence: 9 });
+    test.disconnect(0);
+
+    await waitFor(() => test.get.mock.calls.length === 2);
+    expect(test.getOptionCount()).toBe(1);
+    expect(test.socket.emit).not.toHaveBeenCalledWith("authoring.error", expect.anything());
+    await waitFor(() => test.getOptionCount() === 2, 2500);
+    expect(test.getOptions(1)?.afterSequence).toBe(9);
+    test.gateway.onModuleDestroy();
+  });
+
+  it("ends a missing session during recovery and releases its subscription", async () => {
+    const test = setup();
+    await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
+    test.get.mockRejectedValueOnce(new NotFoundException("courseAuthoring.errors.sessionNotFound"));
+    test.disconnect(0);
+
+    await waitFor(() => {
+      const messages: readonly (readonly unknown[])[] = jest.mocked(test.socket.emit).mock.calls;
+      return messages.some(
+        ([name, payload]) =>
+          name === "authoring.error" &&
+          typeof payload === "object" &&
+          payload !== null &&
+          "code" in payload &&
+          payload.code === "session_not_found",
+      );
+    });
+    expect(test.socket.emit).toHaveBeenCalledWith("authoring.error", {
+      sessionId,
+      code: "session_not_found",
+    });
+    expect(test.subscribeEvents).toHaveBeenCalledTimes(1);
+    expect(test.getOptions(0)?.signal?.aborted).toBe(true);
+    expect(test.socket.leave).toHaveBeenCalledTimes(1);
+
+    // A later explicit join must get a new consumer, rather than attach to a dead one.
+    await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
+    expect(test.subscribeEvents).toHaveBeenCalledTimes(2);
+    test.gateway.onModuleDestroy();
+  });
+
+  it("logs a safe transport reason and connection duration before recovering", async () => {
+    const test = setup();
+    await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
+    test.fail(0, Object.assign(new Error("secret provider response"), { code: "ETIMEDOUT" }));
+    await waitFor(() => jest.mocked(Logger.prototype.warn).mock.calls.length > 0);
+
+    const logged = jest.mocked(Logger.prototype.warn).mock.calls[0]?.[0];
+    expect(JSON.parse(String(logged))).toMatchObject({
+      connectedForMs: expect.any(Number),
+      code: "ETIMEDOUT",
+    });
+    expect(logged).not.toContain("secret provider response");
+    test.gateway.onModuleDestroy();
+  });
+
+  it("does not revoke a replacement subscription when an old authorization finishes late", async () => {
+    const test = setup();
+    await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
+    let rejectAuthorization: (error: Error) => void = () => undefined;
+    test.authorize.mockImplementationOnce(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectAuthorization = reject;
+        }),
+    );
+    const delivery = test.getOptions(0)?.onEvent({
+      schemaVersion: 1,
+      eventId: courseId,
+      sessionId,
+      sequence: 5,
+      occurredAt: new Date().toISOString(),
+      type: "task.updated",
+      payload: {},
+    });
+    await waitFor(() => test.authorize.mock.calls.length === 1);
+    test.gateway.handleDisconnect(test.socket);
+    await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 4 });
+    expect(test.getOptionCount()).toBe(2);
+
+    rejectAuthorization(new ForbiddenException());
+    await delivery;
+
+    expect(test.getOptions(1)?.signal?.aborted).toBe(false);
+    expect(test.socket.emit).not.toHaveBeenCalledWith("authoring.error", expect.anything());
+    test.gateway.onModuleDestroy();
   });
 });

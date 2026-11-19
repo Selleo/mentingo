@@ -108,14 +108,16 @@ export const listAuthoringSessions = async (
   return response.data;
 };
 
-/** Loads one durable session snapshot by course and session identifiers. */
+/** Loads one durable snapshot with a bounded request that recovery owners can cancel. */
 export const getAuthoringSession = async (
   courseId: string,
   sessionId: string,
+  signal?: AbortSignal,
 ): Promise<AuthoringSession> => {
   const response = await ApiClient.api.courseAuthoringControllerGetAuthoringSession(
     courseId,
     sessionId,
+    { timeout: 10_000, signal },
   );
   return normalizeSession(response.data.data);
 };

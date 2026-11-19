@@ -963,6 +963,7 @@ export class ExternalAudioService {
         });
       });
     } catch (error) {
+      abortController.abort();
       if (this.sessionStore.get(session.sessionId) !== session) return;
       this.logger.error("Failed to stream mentor response", error);
 
@@ -1002,10 +1003,12 @@ export class ExternalAudioService {
       }
 
       if (shouldForwardMentorText) {
-        session.socket.sendMentorTextEnd({
-          type: "mentor.text.end",
+        session.socket.sendMentorTextError({
+          type: "mentor.text.error",
           jobId: payload.jobId,
-          reason: "error",
+          code: "MENTOR_RESPONSE_FAILED",
+          message: "Mentor response failed",
+          retryable: false,
         });
       }
       this.emitMentorResponseCompleted(sessionId, {
@@ -1013,6 +1016,7 @@ export class ExternalAudioService {
         jobId: payload.jobId,
         reason: "error",
       });
+      if (session.activeTurnId === payload.jobId) session.activeTurnId = null;
     } finally {
       if (session.activeMentorStream?.turnId === payload.jobId) {
         session.activeMentorStream = null;
@@ -1078,7 +1082,9 @@ export class ExternalAudioService {
       return true;
     }
 
-    return /[.!?]\s*$/.test(chunk) || /\s$/.test(chunk);
+    // Incremental JSON text can end inside a word. Forward earlier word boundaries;
+    // Luma's speech parser retains unfinished words and pronunciation controls.
+    return /[.!?]\s*$/.test(chunk) || /\s/.test(chunk);
   }
 
   private sendMentorTextDeltaChunk(

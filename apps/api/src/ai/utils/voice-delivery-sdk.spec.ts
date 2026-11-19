@@ -33,7 +33,7 @@ it.each(["complete", "truncated"])(
       prompt: "Synthetic offline fixture",
       output: Output.array({ element: jsonSchema(() => voiceDeliverySentenceSchema) }),
     });
-    const stream = streamVoiceSentenceMarkup(result.elementStream, undefined, () => result.output);
+    const stream = streamVoiceSentenceMarkup(result.textStream, undefined, () => result.output);
     const first = stream.next();
     // The synthetic provider starts without any HTTP request.
     await ready;
@@ -42,17 +42,17 @@ it.each(["complete", "truncated"])(
     controller.enqueue({
       type: "text-delta",
       id: "reply",
-      delta: '{"elements":[{"cue":"frustrated","text":"I waited."},{"cue":"',
+      delta: '{"elements":[{"cue":"frustrated","text":"I waited',
     });
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       const timeout = new Promise<never>((_resolve, reject) => {
         timer = setTimeout(
-          () => reject(new Error("Sentence buffered until model completion")),
+          () => reject(new Error("Text buffered until sentence completion")),
           1000,
         );
       });
-      expect((await Promise.race([first, timeout])).value).toBe("⟦cue:frustrated⟧I waited. ");
+      expect((await Promise.race([first, timeout])).value).toBe("⟦cue:frustrated⟧I waited");
     } finally {
       clearTimeout(timer);
     }
@@ -61,8 +61,8 @@ it.each(["complete", "truncated"])(
       id: "reply",
       delta:
         mode === "complete"
-          ? 'frustrated","text":"Who can help?"}]}'
-          : 'frustrated","text":"unfinished',
+          ? '."},{"cue":"frustrated","text":"Who can help?"}]}'
+          : '."},{"cue":"frustrated","text":"unfinished',
     });
     controller.enqueue({ type: "text-end", id: "reply" });
     controller.enqueue({
@@ -75,9 +75,10 @@ it.each(["complete", "truncated"])(
     });
     controller.close();
     if (mode === "complete") {
-      expect((await stream.next()).value).toBe("⟦cue:frustrated⟧Who can help? ");
+      expect((await stream.next()).value).toBe(". ⟦cue:frustrated⟧Who can help? ");
       expect((await stream.next()).done).toBe(true);
     } else {
+      expect((await stream.next()).value).toBe(". ⟦cue:frustrated⟧unfinished");
       await expect(stream.next()).rejects.toThrow();
     }
     expect(model.doStreamCalls).toHaveLength(1);

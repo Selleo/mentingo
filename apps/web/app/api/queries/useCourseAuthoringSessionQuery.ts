@@ -21,14 +21,17 @@ export const authoringSessionQueryOptions = (courseId: string, sessionId: string
     retry: 1,
   });
 
-/** Refreshes monotonically; scoped owners can reject late results before any cache write. */
+/** Refreshes monotonically; canceled or superseded owners cannot commit a late response. */
 export const refreshAuthoringSession = async (
   courseId: string,
   sessionId: string,
   shouldCommit?: () => boolean,
+  signal?: AbortSignal,
 ) => {
-  const snapshot = await getAuthoringSession(courseId, sessionId);
-  if (shouldCommit && !shouldCommit()) return snapshot;
+  const snapshot = signal
+    ? await getAuthoringSession(courseId, sessionId, signal)
+    : await getAuthoringSession(courseId, sessionId);
+  if (signal?.aborted || (shouldCommit && !shouldCommit())) return snapshot;
   queryClient.setQueryData<AuthoringSession>(authoringSessionKey(courseId, sessionId), (current) =>
     !current || snapshot.snapshotSequence >= current.snapshotSequence ? snapshot : current,
   );

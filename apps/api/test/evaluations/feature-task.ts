@@ -392,13 +392,14 @@ export async function runFeatureTask(
   }
   let voiceDeliveryEvidence: FeatureTaskResult["voiceDeliveryEvidence"];
   if (request.structuredOutputMode === "array" && checks.productionOutputSchema) {
-    async function* completeSentences() {
+    /** Serialize validated evaluation output in the SDK envelope; no streaming latency is inferred. */
+    async function* serializedVoiceReply(): AsyncGenerator<string> {
       if (!Array.isArray(rawOutput))
         throw new Error("Native voice output must be sentence elements");
-      yield* rawOutput;
+      yield JSON.stringify({ elements: rawOutput });
     }
     let markup = "";
-    for await (const chunk of streamVoiceSentenceMarkup(completeSentences())) markup += chunk;
+    for await (const chunk of streamVoiceSentenceMarkup(serializedVoiceReply())) markup += chunk;
     output = markup.trim();
     checks.nativeSentenceDelivery = true;
     voiceDeliveryEvidence = {
