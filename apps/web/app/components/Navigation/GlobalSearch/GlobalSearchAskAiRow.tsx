@@ -36,7 +36,7 @@ export const GlobalSearchAskAiRow = ({
       <Sparkles className="size-4" strokeWidth={1.75} aria-hidden />
     </span>
     <span className="shrink-0 body-sm-md text-neutral-950">{title}</span>
-    <span className="min-w-0 flex-1 truncate details text-neutral-600">“{query}”</span>
+    <span className="min-w-0 flex-1 truncate details text-neutral-800">“{query}”</span>
     <CornerDownLeft
       className={cn("size-4 shrink-0 text-neutral-500", !isActive && "invisible")}
       aria-hidden

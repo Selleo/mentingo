@@ -217,7 +217,7 @@ html {
   main[tabindex="-1"]:focus {
     @apply outline-none;
   }
-  /* Same ring as buttons (--ring, 2px with offset) so link focus stays at least 3:1. */
+  /* Same --ring as buttons (2px, offset) so link focus meets 3:1 against the page background. */
   a:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;

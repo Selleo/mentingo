@@ -58,7 +58,7 @@ export const GlobalSearchResultRow = ({
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="flex min-w-0 items-center gap-3">
           <span className="min-w-0 flex-1 truncate body-sm-md text-neutral-950">{title}</span>
-          <span className="flex min-w-0 max-w-[45%] items-center justify-end gap-1.5 overflow-hidden whitespace-nowrap details text-neutral-500">
+          <span className="flex min-w-0 max-w-[45%] items-center justify-end gap-1.5 overflow-hidden whitespace-nowrap details text-neutral-800">
             {meta && (
               <>
                 <span className="min-w-0 truncate [&>svg]:mr-1 [&>svg]:inline [&>svg]:align-[-2px]">
@@ -75,9 +75,9 @@ export const GlobalSearchResultRow = ({
           </span>
         </span>
         {showEvidence && (
-          <span className="flex min-w-0 items-center gap-1.5 text-xs leading-5 text-neutral-600">
+          <span className="flex min-w-0 items-center gap-1.5 text-xs leading-5 text-neutral-800">
             {matchedAttachmentFileName && (
-              <span className="flex min-w-0 max-w-[50%] items-center gap-1 font-medium text-neutral-700">
+              <span className="flex min-w-0 max-w-[50%] items-center gap-1 font-medium text-neutral-800">
                 <Paperclip className="size-3 shrink-0" aria-hidden />
                 <span className="truncate">{matchedAttachmentFileName}</span>
               </span>

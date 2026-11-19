@@ -74,7 +74,7 @@ function CalendarEventList({
                 className="flex size-11 shrink-0 flex-col overflow-hidden rounded-lg border border-primary-200 bg-white text-center shadow-sm"
                 aria-hidden="true"
               >
-                <span className="bg-primary-700 px-1 py-0.5 text-[9px] font-semibold uppercase leading-3 tracking-wide text-white">
+                <span className="bg-primary-700 px-0.5 py-0.5 text-xs font-semibold uppercase leading-3 text-white">
                   {new Intl.DateTimeFormat(i18n.language, { month: "short" }).format(startsAt)}
                 </span>
                 <span className="flex flex-1 items-center justify-center text-sm font-semibold text-neutral-950">
@@ -84,7 +84,7 @@ function CalendarEventList({
             )}
             <span className="min-w-0 flex-1">
               {showDateIcon && (
-                <span className="block text-xs font-semibold uppercase leading-4 tracking-wide text-neutral-800">
+                <span className="block truncate text-xs font-semibold uppercase leading-4 tracking-wide text-neutral-800">
                   {eventType}
                 </span>
               )}

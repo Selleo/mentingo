@@ -114,7 +114,7 @@ const CertificatePreview = ({
           >
             <div className="flex flex-col items-start">
               <h2 className="font-medium text-primary-800">{courseName}</h2>
-              <h2 className="text-sm text-gray-400">{formattedCompletionDate}</h2>
+              <h2 className="text-sm text-neutral-800">{formattedCompletionDate}</h2>
             </div>
 
             <CertificateControls

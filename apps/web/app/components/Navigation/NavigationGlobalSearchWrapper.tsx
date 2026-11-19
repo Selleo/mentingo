@@ -290,8 +290,8 @@ export const NavigationGlobalSearchWrapper = ({
 NavigationGlobalSearchWrapper.displayName = "NavigationGlobalSearch";
 
 const KeyHint = ({ keys, label }: { keys: string; label: string }) => (
-  <span className="flex h-5 items-center gap-1.5 whitespace-nowrap details text-neutral-600">
-    <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-neutral-200 bg-white px-1 font-sans text-xs text-neutral-700">
+  <span className="flex h-5 items-center gap-1.5 whitespace-nowrap details text-neutral-800">
+    <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-neutral-200 bg-white px-1 font-sans text-xs text-neutral-800">
       {keys}
     </kbd>
     {label}

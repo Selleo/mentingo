@@ -53,11 +53,11 @@ export const TextBlank = ({
       "border-b-neutral-400 text-neutral-800": isQuizFeedbackRedacted && isQuizSubmitted,
       "border-b-success-500 text-success-700":
         !isQuizFeedbackRedacted && isCorrectAnswer && studentAnswer?.isStudentAnswer,
-      "border-b-error-500 text-error-500":
+      "border-b-error-500 text-error-700":
         !isQuizFeedbackRedacted &&
         ((typeof studentAnswer?.isStudentAnswer === "boolean" && !studentAnswer.isStudentAnswer) ||
           isUnanswered),
-      "w-28 italic placeholder:text-error-500": !isQuizFeedbackRedacted && isUnanswered,
+      "w-28 italic placeholder:text-error-700": !isQuizFeedbackRedacted && isUnanswered,
     },
   );
 
