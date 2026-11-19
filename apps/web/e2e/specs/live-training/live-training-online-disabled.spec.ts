@@ -6,15 +6,15 @@ import { LIVE_TRAINING_FORM_HANDLES } from "../../data/live-training/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openCalendarCreateLiveTrainingDialogFlow } from "../../flows/live-training/open-calendar-create-live-training-dialog.flow";
 import { openCalendarFlow } from "../../flows/live-training/open-calendar.flow";
+import { getTomorrowDate } from "../../utils/calendar-dates";
 
 test("online delivery cannot be selected when LiveKit is not configured", async ({
   apiClient,
+  cleanup,
   factories,
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await factories.createLiveTrainingFactory().ensureLiveTrainingEnabled();
-
     const liveKitConfiguredResponse = await apiClient.api.envControllerGetLiveKitConfigured();
 
     test.skip(
@@ -22,23 +22,25 @@ test("online delivery cannot be selected when LiveKit is not configured", async 
       "LiveKit is configured in this environment.",
     );
 
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    cleanup.add(await factories.createLiveTrainingFactory().ensureLiveTrainingEnabled());
 
     await openCalendarFlow(page);
-    await openCalendarCreateLiveTrainingDialogFlow(page, tomorrow.toISOString().slice(0, 10));
+    await openCalendarCreateLiveTrainingDialogFlow(page, getTomorrowDate());
 
     const deliverySelect = page.getByTestId(
       LIVE_TRAINING_FORM_HANDLES.deliveryTypeSelect("calendar-live-training"),
     );
+    const onlineOption = page.getByTestId(
+      LIVE_TRAINING_FORM_HANDLES.deliveryTypeOption(LIVE_TRAINING_DELIVERY_TYPES.ONLINE),
+    );
 
-    await expect(deliverySelect).toContainText(/in-person/i);
     await deliverySelect.click();
+    await expect(onlineOption).toHaveAttribute("aria-disabled", "true");
+    // In-person delivery stays the selected default.
     await expect(
       page.getByTestId(
-        LIVE_TRAINING_FORM_HANDLES.deliveryTypeOption(LIVE_TRAINING_DELIVERY_TYPES.ONLINE),
+        LIVE_TRAINING_FORM_HANDLES.deliveryTypeOption(LIVE_TRAINING_DELIVERY_TYPES.OFFLINE),
       ),
-    ).toHaveAttribute("aria-disabled", "true");
-    await expect(deliverySelect).toContainText(/in-person/i);
+    ).toHaveAttribute("data-state", "checked");
   });
 });

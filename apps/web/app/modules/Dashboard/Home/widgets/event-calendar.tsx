@@ -17,7 +17,10 @@ import { CalendarEventDetailsDialog } from "~/modules/Calendar/components/Calend
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { getDateLocale } from "~/utils/getDateLocale";
 
-import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+import {
+  DASHBOARD_CALENDAR_HANDLES,
+  DASHBOARD_WIDGET_HANDLES,
+} from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
 import {
   DashboardWidgetCard,
@@ -179,6 +182,7 @@ export function WidgetEventCalendar() {
           headerAction={
             <Link
               to="/calendar"
+              data-testid={DASHBOARD_CALENDAR_HANDLES.OPEN_CALENDAR}
               className="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 transition-[color,transform] duration-75 hover:text-primary-700 active:scale-95 active:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1 motion-reduce:transition-none"
               aria-label={t("navigationSideBar.calendar")}
               title={t("navigationSideBar.calendar")}
@@ -271,7 +275,10 @@ export function WidgetEventCalendar() {
                       onRetry={() => void refetchUpcomingEvents()}
                     />
                   ) : upcomingEvents.length === 0 ? (
-                    <p className="flex min-h-24 items-center justify-center px-3 text-center text-neutral-500">
+                    <p
+                      data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE}
+                      className="flex min-h-24 items-center justify-center px-3 text-center text-neutral-500"
+                    >
                       {t("dashboardHome.widgets.event_calendar.empty")}
                     </p>
                   ) : (

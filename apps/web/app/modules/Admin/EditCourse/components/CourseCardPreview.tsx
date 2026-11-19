@@ -41,7 +41,7 @@ const CourseCardPreview = ({
             <CardHeader className="overflow-hidden rounded-t-lg p-0">
               <img
                 src={imageUrl || DefaultCoursePhoto}
-                alt="header"
+                alt=""
                 className="h-60 w-full object-cover"
               />
               {category && (

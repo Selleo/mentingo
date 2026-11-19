@@ -38,7 +38,7 @@ export function MagicLinkVerificationCard({
         <CardHeader>
           <CardTitle role="heading" className="text-2xl">
             <div className="mb-6 flex justify-center">
-              <PlatformLogo className="h-16 w-auto py-3" alt="Platform Logo" />
+              <PlatformLogo className="h-16 w-auto py-3" />
             </div>
             {t("loginView.header")}
           </CardTitle>

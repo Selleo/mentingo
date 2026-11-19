@@ -61,7 +61,6 @@ const PromotionCodeDetails = () => {
           pressed={true}
           onPressedChange={handleCouponActivation}
           disabled={isUpdatePromotionCodePending}
-          aria-label="Coupon Activation"
         >
           {isCouponActive
             ? t("adminPromotionCodesView.button.deactivatePromotionCode")

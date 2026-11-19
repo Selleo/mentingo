@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { SearchInput } from "~/components/SearchInput/SearchInput";
 import { useDebounce } from "~/hooks/useDebounce";
+import { useSentSearchAcknowledgments } from "~/hooks/useSentSearchAcknowledgments";
 
 import { LEARNING_PATHS_PAGE_HANDLES } from "../../../../e2e/data/learning-paths/handles";
 
@@ -17,12 +18,15 @@ export function LearningPathsSearchInput() {
   const debouncedValue = useDebounce(value, 300);
 
   const isHydratingFromUrlRef = useRef(false);
+  const { rememberSentSearch, isAcknowledgingSentSearch } = useSentSearchAcknowledgments<string>();
 
   useEffect(() => {
+    if (isAcknowledgingSentSearch(searchQuery)) return;
+
     isHydratingFromUrlRef.current = true;
 
     setValue(searchQuery);
-  }, [searchQuery]);
+  }, [searchQuery, isAcknowledgingSentSearch]);
 
   useEffect(() => {
     if (debouncedValue !== value) return;
@@ -44,8 +48,9 @@ export function LearningPathsSearchInput() {
       nextParams.delete("searchQuery");
     }
 
+    rememberSentSearch(nextSearchQuery);
     setSearchParams(nextParams, { replace: true });
-  }, [debouncedValue, searchParams, searchQuery, setSearchParams, value]);
+  }, [debouncedValue, searchParams, searchQuery, setSearchParams, value, rememberSentSearch]);
 
   return (
     <SearchInput

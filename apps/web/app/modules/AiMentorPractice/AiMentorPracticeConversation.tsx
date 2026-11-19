@@ -219,7 +219,10 @@ export function AiMentorPracticeConversation({
           )}
         >
           {isReplayPending ? (
-            <AiMentorReplayLoader text={t("aiMentorPractice.replayLoadingTitle")} />
+            <AiMentorReplayLoader
+              testId={AI_MENTOR_PRACTICE_HANDLES.REPLAY_LOADER}
+              text={t("aiMentorPractice.replayLoadingTitle")}
+            />
           ) : (
             <AiMentorPracticeMessages
               messages={messages}

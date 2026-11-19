@@ -49,6 +49,7 @@ export const LIVE_TRAINING_HANDLES = {
   FILES_TAB: "live-training-files-tab",
   SESSIONS_TAB: "live-training-sessions-tab",
   SESSIONS_PANEL: "live-training-sessions-panel",
+  PEOPLE_SECTION: "live-training-people-section",
   ADD_HOST_BUTTON: "live-training-add-host-button",
   AFTER_FILES_LOCKED_MESSAGE: "live-training-after-files-locked-message",
   BEFORE_FILE_INPUT: "live-training-before-file-input",

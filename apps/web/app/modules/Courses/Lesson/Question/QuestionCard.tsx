@@ -31,7 +31,7 @@ export const QuestionCard = ({
   questionType,
   isAwaitingReview = false,
   reviewerFeedback,
-  title = "Question title not provided",
+  title,
 }: QuestionCardProps) => {
   const { t } = useTranslation();
   const titleId = useId();
@@ -57,7 +57,11 @@ export const QuestionCard = ({
       <div
         id={titleId}
         className="h6 text-neutral-950"
-        dangerouslySetInnerHTML={{ __html: sanitizeQuizQuestionTitle(title) }}
+        dangerouslySetInnerHTML={{
+          __html: sanitizeQuizQuestionTitle(
+            title ?? t("studentLessonView.other.questionTitleNotProvided"),
+          ),
+        }}
       />
       <div id={instructionId} className="body-base text-neutral-900">
         {t(`studentLessonView.other.${questionType}`)}

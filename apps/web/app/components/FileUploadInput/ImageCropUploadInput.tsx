@@ -88,7 +88,11 @@ export const ImageCropUploadInput = ({
                 onCropComplete={onCropComplete}
               />
             ) : (
-              <img src={processedImageUrl} alt="Uploaded" className="h-full w-full object-cover" />
+              <img
+                src={processedImageUrl}
+                alt={t("a11y.uploadedImage")}
+                className="h-full w-full object-cover"
+              />
             )}
           </>
         ) : (

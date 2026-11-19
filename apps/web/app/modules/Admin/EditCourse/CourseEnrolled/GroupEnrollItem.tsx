@@ -81,7 +81,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                   data-testid={COURSE_ENROLLED_HANDLES.groupEnrollCheckbox(id)}
                   checked={!!field.value}
                   onCheckedChange={(currentValue) => field.onChange(Boolean(currentValue))}
-                  aria-label={`select-group-${id}`}
+                  aria-label={t("a11y.selectGroup", { name })}
                   className="mt-1.5"
                   disabled={isGroupEnrolled}
                 />

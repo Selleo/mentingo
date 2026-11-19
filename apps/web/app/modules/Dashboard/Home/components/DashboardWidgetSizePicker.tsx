@@ -6,6 +6,8 @@ import { Button } from "~/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 
+import { DASHBOARD_EDIT_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+
 import type { DashboardWidgetSize } from "../types";
 
 const SIZE_PREVIEW_CLASSES: Record<DashboardWidgetSize, string> = {
@@ -23,6 +25,7 @@ type DashboardWidgetSizePickerProps = {
   allowedSizes: DashboardWidgetSize[];
   selectedSize?: DashboardWidgetSize;
   title: string;
+  triggerTestId?: string;
   onSelect: (size: DashboardWidgetSize) => void;
 };
 
@@ -30,6 +33,7 @@ export function DashboardWidgetSizePicker({
   allowedSizes,
   selectedSize,
   title,
+  triggerTestId,
   onSelect,
 }: DashboardWidgetSizePickerProps) {
   const { t } = useTranslation();
@@ -48,6 +52,7 @@ export function DashboardWidgetSizePicker({
           onKeyDown={(event) => event.stopPropagation()}
           aria-label={accessibleLabel}
           title={accessibleLabel}
+          data-testid={triggerTestId}
         >
           <LayoutGrid className="size-4" aria-hidden="true" />
           <span className="details-md tabular-nums">{selectedSize?.replace("x", "×")}</span>
@@ -75,6 +80,7 @@ export function DashboardWidgetSizePicker({
                 key={size}
                 type="button"
                 role="radio"
+                data-testid={DASHBOARD_EDIT_HANDLES.sizeOption(size)}
                 aria-checked={selected}
                 aria-label={`${size} — ${t(`dashboardHome.edit.sizes.${size}`)}`}
                 className={cn(

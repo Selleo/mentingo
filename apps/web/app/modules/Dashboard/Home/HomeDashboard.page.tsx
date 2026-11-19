@@ -26,6 +26,11 @@ import Loader from "~/modules/common/Loader/Loader";
 import { useDownloadSummaryReport } from "~/modules/Statistics/Admin/hooks/useDownloadSummaryReport";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import {
+  DASHBOARD_EDIT_HANDLES,
+  DASHBOARD_REPORT_HANDLES,
+} from "../../../../e2e/data/dashboard/handles";
+
 import { DashboardError } from "./components/DashboardError";
 import { DashboardGrid } from "./components/DashboardGrid";
 import { WidgetPickerDialog } from "./components/WidgetPickerDialog";
@@ -177,7 +182,7 @@ export default function HomeDashboardPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  data-testid="dashboard-report-download"
+                  data-testid={DASHBOARD_REPORT_HANDLES.DOWNLOAD}
                   onClick={() => void downloadReport()}
                   disabled={isDownloading}
                 >
@@ -198,17 +203,26 @@ export default function HomeDashboardPage() {
                   <Button
                     type="button"
                     variant="outline"
+                    data-testid={DASHBOARD_EDIT_HANDLES.OPEN_WIDGET_PICKER}
                     onClick={() => setIsWidgetPickerOpen(true)}
                   >
                     <LayoutGrid className="mr-2 size-4" aria-hidden="true" />
                     {t("dashboardHome.edit.widgetsButton")}
                   </Button>
-                  <Button type="button" onClick={() => setIsEditing(false)}>
+                  <Button
+                    type="button"
+                    data-testid={DASHBOARD_EDIT_HANDLES.FINISH_EDITING}
+                    onClick={() => setIsEditing(false)}
+                  >
                     {t("common.button.close")}
                   </Button>
                 </div>
               ) : (
-                <Button type="button" onClick={handleStartEditing}>
+                <Button
+                  type="button"
+                  data-testid={DASHBOARD_EDIT_HANDLES.CUSTOMIZE}
+                  onClick={handleStartEditing}
+                >
                   <Settings2 className="mr-2 size-4" aria-hidden="true" />
                   {t("dashboardHome.customize")}
                 </Button>
@@ -253,7 +267,7 @@ export default function HomeDashboardPage() {
         isRestoringDefault={isRestoringDefault}
       />
       <AlertDialog open={isRestoreConfirmOpen} onOpenChange={setIsRestoreConfirmOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid={DASHBOARD_EDIT_HANDLES.RESTORE_DEFAULT_DIALOG}>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("dashboardHome.edit.restore")}</AlertDialogTitle>
             <AlertDialogDescription>
@@ -261,8 +275,13 @@ export default function HomeDashboardPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("common.button.cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRestoreDefault}>
+            <AlertDialogCancel data-testid={DASHBOARD_EDIT_HANDLES.RESTORE_DEFAULT_CANCEL}>
+              {t("common.button.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              data-testid={DASHBOARD_EDIT_HANDLES.RESTORE_DEFAULT_CONFIRM}
+              onClick={confirmRestoreDefault}
+            >
               {t("dashboardHome.edit.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>

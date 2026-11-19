@@ -15,6 +15,8 @@ import { useTranslation } from "react-i18next";
 
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 
+import { LEARNING_HANDLES } from "../../../../../e2e/data/learning/handles";
+
 import { DndBlank, DraggableWord } from "./FillInTheBlanks/dnd";
 import { BlankSelect, DRAG_ACTIVATION_DISTANCE } from "./FillInTheBlanks/dnd/BlankSelect";
 import { buildDndAccessibility } from "./FillInTheBlanks/dnd/dndAnnouncements";
@@ -211,6 +213,7 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
                 {isCompleted ? (
                   <DndBlank
                     blankId={id}
+                    testId={LEARNING_HANDLES.matchingSlot(id)}
                     words={words}
                     isCorrect={isCorrect}
                     isStudentAnswer={Boolean(answer)}
@@ -220,6 +223,7 @@ export const Matching = ({ question, isCompleted = false }: MatchingProps) => {
                 ) : (
                   <BlankSelect
                     blankId={id}
+                    testId={LEARNING_HANDLES.matchingSlot(id)}
                     label={optionText ?? ""}
                     selectedKey={renderedAnswers[id] ?? null}
                     items={targetItems}

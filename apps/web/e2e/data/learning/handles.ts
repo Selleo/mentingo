@@ -5,6 +5,17 @@ export const LEARNING_HANDLES = {
   LESSON_TITLE: "learning-lesson-title",
   NEXT_LESSON_BUTTON: "learning-next-lesson-button",
   QUIZ_FORM: "learning-quiz-form",
+  quizOption: (optionId: string) => `learning-quiz-option-${optionId}`,
+  trueOrFalseOption: (optionId: string, value: "true" | "false") =>
+    `learning-quiz-true-or-false-${optionId}-${value}`,
+  /** Text blanks are numbered from 1 within their question. */
+  textBlank: (blankNumber: number) => `text-blank-${blankNumber}`,
+  dndBlank: (blankAnswerId: string) => `blank:${blankAnswerId}`,
+  /** The drop slot of a matching pair carries the option id as its test id. */
+  matchingSlot: (optionId: string) => optionId,
+  BRIEF_RESPONSE_INPUT: "brief-response",
+  DETAILED_RESPONSE_INPUT: "detailed-response",
+  EMBED_IFRAME: "learning-embed-iframe",
   QUIZ_SCORE: "learning-quiz-score",
   QUIZ_AWAITING_REVIEW: "learning-quiz-awaiting-review",
   QUIZ_PARTIAL_SCORE: "learning-quiz-partial-score",

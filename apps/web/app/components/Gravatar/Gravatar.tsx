@@ -1,4 +1,5 @@
 import CryptoJS from "crypto-js";
+import { useTranslation } from "react-i18next";
 
 import { AvatarImage } from "../ui/avatar";
 
@@ -11,13 +12,14 @@ type GravatarProps = {
 };
 
 export const Gravatar = ({ email, size = 200, className = "" }: GravatarProps) => {
+  const { t } = useTranslation();
   const hash = email ? CryptoJS.MD5(email.toLowerCase().trim()).toString() : DEFAULT_GRAVATAR_HASH;
   const gravatarUrl = `https://www.gravatar.com/avatar/${hash}?s=${size}&d=mp`;
 
   return (
     <AvatarImage
       src={gravatarUrl}
-      alt={`Avatar for ${email ?? "unknown"}`}
+      alt={email ? t("a11y.avatarFor", { name: email }) : t("a11y.avatar")}
       className={className}
       width={size}
       height={size}

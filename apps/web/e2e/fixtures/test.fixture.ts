@@ -34,6 +34,7 @@ import type { FixtureFactories } from "../factories";
 import type { TenantFactoryCreateInput, TenantFactoryRecord } from "../factories/tenant.factory";
 import type { UserFactoryRecord } from "../factories/user.factory";
 import type { FixtureApiClient } from "../utils/api-client";
+import type { SystemRoleSlug } from "@repo/shared";
 import type { UserRole } from "~/config/userRoles";
 
 type WithAuthPageOptions = {
@@ -81,6 +82,8 @@ export type IsolatedWorkspaceHandle = {
     lastName?: string;
     password?: string;
     role: UserRole;
+    /** Every role of a multi-role user; defaults to `[role]`. */
+    roleSlugs?: SystemRoleSlug[];
   }) => Promise<TenantUserHandle>;
 };
 
@@ -650,6 +653,7 @@ export const test = mergedFixture.extend<
         lastName?: string;
         password?: string;
         role: UserRole;
+        roleSlugs?: SystemRoleSlug[];
       }): Promise<TenantUserHandle> => {
         const email = input.email ?? `isolated-user-${randomUUID().slice(0, 8)}@example.com`;
         const password = input.password ?? ACCOUNT_PASSWORD;
@@ -671,7 +675,7 @@ export const test = mergedFixture.extend<
 
         const userFactory = tenantFactories.createUserFactory();
         await userFactory.update(userRegisterResponse.data.data.id, {
-          roleSlugs: [input.role],
+          roleSlugs: input.roleSlugs ?? [input.role],
         });
 
         const userContext = await browser.newContext();

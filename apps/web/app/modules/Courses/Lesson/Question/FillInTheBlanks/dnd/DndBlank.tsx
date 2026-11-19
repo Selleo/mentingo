@@ -10,6 +10,7 @@ import type { DndWord } from "./types";
 type DndBlankProps = {
   words: DndWord[];
   blankId: string;
+  testId: string;
   isCorrect?: boolean | null;
   isStudentAnswer?: boolean;
   minWidth?: string;
@@ -20,6 +21,7 @@ type DndBlankProps = {
 export const DndBlank = ({
   words,
   blankId,
+  testId,
   isCorrect,
   isStudentAnswer,
   minWidth,
@@ -36,7 +38,7 @@ export const DndBlank = ({
   return (
     <SortableContext id={blankId} items={words.map(({ id }) => id)} strategy={rectSwappingStrategy}>
       <div
-        data-testid={blankId}
+        data-testid={testId}
         ref={setNodeRef}
         style={minWidth ? { minWidth } : undefined}
         className={cn(

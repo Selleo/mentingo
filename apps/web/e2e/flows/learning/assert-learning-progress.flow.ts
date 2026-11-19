@@ -3,7 +3,7 @@ import { expect } from "@playwright/test";
 import type { FixtureApiClient } from "../../utils/api-client";
 
 type LessonStatusExpectation = {
-  completedLessonCount: number;
+  completedLessonCount?: number;
   lessonId: string;
   lessonStatus: string;
 };
@@ -24,23 +24,29 @@ export const assertCourseLessonProgressFlow = async (
         const lesson = chapter?.lessons.find((item) => item.id === expectation.lessonId);
 
         return {
-          completedLessonCount: chapter?.completedLessonCount ?? 0,
+          completedLessonCount: chapter?.completedLessonCount,
           lessonStatus: lesson?.status,
         };
       },
       { timeout: 15_000 },
     )
-    .toEqual({
-      completedLessonCount: expectation.completedLessonCount,
+    .toMatchObject({
+      ...(expectation.completedLessonCount === undefined
+        ? {}
+        : { completedLessonCount: expectation.completedLessonCount }),
       lessonStatus: expectation.lessonStatus,
     });
 };
 
 type QuizProgressExpectation = {
-  attempts: number;
-  completedLessonCount: number;
-  courseLessonStatus: string;
-  lessonCompleted: boolean;
+  attempts?: number;
+  completedLessonCount?: number;
+  correctAnswerCount?: number;
+  courseLessonStatus?: string;
+  isQuizAwaitingReview?: boolean;
+  isQuizFeedbackRedacted?: boolean;
+  lessonCompleted?: boolean;
+  score?: number | null;
 };
 
 export const assertQuizLessonProgressFlow = async (
@@ -70,14 +76,26 @@ export const assertQuizLessonProgressFlow = async (
         const lesson = chapter?.lessons.find((item) => item.id === input.lessonId);
         const lessonData = lessonResponse.data.data;
 
+        // Raw values: a field the API leaves out must fail the match, not default to the expectation.
         return {
-          completedLessonCount: chapter?.completedLessonCount ?? 0,
+          completedLessonCount: chapter?.completedLessonCount,
           courseLessonStatus: lesson?.status,
-          lessonCompleted: lessonData.lessonCompleted ?? false,
-          attempts: lessonData.attempts ?? 0,
+          lessonCompleted: lessonData.lessonCompleted,
+          attempts: lessonData.attempts,
+          correctAnswerCount: lessonData.quizDetails?.correctAnswerCount,
+          isQuizAwaitingReview: lessonData.isQuizAwaitingReview,
+          isQuizFeedbackRedacted: lessonData.isQuizFeedbackRedacted,
+          score: lessonData.quizDetails?.score,
         };
       },
       { timeout: 15_000 },
     )
-    .toEqual(input.expected);
+    .toMatchObject(input.expected);
+};
+
+/** The course as the signed-in learner sees it, including chapter progress and learning state. */
+export const getLearnerCourseFlow = async (apiClient: FixtureApiClient, courseId: string) => {
+  const response = await apiClient.api.courseControllerGetCourse({ id: courseId, language: "en" });
+
+  return response.data.data;
 };
