@@ -27,6 +27,7 @@ export const REPORT_REFERENCING_OPERATORS = new Set<string>([
   OPERATOR.EQ,
   OPERATOR.NEQ,
   OPERATOR.IN,
+  OPERATOR.NOT_IN,
 ]);
 
 /** Any UUID-shaped value; learner conditions use it to tell selected ids from typed text. */

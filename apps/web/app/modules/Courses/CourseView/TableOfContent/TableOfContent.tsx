@@ -1,4 +1,4 @@
-import { useNavigate } from "@remix-run/react";
+import { useNavigate, useSearchParams } from "@remix-run/react";
 import { COURSE_ORIGIN_TYPES, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,8 +14,10 @@ import { CourseAdminStatistics } from "../CourseAdminStatistics/CourseAdminStati
 import { CourseChatTab } from "../CourseChat/CourseChatTab";
 
 import CourseOverviewTabs, {
+  COURSE_OVERVIEW_TAB_SEARCH_PARAM,
   COURSE_OVERVIEW_TABS,
   type CourseOverviewTab,
+  isCourseOverviewTab,
 } from "./CourseOverviewTabs";
 
 type TableOfContentProps = {
@@ -34,7 +36,11 @@ export function TableOfContent({ language }: TableOfContentProps) {
     isAdminExperience,
   );
 
-  const [activeTab, setActiveTab] = useState<CourseOverviewTab>(COURSE_OVERVIEW_TABS.TOC);
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<CourseOverviewTab>(() => {
+    const requestedTab = searchParams.get(COURSE_OVERVIEW_TAB_SEARCH_PARAM);
+    return isCourseOverviewTab(requestedTab) ? requestedTab : COURSE_OVERVIEW_TABS.TOC;
+  });
 
   const permissions = currentUser?.permissions ?? [];
   const canManageCourse = canManageCourseByAuthor({
@@ -66,10 +72,10 @@ export function TableOfContent({ language }: TableOfContentProps) {
   };
 
   useEffect(() => {
-    if (!canShowStatistics && activeTab === COURSE_OVERVIEW_TABS.STATISTICS) {
+    if (currentUser && !canShowStatistics && activeTab === COURSE_OVERVIEW_TABS.STATISTICS) {
       setActiveTab(COURSE_OVERVIEW_TABS.TOC);
     }
-  }, [activeTab, canShowStatistics]);
+  }, [activeTab, canShowStatistics, currentUser]);
 
   return (
     <div data-section="toc" className="rounded-2xl bg-white p-4 shadow-sm md:p-6">

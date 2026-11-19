@@ -18,6 +18,12 @@ export const COURSE_OVERVIEW_TABS = {
 
 export type CourseOverviewTab = (typeof COURSE_OVERVIEW_TABS)[keyof typeof COURSE_OVERVIEW_TABS];
 
+/** Lets a link open the course on a given overview tab, e.g. `?tab=statistics`. */
+export const COURSE_OVERVIEW_TAB_SEARCH_PARAM = "tab";
+
+export const isCourseOverviewTab = (value: string | null): value is CourseOverviewTab =>
+  Object.values<string | null>(COURSE_OVERVIEW_TABS).includes(value);
+
 export const CourseOverviewTabButton = ({
   active,
   children,

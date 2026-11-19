@@ -7714,6 +7714,77 @@
     }
   },
   "reports": {
+    "courseResults": {
+      "course": "Course",
+      "enrolled": "Enrolled",
+      "completionRate": "Completion",
+      "averageProgress": "Average progress",
+      "averageQuizScore": "Quiz score",
+      "empty": "No courses match the current filters"
+    },
+    "pathActivity": {
+      "title": "Path activity",
+      "popular": "Most popular paths · top 8",
+      "inactive": "Longest inactive paths · top 8",
+      "topPath": "Most popular path",
+      "neverActive": "Paths never used"
+    },
+    "paths": {
+      "coursesAndLearners": "Courses: {{courses}} · Learners: {{learners}}",
+      "details": "Show details",
+      "empty": "No development paths match the current filters",
+      "enrollmentsByStatus": "Course enrollments by status",
+      "completedShare": "{{percent}} completed"
+    },
+    "insights": {
+      "activityTrend": "Activity over time",
+      "activityTrendSubtitle": "Learners with recorded activity per month",
+      "changeVsPreviousMonth": "{{change}} vs last month",
+      "funnel": "Learning funnel",
+      "funnelSubtitle": "How matching learners move through their learning",
+      "funnelSteps": {
+        "learners": "In scope",
+        "loggedIn": "Logged in",
+        "started": "Started learning",
+        "completed": "Completed a course"
+      }
+    },
+    "activity": {
+      "title": "Course activity",
+      "popular": "Most popular courses · top 8",
+      "inactive": "Longest inactive courses · top 8",
+      "learners": "Unique active learners in the period",
+      "days": "Full days since last learner activity",
+      "never": "No recorded learner activity",
+      "empty": "No matching courses",
+      "from": "From",
+      "to": "To",
+      "apply": "Apply period",
+      "period": "Popularity period: {{from}} - {{to}} (report timezone).",
+      "definition": "Popularity counts each matching learner once per course. Inactivity uses the latest recorded learner activity across all dates, within the selected scope. Content edits are not learner activity. No automatic archiving.",
+      "limitation": "Recorded activity includes the latest course opening, course and lesson completions, and submitted quizzes (including previous learning cycles). Older openings are not retained, so past-period popularity may be understated. Drafts and archived courses are excluded. Unenrolled courses appear only without group, learner or learning filters. Period selection applies only to these charts; it is not saved or exported.",
+      "periodLabel": "Popularity period",
+      "custom": "Custom range",
+      "lastDays_one": "Last {{count}} day",
+      "lastDays_other": "Last {{count}} days",
+      "highlights": {
+        "topCourse": "Most popular course",
+        "longestGap": "Longest without activity",
+        "neverActive": "Courses never used",
+        "days_one": "{{count}} day",
+        "days_other": "{{count}} days"
+      },
+      "levels": {
+        "recent": "Under 30 days",
+        "stale": "30-89 days",
+        "dormant": "90+ days"
+      },
+      "tooltip": {
+        "learners_one": "{{count}} active learner",
+        "learners_other": "{{count}} active learners",
+        "lastActivity": "Last activity: {{date}}"
+      }
+    },
     "errors": {
       "invalidQuery": "The report criteria are invalid.",
       "invalidConfigurationQuery": "The saved report configuration is invalid.",
@@ -7770,7 +7841,6 @@
     },
     "scope": {
       "groupLabel": "Groups",
-      "boundaryNote": "Results and exports stay within your reporting permissions and the current filters.",
       "allGroups": "All groups",
       "groupsCount": "{{count}} groups"
     },
@@ -7824,12 +7894,15 @@
       "eq": "Is",
       "neq": "Is not",
       "in": "Is any of",
+      "notIn": "Is none of",
       "contains": "Contains",
+      "notContains": "Does not contain",
       "gte": "At least",
       "lte": "At most",
       "between": "Between",
-      "isEmpty": "Has no value",
-      "isNotEmpty": "Has a value"
+      "notBetween": "Not between",
+      "isEmpty": "Is empty",
+      "isNotEmpty": "Is not empty"
     },
     "values": {
       "notStarted": "Not started",
@@ -7898,7 +7971,10 @@
       "activeCertificateContext": "Certificates currently valid",
       "outcomesTitle": "Learning outcomes",
       "platformCourses": "Courses",
-      "platformCoursesContext": "On the platform, excluding drafts and archived courses"
+      "platformCoursesContext": "On the platform, excluding drafts and archived courses",
+      "activeShare": "{{percent}} of matching learners",
+      "aiMentorConversations": "AI Mentor conversations",
+      "aiMentorConversationsContext": "On matching courses"
     },
     "breakdowns": {
       "learnersAndEnrollments": "{{learners}} learners · {{enrollments}} enrollments",
@@ -7910,7 +7986,10 @@
         "courses": "Courses",
         "groups": "Groups",
         "paths": "Paths"
-      }
+      },
+      "statusTitle": "Completions",
+      "statusSubtitle": "Enrollment status of matching learning",
+      "statusChartLabel": "Enrollment status by {{breakdown}}"
     },
     "exports": {
       "spreadsheet": "Spreadsheet",
@@ -7938,14 +8017,12 @@
       "attempts": "Total quiz attempts",
       "lastActivity": "Last activity",
       "pathCourseStatus": "Path course status",
-      "sortAscending": "Sort ascending",
-      "sortDescending": "Sort descending"
+      "group": "Group"
     },
     "help": {
       "title": "About this report",
       "scope": "Group selection limits the learner population. Matching learners include their individual and other group learning.",
-      "metrics": "All metrics, table rows, and exports use the same applied conditions. Empty rates and averages appear as —.",
-      "timezone": "Dates use {{timezone}}."
+      "metrics": "All metrics, table rows, and exports use the same applied conditions. Empty rates and averages appear as —."
     },
     "title": "Reports",
     "description": "Understand organisation progress across learning, development paths, courses, and learners."

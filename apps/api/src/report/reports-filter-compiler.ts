@@ -31,6 +31,7 @@ import {
   REPORT_FILTER_FIELDS as FIELD,
   REPORT_FILTER_MATCH,
   REPORT_FILTER_OPERATORS as OPERATOR,
+  REPORT_NEGATED_FILTER_OPERATORS,
 } from "./constants/reports.constants";
 
 import type { ReportFilterMatch } from "./constants/reports.constants";
@@ -91,7 +92,14 @@ function compileCondition(
     .with(
       {
         field: FIELD.LEARNER,
-        operator: P.union(OPERATOR.CONTAINS, OPERATOR.EQ, OPERATOR.NEQ, OPERATOR.IN),
+        operator: P.union(
+          OPERATOR.CONTAINS,
+          OPERATOR.NOT_CONTAINS,
+          OPERATOR.EQ,
+          OPERATOR.NEQ,
+          OPERATOR.IN,
+          OPERATOR.NOT_IN,
+        ),
       },
       () => matchLearner(condition),
     )
@@ -179,9 +187,11 @@ function matchPathCourses(condition: ReportFilterCondition): SQL {
 function matchLearner(condition: ReportFilterCondition): SQL {
   const values = readValues(condition).map(String);
 
-  return match(condition.operator)
+  const learnerMatches = match(toMatchingOperator(condition.operator))
     .with(OPERATOR.CONTAINS, () => learnerContains(values[0]))
-    .otherwise(() => negateWhenExcluded(learnerIsAnyOf(values), condition));
+    .otherwise(() => learnerIsAnyOf(values));
+
+  return negateWhenExcluded(learnerMatches, condition);
 }
 
 function learnerContains(text: string): SQL {
@@ -211,11 +221,19 @@ function learnerIsAnyOf(values: string[]): SQL {
   );
 }
 
+/** An excluding comparison never matches a missing value: "is not 5" skips rows without a value. */
 function compareColumn(condition: ReportFilterCondition, timezone: string): SQL {
   const { field } = condition;
   const column = REPORT_ROW_COLUMNS[field];
 
   if (isPresenceOperator(condition)) return comparePresence(column, condition);
+  if (isExcludingOperator(condition.operator)) {
+    const matchingCondition = { ...condition, operator: toMatchingOperator(condition.operator) };
+    return combine(
+      [isNotNull(column), not(compareColumn(matchingCondition, timezone))],
+      REPORT_FILTER_MATCH.ALL,
+    );
+  }
 
   const values = readValues(condition);
   const [first, second] = values;
@@ -228,9 +246,6 @@ function compareColumn(condition: ReportFilterCondition, timezone: string): SQL 
       isWholeDay(first)
         ? withinDays(column, toParameter(first), String(first), timezone)
         : eq(column, toParameter(first)),
-    )
-    .with(OPERATOR.NEQ, () =>
-      combine([isNotNull(column), ne(column, toParameter(first))], REPORT_FILTER_MATCH.ALL),
     )
     .with(OPERATOR.IN, () => inArray(column, values.map(toParameter)))
     .with(OPERATOR.GTE, () => gte(column, toParameter(first)))
@@ -283,9 +298,21 @@ function startOfNextDay(value: string, timezone: string): SQL {
 
 function negateWhenExcluded(predicate: SQL, condition: ReportFilterCondition): SQL {
   const isExclusion =
-    condition.operator === OPERATOR.NEQ || condition.operator === OPERATOR.IS_EMPTY;
+    isExcludingOperator(condition.operator) || condition.operator === OPERATOR.IS_EMPTY;
 
   return isExclusion ? not(predicate) : predicate;
+}
+
+function isExcludingOperator(
+  operator: ReportFilterCondition["operator"],
+): operator is keyof typeof REPORT_NEGATED_FILTER_OPERATORS {
+  return operator in REPORT_NEGATED_FILTER_OPERATORS;
+}
+
+function toMatchingOperator(
+  operator: ReportFilterCondition["operator"],
+): ReportFilterCondition["operator"] {
+  return isExcludingOperator(operator) ? REPORT_NEGATED_FILTER_OPERATORS[operator] : operator;
 }
 
 function isPresenceOperator(condition: ReportFilterCondition): boolean {

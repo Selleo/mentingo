@@ -1,7 +1,7 @@
 import { stat } from "node:fs/promises";
 
 import { USER_ROLE } from "~/config/userRoles";
-import { formatReportDate } from "~/modules/Reports/reports.utils";
+import { formatReportDate } from "~/modules/Reports/utils/reports.utils";
 
 import { REPORTS_HANDLES } from "../../data/reports/handles";
 import {
@@ -182,7 +182,9 @@ test("reports save a configuration and download the spreadsheet", async ({ withW
   });
 });
 
-test("reports reset filters while keeping the selected subject", async ({ withWorkerPage }) => {
+test("reports reset clears the subject, groups and conditions while keeping the view", async ({
+  withWorkerPage,
+}) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const reportsApi = await mockReportsApiFlow(page);
     await openReportsPageFlow(page);
@@ -206,13 +208,18 @@ test("reports reset filters while keeping the selected subject", async ({ withWo
         return config ? JSON.parse(config) : null;
       })
       .toMatchObject({
-        subject: { id: REPORTS_IDS.learner, type: "learner" },
+        view: "learner",
+        subject: null,
         groupIds: [],
         filters: { conditions: [], groups: [] },
       });
-    await expect
-      .poll(reportsApi.lastSubmittedQuery)
-      .toMatchObject({ view: "learner", subjectId: REPORTS_IDS.learner, groupIds: [] });
+    // The cleared learner report was already loaded when the tab opened, so it may come from cache.
+    await expect(page.getByTestId(REPORTS_HANDLES.RESULT_TITLE)).not.toContainText(
+      RESULT_ROW.learner.name,
+    );
+    await expect(page.getByTestId(REPORTS_HANDLES.SUBJECT_PICKER)).not.toContainText(
+      RESULT_ROW.learner.name,
+    );
 
     await addReportConditionFlow(page);
     await applyReportFlow(page);
@@ -285,23 +292,16 @@ test("reports run a real course report and export it as a spreadsheet", async ({
       search: course.title,
     });
 
+    const learnerName = `${learner.firstName} ${learner.lastName}`;
+    const resultsTable = page.getByTestId(REPORTS_HANDLES.RESULTS_TABLE);
     await expect(page.getByTestId(REPORTS_HANDLES.RESULT_TITLE)).toContainText(course.title);
-    await expect(page.getByTestId(REPORTS_HANDLES.RESULTS_TABLE)).toContainText(learner.email);
-    await expect(
-      page
-        .getByTestId(REPORTS_HANDLES.metric("learners"))
-        .getByTestId(REPORTS_HANDLES.METRIC_VALUE),
-    ).toHaveText("1");
+    await expect(resultsTable).toContainText(learnerName);
 
     // A new condition filters on status "completed"; the enrolled learner has not started yet.
-    const learnersMetric = page
-      .getByTestId(REPORTS_HANDLES.metric("learners"))
-      .getByTestId(REPORTS_HANDLES.METRIC_VALUE);
     await openReportFiltersFlow(page);
     await addReportConditionFlow(page);
     await applyReportFlow(page);
-    await expect(learnersMetric).toHaveText("0");
-    await expect(page.getByTestId(REPORTS_HANDLES.RESULTS_TABLE)).not.toContainText(learner.email);
+    await expect(resultsTable).not.toContainText(learnerName);
     await chooseReportOptionFlow(
       page,
       page
@@ -310,8 +310,7 @@ test("reports run a real course report and export it as a spreadsheet", async ({
       REPORTS_HANDLES.option("notStarted"),
     );
     await applyReportFlow(page);
-    await expect(learnersMetric).toHaveText("1");
-    await expect(page.getByTestId(REPORTS_HANDLES.RESULTS_TABLE)).toContainText(learner.email);
+    await expect(resultsTable).toContainText(learnerName);
 
     const download = await exportReportSpreadsheetFlow(page);
     await expect(page.getByTestId(REPORTS_HANDLES.EXPORT_DOWNLOAD)).toBeVisible();

@@ -75,9 +75,18 @@ export const reportDefinitionSchema = Type.Object(reportDefinitionProperties, {
   additionalProperties: false,
 });
 
+export const reportActivityPeriodSchema = Type.Object(
+  {
+    from: Type.String({ format: "date" }),
+    to: Type.String({ format: "date" }),
+  },
+  { additionalProperties: false },
+);
+
 export const reportsQuerySchema = Type.Object(
   {
     ...reportDefinitionProperties,
+    activityPeriod: Type.Optional(reportActivityPeriodSchema),
     sortBy: Type.Optional(Type.Enum(REPORT_SORT_FIELDS)),
     sortDirection: Type.Optional(Type.Enum(REPORT_SORT_DIRECTIONS)),
     language: Type.Enum(SUPPORTED_LANGUAGES),
@@ -89,6 +98,7 @@ export const reportsQuerySchema = Type.Object(
 
 export type ReportDefinition = Static<typeof reportDefinitionSchema>;
 export type ReportsQuery = Static<typeof reportsQuerySchema>;
+export type ReportActivityPeriod = Static<typeof reportActivityPeriodSchema>;
 export type ReportFilterCondition = Static<typeof reportFilterConditionSchema>;
 export type ReportFilter = Static<typeof reportFilterSchema>;
 
@@ -149,10 +159,46 @@ export const reportBreakdownSchema = Type.Object({
   learners: Type.Integer({ minimum: 0 }),
   courseEnrollments: Type.Integer({ minimum: 0 }),
   courseCompletions: Type.Integer({ minimum: 0 }),
+  courseInProgress: Type.Integer({ minimum: 0 }),
+  courseCount: Type.Integer({ minimum: 0 }),
+  averageProgress: Type.Union([Type.Number({ minimum: 0, maximum: 100 }), Type.Null()]),
+  averageScore: Type.Union([Type.Number({ minimum: 0, maximum: 100 }), Type.Null()]),
   completionRate: Type.Union([Type.Number({ minimum: 0, maximum: 100 }), Type.Null()]),
 });
 
+export const reportCourseActivityItemSchema = Type.Object({
+  id: UUIDSchema,
+  label: Type.String(),
+  activeLearners: Type.Integer({ minimum: 0 }),
+  lastActivityAt: Type.Union([Type.String({ format: "date-time" }), Type.Null()]),
+  inactiveDays: Type.Union([Type.Integer({ minimum: 0 }), Type.Null()]),
+});
+
+export const reportCourseActivitySchema = Type.Object({
+  popular: Type.Array(reportCourseActivityItemSchema),
+  inactive: Type.Array(reportCourseActivityItemSchema),
+});
+
+export const reportLearningInsightsSchema = Type.Object({
+  activityTrend: Type.Array(
+    Type.Object({
+      month: Type.String({ pattern: "^\\d{4}-\\d{2}$" }),
+      activeLearners: Type.Integer({ minimum: 0 }),
+    }),
+  ),
+  funnel: Type.Object({
+    learners: Type.Integer({ minimum: 0 }),
+    loggedIn: Type.Integer({ minimum: 0 }),
+    started: Type.Integer({ minimum: 0 }),
+    completed: Type.Integer({ minimum: 0 }),
+  }),
+  aiMentorConversations: Type.Integer({ minimum: 0 }),
+});
+
 export const reportsResultSchema = Type.Object({
+  courseActivity: Type.Optional(reportCourseActivitySchema),
+  pathActivity: Type.Optional(reportCourseActivitySchema),
+  learningInsights: Type.Optional(reportLearningInsightsSchema),
   rows: Type.Array(reportRowSchema),
   metrics: reportMetricsSchema,
   breakdowns: Type.Object({
@@ -166,6 +212,8 @@ export const reportsResultSchema = Type.Object({
   capturedAt: Type.String({ format: "date-time" }),
 });
 export type ReportsResult = Static<typeof reportsResultSchema>;
+export type ReportCourseActivity = Static<typeof reportCourseActivitySchema>;
+export type ReportLearningInsights = Static<typeof reportLearningInsightsSchema>;
 
 export const reportOptionsSchema = Type.Object({
   groups: Type.Array(Type.Object({ id: UUIDSchema, label: Type.String() })),

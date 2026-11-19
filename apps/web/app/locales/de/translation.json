@@ -8372,6 +8372,77 @@
     }
   },
   "reports": {
+    "courseResults": {
+      "course": "Kurs",
+      "enrolled": "Eingeschrieben",
+      "completionRate": "Abschluss",
+      "averageProgress": "Durchschnittlicher Fortschritt",
+      "averageQuizScore": "Quizergebnis",
+      "empty": "Keine Kurse entsprechen den aktuellen Filtern"
+    },
+    "pathActivity": {
+      "title": "Pfadaktivität",
+      "popular": "Beliebteste Pfade · Top 8",
+      "inactive": "Am längsten inaktive Pfade · Top 8",
+      "topPath": "Beliebtester Pfad",
+      "neverActive": "Nie genutzte Pfade"
+    },
+    "paths": {
+      "coursesAndLearners": "Kurse: {{courses}} · Lernende: {{learners}}",
+      "details": "Details anzeigen",
+      "empty": "Keine Entwicklungspfade entsprechen den aktuellen Filtern",
+      "enrollmentsByStatus": "Kurseinschreibungen nach Status",
+      "completedShare": "{{percent}} abgeschlossen"
+    },
+    "insights": {
+      "activityTrend": "Aktivität im Zeitverlauf",
+      "activityTrendSubtitle": "Lernende mit erfasster Aktivität pro Monat",
+      "changeVsPreviousMonth": "{{change}} gegenüber Vormonat",
+      "funnel": "Lerntrichter",
+      "funnelSubtitle": "Wie passende Lernende ihr Lernen durchlaufen",
+      "funnelSteps": {
+        "learners": "Im Umfang",
+        "loggedIn": "Angemeldet",
+        "started": "Lernen begonnen",
+        "completed": "Kurs abgeschlossen"
+      }
+    },
+    "activity": {
+      "title": "Kursaktivität",
+      "popular": "Beliebteste Kurse · Top 8",
+      "inactive": "Am längsten inaktive Kurse · Top 8",
+      "learners": "Eindeutige aktive Lernende im Zeitraum",
+      "days": "Volle Tage seit der letzten Lernaktivität",
+      "never": "Keine erfasste Lernaktivität",
+      "empty": "Keine passenden Kurse",
+      "from": "Von",
+      "to": "Bis",
+      "apply": "Zeitraum anwenden",
+      "period": "Beliebtheitszeitraum: {{from}} - {{to}} (Berichtszeitzone).",
+      "definition": "Beliebtheit zählt jede passende lernende Person einmal pro Kurs. Inaktivität basiert auf der letzten erfassten Lernaktivität über alle Daten im gewählten Bereich. Inhaltsänderungen sind keine Lernaktivität. Keine automatische Archivierung.",
+      "limitation": "Erfasst werden die letzte Kursöffnung, Kurs- und Lektionsabschlüsse sowie eingereichte Quizversuche (auch frühere Lernzyklen). Ältere Öffnungen werden nicht gespeichert; die Beliebtheit vergangener Zeiträume kann unterschätzt werden. Entwürfe und archivierte Kurse sind ausgeschlossen. Kurse ohne Einschreibungen erscheinen nur ohne Gruppen-, Lernenden- oder Lernfilter. Der Zeitraum gilt nur für diese Diagramme und wird nicht gespeichert oder exportiert.",
+      "periodLabel": "Beliebtheitszeitraum",
+      "custom": "Benutzerdefinierter Zeitraum",
+      "lastDays_one": "Letzter {{count}} Tag",
+      "lastDays_other": "Letzte {{count}} Tage",
+      "highlights": {
+        "topCourse": "Beliebtester Kurs",
+        "longestGap": "Am längsten ohne Aktivität",
+        "neverActive": "Nie genutzte Kurse",
+        "days_one": "{{count}} Tag",
+        "days_other": "{{count}} Tage"
+      },
+      "levels": {
+        "recent": "Unter 30 Tagen",
+        "stale": "30-89 Tage",
+        "dormant": "90+ Tage"
+      },
+      "tooltip": {
+        "learners_one": "{{count}} aktiver Lernender",
+        "learners_other": "{{count}} aktive Lernende",
+        "lastActivity": "Letzte Aktivität: {{date}}"
+      }
+    },
     "errors": {
       "invalidQuery": "Die Berichtskriterien sind ungültig.",
       "invalidConfigurationQuery": "Die gespeicherte Berichtskonfiguration ist ungültig.",
@@ -8428,7 +8499,6 @@
     },
     "scope": {
       "groupLabel": "Gruppen",
-      "boundaryNote": "Ergebnisse und Exporte bleiben innerhalb Ihrer Berichtsberechtigungen und der aktuellen Filter.",
       "allGroups": "Alle Gruppen",
       "groupsCount": "{{count}} Gruppen"
     },
@@ -8482,12 +8552,15 @@
       "eq": "Ist",
       "neq": "Ist nicht",
       "in": "Ist einer von",
+      "notIn": "Ist keiner von",
       "contains": "Enthält",
+      "notContains": "Enthält nicht",
       "gte": "Mindestens",
       "lte": "Höchstens",
       "between": "Zwischen",
-      "isEmpty": "Hat keinen Wert",
-      "isNotEmpty": "Hat einen Wert"
+      "notBetween": "Nicht zwischen",
+      "isEmpty": "Ist leer",
+      "isNotEmpty": "Ist nicht leer"
     },
     "values": {
       "notStarted": "Nicht begonnen",
@@ -8556,7 +8629,10 @@
       "activeCertificateContext": "Derzeit gültige Zertifikate",
       "outcomesTitle": "Lernergebnisse",
       "platformCourses": "Kurse",
-      "platformCoursesContext": "Auf der Plattform, ohne Entwürfe und archivierte Kurse"
+      "platformCoursesContext": "Auf der Plattform, ohne Entwürfe und archivierte Kurse",
+      "activeShare": "{{percent}} der passenden Lernenden",
+      "aiMentorConversations": "KI-Mentor-Gespräche",
+      "aiMentorConversationsContext": "In passenden Kursen"
     },
     "breakdowns": {
       "learnersAndEnrollments": "{{learners}} Lernende · {{enrollments}} Einschreibungen",
@@ -8568,7 +8644,10 @@
         "courses": "Kurse",
         "groups": "Gruppen",
         "paths": "Pfade"
-      }
+      },
+      "statusTitle": "Abschlüsse",
+      "statusSubtitle": "Einschreibungsstatus des passenden Lernens",
+      "statusChartLabel": "Einschreibungsstatus nach {{breakdown}}"
     },
     "exports": {
       "spreadsheet": "Tabelle",
@@ -8596,14 +8675,12 @@
       "attempts": "Quizversuche insgesamt",
       "lastActivity": "Letzte Aktivität",
       "pathCourseStatus": "Kursstatus im Entwicklungspfad",
-      "sortAscending": "Aufsteigend sortieren",
-      "sortDescending": "Absteigend sortieren"
+      "group": "Gruppe"
     },
     "help": {
       "title": "Informationen zum Bericht",
       "scope": "Die Gruppenauswahl begrenzt die einbezogenen Lernenden. Bei passenden Lernenden werden auch ihre individuellen Lerninhalte und die aus anderen Gruppen berücksichtigt.",
-      "metrics": "Alle Kennzahlen, Tabellenzeilen und Exporte verwenden dieselben angewendeten Bedingungen. Leere Quoten und Durchschnittswerte werden als — angezeigt.",
-      "timezone": "Datumsangaben verwenden {{timezone}}."
+      "metrics": "Alle Kennzahlen, Tabellenzeilen und Exporte verwenden dieselben angewendeten Bedingungen. Leere Quoten und Durchschnittswerte werden als — angezeigt."
     },
     "title": "Berichte",
     "description": "Verfolgen Sie den Lernfortschritt der Organisation über Entwicklungspfade, Kurse und Lernende."

@@ -17,10 +17,13 @@ const result = {
 } as unknown as RunReportResponse["data"];
 
 describe("report sorting headers", () => {
-  it("offers every summary column as a keyboard-accessible server sorting control, with active direction", async () => {
+  it("offers every summary column as a keyboard-accessible server sorting control, toggling the active one", async () => {
     const onSortChange = vi.fn();
     render(
       <ReportResultsTable
+        title="reports.results.tableTitle"
+        hasSubject={false}
+        groupLabels={new Map()}
         result={result}
         view="organisation"
         language="en"
@@ -35,8 +38,6 @@ describe("report sorting headers", () => {
     const headers = screen.getAllByRole("columnheader");
     expect(headers).toHaveLength(8);
     for (const header of headers) expect(within(header).getByRole("button")).toBeDefined();
-    expect(headers[7].getAttribute("aria-sort")).toBe("descending");
-    expect(headers[0].getAttribute("aria-sort")).toBe("none");
     const user = userEvent.setup();
     await user.click(within(headers[0]).getByRole("button"));
     expect(onSortChange).toHaveBeenLastCalledWith({

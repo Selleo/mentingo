@@ -37,6 +37,7 @@ const {
 vi.mock("@remix-run/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@remix-run/react")>()),
   useNavigate: () => vi.fn(),
+  useSearchParams: () => [new URLSearchParams(), vi.fn()],
 }));
 
 vi.mock("~/api/queries", () => ({
