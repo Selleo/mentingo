@@ -118,13 +118,17 @@ class Workflow(unittest.TestCase):
             {
                 "pr_number": "${{ format('{0}', inputs.pr_number) }}",
                 "branch_test": "${{ inputs.pr_video_branch_test == true }}",
+                "retry_run_id": "${{ inputs.pr_video_retry_run_id }}",
             },
         )
         expected_secrets = {
             "CLAUDE_CODE_OAUTH_TOKEN": "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}",
             "ELEVENLABS_API_KEY": "${{ secrets.ELEVENLABS_API_KEY }}",
         }
-        self.assertEqual(caller["secrets"], expected_secrets)
+        self.assertEqual(
+            caller["secrets"],
+            {**expected_secrets, "PR_VIDEO_UPLOAD_TOKEN": "${{ secrets.PR_VIDEO_UPLOAD_TOKEN }}"},
+        )
         self.assertEqual(
             events["workflow_dispatch"]["inputs"]["pr_video_branch_test"]["default"],
             False,
@@ -150,6 +154,22 @@ class Workflow(unittest.TestCase):
         self.assertEqual(self.workflow["jobs"]["film"]["environment"], "release-film")
         self.assertIn("!inputs.pr_video_branch_test", release["jobs"]["film"]["if"])
         self.assertIn("!inputs.pr_video_branch_test", release["jobs"]["publish"]["if"])
+
+    def test_attachment_retry_uses_a_verified_prior_run_without_recording_again(self):
+        recorder = self.workflow["jobs"]["film"]
+        publisher = self.workflow["jobs"]["attach"]
+        self.assertIn("!inputs.retry_run_id", recorder["if"])
+        self.assertIn("inputs.retry_run_id != ''", publisher["if"])
+        verify = next(step for step in publisher["steps"] if step.get("name") == "Verify the previous PR video run")
+        restore = next(step for step in publisher["steps"] if "download-artifact" in step.get("uses", ""))
+        self.assertLess(publisher["steps"].index(verify), publisher["steps"].index(restore))
+        for guard in ('.event == "workflow_dispatch"', '.status == "completed"',
+                      '.path == ".github/workflows/release-film.yml"',
+                      '.head_repository.full_name == env.GITHUB_REPOSITORY',
+                      '.conclusion == "success"'):
+            self.assertIn(guard, verify["run"])
+        self.assertEqual(restore["with"]["run-id"], "${{ inputs.retry_run_id || github.run_id }}")
+        self.assertIn('--run-id "$SOURCE_RUN"', publisher["steps"][-1]["run"])
 
     def test_missing_credentials_fail_before_any_model_or_voice_call(self):
         import os

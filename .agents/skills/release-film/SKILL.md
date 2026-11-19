@@ -434,15 +434,19 @@ previous section and downloadable MP4 artifact; never call an artifact link a pl
 No repository admin settings or environment policies are changed by these workflows.
 
 
-The Release film caller forwards only the existing `CLAUDE_CODE_OAUTH_TOKEN` and
-`ELEVENLABS_API_KEY` secret declarations into the reusable PR workflow. The recording
+The Release film caller forwards the named `CLAUDE_CODE_OAUTH_TOKEN`,
+`ELEVENLABS_API_KEY` and `PR_VIDEO_UPLOAD_TOKEN` secrets into the reusable PR workflow. The recording
 job uses the protected `release-film` environment, where these secrets are configured.
 Missing values fail before planning.
 No provider credentials enter the metadata dispatcher or attachment job.
 Store the user token for native GitHub media uploads as `PR_VIDEO_UPLOAD_TOKEN`
 in the protected `release-film` environment. The attachment job passes it only
 to the media upload request. Metadata reads and the PR body update use
-`GITHUB_TOKEN`.
+`GITHUB_TOKEN`. For an attachment failure after successful recording, dispatch
+Release film with the same `pr_number`, recorded `expected_head` and
+`pr_video_retry_run_id`. This mode verifies the prior recorder run and reuses its
+artifact while it is retained. A changed, closed, draft or external PR remains
+ineligible.
 
 To test the complete pipeline before merging, manually dispatch Release film on
 the fix branch with `pr_number`, `pr_video_branch_test=true` and `publish=false`.
