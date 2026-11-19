@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { ReportFilterBuilder } from "./ReportFilterBuilder";
 
-import type { ReportFilterField, ReportFilterTree } from "./reports.types";
+import type { ReportFilterField, ReportFilterTree } from "../types/reports.types";
 
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 

@@ -4,7 +4,7 @@ import { applyReportFlow } from "./apply-report.flow";
 import { chooseReportOptionFlow } from "./choose-report-option.flow";
 
 import type { Page } from "@playwright/test";
-import type { ReportView } from "~/modules/Reports/reports.types";
+import type { ReportView } from "~/modules/Reports/types/reports.types";
 
 type SelectReportSubjectFlowInput = {
   view: ReportView;

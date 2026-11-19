@@ -8475,6 +8475,41 @@
     }
   },
   "reports": {
+    "courseResults": {
+      "course": "Kurs",
+      "enrolled": "Zapisani",
+      "completionRate": "Ukończenia",
+      "averageProgress": "Średni postęp",
+      "averageQuizScore": "Wynik quizów",
+      "empty": "Żaden kurs nie pasuje do bieżących filtrów"
+    },
+    "pathActivity": {
+      "title": "Aktywność ścieżek",
+      "popular": "Najpopularniejsze ścieżki · top 8",
+      "inactive": "Najdłużej nieaktywne ścieżki · top 8",
+      "topPath": "Najpopularniejsza ścieżka",
+      "neverActive": "Nieużywane ścieżki"
+    },
+    "paths": {
+      "coursesAndLearners": "Kursy: {{courses}} · Uczestnicy: {{learners}}",
+      "details": "Pokaż szczegóły",
+      "empty": "Żadna ścieżka rozwoju nie pasuje do bieżących filtrów",
+      "enrollmentsByStatus": "Zapisy na kursy według statusu",
+      "completedShare": "Ukończono {{percent}}"
+    },
+    "insights": {
+      "activityTrend": "Aktywność w czasie",
+      "activityTrendSubtitle": "Uczestnicy z zarejestrowaną aktywnością w miesiącu",
+      "changeVsPreviousMonth": "{{change}} względem poprzedniego miesiąca",
+      "funnel": "Lejek nauki",
+      "funnelSubtitle": "Jak pasujący uczestnicy przechodzą przez naukę",
+      "funnelSteps": {
+        "learners": "W zakresie",
+        "loggedIn": "Zalogowani",
+        "started": "Rozpoczęli naukę",
+        "completed": "Ukończyli kurs"
+      }
+    },
     "activity": {
       "title": "Aktywność kursów",
       "popular": "Najpopularniejsze kursy · top 8",
@@ -8486,9 +8521,36 @@
       "from": "Od",
       "to": "Do",
       "apply": "Zastosuj okres",
-      "period": "Okres popularności: {{from}} – {{to}} (strefa czasowa raportu).",
+      "period": "Okres popularności: {{from}} - {{to}} (strefa czasowa raportu).",
       "definition": "Popularność liczy każdego pasującego uczestnika raz na kurs. Brak aktywności wyznacza ostatnia zarejestrowana aktywność uczestnika ze wszystkich dat, w wybranym zakresie. Edycja treści nie jest aktywnością uczestnika. Bez automatycznej archiwizacji.",
-      "limitation": "Aktywność obejmuje ostatnie otwarcie kursu, ukończenia kursów i lekcji oraz przesłane quizy (również z poprzednich cykli nauki). Starsze otwarcia nie są przechowywane, więc popularność w przeszłości może być zaniżona. Szkice i kursy zarchiwizowane są wykluczone. Kursy bez zapisów pojawiają się tylko bez filtrów grup, uczestników i nauki. Okres dotyczy tylko tych wykresów; nie jest zapisywany ani eksportowany."
+      "limitation": "Aktywność obejmuje ostatnie otwarcie kursu, ukończenia kursów i lekcji oraz przesłane quizy (również z poprzednich cykli nauki). Starsze otwarcia nie są przechowywane, więc popularność w przeszłości może być zaniżona. Szkice i kursy zarchiwizowane są wykluczone. Kursy bez zapisów pojawiają się tylko bez filtrów grup, uczestników i nauki. Okres dotyczy tylko tych wykresów; nie jest zapisywany ani eksportowany.",
+      "periodLabel": "Okres popularności",
+      "custom": "Własny zakres",
+      "lastDays_one": "Ostatni {{count}} dzień",
+      "lastDays_few": "Ostatnie {{count}} dni",
+      "lastDays_many": "Ostatnie {{count}} dni",
+      "lastDays_other": "Ostatnie {{count}} dni",
+      "highlights": {
+        "topCourse": "Najpopularniejszy kurs",
+        "longestGap": "Najdłużej bez aktywności",
+        "neverActive": "Nigdy nieużywane kursy",
+        "days_one": "{{count}} dzień",
+        "days_few": "{{count}} dni",
+        "days_many": "{{count}} dni",
+        "days_other": "{{count}} dni"
+      },
+      "levels": {
+        "recent": "Poniżej 30 dni",
+        "stale": "30-89 dni",
+        "dormant": "90+ dni"
+      },
+      "tooltip": {
+        "learners_one": "{{count}} aktywny uczestnik",
+        "learners_few": "{{count}} aktywnych uczestników",
+        "learners_many": "{{count}} aktywnych uczestników",
+        "learners_other": "{{count}} aktywnych uczestników",
+        "lastActivity": "Ostatnia aktywność: {{date}}"
+      }
     },
     "errors": {
       "invalidQuery": "Kryteria raportu są nieprawidłowe.",
@@ -8546,7 +8608,6 @@
     },
     "scope": {
       "groupLabel": "Grupy",
-      "boundaryNote": "Wyniki i eksporty uwzględniają Twoje uprawnienia do raportów i bieżące filtry.",
       "allGroups": "Wszystkie grupy",
       "groupsCount": "Grupy: {{count}}"
     },
@@ -8600,12 +8661,15 @@
       "eq": "Jest",
       "neq": "Nie jest",
       "in": "Jest jednym z",
+      "notIn": "Nie jest żadnym z",
       "contains": "Zawiera",
+      "notContains": "Nie zawiera",
       "gte": "Co najmniej",
       "lte": "Co najwyżej",
       "between": "Pomiędzy",
-      "isEmpty": "Brak wartości",
-      "isNotEmpty": "Ma wartość"
+      "notBetween": "Poza zakresem",
+      "isEmpty": "Jest puste",
+      "isNotEmpty": "Nie jest puste"
     },
     "values": {
       "notStarted": "Nierozpoczęte",
@@ -8674,7 +8738,10 @@
       "activeCertificateContext": "Obecnie ważne certyfikaty",
       "outcomesTitle": "Efekty nauki",
       "platformCourses": "Kursy",
-      "platformCoursesContext": "Na platformie, bez wersji roboczych i zarchiwizowanych kursów"
+      "platformCoursesContext": "Na platformie, bez wersji roboczych i zarchiwizowanych kursów",
+      "activeShare": "{{percent}} pasujących uczestników",
+      "aiMentorConversations": "Rozmowy z Mentorem AI",
+      "aiMentorConversationsContext": "W pasujących kursach"
     },
     "breakdowns": {
       "learnersAndEnrollments": "{{learners}} uczestników · {{enrollments}} zapisów",
@@ -8686,7 +8753,10 @@
         "courses": "Kursy",
         "groups": "Grupy",
         "paths": "Ścieżki"
-      }
+      },
+      "statusTitle": "Ukończenia",
+      "statusSubtitle": "Status zapisów w pasującej nauce",
+      "statusChartLabel": "Status zapisów według: {{breakdown}}"
     },
     "exports": {
       "spreadsheet": "Arkusz kalkulacyjny",
@@ -8714,14 +8784,12 @@
       "attempts": "Łączna liczba podejść do quizów",
       "lastActivity": "Ostatnia aktywność",
       "pathCourseStatus": "Status kursu na ścieżce",
-      "sortAscending": "Sortuj rosnąco",
-      "sortDescending": "Sortuj malejąco"
+      "group": "Grupa"
     },
     "help": {
       "title": "Informacje o raporcie",
       "scope": "Wybór grup ogranicza populację. Uczestnicy uwzględniają naukę przypisaną indywidualnie i przez inne grupy.",
-      "metrics": "Wskaźniki, wiersze i eksporty używają tych samych warunków. Puste wskaźniki są oznaczone jako —.",
-      "timezone": "Daty używają strefy {{timezone}}."
+      "metrics": "Wskaźniki, wiersze i eksporty używają tych samych warunków. Puste wskaźniki są oznaczone jako —."
     },
     "title": "Raporty",
     "description": "Poznaj postępy organizacji w nauce, ścieżkach rozwoju, kursach i wśród uczestników."

@@ -7713,6 +7713,41 @@
     }
   },
   "reports": {
+    "courseResults": {
+      "course": "Kurz",
+      "enrolled": "Zapsáno",
+      "completionRate": "Dokončení",
+      "averageProgress": "Průměrný pokrok",
+      "averageQuizScore": "Výsledek kvízů",
+      "empty": "Aktuálním filtrům neodpovídá žádný kurz"
+    },
+    "pathActivity": {
+      "title": "Aktivita cest",
+      "popular": "Nejoblíbenější cesty · top 8",
+      "inactive": "Nejdéle neaktivní cesty · top 8",
+      "topPath": "Nejoblíbenější cesta",
+      "neverActive": "Nikdy nepoužité cesty"
+    },
+    "paths": {
+      "coursesAndLearners": "Kurzy: {{courses}} · Studenti: {{learners}}",
+      "details": "Zobrazit podrobnosti",
+      "empty": "Aktuálním filtrům neodpovídá žádná rozvojová cesta",
+      "enrollmentsByStatus": "Zápisy do kurzů podle stavu",
+      "completedShare": "Dokončeno {{percent}}"
+    },
+    "insights": {
+      "activityTrend": "Aktivita v čase",
+      "activityTrendSubtitle": "Studenti se zaznamenanou aktivitou za měsíc",
+      "changeVsPreviousMonth": "{{change}} oproti minulému měsíci",
+      "funnel": "Trychtýř vzdělávání",
+      "funnelSubtitle": "Jak odpovídající studenti procházejí vzděláváním",
+      "funnelSteps": {
+        "learners": "V rozsahu",
+        "loggedIn": "Přihlášení",
+        "started": "Začali se učit",
+        "completed": "Dokončili kurz"
+      }
+    },
     "activity": {
       "title": "Aktivita kurzů",
       "popular": "Nejoblíbenější kurzy · top 8",
@@ -7724,9 +7759,36 @@
       "from": "Od",
       "to": "Do",
       "apply": "Použít období",
-      "period": "Období oblíbenosti: {{from}} – {{to}} (časové pásmo reportu).",
+      "period": "Období oblíbenosti: {{from}} - {{to}} (časové pásmo reportu).",
       "definition": "Oblíbenost počítá každého odpovídajícího účastníka jednou na kurz. Neaktivita vychází z poslední zaznamenané aktivity bez omezení data ve zvoleném rozsahu. Úpravy obsahu nejsou aktivitou účastníka. Bez automatické archivace.",
-      "limitation": "Aktivita zahrnuje poslední otevření kurzu, dokončení kurzů a lekcí a odeslané kvízy (i předchozí cykly učení). Starší otevření se neuchovávají, takže historická oblíbenost může být podhodnocena. Koncepty a archivované kurzy jsou vyloučeny. Kurzy bez zápisů se zobrazují pouze bez filtrů skupin, účastníků a učení. Období platí pouze pro tyto grafy; neukládá se ani neexportuje."
+      "limitation": "Aktivita zahrnuje poslední otevření kurzu, dokončení kurzů a lekcí a odeslané kvízy (i předchozí cykly učení). Starší otevření se neuchovávají, takže historická oblíbenost může být podhodnocena. Koncepty a archivované kurzy jsou vyloučeny. Kurzy bez zápisů se zobrazují pouze bez filtrů skupin, účastníků a učení. Období platí pouze pro tyto grafy; neukládá se ani neexportuje.",
+      "periodLabel": "Období oblíbenosti",
+      "custom": "Vlastní rozsah",
+      "lastDays_one": "Poslední {{count}} den",
+      "lastDays_few": "Poslední {{count}} dny",
+      "lastDays_many": "Posledních {{count}} dní",
+      "lastDays_other": "Posledních {{count}} dní",
+      "highlights": {
+        "topCourse": "Nejoblíbenější kurz",
+        "longestGap": "Nejdéle bez aktivity",
+        "neverActive": "Nikdy nepoužité kurzy",
+        "days_one": "{{count}} den",
+        "days_few": "{{count}} dny",
+        "days_many": "{{count}} dní",
+        "days_other": "{{count}} dní"
+      },
+      "levels": {
+        "recent": "Méně než 30 dní",
+        "stale": "30-89 dní",
+        "dormant": "90+ dní"
+      },
+      "tooltip": {
+        "learners_one": "{{count}} aktivní student",
+        "learners_few": "{{count}} aktivní studenti",
+        "learners_many": "{{count}} aktivních studentů",
+        "learners_other": "{{count}} aktivních studentů",
+        "lastActivity": "Poslední aktivita: {{date}}"
+      }
     },
     "errors": {
       "invalidQuery": "Kritéria přehledu nejsou platná.",
@@ -7784,7 +7846,6 @@
     },
     "scope": {
       "groupLabel": "Skupiny",
-      "boundaryNote": "Výsledky a exporty zůstávají v rámci vašich oprávnění k reportům a aktuálních filtrů.",
       "allGroups": "Všechny skupiny",
       "groupsCount": "Skupiny: {{count}}"
     },
@@ -7838,12 +7899,15 @@
       "eq": "Je",
       "neq": "Není",
       "in": "Je jednou z hodnot",
+      "notIn": "Není žádnou z hodnot",
       "contains": "Obsahuje",
+      "notContains": "Neobsahuje",
       "gte": "Alespoň",
       "lte": "Nejvýše",
       "between": "Mezi",
-      "isEmpty": "Nemá hodnotu",
-      "isNotEmpty": "Má hodnotu"
+      "notBetween": "Není mezi",
+      "isEmpty": "Je prázdné",
+      "isNotEmpty": "Není prázdné"
     },
     "values": {
       "notStarted": "Nezahájeno",
@@ -7912,7 +7976,10 @@
       "activeCertificateContext": "Aktuálně platné certifikáty",
       "outcomesTitle": "Výsledky vzdělávání",
       "platformCourses": "Kurzy",
-      "platformCoursesContext": "Na platformě, bez konceptů a archivovaných kurzů"
+      "platformCoursesContext": "Na platformě, bez konceptů a archivovaných kurzů",
+      "activeShare": "{{percent}} odpovídajících studentů",
+      "aiMentorConversations": "Konverzace s AI mentorem",
+      "aiMentorConversationsContext": "V odpovídajících kurzech"
     },
     "breakdowns": {
       "learnersAndEnrollments": "Účastníci: {{learners}} · Zápisy: {{enrollments}}",
@@ -7924,7 +7991,10 @@
         "courses": "Kurzy",
         "groups": "Skupiny",
         "paths": "Cesty"
-      }
+      },
+      "statusTitle": "Dokončení",
+      "statusSubtitle": "Stav zápisů odpovídajícího vzdělávání",
+      "statusChartLabel": "Stav zápisů podle: {{breakdown}}"
     },
     "exports": {
       "spreadsheet": "Tabulka",
@@ -7952,14 +8022,12 @@
       "attempts": "Celkový počet pokusů",
       "lastActivity": "Poslední aktivita",
       "pathCourseStatus": "Stav kurzu v rozvojové cestě",
-      "sortAscending": "Seřadit vzestupně",
-      "sortDescending": "Seřadit sestupně"
+      "group": "Skupina"
     },
     "help": {
       "title": "O tomto přehledu",
       "scope": "Výběr skupin omezuje okruh účastníků. U odpovídajících účastníků se zahrnuje i jejich individuální vzdělávání a vzdělávání v jiných skupinách.",
-      "metrics": "Všechny metriky, řádky tabulky i exporty vycházejí ze stejných použitých podmínek. Prázdné míry a průměry se zobrazují jako —.",
-      "timezone": "Data jsou v časovém pásmu {{timezone}}."
+      "metrics": "Všechny metriky, řádky tabulky i exporty vycházejí ze stejných použitých podmínek. Prázdné míry a průměry se zobrazují jako —."
     },
     "title": "Přehledy",
     "description": "Sledujte pokrok organizace v rozvojových cestách, kurzech a u jednotlivých uživatelů."

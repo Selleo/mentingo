@@ -1,7 +1,8 @@
+import type { ReportActivityPeriod } from "../schemas/reports.schema";
 import type { SQL } from "drizzle-orm";
 
 export type CourseActivityContext = {
-  period: { from: string; to: string };
+  period: ReportActivityPeriod;
   timezone: string;
   tenantId: string;
   courseCandidates: SQL;

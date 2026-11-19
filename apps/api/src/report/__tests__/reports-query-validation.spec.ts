@@ -30,10 +30,14 @@ describe("reports query semantic validation", () => {
       ),
     ).not.toThrow();
   });
-  it("requires a subject for specific views and rejects invalid timezones", () => {
-    expect(() => validateReportsQuerySemantics(baseQuery({ view: REPORT_VIEWS.COURSE }))).toThrow(
-      REPORT_ERRORS.SUBJECT_REQUIRED,
-    );
+  it("lets subject views compare every subject and rejects invalid timezones", () => {
+    for (const view of [
+      REPORT_VIEWS.COURSE,
+      REPORT_VIEWS.DEVELOPMENT_PATHS,
+      REPORT_VIEWS.LEARNER,
+    ]) {
+      expect(() => validateReportsQuerySemantics(baseQuery({ view }))).not.toThrow();
+    }
     expect(() => validateReportsQuerySemantics(baseQuery({ timezone: "Mars/Olympus" }))).toThrow(
       REPORT_ERRORS.INVALID_TIMEZONE,
     );

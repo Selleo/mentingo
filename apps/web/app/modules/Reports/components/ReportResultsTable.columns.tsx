@@ -1,17 +1,26 @@
 import { match } from "ts-pattern";
 
 import { Badge } from "~/components/ui/badge";
-import { Progress } from "~/components/ui/progress";
 
-import { formatReportDate, formatReportPercent } from "../reports.utils";
+import { formatReportDate, formatReportPercent } from "../utils/reports.utils";
+
+import {
+  ReportNumberCell,
+  ReportPercentCell,
+  ReportProgressCell,
+  reportSortableHeader,
+  ReportTextCell,
+} from "./ReportTableCells";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
 import type { RunReportResponse } from "~/api/generated-api";
-import type { ReportView } from "~/modules/Reports/reports.types";
+import type { ReportView } from "~/modules/Reports/types/reports.types";
 
 export type ReportRow = RunReportResponse["data"]["rows"][number];
 type PathCourse = ReportRow["pathCourses"][number];
+
+const sortableHeader = (label: string) => reportSortableHeader<ReportRow>(label);
 
 const statusVariant = (status: string) =>
   match(status)
@@ -28,13 +37,14 @@ const getPathCourseColumns = (rows: ReportRow[]) =>
 
 const getPathCourseColumn = (t: TFunction, course: PathCourse): ColumnDef<ReportRow> => ({
   id: `pathCourse-${course.courseId}`,
+  enableSorting: false,
   header: () => (
-    <div className="max-w-48">
-      <span className="block truncate">{course.courseTitle}</span>
-      <span className="details block font-normal text-neutral-500">
-        {t("reports.table.pathCourseStatus")}
-      </span>
-    </div>
+    <span
+      className="block max-w-48 truncate"
+      title={`${course.courseTitle} · ${t("reports.table.pathCourseStatus")}`}
+    >
+      {course.courseTitle}
+    </span>
   ),
   cell: ({ row }) => {
     const courseState = row.original.pathCourses.find(
@@ -49,46 +59,62 @@ const getPathCourseColumn = (t: TFunction, course: PathCourse): ColumnDef<Report
   },
 });
 
+type ReportResultColumnsOptions = {
+  view: ReportView;
+  rows: ReportRow[];
+  language: string;
+  timezone: string;
+  hasSubject: boolean;
+  groupLabels: Map<string, string>;
+};
+
+const getGroupColumn = (t: TFunction, groupLabels: Map<string, string>): ColumnDef<ReportRow> => ({
+  id: "groups",
+  header: t("reports.table.group"),
+  cell: ({ row }) => {
+    const labels = row.original.groupIds.flatMap((groupId) => groupLabels.get(groupId) ?? []);
+    return (
+      <span title={labels.join(", ")}>
+        <ReportTextCell>{labels.join(", ") || "—"}</ReportTextCell>
+      </span>
+    );
+  },
+});
+
 export const getReportResultColumns = (
   t: TFunction,
-  view: ReportView,
-  rows: ReportRow[],
-  language: string,
-  timezone: string,
+  { view, rows, language, timezone, hasSubject, groupLabels }: ReportResultColumnsOptions,
 ): ColumnDef<ReportRow>[] => {
   const columns: ColumnDef<ReportRow>[] = [];
+  const isSingleLearner = view === "learner" && hasSubject;
 
-  if (view !== "learner") {
+  if (!isSingleLearner) {
     columns.push({
       id: "learner",
-      header: t("reports.table.learner"),
-      cell: ({ row }) => (
-        <div className="min-w-0">
-          <p className="body-sm-md truncate text-neutral-950">{row.original.learner.name}</p>
-          <p className="details truncate text-neutral-500">{row.original.learner.email}</p>
-        </div>
-      ),
+      header: sortableHeader(t("reports.table.learner")),
+      cell: ({ row }) => <ReportTextCell>{row.original.learner.name}</ReportTextCell>,
     });
   }
+  if (view === "learner" && !hasSubject) columns.push(getGroupColumn(t, groupLabels));
   if (view !== "course") {
     columns.push({
       id: "course",
-      header: t("reports.table.course"),
-      cell: ({ row }) => row.original.course?.title ?? "—",
+      header: sortableHeader(t("reports.table.course")),
+      cell: ({ row }) => <ReportTextCell>{row.original.course?.title ?? "—"}</ReportTextCell>,
     });
   }
   if (view !== "developmentPaths") {
     columns.push({
       id: "path",
-      header: t("reports.table.path"),
-      cell: ({ row }) => row.original.path?.title ?? "—",
+      header: sortableHeader(t("reports.table.path")),
+      cell: ({ row }) => <ReportTextCell>{row.original.path?.title ?? "—"}</ReportTextCell>,
     });
   }
 
   columns.push(
     {
       id: "status",
-      header: t("reports.table.status"),
+      header: sortableHeader(t("reports.table.status")),
       cell: ({ row }) => (
         <Badge variant={statusVariant(row.original.status)} className="w-max">
           {t(`reports.values.${row.original.status}`)}
@@ -97,34 +123,22 @@ export const getReportResultColumns = (
     },
     {
       id: "progress",
-      header: t("reports.table.progress"),
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Progress
-            value={row.original.progress ?? 0}
-            aria-hidden
-            className="h-1.5 w-20 bg-neutral-200"
-            indicatorClassName="bg-primary-600"
-          />
-          <span className="tabular-nums">{formatReportPercent(row.original.progress)}</span>
-        </div>
-      ),
+      header: sortableHeader(t("reports.table.progress")),
+      cell: ({ row }) => <ReportProgressCell value={row.original.progress} />,
     },
     {
       id: "score",
-      header: t("reports.table.averageQuizScore"),
-      cell: ({ row }) => (
-        <span className="tabular-nums">{formatReportPercent(row.original.score)}</span>
-      ),
+      header: sortableHeader(t("reports.table.averageQuizScore")),
+      cell: ({ row }) => <ReportPercentCell value={row.original.score} />,
     },
     {
       id: "attempts",
-      header: t("reports.table.attempts"),
-      cell: ({ row }) => <span className="tabular-nums">{row.original.attempts}</span>,
+      header: sortableHeader(t("reports.table.attempts")),
+      cell: ({ row }) => <ReportNumberCell>{row.original.attempts}</ReportNumberCell>,
     },
     {
       id: "lastActivity",
-      header: t("reports.table.lastActivity"),
+      header: sortableHeader(t("reports.table.lastActivity")),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
           {formatReportDate(row.original.lastActivityAt, language, timezone)}

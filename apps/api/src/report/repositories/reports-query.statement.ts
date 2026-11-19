@@ -1,28 +1,22 @@
-import {
-  DEFAULT_REPORT_SORT,
-  REPORT_SORT_DIRECTIONS,
-  REPORT_SORT_FIELDS,
-  SYSTEM_ROLE_SLUGS,
-} from "@repo/shared";
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { sql } from "drizzle-orm";
-import { match } from "ts-pattern";
 
 import { currentLearningState } from "src/course-repetition/course-learning-state.sql";
 
-import { REPORT_STATUS, REPORT_VIEWS } from "../constants/reports.constants";
+import { REPORT_VIEWS } from "../constants/reports.constants";
+import { uuidArray } from "../utils/reports-sql.utils";
 
-import { buildCourseActivityCtes, buildCourseActivityProjection } from "./reports-course-activity";
+import { buildCourseActivityCtes } from "./reports-course-activity";
+import { buildLearningInsightsCtes, buildPathActivityCtes } from "./reports-learning-insights";
+import {
+  buildBreakdownCtes,
+  buildPageRowsCte,
+  buildResultProjection,
+  buildSummaryCte,
+} from "./reports-query.result-stages";
 
 import type { ReportStatementContext } from "./reports-query.types";
 import type { SQL } from "drizzle-orm";
-
-function uuidArray(values: readonly string[]): SQL {
-  if (values.length === 0) return sql`ARRAY[]::uuid[]`;
-  return sql`ARRAY[${sql.join(
-    values.map((value) => sql`${value}::uuid`),
-    sql`, `,
-  )}]`;
-}
 
 export function buildReportStatement(
   context: ReportStatementContext,
@@ -35,24 +29,28 @@ export function buildReportStatement(
     buildCourseFactsCte(context),
     buildPathFactsCtes(context),
     buildFilteredRowsCtes(context),
-    ...(context.query.activityPeriod
-      ? [
-          buildCourseActivityCtes({
-            period: context.query.activityPeriod,
-            timezone: context.query.timezone,
-            tenantId: context.access.tenantId,
-            courseCandidates:
-              context.activityCourseCandidates ??
-              sql`SELECT DISTINCT tenant_id, course_id, course_title AS label FROM course_facts WHERE course_id IN (SELECT course_id FROM activity_keys)`,
-            pathView: context.query.view === REPORT_VIEWS.DEVELOPMENT_PATHS,
-          }),
-        ]
-      : []),
+    ...buildActivityCtes(context),
     buildSummaryCte(context),
     buildBreakdownCtes(context),
     buildPageRowsCte(context),
   ];
   return sql`WITH ${sql.join(ctes, sql`, `)} ${buildResultProjection(context)}`;
+}
+
+function buildActivityCtes(context: ReportStatementContext): SQL[] {
+  if (!context.query.activityPeriod) return [];
+  const activityContext = {
+    period: context.query.activityPeriod,
+    timezone: context.query.timezone,
+    tenantId: context.access.tenantId,
+    courseCandidates: context.activityCourseCandidates,
+    pathView: context.query.view === REPORT_VIEWS.DEVELOPMENT_PATHS,
+  };
+  return [
+    buildCourseActivityCtes(activityContext),
+    buildPathActivityCtes(activityContext),
+    buildLearningInsightsCtes(activityContext),
+  ];
 }
 
 function buildLearnerPopulationCte(context: ReportStatementContext): SQL {
@@ -102,7 +100,7 @@ function buildLearnerPopulationCte(context: ReportStatementContext): SQL {
                   : sql``
               }
               ${
-                context.query.view === REPORT_VIEWS.LEARNER
+                context.query.view === REPORT_VIEWS.LEARNER && context.query.subjectId
                   ? sql`AND u.id = ${context.query.subjectId}`
                   : sql``
               }
@@ -307,159 +305,5 @@ function buildFilteredRowsCtes(context: ReportStatementContext): SQL {
             UNION
             SELECT learner_id FROM population_filtered
           )
-  `;
-}
-
-function buildSummaryCte(context: ReportStatementContext): SQL {
-  return sql`
-          summary AS (
-            SELECT COUNT(*)::int AS total, (SELECT COUNT(*)::int FROM matching_learners) AS learners,
-              ${
-                context.query.view === REPORT_VIEWS.DEVELOPMENT_PATHS
-                  ? sql`COALESCE(SUM((SELECT COUNT(*) FROM jsonb_array_elements(r.path_courses) pc WHERE pc ->> 'status' = 'completed')), 0)::int`
-                  : sql`COUNT(*) FILTER (WHERE r.status = 'completed')::int`
-              } AS course_completions,
-              COUNT(DISTINCT learner_id) FILTER (WHERE last_activity_at >= CURRENT_TIMESTAMP - INTERVAL '30 days')::int AS active_learners_30d,
-              COUNT(*) FILTER (WHERE certificate_status = 'active')::int AS active_certificates,
-              COUNT(*) FILTER (WHERE certificate_issued_at IS NOT NULL)::int AS certificates_issued,
-              COUNT(*) FILTER (WHERE score IS NOT NULL)::int AS scored_enrollments,
-              ${
-                context.query.view === REPORT_VIEWS.DEVELOPMENT_PATHS
-                  ? sql`COUNT(*) FILTER (WHERE status = 'completed')::int`
-                  : sql`COALESCE((SELECT COUNT(DISTINCT (slp.student_id, slp.learning_path_id))::int
-                  FROM student_learning_path_courses slpc
-                  JOIN student_learning_paths slp ON slp.tenant_id = slpc.tenant_id
-                    AND slp.student_id = slpc.student_id AND slp.learning_path_id = slpc.learning_path_id
-                  JOIN filtered_course_keys fkeys ON fkeys.tenant_id = slpc.tenant_id
-                    AND fkeys.learner_id = slpc.student_id AND fkeys.course_id = slpc.course_id
-                  WHERE slp.tenant_id = ${context.access.tenantId}
-                    AND (slp.completed_at IS NOT NULL OR slp.progress = 'completed')), 0)::int`
-              }
-                AS completed_paths,
-              ${
-                context.query.view === REPORT_VIEWS.DEVELOPMENT_PATHS
-                  ? sql`COALESCE(SUM(jsonb_array_length(r.path_courses)), 0)::numeric`
-                  : sql`COUNT(*)::numeric`
-              } AS course_enrollments,
-              AVG(progress)::numeric AS average_progress, AVG(score)::numeric AS average_score
-            FROM filtered r
-          )
-  `;
-}
-
-function buildBreakdownCtes(context: ReportStatementContext): SQL {
-  return sql`
-          group_breakdown AS (
-            SELECT gu.group_id::text AS id,
-              ${context.localizedGroupName} AS label,
-              COUNT(DISTINCT f.learner_id)::int AS learners,
-              ${
-                context.query.view === REPORT_VIEWS.DEVELOPMENT_PATHS
-                  ? sql`COALESCE(SUM(jsonb_array_length(f.path_courses)), 0)::int`
-                  : sql`COUNT(*)::int`
-              } AS course_enrollments,
-              ${
-                context.query.view === REPORT_VIEWS.DEVELOPMENT_PATHS
-                  ? sql`COALESCE(SUM((SELECT COUNT(*) FROM jsonb_array_elements(f.path_courses) pc WHERE pc ->> 'status' = 'completed')), 0)::int`
-                  : sql`COUNT(*) FILTER (WHERE f.status = 'completed')::int`
-              } AS course_completions
-            FROM filtered f JOIN group_users gu ON gu.tenant_id = f.tenant_id AND gu.user_id = f.learner_id
-              AND gu.group_id = ANY(${uuidArray(context.authorizedGroupIds)})
-            JOIN groups g ON g.id = gu.group_id AND g.tenant_id = gu.tenant_id
-            GROUP BY gu.group_id, g.name, g.base_language, g.available_locales
-          ),
-          course_breakdown AS (
-            SELECT course_id::text AS id, MAX(course_title) AS label,
-              COUNT(DISTINCT learner_id)::int AS learners, COUNT(*)::int AS course_enrollments,
-              COUNT(*) FILTER (WHERE status = 'completed')::int AS course_completions
-            FROM filtered WHERE course_id IS NOT NULL GROUP BY course_id
-          ),
-          path_breakdown AS (
-            SELECT pcf.path_id::text AS id, MAX(pf.path_title) AS label,
-              COUNT(DISTINCT pcf.learner_id)::int AS learners, COUNT(*)::int AS course_enrollments,
-              COUNT(*) FILTER (WHERE pcf.status = 'completed')::int AS course_completions
-            FROM path_course_facts pcf
-            JOIN filtered f ON f.tenant_id = pcf.tenant_id AND f.learner_id = pcf.learner_id
-              AND (f.course_id = pcf.course_id OR f.path_id = pcf.path_id)
-            JOIN path_facts pf ON pf.tenant_id = pcf.tenant_id AND pf.learner_id = pcf.learner_id
-              AND pf.path_id = pcf.path_id
-            GROUP BY pcf.path_id
-          )
-  `;
-}
-
-/**
- * Orders report rows by the requested column, with stable record ties so pagination never
- * skips or repeats rows. Shared by pagination and JSON aggregation (and therefore exports).
- */
-function buildRowOrder({ query }: ReportStatementContext): SQL {
-  const sortColumn = match(query.sortBy ?? DEFAULT_REPORT_SORT.sortBy)
-    .with(REPORT_SORT_FIELDS.LEARNER, () => sql`learner_name`)
-    .with(REPORT_SORT_FIELDS.COURSE, () => sql`course_title`)
-    .with(REPORT_SORT_FIELDS.PATH, () => sql`path_title`)
-    .with(
-      REPORT_SORT_FIELDS.STATUS,
-      () =>
-        sql`CASE status WHEN ${REPORT_STATUS.NOT_STARTED} THEN 0 WHEN ${REPORT_STATUS.IN_PROGRESS} THEN 1 WHEN ${REPORT_STATUS.COMPLETED} THEN 2 END`,
-    )
-    .with(REPORT_SORT_FIELDS.PROGRESS, () => sql`progress`)
-    .with(REPORT_SORT_FIELDS.SCORE, () => sql`score`)
-    .with(REPORT_SORT_FIELDS.ATTEMPTS, () => sql`attempts`)
-    .with(REPORT_SORT_FIELDS.LAST_ACTIVITY, () => sql`last_activity_at`)
-    .exhaustive();
-
-  const sortDirection = match(query.sortDirection ?? DEFAULT_REPORT_SORT.sortDirection)
-    .with(REPORT_SORT_DIRECTIONS.ASC, () => sql`ASC`)
-    .with(REPORT_SORT_DIRECTIONS.DESC, () => sql`DESC`)
-    .exhaustive();
-
-  return sql`${sortColumn} ${sortDirection} NULLS LAST, learner_id ASC, course_id ASC NULLS LAST, path_id ASC NULLS LAST`;
-}
-
-function buildPageRowsCte(context: ReportStatementContext): SQL {
-  return sql`
-          page_rows AS (
-            SELECT * FROM filtered ORDER BY ${buildRowOrder(context)}
-            LIMIT ${context.pageLimit} OFFSET ${context.pageOffset}
-          )
-  `;
-}
-
-function buildResultProjection(context: ReportStatementContext): SQL {
-  return sql`
-          SELECT summary.*,
-            ${context.query.activityPeriod ? sql`${buildCourseActivityProjection()} AS course_activity,` : sql``}
-            COALESCE((SELECT JSONB_AGG(JSONB_BUILD_OBJECT('id', id, 'label', label, 'learners', learners,
-              'courseEnrollments', course_enrollments, 'courseCompletions', course_completions,
-              'completionRate', CASE WHEN course_enrollments = 0 THEN NULL ELSE ROUND(course_completions::numeric * 100 / course_enrollments, 2) END)
-              ORDER BY learners DESC, label) FROM group_breakdown), '[]'::jsonb) AS groups,
-            COALESCE((SELECT JSONB_AGG(JSONB_BUILD_OBJECT('id', id, 'label', label, 'learners', learners,
-              'courseEnrollments', course_enrollments, 'courseCompletions', course_completions,
-              'completionRate', CASE WHEN course_enrollments = 0 THEN NULL ELSE ROUND(course_completions::numeric * 100 / course_enrollments, 2) END)
-              ORDER BY learners DESC, label) FROM course_breakdown), '[]'::jsonb) AS courses,
-            COALESCE((SELECT JSONB_AGG(JSONB_BUILD_OBJECT('id', id, 'label', label, 'learners', learners,
-              'courseEnrollments', course_enrollments, 'courseCompletions', course_completions,
-              'completionRate', CASE WHEN course_enrollments = 0 THEN NULL ELSE ROUND(course_completions::numeric * 100 / course_enrollments, 2) END)
-              ORDER BY learners DESC, label) FROM path_breakdown), '[]'::jsonb) AS paths,
-            COALESCE((SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
-              'id', learner_id::text || ':' || COALESCE(course_id::text, '') || COALESCE(':' || path_id::text, ''),
-              'learner', JSONB_BUILD_OBJECT('id', learner_id, 'name', learner_name, 'email', learner_email),
-              'course', CASE WHEN course_id IS NULL THEN NULL::jsonb
-                ELSE JSONB_BUILD_OBJECT('id', course_id, 'title', course_title) END,
-              'path', CASE WHEN path_id IS NULL THEN NULL::jsonb
-                ELSE JSONB_BUILD_OBJECT('id', path_id, 'title', path_title) END,
-              'status', status, 'progress', progress, 'score', score, 'attempts', attempts,
-              'certificate', JSONB_BUILD_OBJECT('status', certificate_status, 'issuedAt',
-                CASE WHEN certificate_issued_at IS NULL THEN NULL ELSE
-                  TO_CHAR(certificate_issued_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') END),
-              'enrolledAt', CASE WHEN enrolled_at IS NULL THEN NULL ELSE
-                TO_CHAR(enrolled_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') END,
-              'completedAt', CASE WHEN completed_at IS NULL THEN NULL ELSE
-                TO_CHAR(completed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') END,
-              'lastActivityAt', CASE WHEN last_activity_at IS NULL THEN NULL ELSE
-                TO_CHAR(last_activity_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') END,
-              'groupIds', group_ids, 'pathCourses', path_courses
-            ) ORDER BY ${buildRowOrder(context)}) FROM page_rows), '[]'::jsonb) AS rows
-          FROM summary
   `;
 }

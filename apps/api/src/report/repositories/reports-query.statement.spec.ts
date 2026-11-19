@@ -34,6 +34,7 @@ const renderReportStatementSql = (query: Partial<ReportsQuery> = {}) => {
     managedGroupIds: [],
     authorizedGroupIds: [],
     filterSql: sql`true`,
+    activityCourseCandidates: sql`SELECT tenant_id, id AS course_id, title AS label FROM courses`,
     fromSql: sql`course_facts`,
     pathPopulationSql: sql`true`,
     localizedCourseTitle: sql`course_title`,

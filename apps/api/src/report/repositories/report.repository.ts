@@ -82,7 +82,9 @@ export class ReportRepository {
       FROM ${studentLessonProgress} slp
       JOIN ${lessons} l ON slp.lesson_id = l.id
       JOIN ${chapters} ch ON l.chapter_id = ch.id
-      WHERE ${currentLearningState(sql.raw("slp.learning_state_id"))} AND slp.student_id = ${users.id}
+      WHERE ${currentLearningState(sql.raw("slp.learning_state_id"))} AND slp.student_id = ${
+        users.id
+      }
         AND ch.course_id = ${courses.id}
         AND slp.completed_at IS NOT NULL
     )`;
@@ -129,7 +131,9 @@ export class ReportRepository {
             FROM ${studentLessonProgress} slp
             JOIN ${lessons} l ON slp.lesson_id = l.id
             JOIN ${chapters} ch ON l.chapter_id = ch.id
-            WHERE ${currentLearningState(sql.raw("slp.learning_state_id"))} AND slp.student_id = ${users.id}
+            WHERE ${currentLearningState(sql.raw("slp.learning_state_id"))} AND slp.student_id = ${
+              users.id
+            }
               AND ch.course_id = ${courses.id}
               AND slp.quiz_score IS NOT NULL
           ) quiz_lesson
