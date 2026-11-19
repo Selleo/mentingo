@@ -520,7 +520,7 @@ describe("AuthoringBriefPanel", () => {
     expect(screen.queryByRole("button", { name: "Stop" })).not.toBeInTheDocument();
     expect(screen.queryByText(/preparing your response/i)).not.toBeInTheDocument();
     expect(pendingAttachment).not.toHaveTextContent("Uploading");
-    expect(pendingAttachment.querySelector(".animate-spin")).toBeNull();
+    expect(pendingAttachment.querySelector(".animate-spin")).toBeInTheDocument();
     await user.type(screen.getByTestId("course-authoring-brief-input"), " more detail");
     await user.keyboard("{Enter}");
     expect(onSubmit).not.toHaveBeenCalled();
@@ -550,20 +550,25 @@ describe("AuthoringBriefPanel", () => {
       );
 
     withStatus("queued", "session-created-by-upload");
+    expect(pendingAttachment.querySelector(".animate-spin")).toBeInTheDocument();
     expect(screen.getByTestId("course-authoring-composer-attachments")).toHaveTextContent(
       "guide.pdf",
     );
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
     withStatus("processing", "session-created-by-upload");
+    expect(pendingAttachment.querySelector(".animate-spin")).toBeInTheDocument();
     expect(pendingAttachment).toHaveTextContent("Processing");
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
     withStatus("ready", "session-created-by-upload");
+    expect(pendingAttachment.querySelector(".animate-spin")).toBeNull();
     expect(pendingAttachment).toHaveTextContent("Ready");
     expect(screen.getByRole("button", { name: "Send" })).toBeEnabled();
     withStatus("partial", "session-created-by-upload");
+    expect(pendingAttachment.querySelector(".animate-spin")).toBeNull();
     expect(pendingAttachment).toHaveTextContent("Processing incomplete");
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
     withStatus("failed", "session-created-by-upload");
+    expect(pendingAttachment.querySelector(".animate-spin")).toBeNull();
     expect(pendingAttachment).toHaveTextContent("Failed");
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
     await user.click(screen.getByRole("button", { name: "Remove attachment guide.pdf" }));
