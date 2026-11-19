@@ -877,6 +877,98 @@ export const AUTOMATION_TRIGGER_DEFINITIONS: AutomationTriggerDefinition[] = [
       ),
     ],
   },
+  {
+    type: AUTOMATION_EVENT_KINDS.FORUM_MENTION,
+    kind: AUTOMATION_NODE_KINDS.TRIGGER,
+    labelKey: "automationBuilder.blocks.forumUserMentioned",
+    providedVariables: [
+      variable(
+        "userFirstName",
+        "automationBuilder.variables.mentionedFirstName",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "userFirstName",
+      ),
+      variable(
+        "userLastName",
+        "automationBuilder.variables.mentionedLastName",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "userLastName",
+      ),
+      variable(
+        "authorFullName",
+        "automationBuilder.variables.authorFullName",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "authorFullName",
+      ),
+      variable(
+        "topicTitle",
+        "automationBuilder.variables.topicTitle",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "topic_title",
+      ),
+      variable(
+        "messageContent",
+        "automationBuilder.variables.messageContent",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "message",
+      ),
+      variable(
+        "topicUrl",
+        "automationBuilder.variables.topicUrl",
+        AUTOMATION_PLACEHOLDER_TYPES.URL,
+        "topic_link",
+      ),
+    ],
+  },
+  {
+    type: AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY,
+    kind: AUTOMATION_NODE_KINDS.TRIGGER,
+    labelKey: "automationBuilder.blocks.discussionReply",
+    providedVariables: [
+      variable(
+        "userFirstName",
+        "automationBuilder.variables.recipientFirstName",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "userFirstName",
+      ),
+      variable(
+        "userLastName",
+        "automationBuilder.variables.recipientLastName",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "userLastName",
+      ),
+      variable(
+        "discussionName",
+        "automationBuilder.variables.discussionName",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "discussion_name",
+      ),
+      variable(
+        "replyCount",
+        "automationBuilder.variables.replyCount",
+        AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+        "reply_count",
+      ),
+      variable(
+        "replyAuthors",
+        "automationBuilder.variables.replyAuthors",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "reply_authors",
+      ),
+      variable(
+        "latestReply",
+        "automationBuilder.variables.latestReply",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "latest_reply",
+      ),
+      variable(
+        "discussionUrl",
+        "automationBuilder.variables.discussionUrl",
+        AUTOMATION_PLACEHOLDER_TYPES.URL,
+        "discussion_link",
+      ),
+    ],
+  },
 ];
 
 export const getAutomationTriggerDefinition = (type: AutomationEventKind) =>

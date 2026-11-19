@@ -347,7 +347,9 @@
       "live_training_reminder": "Živé školení začne za 15 minut",
       "live_training_ended": "Živé školení skončilo",
       "quiz_attempt_graded": "Kvíz ohodnocen hodnotitelem",
-      "quiz_grading_digest": "Nové odpovědi čekají na hodnocení (denně)"
+      "quiz_grading_digest": "Nové odpovědi čekají na hodnocení (denně)",
+      "forum_mention": "Uživatel zmíněn v tématu fóra",
+      "discussion_reply": "Nové odpovědi v diskusi (souhrnně)"
     },
     "errors": {
       "incompleteButton": "Zadejte popisek tlačítka a URL.",
@@ -8174,7 +8176,9 @@
         "live_training_reminder": "Účastníci zapsaní do kurzů propojených s nadcházejícím živým školením.",
         "live_training_ended": "Účastníci zapsaní do kurzů propojených s živým školením, které skončilo.",
         "quiz_attempt_graded": "Účastník, jehož odpovědi v kvízu byly ohodnoceny.",
-        "quiz_grading_digest": "Uživatelé, kteří mohou hodnotit odpovědi v kvízech."
+        "quiz_grading_digest": "Uživatelé, kteří mohou hodnotit odpovědi v kvízech.",
+        "forum_mention": "Uživatelé zmínění v příspěvku na fóru.",
+        "discussion_reply": "Účastníci vlákna nebo tématu, kteří si odpovědi v aplikaci nepřečetli."
       }
     },
     "mapping": {
@@ -8274,7 +8278,9 @@
       "courseChatUserMentioned": "Uživatel zmíněn v chatu",
       "courseDueDateReminder": "Připomínka termínu kurzu",
       "quizAttemptGraded": "Kvíz ohodnocen",
-      "quizGradingDigest": "Přehled fronty hodnocení"
+      "quizGradingDigest": "Přehled fronty hodnocení",
+      "forumUserMentioned": "Zmínka ve fóru",
+      "discussionReply": "Nové odpovědi v diskusi"
     },
     "canvas": {
       "emptyTitle": "Vaše plátno automatizace je prázdné",
@@ -8432,7 +8438,14 @@
       "lessonUrl": "Odkaz na lekci",
       "newAnswersCount": "Nové odpovědi",
       "pendingAnswersCount": "Odpovědi čekající na hodnocení",
-      "gradingQueueUrl": "Odkaz na frontu hodnocení"
+      "gradingQueueUrl": "Odkaz na frontu hodnocení",
+      "topicTitle": "Název tématu",
+      "topicUrl": "Odkaz na téma",
+      "discussionName": "Název diskuse",
+      "replyCount": "Počet nových odpovědí",
+      "replyAuthors": "Autoři odpovědí",
+      "latestReply": "Poslední odpověď",
+      "discussionUrl": "Odkaz na diskusi"
     },
     "simulation": {
       "title": "Výsledek simulace",

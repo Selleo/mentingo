@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { AUTOMATION_EVENT_KINDS, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { eq } from "drizzle-orm";
 
 import { NotificationEvent } from "src/automation-execution/events/notification-event";
@@ -267,5 +267,64 @@ describe("Automation recipient scenarios (e2e)", () => {
       await t.requestAutomationApi("post", `/${automation.id}/disable`).expect(201);
     }
     expect(t.adapter.getAllEmails()).toHaveLength(2);
+  });
+
+  it("addresses a grouped discussion reply email to selected users without doubling the participant", async () => {
+    const definition = createWelcomeAutomationDefinition();
+    const trigger = definition.workflow.steps[0];
+    if (trigger.type === "trigger") {
+      trigger.config.eventKind = AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY;
+    }
+    const participantStep = getFirstEmailStep(definition);
+    participantStep.config.mappings = {
+      courses_link: { type: "static", value: "https://academy.example" },
+    };
+    definition.workflow.steps.push({
+      ...structuredClone(participantStep),
+      id: randomUUID(),
+      parentId: participantStep.id,
+      config: { ...participantStep.config, recipients: { type: "everyone" } },
+    });
+    await t.createEnabledAutomation(definition);
+    const replyFields = { discussion_name: "Release notes", reply_count: 2 };
+
+    const [run] = await t.publishNotificationAndGetRuns(
+      new NotificationEvent({
+        occurrenceId: randomUUID(),
+        kind: AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY,
+        recipients: [
+          {
+            itemId: t.student.email,
+            email: t.student.email,
+            language: SUPPORTED_LANGUAGES.EN,
+            eventFields: {
+              userEmail: t.student.email,
+              userFirstName: t.student.firstName,
+              userLastName: t.student.lastName,
+              ...replyFields,
+            },
+          },
+        ],
+        items: [{ itemId: randomUUID(), eventFields: replyFields }],
+      }),
+    );
+
+    const deliveries = await t.runAsTenant(t.defaultTenantId, () =>
+      t.db
+        .select()
+        .from(automationEmailDeliveries)
+        .where(eq(automationEmailDeliveries.runId, run.id)),
+    );
+    const participantDeliveries = deliveries.filter(
+      ({ recipientEmail }) => recipientEmail === t.student.email,
+    );
+    const adminDelivery = deliveries.find(({ recipientEmail }) => recipientEmail === t.admin.email);
+    expect(participantDeliveries).toHaveLength(2);
+    expect(participantDeliveries[0].recipientItemId).toBe(participantDeliveries[1].recipientItemId);
+    expect(adminDelivery?.eventFields).toMatchObject({
+      userFirstName: t.admin.firstName,
+      userEmail: t.admin.email,
+      ...replyFields,
+    });
   });
 });

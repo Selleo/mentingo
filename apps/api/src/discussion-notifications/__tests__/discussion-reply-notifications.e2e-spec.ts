@@ -12,6 +12,7 @@ import { ForumReplyCreatedEvent } from "src/events/forum/forum-reply-created.eve
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  courseChatMessages,
   outboxEvents,
   settings,
   studentCourses,
@@ -418,11 +419,20 @@ describe("Discussion reply notifications (e2e)", () => {
     it("still notifies participants about a reply event stored before mentions were recorded", async () => {
       const [topicAuthor, replier] = await createStudents(2);
       const topic = await createTopic(topicAuthor, "Release notes");
+      const [reply] = await db
+        .insert(courseChatMessages)
+        .values({
+          threadId: topic.id,
+          userId: replier.user.id,
+          content: "A reply",
+          parentMessageId: topic.firstPost.id,
+        })
+        .returning({ id: courseChatMessages.id });
 
       await app.get(OutboxPublisher).publish(
         new ForumReplyCreatedEvent({
           topicId: topic.id,
-          postId: topic.firstPost.id,
+          postId: reply.id,
           firstPostId: topic.firstPost.id,
           actorUserId: replier.user.id,
         }),

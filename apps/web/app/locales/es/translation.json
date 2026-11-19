@@ -347,7 +347,9 @@
       "live_training_reminder": "La formación en directo comienza en 15 minutos",
       "live_training_ended": "Formación en directo finalizada",
       "quiz_attempt_graded": "Cuestionario calificado por un revisor",
-      "quiz_grading_digest": "Nuevas respuestas pendientes de revisión (diario)"
+      "quiz_grading_digest": "Nuevas respuestas pendientes de revisión (diario)",
+      "forum_mention": "Usuario mencionado en un tema del foro",
+      "discussion_reply": "Nuevas respuestas en una discusión (agrupadas)"
     },
     "errors": {
       "incompleteButton": "Introduce el texto del botón y la URL.",
@@ -8104,7 +8106,9 @@
         "live_training_reminder": "Los alumnos inscritos en cursos vinculados a la próxima formación en directo.",
         "live_training_ended": "Los alumnos inscritos en cursos vinculados a la formación en directo que terminó.",
         "quiz_attempt_graded": "El participante cuyas respuestas del cuestionario fueron calificadas.",
-        "quiz_grading_digest": "Los usuarios que pueden calificar respuestas de cuestionarios."
+        "quiz_grading_digest": "Los usuarios que pueden calificar respuestas de cuestionarios.",
+        "forum_mention": "Los usuarios mencionados en la publicación del foro.",
+        "discussion_reply": "Participantes del hilo o tema que no han leído las respuestas en la aplicación."
       }
     },
     "mapping": {
@@ -8204,7 +8208,9 @@
       "courseChatUserMentioned": "Usuario mencionado en el chat",
       "courseDueDateReminder": "Recordatorio de plazo del curso",
       "quizAttemptGraded": "Cuestionario calificado",
-      "quizGradingDigest": "Resumen de la cola de calificación"
+      "quizGradingDigest": "Resumen de la cola de calificación",
+      "forumUserMentioned": "Mención en el foro",
+      "discussionReply": "Nuevas respuestas en una discusión"
     },
     "canvas": {
       "emptyTitle": "El lienzo de automatización está vacío",
@@ -8366,7 +8372,14 @@
       "lessonUrl": "Enlace de la lección",
       "newAnswersCount": "Nuevas respuestas",
       "pendingAnswersCount": "Respuestas pendientes de revisión",
-      "gradingQueueUrl": "Enlace a la cola de calificación"
+      "gradingQueueUrl": "Enlace a la cola de calificación",
+      "topicTitle": "Título del tema",
+      "topicUrl": "Enlace al tema",
+      "discussionName": "Nombre de la discusión",
+      "replyCount": "Número de respuestas nuevas",
+      "replyAuthors": "Autores de las respuestas",
+      "latestReply": "Última respuesta",
+      "discussionUrl": "Enlace a la discusión"
     },
     "simulation": {
       "title": "Resultado de la simulación",

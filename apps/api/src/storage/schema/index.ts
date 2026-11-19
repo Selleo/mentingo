@@ -165,6 +165,7 @@ import type {
 import type { CourseDurationEstimatesByLanguage } from "src/courses/duration/course-duration.types";
 import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
 import type { CourseAuthorMetadata } from "src/courses/types/course.types";
+import type { DiscussionReplyDigestEntry } from "src/discussion-notifications/discussion-notifications.types";
 import type { HostedVideoStatus } from "src/file/hosted-video.types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 import type {
@@ -1428,6 +1429,30 @@ export const courseChatMessageReactions = pgTable(
     userMessageReactionUniqueIdx: uniqueIndex(
       "course_chat_message_reactions_user_message_reaction_unique_idx",
     ).on(table.userId, table.messageId, table.reaction),
+  })),
+);
+
+export const discussionReplyDigests = pgTable(
+  "discussion_reply_digests",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    threadId: uuid("thread_id")
+      .references(() => courseChatThreads.id, { onDelete: "cascade" })
+      .notNull(),
+    sendAfter: timestampWithTimezone({ name: "send_after" }).notNull(),
+    replies: jsonb("replies").$type<DiscussionReplyDigestEntry[]>().notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("discussion_reply_digests", (table) => ({
+    userThreadUniqueIdx: uniqueIndex("discussion_reply_digests_user_id_thread_id_unique_idx").on(
+      table.userId,
+      table.threadId,
+    ),
+    sendAfterIdx: index("discussion_reply_digests_send_after_idx").on(table.sendAfter),
   })),
 );
 

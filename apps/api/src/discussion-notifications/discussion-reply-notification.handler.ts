@@ -48,6 +48,7 @@ export class DiscussionReplyNotificationHandler
     await this.discussionReplyNotificationService.notifyParticipants(
       {
         threadId: thread.threadId,
+        replyId: reply.messageId,
         actorUserId: reply.actorUserId,
         mentionedUserIds: reply.mentionedUserIds ?? [],
         content: getLocalizedUserMentionContentAnnouncement(courseTitles),
@@ -67,6 +68,7 @@ export class DiscussionReplyNotificationHandler
     await this.discussionReplyNotificationService.notifyParticipants(
       {
         threadId: reply.topicId,
+        replyId: reply.postId,
         actorUserId: reply.actorUserId,
         mentionedUserIds: reply.mentionedUserIds ?? [],
         content: getLocalizedForumMentionContentAnnouncement(topicTitle),

@@ -4,8 +4,10 @@ import {
   ANNOUNCEMENT_STATUSES,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
+import { addMinutes } from "date-fns";
 
 import { AnnouncementsRepository } from "src/announcements/announcements.repository";
+import { DISCUSSION_REPLY_DIGEST_DELAY_MINUTES } from "src/discussion-notifications/discussion-notifications.constants";
 import { DiscussionNotificationsRepository } from "src/discussion-notifications/discussion-notifications.repository";
 import { getLocalizedDiscussionReplyTitleAnnouncement } from "src/discussion-notifications/discussion-reply.localizations";
 import { UserNotificationsCreatedEvent } from "src/events/announcement/user-notifications-created.event";
@@ -28,8 +30,9 @@ export class DiscussionReplyNotificationService {
 
   async notifyParticipants(reply: DiscussionReply, filterRecipients: DiscussionRecipientFilter) {
     const notNotified = new Set([...reply.mentionedUserIds, reply.actorUserId]);
-    const participantIds = await this.discussionNotificationsRepository.findThreadParticipantIds(
+    const participantIds = await this.discussionNotificationsRepository.findEarlierParticipantIds(
       reply.threadId,
+      reply.replyId,
     );
     const recipientIds = await filterRecipients(
       participantIds.filter((participantId) => !notNotified.has(participantId)),
@@ -41,7 +44,7 @@ export class DiscussionReplyNotificationService {
 
     if (!actorFullName) return;
 
-    await this.announcementsRepository.createAnnouncement({
+    const announcement = await this.announcementsRepository.createAnnouncement({
       groupId: null,
       title: getLocalizedDiscussionReplyTitleAnnouncement(actorFullName),
       content: reply.content,
@@ -59,6 +62,12 @@ export class DiscussionReplyNotificationService {
       usersToNotify: recipientIds,
     });
 
+    await this.discussionNotificationsRepository.queueReplyDigests({
+      userIds: recipientIds,
+      threadId: reply.threadId,
+      reply: { replyId: reply.replyId, announcementId: announcement.id },
+      sendAfter: addMinutes(new Date(), DISCUSSION_REPLY_DIGEST_DELAY_MINUTES).toISOString(),
+    });
     await this.outboxPublisher.publish(
       new UserNotificationsCreatedEvent({ userIds: recipientIds }),
     );

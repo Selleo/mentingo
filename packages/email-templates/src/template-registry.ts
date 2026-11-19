@@ -7,6 +7,10 @@ import { getCertificateExpirationWarningEmailTranslations } from "./translations
 import { getCertificateExpiredEmailTranslations } from "./translations/certificateExpired";
 import { getCourseDueDateReminderEmailTranslations } from "./translations/courseDueDateReminder";
 import { getCreatePasswordReminderEmailTranslations } from "./translations/createPasswordReminder";
+import {
+  getDiscussionReplyEmailTranslations,
+  getForumMentionEmailTranslations,
+} from "./translations/discussions";
 import { getFinishedCourseEmailTranslations } from "./translations/finishedCourse";
 import { getLiveTrainingEmailButtonText } from "./translations/liveTrainingEmail";
 import { getMagicLinkEmailTranslations } from "./translations/magicLink";
@@ -575,6 +579,93 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         "{{ pending_answers_count }}",
       ),
     buttonUrl: "{{ grading_queue_link }}",
+  }),
+  createEmailTemplateDefinition({
+    event: EMAIL_TEMPLATE_EVENTS.FORUM_MENTION,
+    name: EMAIL_TEMPLATE_NAMES.FORUM_MENTION,
+    description: "Sent when a user is mentioned in a forum topic.",
+    sourceTemplate: "ForumMentionEmail",
+    subject: buildNormalizedLocalizedSubjectTemplates("forumMentionEmail"),
+    variables: [
+      defineEmailTemplateVariable("authorFullName", "Author full name", "text", "Jane Doe", {
+        required: true,
+      }),
+      defineEmailTemplateVariable("topic_title", "Topic title", "text", "Onboarding tips", {
+        required: true,
+      }),
+      defineEmailTemplateVariable(
+        "message",
+        "Message",
+        "text",
+        "You were mentioned in a discussion.",
+        { required: true },
+      ),
+      defineEmailTemplateVariable(
+        "topic_link",
+        "Topic link",
+        "url",
+        "https://example.com/forum/topics/onboarding-tips",
+        { required: true },
+      ),
+    ],
+    getContent: (language) =>
+      getForumMentionEmailTranslations(
+        language,
+        "{{ authorFullName }}",
+        "{{ topic_title }}",
+        "{{ message }}",
+      ),
+    buttonUrl: "{{ topic_link }}",
+  }),
+  createEmailTemplateDefinition({
+    event: EMAIL_TEMPLATE_EVENTS.DISCUSSION_REPLY,
+    name: EMAIL_TEMPLATE_NAMES.DISCUSSION_REPLY,
+    description:
+      "Sent to the participants of a course discussion thread or a forum topic about new replies, grouped into one email.",
+    sourceTemplate: "DiscussionReplyEmail",
+    subject: buildNormalizedLocalizedSubjectTemplates("discussionReplyEmail"),
+    variables: [
+      defineEmailTemplateVariable(
+        "discussion_name",
+        "Discussion name",
+        "text",
+        "Leadership essentials",
+        { required: true },
+      ),
+      defineEmailTemplateVariable("reply_count", "New replies", "number", 3, { required: true }),
+      defineEmailTemplateVariable(
+        "reply_authors",
+        "Reply authors",
+        "text",
+        "Jane Doe, John Smith",
+        {
+          required: true,
+        },
+      ),
+      defineEmailTemplateVariable(
+        "latest_reply",
+        "Latest reply",
+        "text",
+        "Thanks, that solved it for me.",
+        { required: true },
+      ),
+      defineEmailTemplateVariable(
+        "discussion_link",
+        "Discussion link",
+        "url",
+        "https://example.com/course/leadership?tab=Discussion",
+        { required: true },
+      ),
+    ],
+    getContent: (language) =>
+      getDiscussionReplyEmailTranslations(
+        language,
+        "{{ discussion_name }}",
+        "{{ reply_count }}",
+        "{{ reply_authors }}",
+        "{{ latest_reply }}",
+      ),
+    buttonUrl: "{{ discussion_link }}",
   }),
   createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.ANNOUNCEMENT,

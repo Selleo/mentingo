@@ -11,13 +11,17 @@ import {
   courseChatMessages,
   courseChatThreads,
   courses,
+  settings,
   studentCourses,
   users,
 } from "src/storage/schema";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { CourseChatUserProfileRow } from "src/course-chat/course-chat.repository.types";
+import type {
+  CourseChatUserProfileRow,
+  DiscussionEmailRecipient,
+} from "src/course-chat/course-chat.repository.types";
 import type {
   ForumCourseDiscussionRow,
   ForumPostContext,
@@ -218,15 +222,24 @@ export class ForumRepository {
         avatarReference: users.avatarReference,
       })
       .from(users)
-      .where(
-        and(
-          isNull(users.deletedAt),
-          eq(users.archived, false),
-          userHasPermissionCondition(this.db, users.id, users.tenantId, PERMISSIONS.FORUM_READ),
-          userIds ? inArray(users.id, userIds) : undefined,
-        ),
-      )
+      .where(this.forumReaderCondition(userIds))
       .orderBy(users.firstName, users.lastName);
+  }
+
+  async findEmailRecipients(userIds: UUIDType[]): Promise<DiscussionEmailRecipient[]> {
+    if (!userIds.length) return [];
+
+    return this.db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        language: sql<string | null>`${settings.settings}->>'language'`,
+      })
+      .from(users)
+      .leftJoin(settings, eq(settings.userId, users.id))
+      .where(this.forumReaderCondition(userIds));
   }
 
   async findCourseDiscussions(
@@ -410,6 +423,15 @@ export class ForumRepository {
         AND forum_replies.parent_message_id IS NOT NULL
         AND forum_replies.deleted_at IS NULL
     )`;
+  }
+
+  private forumReaderCondition(userIds?: UUIDType[]) {
+    return and(
+      isNull(users.deletedAt),
+      eq(users.archived, false),
+      userHasPermissionCondition(this.db, users.id, users.tenantId, PERMISSIONS.FORUM_READ),
+      userIds ? inArray(users.id, userIds) : undefined,
+    );
   }
 
   private forumTopicCondition() {

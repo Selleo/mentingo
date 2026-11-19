@@ -48,6 +48,8 @@ export const EMAIL_TEMPLATE_EVENTS = {
   LIVE_TRAINING_ENDED: "live_training_ended",
   QUIZ_ATTEMPT_GRADED: "quiz_attempt_graded",
   QUIZ_GRADING_DIGEST: "quiz_grading_digest",
+  FORUM_MENTION: "forum_mention",
+  DISCUSSION_REPLY: "discussion_reply",
 } as const;
 
 export type EmailTemplateEvent = (typeof EMAIL_TEMPLATE_EVENTS)[keyof typeof EMAIL_TEMPLATE_EVENTS];

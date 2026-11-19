@@ -9718,7 +9718,9 @@ export interface ListEmailTemplateEventsResponse {
       | "live_training_reminder"
       | "live_training_ended"
       | "quiz_attempt_graded"
-      | "quiz_grading_digest";
+      | "quiz_grading_digest"
+      | "forum_mention"
+      | "discussion_reply";
     label: string;
     description: string;
     recipientPolicy: string;
@@ -10769,6 +10771,8 @@ export interface DuplicateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -10804,6 +10808,8 @@ export interface DuplicateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -11814,6 +11820,8 @@ export interface ListEmailTemplatesResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -11849,6 +11857,8 @@ export interface ListEmailTemplatesResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -12865,6 +12875,8 @@ export interface GetBuiltInEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -12900,6 +12912,8 @@ export interface GetBuiltInEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -13910,6 +13924,8 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -13945,6 +13961,8 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -14955,6 +14973,8 @@ export interface GetEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -14990,6 +15010,8 @@ export interface GetEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -15984,7 +16006,9 @@ export interface CreateEmailTemplateBody {
     | "live_training_reminder"
     | "live_training_ended"
     | "quiz_attempt_graded"
-    | "quiz_grading_digest";
+    | "quiz_grading_digest"
+    | "forum_mention"
+    | "discussion_reply";
   populateEventTags?: boolean;
   /** @maxItems 100 */
   placeholders?: {
@@ -16986,6 +17010,8 @@ export interface CreateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -17021,6 +17047,8 @@ export interface CreateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -18017,6 +18045,8 @@ export interface UpdateEmailTemplateBody {
         | "live_training_ended"
         | "quiz_attempt_graded"
         | "quiz_grading_digest"
+        | "forum_mention"
+        | "discussion_reply"
       )
     | null;
   name?: {
@@ -19017,6 +19047,8 @@ export interface UpdateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -19052,6 +19084,8 @@ export interface UpdateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -20067,6 +20101,8 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -20102,6 +20138,8 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -21119,6 +21157,8 @@ export interface PublishEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -21154,6 +21194,8 @@ export interface PublishEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -22164,6 +22206,8 @@ export interface ArchiveEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -22199,6 +22243,8 @@ export interface ArchiveEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -23213,6 +23259,8 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -23248,6 +23296,8 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -24258,6 +24308,8 @@ export interface RestoreEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -24293,6 +24345,8 @@ export interface RestoreEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -26241,6 +26295,8 @@ export interface PreviewEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @default "en" */
@@ -26324,6 +26380,8 @@ export interface ListAutomationsResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -26373,7 +26431,9 @@ export interface ListAutomationsResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -26486,6 +26546,8 @@ export interface ListAutomationsResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -26535,7 +26597,9 @@ export interface ListAutomationsResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -26626,7 +26690,9 @@ export interface ListAutomationEventsResponse {
       | "live_training_reminder"
       | "live_training_ended"
       | "quiz_attempt_graded"
-      | "quiz_grading_digest";
+      | "quiz_grading_digest"
+      | "forum_mention"
+      | "discussion_reply";
     label: string;
     description: string;
     recipientPolicy: string;
@@ -26695,7 +26761,9 @@ export interface ListAvailableEmailTemplatesResponse {
             | "live_training_reminder"
             | "live_training_ended"
             | "quiz_attempt_graded"
-            | "quiz_grading_digest";
+            | "quiz_grading_digest"
+            | "forum_mention"
+            | "discussion_reply";
         }
       | {
           type: "custom";
@@ -26749,7 +26817,9 @@ export interface ListBuiltInAutomationTemplatesResponse {
       | "live_training_reminder"
       | "live_training_ended"
       | "quiz_attempt_graded"
-      | "quiz_grading_digest";
+      | "quiz_grading_digest"
+      | "forum_mention"
+      | "discussion_reply";
     definition: {
       /**
        * @minLength 1
@@ -26821,6 +26891,8 @@ export interface ListBuiltInAutomationTemplatesResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -26870,7 +26942,9 @@ export interface ListBuiltInAutomationTemplatesResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -26977,6 +27051,8 @@ export interface SimulateAutomationBody {
                   | "live_training_ended"
                   | "quiz_attempt_graded"
                   | "quiz_grading_digest"
+                  | "forum_mention"
+                  | "discussion_reply"
                 )
               | null;
           };
@@ -27026,7 +27102,9 @@ export interface SimulateAutomationBody {
                         | "live_training_reminder"
                         | "live_training_ended"
                         | "quiz_attempt_graded"
-                        | "quiz_grading_digest";
+                        | "quiz_grading_digest"
+                        | "forum_mention"
+                        | "discussion_reply";
                     }
                   | {
                       type: "custom";
@@ -27171,7 +27249,9 @@ export interface SimulateAutomationResponse {
               | "live_training_reminder"
               | "live_training_ended"
               | "quiz_attempt_graded"
-              | "quiz_grading_digest";
+              | "quiz_grading_digest"
+              | "forum_mention"
+              | "discussion_reply";
           }
         | {
             type: "custom";
@@ -27257,6 +27337,8 @@ export interface CreateAutomationBody {
                   | "live_training_ended"
                   | "quiz_attempt_graded"
                   | "quiz_grading_digest"
+                  | "forum_mention"
+                  | "discussion_reply"
                 )
               | null;
           };
@@ -27306,7 +27388,9 @@ export interface CreateAutomationBody {
                         | "live_training_reminder"
                         | "live_training_ended"
                         | "quiz_attempt_graded"
-                        | "quiz_grading_digest";
+                        | "quiz_grading_digest"
+                        | "forum_mention"
+                        | "discussion_reply";
                     }
                   | {
                       type: "custom";
@@ -27417,6 +27501,8 @@ export interface CreateAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -27466,7 +27552,9 @@ export interface CreateAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -27579,6 +27667,8 @@ export interface CreateAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -27628,7 +27718,9 @@ export interface CreateAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -27743,6 +27835,8 @@ export interface CreateAutomationFromTemplateResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -27792,7 +27886,9 @@ export interface CreateAutomationFromTemplateResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -27905,6 +28001,8 @@ export interface CreateAutomationFromTemplateResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -27954,7 +28052,9 @@ export interface CreateAutomationFromTemplateResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -28069,6 +28169,8 @@ export interface GetAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -28118,7 +28220,9 @@ export interface GetAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -28231,6 +28335,8 @@ export interface GetAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -28280,7 +28386,9 @@ export interface GetAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -28394,6 +28502,8 @@ export interface UpdateAutomationBody {
                   | "live_training_ended"
                   | "quiz_attempt_graded"
                   | "quiz_grading_digest"
+                  | "forum_mention"
+                  | "discussion_reply"
                 )
               | null;
           };
@@ -28443,7 +28553,9 @@ export interface UpdateAutomationBody {
                         | "live_training_reminder"
                         | "live_training_ended"
                         | "quiz_attempt_graded"
-                        | "quiz_grading_digest";
+                        | "quiz_grading_digest"
+                        | "forum_mention"
+                        | "discussion_reply";
                     }
                   | {
                       type: "custom";
@@ -28554,6 +28666,8 @@ export interface UpdateAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -28603,7 +28717,9 @@ export interface UpdateAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -28716,6 +28832,8 @@ export interface UpdateAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -28765,7 +28883,9 @@ export interface UpdateAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -28887,6 +29007,8 @@ export interface DuplicateAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -28936,7 +29058,9 @@ export interface DuplicateAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -29049,6 +29173,8 @@ export interface DuplicateAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -29098,7 +29224,9 @@ export interface DuplicateAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -29213,6 +29341,8 @@ export interface ApplyAutomationBody {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -29262,7 +29392,9 @@ export interface ApplyAutomationBody {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -29374,6 +29506,8 @@ export interface ApplyAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -29423,7 +29557,9 @@ export interface ApplyAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -29536,6 +29672,8 @@ export interface ApplyAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -29585,7 +29723,9 @@ export interface ApplyAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -29700,6 +29840,8 @@ export interface EnableAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -29749,7 +29891,9 @@ export interface EnableAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -29862,6 +30006,8 @@ export interface EnableAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -29911,7 +30057,9 @@ export interface EnableAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -30026,6 +30174,8 @@ export interface DisableAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -30075,7 +30225,9 @@ export interface DisableAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -30188,6 +30340,8 @@ export interface DisableAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -30237,7 +30391,9 @@ export interface DisableAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -30352,6 +30508,8 @@ export interface ArchiveAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -30401,7 +30559,9 @@ export interface ArchiveAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -30514,6 +30674,8 @@ export interface ArchiveAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -30563,7 +30725,9 @@ export interface ArchiveAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -30656,7 +30820,9 @@ export interface ListAutomationRunsResponse {
       | "live_training_reminder"
       | "live_training_ended"
       | "quiz_attempt_graded"
-      | "quiz_grading_digest";
+      | "quiz_grading_digest"
+      | "forum_mention"
+      | "discussion_reply";
     status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
     createdAt: string;
     completedAt: string | null;
@@ -30723,7 +30889,9 @@ export interface GetAutomationRunResponse {
         | "live_training_reminder"
         | "live_training_ended"
         | "quiz_attempt_graded"
-        | "quiz_grading_digest";
+        | "quiz_grading_digest"
+        | "forum_mention"
+        | "discussion_reply";
       status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
       createdAt: string;
       completedAt: string | null;
@@ -30775,7 +30943,9 @@ export interface GetAutomationRunResponse {
               | "live_training_reminder"
               | "live_training_ended"
               | "quiz_attempt_graded"
-              | "quiz_grading_digest";
+              | "quiz_grading_digest"
+              | "forum_mention"
+              | "discussion_reply";
           }
         | {
             type: "custom";
@@ -45561,7 +45731,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "live_training_reminder"
         | "live_training_ended"
         | "quiz_attempt_graded"
-        | "quiz_grading_digest",
+        | "quiz_grading_digest"
+        | "forum_mention"
+        | "discussion_reply",
       params: RequestParams = {},
     ) =>
       this.request<GetBuiltInEmailTemplateResponse, any>({
@@ -45609,7 +45781,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "live_training_reminder"
         | "live_training_ended"
         | "quiz_attempt_graded"
-        | "quiz_grading_digest",
+        | "quiz_grading_digest"
+        | "forum_mention"
+        | "discussion_reply",
       params: RequestParams = {},
     ) =>
       this.request<CreateDraftFromBuiltInEmailTemplateResponse, any>({
@@ -45989,7 +46163,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "live_training_reminder"
         | "live_training_ended"
         | "quiz_attempt_graded"
-        | "quiz_grading_digest",
+        | "quiz_grading_digest"
+        | "forum_mention"
+        | "discussion_reply",
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";

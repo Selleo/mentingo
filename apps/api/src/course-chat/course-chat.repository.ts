@@ -11,6 +11,7 @@ import {
   courseChatMessageReactions,
   courseChatMessages,
   courseChatThreads,
+  settings,
   studentCourses,
   users,
 } from "src/storage/schema";
@@ -28,6 +29,7 @@ import type {
   CourseChatReplyParticipantRow,
   CourseChatReplySummaryRow,
   CourseChatUserProfileRow,
+  DiscussionEmailRecipient,
 } from "src/course-chat/course-chat.repository.types";
 
 @Injectable()
@@ -164,6 +166,22 @@ export class CourseChatRepository {
       .orderBy(users.firstName, users.lastName);
   }
 
+  private discussionReaderCondition(courseId: UUIDType, userIds: UUIDType[]) {
+    return and(
+      eq(studentCourses.courseId, courseId),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      inArray(users.id, userIds),
+      isNull(users.deletedAt),
+      eq(users.archived, false),
+      userHasPermissionCondition(
+        this.db,
+        users.id,
+        users.tenantId,
+        PERMISSIONS.COURSE_DISCUSSION_READ,
+      ),
+    );
+  }
+
   private visibleTopLevelMessagesWhere(courseId: UUIDType) {
     return and(
       eq(courseChatMessages.courseId, courseId),
@@ -205,23 +223,29 @@ export class CourseChatRepository {
       .select({ userId: users.id })
       .from(studentCourses)
       .innerJoin(users, eq(users.id, studentCourses.studentId))
-      .where(
-        and(
-          eq(studentCourses.courseId, courseId),
-          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-          inArray(users.id, userIds),
-          isNull(users.deletedAt),
-          eq(users.archived, false),
-          userHasPermissionCondition(
-            this.db,
-            users.id,
-            users.tenantId,
-            PERMISSIONS.COURSE_DISCUSSION_READ,
-          ),
-        ),
-      );
+      .where(this.discussionReaderCondition(courseId, userIds));
 
     return readers.map(({ userId }) => userId);
+  }
+
+  async findDiscussionEmailRecipients(
+    courseId: UUIDType,
+    userIds: UUIDType[],
+  ): Promise<DiscussionEmailRecipient[]> {
+    if (!userIds.length) return [];
+
+    return this.db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        language: sql<string | null>`${settings.settings}->>'language'`,
+      })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .leftJoin(settings, eq(settings.userId, users.id))
+      .where(this.discussionReaderCondition(courseId, userIds));
   }
 
   async getMentionEmailRecipients(

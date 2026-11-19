@@ -24,7 +24,7 @@ For HR and L&D teams, discussions add peer learning and course-specific collabor
 - Show online presence for course discussion participants.
 - Soft-delete messages and preserve deleted placeholders when replies remain.
 - Broadcast new messages, replies, reactions, deletions, mentions, and presence updates in realtime.
-- Notify the thread author and earlier repliers when someone replies; the notification opens that thread.
+- Notify the thread author and earlier repliers when someone replies, in the application and by a grouped email; both open that thread.
 - Follow the discussion from the organization-wide forum, which shows it as one entry per enrolled course when the forum is enabled.
 
 ## End-User Value
@@ -61,4 +61,5 @@ When the forum is enabled, it lists each enrolled course that has discussion mes
 - Web E2E coverage verifies feature visibility, the empty state, thread and reply creation, reactions, deletion, mentions, presence, pagination, and realtime updates between enrolled learners.
 - Backend E2E coverage verifies the feature gate, authentication, permissions, enrollment isolation, moderation rules, message and reply pagination, validation, and deleted-thread behavior.
 - Mention email delivery remains covered by the dedicated Course Chat mention handler test.
+- Grouped reply emails are covered by the discussion reply email E2E tests.
 - Reply notifications are covered by the discussion reply E2E tests; web unit tests cover opening the Discussion tab and the linked thread from the URL.

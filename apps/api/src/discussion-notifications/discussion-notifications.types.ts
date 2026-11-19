@@ -1,8 +1,9 @@
-import type { AnnouncementSourceType, SupportedLanguages } from "@repo/shared";
+import type { AnnouncementSourceType, DiscussionScope, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
 export type DiscussionReply = {
   threadId: UUIDType;
+  replyId: UUIDType;
   actorUserId: UUIDType;
   mentionedUserIds: UUIDType[];
   content: Record<SupportedLanguages, string>;
@@ -12,3 +13,21 @@ export type DiscussionReply = {
 };
 
 export type DiscussionRecipientFilter = (userIds: UUIDType[]) => Promise<UUIDType[]>;
+
+export type DiscussionReplyDigestEntry = { replyId: UUIDType; announcementId: UUIDType };
+
+export type DiscussionReplyDigest = {
+  id: UUIDType;
+  userId: UUIDType;
+  threadId: UUIDType;
+  replies: DiscussionReplyDigestEntry[];
+};
+
+export type DiscussionDigestThread = {
+  scope: DiscussionScope;
+  courseId: UUIDType | null;
+  title: string | null;
+  firstMessageId: UUIDType;
+};
+
+export type DiscussionDigestReply = { authorFullName: string; content: string };
