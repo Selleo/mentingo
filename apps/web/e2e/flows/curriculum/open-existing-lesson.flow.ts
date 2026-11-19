@@ -1,40 +1,24 @@
+import { expect, type Page } from "@playwright/test";
+
 import { CURRICULUM_HANDLES } from "../../data/curriculum/handles";
 import { waitForDialogOverlaysHiddenFlow } from "../common/wait-for-dialog-overlays-hidden.flow";
 
-import type { Page } from "@playwright/test";
-
+/**
+ * Expands the chapter and opens the lesson. Whenever course data refetches (e.g. after a language
+ * switch) the single-open chapter list auto-expands the most recently updated chapter, which can
+ * collapse ours. So the trigger is clicked only while collapsed (a blind click would toggle an
+ * auto-expanded chapter shut) and the check retries until the lesson card is visible.
+ */
 export const openExistingLessonFlow = async (page: Page, chapterId: string, lessonId: string) => {
   await waitForDialogOverlaysHiddenFlow(page);
   const accordion = page.getByTestId(CURRICULUM_HANDLES.chapterAccordion(chapterId));
-  const lessonCardTestId = CURRICULUM_HANDLES.lessonCard(lessonId);
-  const lessonCard = page.getByTestId(lessonCardTestId);
+  const lessonCard = page.getByTestId(CURRICULUM_HANDLES.lessonCard(lessonId));
 
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    if ((await lessonCard.count()) > 0 && (await lessonCard.isVisible())) {
-      break;
-    }
+  await expect(async () => {
+    if ((await accordion.getAttribute("aria-expanded")) !== "true") await accordion.click();
+    await expect(accordion).toHaveAttribute("aria-expanded", "true", { timeout: 1_000 });
+    await expect(lessonCard).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
 
-    if (attempt === 2) {
-      await page.reload();
-      await page.getByTestId(CURRICULUM_HANDLES.ROOT).waitFor();
-    }
-
-    await accordion.waitFor({ state: "visible" });
-    await accordion.scrollIntoViewIfNeeded();
-    await accordion.click();
-    await lessonCard.waitFor({ state: "visible", timeout: 5_000 }).catch(() => undefined);
-  }
-
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const currentLessonCard = page.getByTestId(lessonCardTestId);
-
-    await currentLessonCard.waitFor({ state: "visible" });
-    try {
-      await currentLessonCard.click();
-      return;
-    } catch (error) {
-      if (attempt === 2) throw error;
-      await page.waitForTimeout(250);
-    }
-  }
+  await lessonCard.click();
 };

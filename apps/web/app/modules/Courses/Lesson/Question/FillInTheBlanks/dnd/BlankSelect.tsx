@@ -17,6 +17,7 @@ export type BlankSelectItem = { key: string; label: string };
 
 type BlankSelectProps = {
   blankId: string;
+  testId: string;
   label: string;
   selectedKey: string | null;
   items: BlankSelectItem[];
@@ -35,6 +36,7 @@ const CLEAR_VALUE = "__blank_clear__";
 
 export const BlankSelect = ({
   blankId,
+  testId,
   label,
   selectedKey,
   items,
@@ -92,7 +94,7 @@ export const BlankSelect = ({
   return (
     <span
       ref={setNodeRef}
-      data-testid={blankId}
+      data-testid={testId}
       style={minWidth ? { minWidth } : undefined}
       className={cn("mx-2 inline-flex max-w-full align-middle", wrapText && "mx-0 w-full")}
     >

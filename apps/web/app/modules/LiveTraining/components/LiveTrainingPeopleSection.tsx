@@ -168,7 +168,10 @@ export function LiveTrainingPeopleSection({
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <section className="group/people flex max-h-[28rem] min-h-0 flex-col rounded-md border border-neutral-200 bg-white p-4 shadow-sm">
+      <section
+        data-testid={LIVE_TRAINING_HANDLES.PEOPLE_SECTION}
+        className="group/people flex max-h-[28rem] min-h-0 flex-col rounded-md border border-neutral-200 bg-white p-4 shadow-sm"
+      >
         <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Users className="size-4 text-neutral-500" />

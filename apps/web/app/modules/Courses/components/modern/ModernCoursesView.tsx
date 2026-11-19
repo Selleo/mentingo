@@ -28,6 +28,8 @@ import { COURSES_VIEWS } from "~/modules/Courses/utils/coursesView";
 import { sumChapterDisplayDurations } from "~/modules/Courses/utils/formatDuration";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { COURSES_PAGE_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import { AddCategoryRow } from "./admin/AddCategoryRow";
 import { AddCourseToCategoryButton } from "./admin/AddCourseToCategoryButton";
 import { FeaturedCourseDialog } from "./admin/FeaturedCourseDialog";
@@ -491,7 +493,7 @@ const ModernCoursesView = () => {
 
   return (
     <PageWrapper isBarebones className="mb-4 min-h-screen w-full p-0" wrapperClassName="h-full">
-      <div className="relative min-h-screen">
+      <div className="relative min-h-screen" data-testid={COURSES_PAGE_HANDLES.MODERN_VIEW}>
         {canOpenCoursesTable && (
           <CoursesViewToggle
             active={COURSES_VIEWS.CATALOGUE}

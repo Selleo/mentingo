@@ -11,7 +11,7 @@ export const addReportConditionFlow = async (page: Page) => {
 };
 
 export const removeReportConditionFlow = async (page: Page) => {
-  await page.getByRole("button", { name: "Remove condition" }).first().click();
+  await page.getByTestId(REPORTS_HANDLES.REMOVE_CONDITION).first().click();
 };
 
 export const resetReportFlow = async (page: Page) => {

@@ -6,22 +6,20 @@ import { assertToastVisible } from "../../utils/assert-toast-visible";
 import { seedLanguageStorage } from "../../utils/language-storage";
 
 test("visitor sees localized auth copy when the language is stored in localStorage", async ({
+  cleanup,
   createWorkspacePage,
 }) => {
-  const { context, page } = await createWorkspacePage({ root: true });
+  const { context, page } = await createWorkspacePage();
+  cleanup.add(() => context.close());
 
   await seedLanguageStorage(context, "de");
 
-  try {
-    await openLoginPageFlow(page, { preserveSession: true });
-    await expect(page.locator("html")).toHaveAttribute("lang", "de");
+  await openLoginPageFlow(page, { preserveSession: true });
+  await expect(page.locator("html")).toHaveAttribute("lang", "de");
 
-    await fillLoginFormFlow(page, `visitor-${Date.now()}@example.com`, "wrong-password");
-    await submitLoginFormFlow(page);
+  await fillLoginFormFlow(page, `visitor-${Date.now()}@example.com`, "wrong-password");
+  await submitLoginFormFlow(page);
 
-    await expect(page).toHaveURL("/auth/login");
-    await assertToastVisible(page, "Ungültige E-Mail-Adresse oder ungültiges Passwort");
-  } finally {
-    await context.close();
-  }
+  await expect(page).toHaveURL("/auth/login");
+  await assertToastVisible(page, "Ungültige E-Mail-Adresse oder ungültiges Passwort");
 });

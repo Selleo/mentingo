@@ -1,3 +1,5 @@
+import { isAxiosError } from "axios";
+
 import type { FixtureApiClient } from "../utils/api-client";
 import type { CreateBody, ListResponse, ReorderBody, UpdateBody } from "~/api/generated-api";
 
@@ -26,7 +28,13 @@ export class TodoTaskFactory {
     return response.data.data;
   }
 
+  /** Deletes the task; a task the test already deleted is ignored. */
   async delete(id: string): Promise<void> {
-    await this.apiClient.api.todoTasksControllerRemove(id);
+    try {
+      await this.apiClient.api.todoTasksControllerRemove(id);
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 404) return;
+      throw error;
+    }
   }
 }

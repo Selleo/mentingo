@@ -1,6 +1,7 @@
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
@@ -42,6 +43,7 @@ const Carousel = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & CarouselProps
 >(({ orientation = "horizontal", opts, setApi, plugins, className, children, ...props }, ref) => {
+  const { t } = useTranslation();
   const [carouselRef, api] = useEmblaCarousel(
     {
       ...opts,
@@ -122,7 +124,7 @@ const Carousel = React.forwardRef<
         onKeyDownCapture={handleKeyDown}
         className={cn("relative", className)}
         role="region"
-        aria-roledescription="carousel"
+        aria-roledescription={t("a11y.carousel")}
         {...props}
       >
         {children}
@@ -229,11 +231,13 @@ CarouselContent.displayName = "CarouselContent";
 
 const CarouselItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => {
+    const { t } = useTranslation();
+
     return (
       <div
         ref={ref}
         role="group"
-        aria-roledescription="slide"
+        aria-roledescription={t("a11y.slide")}
         className={cn(className, "grow-0 basis-full")}
         {...props}
       />
@@ -250,6 +254,7 @@ const CarouselPrevious = React.forwardRef<
     { className, variant = "outline", size = "icon", iconSize = 16, iconClassName, ...props },
     ref,
   ) => {
+    const { t } = useTranslation();
     const { scrollPrev, canScrollPrev } = useCarousel();
 
     return (
@@ -263,7 +268,7 @@ const CarouselPrevious = React.forwardRef<
         {...props}
       >
         <ChevronLeft size={iconSize} className={cn("text-black", iconClassName)} />
-        <span className="sr-only">Previous slide</span>
+        <span className="sr-only">{t("a11y.previousSlide")}</span>
       </Button>
     );
   },
@@ -291,6 +296,7 @@ const CarouselNext = React.forwardRef<
     },
     ref,
   ) => {
+    const { t } = useTranslation();
     const { scrollNext, canScrollNext } = useCarousel();
 
     return (
@@ -308,7 +314,7 @@ const CarouselNext = React.forwardRef<
         ) : (
           <ChevronRight size={iconSize} className={cn("text-black", iconClassName)} />
         )}
-        <span className="sr-only">Next slide</span>
+        <span className="sr-only">{t("a11y.nextSlide")}</span>
       </Button>
     );
   },

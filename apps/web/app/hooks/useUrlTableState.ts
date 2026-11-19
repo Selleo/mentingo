@@ -7,6 +7,7 @@ import {
   type ItemsPerPageOption,
 } from "~/components/Pagination/Pagination";
 import { useDebounce } from "~/hooks/useDebounce";
+import { useSentSearchAcknowledgments } from "~/hooks/useSentSearchAcknowledgments";
 
 export const TABLE_URL_PARAMS = {
   SORT: "sort",
@@ -119,20 +120,30 @@ export function useUrlTableState<TFilterKey extends string, TSortField extends s
     updateUrlParams({ ...values, [TABLE_URL_PARAMS.PAGE]: undefined });
 
   const lastUrlSearch = useRef(search);
+  const isHydratingFromUrl = useRef(false);
+  const { rememberSentSearch, isAcknowledgingSentSearch } = useSentSearchAcknowledgments<string>();
 
   useEffect(() => {
     if (lastUrlSearch.current === search) return;
 
     lastUrlSearch.current = search;
+    if (isAcknowledgingSentSearch(search)) return;
+
+    isHydratingFromUrl.current = true;
     setSearchInput((currentInput) => (currentInput.trim() === search ? currentInput : search));
-  }, [search]);
+  }, [search, isAcknowledgingSentSearch]);
 
   useEffect(() => {
-    if (debouncedSearch === search) return;
+    if (isHydratingFromUrl.current) {
+      isHydratingFromUrl.current = false;
+      return;
+    }
+    if (debouncedSearch !== searchInput.trim() || debouncedSearch === search) return;
 
+    rememberSentSearch(debouncedSearch);
     updateListParams({ [searchParam]: debouncedSearch });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
+  }, [debouncedSearch, search, searchInput]);
 
   const activeFilterCount = [search, ...filterValues].filter(Boolean).length;
 

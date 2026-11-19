@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Progress } from "~/components/ui/progress";
 
+import { REPORTS_HANDLES } from "../../../../e2e/data/reports/handles";
 import { formatReportPercent } from "../reports.utils";
 
 import type { LucideIcon } from "lucide-react";
@@ -63,13 +64,16 @@ export function ReportHeadlineMetrics({ metrics }: ReportMetricsProps) {
       {headline.map(({ key, icon: MetricIcon, label, value, context, rate }) => (
         <article
           key={key}
+          data-testid={REPORTS_HANDLES.metric(key)}
           className="flex flex-col gap-1 rounded-lg border border-neutral-200 bg-white p-5"
         >
           <p className="body-sm-md flex items-center gap-2 text-neutral-600">
             <MetricIcon className="size-4 shrink-0 text-neutral-500" aria-hidden="true" />
             {label}
           </p>
-          <p className="h4 text-neutral-950">{value}</p>
+          <p className="h4 text-neutral-950" data-testid={REPORTS_HANDLES.METRIC_VALUE}>
+            {value}
+          </p>
           <p className="details text-neutral-500">{context}</p>
           {rate !== undefined && (
             <Progress

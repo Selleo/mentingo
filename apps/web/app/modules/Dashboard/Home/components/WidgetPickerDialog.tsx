@@ -25,6 +25,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
+import { DASHBOARD_EDIT_HANDLES } from "../../../../../e2e/data/dashboard/handles";
 import { DASHBOARD_WIDGET_DATA_SCOPES, type DashboardLayoutItem } from "../types";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
@@ -181,6 +182,7 @@ export function WidgetPickerDialog({
 
                   <Switch
                     id={switchId}
+                    data-testid={DASHBOARD_EDIT_HANDLES.widgetToggle(widgetId)}
                     checked={isVisible || isAlwaysVisible}
                     disabled={isAlwaysVisible}
                     onCheckedChange={(checked) => handleVisibilityChange(widgetId, checked)}
@@ -195,6 +197,7 @@ export function WidgetPickerDialog({
           <Button
             type="button"
             variant="outline"
+            data-testid={DASHBOARD_EDIT_HANDLES.RESTORE_DEFAULT}
             onClick={() => void onWidgetsRestoreDefault()}
             disabled={isRestoringDefault}
           >
@@ -207,7 +210,11 @@ export function WidgetPickerDialog({
               t("dashboardHome.edit.restore")
             )}
           </Button>
-          <Button type="button" onClick={() => onOpenChange(false)}>
+          <Button
+            type="button"
+            data-testid={DASHBOARD_EDIT_HANDLES.WIDGET_PICKER_CLOSE}
+            onClick={() => onOpenChange(false)}
+          >
             {t("common.button.close")}
           </Button>
         </DialogFooter>

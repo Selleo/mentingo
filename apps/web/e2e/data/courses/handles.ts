@@ -33,6 +33,8 @@ export const COURSES_VIEW_TOGGLE_HANDLES = {
 
 export const COURSES_PAGE_HANDLES = {
   PAGE: "courses-page",
+  MODERN_VIEW: "courses-page-modern-view",
+  LEGACY_VIEW: "courses-page-legacy-view",
   HEADING: "courses-page-heading",
   CREATE_BUTTON: "courses-page-create-button",
   TITLE_FILTER: "courses-page-title-filter",

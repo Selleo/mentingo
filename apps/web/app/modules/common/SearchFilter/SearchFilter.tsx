@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useSentSearchAcknowledgments } from "~/hooks/useSentSearchAcknowledgments";
 import { cn } from "~/lib/utils";
 
 import type React from "react";
@@ -108,17 +109,25 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const { rememberSentSearch, isAcknowledgingSentSearch } =
+    useSentSearchAcknowledgments<FilterValue>();
   const debouncedSearchTitle = useMemo(
-    () => debounce((name: string, value: FilterValue) => onChangeRef.current(name, value), 300),
-    [],
+    () =>
+      debounce((name: string, value: FilterValue) => {
+        rememberSentSearch(value);
+        onChangeRef.current(name, value);
+      }, 300),
+    [rememberSentSearch],
   );
   useEffect(() => () => debouncedSearchTitle.cancel(), [debouncedSearchTitle]);
   const textFilter = filters.find((filter) => filter.type === "text");
   const textValue = textFilter ? values[textFilter.name] : undefined;
   useEffect(() => {
+    if (isAcknowledgingSentSearch(textValue)) return;
+
     debouncedSearchTitle.cancel();
     if (inputRef.current) inputRef.current.value = typeof textValue === "string" ? textValue : "";
-  }, [textValue, debouncedSearchTitle]);
+  }, [textValue, debouncedSearchTitle, isAcknowledgingSentSearch]);
 
   const handleChange = (name: string, value: FilterValue) => {
     if (filters.find((filter) => filter?.type === "status")?.name === name) {

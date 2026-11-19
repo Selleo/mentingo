@@ -11,7 +11,10 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { CertificatePreviewModal } from "~/modules/Profile/Certificates/CertificatePreviewModal";
 import { formatCertificateDate } from "~/utils/formatCertificateDate";
 
-import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
+import {
+  DASHBOARD_STUDENT_HANDLES,
+  DASHBOARD_WIDGET_HANDLES,
+} from "../../../../../e2e/data/dashboard/handles";
 import { DashboardWidgetQueryState } from "../components/DashboardWidgetQueryState";
 import {
   DashboardWidgetCard,
@@ -85,6 +88,7 @@ export function WidgetStudentCertificates({
             <DashboardWidgetQueryState isLoading={false} isError onRetry={() => void refetch()} />
           ) : certificates.length === 0 ? (
             <div
+              data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE}
               className={cn(
                 "flex h-full items-center justify-center px-4 text-center text-neutral-600",
                 !isCompact && "min-h-32",
@@ -95,6 +99,7 @@ export function WidgetStudentCertificates({
           ) : (
             <div
               ref={scrollRef}
+              data-testid={DASHBOARD_STUDENT_HANDLES.CERTIFICATE_LIST}
               onScroll={handleScroll}
               className={cn(
                 "h-full min-h-0 overflow-y-auto",
@@ -105,6 +110,7 @@ export function WidgetStudentCertificates({
                 <Button
                   key={certificate.id}
                   type="button"
+                  data-testid={DASHBOARD_STUDENT_HANDLES.certificate(certificate.id)}
                   variant="ghost"
                   className={cn(
                     "group flex h-auto w-full items-center justify-start rounded-lg border border-neutral-100 text-left hover:border-primary-200 hover:bg-primary-50",

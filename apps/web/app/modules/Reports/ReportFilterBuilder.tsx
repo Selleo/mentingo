@@ -15,6 +15,8 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
+import { REPORTS_HANDLES } from "../../../e2e/data/reports/handles";
+
 import {
   addCondition,
   addNestedGroup,
@@ -150,6 +152,8 @@ function RuleEditor({
           label={t("reports.filters.value")}
           placeholder={t("reports.filters.selectValue")}
           options={choices}
+          testId={REPORTS_HANDLES.CONDITION_VALUE_PICKER}
+          optionTestId={({ id }) => REPORTS_HANDLES.option(id)}
           selectedIds={selectedIds}
           selectedLabel={choiceLabel}
           multiple={isMultiple}
@@ -211,6 +215,7 @@ function RuleEditor({
     return (
       <Input
         aria-label={t("reports.filters.value")}
+        data-testid={REPORTS_HANDLES.CONDITION_VALUE_INPUT}
         className={cn(controlClassName, "md:col-span-2")}
         type={valueInputType}
         value={Array.isArray(rule.value) ? rule.value.join(", ") : String(rule.value ?? "")}
@@ -220,12 +225,17 @@ function RuleEditor({
   };
 
   return (
-    <div className="grid grid-cols-1 items-center gap-2 md:grid-cols-[minmax(150px,1fr)_minmax(130px,0.8fr)_minmax(120px,0.9fr)_minmax(120px,0.9fr)_auto]">
+    <div
+      data-testid={REPORTS_HANDLES.CONDITION}
+      className="grid grid-cols-1 items-center gap-2 md:grid-cols-[minmax(150px,1fr)_minmax(130px,0.8fr)_minmax(120px,0.9fr)_minmax(120px,0.9fr)_auto]"
+    >
       <OptionPicker
         label={t("reports.filters.field")}
         placeholder={t("reports.filters.field")}
         options={fieldKeys.map((field) => ({ id: field, label: t(`reports.fields.${field}`) }))}
         selectedIds={[rule.field]}
+        testId={REPORTS_HANDLES.CONDITION_FIELD}
+        optionTestId={({ id }) => REPORTS_HANDLES.option(id)}
         className={controlClassName}
         onToggle={({ id }) => {
           const field = fieldKeys.find((fieldKey) => fieldKey === id);
@@ -249,12 +259,20 @@ function RuleEditor({
           update({ operator, value: clearsValue ? undefined : rule.value });
         }}
       >
-        <SelectTrigger aria-label={t("reports.filters.operator")} className={controlClassName}>
+        <SelectTrigger
+          aria-label={t("reports.filters.operator")}
+          data-testid={REPORTS_HANDLES.CONDITION_OPERATOR}
+          className={controlClassName}
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {operators.map((operator) => (
-            <SelectItem key={operator} value={operator}>
+            <SelectItem
+              key={operator}
+              value={operator}
+              data-testid={REPORTS_HANDLES.conditionOperatorOption(operator)}
+            >
               {t(`reports.operators.${operator}`)}
             </SelectItem>
           ))}
@@ -267,6 +285,7 @@ function RuleEditor({
         size="icon"
         className="justify-self-end text-neutral-500 hover:text-error-700"
         aria-label={t("reports.filters.removeCondition")}
+        data-testid={REPORTS_HANDLES.REMOVE_CONDITION}
         onClick={onRemove}
       >
         <Trash2 className="size-4" />
@@ -289,13 +308,14 @@ function JoinSelect({
       <Select value={value} onValueChange={(join) => onChange(join as FilterJoin)}>
         <SelectTrigger
           aria-label={t("reports.filters.matching")}
+          data-testid={REPORTS_HANDLES.MATCHING}
           className="h-8 w-auto gap-1.5 px-2.5 font-medium text-primary-800"
         >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {(["and", "or"] as const).map((join) => (
-            <SelectItem key={join} value={join}>
+            <SelectItem key={join} value={join} data-testid={REPORTS_HANDLES.matchingOption(join)}>
               {t(`reports.filters.join.${join}`)}
             </SelectItem>
           ))}
@@ -370,7 +390,11 @@ export function ReportFilterBuilder({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-2">
           <p className="body-sm-md text-neutral-950">{t("reports.filters.title")}</p>
-          <p data-testid="reports-condition-count" className="details text-neutral-500">
+          <p
+            data-testid={REPORTS_HANDLES.CONDITION_COUNT}
+            data-count={countConditions(value)}
+            className="details text-neutral-500"
+          >
             {t("reports.filters.description", {
               count: countConditions(value),
               max: MAX_REPORT_CONDITIONS,
@@ -401,7 +425,7 @@ export function ReportFilterBuilder({
       {value.groups.map((group) => (
         <div
           key={group.id}
-          data-testid="reports-nested-group"
+          data-testid={REPORTS_HANDLES.NESTED_GROUP}
           className="space-y-2 border-l-2 border-primary-200 pl-3"
         >
           <div className="flex items-center justify-between gap-2">
@@ -443,6 +467,7 @@ export function ReportFilterBuilder({
             variant="ghost"
             size="sm"
             className="h-8 px-2 text-primary-800"
+            data-testid={REPORTS_HANDLES.NESTED_ADD_CONDITION}
             disabled={atLimit}
             onClick={() =>
               updateGroup(group.id, (item) => ({
@@ -458,7 +483,7 @@ export function ReportFilterBuilder({
       ))}
       <div className="flex flex-wrap gap-2">
         <Button
-          data-testid="reports-add-condition"
+          data-testid={REPORTS_HANDLES.ADD_CONDITION}
           type="button"
           variant="outline"
           size="sm"
@@ -472,6 +497,7 @@ export function ReportFilterBuilder({
           type="button"
           variant="ghost"
           size="sm"
+          data-testid={REPORTS_HANDLES.ADD_NESTED_GROUP}
           disabled={atLimit || value.groups.length > 0}
           onClick={() => onChange(addNestedGroup(value, newGroup()))}
         >

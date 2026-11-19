@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
+import { REPORTS_HANDLES } from "../../../../e2e/data/reports/handles";
+
 type ReportVisibility = "personal" | "shared";
 
 type ReportSaveDialogProps = {
@@ -67,6 +69,7 @@ export function ReportSaveDialog({
             <Label htmlFor="report-configuration-name">{t("reports.saved.name")}</Label>
             <Input
               id="report-configuration-name"
+              data-testid={REPORTS_HANDLES.SAVE_NAME_INPUT}
               value={name}
               maxLength={120}
               onChange={(event) => onNameChange(event.target.value)}
@@ -93,7 +96,12 @@ export function ReportSaveDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t("common.button.cancel")}
             </Button>
-            <Button type="submit" disabled={!name.trim() || isPending} className="gap-2">
+            <Button
+              type="submit"
+              disabled={!name.trim() || isPending}
+              className="gap-2"
+              data-testid={REPORTS_HANDLES.SAVE_SUBMIT}
+            >
               <Save className="size-4" />
               {isUpdate ? t("reports.saved.update") : t("reports.saved.save")}
             </Button>

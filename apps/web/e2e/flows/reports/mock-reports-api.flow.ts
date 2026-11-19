@@ -8,6 +8,7 @@ export type ReportsApiMock = {
   savedConfigurations: ReportsApiRecord[];
   submittedQueries: ReportsApiRecord[];
   getExportRequest: () => ReportsApiRecord | undefined;
+  lastSubmittedQuery: () => ReportsApiRecord | undefined;
 };
 
 /** Serves every reports endpoint from fixed data and records what the page sends. */
@@ -73,5 +74,10 @@ export const mockReportsApiFlow = async (page: Page): Promise<ReportsApiMock> =>
     route.fulfill({ body: "mock spreadsheet", contentType: "application/octet-stream" }),
   );
 
-  return { savedConfigurations, submittedQueries, getExportRequest: () => exportRequest };
+  return {
+    savedConfigurations,
+    submittedQueries,
+    getExportRequest: () => exportRequest,
+    lastSubmittedQuery: () => submittedQueries.at(-1),
+  };
 };

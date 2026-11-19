@@ -147,6 +147,7 @@ export default function LoginPage() {
       {loginBackgroundImageS3Key && (
         <div
           className="fixed inset-0 -z-10"
+          data-testid={LOGIN_PAGE_HANDLES.BACKGROUND}
           style={{
             backgroundImage: `url(${loginBackgroundImageS3Key}) `,
             backgroundSize: "cover",
@@ -158,7 +159,7 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle role="heading" className="text-2xl">
             <div className="mb-6 flex justify-center">
-              <PlatformLogo className="h-16 w-auto py-3" alt="Platform Logo" />
+              <PlatformLogo className="h-16 w-auto py-3" />
             </div>
             {t("loginView.header")}
           </CardTitle>
@@ -247,6 +248,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => handlePreviewClick(resource)}
+                    data-testid={LOGIN_PAGE_HANDLES.resource(resource.id)}
                     className="text-sm truncate underline"
                   >
                     {resource.name}

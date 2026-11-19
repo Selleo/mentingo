@@ -9,6 +9,7 @@ import {
   type SupportedLanguages,
 } from "@repo/shared";
 
+import type { Cleanup } from "../fixtures/types";
 import type { FixtureApiClient } from "../utils/api-client";
 import type {
   CreateLiveTrainingBody,
@@ -38,19 +39,32 @@ const getFutureDateOnScheduleStep = (minutesFromNow: number) => {
 export class LiveTrainingFactory {
   constructor(private readonly apiClient: FixtureApiClient) {}
 
+  /** Enables Live Training and returns a task that restores the original setting. */
   async ensureLiveTrainingEnabled() {
     const response = await this.apiClient.api.settingsControllerGetPublicGlobalSettings();
+    const wasEnabled = response.data.data.liveTrainingEnabled;
 
-    if (!response.data.data.liveTrainingEnabled) {
+    if (!wasEnabled) {
       await this.apiClient.api.settingsControllerUpdateLiveTrainingEnabled();
     }
+
+    return async () => {
+      if (wasEnabled) return;
+      // The endpoint toggles the setting.
+      await this.apiClient.api.settingsControllerUpdateLiveTrainingEnabled();
+    };
   }
 
+  /**
+   * Creates an offline Live Training and registers its cleanup: the training is deleted
+   * (ending an open session first) and the original Live Training setting is restored.
+   */
   async createOffline(
+    cleanup: Cleanup,
     input: LiveTrainingFactoryCreateInput = {},
     language: SupportedLanguages = SUPPORTED_LANGUAGES.EN,
   ): Promise<LiveTrainingFactoryRecord> {
-    await this.ensureLiveTrainingEnabled();
+    cleanup.add(await this.ensureLiveTrainingEnabled());
 
     const title = input.title ?? `Offline Live Training ${randomUUID().slice(0, 8)}`;
     await this.apiClient.api.liveTrainingControllerCreateLiveTraining({
@@ -76,6 +90,8 @@ export class LiveTrainingFactory {
     if (!createdLiveTraining) {
       throw new Error(`Live training "${title}" was not found after creation`);
     }
+
+    cleanup.add(() => this.deleteEnsuringSessionClosed(createdLiveTraining.id, language));
 
     return this.get(createdLiveTraining.id, language);
   }
@@ -153,5 +169,19 @@ export class LiveTrainingFactory {
 
   async delete(id: string) {
     await this.apiClient.api.liveTrainingControllerDeleteLiveTraining(id);
+  }
+
+  /** The API rejects deleting a training with an open session, so that session is ended first. */
+  async deleteEnsuringSessionClosed(
+    id: string,
+    language: SupportedLanguages = SUPPORTED_LANGUAGES.EN,
+  ) {
+    const { currentSession } = await this.get(id, language);
+
+    if (currentSession) {
+      await this.endSession(id, currentSession.id, language);
+    }
+
+    await this.delete(id);
   }
 }

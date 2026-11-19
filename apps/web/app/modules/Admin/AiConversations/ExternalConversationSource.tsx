@@ -11,12 +11,12 @@ export function ExternalConversationSource({ source }: { source?: string | null 
   const platform = match(source)
     .with(AI_CONVERSATION_SOURCES.SLACK, () => ({
       label: "Slack",
-      icon: <Icon name="Slack" className="size-4" role="img" aria-label="Slack" />,
+      icon: <Icon name="Slack" className="size-4" aria-hidden="true" />,
     }))
     .with(AI_CONVERSATION_SOURCES.DISCORD, () => ({
       label: "Discord",
       icon: (
-        <svg className="size-4" viewBox="0 0 24 24" role="img" aria-label="Discord">
+        <svg className="size-4" viewBox="0 0 24 24" aria-hidden="true">
           <path
             fill="#5865f2"
             d="M19.6 5.3a18 18 0 0 0-4.4-1.4l-.6 1.2a16.3 16.3 0 0 0-5.2 0l-.6-1.2a18 18 0 0 0-4.4 1.4C1.6 9.4.8 13.4 1.2 17.4a18 18 0 0 0 5.4 2.7l1.1-1.8-1.7-.8.4-.3a12.5 12.5 0 0 0 11.2 0l.4.3-1.7.8 1.1 1.8a18 18 0 0 0 5.4-2.7c.5-4.6-.8-8.5-3.2-12.1Z"
@@ -29,7 +29,7 @@ export function ExternalConversationSource({ source }: { source?: string | null 
     .with(AI_CONVERSATION_SOURCES.WHATSAPP, () => ({
       label: "WhatsApp",
       icon: (
-        <svg className="size-4" viewBox="0 0 24 24" role="img" aria-label="WhatsApp">
+        <svg className="size-4" viewBox="0 0 24 24" aria-hidden="true">
           <path fill="#25d366" d="M12 1a11 11 0 0 0-9.5 16.5L1 23l5.7-1.5A11 11 0 1 0 12 1Z" />
           <path
             fill="white"
@@ -45,7 +45,9 @@ export function ExternalConversationSource({ source }: { source?: string | null 
 
   return (
     <span className="inline-flex shrink-0 items-center gap-1 text-xs text-neutral-600">
-      {platform.icon}
+      <span role="img" aria-label={platform.label} className="inline-flex">
+        {platform.icon}
+      </span>
       <span aria-hidden="true">{platform.label}</span>
     </span>
   );

@@ -85,7 +85,7 @@ const LessonCard = ({
       tabIndex={isInteractionLocked ? undefined : 0}
       role={isInteractionLocked ? undefined : "button"}
       aria-disabled={isInteractionLocked ? true : undefined}
-      aria-label={`Lesson: ${displayTitle}`}
+      aria-label={t("a11y.lessonWithTitle", { title: displayTitle })}
       className={cn(
         "flex gap-x-3 rounded-lg border bg-white p-3 hover:border-neutral-300 hover:bg-neutral-50",
         {

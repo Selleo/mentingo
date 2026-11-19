@@ -2,7 +2,8 @@
 // @ts-nocheck - react-day-picker untyped library
 import { format, getDate } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
+import { createContext, useContext } from "react";
+import { DayContent, DayPicker } from "react-day-picker";
 import { match } from "ts-pattern";
 
 import { Checkmark } from "~/assets/svgs";
@@ -10,12 +11,28 @@ import { buttonVariants } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 import type { ComponentProps } from "react";
-import type { DayProps } from "react-day-picker";
+import type { DayContentProps, DayProps } from "react-day-picker";
 
 export type CalendarProps = ComponentProps<typeof DayPicker> & {
   dates?: string[] | undefined;
   variant?: "default" | "streak";
+  /** Adds a `data-testid` to each day of the default variant. */
+  getDayTestId?: (date: Date) => string;
 };
+
+const DayTestIdContext = createContext<((date: Date) => string) | undefined>(undefined);
+
+// Module-level component, so DayPicker keeps the same day cells across renders.
+function TestIdDayContent(props: DayContentProps) {
+  const getDayTestId = useContext(DayTestIdContext);
+
+  return (
+    <span data-testid={getDayTestId?.(props.date)}>
+      <DayContent {...props} />
+    </span>
+  );
+}
+
 type CustomDayContentProps = DayProps & {
   "data-day": string;
   dates: string[] | undefined;
@@ -49,6 +66,7 @@ function Calendar({
   showOutsideDays = true,
   dates,
   variant = "streak",
+  getDayTestId,
   ...props
 }: CalendarProps) {
   const baseClassNames = match(variant)
@@ -149,19 +167,22 @@ function Calendar({
   })).otherwise(() => ({
     IconLeft: () => <ChevronLeft className="size-4" />,
     IconRight: () => <ChevronRight className="size-4" />,
+    ...(getDayTestId && { DayContent: TestIdDayContent }),
   }));
 
   return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn("w-min max-w-[320px] md:w-full", className)}
-      classNames={{
-        ...baseClassNames,
-        ...classNames,
-      }}
-      components={components}
-      {...props}
-    />
+    <DayTestIdContext.Provider value={getDayTestId}>
+      <DayPicker
+        showOutsideDays={showOutsideDays}
+        className={cn("w-min max-w-[320px] md:w-full", className)}
+        classNames={{
+          ...baseClassNames,
+          ...classNames,
+        }}
+        components={components}
+        {...props}
+      />
+    </DayTestIdContext.Provider>
   );
 }
 Calendar.displayName = "Calendar";

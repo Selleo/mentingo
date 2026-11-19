@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
 
+import { DASHBOARD_WIDGET_HANDLES } from "../../../../../e2e/data/dashboard/handles";
 import { dashboardSizeToSpan } from "../types";
 import { DASHBOARD_WIDGET_REGISTRY } from "../widgetRegistry";
 
@@ -53,6 +54,7 @@ export function SortableWidget({ widget, isEditing, onSizeChange }: SortableWidg
     <div
       ref={setNodeRef}
       data-dashboard-widget-hitbox="true"
+      data-testid={DASHBOARD_WIDGET_HANDLES.SLOT}
       style={{
         transform: CSS.Translate.toString(transform),
         transition,
@@ -67,6 +69,7 @@ export function SortableWidget({ widget, isEditing, onSizeChange }: SortableWidg
         className="h-full min-w-0"
       >
         <DashboardWidgetShell
+          type={widget.id}
           title={title}
           size={widget.size}
           isEditing={isEditing}
