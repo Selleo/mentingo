@@ -8,6 +8,7 @@ import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { clickHandleAndExpectUrlFlow } from "../../flows/click-handle-and-expect-url.flow";
 import { openManageMenuFlow } from "../../flows/navigation/open-manage-menu.flow";
+import { openProfileMenuFlow } from "../../flows/navigation/open-profile-menu.flow";
 import { prepareNavigationPageFlow } from "../../flows/navigation/prepare-navigation-page.flow";
 
 const ROLE_NAVIGATION_EXPECTATIONS = [
@@ -68,7 +69,7 @@ for (const { role, title, canSeeManage } of ROLE_NAVIGATION_EXPECTATIONS) {
       await prepareNavigationPageFlow(page);
       await clickHandleAndExpectUrlFlow(page, NAVIGATION_HANDLES.COURSES_LINK, "/courses");
 
-      await page.getByTestId(NAVIGATION_HANDLES.PROFILE_FOOTER).click();
+      await openProfileMenuFlow(page, NAVIGATION_HANDLES.PROVIDER_INFORMATION_LINK);
       await clickHandleAndExpectUrlFlow(
         page,
         NAVIGATION_HANDLES.PROVIDER_INFORMATION_LINK,
@@ -76,14 +77,14 @@ for (const { role, title, canSeeManage } of ROLE_NAVIGATION_EXPECTATIONS) {
       );
       await expect(page.getByTestId(PROVIDER_INFORMATION_PAGE_HANDLES.HEADING)).toBeVisible();
 
-      await page.getByTestId(NAVIGATION_HANDLES.PROFILE_FOOTER).click();
+      await openProfileMenuFlow(page, NAVIGATION_HANDLES.PROFILE_LINK);
       await clickHandleAndExpectUrlFlow(
         page,
         NAVIGATION_HANDLES.PROFILE_LINK,
         new RegExp(`/profile/${currentUser.data.data.id}$`),
       );
 
-      await page.getByTestId(NAVIGATION_HANDLES.PROFILE_FOOTER).click();
+      await openProfileMenuFlow(page, NAVIGATION_HANDLES.SETTINGS_LINK);
       await clickHandleAndExpectUrlFlow(page, NAVIGATION_HANDLES.SETTINGS_LINK, "/settings");
       await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.TABS)).toBeVisible();
     });
