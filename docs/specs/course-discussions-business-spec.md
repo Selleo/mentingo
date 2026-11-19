@@ -24,7 +24,9 @@ For HR and L&D teams, discussions add peer learning and course-specific collabor
 - Show online presence for course discussion participants.
 - Soft-delete messages and preserve deleted placeholders when replies remain.
 - Broadcast new messages, replies, reactions, deletions, mentions, and presence updates in realtime.
-- Show course threads in the organization-wide forum for enrolled users when the forum is enabled.
+- Notify the people who follow a thread when someone replies, in the application and by a grouped email; both open that thread. The author and the repliers follow it automatically.
+- Follow or stop following a thread with the button under it.
+- Follow the discussion from the organization-wide forum, which shows it as one entry per enrolled course when the forum is enabled.
 
 ## End-User Value
 
@@ -38,9 +40,11 @@ When course discussions are enabled, enrolled learners with discussion access se
 
 Learners can post a thread or open a thread to reply. Mentions are limited to users enrolled in the same course. Reactions and deletions are broadcast to other open course discussion sessions so the page updates without a full reload.
 
+When someone replies in a thread, the learners who follow it get a notification in the application, unless they wrote the reply themselves, were mentioned in it, are no longer enrolled, or turned these notifications off in their account settings. The author of a thread and everyone who replies in it follow it automatically; the button under the thread lets any enrolled learner follow it or stop following. Opening the notification shows the course's Discussion tab on the page that holds the thread, with the thread open. The same link format, `?tab=Discussion`, is used by the mention e-mail and now opens the tab as well.
+
 Discussion APIs are feature-gated and permission-gated. Reading, posting, reacting, deleting, and joining realtime rooms all check course access so users cannot participate in discussions for courses they are not allowed to access.
 
-When the forum is enabled, enrolled users also see their course threads in the forum and can reply there. Replies and deletions made in the forum appear in the Discussion tab, because both views use the same course threads and rules.
+When the forum is enabled, it lists each enrolled course that has discussion messages, with the number of messages and the latest activity. Selecting a course opens its discussion inside the forum as a single topic, where enrolled users can read, post, reply and react under the same rules. Both views show the same messages.
 
 ## Key Technical Context
 
@@ -50,10 +54,13 @@ When the forum is enabled, enrolled users also see their course threads in the f
 - Core permissions include `PERMISSIONS.COURSE_DISCUSSION_READ`, `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_CREATE`, `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_REACT`, `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE_OWN`, and `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE`.
 - Realtime behavior uses Socket.IO rooms plus course-chat events for messages, reactions, deletions, mentions, and presence.
 - Mention email handling uses the existing event/outbox pattern.
-- Course threads and forum topics share the discussion tables with a `course` or `general` scope; course discussion endpoints ignore general forum posts. See `docs/specs/forum-business-spec.md`.
+- Reply notifications are handled in `apps/api/src/discussion-notifications`; see `docs/specs/announcements-notifications-business-spec.md`. The link is built by `getCourseDiscussionThreadPath` from `@repo/shared`, and `GET /course-chat/:courseId/messages?aroundMessageId=` returns the page that holds a thread.
+- Course threads and forum topics share the discussion tables with a `course` or `general` scope; course discussion endpoints ignore general forum posts and forum topic endpoints ignore course threads. See `docs/specs/forum-business-spec.md`.
 
 ## Test Evidence
 
 - Web E2E coverage verifies feature visibility, the empty state, thread and reply creation, reactions, deletion, mentions, presence, pagination, and realtime updates between enrolled learners.
 - Backend E2E coverage verifies the feature gate, authentication, permissions, enrollment isolation, moderation rules, message and reply pagination, validation, and deleted-thread behavior.
 - Mention email delivery remains covered by the dedicated Course Chat mention handler test.
+- Grouped reply emails are covered by the discussion reply email E2E tests.
+- Reply notifications are covered by the discussion reply E2E tests; web unit tests cover opening the Discussion tab and the linked thread from the URL.

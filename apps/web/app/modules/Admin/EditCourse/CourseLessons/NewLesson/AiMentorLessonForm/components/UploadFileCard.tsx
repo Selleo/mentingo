@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
 
@@ -9,6 +11,8 @@ type UploadFileCardProps = {
   compact?: boolean;
   removeDisabled?: boolean;
   showRemove?: boolean;
+  testId?: string;
+  uploadState?: "pending" | "uploaded";
 };
 
 export function UploadFileCard({
@@ -19,9 +23,15 @@ export function UploadFileCard({
   compact = false,
   removeDisabled = false,
   showRemove = true,
+  testId,
+  uploadState,
 }: UploadFileCardProps) {
+  const { t } = useTranslation();
+
   return (
     <div
+      data-testid={testId}
+      data-state={uploadState}
       className={cn(
         "relative flex w-full min-w-0 items-center gap-3 rounded-lg border border-neutral-200 bg-white shadow-sm",
         {
@@ -33,7 +43,7 @@ export function UploadFileCard({
       {showRemove && (
         <button
           type="button"
-          aria-label="Remove file"
+          aria-label={t("a11y.removeFile")}
           onClick={onRemove}
           disabled={removeDisabled}
           className={cn(

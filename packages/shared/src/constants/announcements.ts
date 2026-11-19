@@ -19,10 +19,15 @@ export const ANNOUNCEMENT_SOURCE_TYPES = {
   COURSE_DUE_DATE_REMINDER: "course_due_date_reminder",
   COURSE_CHAT: "course_chat",
   QUIZ_GRADING: "quiz_grading",
+  FORUM: "forum",
 } as const;
 
 export type AnnouncementSourceType =
   (typeof ANNOUNCEMENT_SOURCE_TYPES)[keyof typeof ANNOUNCEMENT_SOURCE_TYPES];
+
+export const NOTIFICATION_SOCKET_EVENTS = {
+  CREATED: "notifications:created",
+} as const;
 
 export const ANNOUNCEMENT_EMAIL_TEMPLATES = {
   DEFAULT: "default",

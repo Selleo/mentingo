@@ -2,7 +2,7 @@
 
 This inventory describes registered recording contracts, not a library of verified finished videos.
 The catalog covers all 33 user-facing route areas and the 61 app business specifications currently
-in `docs/specs`. It contains 246 explicit flows, assigned exactly once to 104 stable video groups per
+in `docs/specs`. It contains 247 explicit flows, assigned exactly once to 104 stable video groups per
 language. Groups contain one to three related flows. English and Polish therefore allow up to 208
 video variants for this inventory; an individual build selects affected groups rather than requiring
 all of them to be generated together.
@@ -46,8 +46,8 @@ AI search. Workflow selection by business spec maps to these same recording feat
 | `tenants`                   |                5 |                   2 | `tenant-administration`                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `competencies`              |               15 |                   5 | `competencies`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `gamification`              |                2 |                   1 | `gamification`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `forum` | 7 | 4 | `forum` |
-| `quiz-grading` | 4 | 2 | `quiz-assessment-engine` |
+| `forum`                     |                8 |                   4 | `forum`                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `quiz-grading`              |                4 |                   2 | `quiz-assessment-engine`                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 ## Evidence and boundaries
 
@@ -102,11 +102,12 @@ as part of this app-wide registration change.
 ## Forum and reviewer grading coverage
 
 Forum adds explicit contracts for organization enablement, filtered discovery, general topics,
-paginated replies, enrolled-course discussion continuity, own-post removal and moderator removal.
+paginated replies, following a topic, enrolled-course discussion continuity, own-post removal and
+moderator removal.
 The disabled-state demonstration has no Forum feature prerequisite; the remaining contracts require
 `FEATURES.FORUM` (`forum`) and their relevant read/create/reply/moderation permissions. Course-thread
-recording also requires enrollment and enabled course discussions. Reactions, mentions, edit actions
-and reply notifications are not presented as Forum functionality because they are not implemented.
+recording also requires enrollment and enabled course discussions. Reactions, mentions and edit
+actions have no recording contract of their own.
 
 Reviewer grading has a separate queue/navigation and grading/history inventory. The associated
 creator flow belongs to Course authoring: enable the real Graded by reviewer switch for brief or

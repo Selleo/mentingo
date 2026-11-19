@@ -86,7 +86,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
             <div className="flex justify-between">
               <CategoryChip category={course.category} className="body-sm-md bg-primary-50" />
             </div>
-            <h1 className="h6 text-neutral-950">{course.title}</h1>
+            <h2 className="h6 text-neutral-950">{course.title}</h2>
             <CourseProgress
               label={t("studentLessonView.sideSection.other.courseProgress")}
               completedLessonCount={course.completedChapterCount ?? 0}

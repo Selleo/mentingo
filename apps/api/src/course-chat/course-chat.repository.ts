@@ -1,15 +1,24 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
-import { and, count, desc, eq, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
+import {
+  COURSE_ENROLLMENT,
+  DISCUSSION_NOTIFICATION_PREFERENCES,
+  PERMISSIONS,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
+import { and, count, desc, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { userHasPermissionCondition } from "src/common/permissions/permission-sql.utils";
 import { LocalizationService } from "src/localization/localization.service";
+import { isNotificationPreferenceEnabled } from "src/settings/utils/notification-preference.sql";
 import {
   courses,
   courseChatMessageReactions,
   courseChatMessages,
   courseChatThreads,
+  discussionThreadFollowers,
+  settings,
   studentCourses,
   users,
 } from "src/storage/schema";
@@ -27,6 +36,7 @@ import type {
   CourseChatReplyParticipantRow,
   CourseChatReplySummaryRow,
   CourseChatUserProfileRow,
+  DiscussionEmailRecipient,
 } from "src/course-chat/course-chat.repository.types";
 
 @Injectable()
@@ -83,6 +93,35 @@ export class CourseChatRepository {
     };
   }
 
+  async findTopLevelMessagePage(
+    courseId: UUIDType,
+    messageId: UUIDType,
+    perPage = DEFAULT_PAGE_SIZE,
+  ): Promise<number> {
+    const [message] = await this.db
+      .select({ createdAt: courseChatMessages.createdAt })
+      .from(courseChatMessages)
+      .innerJoin(courseChatThreads, eq(courseChatThreads.id, courseChatMessages.threadId))
+      .where(
+        and(eq(courseChatMessages.id, messageId), this.visibleTopLevelMessagesWhere(courseId)),
+      );
+
+    if (!message) return 1;
+
+    const [{ newerMessages }] = await this.db
+      .select({ newerMessages: count() })
+      .from(courseChatMessages)
+      .innerJoin(courseChatThreads, eq(courseChatThreads.id, courseChatMessages.threadId))
+      .where(
+        and(
+          this.visibleTopLevelMessagesWhere(courseId),
+          gt(courseChatMessages.createdAt, message.createdAt),
+        ),
+      );
+
+    return Math.floor(newerMessages / perPage) + 1;
+  }
+
   async getReplies(parentMessageId: UUIDType, page = 1, perPage = DEFAULT_PAGE_SIZE) {
     const visibleReplies = this.db
       .$with("visible_course_chat_replies")
@@ -134,6 +173,22 @@ export class CourseChatRepository {
       .orderBy(users.firstName, users.lastName);
   }
 
+  private discussionReaderCondition(courseId: UUIDType, userIds: UUIDType[]) {
+    return and(
+      eq(studentCourses.courseId, courseId),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      inArray(users.id, userIds),
+      isNull(users.deletedAt),
+      eq(users.archived, false),
+      userHasPermissionCondition(
+        this.db,
+        users.id,
+        users.tenantId,
+        PERMISSIONS.COURSE_DISCUSSION_READ,
+      ),
+    );
+  }
+
   private visibleTopLevelMessagesWhere(courseId: UUIDType) {
     return and(
       eq(courseChatMessages.courseId, courseId),
@@ -168,6 +223,44 @@ export class CourseChatRepository {
     return rows.map(({ userId }) => userId);
   }
 
+  async getDiscussionReaderIds(courseId: UUIDType, userIds: UUIDType[]): Promise<UUIDType[]> {
+    if (!userIds.length) return [];
+
+    const readers = await this.db
+      .select({ userId: users.id })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(this.discussionReaderCondition(courseId, userIds));
+
+    return readers.map(({ userId }) => userId);
+  }
+
+  async findDiscussionEmailRecipients(
+    courseId: UUIDType,
+    userIds: UUIDType[],
+  ): Promise<DiscussionEmailRecipient[]> {
+    if (!userIds.length) return [];
+
+    return this.db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        language: sql<string | null>`${settings.settings}->>'language'`,
+        replyEmailsEnabled: isNotificationPreferenceEnabled(
+          DISCUSSION_NOTIFICATION_PREFERENCES.REPLY_EMAILS,
+        ),
+        mentionEmailsEnabled: isNotificationPreferenceEnabled(
+          DISCUSSION_NOTIFICATION_PREFERENCES.MENTION_EMAILS,
+        ),
+      })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .leftJoin(settings, eq(settings.userId, users.id))
+      .where(this.discussionReaderCondition(courseId, userIds));
+  }
+
   async getMentionEmailRecipients(
     courseId: UUIDType,
     userIds: UUIDType[],
@@ -181,9 +274,13 @@ export class CourseChatRepository {
         firstName: users.firstName,
         lastName: users.lastName,
         tenantId: users.tenantId,
+        mentionEmailsEnabled: isNotificationPreferenceEnabled(
+          DISCUSSION_NOTIFICATION_PREFERENCES.MENTION_EMAILS,
+        ),
       })
       .from(studentCourses)
       .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .leftJoin(settings, eq(settings.userId, users.id))
       .where(
         and(
           eq(studentCourses.courseId, courseId),
@@ -279,8 +376,45 @@ export class CourseChatRepository {
       .update(courseChatThreads)
       .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
       .where(eq(courseChatThreads.id, parentMessage.threadId));
+    await this.followThread(parentMessage.threadId, params.userId, db);
 
     return message.id;
+  }
+
+  async followThread(threadId: UUIDType, userId: UUIDType, dbInstance: DatabasePg = this.db) {
+    await dbInstance
+      .insert(discussionThreadFollowers)
+      .values({ threadId, userId })
+      .onConflictDoNothing({
+        target: [discussionThreadFollowers.threadId, discussionThreadFollowers.userId],
+      });
+  }
+
+  async unfollowThread(threadId: UUIDType, userId: UUIDType) {
+    await this.db
+      .delete(discussionThreadFollowers)
+      .where(
+        and(
+          eq(discussionThreadFollowers.threadId, threadId),
+          eq(discussionThreadFollowers.userId, userId),
+        ),
+      );
+  }
+
+  async findFollowedThreadIds(threadIds: UUIDType[], userId: UUIDType): Promise<UUIDType[]> {
+    if (!threadIds.length) return [];
+
+    const followedThreads = await this.db
+      .select({ threadId: discussionThreadFollowers.threadId })
+      .from(discussionThreadFollowers)
+      .where(
+        and(
+          inArray(discussionThreadFollowers.threadId, threadIds),
+          eq(discussionThreadFollowers.userId, userId),
+        ),
+      );
+
+    return followedThreads.map(({ threadId }) => threadId);
   }
 
   async getMessageContext(messageId: UUIDType): Promise<CourseChatMessageContext | null> {
@@ -289,6 +423,7 @@ export class CourseChatRepository {
         id: courseChatMessages.id,
         threadId: courseChatMessages.threadId,
         courseId: sql<UUIDType>`${courseChatMessages.courseId}`,
+        tenantId: courseChatMessages.tenantId,
         userId: courseChatMessages.userId,
         parentMessageId: courseChatMessages.parentMessageId,
         deletedAt: courseChatMessages.deletedAt,
@@ -309,7 +444,7 @@ export class CourseChatRepository {
 
   async toggleMessageReaction(params: {
     messageId: UUIDType;
-    courseId: UUIDType;
+    courseId: UUIDType | null;
     userId: UUIDType;
     reaction: string;
   }): Promise<boolean> {
@@ -616,6 +751,8 @@ export class CourseChatRepository {
         content: params.content,
       })
       .returning({ id: courseChatMessages.id });
+
+    await this.followThread(thread.id, params.userId, db);
 
     return { threadId: thread.id, messageId: message.id };
   }

@@ -347,7 +347,9 @@
       "live_training_reminder": "La formación en directo comienza en 15 minutos",
       "live_training_ended": "Formación en directo finalizada",
       "quiz_attempt_graded": "Cuestionario calificado por un revisor",
-      "quiz_grading_digest": "Nuevas respuestas pendientes de revisión (diario)"
+      "quiz_grading_digest": "Nuevas respuestas pendientes de revisión (diario)",
+      "forum_mention": "Usuario mencionado en un tema del foro",
+      "discussion_reply": "Nuevas respuestas en una discusión (agrupadas)"
     },
     "errors": {
       "incompleteButton": "Introduce el texto del botón y la URL.",
@@ -1107,6 +1109,7 @@
     "notifications": "Notificaciones",
     "promotionCodes": "Códigos de promoción",
     "manage": "Administrar",
+    "skipToContent": "Saltar al contenido",
     "ariaLabels": {
       "goToAvailableCourses": "Ir a cursos disponibles",
       "collapseSidebar": "Contraer barra lateral",
@@ -2444,7 +2447,8 @@
         "forum_read": "Ver el foro.",
         "forum_topic_create": "Crear temas en el foro.",
         "forum_post_create": "Responder en los temas del foro.",
-        "forum_post_delete": "Eliminar cualquier publicación del foro."
+        "forum_post_delete": "Eliminar cualquier publicación del foro.",
+        "forum_post_react": "Reaccionar a las publicaciones del foro."
       }
     },
     "dropdown": {
@@ -4358,7 +4362,18 @@
       "scale_1_5": "Escala del 1 al 5",
       "matching": "Empareja cada elemento con su pareja.",
       "noMatchesAvailable": "Esta pregunta aún no tiene parejas disponibles.",
-      "correctMatch": "Pareja correcta:"
+      "correctMatch": "Pareja correcta:",
+      "fillInTheBlanksInstruction": "Haz clic en un espacio y elige una palabra.",
+      "matchingInstruction": "Haz clic en un elemento y elige su correspondencia.",
+      "blankLabel": "Espacio {{current}} de {{total}}",
+      "answerBank": "el banco de respuestas",
+      "removeWord": "Quitar palabra",
+      "dndInstructions": "Para tomar una palabra, pulsa espacio o intro. Usa las teclas de flecha para moverla entre los espacios. Pulsa espacio o intro de nuevo para soltarla, o escape para cancelar.",
+      "dndOnStart": "Palabra {{word}} tomada.",
+      "dndOnOver": "La palabra {{word}} está sobre {{blank}}.",
+      "dndOnEnd": "La palabra {{word}} se colocó en {{blank}}.",
+      "dndOnCancel": "Arrastre cancelado. La palabra {{word}} volvió a su posición anterior.",
+      "questionTitleNotProvided": "No se ha indicado el título de la pregunta"
     },
     "aiMentor": {
       "title": "Sesión de mentores de IA",
@@ -4713,7 +4728,10 @@
       "online": "En línea",
       "offline": "Sin conexión",
       "emptyUsers": "Aún no hay usuarios registrados.",
-      "mentionedToast": "Alguien te mencionó en la discusión del curso."
+      "mentionedToast": "Alguien te mencionó en la discusión del curso.",
+      "sendError": "No se pudo enviar el mensaje.",
+      "deleteError": "No se pudo eliminar el mensaje.",
+      "reactionError": "No se pudo guardar la reacción."
     }
   },
   "studentChapterView": {
@@ -4927,7 +4945,8 @@
     "inProgress": "En progreso",
     "notStarted": "No iniciado",
     "blocked": "Bloqueado",
-    "awaitingReview": "Pendiente de revisión"
+    "awaitingReview": "Pendiente de revisión",
+    "failed": "No superado"
   },
   "studentCertificateView": {
     "header": "Certificados",
@@ -5550,7 +5569,8 @@
     "learningPaths": "Rutas de desarrollo",
     "adminLearningPaths": "Rutas de desarrollo",
     "adminLearningPathEditor": "Editor de ruta de desarrollo",
-    "gamification": "Gamificación"
+    "gamification": "Gamificación",
+    "notificationUnsubscribe": "Ajustes de notificaciones"
   },
   "learningPathsView": {
     "hero": {
@@ -6128,7 +6148,9 @@
     "edit": {
       "title": "Editar organización",
       "description": "Actualizar los detalles y el estado de la organización.",
-      "submit": "Guardar cambios"
+      "submit": "Guardar cambios",
+      "accessEndsOn": "El acceso termina el {{date}}",
+      "unlimitedAccess": "Acceso ilimitado"
     },
     "form": {
       "tenantName": "Nombre de la organización",
@@ -6138,7 +6160,15 @@
       "statusPlaceholder": "Seleccionar estado",
       "adminFirstName": "Nombre del administrador",
       "adminLastName": "Apellido del administrador",
-      "adminEmail": "Correo electrónico del administrador"
+      "adminEmail": "Correo electrónico del administrador",
+      "accessEndsAt": "Fin del acceso",
+      "accessEndsAtHint": "El acceso dura hasta el final del día seleccionado. Déjelo vacío para un acceso ilimitado.",
+      "sections": {
+        "organization": "Organización",
+        "firstAdmin": "Primer administrador"
+      },
+      "accessEndsAtPlaceholder": "Acceso ilimitado",
+      "accessEndsAtClear": "Quitar fecha de fin"
     },
     "validation": {
       "nameRequired": "El nombre es obligatorio",
@@ -6151,6 +6181,11 @@
       "tenantCreatedSuccessfully": "Organización creada exitosamente",
       "tenantUpdatedSuccessfully": "Organización actualizada con éxito",
       "tenantDeletedSuccessfully": "Organización eliminada permanentemente"
+    },
+    "standing": {
+      "active": "Activa",
+      "inactive": "Inactiva",
+      "accessEnded": "Acceso finalizado"
     }
   },
   "superAdminTenants": {
@@ -6215,42 +6250,55 @@
     "description": "Este espacio de trabajo está actualmente inactivo. Si cree que se trata de un error, comuníquese con su administrador para restaurar el acceso."
   },
   "integrationApiKey": {
-    "title": "Integración clave API",
-    "description": "Genere una clave de larga duración para integraciones externas. La sustitución de la llave anula inmediatamente la anterior.",
-    "status": "Estado",
-    "active": "Activo",
-    "inactive": "No generado",
-    "prefix": "Prefijo clave",
-    "createdAt": "Creado en",
-    "lastUsedAt": "Usado por última vez en",
-    "loading": "Cargando metadatos clave...",
-    "generate": "Generar clave",
-    "override": "Sobrescribir clave",
+    "title": "Claves API de integración",
+    "description": "Las claves permiten que sistemas externos llamen a la API de integración con acceso de administrador. Cree una clave independiente para cada integración para poder revocarla por separado.",
+    "loading": "Cargando claves...",
     "copy": "Copiar clave",
     "generated": {
-      "title": "Copie esta clave ahora. No se volverá a mostrar."
+      "title": "Copie esta clave ahora. No se volverá a mostrar.",
+      "dismiss": "Listo"
     },
-    "confirm": {
-      "title": "¿Anular la clave API actual?",
-      "description": "Esta acción revoca la clave actual inmediatamente. Las integraciones que lo utilicen dejarán de funcionar.",
-      "action": "Sobrescribir clave"
+    "create": {
+      "button": "Crear clave",
+      "title": "Crear clave API de integración",
+      "description": "Asigne a la clave el nombre del sistema que la utilizará.",
+      "nameLabel": "Nombre",
+      "namePlaceholder": "p. ej. Sincronización CRM",
+      "action": "Crear clave"
+    },
+    "revoke": {
+      "button": "Revocar",
+      "title": "¿Revocar «{{name}}»?",
+      "description": "Las integraciones que usan esta clave dejarán de funcionar de inmediato. Esta acción no se puede deshacer.",
+      "action": "Revocar clave"
+    },
+    "table": {
+      "key": "Clave",
+      "created": "Creada",
+      "createdBy": "por {{email}}",
+      "lastUsedAt": "Último uso",
+      "actions": "Acciones",
+      "empty": "Todavía no hay claves API de integración",
+      "emptyHint": "Cree una clave para cada sistema que necesite acceder a la API de integración."
     },
     "toast": {
-      "fetchSuccess": "Integración clave API cargada exitosamente",
-      "rotateSuccess": "Clave de integración API actualizada correctamente",
-      "rotateError": "No se pudo actualizar la clave de integración API",
-      "copySuccess": "Integración clave API copiada",
-      "copyError": "No se pudo copiar la clave de integración API"
+      "createSuccess": "Clave API de integración creada",
+      "createError": "No se pudo crear la clave API de integración",
+      "revokeSuccess": "Clave API de integración revocada",
+      "revokeError": "No se pudo revocar la clave API de integración",
+      "copySuccess": "Clave API de integración copiada",
+      "copyError": "No se pudo copiar la clave API de integración"
     },
     "errors": {
-      "rotateFailed": "No se pudo rotar la clave de integración API",
       "invalidApiKey": "Clave de integración API no válida",
       "ownerInactive": "El propietario de la clave API ya no está activo",
       "ownerNotAdmin": "El propietario de la clave API ya no tiene permisos de administrador",
       "missingApiKeyHeader": "Falta el encabezado X-API-Key",
       "missingTenantIdHeader": "Falta el encabezado X-Tenant-Id",
       "invalidPluginOrigin": "Usa un origen de plugin HTTPS sin ruta (HTTP localhost está permitido en desarrollo)",
-      "pluginAddressUnavailable": "No se pudo verificar la dirección del complemento. Inténtalo de nuevo."
+      "pluginAddressUnavailable": "No se pudo verificar la dirección del complemento. Inténtalo de nuevo.",
+      "createFailed": "No se pudo crear la clave API de integración",
+      "notFound": "No se encontró la clave API de integración"
     }
   },
   "courseDuplication": {
@@ -6627,12 +6675,6 @@
       "averageRating": "Valoración media",
       "detailedStatisticsSoon": "Estadísticas detalladas próximamente",
       "detailedStatisticsDescription": "Esta sección mostrará análisis completos del progreso, finalización de capítulos, participación y mucho más.",
-      "status": {
-        "completed": "Completado",
-        "inProgress": "En curso",
-        "notStarted": "No iniciado",
-        "awaitingReview": "Pendiente de revisión"
-      },
       "lessonTypes": {
         "content": "Contenido",
         "quiz": "Cuestionario",
@@ -6886,6 +6928,10 @@
       "failed": "Algunas tareas requieren atención",
       "saved": "Progreso guardado",
       "reconnecting": "Reconectando. Tu trabajo está guardado.",
+      "connectionOffline": "Se ha perdido la conexión. Tu trabajo está guardado. Vuelve a conectarte para cargar los últimos cambios.",
+      "reconnect": "Volver a conectar",
+      "connectionPermissionRevoked": "Ya no tienes acceso a esta sesión de generación del curso.",
+      "connectionSessionUnavailable": "Esta sesión de generación del curso ya no está disponible.",
       "review": "Revisar cambios",
       "showCourse": "Ver estructura del curso",
       "controls": "Controles de generación",
@@ -8065,7 +8111,9 @@
         "live_training_reminder": "Los alumnos inscritos en cursos vinculados a la próxima formación en directo.",
         "live_training_ended": "Los alumnos inscritos en cursos vinculados a la formación en directo que terminó.",
         "quiz_attempt_graded": "El participante cuyas respuestas del cuestionario fueron calificadas.",
-        "quiz_grading_digest": "Los usuarios que pueden calificar respuestas de cuestionarios."
+        "quiz_grading_digest": "Los usuarios que pueden calificar respuestas de cuestionarios.",
+        "forum_mention": "Los usuarios mencionados en la publicación del foro.",
+        "discussion_reply": "Participantes del hilo o tema que no han leído las respuestas en la aplicación."
       }
     },
     "mapping": {
@@ -8165,7 +8213,9 @@
       "courseChatUserMentioned": "Usuario mencionado en el chat",
       "courseDueDateReminder": "Recordatorio de plazo del curso",
       "quizAttemptGraded": "Cuestionario calificado",
-      "quizGradingDigest": "Resumen de la cola de calificación"
+      "quizGradingDigest": "Resumen de la cola de calificación",
+      "forumUserMentioned": "Mención en el foro",
+      "discussionReply": "Nuevas respuestas en una discusión"
     },
     "canvas": {
       "emptyTitle": "El lienzo de automatización está vacío",
@@ -8327,7 +8377,16 @@
       "lessonUrl": "Enlace de la lección",
       "newAnswersCount": "Nuevas respuestas",
       "pendingAnswersCount": "Respuestas pendientes de revisión",
-      "gradingQueueUrl": "Enlace a la cola de calificación"
+      "gradingQueueUrl": "Enlace a la cola de calificación",
+      "topicTitle": "Título del tema",
+      "topicUrl": "Enlace al tema",
+      "discussionName": "Nombre de la discusión",
+      "replyCount": "Número de respuestas nuevas",
+      "replyAuthors": "Autores de las respuestas",
+      "latestReply": "Última respuesta",
+      "discussionUrl": "Enlace a la discusión",
+      "unsubscribeUrl": "Enlace para darse de baja",
+      "unfollowUrl": "Enlace para dejar de seguir"
     },
     "simulation": {
       "title": "Resultado de la simulación",
@@ -9732,10 +9791,15 @@
     "description": "Haz preguntas y comparte conocimientos con toda tu organización.",
     "newTopic": "Nuevo tema",
     "searchPlaceholder": "Buscar temas",
-    "filter": {
-      "label": "Mostrar temas",
-      "all": "Todos los temas",
-      "general": "General"
+    "courseDiscussions": {
+      "title": "Discusiones de los cursos",
+      "heading": "Discusión: {{course}}",
+      "messages_one": "{{count}} mensaje",
+      "messages_other": "{{count}} mensajes",
+      "viewAll": "Todas las discusiones de los cursos ({{count}})",
+      "searchPlaceholder": "Buscar cursos",
+      "empty": "Ninguno de tus cursos tiene una discusión todavía.",
+      "noResults": "Ninguna discusión de curso coincide con tu búsqueda."
     },
     "sort": {
       "label": "Ordenar temas",
@@ -9760,7 +9824,6 @@
     },
     "topic": {
       "backToForum": "Volver al foro",
-      "courseThreadTitle": "Debate del curso {{course}}",
       "noReplies": "Aún no hay respuestas.",
       "replyPlaceholder": "Escribe una respuesta",
       "replySubmit": "Responder",
@@ -9773,15 +9836,100 @@
     "toast": {
       "createTopicError": "No se pudo crear el tema.",
       "createPostError": "No se pudo enviar la respuesta.",
-      "deletePostError": "No se pudo eliminar la publicación."
+      "deletePostError": "No se pudo eliminar la publicación.",
+      "mentioned": "Alguien te ha mencionado en el foro.",
+      "reactionError": "No se pudo guardar la reacción."
     },
     "errors": {
       "topicNotFound": "Este tema no existe o no tienes acceso a él.",
+      "courseDiscussionNotFound": "Esta discusión del curso no existe o no tienes acceso a ella.",
       "postNotFound": "Esta publicación ya no existe.",
       "cannotDeletePost": "Solo puedes eliminar tus propias publicaciones.",
       "topicDeleted": "Las respuestas están cerradas porque se eliminó la primera publicación.",
       "emptyTitle": "Escribe un título.",
-      "emptyContent": "Escribe un mensaje."
+      "emptyContent": "Escribe un mensaje.",
+      "invalidReaction": "Elige una de las reacciones disponibles."
+    }
+  },
+  "a11y": {
+    "goToHomepage": "Ir a la página de inicio",
+    "platformLogo": "Logotipo de la plataforma",
+    "uploadedImage": "Imagen subida",
+    "uploadQueue": "Cola de subida",
+    "formattingOptions": "Opciones de formato",
+    "switchToLightMode": "Cambiar al modo claro",
+    "switchToDarkMode": "Cambiar al modo oscuro",
+    "videoPlayer": "Reproductor de vídeo",
+    "videoQuality": "Calidad de vídeo",
+    "breadcrumb": "Ruta de navegación",
+    "more": "Más",
+    "carousel": "carrusel",
+    "slide": "diapositiva",
+    "previousSlide": "Diapositiva anterior",
+    "nextSlide": "Diapositiva siguiente",
+    "remove": "Quitar",
+    "clearAll": "Borrar todo",
+    "expandOptions": "Expandir opciones",
+    "collapseOptions": "Contraer opciones",
+    "selectAll": "Seleccionar todo",
+    "selectRow": "Seleccionar fila",
+    "deleteChapter": "Eliminar capítulo",
+    "cancelEditing": "Cancelar edición",
+    "removeFile": "Quitar archivo",
+    "editSection": "Editar sección",
+    "deleteSection": "Eliminar sección",
+    "avatar": "Avatar",
+    "avatarFor": "Avatar de {{name}}",
+    "selectGroup": "Seleccionar grupo {{name}}",
+    "lessonWithTitle": "Lección: {{title}}"
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Notificaciones de discusiones",
+      "saving": "Guardando…",
+      "replyInApp": {
+        "label": "Respuestas – en la aplicación",
+        "description": "Mostrar una notificación cuando alguien responda en una discusión que sigues."
+      },
+      "replyEmails": {
+        "label": "Respuestas – por correo",
+        "description": "Enviar un correo con las nuevas respuestas de una discusión que sigues."
+      },
+      "mentionEmails": {
+        "label": "Menciones – por correo",
+        "description": "Enviar un correo cuando alguien te mencione en una discusión."
+      },
+      "toast": {
+        "saved": "Ajustes de notificaciones guardados.",
+        "error": "No se pudieron guardar los ajustes de notificaciones."
+      }
+    },
+    "following": {
+      "follow": "Seguir",
+      "following": "Siguiendo",
+      "followHint": "Recibir notificaciones sobre nuevas respuestas en esta discusión.",
+      "unfollowHint": "Dejar de recibir notificaciones sobre nuevas respuestas en esta discusión.",
+      "toast": {
+        "followed": "Sigues esta discusión.",
+        "unfollowed": "Ya no sigues esta discusión.",
+        "error": "No se pudo cambiar el seguimiento."
+      }
+    },
+    "unsubscribe": {
+      "title": "Notificaciones de discusiones",
+      "confirmDescription": "Confirma que quieres desactivar estas notificaciones.",
+      "confirm": "Confirmar",
+      "invalidLink": "Este enlace no es válido o ha caducado.",
+      "manageInSettings": "Gestionar las notificaciones en los ajustes",
+      "done": {
+        "replies": "Ya no recibirás correos sobre respuestas en discusiones.",
+        "mentions": "Ya no recibirás correos sobre menciones.",
+        "thread": "Ya no sigues esta discusión."
+      },
+      "tryAgain": "Algo ha salido mal. Inténtalo de nuevo en un momento."
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "Este enlace no es válido o ha caducado."
     }
   }
 }

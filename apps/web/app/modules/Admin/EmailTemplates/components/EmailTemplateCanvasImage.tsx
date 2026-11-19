@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import { useEmailTemplateImagePreview } from "~/api/queries/useEmailTemplateImagePreview";
 
+import { EMAIL_TEMPLATES_HANDLES } from "../../../../../e2e/data/email-templates/handles";
+
 import type { EmailTemplateBlock } from "../emailTemplates.types";
 
 export type EmailTemplateCanvasImageProps = {
@@ -37,6 +39,7 @@ export function EmailTemplateCanvasImage({ block }: EmailTemplateCanvasImageProp
       width={block.attrs.width}
       className="mx-auto h-auto max-w-full"
       referrerPolicy="no-referrer"
+      data-testid={EMAIL_TEMPLATES_HANDLES.CANVAS_IMAGE}
     />
   );
 }

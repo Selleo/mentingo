@@ -7,7 +7,7 @@ import { selectCourseLanguageFlow } from "../../flows/courses/select-course-lang
 import { openCurriculumPageFlow } from "../../flows/curriculum/open-curriculum-page.flow";
 import { updateChapterFlow } from "../../flows/curriculum/update-chapter.flow";
 
-import { createCurriculumCourse } from "./curriculum-test-helpers";
+import { arrangeCurriculumCourse } from "./curriculum-test-helpers";
 
 test("curriculum structure is locked in non-base language while translations can be edited", async ({
   cleanup,
@@ -15,21 +15,17 @@ test("curriculum structure is locked in non-base language while translations can
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const { category, course, categoryFactory, courseFactory } = await createCurriculumCourse(
+    const { course, courseFactory } = await arrangeCurriculumCourse({
+      cleanup,
       factories,
-      `curriculum-language-${Date.now()}`,
-    );
+      title: `curriculum-language-${Date.now()}`,
+    });
     const curriculumFactory = factories.createCurriculumFactory();
     const baseTitle = `base-chapter-${Date.now()}`;
     const germanTitle = `german-chapter-${Date.now()}`;
     const chapter = await curriculumFactory.createChapter({
       courseId: course.id,
       title: baseTitle,
-    });
-
-    cleanup.add(async () => {
-      await courseFactory.delete(course.id);
-      await categoryFactory.delete(category.id);
     });
 
     await openCurriculumPageFlow(page, course.id);

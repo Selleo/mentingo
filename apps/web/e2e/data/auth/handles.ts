@@ -1,3 +1,5 @@
+import { errorPageActionTestId } from "../common/handles";
+
 export const LOGIN_PAGE_HANDLES = {
   PAGE: "login-page",
   EMAIL: "auth-email-input",
@@ -9,7 +11,11 @@ export const LOGIN_PAGE_HANDLES = {
   MAGIC_LINK_LINK: "login-page-magic-link-link",
   REGISTER_LINK: "login-page-register-link",
   VERSION_CHANGELOG_LINK: "login-page-version-changelog-link",
+  BACKGROUND: "login-page-background",
+  resource: (id: string) => `login-page-resource-${id}`,
 } as const;
+
+const REGISTER_INVITE_ONLY = "register-invite-only";
 
 export const REGISTER_PAGE_HANDLES = {
   PAGE: "register-page",
@@ -20,6 +26,11 @@ export const REGISTER_PAGE_HANDLES = {
   PASSWORD: "register-password-input",
   SUBMIT: "register-submit-button",
   SIGN_IN_LINK: "register-sign-in-link",
+  INVITE_ONLY: REGISTER_INVITE_ONLY,
+  INVITE_ONLY_SIGN_IN_LINK: errorPageActionTestId(REGISTER_INVITE_ONLY),
+  formField: (fieldId: string) => `register-form-field-${fieldId}`,
+  formFieldCheckbox: (fieldId: string) => `register-form-field-${fieldId}-checkbox`,
+  formFieldError: (fieldId: string) => `register-form-field-${fieldId}-error`,
 } as const;
 
 export const CREATE_NEW_PASSWORD_PAGE_HANDLES = {
@@ -48,4 +59,18 @@ export const MFA_PAGE_HANDLES = {
   SECRET: "mfa-secret-value",
   TOKEN: "mfa-token-input",
   SUBMIT: "mfa-submit-button",
+} as const;
+
+const COURSE_LOGIN_REQUIRED = "content-access-course-login-required";
+const LESSON_LOGIN_REQUIRED = "content-access-lesson-login-required";
+const LESSON_NOT_AUTHORIZED = "content-access-lesson-not-authorized";
+
+export const CONTENT_ACCESS_HANDLES = {
+  COURSE_LOGIN_REQUIRED,
+  COURSE_LOGIN_REQUIRED_SIGN_IN_LINK: errorPageActionTestId(COURSE_LOGIN_REQUIRED),
+  COURSE_NOT_FOUND: "content-access-course-not-found",
+  LESSON_LOGIN_REQUIRED,
+  LESSON_LOGIN_REQUIRED_SIGN_IN_LINK: errorPageActionTestId(LESSON_LOGIN_REQUIRED),
+  LESSON_NOT_AUTHORIZED,
+  LESSON_NOT_AUTHORIZED_BACK_LINK: errorPageActionTestId(LESSON_NOT_AUTHORIZED),
 } as const;

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { getHlsQualityLabel, type HlsQualityOption, type HlsQualitySelection } from "./hlsQuality";
 
@@ -9,6 +10,7 @@ type HlsQualitySelectorProps = {
 };
 
 export const HlsQualitySelector = ({ options, selection, onSelect }: HlsQualitySelectorProps) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
@@ -36,7 +38,7 @@ export const HlsQualitySelector = ({ options, selection, onSelect }: HlsQualityS
         className="mentingo-vjs-quality-selector__button"
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Video quality"
+        aria-label={t("a11y.videoQuality")}
         onClick={() => setOpen((currentOpen) => !currentOpen)}
       >
         {getHlsQualityLabel(selection, options)}

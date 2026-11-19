@@ -58,6 +58,7 @@ function setup(practice: unknown = readyPractice) {
     on: jest.fn(),
     sendMentorTextDelta: jest.fn(),
     sendMentorTextEnd: jest.fn(),
+    sendMentorTextError: jest.fn(),
     onAudioChunked: jest.fn(),
     onAudioChunkError: jest.fn(),
     onAudioRecovered: jest.fn(),
@@ -75,6 +76,7 @@ function setup(practice: unknown = readyPractice) {
   jest.mocked(createLumaSocket).mockReturnValue(socket as unknown as LumaSocket);
   const repository = {
     getCourseAuthorByLesson: jest.fn().mockResolvedValue(user.userId),
+    getHasPublicCoursePreviewAccess: jest.fn().mockResolvedValue(false),
     findPracticeSessionById: jest.fn().mockResolvedValue(practice),
     checkLessonAssignment: jest.fn().mockResolvedValue([{ isAssigned: true }]),
     findAiMentorVoiceConfigByLessonId: jest.fn().mockResolvedValue({
@@ -263,6 +265,103 @@ describe("Practice voice sessions", () => {
       expect(socket.sendMentorTextDelta).toHaveBeenCalled();
     },
   );
+
+  it("starts an ordinary public preview on the caller's own thread and forwards a spoken turn", async () => {
+    const { service, socket, repository, threadService, aiService } = setup();
+    repository.getHasPublicCoursePreviewAccess.mockResolvedValue(true);
+    const actor = { ...user, permissions: [PERMISSIONS.AI_USE] };
+    await expect(
+      service.startAudio("socket-1", actor, {
+        voiceAction: payload.voiceAction,
+        meta: payload.meta,
+        lessonId: practiceId,
+        preview: true,
+      }),
+    ).resolves.toEqual({ ok: true });
+    expect(repository.checkLessonAssignment).not.toHaveBeenCalled();
+    expect(repository.getHasPublicCoursePreviewAccess).toHaveBeenCalledWith(
+      practiceId,
+      actor.userId,
+    );
+    expect(threadService.createThreadIfNoneExist).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lessonId: practiceId,
+        userId: actor.userId,
+        status: THREAD_STATUS.ACTIVE,
+      }),
+    );
+    const onTranscription = socket.onLearnerTranscription.mock.calls[0][0];
+    await onTranscription({
+      jobId: "public-preview-turn",
+      data: { text: "A public preview answer", status: LEARNER_TRANSCRIPT_STATUSES.FINAL },
+    } as LearnerTranscriptionPayload);
+    expect(repository.getHasPublicCoursePreviewAccess).toHaveBeenCalledTimes(2);
+    expect(aiService.streamMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threadId,
+        lessonId: practiceId,
+        content: "A public preview answer",
+      }),
+      expect.anything(),
+      actor,
+      true,
+    );
+    expect(socket.sendMentorTextDelta).toHaveBeenCalled();
+  });
+
+  it("denies ordinary preview before opening a provider when public eligibility is unavailable", async () => {
+    const { service, threadService, repository } = setup();
+    await expect(
+      service.startAudio(
+        "socket-1",
+        { ...user, permissions: [PERMISSIONS.AI_USE] },
+        {
+          voiceAction: payload.voiceAction,
+          meta: payload.meta,
+          lessonId: practiceId,
+          preview: true,
+        },
+      ),
+    ).resolves.toEqual({ ok: false, translationKey: "common.toast.noAccess" });
+    expect(repository.getHasPublicCoursePreviewAccess).toHaveBeenCalledWith(
+      practiceId,
+      user.userId,
+    );
+    expect(threadService.createThreadIfNoneExist).not.toHaveBeenCalled();
+    expect(createLumaSocket).not.toHaveBeenCalled();
+  });
+
+  it("stops the next spoken preview turn when public eligibility is revoked", async () => {
+    const { service, socket, repository, aiService, publisher } = setup();
+    repository.getHasPublicCoursePreviewAccess.mockResolvedValueOnce(true).mockResolvedValue(false);
+    await service.startAudio(
+      "socket-1",
+      { ...user, permissions: [PERMISSIONS.AI_USE] },
+      {
+        voiceAction: payload.voiceAction,
+        meta: payload.meta,
+        lessonId: practiceId,
+        preview: true,
+      },
+    );
+    const onTranscription = socket.onLearnerTranscription.mock.calls[0][0];
+    await onTranscription({
+      jobId: "revoked-preview-turn",
+      data: { text: "Do not forward this turn", status: LEARNER_TRANSCRIPT_STATUSES.FINAL },
+    } as LearnerTranscriptionPayload);
+    expect(repository.getHasPublicCoursePreviewAccess).toHaveBeenCalledTimes(2);
+    expect(aiService.streamMessage).not.toHaveBeenCalled();
+    expect(socket.sendMentorTextDelta).not.toHaveBeenCalled();
+    expect(socket.sendMentorTextEnd).not.toHaveBeenCalled();
+    expect(socket.sendMentorTextError).toHaveBeenCalledWith(
+      expect.objectContaining({ jobId: "revoked-preview-turn", code: "MENTOR_RESPONSE_FAILED" }),
+    );
+    expect(publisher.emitToRoom).toHaveBeenCalledWith(
+      expect.anything(),
+      "socket-1",
+      expect.objectContaining({ reason: "error" }),
+    );
+  });
 
   it.each([
     { preview: "true" },

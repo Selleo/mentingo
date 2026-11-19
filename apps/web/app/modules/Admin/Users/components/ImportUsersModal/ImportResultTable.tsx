@@ -11,6 +11,8 @@ import {
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 
+import { USERS_IMPORT_MODAL_HANDLES } from "../../../../../../e2e/data/users/handles";
+
 import type { Table as ReactTable } from "@tanstack/react-table";
 
 interface ImportResultTableProps<TData> {
@@ -60,7 +62,10 @@ export const ImportResultTable = <TData,>({
 );
 
 export const ImportResultEmailCell = ({ email }: { email: string }) => (
-  <div className="flex min-w-0 items-center gap-2 font-medium text-neutral-900">
+  <div
+    className="flex min-w-0 items-center gap-2 font-medium text-neutral-900"
+    data-testid={USERS_IMPORT_MODAL_HANDLES.resultEmail(email)}
+  >
     <Mail className="size-4 shrink-0 text-neutral-400" />
     <span className="min-w-0 truncate" title={email}>
       {email}

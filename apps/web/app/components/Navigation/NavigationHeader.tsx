@@ -1,4 +1,5 @@
 import { Link } from "@remix-run/react";
+import { useTranslation } from "react-i18next";
 
 import { MobileMenuToggle } from "~/components/Navigation/MobileMenuToggle";
 import { cn } from "~/lib/utils";
@@ -7,7 +8,7 @@ import { PlatformLogo } from "../PlatformLogo";
 
 import { NavigationGlobalSearchWrapper } from "./NavigationGlobalSearchWrapper";
 
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, RefObject, SetStateAction } from "react";
 
 type NavigationHeaderProps = {
   isMobileNavOpen: boolean;
@@ -15,6 +16,7 @@ type NavigationHeaderProps = {
   is2xlBreakpoint: boolean;
   isSidebarCollapsed: boolean;
   hasConfigurationIssues?: boolean;
+  menuToggleRef?: RefObject<HTMLButtonElement>;
 };
 
 export function NavigationHeader({
@@ -23,7 +25,10 @@ export function NavigationHeader({
   is2xlBreakpoint,
   isSidebarCollapsed,
   hasConfigurationIssues,
+  menuToggleRef,
 }: NavigationHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <div
       className={cn(
@@ -31,16 +36,16 @@ export function NavigationHeader({
         isSidebarCollapsed ? "py-2 2xl:my-4 px-1" : "px-4 py-3 2xl:my-4 md:px-4 2xl:p-0 3xl:px-6",
       )}
     >
-      <Link to="/" aria-label="Go to homepage">
+      <Link to="/" aria-label={t("a11y.goToHomepage")}>
         {isSidebarCollapsed ? (
-          <PlatformLogo variant="signet" className="size-10 md:size-12" alt="Go to homepage" />
+          <PlatformLogo variant="signet" className="size-10 md:size-12" alt="" />
         ) : (
           <>
-            <PlatformLogo variant="signet" className="size-10 2xl:hidden" alt="Go to homepage" />
+            <PlatformLogo variant="signet" className="size-10 2xl:hidden" alt="" />
             <PlatformLogo
               variant="full"
               className="hidden 2xl:block 2xl:h-16 w-auto max-w-full"
-              alt="Go to homepage"
+              alt=""
             />
           </>
         )}
@@ -52,6 +57,7 @@ export function NavigationHeader({
           isMobileNavOpen={isMobileNavOpen}
           setIsMobileNavOpen={setIsMobileNavOpen}
           hasConfigurationIssues={hasConfigurationIssues}
+          buttonRef={menuToggleRef}
         />
       </div>
     </div>

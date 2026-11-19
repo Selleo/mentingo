@@ -29,8 +29,9 @@ export function NavigationMenuButton({
   return (
     <li key={item.label} className={wrapperClassName}>
       <Tooltip>
-        <TooltipTrigger className="w-full">
+        <TooltipTrigger asChild>
           <button
+            type="button"
             onClick={onClick}
             className={cn(
               "flex w-full items-center gap-x-3 rounded-lg bg-white px-4 py-3.5 text-neutral-900 hover:bg-primary-700 hover:text-white 2xl:p-2",

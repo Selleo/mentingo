@@ -400,6 +400,7 @@ export const lessonForChapterSchema = Type.Array(
     status: Type.Union([
       Type.Enum(PROGRESS_STATUSES),
       Type.Literal(LEARNER_PROGRESS_STATUSES.AWAITING_REVIEW),
+      Type.Literal(LEARNER_PROGRESS_STATUSES.FAILED),
     ]),
     quizQuestionCount: Type.Union([Type.Number(), Type.Null()]),
     isExternal: Type.Optional(Type.Boolean()),

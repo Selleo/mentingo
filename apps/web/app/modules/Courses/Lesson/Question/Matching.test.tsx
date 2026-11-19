@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { FormProvider, useForm } from "react-hook-form";
 import { I18nextProvider } from "react-i18next";
 import { describe, expect, it } from "vitest";
@@ -8,29 +9,24 @@ import { getUserAnswers } from "~/modules/Courses/Lesson/utils";
 import i18next from "~/utils/mocks/i18next.mock";
 
 import { Matching, placeMatch } from "./Matching";
+import { makeQuizQuestion, makeQuizQuestionOption } from "./testFactories";
 
-import type { QuizQuestion } from "./types";
 import type { PropsWithChildren } from "react";
 
-const question = {
-  id: "question-1",
+const question = makeQuizQuestion({
   type: "matching",
   title: "Match the animal with its sound",
-  displayOrder: 1,
-  solutionExplanation: null,
-  passQuestion: false,
   matchingTargets: ["Woof", "", "Meow"],
   options: [
-    {
+    makeQuizQuestionOption({
       id: "pair-cat",
       optionText: "Cat",
-      displayOrder: 1,
       isStudentAnswer: true,
       studentAnswer: "Meow",
       isCorrect: true,
       matchedWord: "Meow",
-    },
-    {
+    }),
+    makeQuizQuestionOption({
       id: "pair-dog",
       optionText: "Dog",
       displayOrder: 2,
@@ -38,9 +34,9 @@ const question = {
       studentAnswer: "Meow",
       isCorrect: false,
       matchedWord: "Woof",
-    },
+    }),
   ],
-} as QuizQuestion;
+});
 
 type RenderOptions = { isCompleted: boolean; isQuizFeedbackRedacted?: boolean };
 
@@ -108,16 +104,43 @@ describe("Matching", () => {
     expect(within(bank).queryByText("Woof")).not.toBeInTheDocument();
   });
 
-  it("stretches a placed match across its slot and centers it, unlike bank matches", () => {
+  it("shows a placed match in the pair's labelled combobox and keeps bank matches as chips", () => {
     renderMatching({ isCompleted: false });
 
-    const placedMatch = within(screen.getByTestId("pair-cat")).getByText("Woof");
+    const trigger = within(screen.getByTestId("pair-cat")).getByRole("combobox");
+
+    expect(trigger).toHaveTextContent("Woof");
+    expect(trigger).toHaveAccessibleName("Cat, Woof");
+    // Same plain look as fill-in-the-blanks: the pair name is announced, not shown.
+    expect(trigger).toHaveClass("[&>svg]:hidden");
+    expect(within(screen.getByTestId("pair-dog")).getByRole("combobox").textContent).toBe("");
+
     const bankMatch = within(screen.getByTestId("blank_preset")).getByText("Meow");
 
-    expect(placedMatch).toHaveClass("w-full", "justify-center", "text-center");
-    expect(placedMatch).not.toHaveClass("w-auto", "text-left");
     expect(bankMatch).toHaveClass("w-auto", "text-left");
-    expect(bankMatch).not.toHaveClass("w-full", "text-center");
+  });
+
+  it("keeps a placed match draggable and opens its list only on click", async () => {
+    const user = userEvent.setup();
+
+    renderMatching({ isCompleted: false });
+
+    const trigger = within(screen.getByTestId("pair-cat")).getByRole("combobox");
+
+    // A mouse press may start a drag, so the list waits for the release.
+    await user.pointer({ keys: "[MouseLeft>]", target: trigger });
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+
+    await user.pointer({ keys: "[/MouseLeft]", target: trigger });
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+  });
+
+  it("shows the click-to-choose instruction while answering", () => {
+    renderMatching({ isCompleted: false });
+
+    expect(
+      screen.getByText(i18next.t("studentLessonView.other.matchingInstruction")),
+    ).toBeInTheDocument();
   });
 
   it("shows the learner's answers and the correct match for wrong pairs", () => {

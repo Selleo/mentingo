@@ -8,13 +8,13 @@ import { cn } from "~/lib/utils";
 import { getActiveMentionQuery, getUserDisplayName } from "./courseChatUtils";
 
 import type { KeyboardEvent } from "react";
-import type { CourseChatUser } from "~/api/queries/course-chat/courseChatTypes";
+import type { MentionableUser } from "~/api/queries/course-chat/courseChatTypes";
 
 type MentionTextareaProps = {
   value: string;
   onChange: (value: string) => void;
   onKeyDown?: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
-  users: CourseChatUser[];
+  users: MentionableUser[];
   placeholder: string;
   maxLength: number;
   className?: string;
@@ -61,7 +61,7 @@ export const MentionTextarea = forwardRef<HTMLTextAreaElement, MentionTextareaPr
       textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
     }, [value]);
 
-    const insertMention = (user: CourseChatUser) => {
+    const insertMention = (user: MentionableUser) => {
       const mention = `@${getUserDisplayName(user)} `;
       const nextValue = value.replace(/(^|\s)@([^\s@]*)$/, `$1${mention}`);
       onChange(nextValue);

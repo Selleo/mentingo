@@ -9,6 +9,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import { Button } from "~/components/ui/button";
@@ -59,6 +60,7 @@ export const RichTextUploadQueue = ({
   onClearFinished,
   onRemoveItem,
 }: RichTextUploadQueueProps) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
 
   const activeItems = useMemo(
@@ -91,7 +93,7 @@ export const RichTextUploadQueue = ({
     <section
       data-testid={RICH_TEXT_HANDLES.UPLOAD_QUEUE}
       className="pointer-events-auto w-full overflow-hidden rounded-xl border border-neutral-200 bg-white"
-      aria-label="Upload queue"
+      aria-label={t("a11y.uploadQueue")}
     >
       <button
         type="button"

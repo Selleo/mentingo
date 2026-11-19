@@ -11,6 +11,7 @@ import {
 } from "@playwright/test";
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
+import { TEST_PASSWORD } from "../data/test-data/credentials.data";
 import { createFixtureFactories } from "../factories";
 import { createFixtureApiClient } from "../utils/api-client";
 import {
@@ -33,6 +34,7 @@ import type { FixtureFactories } from "../factories";
 import type { TenantFactoryCreateInput, TenantFactoryRecord } from "../factories/tenant.factory";
 import type { UserFactoryRecord } from "../factories/user.factory";
 import type { FixtureApiClient } from "../utils/api-client";
+import type { SystemRoleSlug } from "@repo/shared";
 import type { UserRole } from "~/config/userRoles";
 
 type WithAuthPageOptions = {
@@ -44,6 +46,8 @@ type WithAuthPage = (
   options?: WithAuthPageOptions,
 ) => Promise<void>;
 type WorkspaceContextOptions = {
+  /** Origin of an isolated workspace; defaults to the worker tenant (or root with `root`). */
+  origin?: string;
   root?: boolean;
   storageState?: BrowserContextOptions["storageState"];
 };
@@ -78,6 +82,8 @@ export type IsolatedWorkspaceHandle = {
     lastName?: string;
     password?: string;
     role: UserRole;
+    /** Every role of a multi-role user; defaults to `[role]`. */
+    roleSlugs?: SystemRoleSlug[];
   }) => Promise<TenantUserHandle>;
 };
 
@@ -104,7 +110,7 @@ const AUTH_ROLES = [
 
 const ADMIN_EMAIL = "admin@example.com";
 const ADMIN_PASSWORD = "password";
-const ACCOUNT_PASSWORD = "Password123@";
+const ACCOUNT_PASSWORD = TEST_PASSWORD;
 const DEFAULT_BASE_URL = process.env.CI
   ? "https://localhost:5173"
   : process.env.VITE_APP_URL || "https://tenant1.lms.localhost";
@@ -497,9 +503,8 @@ export const test = mergedFixture.extend<
     use: (value: CreateWorkspaceContext) => Promise<void>,
   ) => {
     await use(async (options = {}) => {
-      const origin = options.root
-        ? new URL(DEFAULT_BASE_URL).origin
-        : _getWorkerTenantWorkspace.origin;
+      const rootOrigin = options.root ? new URL(DEFAULT_BASE_URL).origin : undefined;
+      const origin = options.origin ?? rootOrigin ?? _getWorkerTenantWorkspace.origin;
       const context = await createWorkspaceBrowserContext(browser, origin, options);
 
       return { context, origin };
@@ -648,6 +653,7 @@ export const test = mergedFixture.extend<
         lastName?: string;
         password?: string;
         role: UserRole;
+        roleSlugs?: SystemRoleSlug[];
       }): Promise<TenantUserHandle> => {
         const email = input.email ?? `isolated-user-${randomUUID().slice(0, 8)}@example.com`;
         const password = input.password ?? ACCOUNT_PASSWORD;
@@ -669,7 +675,7 @@ export const test = mergedFixture.extend<
 
         const userFactory = tenantFactories.createUserFactory();
         await userFactory.update(userRegisterResponse.data.data.id, {
-          roleSlugs: [input.role],
+          roleSlugs: input.roleSlugs ?? [input.role],
         });
 
         const userContext = await browser.newContext();

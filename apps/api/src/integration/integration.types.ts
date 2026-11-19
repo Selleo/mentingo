@@ -1,20 +1,25 @@
-import type { IntegrationKeyMetadata } from "./schemas/integration-key.schema";
 import type { Request } from "express";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
-export type IntegrationKeyMetadataRecord = {
+export type CreateIntegrationKeyParams = {
+  tenantId: string;
+  createdByUserId: string;
+  name: string;
+  keyPrefix: string;
+  keyHash: string;
+};
+
+export type CreatedIntegrationKeyRecord = {
   id: string;
+  name: string;
   keyPrefix: string;
   createdAt: string;
-  updatedAt: string;
   lastUsedAt: string | null;
 };
 
-export type RotateIntegrationKeyParams = {
-  userId: string;
+export type RevokeIntegrationKeyParams = {
   tenantId: string;
-  keyPrefix: string;
-  keyHash: string;
+  keyId: string;
 };
 
 export type FindIntegrationKeyCandidateParams = {
@@ -42,15 +47,6 @@ export type IntegrationRequest = Request & {
 export type IntegrationKeyTenantContext = {
   tenantId: string;
   isManaging: boolean;
-};
-
-export type CurrentAdminKeyData = {
-  key: IntegrationKeyMetadata | null;
-};
-
-export type RotateAdminKeyData = {
-  key: string;
-  metadata: IntegrationKeyMetadata;
 };
 
 export const INTEGRATION_TRAINING_RESULTS_SCOPES = {

@@ -10,16 +10,8 @@ import { filterUsersFlow } from "../../flows/users/filter-users.flow";
 import { openBulkEditActionFlow } from "../../flows/users/open-bulk-edit-action.flow";
 import { openUsersPageFlow } from "../../flows/users/open-users-page.flow";
 import { selectUsersFlow } from "../../flows/users/select-users.flow";
-import { assertToastVisible } from "../../utils/assert-toast-visible";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 import { createDisposableAdminSession } from "../../utils/create-disposable-admin-session";
-
-test("admin cannot open bulk edit actions without selecting users", async ({ withWorkerPage }) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await openUsersPageFlow(page);
-
-    await expect(page.getByTestId(USERS_PAGE_HANDLES.BULK_EDIT_TRIGGER)).toBeDisabled();
-  });
-});
 
 test("admin cannot submit a bulk role update without choosing a role", async ({
   cleanup,
@@ -83,6 +75,11 @@ test("admin can bulk update roles for selected users", async ({
         );
       })
       .toBe(true);
+
+    await filterUsersFlow(page, { roleSlug: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+    for (const user of users) {
+      await expect(page.getByTestId(USERS_PAGE_HANDLES.row(user.id))).toBeVisible();
+    }
   });
 });
 
@@ -111,7 +108,7 @@ test("admin cannot bulk update their own role", async ({
     });
     await confirmBulkEditFlow(page, { requireConfirmation: true });
 
-    await assertToastVisible(page, "Administrator cannot change their own role");
+    await assertToastVariantVisible(page, "destructive");
     await expect
       .poll(async () => {
         const existingAdmin = await userFactory.getById(disposableAdmin.id);

@@ -14,15 +14,20 @@ import { submitGroupFormFlow } from "../../flows/groups/submit-group-form.flow";
 test("admin can update a group", async ({ cleanup, factories, withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const groupFactory = factories.createGroupFactory();
-    const group = await groupFactory.create();
+    const group = await groupFactory.create({ characteristic: "Prefilled characteristic" });
     const updatedName = `updated-group-${Date.now()}`;
     const updatedCharacteristic = `Updated characteristic ${Date.now()}`;
 
     cleanup.add(async () => {
-      await Promise.allSettled([groupFactory.delete(group.id)]);
+      await groupFactory.delete(group.id);
     });
 
     await openGroupPageFlow(page, group.id);
+    await expect(page.getByTestId(GROUP_FORM_HANDLES.NAME_INPUT)).toHaveValue(group.name);
+    await expect(page.getByTestId(GROUP_FORM_HANDLES.CHARACTERISTIC_INPUT)).toHaveValue(
+      group.characteristic ?? "",
+    );
+
     await fillGroupFormFlow(page, {
       name: updatedName,
       characteristic: updatedCharacteristic,
@@ -31,6 +36,7 @@ test("admin can update a group", async ({ cleanup, factories, withWorkerPage }) 
 
     await expect(page).toHaveURL(new RegExp(`/admin/groups/${group.id}$`));
     await expect(page.getByTestId(GROUP_PAGE_HANDLES.PAGE)).toBeVisible();
+    await expect(page.getByTestId(GROUP_FORM_HANDLES.NAME_INPUT)).toHaveValue(updatedName);
 
     await expect
       .poll(async () => {
@@ -42,31 +48,6 @@ test("admin can update a group", async ({ cleanup, factories, withWorkerPage }) 
         );
       })
       .toBe(true);
-  });
-});
-
-test("admin sees existing group values prefilled on the edit page", async ({
-  cleanup,
-  factories,
-  withWorkerPage,
-}) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const groupFactory = factories.createGroupFactory();
-    const group = await groupFactory.create({
-      name: `prefilled-group-${Date.now()}`,
-      characteristic: "Prefilled characteristic",
-    });
-
-    cleanup.add(async () => {
-      await Promise.allSettled([groupFactory.delete(group.id)]);
-    });
-
-    await openGroupPageFlow(page, group.id);
-
-    await expect(page.getByTestId(GROUP_FORM_HANDLES.NAME_INPUT)).toHaveValue(group.name);
-    await expect(page.getByTestId(GROUP_FORM_HANDLES.CHARACTERISTIC_INPUT)).toHaveValue(
-      group.characteristic ?? "",
-    );
   });
 });
 
@@ -83,7 +64,7 @@ test("admin can cancel group editing without persisting changes", async ({
     });
 
     cleanup.add(async () => {
-      await Promise.allSettled([groupFactory.delete(group.id)]);
+      await groupFactory.delete(group.id);
     });
 
     await openGroupPageFlow(page, group.id);

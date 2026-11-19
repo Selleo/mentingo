@@ -8,6 +8,7 @@ import {
 import { clamp } from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 import videojs from "video.js";
 
@@ -31,6 +32,7 @@ import { HlsQualitySelector } from "./HlsQualitySelector";
 import "./videojs-vimeo-tech";
 import "./videoPlayer.css";
 import { useVideoCoverageTracker } from "./useVideoCoverageTracker";
+import { resolveVideoJsLanguage } from "./videoJsLanguage";
 
 import type { VideoAspectRatio } from "./aspectRatio";
 import type { VideoCoverageTrackingOptions } from "./videoCoverage.types";
@@ -192,6 +194,8 @@ export const VideoPlayer = ({
   onTimeUpdate,
   poster,
 }: VideoPlayerProps) => {
+  const { t, i18n } = useTranslation();
+  const initialLanguageRef = useRef(i18n.language);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [player, setPlayer] = useState<VideoJSType | null>(null);
   const [qualityControlHost, setQualityControlHost] = useState<HTMLDivElement | null>(null);
@@ -479,7 +483,12 @@ export const VideoPlayer = ({
     videoElement.setAttribute("tabindex", "0");
     videoRef.current?.appendChild(videoElement);
 
-    const player = (playerRef.current = videojs(videoElement, options));
+    // Sliders, time displays and the region label localize only at creation, so pass the language here;
+    // it stays out of the memoised options so a language change does not re-run this init effect.
+    const player = (playerRef.current = videojs(videoElement, {
+      ...options,
+      language: resolveVideoJsLanguage(initialLanguageRef.current),
+    }));
     setPlayer(player);
     const qualityLevels = (player as VideoJsPlayerWithQualityLevels).qualityLevels?.();
 
@@ -516,6 +525,11 @@ export const VideoPlayer = ({
       qualityLevels?.off("change", handleHlsQualitySync);
     };
   }, [options, syncHlsQuality]);
+
+  useEffect(() => {
+    // Video.js components re-render their control texts on the player's languagechange event.
+    player?.language(resolveVideoJsLanguage(i18n.language));
+  }, [i18n.language, player]);
 
   useEffect(() => {
     const player = playerRef.current;
@@ -852,7 +866,7 @@ export const VideoPlayer = ({
       data-vjs-player
       data-video-player-shortcuts
       role="button"
-      aria-label="Video player"
+      aria-label={t("a11y.videoPlayer")}
       tabIndex={0}
       onKeyDown={handleKeyDown}
       className={cn(

@@ -1,8 +1,8 @@
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
-import { TENANT_STATUSES } from "@repo/shared";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { isTenantAccessActive } from "src/common/utils/tenantAccess";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { tenants } from "src/storage/schema";
 
@@ -24,11 +24,11 @@ export class McpResourceService {
       throw new UnauthorizedException("Unknown MCP tenant host");
     }
     const [tenant] = await this.dbAdmin
-      .select({ id: tenants.id, status: tenants.status })
+      .select({ id: tenants.id, status: tenants.status, accessEndsAt: tenants.accessEndsAt })
       .from(tenants)
       .where(eq(tenants.host, origin))
       .limit(1);
-    if (!tenant || tenant.status !== TENANT_STATUSES.ACTIVE) {
+    if (!tenant || !isTenantAccessActive(tenant)) {
       throw new UnauthorizedException("Unknown MCP tenant host");
     }
     return { tenantId: tenant.id, origin, url: `${origin}/api/mcp` };
@@ -36,11 +36,11 @@ export class McpResourceService {
 
   async forTenant(tenantId: string): Promise<McpResource> {
     const [tenant] = await this.dbAdmin
-      .select({ host: tenants.host, status: tenants.status })
+      .select({ host: tenants.host, status: tenants.status, accessEndsAt: tenants.accessEndsAt })
       .from(tenants)
       .where(eq(tenants.id, tenantId))
       .limit(1);
-    if (!tenant || tenant.status !== TENANT_STATUSES.ACTIVE) {
+    if (!tenant || !isTenantAccessActive(tenant)) {
       throw new UnauthorizedException("MCP tenant is inactive");
     }
     const origin = new URL(tenant.host).origin;

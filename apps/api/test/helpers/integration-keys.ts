@@ -34,7 +34,8 @@ export async function issueIntegrationKey(params: {
     .where(eq(tenants.id, admin.tenantId));
 
   const response = await request(params.app.getHttpServer())
-    .post("/api/integration/key")
+    .post("/api/integration/keys")
+    .send({ name: "Test integration key" })
     .set("Cookie", await cookieFor(admin, params.app))
     .set("X-Forwarded-For", faker.internet.ipv4())
     .expect(201);

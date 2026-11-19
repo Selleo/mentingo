@@ -44,7 +44,7 @@ export class AssistantRepository {
   async findTenantState(tenantId: string): Promise<AssistantTenantState | undefined> {
     return this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
       const [tenant] = await this.db
-        .select({ host: tenants.host, status: tenants.status })
+        .select({ host: tenants.host, status: tenants.status, accessEndsAt: tenants.accessEndsAt })
         .from(tenants)
         .where(eq(tenants.id, tenantId))
         .limit(1);

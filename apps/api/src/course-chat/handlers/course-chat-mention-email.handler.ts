@@ -14,9 +14,11 @@ import { EmailService } from "src/common/emails/emails.service";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { CourseChatRepository } from "src/course-chat/course-chat.repository";
+import { UserNotificationsCreatedEvent } from "src/events/announcement/user-notifications-created.event";
 import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
 import { NotificationCollectorService } from "src/notifications/services/notification-collector.service";
 import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { UserService } from "src/user/user.service";
@@ -41,6 +43,7 @@ export class CourseChatMentionEmailHandler
     private readonly tenantDbRunnerService: TenantDbRunnerService,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly notificationCollectorService: NotificationCollectorService,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async handleOutboxEvent(
@@ -95,11 +98,16 @@ export class CourseChatMentionEmailHandler
         sourceId: courseId,
         usersToNotify: uniqueMentionedUserIds,
       });
+      await this.outboxPublisher.publish(
+        new UserNotificationsCreatedEvent({ userIds: uniqueMentionedUserIds }),
+      );
 
-      if (!message || !recipients.length) return;
+      const emailRecipients = recipients.filter((recipient) => recipient.mentionEmailsEnabled);
+
+      if (!message || !emailRecipients.length) return;
 
       await processInBatches(
-        recipients,
+        emailRecipients,
         async (recipient) => {
           const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
             tenantId,

@@ -85,12 +85,16 @@ const AiMentorLesson = ({
   const courseExperience = useOptionalCourseAccessProvider();
   const isPreviewMode = courseExperience?.isPreviewMode ?? true;
 
-  const canPreviewVoice =
+  const isReadOnly = isPreviewMode || hideControls;
+  const isChatReadOnly = hideControls || !lesson.threadId || lesson.status !== "active";
+  const isAuthorPreview =
     isPreviewMode &&
     !hideControls &&
     Boolean(courseExperience?.canEditCourse || allowVoiceMentorInPreview);
-  const isReadOnly = isPreviewMode || hideControls;
-  const isChatReadOnly = hideControls || !lesson.threadId || lesson.status !== "active";
+  // Active public-preview threads may use voice; evaluation remains author-only in preview.
+  // The backend rechecks preview eligibility at voice startup and on each spoken turn.
+  const canPreviewVoice = isAuthorPreview || (isPreviewMode && !isChatReadOnly);
+  const canJudge = !isChatReadOnly && (!isPreviewMode || isAuthorPreview);
 
   const { mutateAsync: judgeLesson, isPending: isJudgePending } = useJudgeLesson(lesson.id);
   const { mutateAsync: retakeLesson, isPending: isRetakePending } = useRetakeLesson(
@@ -262,14 +266,14 @@ const AiMentorLesson = ({
   );
 
   const handleJudge = useCallback(async () => {
-    if (!lesson.threadId || isReadOnly) return;
+    if (!lesson.threadId || !canJudge) return;
     const response = await judgeLesson({
       threadId: lesson.threadId,
       learningStateId: lesson.learningStateId,
     });
     setLatestEvaluation(response.data);
     setShowEvaluationDialog(true);
-  }, [isReadOnly, judgeLesson, lesson.threadId, lesson.learningStateId]);
+  }, [canJudge, judgeLesson, lesson.threadId, lesson.learningStateId]);
 
   const handleRetakeLesson = async () => {
     if (!lesson.threadId || hideControls) return;
@@ -504,7 +508,7 @@ const AiMentorLesson = ({
                 <LessonForm
                   voiceTarget={{ lessonId: lesson.id, ...(isPreviewMode ? { preview: true } : {}) }}
                   allowVoiceMentor={!isReadOnly || canPreviewVoice}
-                  allowJudge={!isReadOnly}
+                  allowJudge={canJudge}
                   textReadOnly={isChatReadOnly}
                   mentorName={
                     lesson.aiMentor?.name ||
@@ -535,7 +539,7 @@ const AiMentorLesson = ({
                 <div className="mt-4 flex w-full justify-center">
                   {shouldShowComposer && !isJudgePending && (
                     <Button
-                      disabled={isReadOnly}
+                      disabled={!canJudge}
                       data-testid={LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON}
                       variant="primary"
                       size="lg"

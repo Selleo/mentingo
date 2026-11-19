@@ -4,6 +4,10 @@ export const SETTINGS_PAGE_SELECTORS = {
 } as const;
 
 export const SETTINGS_PAGE_HANDLES = {
+  TABS: "settings-tabs",
+  DISCUSSION_NOTIFICATIONS_CARD: "settings-discussion-notifications-card",
+  discussionNotificationSwitch: (preference: string) =>
+    `settings-discussion-notification-switch-${preference}`,
   ACCOUNT_TAB: "settings-account-tab",
   INTEGRATIONS_TAB: "settings-integrations-tab",
   PUBLIC_COURSE_PREVIEW_SWITCH: "settings-public-course-preview-switch",
@@ -20,6 +24,7 @@ export const SETTINGS_PAGE_HANDLES = {
   NO_AVAILABLE_SETTINGS: "settings-no-available-settings",
   ORGANIZATION_WARNING_INDICATOR: "settings-organization-warning-indicator",
   LANGUAGE_SELECT: "settings-language-select",
+  languageOption: (language: string) => `settings-language-option-${language}`,
   USER_DETAILS_DESCRIPTION: "settings-user-details-description",
   USER_DETAILS_CONTACT_EMAIL: "settings-user-details-contact-email",
   USER_DETAILS_CONTACT_EMAIL_ERROR: "settings-user-details-contact-email-error",
@@ -31,10 +36,15 @@ export const SETTINGS_PAGE_HANDLES = {
   PASSWORD_CONFIRM: "settings-password-confirm",
   PASSWORD_SAVE: "settings-password-save",
   INTEGRATION_API_KEY_CARD: "settings-integration-api-key-card",
-  INTEGRATION_API_KEY_GENERATE: "settings-integration-api-key-generate",
-  INTEGRATION_API_KEY_OVERRIDE: "settings-integration-api-key-override",
-  INTEGRATION_API_KEY_CONFIRM_ROTATE: "settings-integration-api-key-confirm-rotate",
+  INTEGRATION_API_KEY_CREATE: "settings-integration-api-key-create",
+  INTEGRATION_API_KEY_NAME_INPUT: "settings-integration-api-key-name-input",
+  INTEGRATION_API_KEY_CONFIRM_CREATE: "settings-integration-api-key-confirm-create",
   INTEGRATION_API_KEY_GENERATED: "settings-integration-api-key-generated",
+  INTEGRATION_API_KEYS_TABLE: "settings-integration-api-keys-table",
+  INTEGRATION_API_KEYS_EMPTY: "settings-integration-api-keys-empty",
+  integrationApiKeyRow: (keyId: string) => `settings-integration-api-key-row-${keyId}`,
+  integrationApiKeyRevoke: (keyId: string) => `settings-integration-api-key-revoke-${keyId}`,
+  INTEGRATION_API_KEY_CONFIRM_REVOKE: "settings-integration-api-key-confirm-revoke",
   NOTIFICATION_PREFERENCES_CARD: "settings-notification-preferences-card",
   REGISTRATION_FORM_BUILDER_CARD: "settings-registration-form-builder-card",
   RESET_ONBOARDING_BUTTON: "settings-reset-onboarding-button",

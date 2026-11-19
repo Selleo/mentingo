@@ -4,6 +4,7 @@ import { match } from "ts-pattern";
 
 import {
   COURSE_CHAT_MESSAGES_PER_PAGE,
+  cacheCourseChatMessagesPage,
   useInfiniteCourseChatReplies,
   useCourseChatMessages,
   useCourseChatUsers,
@@ -26,21 +27,42 @@ type CourseChatTabProps = {
   courseId: string;
   currentUserId: string;
   canDeleteAnyMessage: boolean;
+  requestedThreadId?: string;
+  onRequestedThreadShown?: () => void;
 };
 
 export function CourseChatTab({
   courseId,
   currentUserId,
   canDeleteAnyMessage,
+  requestedThreadId,
+  onRequestedThreadShown,
 }: CourseChatTabProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { openMessageId, page, setOpenMessage, setPage, toggleOpenMessage } = useCourseChatState();
+  const {
+    openMessageId,
+    page,
+    requestedThreadId: pendingThreadId,
+    setOpenMessage,
+    setPage,
+    showRequestedThread,
+    toggleOpenMessage,
+  } = useCourseChatState(requestedThreadId);
 
   const { data: messagesResponse, isLoading: isLoadingMessages } = useCourseChatMessages(
     courseId,
     page,
+    pendingThreadId,
   );
+
+  useEffect(() => {
+    if (!pendingThreadId || !messagesResponse) return;
+
+    cacheCourseChatMessagesPage(courseId, messagesResponse);
+    showRequestedThread(messagesResponse.pagination.page);
+    onRequestedThreadShown?.();
+  }, [courseId, pendingThreadId, messagesResponse, showRequestedThread, onRequestedThreadShown]);
   const { data: chatUsers = [] } = useCourseChatUsers(courseId);
   const chatUsersById = useMemo(
     () => new Map(chatUsers.map((user) => [user.id, user])),
@@ -68,7 +90,13 @@ export function CourseChatTab({
     useCreateCourseChatMessage(courseId);
 
   const handleMentioned = useCallback(() => {
-    toast({ description: t("studentCourseView.courseChat.mentionedToast") });
+    toast({
+      description: (
+        <span data-testid={COURSE_DISCUSSION_HANDLES.MENTION_TOAST}>
+          {t("studentCourseView.courseChat.mentionedToast")}
+        </span>
+      ),
+    });
   }, [t, toast]);
 
   useCourseChatSocket({ courseId, enabled: Boolean(courseId), onMentioned: handleMentioned });
@@ -109,6 +137,7 @@ export function CourseChatTab({
           key={message.id}
           message={message}
           isOpen={message.id === openMessageId}
+          isRequested={message.id === pendingThreadId}
           isLoadingReplies={isLoadingReplies && message.id === openMessageId}
           hasMoreReplies={Boolean(hasMoreReplies)}
           isFetchingMoreReplies={isFetchingMoreReplies}

@@ -347,7 +347,9 @@
       "live_training_reminder": "Tiesioginis mokymas prasidės po 15 minučių",
       "live_training_ended": "Tiesioginis mokymas baigėsi",
       "quiz_attempt_graded": "Testą įvertino vertintojas",
-      "quiz_grading_digest": "Nauji atsakymai laukia įvertinimo (kasdien)"
+      "quiz_grading_digest": "Nauji atsakymai laukia įvertinimo (kasdien)",
+      "forum_mention": "Naudotojas paminėtas forumo temoje",
+      "discussion_reply": "Nauji atsakymai diskusijoje (sugrupuoti)"
     },
     "errors": {
       "incompleteButton": "Įveskite mygtuko tekstą ir URL.",
@@ -1104,6 +1106,7 @@
     "notifications": "Pranešimai",
     "promotionCodes": "Reklamos kodai",
     "manage": "Tvarkyti",
+    "skipToContent": "Pereiti prie turinio",
     "ariaLabels": {
       "goToAvailableCourses": "Eikite į galimus kursus",
       "collapseSidebar": "Sutraukti šoninę juostą",
@@ -2451,7 +2454,8 @@
         "forum_read": "Gali peržiūrėti forumą.",
         "forum_topic_create": "Gali kurti forumo temas.",
         "forum_post_create": "Gali atsakyti forumo temose.",
-        "forum_post_delete": "Gali trinti bet kuriuos forumo įrašus."
+        "forum_post_delete": "Gali trinti bet kuriuos forumo įrašus.",
+        "forum_post_react": "Gali reaguoti į forumo įrašus."
       }
     },
     "dropdown": {
@@ -4415,7 +4419,18 @@
       "scale_1_5": "Domanda di tipo scala (1–5)",
       "matching": "Suderinkite kiekvieną elementą su jo pora.",
       "noMatchesAvailable": "Šiam klausimui dar nėra atitikmenų.",
-      "correctMatch": "Teisingas atitikmuo:"
+      "correctMatch": "Teisingas atitikmuo:",
+      "fillInTheBlanksInstruction": "Spustelėkite tarpą ir pasirinkite žodį.",
+      "matchingInstruction": "Spustelėkite elementą ir pasirinkite jo atitikmenį.",
+      "blankLabel": "Tarpas {{current}} iš {{total}}",
+      "answerBank": "atsakymų banką",
+      "removeWord": "Pašalinti žodį",
+      "dndInstructions": "Norėdami paimti žodį, paspauskite tarpą arba enter. Rodyklių klavišais perkelkite jį tarp tarpų. Norėdami padėti, dar kartą paspauskite tarpą arba enter, arba escape, kad atšauktumėte.",
+      "dndOnStart": "Paimtas žodis {{word}}.",
+      "dndOnOver": "Žodis {{word}} yra virš {{blank}}.",
+      "dndOnEnd": "Žodis {{word}} įdėtas į {{blank}}.",
+      "dndOnCancel": "Vilkimas atšauktas. Žodis {{word}} grįžo į ankstesnę vietą.",
+      "questionTitleNotProvided": "Klausimo pavadinimas nepateiktas"
     },
     "aiMentor": {
       "title": "AI mentoriaus sesija",
@@ -4778,7 +4793,10 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "Dar nėra užsiregistravusių vartotojų.",
-      "mentionedToast": "Kažkas paminėjo jus kurso diskusijoje."
+      "mentionedToast": "Kažkas paminėjo jus kurso diskusijoje.",
+      "sendError": "Nepavyko išsiųsti žinutės.",
+      "deleteError": "Nepavyko ištrinti žinutės.",
+      "reactionError": "Nepavyko išsaugoti reakcijos."
     }
   },
   "studentChapterView": {
@@ -4993,7 +5011,8 @@
     "inProgress": "Vykdoma",
     "notStarted": "Nepradėtas",
     "blocked": "Užblokuota",
-    "awaitingReview": "Laukia įvertinimo"
+    "awaitingReview": "Laukia įvertinimo",
+    "failed": "Neišlaikyta"
   },
   "studentCertificateView": {
     "header": "Sertifikatai",
@@ -5598,7 +5617,8 @@
     "learningPaths": "Tobulėjimo keliai",
     "adminLearningPaths": "Tobulėjimo keliai",
     "adminLearningPathEditor": "Tobulėjimo kelio redaktorius",
-    "gamification": "Žaidybinimas"
+    "gamification": "Žaidybinimas",
+    "notificationUnsubscribe": "Pranešimų nustatymai"
   },
   "courseDuplication": {
     "error": {
@@ -6379,7 +6399,9 @@
     "edit": {
       "title": "Redaguoti organizaciją",
       "description": "Atnaujinkite organizacijos informaciją ir būseną.",
-      "submit": "Išsaugoti pakeitimus"
+      "submit": "Išsaugoti pakeitimus",
+      "accessEndsOn": "Prieiga baigiasi {{date}}",
+      "unlimitedAccess": "Neribota prieiga"
     },
     "form": {
       "tenantName": "Organizacijos pavadinimas",
@@ -6389,7 +6411,15 @@
       "statusPlaceholder": "Pasirinkite būseną",
       "adminFirstName": "Administratoriaus vardas",
       "adminLastName": "Administratoriaus pavardė",
-      "adminEmail": "Administratoriaus el"
+      "adminEmail": "Administratoriaus el",
+      "accessEndsAt": "Prieigos pabaiga",
+      "accessEndsAtHint": "Prieiga galioja iki pasirinktos dienos pabaigos. Palikite tuščią, jei prieiga neribota.",
+      "sections": {
+        "organization": "Organizacija",
+        "firstAdmin": "Pirmasis administratorius"
+      },
+      "accessEndsAtPlaceholder": "Neribota prieiga",
+      "accessEndsAtClear": "Pašalinti pabaigos datą"
     },
     "validation": {
       "nameRequired": "Reikalingas vardas",
@@ -6402,6 +6432,11 @@
       "tenantCreatedSuccessfully": "Organizacija sėkmingai sukurta",
       "tenantUpdatedSuccessfully": "Organizacija sėkmingai atnaujinta",
       "tenantDeletedSuccessfully": "Organizacija ištrinta visam laikui"
+    },
+    "standing": {
+      "active": "Aktyvi",
+      "inactive": "Neaktyvi",
+      "accessEnded": "Prieiga baigėsi"
     }
   },
   "superAdminTenants": {
@@ -6466,42 +6501,55 @@
     "description": "Ši darbo sritis šiuo metu neaktyvi. Jei manote, kad tai klaida, susisiekite su administratoriumi, kad atkurtumėte prieigą."
   },
   "integrationApiKey": {
-    "title": "Integravimo API raktas",
-    "description": "Sukurkite ilgalaikį išorinės integracijos raktą. Pakeitus raktą iš karto atšaukiamas ankstesnis.",
-    "status": "Būsena",
-    "active": "Aktyvus",
-    "inactive": "Nesugeneruota",
-    "prefix": "Rakto priešdėlis",
-    "createdAt": "Sukurta",
-    "lastUsedAt": "Paskutinį kartą naudotas",
-    "loading": "Įkeliami rakto metaduomenys...",
-    "generate": "Sukurti raktą",
-    "override": "Nepaisyti klavišo",
+    "title": "Integravimo API raktai",
+    "description": "Raktai leidžia išorinėms sistemoms naudoti integravimo API su administratoriaus teisėmis. Kiekvienai integracijai sukurkite atskirą raktą, kad galėtumėte jį atšaukti atskirai.",
+    "loading": "Įkeliami raktai...",
     "copy": "Kopijuoti raktą",
     "generated": {
-      "title": "Nukopijuokite šį raktą dabar. Daugiau jis nebus rodomas."
+      "title": "Nukopijuokite šį raktą dabar. Daugiau jis nebus rodomas.",
+      "dismiss": "Baigta"
     },
-    "confirm": {
-      "title": "Nepaisyti dabartinio API rakto?",
-      "description": "Šis veiksmas nedelsiant atšaukia dabartinį raktą. Ją naudojantys integracijos nustos veikti.",
-      "action": "Nepaisyti klavišo"
+    "create": {
+      "button": "Sukurti raktą",
+      "title": "Sukurti integravimo API raktą",
+      "description": "Pavadinkite raktą pagal sistemą, kuri jį naudos.",
+      "nameLabel": "Pavadinimas",
+      "namePlaceholder": "pvz., CRM sinchronizavimas",
+      "action": "Sukurti raktą"
+    },
+    "revoke": {
+      "button": "Atšaukti",
+      "title": "Atšaukti „{{name}}“?",
+      "description": "Šį raktą naudojančios integracijos iškart nustos veikti. Šio veiksmo anuliuoti negalima.",
+      "action": "Atšaukti raktą"
+    },
+    "table": {
+      "key": "Raktas",
+      "created": "Sukurta",
+      "createdBy": "sukūrė {{email}}",
+      "lastUsedAt": "Paskutinį kartą naudota",
+      "actions": "Veiksmai",
+      "empty": "Integravimo API raktų dar nėra",
+      "emptyHint": "Sukurkite raktą kiekvienai sistemai, kuriai reikia prieigos prie integravimo API."
     },
     "toast": {
-      "fetchSuccess": "Integravimo API raktas sėkmingai įkeltas",
-      "rotateSuccess": "Integravimo API raktas sėkmingai atnaujintas",
-      "rotateError": "Nepavyko atnaujinti integravimo API rakto",
+      "createSuccess": "Integravimo API raktas sukurtas",
+      "createError": "Nepavyko sukurti integravimo API rakto",
+      "revokeSuccess": "Integravimo API raktas atšauktas",
+      "revokeError": "Nepavyko atšaukti integravimo API rakto",
       "copySuccess": "Integracijos API raktas nukopijuotas",
       "copyError": "Nepavyko nukopijuoti integravimo API rakto"
     },
     "errors": {
-      "rotateFailed": "Nepavyko pasukti integravimo API rakto",
       "invalidApiKey": "Netinkamas integravimo API raktas",
       "ownerInactive": "API rakto savininkas nebėra aktyvus",
       "ownerNotAdmin": "API rakto savininkas nebeturi administratoriaus teisių",
       "missingApiKeyHeader": "Trūksta X-API-Key antraštės",
       "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės",
       "invalidPluginOrigin": "Naudokite HTTPS papildinio kilmę be kelio (HTTP localhost leidžiamas kūrimo aplinkoje)",
-      "pluginAddressUnavailable": "Nepavyko patikrinti papildinio adreso. Bandykite dar kartą."
+      "pluginAddressUnavailable": "Nepavyko patikrinti papildinio adreso. Bandykite dar kartą.",
+      "createFailed": "Nepavyko sukurti integracijos API rakto",
+      "notFound": "Integracijos API raktas nerastas"
     }
   },
   "luma": {
@@ -6681,13 +6729,6 @@
       "averageRating": "Vid. įvertinimas",
       "detailedStatisticsSoon": "Išsami statistika jau netrukus",
       "detailedStatisticsDescription": "Šioje skiltyje bus rodoma išsami pažangos, skyrių baigimo, įsitraukimo ir kitų duomenų analizė.",
-      "status": {
-        "started": "Pradėta",
-        "completed": "Baigta",
-        "inProgress": "Vykdoma",
-        "notStarted": "Nepradėta",
-        "awaitingReview": "Laukia įvertinimo"
-      },
       "lessonTypes": {
         "content": "Turinys",
         "quiz": "Testas",
@@ -6941,6 +6982,10 @@
       "failed": "Kai kurioms užduotims reikia dėmesio",
       "saved": "Eiga išsaugota",
       "reconnecting": "Jungiamasi iš naujo. Jūsų darbas išsaugotas.",
+      "connectionOffline": "Ryšys nutrūko. Jūsų darbas išsaugotas. Prisijunkite iš naujo, kad įkeltumėte naujausius pakeitimus.",
+      "reconnect": "Prisijungti iš naujo",
+      "connectionPermissionRevoked": "Jūs nebeturite prieigos prie šios kurso generavimo sesijos.",
+      "connectionSessionUnavailable": "Ši kurso generavimo sesija nebepasiekiama.",
       "review": "Peržiūrėti pakeitimus",
       "showCourse": "Rodyti kurso struktūrą",
       "controls": "Generavimo nustatymai",
@@ -7895,7 +7940,9 @@
         "live_training_reminder": "Besimokantieji, užsiregistravę į kursus, susietus su artėjančiais tiesioginiais mokymais.",
         "live_training_ended": "Besimokantieji, užsiregistravę į kursus, susietus su pasibaigusiais tiesioginiais mokymais.",
         "quiz_attempt_graded": "Besimokantysis, kurio testo atsakymai buvo įvertinti.",
-        "quiz_grading_digest": "Naudotojai, galintys vertinti testų atsakymus."
+        "quiz_grading_digest": "Naudotojai, galintys vertinti testų atsakymus.",
+        "forum_mention": "Forumo įraše paminėti naudotojai.",
+        "discussion_reply": "Gijos arba temos dalyviai, kurie neperskaitė atsakymų programoje."
       }
     },
     "mapping": {
@@ -7996,7 +8043,9 @@
       "courseChatUserMentioned": "Vartotojas paminėtas pokalbyje",
       "courseDueDateReminder": "Kurso termino priminimas",
       "quizAttemptGraded": "Testas įvertintas",
-      "quizGradingDigest": "Vertinimo eilės suvestinė"
+      "quizGradingDigest": "Vertinimo eilės suvestinė",
+      "forumUserMentioned": "Paminėjimas forume",
+      "discussionReply": "Nauji atsakymai diskusijoje"
     },
     "canvas": {
       "emptyTitle": "Jūsų automatizavimo drobė tuščia",
@@ -8155,7 +8204,16 @@
       "lessonUrl": "Pamokos nuoroda",
       "newAnswersCount": "Nauji atsakymai",
       "pendingAnswersCount": "Atsakymai, laukiantys įvertinimo",
-      "gradingQueueUrl": "Vertinimo eilės nuoroda"
+      "gradingQueueUrl": "Vertinimo eilės nuoroda",
+      "topicTitle": "Temos pavadinimas",
+      "topicUrl": "Temos nuoroda",
+      "discussionName": "Diskusijos pavadinimas",
+      "replyCount": "Naujų atsakymų skaičius",
+      "replyAuthors": "Atsakymų autoriai",
+      "latestReply": "Naujausias atsakymas",
+      "discussionUrl": "Diskusijos nuoroda",
+      "unsubscribeUrl": "Atsisakymo nuoroda",
+      "unfollowUrl": "Nuoroda nebesekti"
     },
     "simulation": {
       "title": "Simuliacijos rezultatas",
@@ -9846,10 +9904,17 @@
     "description": "Užduokite klausimus ir dalinkitės žiniomis su visa organizacija.",
     "newTopic": "Nauja tema",
     "searchPlaceholder": "Ieškoti temų",
-    "filter": {
-      "label": "Rodyti temas",
-      "all": "Visos temos",
-      "general": "Bendros temos"
+    "courseDiscussions": {
+      "title": "Kursų diskusijos",
+      "heading": "Diskusija: {{course}}",
+      "messages_one": "{{count}} žinutė",
+      "messages_few": "{{count}} žinutės",
+      "messages_many": "{{count}} žinutės",
+      "messages_other": "{{count}} žinučių",
+      "viewAll": "Visos kursų diskusijos ({{count}})",
+      "searchPlaceholder": "Ieškoti kursų",
+      "empty": "Nė viename jūsų kurse dar nėra diskusijos.",
+      "noResults": "Pagal paiešką kursų diskusijų nerasta."
     },
     "sort": {
       "label": "Rūšiuoti temas",
@@ -9876,7 +9941,6 @@
     },
     "topic": {
       "backToForum": "Grįžti į forumą",
-      "courseThreadTitle": "Kurso „{{course}}“ diskusija",
       "noReplies": "Atsakymų dar nėra.",
       "replyPlaceholder": "Parašykite atsakymą",
       "replySubmit": "Atsakyti",
@@ -9889,15 +9953,100 @@
     "toast": {
       "createTopicError": "Nepavyko sukurti temos.",
       "createPostError": "Nepavyko išsiųsti atsakymo.",
-      "deletePostError": "Nepavyko ištrinti įrašo."
+      "deletePostError": "Nepavyko ištrinti įrašo.",
+      "mentioned": "Kažkas jus paminėjo forume.",
+      "reactionError": "Nepavyko išsaugoti reakcijos."
     },
     "errors": {
       "topicNotFound": "Ši tema neegzistuoja arba neturite prieigos prie jos.",
+      "courseDiscussionNotFound": "Ši kurso diskusija neegzistuoja arba neturite prieigos prie jos.",
       "postNotFound": "Šis įrašas nebeegzistuoja.",
       "cannotDeletePost": "Galite ištrinti tik savo įrašus.",
       "topicDeleted": "Atsakymai uždaryti, nes pirmasis įrašas buvo ištrintas.",
       "emptyTitle": "Įveskite pavadinimą.",
-      "emptyContent": "Įveskite žinutę."
+      "emptyContent": "Įveskite žinutę.",
+      "invalidReaction": "Pasirinkite vieną iš galimų reakcijų."
+    }
+  },
+  "a11y": {
+    "goToHomepage": "Eiti į pagrindinį puslapį",
+    "platformLogo": "Platformos logotipas",
+    "uploadedImage": "Įkeltas paveikslėlis",
+    "uploadQueue": "Įkėlimo eilė",
+    "formattingOptions": "Formatavimo parinktys",
+    "switchToLightMode": "Perjungti į šviesų režimą",
+    "switchToDarkMode": "Perjungti į tamsų režimą",
+    "videoPlayer": "Vaizdo grotuvas",
+    "videoQuality": "Vaizdo kokybė",
+    "breadcrumb": "Naršymo kelias",
+    "more": "Daugiau",
+    "carousel": "karuselė",
+    "slide": "skaidrė",
+    "previousSlide": "Ankstesnė skaidrė",
+    "nextSlide": "Kita skaidrė",
+    "remove": "Pašalinti",
+    "clearAll": "Išvalyti viską",
+    "expandOptions": "Išskleisti parinktis",
+    "collapseOptions": "Suskleisti parinktis",
+    "selectAll": "Pažymėti viską",
+    "selectRow": "Pažymėti eilutę",
+    "deleteChapter": "Ištrinti skyrių",
+    "cancelEditing": "Atšaukti redagavimą",
+    "removeFile": "Pašalinti failą",
+    "editSection": "Redaguoti skyrelį",
+    "deleteSection": "Ištrinti skyrelį",
+    "avatar": "Avataras",
+    "avatarFor": "Avataras: {{name}}",
+    "selectGroup": "Pažymėti grupę {{name}}",
+    "lessonWithTitle": "Pamoka: {{title}}"
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Pranešimai apie diskusijas",
+      "saving": "Išsaugoma…",
+      "replyInApp": {
+        "label": "Atsakymai – programoje",
+        "description": "Rodyti pranešimą, kai kas nors atsako jūsų sekamoje diskusijoje."
+      },
+      "replyEmails": {
+        "label": "Atsakymai – el. paštu",
+        "description": "Siųsti vieną el. laišką su naujais atsakymais jūsų sekamoje diskusijoje."
+      },
+      "mentionEmails": {
+        "label": "Paminėjimai – el. paštu",
+        "description": "Siųsti el. laišką, kai kas nors jus pamini diskusijoje."
+      },
+      "toast": {
+        "saved": "Pranešimų nustatymai išsaugoti.",
+        "error": "Nepavyko išsaugoti pranešimų nustatymų."
+      }
+    },
+    "following": {
+      "follow": "Sekti",
+      "following": "Sekate",
+      "followHint": "Gauti pranešimus apie naujus atsakymus šioje diskusijoje.",
+      "unfollowHint": "Išjungti pranešimus apie naujus atsakymus šioje diskusijoje.",
+      "toast": {
+        "followed": "Sekate šią diskusiją.",
+        "unfollowed": "Šios diskusijos nebesekate.",
+        "error": "Nepavyko pakeisti sekimo."
+      }
+    },
+    "unsubscribe": {
+      "title": "Pranešimai apie diskusijas",
+      "confirmDescription": "Patvirtinkite, kad norite išjungti šiuos pranešimus.",
+      "confirm": "Patvirtinti",
+      "invalidLink": "Ši nuoroda neteisinga arba nebegalioja.",
+      "manageInSettings": "Tvarkyti pranešimus nustatymuose",
+      "done": {
+        "replies": "El. laiškų apie atsakymus diskusijose nebegausite.",
+        "mentions": "El. laiškų apie paminėjimus nebegausite.",
+        "thread": "Šios diskusijos nebesekate."
+      },
+      "tryAgain": "Kažkas nepavyko. Pabandykite dar kartą po akimirkos."
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "Ši nuoroda neteisinga arba nebegalioja."
     }
   }
 }

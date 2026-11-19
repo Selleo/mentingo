@@ -115,11 +115,18 @@ export const routeAccessConfig = createRouteConfig({
   "auth/mfa": PUBLIC,
   "auth/change-password": PUBLIC,
   "tenant-inactive": PUBLIC,
+  "notifications/unsubscribe": PUBLIC,
   "oauth/connect": PUBLIC,
 
   "helpdesk/tutorials/:key": AUTHENTICATED_USER_ACCESS,
   forum: { allOf: [PERMISSIONS.FORUM_READ] },
   "forum/topics/:topicId": { allOf: [PERMISSIONS.FORUM_READ] },
+  "forum/courses": {
+    allOf: [PERMISSIONS.FORUM_READ, PERMISSIONS.COURSE_DISCUSSION_READ],
+  },
+  "forum/courses/:courseId": {
+    allOf: [PERMISSIONS.FORUM_READ, PERMISSIONS.COURSE_DISCUSSION_READ],
+  },
   assistant: AUTHENTICATED_USER_ACCESS,
   "assistant/:threadId": AUTHENTICATED_USER_ACCESS,
 

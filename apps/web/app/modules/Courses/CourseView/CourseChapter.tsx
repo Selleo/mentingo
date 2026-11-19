@@ -17,6 +17,10 @@ import { cn, formatWithPlural } from "~/lib/utils";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { ChapterCounter } from "~/modules/Courses/CourseView/components/ChapterCounter";
 import { CourseChapterLesson } from "~/modules/Courses/CourseView/CourseChapterLesson";
+import { LESSON_PROGRESS_STATUSES } from "~/modules/Courses/Lesson/types";
+import { isResumableLessonStatus } from "~/modules/Courses/Lesson/utils";
+
+import { COURSE_TOC_HANDLES } from "../../../../e2e/data/courses/handles";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -94,12 +98,11 @@ export const CourseChapter = ({ chapter, isLastChapter = false }: CourseChapterP
 
     const firstNotStartedLesson = find(
       accessibleLessons,
-      (lesson) => lesson.status === "not_started",
+      (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.NOT_STARTED,
     )?.id;
 
-    const firstInProgressLesson = find(
-      accessibleLessons,
-      (lesson) => lesson.status === "in_progress",
+    const firstInProgressLesson = find(accessibleLessons, (lesson) =>
+      isResumableLessonStatus(lesson.status),
     )?.id;
 
     const lessonToPlay = firstInProgressLesson ?? firstNotStartedLesson ?? accessibleLessons[0].id;
@@ -120,7 +123,7 @@ export const CourseChapter = ({ chapter, isLastChapter = false }: CourseChapterP
           />
           <div className="flex w-full flex-col">
             <AccordionTrigger
-              data-testid={chapter.title}
+              data-testid={COURSE_TOC_HANDLES.chapter(chapter.id)}
               className="border text-start data-[state=closed]:rounded-lg data-[state=open]:rounded-t-lg data-[state=open]:border-primary-500 data-[state=open]:bg-primary-50 [&[data-state=open]>div>div>svg]:rotate-180 [&[data-state=open]>div>div>svg]:duration-200 [&[data-state=open]>div>div>svg]:ease-out"
             >
               <div className="flex w-full items-center gap-x-1 px-2 py-4 md:gap-x-4 md:p-4">

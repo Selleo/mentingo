@@ -2,6 +2,7 @@ import {
   type CanActivate,
   type ExecutionContext,
   Injectable,
+  HttpException,
   Logger,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -11,6 +12,8 @@ import { parse } from "cookie";
 
 import { SessionService } from "src/auth/session/session.service";
 import { getSessionRoomName, getUserRoomName } from "src/websocket/websocket.rooms";
+
+import { WsAuthenticationException } from "./ws-authentication.exception";
 
 import type { AuthenticatedSocket, WsUser } from "src/websocket/websocket.types";
 
@@ -32,7 +35,8 @@ export class WsJwtGuard implements CanActivate {
 
     if (!token) {
       this.logger.debug("No token provided for WebSocket connection");
-      throw new WsException("Unauthorized: No token provided");
+      client.disconnect(true);
+      throw new WsAuthenticationException("Unauthorized: No token provided");
     }
 
     try {
@@ -66,19 +70,37 @@ export class WsJwtGuard implements CanActivate {
 
       return true;
     } catch (error) {
+      if (!this.isCredentialFailure(error)) {
+        this.logger.warn({
+          event: "websocket_authentication_unavailable",
+          errorName: error instanceof Error ? error.name : typeof error,
+        });
+        throw new WsException("Authentication temporarily unavailable");
+      }
       if (error instanceof Error && error.name === "TokenExpiredError") {
         client.emit(AUTH_SOCKET_EVENTS.SESSION_EXPIRED);
       }
       client.disconnect(true);
-      if (error instanceof WsException) throw error;
+      if (error instanceof WsAuthenticationException) throw error;
 
-      this.logger.debug(`WebSocket authentication failed: ${error}`);
-      throw new WsException("Unauthorized: Invalid token");
+      this.logger.debug("WebSocket credentials rejected");
+      throw new WsAuthenticationException("Unauthorized: Invalid token");
     }
   }
 
   private assertSocketConnected(client: AuthenticatedSocket): void {
-    if (client.connected === false) throw new WsException("Unauthorized: Socket disconnected");
+    if (client.connected === false)
+      throw new WsAuthenticationException("Unauthorized: Socket disconnected");
+  }
+
+  /** Only explicit access denials and JWT validation errors terminate a browser session. */
+  private isCredentialFailure(error: unknown): boolean {
+    if (error instanceof WsAuthenticationException) return true;
+    if (error instanceof HttpException) return [401, 403].includes(error.getStatus());
+    return (
+      error instanceof Error &&
+      ["TokenExpiredError", "JsonWebTokenError", "NotBeforeError"].includes(error.name)
+    );
   }
 
   private extractToken(client: AuthenticatedSocket): string | null {

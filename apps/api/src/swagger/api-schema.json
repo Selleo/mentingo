@@ -804,6 +804,33 @@
         }
       }
     },
+    "/api/settings/notifications": {
+      "patch": {
+        "operationId": "SettingsController_updateNotificationPreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationPreferencesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateNotificationPreferencesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/dashboard": {
       "get": {
         "operationId": "SettingsController_getDashboardSettings",
@@ -13438,6 +13465,14 @@
                 {
                   "const": "quiz_grading_digest",
                   "type": "string"
+                },
+                {
+                  "const": "forum_mention",
+                  "type": "string"
+                },
+                {
+                  "const": "discussion_reply",
+                  "type": "string"
                 }
               ]
             }
@@ -13588,6 +13623,14 @@
                 },
                 {
                   "const": "quiz_grading_digest",
+                  "type": "string"
+                },
+                {
+                  "const": "forum_mention",
+                  "type": "string"
+                },
+                {
+                  "const": "discussion_reply",
                   "type": "string"
                 }
               ]
@@ -14528,6 +14571,14 @@
                 },
                 {
                   "const": "quiz_grading_digest",
+                  "type": "string"
+                },
+                {
+                  "const": "forum_mention",
+                  "type": "string"
+                },
+                {
+                  "const": "discussion_reply",
                   "type": "string"
                 }
               ]
@@ -15716,6 +15767,15 @@
               "minimum": 1,
               "type": "number"
             }
+          },
+          {
+            "name": "aroundMessageId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -15875,6 +15935,58 @@
         }
       }
     },
+    "/api/course-chat/messages/{messageId}/follow": {
+      "put": {
+        "operationId": "CourseChatController_followThread",
+        "parameters": [
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "CourseChatController_unfollowThread",
+        "parameters": [
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnfollowThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course-chat/messages/{messageId}": {
       "delete": {
         "operationId": "CourseChatController_deleteMessage",
@@ -15905,6 +16017,98 @@
     "/api/forum/topics": {
       "get": {
         "operationId": "ForumController_getTopics",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "lastActivity",
+                  "type": "string"
+                },
+                {
+                  "const": "newest",
+                  "type": "string"
+                },
+                {
+                  "const": "mostReplies",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTopicsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "ForumController_createTopic",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTopicBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTopicResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/course-discussions": {
+      "get": {
+        "operationId": "ForumController_getCourseDiscussions",
         "parameters": [
           {
             "name": "language",
@@ -15964,27 +16168,6 @@
             }
           },
           {
-            "name": "sort",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "lastActivity",
-                  "type": "string"
-                },
-                {
-                  "const": "newest",
-                  "type": "string"
-                },
-                {
-                  "const": "mostReplies",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
             "name": "search",
             "required": false,
             "in": "query",
@@ -15992,32 +16175,6 @@
               "maxLength": 200,
               "type": "string"
             }
-          },
-          {
-            "name": "scope",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "general",
-                  "type": "string"
-                },
-                {
-                  "const": "course",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "courseId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -16025,71 +16182,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetTopicsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "ForumController_createTopic",
-        "parameters": [
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "en",
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                },
-                {
-                  "const": "es",
-                  "type": "string"
-                },
-                {
-                  "const": "fr",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateTopicBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateTopicResponse"
+                  "$ref": "#/components/schemas/GetCourseDiscussionsResponse"
                 }
               }
             }
@@ -16097,12 +16190,12 @@
         }
       }
     },
-    "/api/forum/topics/{topicId}": {
+    "/api/forum/course-discussions/{courseId}": {
       "get": {
-        "operationId": "ForumController_getTopic",
+        "operationId": "ForumController_getCourseDiscussion",
         "parameters": [
           {
-            "name": "topicId",
+            "name": "courseId",
             "required": true,
             "in": "path",
             "schema": {
@@ -16154,7 +16247,86 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "$ref": "#/components/schemas/GetCourseDiscussionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/topics/{topicId}": {
+      "get": {
+        "operationId": "ForumController_getTopic",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
                   "$ref": "#/components/schemas/GetTopicResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/topics/{topicId}/follow": {
+      "put": {
+        "operationId": "ForumController_followTopic",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowTopicResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "ForumController_unfollowTopic",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnfollowTopicResponse"
                 }
               }
             }
@@ -16243,6 +16415,60 @@
         }
       }
     },
+    "/api/forum/posts/{postId}/reactions": {
+      "post": {
+        "operationId": "ForumController_togglePostReaction",
+        "parameters": [
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TogglePostReactionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TogglePostReactionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forum/users": {
+      "get": {
+        "operationId": "ForumController_getMentionableUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMentionableUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/forum/posts/{postId}": {
       "delete": {
         "operationId": "ForumController_deletePost",
@@ -16263,6 +16489,33 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeletePostResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/discussion-notifications/unsubscribe": {
+      "post": {
+        "operationId": "DiscussionNotificationsController_unsubscribe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnsubscribeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnsubscribeResponse"
                 }
               }
             }
@@ -20603,6 +20856,51 @@
           "Integration"
         ]
       },
+      "delete": {
+        "operationId": "IntegrationController_clearPhishingConnection",
+        "summary": "Disconnect a tenant from the phishing platform",
+        "description": "Removes the phishing platform plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClearPhishingConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
       "get": {
         "operationId": "IntegrationController_phishingConnectionStatus",
         "summary": "Verify tenant phishing connectivity",
@@ -20688,6 +20986,51 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ConfigureCompetenciesConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
+      "delete": {
+        "operationId": "IntegrationController_clearCompetenciesConnection",
+        "summary": "Disconnect a tenant from the competencies platform",
+        "description": "Removes the competencies platform plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClearCompetenciesConnectionResponse"
                 }
               }
             }
@@ -20850,7 +21193,7 @@
       "post": {
         "operationId": "IntegrationController_createTenant",
         "summary": "Create tenant via integration API",
-        "description": "Creates a new tenant and invites its initial admin user.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "description": "Creates a new tenant and invites its initial admin user. Optional accessEndsAt blocks the tenant from that moment, like an inactive status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
         "parameters": [
           {
             "name": "X-API-Key",
@@ -20907,7 +21250,7 @@
       "patch": {
         "operationId": "IntegrationController_updateTenant",
         "summary": "Update tenant via integration API",
-        "description": "Updates the target tenant's name, host, or status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "description": "Updates the target tenant's name, host, status, or access end date. Send accessEndsAt as null to clear it.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
         "parameters": [
           {
             "name": "X-API-Key",
@@ -21070,6 +21413,185 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/tenants/{tenantId}/integration-keys": {
+      "get": {
+        "operationId": "IntegrationController_getTenantIntegrationKeys",
+        "summary": "List integration API keys of a tenant",
+        "description": "Lists active integration API keys of the target tenant without their secret values. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Not required; the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTenantIntegrationKeysResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
+      "post": {
+        "operationId": "IntegrationController_createTenantIntegrationKey",
+        "summary": "Create an integration API key for a tenant",
+        "description": "Creates an integration API key for the target tenant, recorded as created by the calling key's user. The raw key is returned only once, in this response. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Not required; the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTenantIntegrationKeyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTenantIntegrationKeyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/tenants/{tenantId}/integration-keys/{keyId}": {
+      "delete": {
+        "operationId": "IntegrationController_revokeTenantIntegrationKey",
+        "summary": "Revoke an integration API key of a tenant",
+        "description": "Revokes an active integration API key of the target tenant. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Not required; the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
           },
           "401": {
             "description": "Missing or invalid integration API key."
@@ -22553,6 +23075,51 @@
           "Integration"
         ]
       },
+      "delete": {
+        "operationId": "IntegrationContentMarketplaceController_clearContentMarketplaceConnection",
+        "summary": "Disconnect a tenant from the content marketplace",
+        "description": "Removes the content marketplace plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClearContentMarketplaceConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      },
       "get": {
         "operationId": "IntegrationContentMarketplaceController_checkContentMarketplaceConnection",
         "summary": "Verify tenant content marketplace connectivity",
@@ -22599,17 +23166,17 @@
         ]
       }
     },
-    "/api/integration/key": {
+    "/api/integration/keys": {
       "get": {
-        "operationId": "IntegrationAdminController_getCurrentKey",
-        "summary": "Get current integration API key metadata for admin",
+        "operationId": "IntegrationAdminController_getKeys",
+        "summary": "List active integration API keys of the current organization",
         "parameters": [],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetCurrentKeyResponse"
+                  "$ref": "#/components/schemas/GetKeysResponse"
                 }
               }
             }
@@ -22626,18 +23193,60 @@
         ]
       },
       "post": {
-        "operationId": "IntegrationAdminController_rotateKey",
-        "summary": "Rotate integration API key for admin",
+        "operationId": "IntegrationAdminController_createKey",
+        "summary": "Create an integration API key for the current organization",
+        "description": "The raw key is returned only once, in this response.",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKeyBody"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RotateKeyResponse"
+                  "$ref": "#/components/schemas/CreateKeyResponse"
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Admin role required."
+          }
+        },
+        "tags": [
+          "Integration Admin"
+        ]
+      }
+    },
+    "/api/integration/keys/{keyId}": {
+      "delete": {
+        "operationId": "IntegrationAdminController_revokeKey",
+        "summary": "Revoke an integration API key of the current organization",
+        "parameters": [
+          {
+            "name": "keyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
           },
           "401": {
             "description": "Authentication required."
@@ -27771,6 +28380,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "forum.post.react",
+                      "type": "string"
+                    },
+                    {
                       "const": "forum.post.delete",
                       "type": "string"
                     }
@@ -28985,6 +29598,15 @@
                   "isMFAEnabled": {
                     "default": false,
                     "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -29029,6 +29651,15 @@
                   },
                   "isMFAEnabled": {
                     "default": false,
+                    "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
                     "type": "boolean"
                   },
                   "adminNewUserNotification": {
@@ -29146,6 +29777,15 @@
                   "isMFAEnabled": {
                     "default": false,
                     "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -29190,6 +29830,163 @@
                   },
                   "isMFAEnabled": {
                     "default": false,
+                    "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
+                    "type": "boolean"
+                  },
+                  "adminNewUserNotification": {
+                    "type": "boolean"
+                  },
+                  "adminFinishedCourseNotification": {
+                    "type": "boolean"
+                  },
+                  "configWarningDismissed": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled",
+                  "adminNewUserNotification",
+                  "adminFinishedCourseNotification",
+                  "configWarningDismissed"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateNotificationPreferencesBody": {
+        "additionalProperties": false,
+        "minProperties": 1,
+        "type": "object",
+        "properties": {
+          "discussionReplyEmails": {
+            "type": "boolean"
+          },
+          "discussionReplyInApp": {
+            "type": "boolean"
+          },
+          "mentionEmails": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateNotificationPreferencesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      },
+                      {
+                        "const": "fr",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "discussionReplyEmails": {
+                    "type": "boolean"
+                  },
+                  "discussionReplyInApp": {
+                    "type": "boolean"
+                  },
+                  "mentionEmails": {
                     "type": "boolean"
                   },
                   "adminNewUserNotification": {
@@ -30182,6 +30979,15 @@
               },
               "isMFAEnabled": {
                 "default": false,
+                "type": "boolean"
+              },
+              "discussionReplyEmails": {
+                "type": "boolean"
+              },
+              "discussionReplyInApp": {
+                "type": "boolean"
+              },
+              "mentionEmails": {
                 "type": "boolean"
               },
               "adminNewUserNotification": {
@@ -33649,6 +34455,15 @@
                 "default": false,
                 "type": "boolean"
               },
+              "discussionReplyEmails": {
+                "type": "boolean"
+              },
+              "discussionReplyInApp": {
+                "type": "boolean"
+              },
+              "mentionEmails": {
+                "type": "boolean"
+              },
               "adminNewUserNotification": {
                 "type": "boolean"
               },
@@ -33712,6 +34527,15 @@
               },
               "isMFAEnabled": {
                 "default": false,
+                "type": "boolean"
+              },
+              "discussionReplyEmails": {
+                "type": "boolean"
+              },
+              "discussionReplyInApp": {
+                "type": "boolean"
+              },
+              "mentionEmails": {
                 "type": "boolean"
               },
               "adminNewUserNotification": {
@@ -34769,6 +35593,15 @@
               },
               "isMFAEnabled": {
                 "default": false,
+                "type": "boolean"
+              },
+              "discussionReplyEmails": {
+                "type": "boolean"
+              },
+              "discussionReplyInApp": {
+                "type": "boolean"
+              },
+              "mentionEmails": {
                 "type": "boolean"
               },
               "adminNewUserNotification": {
@@ -40186,6 +41019,10 @@
                               {
                                 "const": "awaiting_review",
                                 "type": "string"
+                              },
+                              {
+                                "const": "failed",
+                                "type": "string"
                               }
                             ]
                           },
@@ -43764,6 +44601,10 @@
                         },
                         {
                           "const": "awaiting_review",
+                          "type": "string"
+                        },
+                        {
+                          "const": "failed",
                           "type": "string"
                         }
                       ]
@@ -71036,6 +71877,16 @@
                     }
                   ]
                 },
+                "linkPath": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "title": {
                   "type": "string"
                 },
@@ -71143,6 +71994,7 @@
                 "emailTemplate",
                 "sourceType",
                 "sourceId",
+                "linkPath",
                 "title",
                 "content",
                 "baseLanguage",
@@ -71295,6 +72147,16 @@
                     }
                   ]
                 },
+                "linkPath": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "title": {
                   "type": "string"
                 },
@@ -71395,6 +72257,7 @@
                 "emailTemplate",
                 "sourceType",
                 "sourceId",
+                "linkPath",
                 "title",
                 "content",
                 "baseLanguage",
@@ -71650,6 +72513,16 @@
                   }
                 ]
               },
+              "linkPath": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "title": {
                 "type": "string"
               },
@@ -71747,6 +72620,7 @@
               "emailTemplate",
               "sourceType",
               "sourceId",
+              "linkPath",
               "title",
               "content",
               "baseLanguage",
@@ -74118,6 +74992,14 @@
                     },
                     {
                       "const": "quiz_grading_digest",
+                      "type": "string"
+                    },
+                    {
+                      "const": "forum_mention",
+                      "type": "string"
+                    },
+                    {
+                      "const": "discussion_reply",
                       "type": "string"
                     }
                   ]
@@ -78493,6 +79375,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -78627,6 +79517,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -82818,6 +83716,14 @@
                         {
                           "const": "quiz_grading_digest",
                           "type": "string"
+                        },
+                        {
+                          "const": "forum_mention",
+                          "type": "string"
+                        },
+                        {
+                          "const": "discussion_reply",
+                          "type": "string"
                         }
                       ]
                     },
@@ -82952,6 +83858,14 @@
                         },
                         {
                           "const": "quiz_grading_digest",
+                          "type": "string"
+                        },
+                        {
+                          "const": "forum_mention",
+                          "type": "string"
+                        },
+                        {
+                          "const": "discussion_reply",
                           "type": "string"
                         }
                       ]
@@ -87168,6 +88082,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -87302,6 +88224,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -91491,6 +92421,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -91625,6 +92563,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -95814,6 +96760,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -95948,6 +96902,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -100028,6 +100990,14 @@
               {
                 "const": "quiz_grading_digest",
                 "type": "string"
+              },
+              {
+                "const": "forum_mention",
+                "type": "string"
+              },
+              {
+                "const": "discussion_reply",
+                "type": "string"
               }
             ]
           },
@@ -104060,6 +105030,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -104194,6 +105172,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -108276,6 +109262,14 @@
                   {
                     "const": "quiz_grading_digest",
                     "type": "string"
+                  },
+                  {
+                    "const": "forum_mention",
+                    "type": "string"
+                  },
+                  {
+                    "const": "discussion_reply",
+                    "type": "string"
                   }
                 ]
               },
@@ -112273,6 +113267,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -112407,6 +113409,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -116638,6 +117648,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -116772,6 +117790,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -121007,6 +122033,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -121141,6 +122175,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -125330,6 +126372,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -125464,6 +126514,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -129664,6 +130722,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -129798,6 +130864,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -133987,6 +135061,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -134121,6 +135203,14 @@
                       },
                       {
                         "const": "quiz_grading_digest",
+                        "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
                         "type": "string"
                       }
                     ]
@@ -142025,6 +143115,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -142327,6 +143425,14 @@
                                           {
                                             "const": "quiz_grading_digest",
                                             "type": "string"
+                                          },
+                                          {
+                                            "const": "forum_mention",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "discussion_reply",
+                                            "type": "string"
                                           }
                                         ]
                                       },
@@ -142517,6 +143623,14 @@
                                                   },
                                                   {
                                                     "const": "quiz_grading_digest",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "forum_mention",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "discussion_reply",
                                                     "type": "string"
                                                   }
                                                 ]
@@ -142994,6 +144108,14 @@
                                                   {
                                                     "const": "quiz_grading_digest",
                                                     "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "forum_mention",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "discussion_reply",
+                                                    "type": "string"
                                                   }
                                                 ]
                                               },
@@ -143184,6 +144306,14 @@
                                                           },
                                                           {
                                                             "const": "quiz_grading_digest",
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "const": "forum_mention",
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "const": "discussion_reply",
                                                             "type": "string"
                                                           }
                                                         ]
@@ -143633,6 +144763,14 @@
                     {
                       "const": "quiz_grading_digest",
                       "type": "string"
+                    },
+                    {
+                      "const": "forum_mention",
+                      "type": "string"
+                    },
+                    {
+                      "const": "discussion_reply",
+                      "type": "string"
                     }
                   ]
                 },
@@ -144036,6 +145174,14 @@
                             {
                               "const": "quiz_grading_digest",
                               "type": "string"
+                            },
+                            {
+                              "const": "forum_mention",
+                              "type": "string"
+                            },
+                            {
+                              "const": "discussion_reply",
+                              "type": "string"
                             }
                           ]
                         }
@@ -144331,6 +145477,14 @@
                     {
                       "const": "quiz_grading_digest",
                       "type": "string"
+                    },
+                    {
+                      "const": "forum_mention",
+                      "type": "string"
+                    },
+                    {
+                      "const": "discussion_reply",
+                      "type": "string"
                     }
                   ]
                 },
@@ -144561,6 +145715,14 @@
                                               {
                                                 "const": "quiz_grading_digest",
                                                 "type": "string"
+                                              },
+                                              {
+                                                "const": "forum_mention",
+                                                "type": "string"
+                                              },
+                                              {
+                                                "const": "discussion_reply",
+                                                "type": "string"
                                               }
                                             ]
                                           },
@@ -144751,6 +145913,14 @@
                                                       },
                                                       {
                                                         "const": "quiz_grading_digest",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "forum_mention",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "discussion_reply",
                                                         "type": "string"
                                                       }
                                                     ]
@@ -145210,6 +146380,14 @@
                                     {
                                       "const": "quiz_grading_digest",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "forum_mention",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "discussion_reply",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -145400,6 +146578,14 @@
                                             },
                                             {
                                               "const": "quiz_grading_digest",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "forum_mention",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "discussion_reply",
                                               "type": "string"
                                             }
                                           ]
@@ -146120,6 +147306,14 @@
                                 {
                                   "const": "quiz_grading_digest",
                                   "type": "string"
+                                },
+                                {
+                                  "const": "forum_mention",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "discussion_reply",
+                                  "type": "string"
                                 }
                               ]
                             }
@@ -146439,6 +147633,14 @@
                                     {
                                       "const": "quiz_grading_digest",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "forum_mention",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "discussion_reply",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -146629,6 +147831,14 @@
                                             },
                                             {
                                               "const": "quiz_grading_digest",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "forum_mention",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "discussion_reply",
                                               "type": "string"
                                             }
                                           ]
@@ -147084,6 +148294,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -147274,6 +148492,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -147751,6 +148977,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -147941,6 +149175,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -148426,6 +149668,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -148616,6 +149866,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -149093,6 +150351,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -149283,6 +150549,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -149768,6 +151042,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -149958,6 +151240,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -150435,6 +151725,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -150625,6 +151923,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -151107,6 +152413,14 @@
                                     {
                                       "const": "quiz_grading_digest",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "forum_mention",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "discussion_reply",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -151297,6 +152611,14 @@
                                             },
                                             {
                                               "const": "quiz_grading_digest",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "forum_mention",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "discussion_reply",
                                               "type": "string"
                                             }
                                           ]
@@ -151748,6 +153070,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -151938,6 +153268,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -152415,6 +153753,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -152605,6 +153951,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -153111,6 +154465,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -153301,6 +154663,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -153778,6 +155148,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -153968,6 +155346,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -154454,6 +155840,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -154644,6 +156038,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -155101,6 +156503,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -155291,6 +156701,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -155768,6 +157186,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -155958,6 +157384,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -156443,6 +157877,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -156633,6 +158075,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -157110,6 +158560,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -157300,6 +158758,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -157785,6 +159251,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -157975,6 +159449,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -158452,6 +159934,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -158642,6 +160132,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -159127,6 +160625,14 @@
                                         {
                                           "const": "quiz_grading_digest",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "forum_mention",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "discussion_reply",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -159317,6 +160823,14 @@
                                                 },
                                                 {
                                                   "const": "quiz_grading_digest",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
                                                   "type": "string"
                                                 }
                                               ]
@@ -159794,6 +161308,14 @@
                                                 {
                                                   "const": "quiz_grading_digest",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "forum_mention",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "discussion_reply",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -159984,6 +161506,14 @@
                                                         },
                                                         {
                                                           "const": "quiz_grading_digest",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "forum_mention",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "discussion_reply",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -160439,6 +161969,14 @@
                     {
                       "const": "quiz_grading_digest",
                       "type": "string"
+                    },
+                    {
+                      "const": "forum_mention",
+                      "type": "string"
+                    },
+                    {
+                      "const": "discussion_reply",
+                      "type": "string"
                     }
                   ]
                 },
@@ -160744,6 +162282,14 @@
                       {
                         "const": "quiz_grading_digest",
                         "type": "string"
+                      },
+                      {
+                        "const": "forum_mention",
+                        "type": "string"
+                      },
+                      {
+                        "const": "discussion_reply",
+                        "type": "string"
                       }
                     ]
                   },
@@ -160976,6 +162522,14 @@
                                 },
                                 {
                                   "const": "quiz_grading_digest",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "forum_mention",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "discussion_reply",
                                   "type": "string"
                                 }
                               ]
@@ -161939,6 +163493,9 @@
                       "avatarReference"
                     ]
                   }
+                },
+                "isFollowing": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -161954,7 +163511,8 @@
                 "reactions",
                 "replyCount",
                 "latestReply",
-                "replyParticipants"
+                "replyParticipants",
+                "isFollowing"
               ]
             }
           },
@@ -162315,6 +163873,9 @@
                     "avatarReference"
                   ]
                 }
+              },
+              "isFollowing": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -162330,7 +163891,8 @@
               "reactions",
               "replyCount",
               "latestReply",
-              "replyParticipants"
+              "replyParticipants",
+              "isFollowing"
             ]
           }
         },
@@ -162596,6 +164158,9 @@
                       "avatarReference"
                     ]
                   }
+                },
+                "isFollowing": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -162611,7 +164176,8 @@
                 "reactions",
                 "replyCount",
                 "latestReply",
-                "replyParticipants"
+                "replyParticipants",
+                "isFollowing"
               ]
             }
           },
@@ -162707,6 +164273,54 @@
           "data"
         ]
       },
+      "FollowThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "messageId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isFollowing": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "messageId",
+              "isFollowing"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UnfollowThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "messageId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isFollowing": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "messageId",
+              "isFollowing"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "DeleteMessageResponse": {
         "type": "object",
         "properties": {
@@ -162771,50 +164385,8 @@
                   "format": "uuid",
                   "type": "string"
                 },
-                "scope": {
-                  "anyOf": [
-                    {
-                      "const": "general",
-                      "type": "string"
-                    },
-                    {
-                      "const": "course",
-                      "type": "string"
-                    }
-                  ]
-                },
                 "title": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "course": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "format": "uuid",
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "title"
-                      ]
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
+                  "type": "string"
                 },
                 "author": {
                   "type": "object",
@@ -162865,9 +164437,7 @@
               },
               "required": [
                 "id",
-                "scope",
                 "title",
-                "course",
                 "author",
                 "replyCount",
                 "lastActivityAt",
@@ -162908,6 +164478,113 @@
           "pagination"
         ]
       },
+      "GetCourseDiscussionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseTitle": {
+                  "type": "string"
+                },
+                "messageCount": {
+                  "type": "number"
+                },
+                "lastActivityAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "courseId",
+                "courseTitle",
+                "messageCount",
+                "lastActivityAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetCourseDiscussionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseTitle": {
+                "type": "string"
+              },
+              "messageCount": {
+                "type": "number"
+              },
+              "lastActivityAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "courseId",
+              "courseTitle",
+              "messageCount",
+              "lastActivityAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "CreateTopicBody": {
         "type": "object",
         "properties": {
@@ -162920,6 +164597,14 @@
             "minLength": 1,
             "maxLength": 5000,
             "type": "string"
+          },
+          "mentionedUserIds": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -162937,50 +164622,8 @@
                 "format": "uuid",
                 "type": "string"
               },
-              "scope": {
-                "anyOf": [
-                  {
-                    "const": "general",
-                    "type": "string"
-                  },
-                  {
-                    "const": "course",
-                    "type": "string"
-                  }
-                ]
-              },
               "title": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "course": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "title"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "type": "string"
               },
               "author": {
                 "type": "object",
@@ -163125,18 +164768,20 @@
                   "user",
                   "reactions"
                 ]
+              },
+              "isFollowing": {
+                "type": "boolean"
               }
             },
             "required": [
               "id",
-              "scope",
               "title",
-              "course",
               "author",
               "replyCount",
               "lastActivityAt",
               "createdAt",
-              "firstPost"
+              "firstPost",
+              "isFollowing"
             ]
           }
         },
@@ -163154,50 +164799,8 @@
                 "format": "uuid",
                 "type": "string"
               },
-              "scope": {
-                "anyOf": [
-                  {
-                    "const": "general",
-                    "type": "string"
-                  },
-                  {
-                    "const": "course",
-                    "type": "string"
-                  }
-                ]
-              },
               "title": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "course": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "title"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "type": "string"
               },
               "author": {
                 "type": "object",
@@ -163342,18 +164945,68 @@
                   "user",
                   "reactions"
                 ]
+              },
+              "isFollowing": {
+                "type": "boolean"
               }
             },
             "required": [
               "id",
-              "scope",
               "title",
-              "course",
               "author",
               "replyCount",
               "lastActivityAt",
               "createdAt",
-              "firstPost"
+              "firstPost",
+              "isFollowing"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FollowTopicResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "topicId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isFollowing": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "topicId",
+              "isFollowing"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UnfollowTopicResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "topicId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "isFollowing": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "topicId",
+              "isFollowing"
             ]
           }
         },
@@ -163509,6 +165162,14 @@
             "minLength": 1,
             "maxLength": 5000,
             "type": "string"
+          },
+          "mentionedUserIds": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -163627,6 +165288,109 @@
           "data"
         ]
       },
+      "TogglePostReactionBody": {
+        "type": "object",
+        "properties": {
+          "reaction": {
+            "minLength": 1,
+            "maxLength": 16,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reaction"
+        ]
+      },
+      "TogglePostReactionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "topicId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "postId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "reactions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reaction": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "number"
+                    },
+                    "reactedByCurrentUser": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "reaction",
+                    "count",
+                    "reactedByCurrentUser"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "topicId",
+              "postId",
+              "reactions"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetMentionableUsersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "avatarReference": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "firstName",
+                "lastName",
+                "avatarReference"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "DeletePostResponse": {
         "type": "object",
         "properties": {
@@ -163668,6 +165432,51 @@
               "removed",
               "deletedAt",
               "topicRemoved"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UnsubscribeBody": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "minLength": 1,
+            "maxLength": 2048,
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "UnsubscribeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "replies",
+                    "type": "string"
+                  },
+                  {
+                    "const": "mentions",
+                    "type": "string"
+                  },
+                  {
+                    "const": "thread",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type"
             ]
           }
         },
@@ -176176,12 +177985,37 @@
                     },
                     "host": {
                       "type": "string"
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "active",
+                          "type": "string"
+                        },
+                        {
+                          "const": "inactive",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "accessEndsAt": {
+                      "anyOf": [
+                        {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
                     "id",
                     "name",
-                    "host"
+                    "host",
+                    "status",
+                    "accessEndsAt"
                   ]
                 }
               },
@@ -176228,6 +178062,26 @@
         ]
       },
       "ConfigurePhishingConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tenantId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ClearPhishingConnectionResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -176297,6 +178151,26 @@
         ]
       },
       "ConfigureCompetenciesConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tenantId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ClearCompetenciesConnectionResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -176473,12 +178347,37 @@
                 },
                 "host": {
                   "type": "string"
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "active",
+                      "type": "string"
+                    },
+                    {
+                      "const": "inactive",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "accessEndsAt": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
                 "id",
                 "name",
-                "host"
+                "host",
+                "status",
+                "accessEndsAt"
               ]
             }
           }
@@ -176508,6 +178407,17 @@
               {
                 "const": "inactive",
                 "type": "string"
+              }
+            ]
+          },
+          "accessEndsAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
             ]
           },
@@ -176595,6 +178505,17 @@
               "isManaging": {
                 "type": "boolean"
               },
+              "accessEndsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -176608,6 +178529,7 @@
               "host",
               "status",
               "isManaging",
+              "accessEndsAt",
               "createdAt",
               "updatedAt"
             ]
@@ -176638,6 +178560,17 @@
               {
                 "const": "inactive",
                 "type": "string"
+              }
+            ]
+          },
+          "accessEndsAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
             ]
           }
@@ -176674,6 +178607,17 @@
               "isManaging": {
                 "type": "boolean"
               },
+              "accessEndsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -176687,6 +178631,7 @@
               "host",
               "status",
               "isManaging",
+              "accessEndsAt",
               "createdAt",
               "updatedAt"
             ]
@@ -176976,6 +178921,156 @@
           "data"
         ]
       },
+      "GetTenantIntegrationKeysResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "keyPrefix": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "lastUsedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdBy": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "email"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "keyPrefix",
+                "createdAt",
+                "lastUsedAt",
+                "createdBy"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateTenantIntegrationKeyBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "\\S",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateTenantIntegrationKeyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "keyPrefix": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "lastUsedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdBy": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "email"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "keyPrefix",
+                  "createdAt",
+                  "lastUsedAt",
+                  "createdBy"
+                ]
+              }
+            },
+            "required": [
+              "key",
+              "metadata"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "DeactivateTenantResponse": {
         "type": "object",
         "properties": {
@@ -177007,6 +179102,17 @@
               "isManaging": {
                 "type": "boolean"
               },
+              "accessEndsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -177020,6 +179126,7 @@
               "host",
               "status",
               "isManaging",
+              "accessEndsAt",
               "createdAt",
               "updatedAt"
             ]
@@ -178224,6 +180331,26 @@
           "data"
         ]
       },
+      "ClearContentMarketplaceConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tenantId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "CheckContentMarketplaceConnectionResponse": {
         "type": "object",
         "properties": {
@@ -178252,65 +180379,85 @@
           "data"
         ]
       },
-      "GetCurrentKeyResponse": {
+      "GetKeysResponse": {
         "type": "object",
         "properties": {
           "data": {
-            "type": "object",
-            "properties": {
-              "key": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "keyPrefix": {
-                        "type": "string"
-                      },
-                      "createdAt": {
-                        "type": "string"
-                      },
-                      "updatedAt": {
-                        "type": "string"
-                      },
-                      "lastUsedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "keyPrefix": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "lastUsedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
                     },
-                    "required": [
-                      "id",
-                      "keyPrefix",
-                      "createdAt",
-                      "updatedAt",
-                      "lastUsedAt"
-                    ]
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdBy": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    }
                   },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "key"
-            ]
+                  "required": [
+                    "id",
+                    "email"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "keyPrefix",
+                "createdAt",
+                "lastUsedAt",
+                "createdBy"
+              ]
+            }
           }
         },
         "required": [
           "data"
         ]
       },
-      "RotateKeyResponse": {
+      "CreateKeyBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "\\S",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateKeyResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -178326,13 +180473,13 @@
                     "format": "uuid",
                     "type": "string"
                   },
+                  "name": {
+                    "type": "string"
+                  },
                   "keyPrefix": {
                     "type": "string"
                   },
                   "createdAt": {
-                    "type": "string"
-                  },
-                  "updatedAt": {
                     "type": "string"
                   },
                   "lastUsedAt": {
@@ -178344,14 +180491,31 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "createdBy": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "email"
+                    ]
                   }
                 },
                 "required": [
                   "id",
+                  "name",
                   "keyPrefix",
                   "createdAt",
-                  "updatedAt",
-                  "lastUsedAt"
+                  "lastUsedAt",
+                  "createdBy"
                 ]
               }
             },
@@ -178401,6 +180565,17 @@
                     "isManaging": {
                       "type": "boolean"
                     },
+                    "accessEndsAt": {
+                      "anyOf": [
+                        {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "createdAt": {
                       "type": "string"
                     },
@@ -178414,6 +180589,7 @@
                     "host",
                     "status",
                     "isManaging",
+                    "accessEndsAt",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -178735,6 +180911,17 @@
               "isManaging": {
                 "type": "boolean"
               },
+              "accessEndsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -178748,6 +180935,7 @@
               "host",
               "status",
               "isManaging",
+              "accessEndsAt",
               "createdAt",
               "updatedAt"
             ]
@@ -178778,6 +180966,17 @@
               {
                 "const": "inactive",
                 "type": "string"
+              }
+            ]
+          },
+          "accessEndsAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
             ]
           }
@@ -178814,6 +181013,17 @@
               "isManaging": {
                 "type": "boolean"
               },
+              "accessEndsAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -178827,6 +181037,7 @@
               "host",
               "status",
               "isManaging",
+              "accessEndsAt",
               "createdAt",
               "updatedAt"
             ]

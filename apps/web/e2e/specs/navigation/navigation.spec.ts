@@ -1,19 +1,16 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { NAVIGATION_HANDLES } from "../../data/navigation/handles";
+import {
+  NAVIGATION_HANDLES,
+  PROVIDER_INFORMATION_PAGE_HANDLES,
+} from "../../data/navigation/handles";
+import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { clickHandleAndExpectUrlFlow } from "../../flows/click-handle-and-expect-url.flow";
+import { openManageMenuFlow } from "../../flows/navigation/open-manage-menu.flow";
 import { prepareNavigationPageFlow } from "../../flows/navigation/prepare-navigation-page.flow";
 
-import type { Page } from "@playwright/test";
-
-type RoleNavigationExpectation = {
-  role: USER_ROLE;
-  title: string;
-  canSeeManage: boolean;
-};
-
-const ROLE_NAVIGATION_EXPECTATIONS: RoleNavigationExpectation[] = [
+const ROLE_NAVIGATION_EXPECTATIONS = [
   {
     role: USER_ROLE.admin,
     title: "admin",
@@ -29,16 +26,7 @@ const ROLE_NAVIGATION_EXPECTATIONS: RoleNavigationExpectation[] = [
     title: "student",
     canSeeManage: false,
   },
-];
-
-const openManageMenu = async (page: Page) => {
-  const usersLink = page.getByTestId(NAVIGATION_HANDLES.USERS_LINK);
-
-  if (await usersLink.isVisible()) return;
-
-  await page.getByTestId(NAVIGATION_HANDLES.MANAGE_TOGGLE).click();
-  await expect(usersLink).toBeVisible();
-};
+] as const;
 
 for (const { role, title, canSeeManage } of ROLE_NAVIGATION_EXPECTATIONS) {
   test(`${title} can navigate the sidebar`, async ({ withWorkerPage }) => {
@@ -52,16 +40,16 @@ for (const { role, title, canSeeManage } of ROLE_NAVIGATION_EXPECTATIONS) {
       );
 
       if (canSeeManage) {
-        await openManageMenu(page);
+        await openManageMenuFlow(page);
 
         await clickHandleAndExpectUrlFlow(page, NAVIGATION_HANDLES.USERS_LINK, "/admin/users");
         await clickHandleAndExpectUrlFlow(page, NAVIGATION_HANDLES.COURSES_LINK, "/courses");
 
-        await openManageMenu(page);
+        await openManageMenuFlow(page);
         await clickHandleAndExpectUrlFlow(page, NAVIGATION_HANDLES.GROUPS_LINK, "/admin/groups");
         await clickHandleAndExpectUrlFlow(page, NAVIGATION_HANDLES.COURSES_LINK, "/courses");
 
-        await openManageMenu(page);
+        await openManageMenuFlow(page);
         await clickHandleAndExpectUrlFlow(
           page,
           NAVIGATION_HANDLES.CATEGORIES_LINK,
@@ -86,7 +74,7 @@ for (const { role, title, canSeeManage } of ROLE_NAVIGATION_EXPECTATIONS) {
         NAVIGATION_HANDLES.PROVIDER_INFORMATION_LINK,
         "/provider-information",
       );
-      await expect(page.locator("#provider-information")).toBeVisible();
+      await expect(page.getByTestId(PROVIDER_INFORMATION_PAGE_HANDLES.HEADING)).toBeVisible();
 
       await page.getByTestId(NAVIGATION_HANDLES.PROFILE_FOOTER).click();
       await clickHandleAndExpectUrlFlow(
@@ -97,7 +85,7 @@ for (const { role, title, canSeeManage } of ROLE_NAVIGATION_EXPECTATIONS) {
 
       await page.getByTestId(NAVIGATION_HANDLES.PROFILE_FOOTER).click();
       await clickHandleAndExpectUrlFlow(page, NAVIGATION_HANDLES.SETTINGS_LINK, "/settings");
-      await expect(page.locator("#settings-tabs")).toBeVisible();
+      await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.TABS)).toBeVisible();
     });
   });
 }

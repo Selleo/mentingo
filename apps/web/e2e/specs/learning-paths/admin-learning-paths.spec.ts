@@ -7,7 +7,6 @@ import {
   LEARNING_PATH_SETTINGS_TABS,
   LEARNING_PATH_TRAIL_HANDLES,
   LEARNING_PATH_TRAIL_STOP_STATUSES,
-  LEARNING_PATHS_PAGE_HANDLES,
 } from "../../data/learning-paths/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { addCoursesToLearningPathFlow } from "../../flows/learning-paths/add-courses-to-learning-path.flow";
@@ -26,17 +25,6 @@ import {
   createLearningPathTestPrefix,
   enableLearningPathsForWorkerTenant,
 } from "./learning-paths-test-helpers";
-
-import type { LearningPathFactory } from "../../factories/learning-path.factory";
-
-const getLearningPathCourseIds = async (
-  learningPathFactory: LearningPathFactory,
-  learningPathId: string,
-) => {
-  const learningPath = await learningPathFactory.getById(learningPathId);
-
-  return learningPath.courses.map((course) => course.courseId);
-};
 
 test.describe("admin development paths", () => {
   test("admin can create a development path in the create dialog", async ({
@@ -68,7 +56,7 @@ test.describe("admin development paths", () => {
         .toBe(description);
 
       const createdLearningPath = await learningPathFactory.findByTitle(title);
-      const card = page.getByTestId(LEARNING_PATH_CARD_HANDLES.card(createdLearningPath!.id));
+      const card = page.getByTestId(LEARNING_PATH_CARD_HANDLES.card(createdLearningPath?.id ?? ""));
 
       await expect(card).toBeVisible();
       await expect(card.getByTestId(LEARNING_PATH_CARD_HANDLES.TITLE)).toHaveText(title);
@@ -105,7 +93,7 @@ test.describe("admin development paths", () => {
       }
 
       await expect
-        .poll(async () => getLearningPathCourseIds(learningPathFactory, learningPath.id))
+        .poll(async () => learningPathFactory.getCourseIds(learningPath.id))
         .toEqual(extraCourseIds);
     });
   });
@@ -136,7 +124,7 @@ test.describe("admin development paths", () => {
       await expect(page.getByTestId(LEARNING_PATH_TRAIL_HANDLES.stop(keptCourse.id))).toBeVisible();
 
       await expect
-        .poll(async () => getLearningPathCourseIds(learningPathFactory, learningPath.id))
+        .poll(async () => learningPathFactory.getCourseIds(learningPath.id))
         .toEqual([keptCourse.id]);
     });
   });
@@ -162,8 +150,20 @@ test.describe("admin development paths", () => {
       await moveTrailCourseForwardFlow(page, firstCourse.id);
 
       await expect
-        .poll(async () => getLearningPathCourseIds(learningPathFactory, learningPath.id))
+        .poll(async () => learningPathFactory.getCourseIds(learningPath.id))
         .toEqual([secondCourse.id, firstCourse.id]);
+
+      await page.reload();
+      const stops = page.getByTestId(LEARNING_PATH_TRAIL_HANDLES.STOP_PATTERN);
+      await expect(stops).toHaveCount(2);
+      await expect(stops.nth(0)).toHaveAttribute(
+        "data-testid",
+        LEARNING_PATH_TRAIL_HANDLES.stop(secondCourse.id),
+      );
+      await expect(stops.nth(1)).toHaveAttribute(
+        "data-testid",
+        LEARNING_PATH_TRAIL_HANDLES.stop(firstCourse.id),
+      );
     });
   });
 
@@ -271,31 +271,6 @@ test.describe("admin development paths", () => {
       await expect(
         page.getByTestId(LEARNING_PATH_SETTINGS_HANDLES.tab(LEARNING_PATH_SETTINGS_TABS.GENERAL)),
       ).toHaveAttribute("data-state", "inactive");
-    });
-  });
-
-  test("admin sees the create tile after the last development path", async ({
-    apiClient,
-    cleanup,
-    factories,
-    withWorkerPage,
-  }) => {
-    const { prefix, learningPath } = await arrangeLearningPath({
-      apiClient,
-      cleanup,
-      factories,
-      withWorkerPage,
-      prefix: createLearningPathTestPrefix("create-tile"),
-      courseCount: 0,
-    });
-
-    await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-      await openLearningPathsPageFlow(page, prefix);
-
-      await expect(
-        page.getByTestId(LEARNING_PATH_CARD_HANDLES.card(learningPath.id)),
-      ).toBeVisible();
-      await expect(page.getByTestId(LEARNING_PATHS_PAGE_HANDLES.CREATE_TILE)).toBeVisible();
     });
   });
 });

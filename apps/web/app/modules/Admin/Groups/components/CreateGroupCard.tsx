@@ -41,7 +41,7 @@ const CreateGroupCard = ({ form, handleSubmit, languageSelector }: CreateGroupPr
                 <FormControl>
                   <Input id="name" {...field} data-testid={GROUP_FORM_HANDLES.NAME_INPUT} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid={GROUP_FORM_HANDLES.NAME_ERROR} />
               </FormItem>
             )}
           />
@@ -61,7 +61,7 @@ const CreateGroupCard = ({ form, handleSubmit, languageSelector }: CreateGroupPr
                     data-testid={GROUP_FORM_HANDLES.CHARACTERISTIC_INPUT}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage data-testid={GROUP_FORM_HANDLES.CHARACTERISTIC_ERROR} />
               </FormItem>
             )}
           />

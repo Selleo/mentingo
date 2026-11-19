@@ -25,8 +25,11 @@ import { getBlankAnswerIds, getBlankCount } from "~/utils/blankAnswerMarkers";
 import { LEARNING_HANDLES } from "../../../../../../../e2e/data/learning/handles";
 import { getCorrectSentence } from "../correctSentence";
 
+import { BlankSelect, DRAG_ACTIVATION_DISTANCE } from "./BlankSelect";
+import { buildDndAccessibility } from "./dndAnnouncements";
 import { DndBlank } from "./DndBlank";
 import { DraggableWord } from "./DraggableWord";
+import { moveWordToBlank, WORD_BANK_BLANK_ID } from "./placeWord";
 import { SentenceBuilder } from "./SentenceBuilder";
 import { WordBank } from "./WordBank";
 
@@ -39,7 +42,6 @@ type FillInTheBlanksDndProps = {
   isCompleted?: boolean;
 };
 
-const WORD_BANK_BLANK_ID = "blank_preset";
 const DND_BLANK_ID_PREFIX = "blank:";
 
 const createDndBlankId = (answerId: string) => `${DND_BLANK_ID_PREFIX}${answerId}`;
@@ -195,7 +197,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: isCompleted ? Infinity : 0,
+        distance: isCompleted ? Infinity : DRAG_ACTIVATION_DISTANCE,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -321,6 +323,41 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
     resetDragState();
   };
 
+  const syncFormValues = (nextWords: DndWord[]) => {
+    const blankIds =
+      blankAnswerIds.length > 0
+        ? blankAnswerIds
+        : Array.from({ length: maxAnswersAmount }, (_item, index) => `${index + 1}`);
+
+    for (const blankId of blankIds) {
+      setValue(`fillInTheBlanksDnd.${question.id}.${blankId}`, null);
+    }
+
+    for (const word of nextWords) {
+      if (word.blankId !== WORD_BANK_BLANK_ID) {
+        const answerId = getAnswerIdFromDndBlankId(word.blankId);
+
+        setValue(`fillInTheBlanksDnd.${question.id}.${answerId}`, word.value);
+      }
+    }
+  };
+
+  const handleSelectWord = (blankId: string, wordKey: string | null) => {
+    if (isCompleted) return;
+
+    setWords((previous) => {
+      const wordId = wordKey ?? previous.find((word) => word.blankId === blankId)?.id ?? null;
+
+      if (!wordId) return previous;
+
+      const next = moveWordToBlank(previous, wordId, wordKey ? blankId : WORD_BANK_BLANK_ID);
+
+      syncFormValues(next);
+
+      return next;
+    });
+  };
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
@@ -398,21 +435,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
         }
       }
 
-      const blankIds =
-        blankAnswerIds.length > 0
-          ? blankAnswerIds
-          : Array.from({ length: maxAnswersAmount }, (_item, index) => `${index + 1}`);
-
-      for (const blankId of blankIds) {
-        setValue(`fillInTheBlanksDnd.${question.id}.${blankId}`, null);
-      }
-
-      for (const word of updatedWords) {
-        if (word.blankId !== WORD_BANK_BLANK_ID) {
-          const answerId = getAnswerIdFromDndBlankId(word.blankId);
-          setValue(`fillInTheBlanksDnd.${question.id}.${answerId}`, word.value);
-        }
-      }
+      syncFormValues(updatedWords);
 
       return updatedWords;
     });
@@ -429,14 +452,37 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
     ({ blankId }) => blankId === WORD_BANK_BLANK_ID,
   );
 
+  const wordItems = words
+    .filter((word) => word.value !== null)
+    .map((word) => ({ key: word.id, label: word.value ?? "" }));
+
+  const getBlankLabel = (overId: string) =>
+    overId === WORD_BANK_BLANK_ID
+      ? t("studentLessonView.other.answerBank")
+      : t("studentLessonView.other.blankLabel", {
+          current: getBlankIndex(overId),
+          total: maxAnswersAmount,
+        });
+
+  const dndAccessibility = buildDndAccessibility(t, {
+    getWordLabel: (activeId) => words.find((word) => word.id === activeId)?.value ?? "",
+    getBlankLabel,
+  });
+
   return (
     <div className="rounded-lg border bg-card p-8 text-card-foreground shadow-sm select-none touch-none">
       <div className="details uppercase text-primary-700">
         {t("studentLessonView.other.question")} {question.displayOrder}
       </div>
       <div className="h6 my-4 text-neutral-950">{t("studentLessonView.other.fillInTheBlanks")}</div>
+      {!isCompleted && (
+        <p className="body-sm mb-4 text-neutral-700">
+          {t("studentLessonView.other.fillInTheBlanksInstruction")}
+        </p>
+      )}
       <DndContext
         sensors={sensors}
+        accessibility={dndAccessibility}
         collisionDetection={collisionDetection}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
@@ -451,13 +497,30 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
           replacement={(index, answerId) => {
             const blankId = answerId ? createDndBlankId(answerId) : `${index + 1}`;
             const wordsInBlank = renderedWords.filter((word) => word.blankId === blankId);
+            const testId = answerId ? LEARNING_HANDLES.dndBlank(answerId) : blankId;
+
+            if (isCompleted) {
+              return (
+                <DndBlank
+                  blankId={blankId}
+                  testId={testId}
+                  words={wordsInBlank}
+                  isCorrect={wordsInBlank[0]?.isCorrect}
+                  isStudentAnswer={!!wordsInBlank[0]?.isStudentAnswer}
+                  minWidth={blankMinWidth}
+                />
+              );
+            }
 
             return (
-              <DndBlank
+              <BlankSelect
                 blankId={blankId}
-                words={wordsInBlank}
-                isCorrect={wordsInBlank[0]?.isCorrect}
-                isStudentAnswer={!!wordsInBlank[0]?.isStudentAnswer}
+                testId={testId}
+                label={getBlankLabel(blankId)}
+                selectedKey={wordsInBlank[0]?.id ?? null}
+                items={wordItems}
+                onSelect={(wordKey) => handleSelectWord(blankId, wordKey)}
+                dragId={wordsInBlank[0]?.id}
                 minWidth={blankMinWidth}
               />
             );

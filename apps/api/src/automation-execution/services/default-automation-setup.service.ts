@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import {
   getBuiltInTemplatePublication,
   deriveEmailTemplatePublicationUsage,
@@ -7,9 +7,15 @@ import {
 import {
   AUTOMATION_STATUSES,
   AUTOMATION_EVENT_KINDS,
+  AUTOMATION_MAPPING_TYPES,
   AUTOMATION_STEP_TYPES,
   AUTOMATION_TEMPLATE_TYPES,
+  BUILT_IN_EMAIL_TEMPLATE_KEYS,
+  DISCUSSION_EMAIL_LINK_FIELDS,
   SUPPORTED_LANGUAGES,
+  type AutomationPlaceholderMappings,
+  type BuiltInEmailTemplateKey,
+  ACCOUNT_SETTINGS_PATH,
   type LocalizedText,
 } from "@repo/shared";
 import { isEqual } from "lodash";
@@ -20,7 +26,11 @@ import {
   getAutomationMappingIssues,
 } from "src/automations/mappers/automation-mapping";
 import { AutomationDefinitionStorageService } from "src/automations/services/automation-definition-storage.service";
+import { DatabasePg } from "src/common";
+import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { EmailTemplateValidationService } from "src/email-templates/services/email-template-validation.service";
+import { dbAls } from "src/storage/db/db-als.store";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { BUILT_IN_AUTOMATIONS } from "../catalog";
@@ -29,7 +39,8 @@ import { DefaultAutomationSetupRepository } from "../repositories/default-automa
 import { acquireAutomationLifecycleLock } from "../utils/acquire-automation-lifecycle-lock";
 
 import type { AutomationRecord } from "src/automations/automation.types";
-import type { DatabasePg } from "src/common";
+
+const DISCUSSION_EMAIL_LINK_PLACEHOLDERS: string[] = Object.values(DISCUSSION_EMAIL_LINK_FIELDS);
 
 @Injectable()
 export class DefaultAutomationSetupService {
@@ -38,6 +49,7 @@ export class DefaultAutomationSetupService {
     private readonly automationDefinitionStorageService: AutomationDefinitionStorageService,
     private readonly defaultAutomationSetupRepository: DefaultAutomationSetupRepository,
     private readonly emailTemplateValidationService: EmailTemplateValidationService,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {}
 
   async ensureDefaultAutomationsForAllTenants(): Promise<void> {
@@ -48,6 +60,7 @@ export class DefaultAutomationSetupService {
           transaction,
         );
         await this.ensureTenantDefaultAutomations(transaction);
+        await this.addMissingDiscussionEmailLinkMappings(transaction);
         await this.validateTenantBuiltInAutomationDependencies(transaction);
       }),
     );
@@ -126,6 +139,60 @@ export class DefaultAutomationSetupService {
         transaction,
       );
     }
+  }
+
+  private async addMissingDiscussionEmailLinkMappings(transaction: DatabasePg): Promise<void> {
+    const steps =
+      await this.defaultAutomationSetupRepository.listBuiltInTemplateEmailSteps(transaction);
+
+    let accountSettingsUrl: string | undefined;
+
+    for (const step of steps) {
+      const missingLinks = this.findBuiltInTemplatePlaceholderNames(step.templateKey).filter(
+        (name) => DISCUSSION_EMAIL_LINK_PLACEHOLDERS.includes(name) && !step.mappings[name],
+      );
+
+      if (!missingLinks.length) {
+        continue;
+      }
+
+      const eventFields = step.triggerEventKind
+        ? (findAutomationEventDefinition(step.triggerEventKind)?.fields ?? [])
+        : [];
+
+      const mappings: AutomationPlaceholderMappings = {};
+
+      for (const name of missingLinks) {
+        if (eventFields.some((field) => field.key === name)) {
+          mappings[name] = { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: name };
+          continue;
+        }
+
+        accountSettingsUrl ??= await this.resolveAccountSettingsUrl();
+        mappings[name] = { type: AUTOMATION_MAPPING_TYPES.STATIC, value: accountSettingsUrl };
+      }
+
+      await this.defaultAutomationSetupRepository.addEmailStepMappings(step, mappings, transaction);
+    }
+  }
+
+  private findBuiltInTemplatePlaceholderNames(templateKey: string): string[] {
+    const isBuiltInTemplateKey = (key: string): key is BuiltInEmailTemplateKey =>
+      Object.values<string>(BUILT_IN_EMAIL_TEMPLATE_KEYS).includes(key);
+
+    return isBuiltInTemplateKey(templateKey)
+      ? getBuiltInTemplatePublication(templateKey).placeholders.map(({ name }) => name)
+      : [];
+  }
+
+  private async resolveAccountSettingsUrl(): Promise<string> {
+    const tenantId = dbAls.getStore()?.tenantId;
+
+    if (!tenantId) {
+      throw new Error("Automation setup requires an originating tenant");
+    }
+
+    return `${await resolveTenantOrigin(this.dbAdmin, tenantId)}${ACCOUNT_SETTINGS_PATH}`;
   }
 
   private async validateTenantBuiltInAutomationDependencies(

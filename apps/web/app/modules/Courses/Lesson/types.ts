@@ -55,6 +55,7 @@ export const LESSON_PROGRESS_STATUSES = {
   COMPLETED: "completed",
   BLOCKED: "blocked",
   AWAITING_REVIEW: "awaiting_review",
+  FAILED: "failed",
 } as const;
 
 export type ProgressStatus =

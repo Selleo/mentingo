@@ -2,11 +2,16 @@ import {
   EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT,
   getBuiltInTemplatePublication,
 } from "@repo/email-templates";
-import { eq } from "drizzle-orm";
+import {
+  AUTOMATION_EVENT_KINDS,
+  AUTOMATION_MAPPING_TYPES,
+  AUTOMATION_NODE_KINDS,
+} from "@repo/shared";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 import { DefaultAutomationSetupService } from "src/automation-execution/services/default-automation-setup.service";
 import { EmailTemplateRenderingService } from "src/email-templates/services/email-template-rendering.service";
-import { automations, emailTemplates } from "src/storage/schema";
+import { automationSteps, automations, emailTemplates } from "src/storage/schema";
 
 import { AutomationValidationAndSimulationService } from "../services/automation-validation-and-simulation.service";
 
@@ -14,6 +19,7 @@ import { getFirstEmailStep, setupAutomationTestContext } from "./automation-test
 
 import type { AutomationTestContext } from "./automation-test.helpers";
 import type { AutomationWorkflowTemplateResponse } from "../schema/automation.schema";
+import type { AutomationEventKind } from "@repo/shared";
 
 describe("Automation upgrade compatibility (e2e)", () => {
   let t: AutomationTestContext;
@@ -104,6 +110,106 @@ describe("Automation upgrade compatibility (e2e)", () => {
       });
     },
   );
+
+  it("starts with automations stored before the discussion emails had unsubscribe links", async () => {
+    const setup = t.app.get(DefaultAutomationSetupService);
+    const stepsOf = (
+      eventKind: AutomationEventKind,
+      nodeKind: (typeof AUTOMATION_NODE_KINDS)[keyof typeof AUTOMATION_NODE_KINDS],
+    ) =>
+      and(
+        inArray(
+          automationSteps.automationId,
+          t.db
+            .select({ id: automations.id })
+            .from(automations)
+            .where(eq(automations.builtInKey, eventKind)),
+        ),
+        eq(automationSteps.nodeKind, nodeKind),
+      );
+    const emailStepsOf = (eventKind: AutomationEventKind) =>
+      stepsOf(eventKind, AUTOMATION_NODE_KINDS.ACTION);
+    const mappingsOf = async (eventKind: AutomationEventKind) => {
+      const steps = await t.runAsTenant(t.defaultTenantId, () =>
+        t.db
+          .select({
+            mappings: sql<Record<string, unknown>>`${automationSteps.configuration}->'mappings'`,
+          })
+          .from(automationSteps)
+          .where(emailStepsOf(eventKind)),
+      );
+
+      return steps.map(({ mappings }) => mappings);
+    };
+    const staticMapping = (value: string) => ({ type: AUTOMATION_MAPPING_TYPES.STATIC, value });
+    const eventField = (field: string) => ({ type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field });
+    const setConfiguration = (path: string, value: unknown) =>
+      sql`jsonb_set(${automationSteps.configuration}, ${path}, ${JSON.stringify(
+        value,
+      )}::text::jsonb)`;
+
+    await t.runAsTenant(t.defaultTenantId, async () => {
+      await setup.ensureTenantDefaultAutomations();
+      await t.db
+        .update(automationSteps)
+        .set({
+          configuration: sql`${automationSteps.configuration} #- '{mappings,unsubscribe_link}' #- '{mappings,unfollow_link}'`,
+        })
+        .where(eq(automationSteps.nodeKind, AUTOMATION_NODE_KINDS.ACTION));
+
+      await t.db
+        .update(automationSteps)
+        .set({
+          configuration: setConfiguration(
+            "{mappings,course_link}",
+            staticMapping("https://academy.example"),
+          ),
+        })
+        .where(emailStepsOf(AUTOMATION_EVENT_KINDS.COURSE_CHAT_MENTION));
+
+      await t.db
+        .update(automationSteps)
+        .set({ configuration: setConfiguration("{name}", AUTOMATION_EVENT_KINDS.ANNOUNCEMENT) })
+        .where(stepsOf(AUTOMATION_EVENT_KINDS.FORUM_MENTION, AUTOMATION_NODE_KINDS.TRIGGER));
+      await t.db
+        .update(automationSteps)
+        .set({
+          configuration: setConfiguration("{mappings}", {
+            authorFullName: staticMapping("Mentingo"),
+            topic_title: staticMapping("News"),
+            message: staticMapping("See the latest announcement."),
+            topic_link: staticMapping("https://academy.example/notifications"),
+          }),
+        })
+        .where(emailStepsOf(AUTOMATION_EVENT_KINDS.FORUM_MENTION));
+    });
+
+    await setup.ensureDefaultAutomationsForAllTenants();
+
+    expect(await mappingsOf(AUTOMATION_EVENT_KINDS.COURSE_CHAT_MENTION)).toEqual(
+      Array(2).fill(
+        expect.objectContaining({
+          course_link: staticMapping("https://academy.example"),
+          unsubscribe_link: eventField("unsubscribe_link"),
+        }),
+      ),
+    );
+    expect(await mappingsOf(AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY)).toEqual(
+      Array(2).fill(
+        expect.objectContaining({
+          unfollow_link: eventField("unfollow_link"),
+          unsubscribe_link: eventField("unsubscribe_link"),
+        }),
+      ),
+    );
+    expect(await mappingsOf(AUTOMATION_EVENT_KINDS.FORUM_MENTION)).toEqual(
+      Array(2).fill(
+        expect.objectContaining({
+          unsubscribe_link: staticMapping("https://tenant.local/settings"),
+        }),
+      ),
+    );
+  });
 
   it("applies and enables an account email with an unfinished secondary translation", async () => {
     const publication = getBuiltInTemplatePublication("password_recovery");

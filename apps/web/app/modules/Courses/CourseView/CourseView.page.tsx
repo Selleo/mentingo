@@ -11,6 +11,7 @@ import { useUserSettingsSuspense } from "~/api/queries/useUserSettings";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
+import { usePageTitle } from "~/hooks/usePageTitle";
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import CourseOverview from "~/modules/Courses/CourseView/CourseOverview/CourseOverview";
@@ -142,6 +143,8 @@ function CourseContent({
   const [openGenerateTranslationModal, setOpenGenerateTranslationModal] = useState(false);
 
   const { data: course } = useCourseAvailabilitySuspense(id, language);
+
+  usePageTitle([course?.title]);
 
   const handleCourseLanguageChange = useCallback(
     (nextLanguage: SupportedLanguages) => {

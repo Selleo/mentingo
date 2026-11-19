@@ -102,6 +102,7 @@ import type {
   ResetDashboardSettingsBody,
   UpdateGlobalColorSchemaBody,
   UpdateLeaderboardSettingsBody,
+  UpdateNotificationPreferencesBody,
 } from "./schemas/update-settings.schema";
 import type { RegistrationFormFieldDbModel } from "./types/registration-form.types";
 import type {
@@ -1040,6 +1041,23 @@ export class SettingsService {
       });
 
     return newUserSettings;
+  }
+
+  public async updateNotificationPreferences(
+    userId: UUIDType,
+    preferences: UpdateNotificationPreferencesBody,
+  ): Promise<SettingsJSONContentSchema> {
+    const [updatedRow] = await this.db
+      .update(settings)
+      .set({ settings: sql`${settings.settings} || ${JSON.stringify(preferences)}::text::jsonb` })
+      .where(eq(settings.userId, userId))
+      .returning({
+        settings: sql<UserSettingsJSONContentSchema>`${settings.settings} - 'dashboard'`,
+      });
+
+    if (!updatedRow) throw new NotFoundException(USER_SETTINGS_NOT_FOUND_MESSAGE);
+
+    return updatedRow.settings;
   }
 
   public async updateGlobalUnregisteredUserCoursesAccessibility(

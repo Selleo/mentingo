@@ -149,7 +149,7 @@ describe("useCourseAuthoringSocket", () => {
     );
     act(() => listeners.get("authoring.resync")?.({ sessionId: "session-1" }));
 
-    await waitFor(() => expect(result.current).toBe("offline"));
+    await waitFor(() => expect(result.current).toBe("permission_revoked"));
     expect(onRefresh).not.toHaveBeenCalled();
   });
 
@@ -397,7 +397,399 @@ describe("useCourseAuthoringSocket", () => {
       expect(onRefresh).toHaveBeenCalledTimes(2);
       expect(onSnapshot).toHaveBeenCalledWith(expect.objectContaining({ snapshotSequence: 184 }));
       const joinCalls = socket.emit.mock.calls.filter(([name]) => name === "join:course-authoring");
-      expect(joinCalls.at(-1)?.[1]).toMatchObject({ afterSequence: 184 });
+      expect(joinCalls).toHaveLength(1);
+      await act(() => vi.advanceTimersByTimeAsync(60_000));
+      expect(onRefresh).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("refreshes active work without rejoining a healthy stream", async () => {
+    vi.useFakeTimers();
+    try {
+      const { listeners, socket } = createSocket();
+      mocks.acquireSocket.mockReturnValue(socket);
+      const running = {
+        ...session(),
+        turns: [
+          {
+            requestId: "request-1",
+            messageId: "message-1",
+            status: "running",
+            taskIds: [],
+            parts: [],
+            firstSequence: 1,
+            updatedSequence: 1,
+          },
+        ],
+      } as AuthoringSession;
+      const onRefresh = vi.fn().mockResolvedValue(running);
+      const onSnapshot = vi.fn();
+      renderHook(() =>
+        useCourseAuthoringSocket({ courseId: "course-1", session: running, onSnapshot, onRefresh }),
+      );
+      act(() => listeners.get("authoring.snapshot")?.(running));
+      await act(() => vi.advanceTimersByTimeAsync(ACTIVE_TURN_RECONCILE_DELAY_MS));
+      expect(onRefresh).toHaveBeenCalledOnce();
+      expect(
+        socket.emit.mock.calls.filter(([name]) => name === "join:course-authoring"),
+      ).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("keeps recovering an idle session after the fast retry budget is exhausted", async () => {
+    vi.useFakeTimers();
+    try {
+      const { listeners, socket } = createSocket();
+      mocks.acquireSocket.mockReturnValue(socket);
+      const onSnapshot = vi.fn();
+      const onRefresh = vi
+        .fn()
+        .mockRejectedValueOnce(new Error("network unavailable"))
+        .mockRejectedValueOnce(new Error("network unavailable"))
+        .mockRejectedValueOnce(new Error("network unavailable"))
+        .mockRejectedValueOnce(new Error("network unavailable"))
+        .mockResolvedValue(session());
+      const { result, unmount } = renderHook(() =>
+        useCourseAuthoringSocket({
+          courseId: "course-1",
+          session: session(),
+          onSnapshot,
+          onRefresh,
+        }),
+      );
+      act(() => listeners.get("authoring.resync")?.({ sessionId: "session-1" }));
+      await act(() => vi.advanceTimersByTimeAsync(4_000));
+      expect(onRefresh).toHaveBeenCalledTimes(4);
+      expect(result.current).toBe("offline");
+      await act(() => vi.advanceTimersByTimeAsync(30_000));
+      expect(onRefresh).toHaveBeenCalledTimes(5);
+      act(() => listeners.get("authoring.snapshot")?.(session()));
+      expect(result.current).toBe("live");
+      unmount();
+      await act(() => vi.advanceTimersByTimeAsync(60_000));
+      expect(onRefresh).toHaveBeenCalledTimes(5);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("recovers when a connected socket never acknowledges joining the session", async () => {
+    vi.useFakeTimers();
+    try {
+      const { socket } = createSocket();
+      mocks.acquireSocket.mockReturnValue(socket);
+      const onRefresh = vi.fn().mockResolvedValue(session());
+      const { unmount } = renderHook(() =>
+        useCourseAuthoringSocket({
+          courseId: "course-1",
+          session: session(),
+          onSnapshot: vi.fn(),
+          onRefresh,
+        }),
+      );
+      await act(() => vi.advanceTimersByTimeAsync(10_000));
+      expect(onRefresh).toHaveBeenCalledOnce();
+      unmount();
+      await act(() => vi.advanceTimersByTimeAsync(30_000));
+      expect(onRefresh).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("ignores late snapshots and events after confirmed permission revocation", () => {
+    const { listeners, socket } = createSocket();
+    mocks.acquireSocket.mockReturnValue(socket);
+    const onSnapshot = vi.fn();
+    const onEvent = vi.fn();
+    const { result } = renderHook(() =>
+      useCourseAuthoringSocket({
+        courseId: "course-1",
+        session: session(),
+        onSnapshot,
+        onEvent,
+        onRefresh: vi.fn(),
+      }),
+    );
+    act(() =>
+      listeners.get("authoring.error")?.({ sessionId: "session-1", code: "permission_revoked" }),
+    );
+    act(() => listeners.get("authoring.snapshot")?.(session()));
+    act(() => listeners.get("authoring.event")?.(event(2)));
+    expect(onSnapshot).not.toHaveBeenCalled();
+    expect(onEvent).not.toHaveBeenCalled();
+    expect(result.current).toBe("permission_revoked");
+  });
+
+  it("restores the same session across repeated two-minute disconnects and recovers completion", async () => {
+    vi.useFakeTimers();
+    try {
+      const { listeners, socket } = createSocket();
+      mocks.acquireSocket.mockReturnValue(socket);
+      const completed = {
+        ...session(),
+        snapshotSequence: 4,
+        turns: [
+          {
+            requestId: "request-1",
+            messageId: "message-1",
+            status: "completed",
+            taskIds: [],
+            parts: [],
+            firstSequence: 2,
+            updatedSequence: 4,
+          },
+        ],
+      } as AuthoringSession;
+      const onSnapshot = vi.fn();
+      const onRefresh = vi.fn().mockResolvedValue(completed);
+      const { unmount } = renderHook(() =>
+        useCourseAuthoringSocket({
+          courseId: "course-1",
+          session: session(),
+          onSnapshot,
+          onRefresh,
+        }),
+      );
+      act(() => listeners.get("authoring.snapshot")?.(session()));
+      for (let cycle = 0; cycle < 3; cycle += 1) {
+        await act(() => vi.advanceTimersByTimeAsync(120_000));
+        socket.connected = false;
+        act(() => listeners.get("disconnect")?.("transport close"));
+        await act(async () => {
+          await Promise.resolve();
+        });
+        socket.connected = true;
+        act(() => listeners.get("connect")?.());
+        await act(async () => {
+          await Promise.resolve();
+        });
+        act(() => listeners.get("authoring.snapshot")?.(completed));
+      }
+      expect(onRefresh).toHaveBeenCalledTimes(3);
+      expect(onSnapshot).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sessionId: "session-1",
+          turns: [expect.objectContaining({ status: "completed" })],
+        }),
+      );
+      for (const [name, payload] of socket.emit.mock.calls) {
+        if (name === "join:course-authoring")
+          expect(payload).toMatchObject({ sessionId: "session-1" });
+      }
+      unmount();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("times out stalled snapshots and retries without losing the session", async () => {
+    vi.useFakeTimers();
+    try {
+      const { listeners, socket } = createSocket();
+      mocks.acquireSocket.mockReturnValue(socket);
+      const onRefresh = vi.fn().mockImplementation(() => new Promise<AuthoringSession>(() => {}));
+      const { result, unmount } = renderHook(() =>
+        useCourseAuthoringSocket({
+          courseId: "course-1",
+          session: session(),
+          onSnapshot: vi.fn(),
+          onRefresh,
+        }),
+      );
+      act(() => listeners.get("authoring.resync")?.({ sessionId: "session-1" }));
+      await act(() => vi.advanceTimersByTimeAsync(44_000));
+      expect(result.current).toBe("offline");
+      expect(onRefresh).toHaveBeenCalledTimes(4);
+      for (const [signal] of onRefresh.mock.calls)
+        expect((signal as AbortSignal).aborted).toBe(true);
+      onRefresh.mockResolvedValue(session());
+      await act(() => vi.advanceTimersByTimeAsync(30_000));
+      act(() => listeners.get("authoring.snapshot")?.(session()));
+      expect(result.current).toBe("live");
+      unmount();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("arms silence recovery when a REST update first reveals running work", async () => {
+    vi.useFakeTimers();
+    try {
+      const { listeners, socket } = createSocket();
+      mocks.acquireSocket.mockReturnValue(socket);
+      const onSnapshot = vi.fn();
+      const onRefresh = vi.fn().mockResolvedValue(session());
+      const { rerender, unmount } = renderHook(
+        ({ current }) =>
+          useCourseAuthoringSocket({
+            courseId: "course-1",
+            session: current,
+            onSnapshot,
+            onRefresh,
+          }),
+        { initialProps: { current: session() } },
+      );
+      act(() => listeners.get("authoring.snapshot")?.(session()));
+      rerender({
+        current: {
+          ...session(),
+          turns: [
+            {
+              requestId: "request-1",
+              messageId: "message-1",
+              status: "running",
+              taskIds: [],
+              parts: [],
+              firstSequence: 1,
+              updatedSequence: 1,
+            },
+          ],
+        } as AuthoringSession,
+      });
+      await act(() => vi.advanceTimersByTimeAsync(ACTIVE_TURN_RECONCILE_DELAY_MS));
+      expect(onRefresh).toHaveBeenCalledOnce();
+      unmount();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not restart a healthy subscription when callbacks change", () => {
+    const { socket } = createSocket();
+    mocks.acquireSocket.mockReturnValue(socket);
+    const { rerender } = renderHook(() =>
+      useCourseAuthoringSocket({
+        courseId: "course-1",
+        session: session(),
+        onSnapshot: vi.fn(),
+        onRefresh: vi.fn(),
+      }),
+    );
+    rerender();
+    expect(mocks.acquireSocket).toHaveBeenCalledOnce();
+    expect(mocks.releaseSocket).not.toHaveBeenCalled();
+  });
+
+  it("retries manually within the same session and cancels the old snapshot read", async () => {
+    const { listeners, socket } = createSocket();
+    mocks.acquireSocket.mockReturnValue(socket);
+    const onSnapshot = vi.fn();
+    const onRefresh = vi.fn().mockImplementation(() => new Promise<AuthoringSession>(() => {}));
+    const { rerender, unmount } = renderHook(
+      ({ reconnectAttempt }) =>
+        useCourseAuthoringSocket({
+          courseId: "course-1",
+          session: session(),
+          onSnapshot,
+          onRefresh,
+          reconnectAttempt,
+        }),
+      { initialProps: { reconnectAttempt: 0 } },
+    );
+    act(() => listeners.get("authoring.resync")?.({ sessionId: "session-1" }));
+    const signal = onRefresh.mock.calls[0]?.[0] as AbortSignal;
+    rerender({ reconnectAttempt: 1 });
+    expect(signal.aborted).toBe(true);
+    expect(
+      socket.emit.mock.calls.filter(([name]) => name === "join:course-authoring").at(-1)?.[1],
+    ).toMatchObject({ sessionId: "session-1" });
+    unmount();
+    await act(async () => {
+      await Promise.resolve();
+    });
+  });
+
+  it.each([404, 403])(
+    "stops automatic retries after a confirmed snapshot HTTP %s",
+    async (status) => {
+      vi.useFakeTimers();
+      try {
+        const { listeners, socket } = createSocket();
+        mocks.acquireSocket.mockReturnValue(socket);
+        const onRefresh = vi
+          .fn()
+          .mockRejectedValue({ isAxiosError: true, response: { status, data: {} } });
+        const onSessionUnavailable = vi.fn();
+        const { result, unmount } = renderHook(() =>
+          useCourseAuthoringSocket({
+            courseId: "course-1",
+            session: session(),
+            onSnapshot: vi.fn(),
+            onRefresh,
+            onSessionUnavailable,
+          }),
+        );
+        act(() => listeners.get("authoring.resync")?.({ sessionId: "session-1" }));
+        await act(() => vi.advanceTimersByTimeAsync(120_000));
+        expect(onRefresh).toHaveBeenCalledOnce();
+        expect(result.current).toBe(status === 404 ? "session_unavailable" : "permission_revoked");
+        expect(onSessionUnavailable).toHaveBeenCalledTimes(status === 404 ? 1 : 0);
+        unmount();
+      } finally {
+        vi.useRealTimers();
+      }
+    },
+  );
+  it("rejoins after a disconnect coalesced behind a superseded watchdog snapshot", async () => {
+    vi.useFakeTimers();
+    try {
+      const { listeners, socket } = createSocket();
+      mocks.acquireSocket.mockReturnValue(socket);
+      const running = {
+        ...session(),
+        turns: [
+          {
+            requestId: "request-1",
+            messageId: "message-1",
+            status: "running",
+            taskIds: [],
+            parts: [],
+            firstSequence: 1,
+            updatedSequence: 1,
+          },
+        ],
+      } as AuthoringSession;
+      let resolveOld: (snapshot: AuthoringSession) => void = () => undefined;
+      const completed = { ...session(), snapshotSequence: 2 };
+      const onRefresh = vi
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise<AuthoringSession>((resolve) => {
+              resolveOld = resolve;
+            }),
+        )
+        .mockResolvedValue(completed);
+      const { result, unmount } = renderHook(() =>
+        useCourseAuthoringSocket({
+          courseId: "course-1",
+          session: running,
+          onSnapshot: vi.fn(),
+          onRefresh,
+        }),
+      );
+      act(() => listeners.get("authoring.snapshot")?.(running));
+      await act(() => vi.advanceTimersByTimeAsync(ACTIVE_TURN_RECONCILE_DELAY_MS));
+      expect(onRefresh).toHaveBeenCalledOnce();
+      act(() => listeners.get("authoring.event")?.(event(2)));
+      socket.connected = false;
+      act(() => listeners.get("disconnect")?.());
+      socket.connected = true;
+      act(() => listeners.get("connect")?.());
+      await act(async () => {
+        resolveOld(running);
+        await Promise.resolve();
+      });
+      expect(onRefresh).toHaveBeenCalledTimes(2);
+      expect(
+        socket.emit.mock.calls.filter(([name]) => name === "join:course-authoring").at(-1)?.[1],
+      ).toMatchObject({ afterSequence: 2 });
+      act(() => listeners.get("authoring.snapshot")?.(completed));
+      expect(result.current).toBe("live");
+      unmount();
     } finally {
       vi.useRealTimers();
     }

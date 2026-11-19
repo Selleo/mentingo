@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { TENANT_STATUSES } from "@repo/shared";
 import {
   and,
   asc,
@@ -9,6 +10,7 @@ import {
   gte,
   ilike,
   inArray,
+  isNotNull,
   isNull,
   lte,
   or,
@@ -194,6 +196,7 @@ export class TenantsRepository {
         name: input.name,
         host: input.host,
         status: input.status,
+        accessEndsAt: input.accessEndsAt,
       })
       .returning();
     return tenant;
@@ -207,6 +210,23 @@ export class TenantsRepository {
       .returning();
 
     return tenant ?? null;
+  }
+
+  /** Deactivates every active tenant whose access end has passed; returns how many were deactivated. */
+  async deactivateTenantsWithEndedAccess(now: string): Promise<number> {
+    const deactivatedTenants = await this.dbBase
+      .update(tenants)
+      .set({ status: TENANT_STATUSES.INACTIVE })
+      .where(
+        and(
+          eq(tenants.status, TENANT_STATUSES.ACTIVE),
+          isNotNull(tenants.accessEndsAt),
+          lte(tenants.accessEndsAt, now),
+        ),
+      )
+      .returning({ id: tenants.id });
+
+    return deactivatedTenants.length;
   }
 
   async deleteById(id: string): Promise<Tenant | null> {

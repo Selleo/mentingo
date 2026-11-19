@@ -3,9 +3,9 @@ import { useEffect } from "react";
 
 import {
   invalidateCourseChatMessageCreated,
+  invalidateMessageReactions,
   updateDeletedMessageInCache,
   updateCourseChatUserPresence,
-  updateMessageReactionsInCache,
 } from "~/api/queries/course-chat/useCourseChat";
 import { acquireSocket, releaseSocket } from "~/api/socket";
 
@@ -55,7 +55,7 @@ export function useCourseChatSocket({
       if (payload.courseId === courseId) onMentioned?.(payload);
     };
     const handleMessageReactionsUpdated = (payload: ToggleMessageReactionResponse["data"]) => {
-      if (payload.courseId === courseId) updateMessageReactionsInCache(payload);
+      if (payload.courseId === courseId) invalidateMessageReactions(payload);
     };
     const handleMessageDeleted = (payload: DeleteMessageResponse["data"]) => {
       if (payload.courseId === courseId) updateDeletedMessageInCache(payload);

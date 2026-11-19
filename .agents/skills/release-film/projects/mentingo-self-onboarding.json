@@ -9767,6 +9767,42 @@
           ]
         },
         {
+          "id": "follow-forum-topic",
+          "title": "Follow a forum topic",
+          "description": "Follow a forum topic in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [
+            "forum"
+          ],
+          "pageKeys": [
+            "forum"
+          ],
+          "specPaths": [
+            "docs/specs/forum-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Forum/**",
+            "apps/api/src/forum/**",
+            "apps/api/src/course-chat/**",
+            "apps/web/e2e/specs/forum/**"
+          ],
+          "goal": "Follow a forum topic.",
+          "preconditions": [
+            "Use localized synthetic examples and permitted demo accounts in the isolated recording tenant.",
+            "Forum is enabled; the account has forum.read; a demo topic started by another user exists."
+          ],
+          "actions": [
+            "Open a synthetic general topic started by another user.",
+            "Use the Follow button next to the topic title.",
+            "Use the button again to stop following the topic."
+          ],
+          "outcomes": [
+            "The button shows whether the topic is followed; replies in a followed topic are announced in notifications."
+          ]
+        },
+        {
           "id": "follow-course-forum-thread",
           "title": "Continue a course discussion from the forum",
           "description": "Continue a course discussion from the forum in Mentingo.",
@@ -9891,7 +9927,8 @@
           "description": "Start a topic and join the discussion in Mentingo.",
           "flowIds": [
             "create-forum-topic",
-            "reply-forum-topic"
+            "reply-forum-topic",
+            "follow-forum-topic"
           ]
         },
         {

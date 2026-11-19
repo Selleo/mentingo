@@ -45,6 +45,8 @@ export const TENANT_FORM_HANDLES = {
   NAME_INPUT: "tenant-form-name-input",
   HOST_INPUT: "tenant-form-host-input",
   STATUS_SELECT: "tenant-form-status-select",
+  ACCESS_ENDS_AT_INPUT: "tenant-form-access-ends-at-input",
+  ACCESS_ENDS_AT_CLEAR: "tenant-form-access-ends-at-clear",
   statusOption: (status: "active" | "inactive") => `tenant-form-status-option-${status}`,
   ADMIN_FIRST_NAME_INPUT: "tenant-form-admin-first-name-input",
   ADMIN_LAST_NAME_INPUT: "tenant-form-admin-last-name-input",
@@ -61,4 +63,5 @@ export const TENANT_PAGE_HANDLES = {
   PAGE: "tenant-page",
   HEADING: "tenant-page-heading",
   LOADING: "tenant-page-loading",
+  STATUS_BADGE: "tenant-page-status-badge",
 } as const;

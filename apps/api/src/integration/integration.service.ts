@@ -10,7 +10,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { PERMISSIONS, TENANT_STATUSES } from "@repo/shared";
+import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS, TENANT_STATUSES } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { hasPermission } from "src/common/permissions/permission.utils";
@@ -20,17 +20,25 @@ import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { TenantsService } from "src/super-admin/tenants.service";
 
+import {
+  COMPETENCIES_PLUGIN_ENV_NAMES,
+  INTEGRATION_KEY_ROLE_SLUG,
+  PHISHING_PLUGIN_ENV_NAMES,
+} from "./integration.constants";
 import { IntegrationRepository } from "./integration.repository";
 import { isAllowedPluginOrigin, toPluginOrigin } from "./utils/integration-plugin-origin.utils";
 import { assertCanManageTenants } from "./utils/integration-tenant-access.utils";
+import { withIsoAccessEndsAt } from "./utils/integration-tenant-response.utils";
 
 import type {
-  CurrentAdminKeyData,
   IntegrationKeyTenantContext,
   IntegrationTrainingResultsData,
   IntegrationTrainingResultsQuery,
-  RotateAdminKeyData,
 } from "./integration.types";
+import type {
+  CreateIntegrationKeyResponse,
+  IntegrationKeysResponse,
+} from "./schemas/integration-key.schema";
 import type {
   IntegrationCompetenciesConnection,
   IntegrationPluginDiscovery,
@@ -66,33 +74,74 @@ export class IntegrationService {
     this.keySecret = Buffer.from(process.env.MASTER_KEY, "base64");
   }
 
-  async getCurrentAdminKey(userId: string): Promise<CurrentAdminKeyData> {
-    const key = await this.integrationRepository.getCurrentActiveKeyByCreator(userId);
-
-    return {
-      key,
-    };
+  async getKeysForTenant(tenantId: string): Promise<IntegrationKeysResponse> {
+    return this.integrationRepository.findActiveKeysByTenant(tenantId);
   }
 
-  async rotateAdminKey(actor: CurrentUserType): Promise<RotateAdminKeyData> {
+  async createKeyForTenant(
+    tenantId: string,
+    name: string,
+    creator: CurrentUserType,
+  ): Promise<CreateIntegrationKeyResponse> {
     const rawKey = this.buildRawApiKey();
-    const keyPrefix = this.extractPrefix(rawKey);
-    const keyHash = this.hashApiKey(rawKey);
 
-    const createdKey = await this.integrationRepository.rotateAdminKey({
-      userId: actor.userId,
-      tenantId: actor.tenantId,
-      keyPrefix,
-      keyHash,
-    });
+    const createdKey = await this.tenantDbRunner.runWithTenant(tenantId, () =>
+      this.integrationRepository.createKey({
+        tenantId,
+        createdByUserId: creator.userId,
+        name: name.trim(),
+        keyPrefix: this.extractPrefix(rawKey),
+        keyHash: this.hashApiKey(rawKey),
+      }),
+    );
 
     if (!createdKey)
-      throw new InternalServerErrorException("integrationApiKey.errors.rotateFailed");
+      throw new InternalServerErrorException("integrationApiKey.errors.createFailed");
 
     return {
       key: rawKey,
-      metadata: createdKey,
+      metadata: { ...createdKey, createdBy: { id: creator.userId, email: creator.email } },
     };
+  }
+
+  async revokeKeyForTenant(tenantId: string, keyId: string): Promise<void> {
+    const revokedKey = await this.tenantDbRunner.runWithTenant(tenantId, () =>
+      this.integrationRepository.revokeKey({ tenantId, keyId }),
+    );
+
+    if (!revokedKey) throw new NotFoundException("integrationApiKey.errors.notFound");
+  }
+
+  async getKeysForManagedTenant(
+    tenantId: string,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationKeysResponse> {
+    await this.assertCanManageExistingTenant(tenantId, actor, keyTenant);
+
+    return this.getKeysForTenant(tenantId);
+  }
+
+  async createKeyForManagedTenant(
+    tenantId: string,
+    name: string,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<CreateIntegrationKeyResponse> {
+    await this.assertCanManageExistingTenant(tenantId, actor, keyTenant);
+
+    return this.createKeyForTenant(tenantId, name, actor);
+  }
+
+  async revokeKeyForManagedTenant(
+    tenantId: string,
+    keyId: string,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<void> {
+    await this.assertCanManageExistingTenant(tenantId, actor, keyTenant);
+
+    await this.revokeKeyForTenant(tenantId, keyId);
   }
 
   async authenticateApiKey(apiKey: string): Promise<{
@@ -114,15 +163,6 @@ export class IntegrationService {
 
     if (key.userDeletedAt) throw new ForbiddenException("integrationApiKey.errors.ownerInactive");
 
-    const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(
-      key.userId,
-      this.dbAdmin,
-    );
-
-    if (!permissions.includes(PERMISSIONS.INTEGRATION_API_USE)) {
-      throw new ForbiddenException("integrationApiKey.errors.ownerNotAdmin");
-    }
-
     const { keyId, keyTenantId, keyTenantIsManaging, userId, userEmail } = key;
 
     return {
@@ -132,8 +172,8 @@ export class IntegrationService {
       user: {
         userId,
         email: userEmail,
-        roleSlugs,
-        permissions,
+        roleSlugs: [INTEGRATION_KEY_ROLE_SLUG],
+        permissions: SYSTEM_ROLE_PERMISSIONS[INTEGRATION_KEY_ROLE_SLUG],
         tenantId: keyTenantId,
       },
     };
@@ -143,26 +183,20 @@ export class IntegrationService {
     await this.integrationRepository.markKeyAsUsed(keyId);
   }
 
-  async getAllTenants() {
-    return this.integrationRepository.getAllTenants();
-  }
-
   async getTenantsForActor(actor: CurrentUserType) {
     const currentTenant = await this.integrationRepository.getTenantById(actor.tenantId);
 
     if (!currentTenant) throw new UnauthorizedException("integrationApiKey.errors.invalidApiKey");
 
     if (!currentTenant.isManaging) {
-      return [
-        {
-          id: currentTenant.id,
-          name: currentTenant.name,
-          host: currentTenant.host,
-        },
-      ];
+      const { id, name, host, status, accessEndsAt } = currentTenant;
+
+      return [withIsoAccessEndsAt({ id, name, host, status, accessEndsAt })];
     }
 
-    return this.integrationRepository.getAllTenants();
+    const allTenants = await this.integrationRepository.getAllTenants();
+
+    return allTenants.map(withIsoAccessEndsAt);
   }
 
   async createTenantForIntegration(
@@ -174,9 +208,11 @@ export class IntegrationService {
 
     const keyTenantActor = { ...actor, tenantId: keyTenant.tenantId };
 
-    return this.tenantsService.createTenant(input, keyTenantActor, {
+    const createdTenant = await this.tenantsService.createTenant(input, keyTenantActor, {
       actorLookupTenantId: keyTenant.tenantId,
     });
+
+    return withIsoAccessEndsAt(createdTenant);
   }
 
   async deactivateTenantForIntegration(
@@ -186,9 +222,11 @@ export class IntegrationService {
   ): Promise<IntegrationTenantLifecycleResponse> {
     assertCanManageTenants(actor, keyTenant);
 
-    return this.tenantsService.updateTenantById(tenantId, {
+    const deactivatedTenant = await this.tenantsService.updateTenantById(tenantId, {
       status: TENANT_STATUSES.INACTIVE,
     });
+
+    return withIsoAccessEndsAt(deactivatedTenant);
   }
 
   async deleteTenantForIntegration(
@@ -209,7 +247,9 @@ export class IntegrationService {
   ): Promise<IntegrationTenantLifecycleResponse> {
     assertCanManageTenants(actor, keyTenant);
 
-    return this.tenantsService.updateTenantById(tenantId, input);
+    const updatedTenant = await this.tenantsService.updateTenantById(tenantId, input);
+
+    return withIsoAccessEndsAt(updatedTenant);
   }
 
   async updateTenantApiKeysForIntegration(
@@ -264,6 +304,18 @@ export class IntegrationService {
     ]);
     await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
       this.envService.persistEnvValues(values, { ...actor, tenantId }),
+    );
+    return { tenantId };
+  }
+
+  async clearPhishingConnection(
+    tenantId: string,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationPluginConfigured> {
+    await this.assertCanManageExistingTenant(tenantId, actor, keyTenant);
+    await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
+      this.envService.removeEnvValues([...PHISHING_PLUGIN_ENV_NAMES], { ...actor, tenantId }),
     );
     return { tenantId };
   }
@@ -326,6 +378,18 @@ export class IntegrationService {
     return { tenantId };
   }
 
+  async clearCompetenciesConnection(
+    tenantId: string,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationPluginConfigured> {
+    await this.assertCanManageExistingTenant(tenantId, actor, keyTenant);
+    await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
+      this.envService.removeEnvValues([...COMPETENCIES_PLUGIN_ENV_NAMES], { ...actor, tenantId }),
+    );
+    return { tenantId };
+  }
+
   async competenciesConnectionStatus(
     tenantId: string,
     actor: CurrentUserType,
@@ -357,6 +421,17 @@ export class IntegrationService {
         return { tenantId, reachable: false, enabled: false };
       }
     });
+  }
+
+  private async assertCanManageExistingTenant(
+    tenantId: string,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ) {
+    assertCanManageTenants(actor, keyTenant);
+
+    const tenant = await this.integrationRepository.getTenantById(tenantId);
+    if (!tenant) throw new NotFoundException("superAdminTenants.error.notFound");
   }
 
   private buildRawApiKey() {

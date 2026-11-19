@@ -60,7 +60,12 @@ export default function ArticleDetailsPage() {
     return (
       <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_ARTICLES_ACCESS}>
         <PageWrapper>
-          <div className="py-10 text-center text-neutral-700">{t("articlesView.notFound")}</div>
+          <div
+            className="py-10 text-center text-neutral-700"
+            data-testid={ARTICLE_DETAILS_PAGE_HANDLES.NOT_FOUND}
+          >
+            {t("articlesView.notFound")}
+          </div>
         </PageWrapper>
       </ContentAccessGuard>
     );

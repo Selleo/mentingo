@@ -95,6 +95,7 @@ export const createAnnouncementFactory = (db: DatabasePg) => {
       emailTemplate: ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT,
       sourceType: ANNOUNCEMENT_SOURCE_TYPES.MANUAL,
       sourceId: null,
+      linkPath: null,
       baseLanguage: SUPPORTED_LANGUAGES.EN,
       availableLocales: [SUPPORTED_LANGUAGES.EN],
       deletedAt: null,

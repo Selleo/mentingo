@@ -51,9 +51,9 @@ test("admin loads the next development paths page when scrolling to the end", as
     await expect(
       page.getByTestId(LEARNING_PATH_CARD_HANDLES.card(lastLearningPath.id)),
     ).toBeVisible();
-    await expect(
-      page.locator(`[data-testid^="${LEARNING_PATH_CARD_HANDLES.CARD_PREFIX}"]`),
-    ).toHaveCount(learningPathCount);
+    await expect(page.getByTestId(LEARNING_PATH_CARD_HANDLES.CARD_PATTERN)).toHaveCount(
+      learningPathCount,
+    );
     await expect(page.getByTestId(LEARNING_PATHS_PAGE_HANDLES.NEXT_PAGE_LOADER)).toBeHidden();
     await expect(page.getByTestId(LEARNING_PATHS_PAGE_HANDLES.CREATE_TILE)).toBeVisible();
   });

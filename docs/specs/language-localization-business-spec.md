@@ -26,6 +26,7 @@ The main workflow is simple for learners: choose a preferred interface language 
 - Lock structural curriculum edits to the base language while allowing translation edits in other languages.
 - Keep localized admin objects such as groups and categories usable in filters and selection lists.
 - Show course category filters and category-based course lists in the active interface language when translations exist.
+- Give screen reader users button names, image descriptions, and video player controls in the active interface language.
 
 ## End-User Value
 
@@ -49,6 +50,8 @@ Curriculum has an extra safeguard: chapter and lesson structure is controlled fr
 - User language persistence uses the settings API and `PERMISSIONS.SETTINGS_UPDATE_SELF`.
 - Many content endpoints require an explicit `language` parameter to return localized fields.
 - Course and category list screens pass the active UI language into category/course queries so localized database entries can be displayed and filtered consistently.
+- Accessible names (`aria-label`, `alt`, `title`, sr-only text) come from the web translation files; a web lint rule rejects hard-coded text in these attributes.
+- The video player loads the Video.js language file for the active interface language and switches when the language changes; Lithuanian has no Video.js language file, so its player controls stay in English.
 - The course enrollment screen passes the active UI language to group queries so translated group names appear when assigning groups to a course, even when the course content uses another language.
 
 ## Test Evidence
@@ -56,5 +59,6 @@ Curriculum has an extra safeguard: chapter and lesson structure is controlled fr
 - Web E2E coverage verifies that users can change interface language and keep it after reload.
 - Web E2E coverage verifies localized auth copy for visitor-facing pages.
 - Curriculum E2E coverage verifies that non-base-language curriculum structure is locked while translations can still be edited.
+- Web unit coverage verifies the video player follows the interface language and that translated accessible names render in Polish.
 - API E2E coverage verifies user settings language updates and invalid language-setting rejection.
 - API E2E coverage verifies category and group list localization by requested language; web query coverage verifies category requests include the selected language.

@@ -53,7 +53,12 @@ import {
   REPORTS_SEED_QUIZ_SCORE,
   REPORTS_SEED_RANDOM_SEED,
 } from "./reports-seed-data";
-import { addEmailSuffix, assignSystemRoleToUser, getTenantEmailSuffix } from "./seed-helpers";
+import {
+  addEmailSuffix,
+  assignSystemRoleToUser,
+  getSeedTenantOrigins,
+  getTenantEmailSuffix,
+} from "./seed-helpers";
 
 import type { ReportsSeedCourse, ReportsSeedOutcome } from "./seed.types";
 import type { DatabasePg, UUIDType } from "../common";
@@ -77,7 +82,7 @@ async function seedReports() {
   faker.seed(REPORTS_SEED_RANDOM_SEED);
 
   try {
-    for (const origin of getTenantOrigins()) {
+    for (const origin of getSeedTenantOrigins()) {
       await seedTenant(origin);
     }
   } finally {
@@ -433,16 +438,6 @@ function toPathProgress(isCompleted: boolean, isStarted: boolean) {
     .with({ isCompleted: true }, () => LEARNING_PATH_PROGRESS_STATUSES.COMPLETED)
     .with({ isStarted: true }, () => LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS)
     .otherwise(() => LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED);
-}
-
-function getTenantOrigins(): string[] {
-  const devTenantOrigins = (process.env.DEV_TENANT_ORIGINS || "")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-  if (devTenantOrigins.length) return devTenantOrigins;
-
-  return [process.env.CORS_ORIGIN].filter((origin): origin is string => Boolean(origin));
 }
 
 if (require.main === module) {

@@ -5,6 +5,8 @@ import { match } from "ts-pattern";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
+import { REPORTS_HANDLES } from "../../../../e2e/data/reports/handles";
+
 import type { LucideIcon } from "lucide-react";
 import type { GetReportExportResponse } from "~/api/generated-api";
 
@@ -88,6 +90,7 @@ export function ReportExportStatus({
             size="sm"
             variant="outline"
             className="gap-2 bg-white"
+            data-testid={REPORTS_HANDLES.EXPORT_DOWNLOAD}
             disabled={isDownloading}
             onClick={onDownload}
           >

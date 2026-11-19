@@ -21,6 +21,7 @@ import {
   LogIn,
   Mail,
   Megaphone,
+  MessagesSquare,
   UserCheck,
   UserPlus,
   Video,
@@ -57,6 +58,8 @@ const TRIGGER_ICONS: Record<AutomationEventKind, LucideIcon> = {
   [AUTOMATION_EVENT_KINDS.ANNOUNCEMENT]: Megaphone,
   [AUTOMATION_EVENT_KINDS.QUIZ_ATTEMPT_GRADED]: ListChecks,
   [AUTOMATION_EVENT_KINDS.QUIZ_GRADING_DIGEST]: ClipboardList,
+  [AUTOMATION_EVENT_KINDS.FORUM_MENTION]: AtSign,
+  [AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY]: MessagesSquare,
 };
 
 export function AutomationNodeIcon({ eventKind }: { eventKind?: AutomationEventKind | null }) {

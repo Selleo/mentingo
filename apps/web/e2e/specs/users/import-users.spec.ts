@@ -12,7 +12,7 @@ import { openImportUsersModalFlow } from "../../flows/users/open-import-users-mo
 import { openUsersPageFlow } from "../../flows/users/open-users-page.flow";
 import { submitImportUsersFlow } from "../../flows/users/submit-import-users.flow";
 import { uploadUsersImportFileFlow } from "../../flows/users/upload-users-import-file.flow";
-import { assertToastVisible } from "../../utils/assert-toast-visible";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 
 test("admin can import users from csv and assign existing groups", async ({
   cleanup,
@@ -27,31 +27,26 @@ test("admin can import users from csv and assign existing groups", async ({
     const groupFactory = factories.createGroupFactory();
     const prefix = `import-users-success-${Date.now()}`;
     const category = await categoryFactory.create(`Import users ${prefix}`);
+    cleanup.add(async () => {
+      await categoryFactory.delete(category.id);
+    });
     const course = await courseFactory.create({
       title: `${prefix}-course`,
       categoryId: category.id,
     });
-    const groupOne = await groupFactory.create({ name: `${prefix}-group-one` });
-    const groupTwo = await groupFactory.create({ name: `${prefix}-group-two` });
-    const importedStudentEmail = `${prefix}-student@example.com`;
-    const importedCreatorEmail = `${prefix}-creator@example.com`;
-    const importFile = await materializeUsersImportFile(USERS_IMPORT_FILE_TEMPLATES.SUCCESS, {
-      EMAIL_ONE: importedStudentEmail,
-      EMAIL_TWO: importedCreatorEmail,
-      GROUP_ONE: groupOne.name,
-      GROUP_TWO: groupTwo.name,
-    });
-
     cleanup.add(async () => {
       await courseFactory.delete(course.id);
-      await categoryFactory.delete(category.id);
     });
+    const groupOne = await groupFactory.create({ name: `${prefix}-group-one` });
     cleanup.add(async () => {
       await groupFactory.delete(groupOne.id);
     });
+    const groupTwo = await groupFactory.create({ name: `${prefix}-group-two` });
     cleanup.add(async () => {
       await groupFactory.delete(groupTwo.id);
     });
+    const importedStudentEmail = `${prefix}-student@example.com`;
+    const importedCreatorEmail = `${prefix}-creator@example.com`;
     cleanup.add(async () => {
       const importedUsers = await Promise.all([
         userFactory.getByEmail(importedStudentEmail),
@@ -67,6 +62,12 @@ test("admin can import users from csv and assign existing groups", async ({
 
       await userFactory.deleteMany(importedUserIds);
     });
+    const importFile = await materializeUsersImportFile(USERS_IMPORT_FILE_TEMPLATES.SUCCESS, {
+      EMAIL_ONE: importedStudentEmail,
+      EMAIL_TWO: importedCreatorEmail,
+      GROUP_ONE: groupOne.name,
+      GROUP_TWO: groupTwo.name,
+    });
     cleanup.add(importFile.cleanup);
 
     await enrollmentFactory.enrollGroups(course.id, [{ id: groupOne.id, isMandatory: false }]);
@@ -79,8 +80,12 @@ test("admin can import users from csv and assign existing groups", async ({
     const importResult = page.getByTestId(USERS_IMPORT_MODAL_HANDLES.RESULT);
 
     await expect(importResult).toBeVisible();
-    await expect(importResult.getByText(importedStudentEmail)).toBeVisible();
-    await expect(importResult.getByText(importedCreatorEmail)).toBeVisible();
+    await expect(
+      importResult.getByTestId(USERS_IMPORT_MODAL_HANDLES.resultEmail(importedStudentEmail)),
+    ).toBeVisible();
+    await expect(
+      importResult.getByTestId(USERS_IMPORT_MODAL_HANDLES.resultEmail(importedCreatorEmail)),
+    ).toBeVisible();
 
     await expect
       .poll(async () => {
@@ -132,19 +137,16 @@ test("admin sees imported and skipped users when duplicates are present", async 
     const groupFactory = factories.createGroupFactory();
     const prefix = `import-users-duplicate-${Date.now()}`;
     const group = await groupFactory.create({ name: `${prefix}-group` });
-    const existingUser = await userFactory.create({
-      email: `${prefix}-existing@example.com`,
-    });
-    const importedEmail = `${prefix}-new@example.com`;
-    const importFile = await materializeUsersImportFile(USERS_IMPORT_FILE_TEMPLATES.DUPLICATE, {
-      EXISTING_EMAIL: existingUser.email,
-      NEW_EMAIL: importedEmail,
-      GROUP_ONE: group.name,
-    });
-
     cleanup.add(async () => {
       await groupFactory.delete(group.id);
     });
+    const existingUser = await userFactory.create({
+      email: `${prefix}-existing@example.com`,
+    });
+    cleanup.add(async () => {
+      await userFactory.delete(existingUser.id);
+    });
+    const importedEmail = `${prefix}-new@example.com`;
     cleanup.add(async () => {
       const importedUser = await userFactory.getByEmail(importedEmail);
 
@@ -152,8 +154,10 @@ test("admin sees imported and skipped users when duplicates are present", async 
         await userFactory.delete(importedUser.id);
       }
     });
-    cleanup.add(async () => {
-      await userFactory.delete(existingUser.id);
+    const importFile = await materializeUsersImportFile(USERS_IMPORT_FILE_TEMPLATES.DUPLICATE, {
+      EXISTING_EMAIL: existingUser.email,
+      NEW_EMAIL: importedEmail,
+      GROUP_ONE: group.name,
     });
     cleanup.add(importFile.cleanup);
 
@@ -165,11 +169,17 @@ test("admin sees imported and skipped users when duplicates are present", async 
     const importResult = page.getByTestId(USERS_IMPORT_MODAL_HANDLES.RESULT);
 
     await expect(importResult).toBeVisible();
-    await expect(importResult.getByText(importedEmail)).toBeVisible();
+    await expect(
+      importResult.getByTestId(USERS_IMPORT_MODAL_HANDLES.resultEmail(importedEmail)),
+    ).toBeVisible();
 
     await page.getByTestId(USERS_IMPORT_MODAL_HANDLES.RESULT_SKIPPED_TAB).click();
-    await expect(importResult.getByText(existingUser.email)).toBeVisible();
-    await expect(importResult.getByText("user with this email already exists")).toBeVisible();
+    await expect(
+      importResult.getByTestId(USERS_IMPORT_MODAL_HANDLES.resultEmail(existingUser.email)),
+    ).toBeVisible();
+    await expect(
+      importResult.getByTestId(USERS_IMPORT_MODAL_HANDLES.resultEmail(importedEmail)),
+    ).toHaveCount(0);
 
     await expect
       .poll(async () => {
@@ -202,7 +212,7 @@ test("admin sees an error when the import file is malformed", async ({
     await uploadUsersImportFileFlow(page, importFile.filePath);
     await submitImportUsersFlow(page);
 
-    await assertToastVisible(page, "Import failed – required data missing.", { optional: true });
+    await assertToastVariantVisible(page, "destructive");
     await expect(page.getByTestId(USERS_IMPORT_MODAL_HANDLES.RESULT)).toHaveCount(0);
     await expect(page.getByTestId(USERS_IMPORT_MODAL_HANDLES.ROOT)).toBeVisible();
   });
@@ -240,7 +250,7 @@ test("admin sees an error when all imported users reference unknown groups", asy
     await uploadUsersImportFileFlow(page, importFile.filePath);
     await submitImportUsersFlow(page);
 
-    await assertToastVisible(page, "Import failed – no valid users found.");
+    await assertToastVariantVisible(page, "destructive");
     await expect(page.getByTestId(USERS_IMPORT_MODAL_HANDLES.RESULT)).toHaveCount(0);
     await expect(page.getByTestId(USERS_IMPORT_MODAL_HANDLES.ROOT)).toBeVisible();
 

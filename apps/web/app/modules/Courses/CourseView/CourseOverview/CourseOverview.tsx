@@ -359,7 +359,10 @@ export default function CourseOverview({
               >
                 <Settings className="size-4 text-primary-700" />
 
-                <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
+                <span
+                  data-testid={COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON_LABEL}
+                  className="hidden text-sm font-semibold text-neutral-950 sm:inline"
+                >
                   {t("modernCourseView.overview.courseSettings")}
                 </span>
               </Button>
@@ -373,7 +376,10 @@ export default function CourseOverview({
                 >
                   <Upload className="size-4 text-primary-700" />
 
-                  <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
+                  <span
+                    data-testid={COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON_LABEL}
+                    className="hidden text-sm font-semibold text-neutral-950 sm:inline"
+                  >
                     {t("modernCourseView.overview.editMedia")}
                   </span>
                 </Button>

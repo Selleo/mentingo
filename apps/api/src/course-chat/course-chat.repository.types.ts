@@ -46,6 +46,17 @@ export type CourseChatMentionEmailRecipient = {
   firstName: string;
   lastName?: string;
   tenantId: UUIDType;
+  mentionEmailsEnabled: boolean;
+};
+
+export type DiscussionEmailRecipient = {
+  id: UUIDType;
+  email: string;
+  firstName: string;
+  lastName: string;
+  language: string | null;
+  replyEmailsEnabled: boolean;
+  mentionEmailsEnabled: boolean;
 };
 
 export type CourseChatEmailContext = {
@@ -56,6 +67,7 @@ export type CourseChatMessageContext = {
   id: UUIDType;
   threadId: UUIDType;
   courseId: UUIDType;
+  tenantId: UUIDType;
   userId?: UUIDType;
   parentMessageId: UUIDType | null;
   deletedAt?: string | null;

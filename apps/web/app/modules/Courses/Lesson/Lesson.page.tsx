@@ -10,6 +10,7 @@ import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
+import { usePageTitle } from "~/hooks/usePageTitle";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import Loader from "~/modules/common/Loader/Loader";
 import {
@@ -21,6 +22,8 @@ import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
+
+import { CONTENT_ACCESS_HANDLES } from "../../../../e2e/data/auth/handles";
 
 import type { MetaFunction } from "@remix-run/react";
 import type { GetCourseResponse } from "~/api/generated-api";
@@ -54,6 +57,10 @@ export default function LessonPage() {
   const [error, setError] = useState(false);
   const [freshLessonRequestKey, setFreshLessonRequestKey] = useState<string | null>(null);
 
+  // Focus the lesson heading only after moving to another lesson: not on the initial page load
+  // and not when the same lesson remounts (e.g. a new learning state after a quiz retake).
+  const [focusedLessonId, setFocusedLessonId] = useState(lessonId);
+
   const lessonRequestKey = `${lessonId}:${language}:${user?.id ?? ""}`;
 
   const {
@@ -62,6 +69,8 @@ export default function LessonPage() {
     isError: lessonError,
   } = useLesson(lessonId, language, user?.id || "");
   const { data: course } = useCourse(courseId, language);
+
+  usePageTitle([lesson?.id === lessonId ? lesson.title : undefined, course?.title]);
 
   useEffect(() => {
     if (course && !course.availableLocales.includes(language)) setLanguage(course.baseLanguage);
@@ -103,6 +112,7 @@ export default function LessonPage() {
     if (!user) {
       return (
         <ErrorPage
+          testId={CONTENT_ACCESS_HANDLES.LESSON_LOGIN_REQUIRED}
           iconName="LogIn"
           title={t("studentLessonView.error.loginTitle")}
           description={t("studentLessonView.error.loginDescription")}
@@ -115,6 +125,7 @@ export default function LessonPage() {
 
     return (
       <ErrorPage
+        testId={CONTENT_ACCESS_HANDLES.LESSON_NOT_AUTHORIZED}
         title={t("studentLessonView.error.notAuthorizedTitle")}
         description={t("studentLessonView.error.notAuthorizedDescription")}
         actionLabel={t("studentLessonView.error.goBackToCourse")}
@@ -238,7 +249,7 @@ export default function LessonPage() {
         <div className="flex w-full max-w-full flex-col gap-6">
           <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px] lg:items-start">
             <div className="flex w-full min-w-0 flex-col divide-y rounded-lg bg-white">
-              <div className="flex items-center p-6 sm:px-10 3xl:px-8">
+              <div className="flex items-center px-6 py-4 sm:p-6 sm:px-10 3xl:px-8">
                 <p className="h6 text-neutral-950">
                   <span className="text-neutral-800">
                     {t("studentLessonView.other.chapter")} {currentChapter?.displayOrder}:
@@ -248,6 +259,8 @@ export default function LessonPage() {
               </div>
               <LessonContent
                 showPreviewNotice
+                focusTitleOnMount={focusedLessonId !== lessonId}
+                onTitleFocused={() => setFocusedLessonId(lessonId)}
                 key={`${lesson.id}:${lesson.learningStateId ?? "current"}`}
                 lesson={lesson}
                 course={course}

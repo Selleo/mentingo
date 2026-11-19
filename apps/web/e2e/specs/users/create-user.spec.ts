@@ -7,7 +7,7 @@ import { expect, test } from "../../fixtures/test.fixture";
 import { fillCreateUserFormFlow } from "../../flows/users/fill-create-user-form.flow";
 import { openCreateUserPageFlow } from "../../flows/users/open-create-user-page.flow";
 import { submitCreateUserFormFlow } from "../../flows/users/submit-create-user-form.flow";
-import { assertToastVisible } from "../../utils/assert-toast-visible";
+import { assertToastVariantVisible } from "../../utils/assert-toast-visible";
 
 test("admin can create a user from the create page", async ({
   cleanup,
@@ -17,6 +17,12 @@ test("admin can create a user from the create page", async ({
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const userFactory = factories.createUserFactory();
     const email = `create-user-${Date.now()}@example.com`;
+
+    cleanup.add(async () => {
+      const createdUser = await userFactory.getByEmail(email);
+
+      if (createdUser) await userFactory.delete(createdUser.id);
+    });
 
     await openCreateUserPageFlow(page);
     await fillCreateUserFormFlow(page, {
@@ -28,22 +34,12 @@ test("admin can create a user from the create page", async ({
     });
     await submitCreateUserFormFlow(page);
 
-    await expect
-      .poll(async () => {
-        const createdUser = await userFactory.getByEmail(email);
-        return createdUser?.id ?? null;
-      })
-      .not.toBeNull();
-
+    await expect.poll(async () => (await userFactory.getByEmail(email))?.id).toBeTruthy();
     const createdUser = await userFactory.getByEmail(email);
 
-    cleanup.add(async () => {
-      if (createdUser) {
-        await userFactory.delete(createdUser.id);
-      }
-    });
+    if (!createdUser) throw new Error(`Expected user ${email} to exist`);
 
-    await expect(page).toHaveURL(new RegExp(`/admin/users/${createdUser?.id}$`));
+    await expect(page).toHaveURL(new RegExp(`/admin/users/${createdUser.id}$`));
     await expect(page.getByTestId(USER_PAGE_HANDLES.EMAIL_INPUT)).toHaveValue(email);
   });
 });
@@ -90,6 +86,6 @@ test("admin sees a conflict when creating a duplicate email", async ({
     await submitCreateUserFormFlow(page);
 
     await expect(page).toHaveURL(/\/admin\/users\/new$/);
-    await assertToastVisible(page, "User with this email already exists");
+    await assertToastVariantVisible(page, "destructive");
   });
 });

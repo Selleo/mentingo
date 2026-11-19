@@ -165,6 +165,7 @@ import type {
 import type { CourseDurationEstimatesByLanguage } from "src/courses/duration/course-duration.types";
 import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
 import type { CourseAuthorMetadata } from "src/courses/types/course.types";
+import type { DiscussionReplyDigestEntry } from "src/discussion-notifications/discussion-notifications.types";
 import type { HostedVideoStatus } from "src/file/hosted-video.types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 import type {
@@ -1431,6 +1432,51 @@ export const courseChatMessageReactions = pgTable(
   })),
 );
 
+export const discussionReplyDigests = pgTable(
+  "discussion_reply_digests",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    threadId: uuid("thread_id")
+      .references(() => courseChatThreads.id, { onDelete: "cascade" })
+      .notNull(),
+    sendAfter: timestampWithTimezone({ name: "send_after" }).notNull(),
+    replies: nativeJsonb<DiscussionReplyDigestEntry[]>("replies").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("discussion_reply_digests", (table) => ({
+    userThreadUniqueIdx: uniqueIndex("discussion_reply_digests_user_id_thread_id_unique_idx").on(
+      table.userId,
+      table.threadId,
+    ),
+    sendAfterIdx: index("discussion_reply_digests_send_after_idx").on(table.sendAfter),
+  })),
+);
+
+export const discussionThreadFollowers = pgTable(
+  "discussion_thread_followers",
+  {
+    ...id,
+    ...timestamps,
+    threadId: uuid("thread_id")
+      .references(() => courseChatThreads.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("discussion_thread_followers", (table) => ({
+    threadUserUniqueIdx: uniqueIndex("discussion_thread_followers_thread_id_user_id_unique_idx").on(
+      table.threadId,
+      table.userId,
+    ),
+  })),
+);
+
 export const studentCourses = pgTable(
   "student_courses",
   {
@@ -2081,6 +2127,7 @@ export const announcements = pgTable(
       .notNull()
       .default(ANNOUNCEMENT_SOURCE_TYPES.MANUAL),
     sourceId: uuid("source_id"),
+    linkPath: text("link_path"),
     baseLanguage,
     availableLocales,
     deletedAt: timestampWithTimezone({ name: "deleted_at" }),
@@ -2209,6 +2256,7 @@ export const integrationApiKeys = pgTable(
   {
     ...id,
     ...timestamps,
+    name: text("name").notNull(),
     keyPrefix: text("key_prefix").notNull(),
     keyHash: text("key_hash").notNull(),
     createdByUserId: uuid("created_by_user_id")

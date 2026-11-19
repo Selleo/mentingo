@@ -44,12 +44,14 @@ import { attachAuthoringWorkProgress } from "./authoringWorkProgress";
 import { AuthoringActivityRail } from "./components/AuthoringActivityRail";
 import { AuthoringAssistantMessages } from "./components/AuthoringAssistantMessages";
 import { AuthoringBriefPanel, freshSessionPolicy } from "./components/AuthoringBriefPanel";
+import { AuthoringConnectionNotice } from "./components/AuthoringConnectionNotice";
 import { CourseGenerationInteraction } from "./components/CourseGenerationInteraction";
 import { ProposalGroup } from "./components/ProposalGroupCard";
 import { ProposalReview } from "./components/ProposalReview";
 import {
   AUTHORING_APPLICATION_STATUS,
   AUTHORING_APPLY_STATE,
+  AUTHORING_CONNECTION_STATE,
   AUTHORING_TASK_KIND,
   AUTHORING_PART_KIND,
   AUTHORING_PART_STATUS,
@@ -411,6 +413,7 @@ export const CourseGenerationSession = ({
     },
     [id, refreshAfterConfirmedApply, sessionId],
   );
+  const [reconnectAttempt, setReconnectAttempt] = useState(0);
   const connection = useCourseAuthoringSocket({
     courseId: id,
     session,
@@ -418,7 +421,18 @@ export const CourseGenerationSession = ({
     onEvent: handleEvent,
     onRefresh: refetchSnapshot,
     onSessionUnavailable,
+    reconnectAttempt,
   });
+  let displayedConnection = connection;
+  if (sessionQuery.isError) {
+    if (isUnavailableAuthoringSession(sessionQuery.error))
+      displayedConnection = AUTHORING_CONNECTION_STATE.SESSION_UNAVAILABLE;
+    else if (isAxiosError(sessionQuery.error) && sessionQuery.error.response?.status === 403)
+      displayedConnection = AUTHORING_CONNECTION_STATE.PERMISSION_REVOKED;
+  }
+  const accessUnavailable =
+    displayedConnection === AUTHORING_CONNECTION_STATE.PERMISSION_REVOKED ||
+    displayedConnection === AUTHORING_CONNECTION_STATE.SESSION_UNAVAILABLE;
   const projection = useMemo(
     () => projectWorkspaceRecords(visibleRecords, session?.tasks ?? []),
     [visibleRecords, session?.tasks],
@@ -1281,7 +1295,7 @@ export const CourseGenerationSession = ({
     }
   };
 
-  if (sessionQuery.isError || contextQuery.isError) {
+  if (!accessUnavailable && (sessionQuery.isError || contextQuery.isError)) {
     return (
       <PageWrapper>
         <ErrorState
@@ -1678,15 +1692,15 @@ export const CourseGenerationSession = ({
         )}
       </header>
 
-      {connection !== "live" && session && (
-        <p role="status" className="mx-auto mb-4 max-w-3xl text-sm text-neutral-500">
-          {t("courseAuthoring.conversation.reconnecting")}
-        </p>
+      {(session || accessUnavailable) && (
+        <AuthoringConnectionNotice
+          connection={displayedConnection}
+          onReconnect={() => setReconnectAttempt((attempt) => attempt + 1)}
+        />
       )}
 
-      {!session || !context ? (
-        <LoadingState />
-      ) : (
+      {!accessUnavailable && (!session || !context) && <LoadingState />}
+      {!accessUnavailable && session && context && (
         <CourseGenerationInteraction
           hasExistingContent={context.chapters.length > 0}
           hasWork={

@@ -39,6 +39,8 @@ export const AUTOMATION_EVENT_KINDS = {
   LIVE_TRAINING_ENDED: "live_training_ended",
   QUIZ_ATTEMPT_GRADED: "quiz_attempt_graded",
   QUIZ_GRADING_DIGEST: "quiz_grading_digest",
+  FORUM_MENTION: "forum_mention",
+  DISCUSSION_REPLY: "discussion_reply",
 } as const;
 
 /** Stable resource keys, deliberately separate from the notification catalog. */
@@ -74,6 +76,8 @@ export const BUILT_IN_EMAIL_TEMPLATE_KEYS = {
   LIVE_TRAINING_ENDED: "live_training_ended",
   QUIZ_ATTEMPT_GRADED: "quiz_attempt_graded",
   QUIZ_GRADING_DIGEST: "quiz_grading_digest",
+  FORUM_MENTION: "forum_mention",
+  DISCUSSION_REPLY: "discussion_reply",
 } as const;
 
 export const AUTOMATION_RUN_STATUSES = {

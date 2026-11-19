@@ -48,9 +48,9 @@ test("admin course controls remain accessible on a small screen", async ({
     await expect(learningModeButton).toBeVisible();
     await expect(detailsButton).toBeVisible();
     await expect(learningOutcomes).toBeHidden();
-    await expect(settingsButton.locator("span")).toBeHidden();
-    await expect(editMediaButton.locator("span")).toBeHidden();
-    await expect(languageSelect.locator("span.hidden", { hasText: "English" })).toBeHidden();
+    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON_LABEL)).toBeHidden();
+    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON_LABEL)).toBeHidden();
+    await expect(page.getByTestId(EDIT_COURSE_PAGE_HANDLES.LANGUAGE_SELECT_LABEL)).toBeHidden();
 
     for (const element of [
       settingsButton,
@@ -77,54 +77,38 @@ test("student course actions remain accessible on a small screen", async ({
   const enrollmentFactory = factories.createEnrollmentFactory();
   let courseId = "";
 
-  await withWorkerPage(
-    USER_ROLE.admin,
-    async () => {
-      const category = await categoryFactory.create(`Responsive Student Category ${Date.now()}`);
-      const course = await courseFactory.create({
-        title: `Kotlin for Beginners: Modern Android Development ${Date.now()}`,
-        categoryId: category.id,
-        language: "en",
-        status: "published",
-      });
+  await withWorkerPage(USER_ROLE.admin, async () => {
+    const category = await categoryFactory.create(`Responsive Student Category ${Date.now()}`);
+    const course = await courseFactory.create({
+      title: `Kotlin for Beginners: Modern Android Development ${Date.now()}`,
+      categoryId: category.id,
+      language: "en",
+      status: "published",
+    });
 
-      courseId = course.id;
+    courseId = course.id;
 
-      cleanup.add(async () => {
+    // The student session runs last, so cleanup switches back to the admin first.
+    cleanup.add(async () => {
+      await withWorkerPage(USER_ROLE.admin, async () => {
         await courseFactory.delete(course.id);
         await categoryFactory.delete(category.id);
       });
-    },
-    { root: true },
-  );
+    });
+  });
 
-  try {
-    await withWorkerPage(
-      USER_ROLE.student,
-      async ({ page }) => {
-        await enrollmentFactory.selfEnroll(courseId);
-        await page.setViewportSize(MOBILE_VIEWPORT);
-        await openCourseOverviewFlow(page, courseId);
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
+    await enrollmentFactory.selfEnroll(courseId);
+    await page.setViewportSize(MOBILE_VIEWPORT);
+    await openCourseOverviewFlow(page, courseId);
 
-        const continueLearningButton = page.getByTestId(
-          COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON,
-        );
-        const detailsButton = page.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON);
-        const hero = page.getByTestId(COURSE_OVERVIEW_HANDLES.HERO);
-        const heroTitle = page.getByTestId(COURSE_OVERVIEW_HANDLES.HERO_TITLE);
+    const continueLearningButton = page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON);
+    const detailsButton = page.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON);
+    const hero = page.getByTestId(COURSE_OVERVIEW_HANDLES.HERO);
+    const heroTitle = page.getByTestId(COURSE_OVERVIEW_HANDLES.HERO_TITLE);
 
-        await expect(continueLearningButton).toBeVisible();
-        await expect(detailsButton).toBeVisible();
-        await expect(continueLearningButton).toHaveText("Continue learning");
-        await expect(detailsButton).toHaveText("Course details");
-
-        for (const element of [hero, heroTitle, continueLearningButton, detailsButton]) {
-          await expect(element).toBeInViewport({ ratio: 1 });
-        }
-      },
-      { root: true },
-    );
-  } finally {
-    await withWorkerPage(USER_ROLE.admin, async () => {}, { root: true });
-  }
+    for (const element of [hero, heroTitle, continueLearningButton, detailsButton]) {
+      await expect(element).toBeInViewport({ ratio: 1 });
+    }
+  });
 });

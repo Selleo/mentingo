@@ -1751,6 +1751,69 @@
       "when": 1794847269217,
       "tag": "0249_enable_assessment_feedback_ranges_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 250,
+      "version": "7",
+      "when": 1794924508378,
+      "tag": "0250_add_integration_api_key_name_and_tenant_access_ends_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 251,
+      "version": "7",
+      "when": 1794924515634,
+      "tag": "0251_backfill_integration_api_key_names",
+      "breakpoints": true
+    },
+    {
+      "idx": 252,
+      "version": "7",
+      "when": 1794924528389,
+      "tag": "0252_require_integration_api_key_name",
+      "breakpoints": true
+    },
+    {
+      "idx": 253,
+      "version": "7",
+      "when": 1795009857876,
+      "tag": "0253_add_announcement_link_path",
+      "breakpoints": true
+    },
+    {
+      "idx": 254,
+      "version": "7",
+      "when": 1795019247518,
+      "tag": "0254_add_discussion_reply_digests",
+      "breakpoints": true
+    },
+    {
+      "idx": 255,
+      "version": "7",
+      "when": 1795019251324,
+      "tag": "0255_enable_discussion_reply_digests_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 256,
+      "version": "7",
+      "when": 1795021819625,
+      "tag": "0256_add_discussion_thread_followers",
+      "breakpoints": true
+    },
+    {
+      "idx": 257,
+      "version": "7",
+      "when": 1795021825812,
+      "tag": "0257_backfill_discussion_thread_followers",
+      "breakpoints": true
+    },
+    {
+      "idx": 258,
+      "version": "7",
+      "when": 1795021830114,
+      "tag": "0258_enable_discussion_thread_followers_rls",
+      "breakpoints": true
     }
   ]
 }

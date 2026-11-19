@@ -347,7 +347,9 @@
       "live_training_reminder": "La formation en direct commence dans 15 minutes",
       "live_training_ended": "Formation en direct terminée",
       "quiz_attempt_graded": "Quiz évalué par un évaluateur",
-      "quiz_grading_digest": "Nouvelles réponses en attente d’évaluation (quotidien)"
+      "quiz_grading_digest": "Nouvelles réponses en attente d’évaluation (quotidien)",
+      "forum_mention": "Utilisateur mentionné dans un sujet du forum",
+      "discussion_reply": "Nouvelles réponses dans une discussion (regroupées)"
     },
     "errors": {
       "incompleteButton": "Saisissez le libellé du bouton et son URL.",
@@ -1103,6 +1105,7 @@
     "notifications": "Centre de notifications",
     "promotionCodes": "Codes promotionnels",
     "manage": "Gérer",
+    "skipToContent": "Aller au contenu",
     "ariaLabels": {
       "goToAvailableCourses": "Aller aux cours disponibles",
       "collapseSidebar": "Réduire la barre latérale",
@@ -2446,7 +2449,8 @@
         "forum_read": "Consultez le forum.",
         "forum_topic_create": "Créez des sujets sur le forum.",
         "forum_post_create": "Répondez aux sujets du forum.",
-        "forum_post_delete": "Supprimez n'importe quel message du forum."
+        "forum_post_delete": "Supprimez n'importe quel message du forum.",
+        "forum_post_react": "Réagissez aux messages du forum."
       }
     },
     "dropdown": {
@@ -4171,7 +4175,18 @@
       "scale_1_5": "Question sur l'échelle (1-5)",
       "matching": "Associez chaque élément à sa paire.",
       "noMatchesAvailable": "Aucune correspondance n’est encore disponible pour cette question.",
-      "correctMatch": "Bonne correspondance :"
+      "correctMatch": "Bonne correspondance :",
+      "fillInTheBlanksInstruction": "Cliquez sur un espace et choisissez un mot.",
+      "matchingInstruction": "Cliquez sur un élément et choisissez sa correspondance.",
+      "blankLabel": "Espace {{current}} sur {{total}}",
+      "answerBank": "la banque de réponses",
+      "removeWord": "Retirer le mot",
+      "dndInstructions": "Pour saisir un mot, appuyez sur espace ou entrée. Utilisez les touches fléchées pour le déplacer entre les espaces. Appuyez de nouveau sur espace ou entrée pour le déposer, ou échap pour annuler.",
+      "dndOnStart": "Mot {{word}} saisi.",
+      "dndOnOver": "Le mot {{word}} est sur {{blank}}.",
+      "dndOnEnd": "Le mot {{word}} a été placé dans {{blank}}.",
+      "dndOnCancel": "Déplacement annulé. Le mot {{word}} est revenu à sa position précédente.",
+      "questionTitleNotProvided": "Titre de la question non renseigné"
     },
     "aiMentor": {
       "title": "Session avec l'AI Mentor",
@@ -4517,7 +4532,10 @@
       "online": "En ligne",
       "offline": "Hors ligne",
       "emptyUsers": "Aucun utilisateur inscrit pour l'instant.",
-      "mentionedToast": "Quelqu'un vous a mentionné lors de la discussion sur le cours."
+      "mentionedToast": "Quelqu'un vous a mentionné lors de la discussion sur le cours.",
+      "sendError": "Impossible d'envoyer le message.",
+      "deleteError": "Impossible de supprimer le message.",
+      "reactionError": "La réaction n'a pas pu être enregistrée."
     }
   },
   "studentChapterView": {
@@ -4721,7 +4739,8 @@
     "inProgress": "En cours",
     "notStarted": "Non démarré",
     "blocked": "Bloqué",
-    "awaitingReview": "En attente d'évaluation"
+    "awaitingReview": "En attente d'évaluation",
+    "failed": "Non réussi"
   },
   "studentCertificateView": {
     "header": "Certificats",
@@ -5344,7 +5363,8 @@
     "learningPaths": "Parcours de développement",
     "adminLearningPaths": "Parcours de développement",
     "adminLearningPathEditor": "Éditeur de parcours de développement",
-    "gamification": "Gamification"
+    "gamification": "Gamification",
+    "notificationUnsubscribe": "Paramètres des notifications"
   },
   "learningPathsView": {
     "hero": {
@@ -5922,7 +5942,9 @@
     "edit": {
       "title": "Modifier l'organisation",
       "description": "Mettre à jour les détails et le statut de l'organisation.",
-      "submit": "Enregistrer les modifications"
+      "submit": "Enregistrer les modifications",
+      "accessEndsOn": "L'accès se termine le {{date}}",
+      "unlimitedAccess": "Accès illimité"
     },
     "form": {
       "tenantName": "Nom de l'organisation",
@@ -5932,7 +5954,15 @@
       "statusPlaceholder": "Sélectionnez le statut",
       "adminFirstName": "Prénom de l'administrateur",
       "adminLastName": "Nom de famille de l'administrateur",
-      "adminEmail": "E-mail de l'administrateur"
+      "adminEmail": "E-mail de l'administrateur",
+      "accessEndsAt": "Fin de l'accès",
+      "accessEndsAtHint": "L'accès dure jusqu'à la fin du jour sélectionné. Laissez vide pour un accès illimité.",
+      "sections": {
+        "organization": "Organisation",
+        "firstAdmin": "Premier administrateur"
+      },
+      "accessEndsAtPlaceholder": "Accès illimité",
+      "accessEndsAtClear": "Supprimer la date de fin"
     },
     "validation": {
       "nameRequired": "Le nom est requis",
@@ -5945,6 +5975,11 @@
       "tenantCreatedSuccessfully": "Organisation créée avec succès",
       "tenantUpdatedSuccessfully": "Organisation mise à jour avec succès",
       "tenantDeletedSuccessfully": "Organisation supprimée définitivement"
+    },
+    "standing": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "accessEnded": "Accès terminé"
     }
   },
   "superAdminTenants": {
@@ -6009,42 +6044,55 @@
     "description": "Cet espace de travail est actuellement inactif. Si vous pensez qu'il s'agit d'une erreur, contactez votre administrateur pour restaurer l'accès."
   },
   "integrationApiKey": {
-    "title": "Clé API d'intégration",
-    "description": "Générez une clé longue durée pour les intégrations externes. Le remplacement de la clé révoque immédiatement la précédente.",
-    "status": "Statut",
-    "active": "Actif",
-    "inactive": "Non généré",
-    "prefix": "Préfixe de clé",
-    "createdAt": "Date de création",
-    "lastUsedAt": "Dernière utilisation à",
-    "loading": "Chargement des métadonnées clés...",
-    "generate": "Générer une clé",
-    "override": "Remplacer la clé",
+    "title": "Clés API d'intégration",
+    "description": "Les clés permettent à des systèmes externes d'appeler l'API d'intégration avec un accès administrateur. Créez une clé distincte pour chaque intégration afin de pouvoir la révoquer séparément.",
+    "loading": "Chargement des clés...",
     "copy": "Copier la clé",
     "generated": {
-      "title": "Copiez cette clé maintenant. Il ne sera plus affiché."
+      "title": "Copiez cette clé maintenant. Elle ne sera plus affichée.",
+      "dismiss": "Terminé"
     },
-    "confirm": {
-      "title": "Remplacer la clé API actuelle ?",
-      "description": "Cette action révoque immédiatement la clé actuelle. Les intégrations qui l'utilisent cesseront de fonctionner.",
-      "action": "Remplacer la clé"
+    "create": {
+      "button": "Créer une clé",
+      "title": "Créer une clé API d'intégration",
+      "description": "Nommez la clé d'après le système qui l'utilisera.",
+      "nameLabel": "Nom",
+      "namePlaceholder": "p. ex. Synchronisation CRM",
+      "action": "Créer la clé"
+    },
+    "revoke": {
+      "button": "Révoquer",
+      "title": "Révoquer « {{name}} » ?",
+      "description": "Les intégrations utilisant cette clé cesseront immédiatement de fonctionner. Cette action est irréversible.",
+      "action": "Révoquer la clé"
+    },
+    "table": {
+      "key": "Clé",
+      "created": "Créée",
+      "createdBy": "par {{email}}",
+      "lastUsedAt": "Dernière utilisation",
+      "actions": "Actions",
+      "empty": "Aucune clé API d'intégration pour le moment",
+      "emptyHint": "Créez une clé pour chaque système qui doit accéder à l'API d'intégration."
     },
     "toast": {
-      "fetchSuccess": "Clé API d'intégration chargée avec succès",
-      "rotateSuccess": "Clé API d'intégration mise à jour avec succès",
-      "rotateError": "Échec de la mise à jour de la clé API d'intégration",
+      "createSuccess": "Clé API d'intégration créée",
+      "createError": "Échec de la création de la clé API d'intégration",
+      "revokeSuccess": "Clé API d'intégration révoquée",
+      "revokeError": "Échec de la révocation de la clé API d'intégration",
       "copySuccess": "Clé API d'intégration copiée",
       "copyError": "Échec de la copie de la clé API d'intégration"
     },
     "errors": {
-      "rotateFailed": "Échec de la rotation de la clé API d'intégration",
       "invalidApiKey": "Clé API d'intégration non valide",
       "ownerInactive": "Le propriétaire de la clé API n'est plus actif",
       "ownerNotAdmin": "Le propriétaire de la clé API ne dispose plus des autorisations d'administrateur",
       "missingApiKeyHeader": "En-tête X-API-Key manquant",
       "missingTenantIdHeader": "En-tête X-Tenant-Id manquant",
       "invalidPluginOrigin": "Utilisez une origine de plugin HTTPS sans chemin (HTTP localhost est autorisé en développement)",
-      "pluginAddressUnavailable": "Impossible de vérifier l'adresse du module. Réessayez."
+      "pluginAddressUnavailable": "Impossible de vérifier l'adresse du module. Réessayez.",
+      "createFailed": "Impossible de créer la clé API d'intégration",
+      "notFound": "Clé API d'intégration introuvable"
     }
   },
   "courseDuplication": {
@@ -6421,13 +6469,6 @@
       "averageRating": "Note moyenne",
       "detailedStatisticsSoon": "Statistiques détaillées bientôt disponibles",
       "detailedStatisticsDescription": "Cette section affichera des analyses détaillées, notamment la progression des étudiants au fil du temps, les taux de validation des chapitres, les indicateurs d'engagement et plus encore.",
-      "status": {
-        "started": "Commencé",
-        "completed": "Terminé",
-        "inProgress": "En cours",
-        "notStarted": "Non commencé",
-        "awaitingReview": "En attente d'évaluation"
-      },
       "lessonTypes": {
         "content": "Contenu",
         "quiz": "Quiz",
@@ -6681,6 +6722,10 @@
       "failed": "Certaines tâches nécessitent votre attention",
       "saved": "Progression enregistrée",
       "reconnecting": "Reconnexion. Votre travail est enregistré.",
+      "connectionOffline": "La connexion a été perdue. Votre travail est enregistré. Reconnectez-vous pour charger les dernières modifications.",
+      "reconnect": "Se reconnecter",
+      "connectionPermissionRevoked": "Vous n’avez plus accès à cette session de génération de cours.",
+      "connectionSessionUnavailable": "Cette session de génération de cours n’est plus disponible.",
       "review": "Vérifier les changements",
       "showCourse": "Voir le plan du cours",
       "controls": "Paramètres de génération",
@@ -7775,7 +7820,9 @@
     "blocks": {
       "userAssignedToGroup": "Utilisateur affecté à un groupe",
       "quizAttemptGraded": "Quiz évalué",
-      "quizGradingDigest": "Récapitulatif de la file d’évaluation"
+      "quizGradingDigest": "Récapitulatif de la file d’évaluation",
+      "forumUserMentioned": "Mention sur le forum",
+      "discussionReply": "Nouvelles réponses dans une discussion"
     },
     "recipients": {
       "title": "Destinataires",
@@ -7824,7 +7871,9 @@
         "live_training_reminder": "Les apprenants inscrits aux cours liés à la prochaine formation en direct.",
         "live_training_ended": "Les apprenants inscrits aux cours liés à la formation en direct qui s’est terminée.",
         "quiz_attempt_graded": "L’apprenant dont les réponses au quiz ont été évaluées.",
-        "quiz_grading_digest": "Les utilisateurs pouvant évaluer les réponses aux quiz."
+        "quiz_grading_digest": "Les utilisateurs pouvant évaluer les réponses aux quiz.",
+        "forum_mention": "Les utilisateurs mentionnés dans le message du forum.",
+        "discussion_reply": "Les participants du fil ou du sujet qui n'ont pas lu les réponses dans l'application."
       }
     },
     "mapping": {
@@ -7974,7 +8023,16 @@
       "lessonUrl": "Lien de la leçon",
       "newAnswersCount": "Nouvelles réponses",
       "pendingAnswersCount": "Réponses en attente d’évaluation",
-      "gradingQueueUrl": "Lien de la file d’évaluation"
+      "gradingQueueUrl": "Lien de la file d’évaluation",
+      "topicTitle": "Titre du sujet",
+      "topicUrl": "Lien vers le sujet",
+      "discussionName": "Nom de la discussion",
+      "replyCount": "Nombre de nouvelles réponses",
+      "replyAuthors": "Auteurs des réponses",
+      "latestReply": "Dernière réponse",
+      "discussionUrl": "Lien vers la discussion",
+      "unsubscribeUrl": "Lien de désabonnement",
+      "unfollowUrl": "Lien pour ne plus suivre"
     },
     "simulation": {
       "title": "Résultat de la simulation",
@@ -9317,10 +9375,15 @@
     "description": "Posez des questions et partagez vos connaissances avec toute votre organisation.",
     "newTopic": "Nouveau sujet",
     "searchPlaceholder": "Rechercher des sujets",
-    "filter": {
-      "label": "Afficher les sujets",
-      "all": "Tous les sujets",
-      "general": "Général"
+    "courseDiscussions": {
+      "title": "Discussions des cours",
+      "heading": "Discussion : {{course}}",
+      "messages_one": "{{count}} message",
+      "messages_other": "{{count}} messages",
+      "viewAll": "Toutes les discussions des cours ({{count}})",
+      "searchPlaceholder": "Rechercher des cours",
+      "empty": "Aucun de vos cours n'a encore de discussion.",
+      "noResults": "Aucune discussion de cours ne correspond à votre recherche."
     },
     "sort": {
       "label": "Trier les sujets",
@@ -9345,7 +9408,6 @@
     },
     "topic": {
       "backToForum": "Retour au forum",
-      "courseThreadTitle": "Discussion du cours {{course}}",
       "noReplies": "Aucune réponse pour l'instant.",
       "replyPlaceholder": "Écrivez une réponse",
       "replySubmit": "Répondre",
@@ -9358,15 +9420,100 @@
     "toast": {
       "createTopicError": "Impossible de créer le sujet.",
       "createPostError": "Impossible d'envoyer la réponse.",
-      "deletePostError": "Impossible de supprimer le message."
+      "deletePostError": "Impossible de supprimer le message.",
+      "mentioned": "Quelqu'un vous a mentionné(e) sur le forum.",
+      "reactionError": "La réaction n'a pas pu être enregistrée."
     },
     "errors": {
       "topicNotFound": "Ce sujet n'existe pas ou vous n'y avez pas accès.",
+      "courseDiscussionNotFound": "Cette discussion de cours n'existe pas ou vous n'y avez pas accès.",
       "postNotFound": "Ce message n'existe plus.",
       "cannotDeletePost": "Vous ne pouvez supprimer que vos propres messages.",
       "topicDeleted": "Les réponses sont fermées car le premier message a été supprimé.",
       "emptyTitle": "Saisissez un titre.",
-      "emptyContent": "Saisissez un message."
+      "emptyContent": "Saisissez un message.",
+      "invalidReaction": "Choisissez l'une des réactions disponibles."
+    }
+  },
+  "a11y": {
+    "goToHomepage": "Aller à la page d'accueil",
+    "platformLogo": "Logo de la plateforme",
+    "uploadedImage": "Image téléversée",
+    "uploadQueue": "File d'attente de téléversement",
+    "formattingOptions": "Options de mise en forme",
+    "switchToLightMode": "Passer en mode clair",
+    "switchToDarkMode": "Passer en mode sombre",
+    "videoPlayer": "Lecteur vidéo",
+    "videoQuality": "Qualité vidéo",
+    "breadcrumb": "Fil d'Ariane",
+    "more": "Plus",
+    "carousel": "carrousel",
+    "slide": "diapositive",
+    "previousSlide": "Diapositive précédente",
+    "nextSlide": "Diapositive suivante",
+    "remove": "Retirer",
+    "clearAll": "Tout effacer",
+    "expandOptions": "Afficher les options",
+    "collapseOptions": "Masquer les options",
+    "selectAll": "Tout sélectionner",
+    "selectRow": "Sélectionner la ligne",
+    "deleteChapter": "Supprimer le chapitre",
+    "cancelEditing": "Annuler la modification",
+    "removeFile": "Retirer le fichier",
+    "editSection": "Modifier la section",
+    "deleteSection": "Supprimer la section",
+    "avatar": "Avatar",
+    "avatarFor": "Avatar de {{name}}",
+    "selectGroup": "Sélectionner le groupe {{name}}",
+    "lessonWithTitle": "Leçon : {{title}}"
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Notifications des discussions",
+      "saving": "Enregistrement…",
+      "replyInApp": {
+        "label": "Réponses – dans l'application",
+        "description": "Afficher une notification lorsque quelqu'un répond dans une discussion que vous suivez."
+      },
+      "replyEmails": {
+        "label": "Réponses – par e-mail",
+        "description": "Envoyer un e-mail avec les nouvelles réponses d'une discussion que vous suivez."
+      },
+      "mentionEmails": {
+        "label": "Mentions – par e-mail",
+        "description": "Envoyer un e-mail lorsque quelqu'un vous mentionne dans une discussion."
+      },
+      "toast": {
+        "saved": "Paramètres des notifications enregistrés.",
+        "error": "Impossible d'enregistrer les paramètres des notifications."
+      }
+    },
+    "following": {
+      "follow": "Suivre",
+      "following": "Suivi",
+      "followHint": "Recevoir des notifications sur les nouvelles réponses de cette discussion.",
+      "unfollowHint": "Ne plus recevoir de notifications sur les nouvelles réponses de cette discussion.",
+      "toast": {
+        "followed": "Vous suivez cette discussion.",
+        "unfollowed": "Vous ne suivez plus cette discussion.",
+        "error": "Impossible de modifier le suivi."
+      }
+    },
+    "unsubscribe": {
+      "title": "Notifications des discussions",
+      "confirmDescription": "Confirmez que vous souhaitez désactiver ces notifications.",
+      "confirm": "Confirmer",
+      "invalidLink": "Ce lien est invalide ou a expiré.",
+      "manageInSettings": "Gérer les notifications dans les paramètres",
+      "done": {
+        "replies": "Vous ne recevrez plus d'e-mails sur les réponses dans les discussions.",
+        "mentions": "Vous ne recevrez plus d'e-mails sur les mentions.",
+        "thread": "Vous ne suivez plus cette discussion."
+      },
+      "tryAgain": "Une erreur s'est produite. Réessayez dans un instant."
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "Ce lien est invalide ou a expiré."
     }
   }
 }

@@ -24,7 +24,12 @@ export function Toaster() {
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
-          <Toast key={id} data-testid={TOAST_HANDLES.ROOT} {...props}>
+          <Toast
+            key={id}
+            data-testid={TOAST_HANDLES.ROOT}
+            data-variant={props.variant ?? "default"}
+            {...props}
+          >
             <div className="flex items-center gap-1">
               {match(props.variant)
                 .with("success", () => (

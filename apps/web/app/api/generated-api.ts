@@ -303,6 +303,7 @@ export interface CurrentUserResponse {
       | "forum.read"
       | "forum.topic.create"
       | "forum.post.create"
+      | "forum.post.react"
       | "forum.post.delete"
     )[];
     shouldVerifyMFA: boolean;
@@ -559,11 +560,17 @@ export interface GetUserSettingsResponse {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
@@ -583,11 +590,46 @@ export interface UpdateUserSettingsResponse {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
+        adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
+        configWarningDismissed: boolean;
+      };
+}
+
+export interface UpdateNotificationPreferencesBody {
+  discussionReplyEmails?: boolean;
+  discussionReplyInApp?: boolean;
+  mentionEmails?: boolean;
+}
+
+export interface UpdateNotificationPreferencesResponse {
+  data:
+    | {
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @default false */
+        isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
+      }
+    | {
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @default false */
+        isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
@@ -750,6 +792,9 @@ export interface UpdateAdminNewUserNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
+    discussionReplyEmails?: boolean;
+    discussionReplyInApp?: boolean;
+    mentionEmails?: boolean;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1351,6 +1396,9 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
+    discussionReplyEmails?: boolean;
+    discussionReplyInApp?: boolean;
+    mentionEmails?: boolean;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1362,6 +1410,9 @@ export interface UpdateAdminOverdueCourseNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
+    discussionReplyEmails?: boolean;
+    discussionReplyInApp?: boolean;
+    mentionEmails?: boolean;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1587,6 +1638,9 @@ export interface UpdateConfigWarningDismissedResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
+    discussionReplyEmails?: boolean;
+    discussionReplyInApp?: boolean;
+    mentionEmails?: boolean;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -2635,7 +2689,10 @@ export interface GetCourseResponse {
         title: string;
         type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
         displayOrder: number;
-        status: ("not_started" | "in_progress" | "completed" | "blocked") | "awaiting_review";
+        status:
+          | ("not_started" | "in_progress" | "completed" | "blocked")
+          | "awaiting_review"
+          | "failed";
         quizQuestionCount: number | null;
         isExternal?: boolean;
         lessonResources?: {
@@ -3437,7 +3494,10 @@ export interface GetChapterWithLessonResponse {
       title: string;
       type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
       displayOrder: number;
-      status: ("not_started" | "in_progress" | "completed" | "blocked") | "awaiting_review";
+      status:
+        | ("not_started" | "in_progress" | "completed" | "blocked")
+        | "awaiting_review"
+        | "failed";
       quizQuestionCount: number | null;
       isExternal?: boolean;
       lessonResources?: {
@@ -9035,6 +9095,7 @@ export interface GetAllAnnouncementsResponse {
     emailTemplate: string;
     sourceType: string;
     sourceId: string | null;
+    linkPath: string | null;
     title: string;
     content: string;
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -9070,6 +9131,7 @@ export interface GetAnnouncementsForUserResponse {
     emailTemplate: string;
     sourceType: string;
     sourceId: string | null;
+    linkPath: string | null;
     title: string;
     content: string;
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -9119,6 +9181,7 @@ export interface CreateAnnouncementResponse {
     emailTemplate: string;
     sourceType: string;
     sourceId: string | null;
+    linkPath: string | null;
     title: string;
     content: string;
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -9708,7 +9771,9 @@ export interface ListEmailTemplateEventsResponse {
       | "live_training_reminder"
       | "live_training_ended"
       | "quiz_attempt_graded"
-      | "quiz_grading_digest";
+      | "quiz_grading_digest"
+      | "forum_mention"
+      | "discussion_reply";
     label: string;
     description: string;
     recipientPolicy: string;
@@ -10759,6 +10824,8 @@ export interface DuplicateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -10794,6 +10861,8 @@ export interface DuplicateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -11804,6 +11873,8 @@ export interface ListEmailTemplatesResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -11839,6 +11910,8 @@ export interface ListEmailTemplatesResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -12855,6 +12928,8 @@ export interface GetBuiltInEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -12890,6 +12965,8 @@ export interface GetBuiltInEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -13900,6 +13977,8 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -13935,6 +14014,8 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -14945,6 +15026,8 @@ export interface GetEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -14980,6 +15063,8 @@ export interface GetEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -15974,7 +16059,9 @@ export interface CreateEmailTemplateBody {
     | "live_training_reminder"
     | "live_training_ended"
     | "quiz_attempt_graded"
-    | "quiz_grading_digest";
+    | "quiz_grading_digest"
+    | "forum_mention"
+    | "discussion_reply";
   populateEventTags?: boolean;
   /** @maxItems 100 */
   placeholders?: {
@@ -16976,6 +17063,8 @@ export interface CreateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -17011,6 +17100,8 @@ export interface CreateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -18007,6 +18098,8 @@ export interface UpdateEmailTemplateBody {
         | "live_training_ended"
         | "quiz_attempt_graded"
         | "quiz_grading_digest"
+        | "forum_mention"
+        | "discussion_reply"
       )
     | null;
   name?: {
@@ -19007,6 +19100,8 @@ export interface UpdateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -19042,6 +19137,8 @@ export interface UpdateEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -20057,6 +20154,8 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -20092,6 +20191,8 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -21109,6 +21210,8 @@ export interface PublishEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -21144,6 +21247,8 @@ export interface PublishEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -22154,6 +22259,8 @@ export interface ArchiveEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -22189,6 +22296,8 @@ export interface ArchiveEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -23203,6 +23312,8 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -23238,6 +23349,8 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -24248,6 +24361,8 @@ export interface RestoreEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     event?:
@@ -24283,6 +24398,8 @@ export interface RestoreEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @maxItems 100 */
@@ -26231,6 +26348,8 @@ export interface PreviewEmailTemplateResponse {
           | "live_training_ended"
           | "quiz_attempt_graded"
           | "quiz_grading_digest"
+          | "forum_mention"
+          | "discussion_reply"
         )
       | null;
     /** @default "en" */
@@ -26314,6 +26433,8 @@ export interface ListAutomationsResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -26363,7 +26484,9 @@ export interface ListAutomationsResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -26476,6 +26599,8 @@ export interface ListAutomationsResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -26525,7 +26650,9 @@ export interface ListAutomationsResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -26616,7 +26743,9 @@ export interface ListAutomationEventsResponse {
       | "live_training_reminder"
       | "live_training_ended"
       | "quiz_attempt_graded"
-      | "quiz_grading_digest";
+      | "quiz_grading_digest"
+      | "forum_mention"
+      | "discussion_reply";
     label: string;
     description: string;
     recipientPolicy: string;
@@ -26685,7 +26814,9 @@ export interface ListAvailableEmailTemplatesResponse {
             | "live_training_reminder"
             | "live_training_ended"
             | "quiz_attempt_graded"
-            | "quiz_grading_digest";
+            | "quiz_grading_digest"
+            | "forum_mention"
+            | "discussion_reply";
         }
       | {
           type: "custom";
@@ -26739,7 +26870,9 @@ export interface ListBuiltInAutomationTemplatesResponse {
       | "live_training_reminder"
       | "live_training_ended"
       | "quiz_attempt_graded"
-      | "quiz_grading_digest";
+      | "quiz_grading_digest"
+      | "forum_mention"
+      | "discussion_reply";
     definition: {
       /**
        * @minLength 1
@@ -26811,6 +26944,8 @@ export interface ListBuiltInAutomationTemplatesResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -26860,7 +26995,9 @@ export interface ListBuiltInAutomationTemplatesResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -26967,6 +27104,8 @@ export interface SimulateAutomationBody {
                   | "live_training_ended"
                   | "quiz_attempt_graded"
                   | "quiz_grading_digest"
+                  | "forum_mention"
+                  | "discussion_reply"
                 )
               | null;
           };
@@ -27016,7 +27155,9 @@ export interface SimulateAutomationBody {
                         | "live_training_reminder"
                         | "live_training_ended"
                         | "quiz_attempt_graded"
-                        | "quiz_grading_digest";
+                        | "quiz_grading_digest"
+                        | "forum_mention"
+                        | "discussion_reply";
                     }
                   | {
                       type: "custom";
@@ -27161,7 +27302,9 @@ export interface SimulateAutomationResponse {
               | "live_training_reminder"
               | "live_training_ended"
               | "quiz_attempt_graded"
-              | "quiz_grading_digest";
+              | "quiz_grading_digest"
+              | "forum_mention"
+              | "discussion_reply";
           }
         | {
             type: "custom";
@@ -27247,6 +27390,8 @@ export interface CreateAutomationBody {
                   | "live_training_ended"
                   | "quiz_attempt_graded"
                   | "quiz_grading_digest"
+                  | "forum_mention"
+                  | "discussion_reply"
                 )
               | null;
           };
@@ -27296,7 +27441,9 @@ export interface CreateAutomationBody {
                         | "live_training_reminder"
                         | "live_training_ended"
                         | "quiz_attempt_graded"
-                        | "quiz_grading_digest";
+                        | "quiz_grading_digest"
+                        | "forum_mention"
+                        | "discussion_reply";
                     }
                   | {
                       type: "custom";
@@ -27407,6 +27554,8 @@ export interface CreateAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -27456,7 +27605,9 @@ export interface CreateAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -27569,6 +27720,8 @@ export interface CreateAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -27618,7 +27771,9 @@ export interface CreateAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -27733,6 +27888,8 @@ export interface CreateAutomationFromTemplateResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -27782,7 +27939,9 @@ export interface CreateAutomationFromTemplateResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -27895,6 +28054,8 @@ export interface CreateAutomationFromTemplateResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -27944,7 +28105,9 @@ export interface CreateAutomationFromTemplateResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -28059,6 +28222,8 @@ export interface GetAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -28108,7 +28273,9 @@ export interface GetAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -28221,6 +28388,8 @@ export interface GetAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -28270,7 +28439,9 @@ export interface GetAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -28384,6 +28555,8 @@ export interface UpdateAutomationBody {
                   | "live_training_ended"
                   | "quiz_attempt_graded"
                   | "quiz_grading_digest"
+                  | "forum_mention"
+                  | "discussion_reply"
                 )
               | null;
           };
@@ -28433,7 +28606,9 @@ export interface UpdateAutomationBody {
                         | "live_training_reminder"
                         | "live_training_ended"
                         | "quiz_attempt_graded"
-                        | "quiz_grading_digest";
+                        | "quiz_grading_digest"
+                        | "forum_mention"
+                        | "discussion_reply";
                     }
                   | {
                       type: "custom";
@@ -28544,6 +28719,8 @@ export interface UpdateAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -28593,7 +28770,9 @@ export interface UpdateAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -28706,6 +28885,8 @@ export interface UpdateAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -28755,7 +28936,9 @@ export interface UpdateAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -28877,6 +29060,8 @@ export interface DuplicateAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -28926,7 +29111,9 @@ export interface DuplicateAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -29039,6 +29226,8 @@ export interface DuplicateAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -29088,7 +29277,9 @@ export interface DuplicateAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -29203,6 +29394,8 @@ export interface ApplyAutomationBody {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -29252,7 +29445,9 @@ export interface ApplyAutomationBody {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -29364,6 +29559,8 @@ export interface ApplyAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -29413,7 +29610,9 @@ export interface ApplyAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -29526,6 +29725,8 @@ export interface ApplyAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -29575,7 +29776,9 @@ export interface ApplyAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -29690,6 +29893,8 @@ export interface EnableAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -29739,7 +29944,9 @@ export interface EnableAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -29852,6 +30059,8 @@ export interface EnableAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -29901,7 +30110,9 @@ export interface EnableAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -30016,6 +30227,8 @@ export interface DisableAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -30065,7 +30278,9 @@ export interface DisableAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -30178,6 +30393,8 @@ export interface DisableAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -30227,7 +30444,9 @@ export interface DisableAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -30342,6 +30561,8 @@ export interface ArchiveAutomationResponse {
                     | "live_training_ended"
                     | "quiz_attempt_graded"
                     | "quiz_grading_digest"
+                    | "forum_mention"
+                    | "discussion_reply"
                   )
                 | null;
             };
@@ -30391,7 +30612,9 @@ export interface ArchiveAutomationResponse {
                           | "live_training_reminder"
                           | "live_training_ended"
                           | "quiz_attempt_graded"
-                          | "quiz_grading_digest";
+                          | "quiz_grading_digest"
+                          | "forum_mention"
+                          | "discussion_reply";
                       }
                     | {
                         type: "custom";
@@ -30504,6 +30727,8 @@ export interface ArchiveAutomationResponse {
                       | "live_training_ended"
                       | "quiz_attempt_graded"
                       | "quiz_grading_digest"
+                      | "forum_mention"
+                      | "discussion_reply"
                     )
                   | null;
               };
@@ -30553,7 +30778,9 @@ export interface ArchiveAutomationResponse {
                             | "live_training_reminder"
                             | "live_training_ended"
                             | "quiz_attempt_graded"
-                            | "quiz_grading_digest";
+                            | "quiz_grading_digest"
+                            | "forum_mention"
+                            | "discussion_reply";
                         }
                       | {
                           type: "custom";
@@ -30646,7 +30873,9 @@ export interface ListAutomationRunsResponse {
       | "live_training_reminder"
       | "live_training_ended"
       | "quiz_attempt_graded"
-      | "quiz_grading_digest";
+      | "quiz_grading_digest"
+      | "forum_mention"
+      | "discussion_reply";
     status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
     createdAt: string;
     completedAt: string | null;
@@ -30713,7 +30942,9 @@ export interface GetAutomationRunResponse {
         | "live_training_reminder"
         | "live_training_ended"
         | "quiz_attempt_graded"
-        | "quiz_grading_digest";
+        | "quiz_grading_digest"
+        | "forum_mention"
+        | "discussion_reply";
       status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
       createdAt: string;
       completedAt: string | null;
@@ -30765,7 +30996,9 @@ export interface GetAutomationRunResponse {
               | "live_training_reminder"
               | "live_training_ended"
               | "quiz_attempt_graded"
-              | "quiz_grading_digest";
+              | "quiz_grading_digest"
+              | "forum_mention"
+              | "discussion_reply";
           }
         | {
             type: "custom";
@@ -30929,6 +31162,7 @@ export interface GetMessagesResponse {
       lastName: string;
       avatarReference: string | null;
     }[];
+    isFollowing: boolean;
   }[];
   pagination: {
     totalItems: number;
@@ -31018,6 +31252,7 @@ export interface CreateMessageResponse {
       lastName: string;
       avatarReference: string | null;
     }[];
+    isFollowing: boolean;
   };
 }
 
@@ -31079,6 +31314,7 @@ export interface GetRepliesResponse {
       lastName: string;
       avatarReference: string | null;
     }[];
+    isFollowing: boolean;
   }[];
   pagination: {
     totalItems: number;
@@ -31110,6 +31346,22 @@ export interface ToggleMessageReactionResponse {
   };
 }
 
+export interface FollowThreadResponse {
+  data: {
+    /** @format uuid */
+    messageId: string;
+    isFollowing: boolean;
+  };
+}
+
+export interface UnfollowThreadResponse {
+  data: {
+    /** @format uuid */
+    messageId: string;
+    isFollowing: boolean;
+  };
+}
+
 export interface DeleteMessageResponse {
   data: {
     /** @format uuid */
@@ -31126,13 +31378,7 @@ export interface GetTopicsResponse {
   data: {
     /** @format uuid */
     id: string;
-    scope: "general" | "course";
-    title: string | null;
-    course: {
-      /** @format uuid */
-      id: string;
-      title: string;
-    } | null;
+    title: string;
     author: {
       /** @format uuid */
       id: string;
@@ -31154,6 +31400,32 @@ export interface GetTopicsResponse {
   appliedFilters?: object;
 }
 
+export interface GetCourseDiscussionsResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    courseTitle: string;
+    messageCount: number;
+    lastActivityAt: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetCourseDiscussionResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    courseTitle: string;
+    messageCount: number;
+    lastActivityAt: string | null;
+  };
+}
+
 export interface CreateTopicBody {
   /**
    * @minLength 1
@@ -31165,19 +31437,15 @@ export interface CreateTopicBody {
    * @maxLength 5000
    */
   content: string;
+  /** @maxItems 20 */
+  mentionedUserIds?: string[];
 }
 
 export interface CreateTopicResponse {
   data: {
     /** @format uuid */
     id: string;
-    scope: "general" | "course";
-    title: string | null;
-    course: {
-      /** @format uuid */
-      id: string;
-      title: string;
-    } | null;
+    title: string;
     author: {
       /** @format uuid */
       id: string;
@@ -31213,6 +31481,7 @@ export interface CreateTopicResponse {
         reactedByCurrentUser: boolean;
       }[];
     };
+    isFollowing: boolean;
   };
 }
 
@@ -31220,13 +31489,7 @@ export interface GetTopicResponse {
   data: {
     /** @format uuid */
     id: string;
-    scope: "general" | "course";
-    title: string | null;
-    course: {
-      /** @format uuid */
-      id: string;
-      title: string;
-    } | null;
+    title: string;
     author: {
       /** @format uuid */
       id: string;
@@ -31262,6 +31525,23 @@ export interface GetTopicResponse {
         reactedByCurrentUser: boolean;
       }[];
     };
+    isFollowing: boolean;
+  };
+}
+
+export interface FollowTopicResponse {
+  data: {
+    /** @format uuid */
+    topicId: string;
+    isFollowing: boolean;
+  };
+}
+
+export interface UnfollowTopicResponse {
+  data: {
+    /** @format uuid */
+    topicId: string;
+    isFollowing: boolean;
   };
 }
 
@@ -31305,6 +31585,8 @@ export interface CreatePostBody {
    * @maxLength 5000
    */
   content: string;
+  /** @maxItems 20 */
+  mentionedUserIds?: string[];
 }
 
 export interface CreatePostResponse {
@@ -31335,6 +31617,38 @@ export interface CreatePostResponse {
   };
 }
 
+export interface TogglePostReactionBody {
+  /**
+   * @minLength 1
+   * @maxLength 16
+   */
+  reaction: string;
+}
+
+export interface TogglePostReactionResponse {
+  data: {
+    /** @format uuid */
+    topicId: string;
+    /** @format uuid */
+    postId: string;
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+  };
+}
+
+export interface GetMentionableUsersResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarReference: string | null;
+  }[];
+}
+
 export interface DeletePostResponse {
   data: {
     /** @format uuid */
@@ -31345,6 +31659,20 @@ export interface DeletePostResponse {
     removed: boolean;
     deletedAt: string | null;
     topicRemoved: boolean;
+  };
+}
+
+export interface UnsubscribeBody {
+  /**
+   * @minLength 1
+   * @maxLength 2048
+   */
+  token: string;
+}
+
+export interface UnsubscribeResponse {
+  data: {
+    type: "replies" | "mentions" | "thread";
   };
 }
 
@@ -33933,6 +34261,8 @@ export interface DiscoverPluginConnectionResponse {
       id: string;
       name: string;
       host: string;
+      status: "active" | "inactive";
+      accessEndsAt: string | null;
     }[];
     canConfigurePlugins: boolean;
   };
@@ -33963,6 +34293,13 @@ export interface ConfigurePhishingConnectionResponse {
   };
 }
 
+export interface ClearPhishingConnectionResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+  };
+}
+
 export interface PhishingConnectionStatusResponse {
   data: {
     /** @format uuid */
@@ -33986,6 +34323,13 @@ export interface ConfigureCompetenciesConnectionBody {
 }
 
 export interface ConfigureCompetenciesConnectionResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+  };
+}
+
+export interface ClearCompetenciesConnectionResponse {
   data: {
     /** @format uuid */
     tenantId: string;
@@ -34032,6 +34376,8 @@ export interface GetTenantsResponse {
     id: string;
     name: string;
     host: string;
+    status: "active" | "inactive";
+    accessEndsAt: string | null;
   }[];
 }
 
@@ -34041,6 +34387,7 @@ export interface CreateTenantBody {
   /** @minLength 1 */
   host: string;
   status?: "active" | "inactive";
+  accessEndsAt?: string | null;
   /** @format email */
   adminEmail: string;
   /** @minLength 1 */
@@ -34058,6 +34405,7 @@ export interface CreateTenantResponse {
     host: string;
     status: "active" | "inactive";
     isManaging: boolean;
+    accessEndsAt: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -34069,6 +34417,7 @@ export interface UpdateTenantBody {
   /** @minLength 1 */
   host?: string;
   status?: "active" | "inactive";
+  accessEndsAt?: string | null;
 }
 
 export interface UpdateTenantResponse {
@@ -34079,6 +34428,7 @@ export interface UpdateTenantResponse {
     host: string;
     status: "active" | "inactive";
     isManaging: boolean;
+    accessEndsAt: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -34160,6 +34510,50 @@ export interface UpdateTenantApiKeysResponse {
   };
 }
 
+export interface GetTenantIntegrationKeysResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    keyPrefix: string;
+    createdAt: string;
+    lastUsedAt: string | null;
+    createdBy: {
+      /** @format uuid */
+      id: string;
+      email: string;
+    };
+  }[];
+}
+
+export interface CreateTenantIntegrationKeyBody {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   * @pattern \S
+   */
+  name: string;
+}
+
+export interface CreateTenantIntegrationKeyResponse {
+  data: {
+    key: string;
+    metadata: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      keyPrefix: string;
+      createdAt: string;
+      lastUsedAt: string | null;
+      createdBy: {
+        /** @format uuid */
+        id: string;
+        email: string;
+      };
+    };
+  };
+}
+
 export interface DeactivateTenantResponse {
   data: {
     /** @format uuid */
@@ -34168,6 +34562,7 @@ export interface DeactivateTenantResponse {
     host: string;
     status: "active" | "inactive";
     isManaging: boolean;
+    accessEndsAt: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -34422,6 +34817,13 @@ export interface SaveContentMarketplaceConnectionResponse {
   };
 }
 
+export interface ClearContentMarketplaceConnectionResponse {
+  data: {
+    /** @format uuid */
+    tenantId: string;
+  };
+}
+
 export interface CheckContentMarketplaceConnectionResponse {
   data: {
     /** @format uuid */
@@ -34431,29 +34833,46 @@ export interface CheckContentMarketplaceConnectionResponse {
   };
 }
 
-export interface GetCurrentKeyResponse {
+export interface GetKeysResponse {
   data: {
-    key: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    keyPrefix: string;
+    createdAt: string;
+    lastUsedAt: string | null;
+    createdBy: {
       /** @format uuid */
       id: string;
-      keyPrefix: string;
-      createdAt: string;
-      updatedAt: string;
-      lastUsedAt: string | null;
-    } | null;
-  };
+      email: string;
+    };
+  }[];
 }
 
-export interface RotateKeyResponse {
+export interface CreateKeyBody {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   * @pattern \S
+   */
+  name: string;
+}
+
+export interface CreateKeyResponse {
   data: {
     key: string;
     metadata: {
       /** @format uuid */
       id: string;
+      name: string;
       keyPrefix: string;
       createdAt: string;
-      updatedAt: string;
       lastUsedAt: string | null;
+      createdBy: {
+        /** @format uuid */
+        id: string;
+        email: string;
+      };
     };
   };
 }
@@ -34466,6 +34885,7 @@ export interface FindAllTenantsResponse {
     host: string;
     status: "active" | "inactive";
     isManaging: boolean;
+    accessEndsAt: string | null;
     createdAt: string;
     updatedAt: string;
   } & {
@@ -34548,6 +34968,7 @@ export interface FindTenantByIdResponse {
     host: string;
     status: "active" | "inactive";
     isManaging: boolean;
+    accessEndsAt: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -34559,6 +34980,7 @@ export interface UpdateTenantByIdBody {
   /** @minLength 1 */
   host?: string;
   status?: "active" | "inactive";
+  accessEndsAt?: string | null;
 }
 
 export interface UpdateTenantByIdResponse {
@@ -34569,6 +34991,7 @@ export interface UpdateTenantByIdResponse {
     host: string;
     status: "active" | "inactive";
     isManaging: boolean;
+    accessEndsAt: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -39603,6 +40026,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<UpdateUserSettingsResponse, any>({
         path: `/api/settings`,
         method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateNotificationPreferences
+     * @request PATCH:/api/settings/notifications
+     */
+    settingsControllerUpdateNotificationPreferences: (
+      data: UpdateNotificationPreferencesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateNotificationPreferencesResponse, any>({
+        path: `/api/settings/notifications`,
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
         format: "json",
@@ -45412,7 +45854,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "live_training_reminder"
         | "live_training_ended"
         | "quiz_attempt_graded"
-        | "quiz_grading_digest",
+        | "quiz_grading_digest"
+        | "forum_mention"
+        | "discussion_reply",
       params: RequestParams = {},
     ) =>
       this.request<GetBuiltInEmailTemplateResponse, any>({
@@ -45460,7 +45904,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "live_training_reminder"
         | "live_training_ended"
         | "quiz_attempt_graded"
-        | "quiz_grading_digest",
+        | "quiz_grading_digest"
+        | "forum_mention"
+        | "discussion_reply",
       params: RequestParams = {},
     ) =>
       this.request<CreateDraftFromBuiltInEmailTemplateResponse, any>({
@@ -45840,7 +46286,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "live_training_reminder"
         | "live_training_ended"
         | "quiz_attempt_graded"
-        | "quiz_grading_digest",
+        | "quiz_grading_digest"
+        | "forum_mention"
+        | "discussion_reply",
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -46308,6 +46756,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         /** @min 1 */
         perPage?: number;
+        /** @format uuid */
+        aroundMessageId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -46400,6 +46850,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseChatControllerFollowThread
+     * @request PUT:/api/course-chat/messages/{messageId}/follow
+     */
+    courseChatControllerFollowThread: (messageId: string, params: RequestParams = {}) =>
+      this.request<FollowThreadResponse, any>({
+        path: `/api/course-chat/messages/${messageId}/follow`,
+        method: "PUT",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerUnfollowThread
+     * @request DELETE:/api/course-chat/messages/{messageId}/follow
+     */
+    courseChatControllerUnfollowThread: (messageId: string, params: RequestParams = {}) =>
+      this.request<UnfollowThreadResponse, any>({
+        path: `/api/course-chat/messages/${messageId}/follow`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseChatControllerDeleteMessage
      * @request DELETE:/api/course-chat/messages/{messageId}
      */
@@ -46419,8 +46897,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     forumControllerGetTopics: (
       query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @min 1 */
         page?: number;
         /**
@@ -46431,9 +46907,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         sort?: "lastActivity" | "newest" | "mostReplies";
         /** @maxLength 200 */
         search?: string;
-        scope?: "general" | "course";
-        /** @format uuid */
-        courseId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -46451,20 +46924,64 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name ForumControllerCreateTopic
      * @request POST:/api/forum/topics
      */
-    forumControllerCreateTopic: (
-      data: CreateTopicBody,
+    forumControllerCreateTopic: (data: CreateTopicBody, params: RequestParams = {}) =>
+      this.request<CreateTopicResponse, any>({
+        path: `/api/forum/topics`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetCourseDiscussions
+     * @request GET:/api/forum/course-discussions
+     */
+    forumControllerGetCourseDiscussions: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        /** @maxLength 200 */
+        search?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseDiscussionsResponse, any>({
+        path: `/api/forum/course-discussions`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetCourseDiscussion
+     * @request GET:/api/forum/course-discussions/{courseId}
+     */
+    forumControllerGetCourseDiscussion: (
+      courseId: string,
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
       },
       params: RequestParams = {},
     ) =>
-      this.request<CreateTopicResponse, any>({
-        path: `/api/forum/topics`,
-        method: "POST",
+      this.request<GetCourseDiscussionResponse, any>({
+        path: `/api/forum/course-discussions/${courseId}`,
+        method: "GET",
         query: query,
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -46475,18 +46992,38 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name ForumControllerGetTopic
      * @request GET:/api/forum/topics/{topicId}
      */
-    forumControllerGetTopic: (
-      topicId: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
-      },
-      params: RequestParams = {},
-    ) =>
+    forumControllerGetTopic: (topicId: string, params: RequestParams = {}) =>
       this.request<GetTopicResponse, any>({
         path: `/api/forum/topics/${topicId}`,
         method: "GET",
-        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerFollowTopic
+     * @request PUT:/api/forum/topics/{topicId}/follow
+     */
+    forumControllerFollowTopic: (topicId: string, params: RequestParams = {}) =>
+      this.request<FollowTopicResponse, any>({
+        path: `/api/forum/topics/${topicId}/follow`,
+        method: "PUT",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerUnfollowTopic
+     * @request DELETE:/api/forum/topics/{topicId}/follow
+     */
+    forumControllerUnfollowTopic: (topicId: string, params: RequestParams = {}) =>
+      this.request<UnfollowTopicResponse, any>({
+        path: `/api/forum/topics/${topicId}/follow`,
+        method: "DELETE",
         format: "json",
         ...params,
       }),
@@ -46541,6 +47078,40 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name ForumControllerTogglePostReaction
+     * @request POST:/api/forum/posts/{postId}/reactions
+     */
+    forumControllerTogglePostReaction: (
+      postId: string,
+      data: TogglePostReactionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<TogglePostReactionResponse, any>({
+        path: `/api/forum/posts/${postId}/reactions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerGetMentionableUsers
+     * @request GET:/api/forum/users
+     */
+    forumControllerGetMentionableUsers: (params: RequestParams = {}) =>
+      this.request<GetMentionableUsersResponse, any>({
+        path: `/api/forum/users`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ForumControllerDeletePost
      * @request DELETE:/api/forum/posts/{postId}
      */
@@ -46548,6 +47119,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<DeletePostResponse, any>({
         path: `/api/forum/posts/${postId}`,
         method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DiscussionNotificationsControllerUnsubscribe
+     * @request POST:/api/discussion-notifications/unsubscribe
+     */
+    discussionNotificationsControllerUnsubscribe: (
+      data: UnsubscribeBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UnsubscribeResponse, any>({
+        path: `/api/discussion-notifications/unsubscribe`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -48568,6 +49158,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Removes the phishing platform plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.
+     *
+     * @tags Integration
+     * @name IntegrationControllerClearPhishingConnection
+     * @summary Disconnect a tenant from the phishing platform
+     * @request DELETE:/api/integration/tenants/{tenantId}/plugins/phishing
+     */
+    integrationControllerClearPhishingConnection: (tenantId: string, params: RequestParams = {}) =>
+      this.request<ClearPhishingConnectionResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/phishing`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Checks that Mentingo can authenticate to the configured plugin and reports its enabled state. Requires a managing tenant key with tenant management permission. No credentials are returned.
      *
      * @tags Integration
@@ -48600,6 +49206,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PUT",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Removes the competencies platform plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.
+     *
+     * @tags Integration
+     * @name IntegrationControllerClearCompetenciesConnection
+     * @summary Disconnect a tenant from the competencies platform
+     * @request DELETE:/api/integration/tenants/{tenantId}/plugins/competencies
+     */
+    integrationControllerClearCompetenciesConnection: (
+      tenantId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<ClearCompetenciesConnectionResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/competencies`,
+        method: "DELETE",
         format: "json",
         ...params,
       }),
@@ -48663,7 +49288,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description Creates a new tenant and invites its initial admin user. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     * @description Creates a new tenant and invites its initial admin user. Optional accessEndsAt blocks the tenant from that moment, like an inactive status. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
      *
      * @tags Integration
      * @name IntegrationControllerCreateTenant
@@ -48681,7 +49306,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description Updates the target tenant's name, host, or status. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     * @description Updates the target tenant's name, host, status, or access end date. Send accessEndsAt as null to clear it. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
      *
      * @tags Integration
      * @name IntegrationControllerUpdateTenant
@@ -48736,6 +49361,63 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Lists active integration API keys of the target tenant without their secret values. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     *
+     * @tags Integration
+     * @name IntegrationControllerGetTenantIntegrationKeys
+     * @summary List integration API keys of a tenant
+     * @request GET:/api/integration/tenants/{tenantId}/integration-keys
+     */
+    integrationControllerGetTenantIntegrationKeys: (tenantId: string, params: RequestParams = {}) =>
+      this.request<GetTenantIntegrationKeysResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/integration-keys`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Creates an integration API key for the target tenant, recorded as created by the calling key's user. The raw key is returned only once, in this response. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     *
+     * @tags Integration
+     * @name IntegrationControllerCreateTenantIntegrationKey
+     * @summary Create an integration API key for a tenant
+     * @request POST:/api/integration/tenants/{tenantId}/integration-keys
+     */
+    integrationControllerCreateTenantIntegrationKey: (
+      tenantId: string,
+      data: CreateTenantIntegrationKeyBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateTenantIntegrationKeyResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/integration-keys`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Revokes an active integration API key of the target tenant. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     *
+     * @tags Integration
+     * @name IntegrationControllerRevokeTenantIntegrationKey
+     * @summary Revoke an integration API key of a tenant
+     * @request DELETE:/api/integration/tenants/{tenantId}/integration-keys/{keyId}
+     */
+    integrationControllerRevokeTenantIntegrationKey: (
+      tenantId: string,
+      keyId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, void>({
+        path: `/api/integration/tenants/${tenantId}/integration-keys/${keyId}`,
+        method: "DELETE",
         ...params,
       }),
 
@@ -49186,6 +49868,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Removes the content marketplace plugin values saved for the path tenant. Values that are not set are ignored, so retrying is safe. Requires a managing tenant key with tenant management permission.
+     *
+     * @tags Integration
+     * @name IntegrationContentMarketplaceControllerClearContentMarketplaceConnection
+     * @summary Disconnect a tenant from the content marketplace
+     * @request DELETE:/api/integration/tenants/{tenantId}/plugins/content-marketplace
+     */
+    integrationContentMarketplaceControllerClearContentMarketplaceConnection: (
+      tenantId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<ClearContentMarketplaceConnectionResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/plugins/content-marketplace`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Checks that Mentingo can authenticate to the configured content marketplace plugin and reports whether the marketplace is enabled for the tenant. Requires a managing tenant key with tenant management permission. No credentials are returned.
      *
      * @tags Integration
@@ -49208,14 +49909,32 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Integration Admin
-     * @name IntegrationAdminControllerGetCurrentKey
-     * @summary Get current integration API key metadata for admin
-     * @request GET:/api/integration/key
+     * @name IntegrationAdminControllerGetKeys
+     * @summary List active integration API keys of the current organization
+     * @request GET:/api/integration/keys
      */
-    integrationAdminControllerGetCurrentKey: (params: RequestParams = {}) =>
-      this.request<GetCurrentKeyResponse, void>({
-        path: `/api/integration/key`,
+    integrationAdminControllerGetKeys: (params: RequestParams = {}) =>
+      this.request<GetKeysResponse, void>({
+        path: `/api/integration/keys`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description The raw key is returned only once, in this response.
+     *
+     * @tags Integration Admin
+     * @name IntegrationAdminControllerCreateKey
+     * @summary Create an integration API key for the current organization
+     * @request POST:/api/integration/keys
+     */
+    integrationAdminControllerCreateKey: (data: CreateKeyBody, params: RequestParams = {}) =>
+      this.request<CreateKeyResponse, void>({
+        path: `/api/integration/keys`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -49224,15 +49943,14 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Integration Admin
-     * @name IntegrationAdminControllerRotateKey
-     * @summary Rotate integration API key for admin
-     * @request POST:/api/integration/key
+     * @name IntegrationAdminControllerRevokeKey
+     * @summary Revoke an integration API key of the current organization
+     * @request DELETE:/api/integration/keys/{keyId}
      */
-    integrationAdminControllerRotateKey: (params: RequestParams = {}) =>
-      this.request<RotateKeyResponse, void>({
-        path: `/api/integration/key`,
-        method: "POST",
-        format: "json",
+    integrationAdminControllerRevokeKey: (keyId: string, params: RequestParams = {}) =>
+      this.request<void, void>({
+        path: `/api/integration/keys/${keyId}`,
+        method: "DELETE",
         ...params,
       }),
 

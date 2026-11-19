@@ -213,6 +213,10 @@ html {
   body {
     @apply bg-background text-foreground;
   }
+  /* Focused by the skip link only to move the Tab starting point; no ring around the whole page. */
+  main[tabindex="-1"]:focus {
+    @apply outline-none;
+  }
 }
 
 @layer components {

@@ -347,7 +347,9 @@
       "live_training_reminder": "Živé školení začne za 15 minut",
       "live_training_ended": "Živé školení skončilo",
       "quiz_attempt_graded": "Kvíz ohodnocen hodnotitelem",
-      "quiz_grading_digest": "Nové odpovědi čekají na hodnocení (denně)"
+      "quiz_grading_digest": "Nové odpovědi čekají na hodnocení (denně)",
+      "forum_mention": "Uživatel zmíněn v tématu fóra",
+      "discussion_reply": "Nové odpovědi v diskusi (souhrnně)"
     },
     "errors": {
       "incompleteButton": "Zadejte popisek tlačítka a URL.",
@@ -1110,6 +1112,7 @@
     "notifications": "Notifikace",
     "promotionCodes": "Propagační kódy",
     "manage": "Spravovat",
+    "skipToContent": "Přejít na obsah",
     "ariaLabels": {
       "goToAvailableCourses": "Přejděte na dostupné kurzy",
       "collapseSidebar": "Sbalit postranní panel",
@@ -2457,7 +2460,8 @@
         "forum_read": "Může zobrazit fórum.",
         "forum_topic_create": "Může vytvářet témata ve fóru.",
         "forum_post_create": "Může odpovídat v tématech fóra.",
-        "forum_post_delete": "Může mazat jakékoli příspěvky ve fóru."
+        "forum_post_delete": "Může mazat jakékoli příspěvky ve fóru.",
+        "forum_post_react": "Může reagovat na příspěvky ve fóru."
       }
     },
     "dropdown": {
@@ -4420,7 +4424,18 @@
       "scale_1_5": "Otázka typu škála (1–5)",
       "matching": "Přiřaďte každou položku k její dvojici.",
       "noMatchesAvailable": "Pro tuto otázku zatím nejsou k dispozici žádná přiřazení.",
-      "correctMatch": "Správné přiřazení:"
+      "correctMatch": "Správné přiřazení:",
+      "fillInTheBlanksInstruction": "Klikněte na mezeru a vyberte slovo.",
+      "matchingInstruction": "Klikněte na položku a vyberte její protějšek.",
+      "blankLabel": "Mezera {{current}} z {{total}}",
+      "answerBank": "zásobníku odpovědí",
+      "removeWord": "Odebrat slovo",
+      "dndInstructions": "Slovo zvednete stisknutím mezerníku nebo klávesy enter. Pomocí šipek je přesouvejte mezi mezerami. Dalším stisknutím mezerníku nebo enteru je položíte, klávesou escape zrušíte.",
+      "dndOnStart": "Zvednuto slovo {{word}}.",
+      "dndOnOver": "Slovo {{word}} je nad {{blank}}.",
+      "dndOnEnd": "Slovo {{word}} bylo umístěno do {{blank}}.",
+      "dndOnCancel": "Přetažení zrušeno. Slovo {{word}} se vrátilo na předchozí místo.",
+      "questionTitleNotProvided": "Název otázky nebyl zadán"
     },
     "aiMentor": {
       "title": "Sezení AI Mentor",
@@ -4783,7 +4798,10 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "Zatím nejsou zapsáni žádní uživatelé.",
-      "mentionedToast": "Někdo vás zmínil v diskuzi kurzu."
+      "mentionedToast": "Někdo vás zmínil v diskuzi kurzu.",
+      "sendError": "Zprávu se nepodařilo odeslat.",
+      "deleteError": "Zprávu se nepodařilo smazat.",
+      "reactionError": "Reakci se nepodařilo uložit."
     }
   },
   "studentChapterView": {
@@ -4998,7 +5016,8 @@
     "inProgress": "Probíhá",
     "notStarted": "Nezahájeno",
     "blocked": "Blokováno",
-    "awaitingReview": "Čeká na hodnocení"
+    "awaitingReview": "Čeká na hodnocení",
+    "failed": "Nesplněno"
   },
   "studentCertificateView": {
     "header": "Certifikáty",
@@ -5602,7 +5621,8 @@
     "learningPaths": "Rozvojové cesty",
     "adminLearningPaths": "Rozvojové cesty",
     "adminLearningPathEditor": "Editor rozvojové cesty",
-    "gamification": "Gamifikace"
+    "gamification": "Gamifikace",
+    "notificationUnsubscribe": "Nastavení oznámení"
   },
   "courseDuplication": {
     "error": {
@@ -6383,7 +6403,9 @@
     "edit": {
       "title": "Upravit organizaci",
       "description": "Aktualizujte podrobnosti a stav organizace.",
-      "submit": "Uložit změny"
+      "submit": "Uložit změny",
+      "accessEndsOn": "Přístup končí {{date}}",
+      "unlimitedAccess": "Neomezený přístup"
     },
     "form": {
       "tenantName": "Název organizace",
@@ -6393,7 +6415,15 @@
       "statusPlaceholder": "Vyberte stav",
       "adminFirstName": "Jméno správce",
       "adminLastName": "Příjmení správce",
-      "adminEmail": "E-mail správce"
+      "adminEmail": "E-mail správce",
+      "accessEndsAt": "Konec přístupu",
+      "accessEndsAtHint": "Přístup trvá do konce vybraného dne. Ponechte prázdné pro neomezený přístup.",
+      "sections": {
+        "organization": "Organizace",
+        "firstAdmin": "První administrátor"
+      },
+      "accessEndsAtPlaceholder": "Neomezený přístup",
+      "accessEndsAtClear": "Odebrat datum ukončení"
     },
     "validation": {
       "nameRequired": "Jméno je povinné",
@@ -6406,6 +6436,11 @@
       "tenantCreatedSuccessfully": "Organizace byla úspěšně vytvořena",
       "tenantUpdatedSuccessfully": "Organizace byla úspěšně aktualizována",
       "tenantDeletedSuccessfully": "Organizace byla trvale odstraněna"
+    },
+    "standing": {
+      "active": "Aktivní",
+      "inactive": "Neaktivní",
+      "accessEnded": "Přístup skončil"
     }
   },
   "superAdminTenants": {
@@ -6470,42 +6505,55 @@
     "description": "Tento pracovní prostor je momentálně neaktivní. Pokud se domníváte, že se jedná o chybu, obraťte se na správce, aby obnovil přístup."
   },
   "integrationApiKey": {
-    "title": "Integrační API klíč",
-    "description": "Vygenerujte klíč s dlouhou životností pro externí integrace. Výměna klíče okamžitě zruší předchozí.",
-    "status": "Postavení",
-    "active": "Aktivní",
-    "inactive": "Nevygenerováno",
-    "prefix": "Předpona klíče",
-    "createdAt": "Vytvořeno v",
-    "lastUsedAt": "Naposledy použito v",
-    "loading": "Načítání klíčových metadat...",
-    "generate": "Vygenerovat klíč",
-    "override": "Přepsat klíč",
+    "title": "Integrační API klíče",
+    "description": "Klíče umožňují externím systémům volat integrační API s právy administrátora. Pro každou integraci vytvořte samostatný klíč, abyste jej mohli zrušit samostatně.",
+    "loading": "Načítání klíčů...",
     "copy": "Kopírovat klíč",
     "generated": {
-      "title": "Zkopírujte tento klíč nyní. Již se nebude zobrazovat."
+      "title": "Zkopírujte tento klíč nyní. Již se nebude zobrazovat.",
+      "dismiss": "Hotovo"
     },
-    "confirm": {
-      "title": "Přepsat aktuální klíč API?",
-      "description": "Tato akce okamžitě zruší aktuální klíč. Integrace, které ji používají, přestanou fungovat.",
-      "action": "Přepsat klíč"
+    "create": {
+      "button": "Vytvořit klíč",
+      "title": "Vytvořit integrační API klíč",
+      "description": "Pojmenujte klíč podle systému, který jej bude používat.",
+      "nameLabel": "Název",
+      "namePlaceholder": "např. Synchronizace CRM",
+      "action": "Vytvořit klíč"
+    },
+    "revoke": {
+      "button": "Zrušit",
+      "title": "Zrušit „{{name}}“?",
+      "description": "Integrace používající tento klíč okamžitě přestanou fungovat. Tuto akci nelze vrátit zpět.",
+      "action": "Zrušit klíč"
+    },
+    "table": {
+      "key": "Klíč",
+      "created": "Vytvořeno",
+      "createdBy": "uživatelem {{email}}",
+      "lastUsedAt": "Naposledy použito",
+      "actions": "Akce",
+      "empty": "Zatím žádné integrační API klíče",
+      "emptyHint": "Vytvořte klíč pro každý systém, který potřebuje přístup k integračnímu API."
     },
     "toast": {
-      "fetchSuccess": "Klíč Integration API byl úspěšně načten",
-      "rotateSuccess": "Klíč Integration API byl úspěšně aktualizován",
-      "rotateError": "Aktualizace klíče integračního rozhraní API se nezdařila",
+      "createSuccess": "Integrační API klíč byl vytvořen",
+      "createError": "Integrační API klíč se nepodařilo vytvořit",
+      "revokeSuccess": "Integrační API klíč byl zrušen",
+      "revokeError": "Integrační API klíč se nepodařilo zrušit",
       "copySuccess": "Klíč integračního rozhraní API zkopírován",
       "copyError": "Klíč integračního rozhraní API se nepodařilo zkopírovat"
     },
     "errors": {
-      "rotateFailed": "Nepodařilo se otočit klíč integračního rozhraní API",
       "invalidApiKey": "Neplatný klíč integračního rozhraní API",
       "ownerInactive": "Vlastník klíče API již není aktivní",
       "ownerNotAdmin": "Vlastník klíče API již nemá oprávnění správce",
       "missingApiKeyHeader": "Chybí hlavička X-API-Key",
       "missingTenantIdHeader": "Chybí hlavička X-Tenant-Id",
       "invalidPluginOrigin": "Použijte HTTPS původ pluginu bez cesty (HTTP localhost je povolen při vývoji)",
-      "pluginAddressUnavailable": "Nepodařilo se ověřit adresu pluginu. Zkuste to znovu."
+      "pluginAddressUnavailable": "Nepodařilo se ověřit adresu pluginu. Zkuste to znovu.",
+      "createFailed": "Integrační API klíč se nepodařilo vytvořit",
+      "notFound": "Integrační API klíč nebyl nalezen"
     }
   },
   "luma": {
@@ -6685,13 +6733,6 @@
       "averageRating": "Prům. hodnocení",
       "detailedStatisticsSoon": "Podrobné statistiky již brzy",
       "detailedStatisticsDescription": "Tato sekce zobrazí podrobnou analýzu pokroku, dokončení kapitol, zapojení a další údaje.",
-      "status": {
-        "started": "Zahájeno",
-        "completed": "Dokončeno",
-        "inProgress": "Probíhá",
-        "notStarted": "Nezahájeno",
-        "awaitingReview": "Čeká na hodnocení"
-      },
       "lessonTypes": {
         "content": "Obsah",
         "quiz": "Kvíz",
@@ -6945,6 +6986,10 @@
       "failed": "Některé úlohy vyžadují pozornost",
       "saved": "Průběh uložen",
       "reconnecting": "Obnovování připojení. Vaše práce je uložená.",
+      "connectionOffline": "Připojení bylo přerušeno. Vaše práce je uložená. Připojte se znovu a načtěte nejnovější změny.",
+      "reconnect": "Připojit znovu",
+      "connectionPermissionRevoked": "K této relaci generování kurzu již nemáte přístup.",
+      "connectionSessionUnavailable": "Tato relace generování kurzu již není dostupná.",
       "review": "Zkontrolovat změny",
       "showCourse": "Zobrazit osnovu kurzu",
       "controls": "Nastavení generování",
@@ -8136,7 +8181,9 @@
         "live_training_reminder": "Účastníci zapsaní do kurzů propojených s nadcházejícím živým školením.",
         "live_training_ended": "Účastníci zapsaní do kurzů propojených s živým školením, které skončilo.",
         "quiz_attempt_graded": "Účastník, jehož odpovědi v kvízu byly ohodnoceny.",
-        "quiz_grading_digest": "Uživatelé, kteří mohou hodnotit odpovědi v kvízech."
+        "quiz_grading_digest": "Uživatelé, kteří mohou hodnotit odpovědi v kvízech.",
+        "forum_mention": "Uživatelé zmínění v příspěvku na fóru.",
+        "discussion_reply": "Účastníci vlákna nebo tématu, kteří si odpovědi v aplikaci nepřečetli."
       }
     },
     "mapping": {
@@ -8236,7 +8283,9 @@
       "courseChatUserMentioned": "Uživatel zmíněn v chatu",
       "courseDueDateReminder": "Připomínka termínu kurzu",
       "quizAttemptGraded": "Kvíz ohodnocen",
-      "quizGradingDigest": "Přehled fronty hodnocení"
+      "quizGradingDigest": "Přehled fronty hodnocení",
+      "forumUserMentioned": "Zmínka ve fóru",
+      "discussionReply": "Nové odpovědi v diskusi"
     },
     "canvas": {
       "emptyTitle": "Vaše plátno automatizace je prázdné",
@@ -8394,7 +8443,16 @@
       "lessonUrl": "Odkaz na lekci",
       "newAnswersCount": "Nové odpovědi",
       "pendingAnswersCount": "Odpovědi čekající na hodnocení",
-      "gradingQueueUrl": "Odkaz na frontu hodnocení"
+      "gradingQueueUrl": "Odkaz na frontu hodnocení",
+      "topicTitle": "Název tématu",
+      "topicUrl": "Odkaz na téma",
+      "discussionName": "Název diskuse",
+      "replyCount": "Počet nových odpovědí",
+      "replyAuthors": "Autoři odpovědí",
+      "latestReply": "Poslední odpověď",
+      "discussionUrl": "Odkaz na diskusi",
+      "unsubscribeUrl": "Odkaz pro odhlášení",
+      "unfollowUrl": "Odkaz pro ukončení sledování"
     },
     "simulation": {
       "title": "Výsledek simulace",
@@ -9848,10 +9906,17 @@
     "description": "Pokládejte otázky a sdílejte znalosti s celou organizací.",
     "newTopic": "Nové téma",
     "searchPlaceholder": "Hledat témata",
-    "filter": {
-      "label": "Zobrazit témata",
-      "all": "Všechna témata",
-      "general": "Obecné"
+    "courseDiscussions": {
+      "title": "Diskuse v kurzech",
+      "heading": "Diskuse: {{course}}",
+      "messages_one": "{{count}} zpráva",
+      "messages_few": "{{count}} zprávy",
+      "messages_many": "{{count}} zprávy",
+      "messages_other": "{{count}} zpráv",
+      "viewAll": "Všechny diskuse v kurzech ({{count}})",
+      "searchPlaceholder": "Hledat kurzy",
+      "empty": "V žádném z vašich kurzů zatím není diskuse.",
+      "noResults": "Hledání neodpovídá žádná diskuse kurzu."
     },
     "sort": {
       "label": "Seřadit témata",
@@ -9878,7 +9943,6 @@
     },
     "topic": {
       "backToForum": "Zpět na fórum",
-      "courseThreadTitle": "Diskuse v kurzu {{course}}",
       "noReplies": "Zatím žádné odpovědi.",
       "replyPlaceholder": "Napište odpověď",
       "replySubmit": "Odpovědět",
@@ -9891,15 +9955,100 @@
     "toast": {
       "createTopicError": "Téma se nepodařilo založit.",
       "createPostError": "Odpověď se nepodařilo odeslat.",
-      "deletePostError": "Příspěvek se nepodařilo smazat."
+      "deletePostError": "Příspěvek se nepodařilo smazat.",
+      "mentioned": "Někdo vás zmínil ve fóru.",
+      "reactionError": "Reakci se nepodařilo uložit."
     },
     "errors": {
       "topicNotFound": "Toto téma neexistuje nebo k němu nemáte přístup.",
+      "courseDiscussionNotFound": "Tato diskuse kurzu neexistuje nebo k ní nemáte přístup.",
       "postNotFound": "Tento příspěvek již neexistuje.",
       "cannotDeletePost": "Můžete mazat pouze vlastní příspěvky.",
       "topicDeleted": "Odpovědi jsou uzavřené, protože první příspěvek byl smazán.",
       "emptyTitle": "Zadejte název.",
-      "emptyContent": "Zadejte zprávu."
+      "emptyContent": "Zadejte zprávu.",
+      "invalidReaction": "Vyberte jednu z dostupných reakcí."
+    }
+  },
+  "a11y": {
+    "goToHomepage": "Přejít na domovskou stránku",
+    "platformLogo": "Logo platformy",
+    "uploadedImage": "Nahraný obrázek",
+    "uploadQueue": "Fronta nahrávání",
+    "formattingOptions": "Možnosti formátování",
+    "switchToLightMode": "Přepnout na světlý režim",
+    "switchToDarkMode": "Přepnout na tmavý režim",
+    "videoPlayer": "Přehrávač videa",
+    "videoQuality": "Kvalita videa",
+    "breadcrumb": "Drobečková navigace",
+    "more": "Více",
+    "carousel": "karusel",
+    "slide": "snímek",
+    "previousSlide": "Předchozí snímek",
+    "nextSlide": "Další snímek",
+    "remove": "Odebrat",
+    "clearAll": "Vymazat vše",
+    "expandOptions": "Rozbalit možnosti",
+    "collapseOptions": "Sbalit možnosti",
+    "selectAll": "Vybrat vše",
+    "selectRow": "Vybrat řádek",
+    "deleteChapter": "Smazat kapitolu",
+    "cancelEditing": "Zrušit úpravy",
+    "removeFile": "Odebrat soubor",
+    "editSection": "Upravit sekci",
+    "deleteSection": "Smazat sekci",
+    "avatar": "Avatar",
+    "avatarFor": "Avatar: {{name}}",
+    "selectGroup": "Vybrat skupinu {{name}}",
+    "lessonWithTitle": "Lekce: {{title}}"
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Oznámení o diskusích",
+      "saving": "Ukládání…",
+      "replyInApp": {
+        "label": "Odpovědi – v aplikaci",
+        "description": "Zobrazit oznámení, když někdo odpoví v diskusi, kterou sledujete."
+      },
+      "replyEmails": {
+        "label": "Odpovědi – e-mailem",
+        "description": "Poslat jeden e-mail s novými odpověďmi v diskusi, kterou sledujete."
+      },
+      "mentionEmails": {
+        "label": "Zmínky – e-mailem",
+        "description": "Poslat e-mail, když vás někdo zmíní v diskusi."
+      },
+      "toast": {
+        "saved": "Nastavení oznámení bylo uloženo.",
+        "error": "Nastavení oznámení se nepodařilo uložit."
+      }
+    },
+    "following": {
+      "follow": "Sledovat",
+      "following": "Sledujete",
+      "followHint": "Dostávat oznámení o nových odpovědích v této diskusi.",
+      "unfollowHint": "Vypnout oznámení o nových odpovědích v této diskusi.",
+      "toast": {
+        "followed": "Sledujete tuto diskusi.",
+        "unfollowed": "Tuto diskusi již nesledujete.",
+        "error": "Sledování se nepodařilo změnit."
+      }
+    },
+    "unsubscribe": {
+      "title": "Oznámení o diskusích",
+      "confirmDescription": "Potvrďte, že chcete tato oznámení vypnout.",
+      "confirm": "Potvrdit",
+      "invalidLink": "Tento odkaz je neplatný nebo vypršel.",
+      "manageInSettings": "Spravovat oznámení v nastavení",
+      "done": {
+        "replies": "E-maily o odpovědích v diskusích už nebudete dostávat.",
+        "mentions": "E-maily o zmínkách už nebudete dostávat.",
+        "thread": "Tuto diskusi již nesledujete."
+      },
+      "tryAgain": "Něco se pokazilo. Zkuste to za chvíli znovu."
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "Tento odkaz je neplatný nebo vypršel."
     }
   }
 }

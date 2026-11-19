@@ -1,8 +1,10 @@
-import { match } from "ts-pattern";
+import { buildMentionPattern, findMentionedUserIds } from "@repo/shared";
 
-import type { CourseChatUser } from "~/api/queries/course-chat/courseChatTypes";
+import type { MentionableUser } from "~/api/queries/course-chat/courseChatTypes";
 
-export function getUserDisplayName(user: CourseChatUser) {
+const mentionPatternByUsers = new WeakMap<MentionableUser[], RegExp | null>();
+
+export function getUserDisplayName(user: Pick<MentionableUser, "firstName" | "lastName">) {
   return `${user.firstName} ${user.lastName}`;
 }
 
@@ -12,32 +14,33 @@ export function getActiveMentionQuery(value: string) {
   return match?.[2] ?? null;
 }
 
-export function getMentionedUserIds(content: string, users: CourseChatUser[]) {
-  return users
-    .filter((user) => content.includes(`@${getUserDisplayName(user)}`))
-    .map((user) => user.id);
+export function getMentionedUserIds(content: string, users: MentionableUser[]) {
+  return findMentionedUserIds(content, users);
 }
 
-export function renderMessageContent(content: string, users: CourseChatUser[]) {
-  const mentionLabels = users
-    .map((user) => `@${getUserDisplayName(user)}`)
-    .sort((a, b) => b.length - a.length);
+export function renderMessageContent(content: string, users: MentionableUser[]) {
+  const mentionPattern = getMentionPattern(users);
 
-  if (!mentionLabels.length) return content;
+  if (!mentionPattern) return content;
 
-  const mentionRegex = new RegExp(`(${mentionLabels.map(escapeRegExp).join("|")})`, "g");
-
-  return content.split(mentionRegex).map((part, index) =>
-    match(mentionLabels.includes(part))
-      .with(true, () => (
-        <span key={`${part}-${index}`} className="font-medium text-primary-700">
-          {part}
-        </span>
-      ))
-      .otherwise(() => part),
+  return content.split(mentionPattern).map((part, index) =>
+    index % 2 === 1 ? (
+      <span key={`${part}-${index}`} className="font-medium text-primary-700">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
   );
 }
 
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function getMentionPattern(users: MentionableUser[]) {
+  const cachedPattern = mentionPatternByUsers.get(users);
+
+  if (cachedPattern !== undefined) return cachedPattern;
+
+  const mentionPattern = buildMentionPattern(users);
+  mentionPatternByUsers.set(users, mentionPattern);
+
+  return mentionPattern;
 }

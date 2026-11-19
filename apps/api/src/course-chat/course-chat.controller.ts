@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
 import { FEATURES, PERMISSIONS, type PermissionKey } from "@repo/shared";
+import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -19,6 +20,7 @@ import {
   courseChatMessageReactionsUpdatedSchema,
   courseChatMessageSchema,
   courseChatMessagesResponseSchema,
+  courseChatThreadFollowingSchema,
   courseChatPaginationQuerySchema,
   courseChatRepliesResponseSchema,
   courseChatUsersResponseSchema,
@@ -27,6 +29,7 @@ import {
   toggleCourseChatMessageReactionSchema,
   type CourseChatMessageReactionsUpdatedResponse,
   type CourseChatMessageResponse,
+  type CourseChatThreadFollowingResponse,
   type CourseChatUserResponse,
   type CreateCourseChatMessageBody,
   type DeleteCourseChatMessageResponse,
@@ -45,6 +48,7 @@ export class CourseChatController {
       { type: "param", name: "courseId", schema: UUIDSchema },
       { type: "query", name: "page", schema: courseChatPaginationQuerySchema },
       { type: "query", name: "perPage", schema: courseChatPaginationQuerySchema },
+      { type: "query", name: "aroundMessageId", schema: Type.Optional(UUIDSchema) },
     ],
     response: paginatedResponse(courseChatMessagesResponseSchema),
   })
@@ -52,9 +56,10 @@ export class CourseChatController {
     @Param("courseId") courseId: UUIDType,
     @Query("page") page: number | undefined,
     @Query("perPage") perPage: number | undefined,
+    @Query("aroundMessageId") aroundMessageId: UUIDType | undefined,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<PaginatedResponse<CourseChatMessageResponse[]>> {
-    return this.courseChatService.getMessages({ courseId, userId, page, perPage });
+    return this.courseChatService.getMessages({ courseId, userId, page, perPage, aroundMessageId });
   }
 
   @Get(":courseId/users")
@@ -122,6 +127,32 @@ export class CourseChatController {
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<CourseChatMessageReactionsUpdatedResponse>> {
     return this.courseChatService.toggleMessageReaction(messageId, userId, body);
+  }
+
+  @Put("messages/:messageId/follow")
+  @RequirePermission(PERMISSIONS.COURSE_DISCUSSION_READ)
+  @Validate({
+    request: [{ type: "param", name: "messageId", schema: UUIDSchema }],
+    response: baseResponse(courseChatThreadFollowingSchema),
+  })
+  async followThread(
+    @Param("messageId") messageId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<CourseChatThreadFollowingResponse>> {
+    return this.courseChatService.setThreadFollowing(messageId, userId, true);
+  }
+
+  @Delete("messages/:messageId/follow")
+  @RequirePermission(PERMISSIONS.COURSE_DISCUSSION_READ)
+  @Validate({
+    request: [{ type: "param", name: "messageId", schema: UUIDSchema }],
+    response: baseResponse(courseChatThreadFollowingSchema),
+  })
+  async unfollowThread(
+    @Param("messageId") messageId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<CourseChatThreadFollowingResponse>> {
+    return this.courseChatService.setThreadFollowing(messageId, userId, false);
   }
 
   @Delete("messages/:messageId")

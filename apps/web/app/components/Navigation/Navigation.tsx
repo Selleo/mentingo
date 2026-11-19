@@ -1,6 +1,6 @@
 import { useLocation } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useRef, useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCurrentUser } from "~/api/queries";
@@ -35,6 +35,8 @@ import type { LeafMenuItem, NavigationGroups } from "~/config/navigationConfig";
 
 type DashboardNavigationProps = { menuItems?: NavigationGroups[] };
 
+const isDesktopViewport = () => typeof window !== "undefined" && window.innerWidth >= 1440;
+
 export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { isMobileNavOpen, setIsMobileNavOpen } = useMobileNavigation();
 
@@ -59,7 +61,8 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
   const { t } = useTranslation();
   const { pathname } = useLocation();
-  const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
+  // Read the viewport on the first render so the desktop sidebar is never briefly inert.
+  const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(isDesktopViewport);
   const { data: isStripeConfigured } = useStripeConfigured();
   const { data: phishingConfiguration, isError: isPhishingConfigurationError } =
     usePhishingConfiguration(matchesRequirement(permissions, routeAccessConfig.phishing));
@@ -81,6 +84,41 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
   const { isSidebarCollapsed, toggleSidebarCollapsed } = useNavigationStore();
 
+  const navRef = useRef<HTMLElement>(null);
+  const menuToggleRef = useRef<HTMLButtonElement>(null);
+  const wasMobileNavOpen = useRef(isMobileNavOpen);
+
+  useEffect(() => {
+    const wasOpen = wasMobileNavOpen.current;
+
+    wasMobileNavOpen.current = isMobileNavOpen;
+
+    // Resizing to desktop closes the menu and hides the toggle; the nav stays usable there.
+    if (!wasOpen || isMobileNavOpen || isDesktopViewport()) return;
+
+    // Only reclaim focus lost with the closing menu, not focus another surface (e.g. helpdesk) took.
+    const focused = document.activeElement;
+
+    if (focused === document.body || navRef.current?.contains(focused)) {
+      menuToggleRef.current?.focus();
+    }
+  }, [isMobileNavOpen]);
+
+  useEffect(() => {
+    if (!isMobileNavOpen) return;
+
+    // The open menu fills the viewport and squeezes <main> to zero height; keep it out of the Tab order.
+    const main = document.querySelector("main");
+
+    if (!main) return;
+
+    main.setAttribute("inert", "");
+
+    return () => {
+      main.removeAttribute("inert");
+    };
+  }, [isMobileNavOpen]);
+
   const isLearningPathsEnabled = globalSettings?.learningPathsEnabled !== false;
 
   const { data: studentLearningPaths } = useLearningPaths(
@@ -95,10 +133,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     canAccessLearningPathAdmin || Boolean(studentLearningPaths?.pagination.totalItems);
 
   useEffect(() => {
-    const updateBreakpoint = () => {
-      const width = window.innerWidth;
-      setIs2xlBreakpoint(width >= 1440);
-    };
+    const updateBreakpoint = () => setIs2xlBreakpoint(isDesktopViewport());
     updateBreakpoint();
     window.addEventListener("resize", updateBreakpoint);
     return () => {
@@ -128,6 +163,8 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
   if (shouldHideTopbarAndSidebar(pathname)) return null;
 
+  // Below 2xl a closed menu is only visually hidden, so keep it out of focus and AT.
+  const isNavHidden = !isMobileNavOpen && !is2xlBreakpoint;
   const showNavigationLabels = !isSidebarCollapsed || !is2xlBreakpoint;
   const shouldShowTooltips = isSidebarCollapsed && is2xlBreakpoint;
 
@@ -150,6 +187,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
               className="gap-2 py-2.5"
               variant="outline"
               size="icon"
+              aria-expanded={!isSidebarCollapsed}
               aria-label={t(
                 isSidebarCollapsed
                   ? "navigationSideBar.ariaLabels.expandSidebar"
@@ -171,6 +209,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
           is2xlBreakpoint={is2xlBreakpoint}
           hasConfigurationIssues={hasConfigurationIssues}
           isSidebarCollapsed={isSidebarCollapsed}
+          menuToggleRef={menuToggleRef}
         />
 
         {/* Mount one search per breakpoint: a CSS-hidden copy still registers ⌘K and opens a
@@ -184,6 +223,9 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
         <Separator className="sr-only bg-neutral-200 2xl:not-sr-only 2xl:h-px" />
         <nav
+          ref={navRef}
+          // React 18 renders unknown attributes from strings. React 19 takes a boolean; switch to true on upgrade.
+          inert={isNavHidden ? "" : undefined}
           className={cn("2xl:flex 2xl:h-full 2xl:min-h-0 2xl:flex-col 2xl:justify-between", {
             "flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden bg-primary-50 px-4 pb-4 pt-7 2xl:bg-transparent 2xl:p-0 2xl:overflow-hidden":
               isMobileNavOpen,

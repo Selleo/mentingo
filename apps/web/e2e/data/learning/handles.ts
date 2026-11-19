@@ -5,6 +5,17 @@ export const LEARNING_HANDLES = {
   LESSON_TITLE: "learning-lesson-title",
   NEXT_LESSON_BUTTON: "learning-next-lesson-button",
   QUIZ_FORM: "learning-quiz-form",
+  quizOption: (optionId: string) => `learning-quiz-option-${optionId}`,
+  trueOrFalseOption: (optionId: string, value: "true" | "false") =>
+    `learning-quiz-true-or-false-${optionId}-${value}`,
+  /** Text blanks are numbered from 1 within their question. */
+  textBlank: (blankNumber: number) => `text-blank-${blankNumber}`,
+  dndBlank: (blankAnswerId: string) => `blank:${blankAnswerId}`,
+  /** The drop slot of a matching pair carries the option id as its test id. */
+  matchingSlot: (optionId: string) => optionId,
+  BRIEF_RESPONSE_INPUT: "brief-response",
+  DETAILED_RESPONSE_INPUT: "detailed-response",
+  EMBED_IFRAME: "learning-embed-iframe",
   QUIZ_SCORE: "learning-quiz-score",
   QUIZ_AWAITING_REVIEW: "learning-quiz-awaiting-review",
   QUIZ_PARTIAL_SCORE: "learning-quiz-partial-score",
@@ -21,6 +32,8 @@ export const LEARNING_HANDLES = {
   QUIZ_TIMER_MESSAGE: "learning-quiz-timer-message",
   FILL_IN_THE_BLANKS_CORRECT_SENTENCE: "learning-fill-in-the-blanks-correct-sentence",
   FILL_IN_THE_BLANKS_DND_CORRECT_SENTENCE: "learning-fill-in-the-blanks-dnd-correct-sentence",
+  BLANK_SELECT_TRIGGER: "learning-blank-select-trigger",
+  blankSelectOption: (label: string) => `learning-blank-select-option-${label}`,
   AI_MENTOR_TASK_DESCRIPTION: "learning-ai-mentor-task-description",
   AI_MENTOR_TASK_DESCRIPTION_DIALOG: "learning-ai-mentor-task-description-dialog",
   AI_MENTOR_MESSAGES: "learning-ai-mentor-messages",

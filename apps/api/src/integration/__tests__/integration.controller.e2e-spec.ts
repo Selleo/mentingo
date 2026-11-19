@@ -71,11 +71,14 @@ describe("IntegrationController (e2e)", () => {
   });
 
   describe("integration key management", () => {
-    it("returns 401 for rotate key when user is not authenticated", async () => {
-      await request(app.getHttpServer()).post("/api/integration/key").expect(401);
+    it("returns 401 for creating a key when user is not authenticated", async () => {
+      await request(app.getHttpServer())
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
+        .expect(401);
     });
 
-    it("returns null current key for admin before first key generation", async () => {
+    it("lists no keys for admin before the first key is created", async () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
@@ -83,11 +86,11 @@ describe("IntegrationController (e2e)", () => {
       const cookies = await cookieFor(admin, app);
 
       const response = await request(app.getHttpServer())
-        .get("/api/integration/key")
+        .get("/api/integration/keys")
         .set("Cookie", cookies)
         .expect(200);
 
-      expect(response.body.data.key).toBeNull();
+      expect(response.body.data).toEqual([]);
     });
 
     it("generates raw key once and stores only hash/prefix in database", async () => {
@@ -98,13 +101,17 @@ describe("IntegrationController (e2e)", () => {
       const cookies = await cookieFor(admin, app);
 
       const response = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
 
       const rawKey = response.body.data.key as string;
       expect(rawKey).toMatch(/^itgk_[A-Za-z0-9_-]+$/);
-      expect(response.body.data.metadata.keyPrefix).toBe(rawKey.slice(0, 16));
+      expect(response.body.data.metadata).toMatchObject({
+        keyPrefix: rawKey.slice(0, 16),
+        name: "Test integration key",
+      });
 
       const [storedKey] = await db
         .select()
@@ -123,7 +130,7 @@ describe("IntegrationController (e2e)", () => {
       expect(storedKey.keyHash).not.toBe(rawKey);
     });
 
-    it("returns 429 on integration key rotation request above configured write limit", async () => {
+    it("returns 429 on integration key creation above configured write limit", async () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
@@ -136,13 +143,15 @@ describe("IntegrationController (e2e)", () => {
         attempt += 1
       ) {
         await request(app.getHttpServer())
-          .post("/api/integration/key")
+          .post("/api/integration/keys")
+          .send({ name: "Test integration key" })
           .set("Cookie", cookies)
           .expect(201);
       }
 
       await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(429);
     });
@@ -166,7 +175,8 @@ describe("IntegrationController (e2e)", () => {
       const group = await groupFactory.create();
 
       const rotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
 
@@ -210,7 +220,8 @@ describe("IntegrationController (e2e)", () => {
         .expect(200);
 
       const rotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
       const apiKey = rotateResponse.body.data.key as string;
@@ -240,7 +251,8 @@ describe("IntegrationController (e2e)", () => {
       const cookies = await cookieFor(admin, app);
 
       const rotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
       const apiKey = rotateResponse.body.data.key as string;
@@ -253,27 +265,65 @@ describe("IntegrationController (e2e)", () => {
       expect(response.body.message).toBe("integrationApiKey.errors.missingTenantIdHeader");
     });
 
-    it("rejects old key after rotation override", async () => {
+    it("keeps earlier keys working when another key is created", async () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
         .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const cookies = await cookieFor(admin, app);
 
-      const firstRotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+      const firstKeyResponse = await request(app.getHttpServer())
+        .post("/api/integration/keys")
+        .send({ name: "First key" })
         .set("Cookie", cookies)
         .expect(201);
-      const oldKey = firstRotateResponse.body.data.key as string;
+      const firstKey = firstKeyResponse.body.data.key as string;
 
       await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Second key" })
         .set("Cookie", cookies)
         .expect(201);
+
+      await request(app.getHttpServer())
+        .get("/api/integration/groups")
+        .set("X-API-Key", firstKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .expect(200);
+
+      const listResponse = await request(app.getHttpServer())
+        .get("/api/integration/keys")
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(listResponse.body.data.map((key: { name: string }) => key.name).sort()).toEqual([
+        "First key",
+        "Second key",
+      ]);
+    });
+
+    it("rejects a revoked key", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const cookies = await cookieFor(admin, app);
+
+      const createResponse = await request(app.getHttpServer())
+        .post("/api/integration/keys")
+        .send({ name: "Revoked key" })
+        .set("Cookie", cookies)
+        .expect(201);
+      const revokedKey = createResponse.body.data.key as string;
+
+      await request(app.getHttpServer())
+        .delete(`/api/integration/keys/${createResponse.body.data.metadata.id}`)
+        .set("Cookie", cookies)
+        .expect(204);
 
       const response = await request(app.getHttpServer())
         .get("/api/integration/groups")
-        .set("X-API-Key", oldKey)
+        .set("X-API-Key", revokedKey)
         .set("X-Tenant-Id", admin.tenantId)
         .expect(401);
 
@@ -298,7 +348,8 @@ describe("IntegrationController (e2e)", () => {
       });
 
       const rotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
       const apiKey = rotateResponse.body.data.key as string;
@@ -334,7 +385,8 @@ describe("IntegrationController (e2e)", () => {
       });
 
       const rotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
       const apiKey = rotateResponse.body.data.key as string;
@@ -368,7 +420,8 @@ describe("IntegrationController (e2e)", () => {
         .returning({ id: tenants.id });
 
       const rotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
       const apiKey = rotateResponse.body.data.key as string;
@@ -400,7 +453,8 @@ describe("IntegrationController (e2e)", () => {
         .returning({ id: tenants.id });
 
       const rotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
       const apiKey = rotateResponse.body.data.key as string;
@@ -424,7 +478,8 @@ describe("IntegrationController (e2e)", () => {
       await dbAdmin.update(tenants).set({ isManaging }).where(eq(tenants.id, admin.tenantId));
 
       const rotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
 
@@ -788,7 +843,8 @@ describe("IntegrationController (e2e)", () => {
       });
 
       const rotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
 
@@ -1053,7 +1109,8 @@ describe("IntegrationController (e2e)", () => {
       const cookies = await cookieFor(admin, app);
 
       const rotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
 
@@ -1146,7 +1203,8 @@ describe("IntegrationController (e2e)", () => {
       });
 
       const rotateResponse = await request(app.getHttpServer())
-        .post("/api/integration/key")
+        .post("/api/integration/keys")
+        .send({ name: "Test integration key" })
         .set("Cookie", cookies)
         .expect(201);
 

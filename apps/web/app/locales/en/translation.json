@@ -347,7 +347,9 @@
       "live_training_reminder": "Live training starts in 15 minutes",
       "live_training_ended": "Live training ended",
       "quiz_attempt_graded": "Quiz graded by a reviewer",
-      "quiz_grading_digest": "New answers waiting for review (daily)"
+      "quiz_grading_digest": "New answers waiting for review (daily)",
+      "forum_mention": "User mentioned in a forum topic",
+      "discussion_reply": "New replies in a discussion (grouped)"
     },
     "errors": {
       "incompleteButton": "Enter a button label and URL.",
@@ -1104,6 +1106,7 @@
     "notifications": "Notifications",
     "promotionCodes": "Promotion Codes",
     "manage": "Manage",
+    "skipToContent": "Skip to content",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses",
       "collapseSidebar": "Collapse sidebar",
@@ -2452,7 +2455,8 @@
         "forum_read": "View the forum.",
         "forum_topic_create": "Create forum topics.",
         "forum_post_create": "Reply in forum topics.",
-        "forum_post_delete": "Delete any forum post."
+        "forum_post_delete": "Delete any forum post.",
+        "forum_post_react": "React to forum posts."
       }
     },
     "dropdown": {
@@ -4414,7 +4418,18 @@
       "scale_1_5": "Scale question (1-5)",
       "matching": "Match each item with its pair.",
       "noMatchesAvailable": "No matches are available for this question yet.",
-      "correctMatch": "Correct match:"
+      "correctMatch": "Correct match:",
+      "fillInTheBlanksInstruction": "Click a blank and choose a word.",
+      "matchingInstruction": "Click an item and choose its match.",
+      "blankLabel": "Blank {{current}} of {{total}}",
+      "answerBank": "the answer bank",
+      "removeWord": "Remove word",
+      "dndInstructions": "To pick up a word, press space or enter. Use the arrow keys to move it between blanks. Press space or enter again to drop it, or escape to cancel.",
+      "dndOnStart": "Picked up the word {{word}}.",
+      "dndOnOver": "Word {{word}} is over {{blank}}.",
+      "dndOnEnd": "Word {{word}} was placed in {{blank}}.",
+      "dndOnCancel": "Dragging cancelled. Word {{word}} returned to its previous position.",
+      "questionTitleNotProvided": "Question title not provided"
     },
     "aiMentor": {
       "title": "AI Mentor Session",
@@ -4775,7 +4790,10 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "No enrolled users yet.",
-      "mentionedToast": "Someone mentioned you in the course discussion."
+      "mentionedToast": "Someone mentioned you in the course discussion.",
+      "sendError": "The message could not be sent.",
+      "deleteError": "The message could not be deleted.",
+      "reactionError": "The reaction could not be saved."
     }
   },
   "studentChapterView": {
@@ -4990,7 +5008,8 @@
     "inProgress": "In Progress",
     "notStarted": "Not Started",
     "blocked": "Blocked",
-    "awaitingReview": "Waiting for review"
+    "awaitingReview": "Waiting for review",
+    "failed": "Failed"
   },
   "studentCertificateView": {
     "header": "Certificates",
@@ -5613,7 +5632,8 @@
     "learningPaths": "Development Paths",
     "adminLearningPaths": "Development Paths",
     "adminLearningPathEditor": "Development Path Editor",
-    "gamification": "Gamification"
+    "gamification": "Gamification",
+    "notificationUnsubscribe": "Notification settings"
   },
   "learningPathsView": {
     "hero": {
@@ -6191,7 +6211,9 @@
     "edit": {
       "title": "Edit Organization",
       "description": "Update organization details and status.",
-      "submit": "Save Changes"
+      "submit": "Save Changes",
+      "accessEndsOn": "Access ends {{date}}",
+      "unlimitedAccess": "Unlimited access"
     },
     "form": {
       "tenantName": "Organization Name",
@@ -6201,7 +6223,15 @@
       "statusPlaceholder": "Select status",
       "adminFirstName": "Admin First Name",
       "adminLastName": "Admin Last Name",
-      "adminEmail": "Admin Email"
+      "adminEmail": "Admin Email",
+      "accessEndsAt": "Access ends",
+      "accessEndsAtHint": "Access lasts until the end of the selected day. Leave empty for unlimited access.",
+      "sections": {
+        "organization": "Organization",
+        "firstAdmin": "First admin"
+      },
+      "accessEndsAtPlaceholder": "Unlimited access",
+      "accessEndsAtClear": "Remove end date"
     },
     "validation": {
       "nameRequired": "Name is required",
@@ -6214,6 +6244,11 @@
       "tenantCreatedSuccessfully": "Organization created successfully",
       "tenantUpdatedSuccessfully": "Organization updated successfully",
       "tenantDeletedSuccessfully": "Organization deleted permanently"
+    },
+    "standing": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "accessEnded": "Access ended"
     }
   },
   "superAdminTenants": {
@@ -6278,42 +6313,55 @@
     "description": "This workspace is currently inactive. If you believe this is a mistake, contact your administrator to restore access."
   },
   "integrationApiKey": {
-    "title": "Integration API key",
-    "description": "Generate a long-lived key for external integrations. Replacing the key immediately revokes the previous one.",
-    "status": "Status",
-    "active": "Active",
-    "inactive": "Not generated",
-    "prefix": "Key prefix",
-    "createdAt": "Created at",
-    "lastUsedAt": "Last used at",
-    "loading": "Loading key metadata...",
-    "generate": "Generate key",
-    "override": "Override key",
+    "title": "Integration API keys",
+    "description": "Keys let external systems call the integration API with admin access. Create a separate key for each integration so you can revoke it on its own.",
+    "loading": "Loading keys...",
     "copy": "Copy key",
     "generated": {
-      "title": "Copy this key now. It will not be shown again."
+      "title": "Copy this key now. It will not be shown again.",
+      "dismiss": "Done"
     },
-    "confirm": {
-      "title": "Override current API key?",
-      "description": "This action revokes the current key immediately. Integrations using it will stop working.",
-      "action": "Override key"
+    "create": {
+      "button": "Create key",
+      "title": "Create integration API key",
+      "description": "Name the key after the system that will use it.",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. CRM sync",
+      "action": "Create key"
+    },
+    "revoke": {
+      "button": "Revoke",
+      "title": "Revoke \"{{name}}\"?",
+      "description": "Integrations using this key stop working immediately. This cannot be undone.",
+      "action": "Revoke key"
+    },
+    "table": {
+      "key": "Key",
+      "created": "Created",
+      "createdBy": "by {{email}}",
+      "lastUsedAt": "Last used",
+      "actions": "Actions",
+      "empty": "No integration API keys yet",
+      "emptyHint": "Create a key for each system that needs access to the integration API."
     },
     "toast": {
-      "fetchSuccess": "Integration API key loaded successfully",
-      "rotateSuccess": "Integration API key updated successfully",
-      "rotateError": "Failed to update integration API key",
+      "createSuccess": "Integration API key created",
+      "createError": "Failed to create integration API key",
+      "revokeSuccess": "Integration API key revoked",
+      "revokeError": "Failed to revoke integration API key",
       "copySuccess": "Integration API key copied",
       "copyError": "Failed to copy integration API key"
     },
     "errors": {
-      "rotateFailed": "Failed to rotate integration API key",
       "invalidApiKey": "Invalid integration API key",
       "ownerInactive": "API key owner is no longer active",
       "ownerNotAdmin": "API key owner no longer has admin permissions",
       "missingApiKeyHeader": "Missing X-API-Key header",
       "missingTenantIdHeader": "Missing X-Tenant-Id header",
       "invalidPluginOrigin": "Use an HTTPS plugin origin without a path (HTTP localhost is allowed in development)",
-      "pluginAddressUnavailable": "Could not verify the plugin address. Try again."
+      "pluginAddressUnavailable": "Could not verify the plugin address. Try again.",
+      "createFailed": "Failed to create integration API key",
+      "notFound": "Integration API key not found"
     }
   },
   "courseDuplication": {
@@ -6690,13 +6738,6 @@
       "averageRating": "Avg. rating",
       "detailedStatisticsSoon": "Detailed statistics coming soon",
       "detailedStatisticsDescription": "This section will display comprehensive analytics including student progress over time, chapter completion rates, engagement metrics, and more.",
-      "status": {
-        "started": "Started",
-        "completed": "Completed",
-        "inProgress": "In progress",
-        "notStarted": "Not started",
-        "awaitingReview": "Waiting for review"
-      },
       "lessonTypes": {
         "content": "Content",
         "quiz": "Quiz",
@@ -6949,6 +6990,10 @@
       "failed": "Some work needs attention",
       "saved": "Progress saved",
       "reconnecting": "Reconnecting. Your work is saved.",
+      "connectionOffline": "Connection lost. Your work is saved. Reconnect to load the latest updates.",
+      "reconnect": "Reconnect",
+      "connectionPermissionRevoked": "You no longer have access to this course generation session.",
+      "connectionSessionUnavailable": "This course generation session is no longer available.",
       "review": "Review changes",
       "showCourse": "View course outline",
       "controls": "Generation controls",
@@ -8137,7 +8182,9 @@
         "live_training_reminder": "Learners enrolled in courses linked to the upcoming live training.",
         "live_training_ended": "Learners enrolled in courses linked to the live training that ended.",
         "quiz_attempt_graded": "The learner whose quiz answers were graded.",
-        "quiz_grading_digest": "Users who can grade quiz answers."
+        "quiz_grading_digest": "Users who can grade quiz answers.",
+        "forum_mention": "The users mentioned in the forum post.",
+        "discussion_reply": "Participants of the thread or topic who have not read the replies in the application."
       }
     },
     "mapping": {
@@ -8237,7 +8284,9 @@
       "courseChatUserMentioned": "User mentioned in chat",
       "courseDueDateReminder": "Course due date reminder",
       "quizAttemptGraded": "Quiz graded",
-      "quizGradingDigest": "Grading queue digest"
+      "quizGradingDigest": "Grading queue digest",
+      "forumUserMentioned": "Forum mention",
+      "discussionReply": "New replies in a discussion"
     },
     "canvas": {
       "emptyTitle": "Your automation canvas is empty",
@@ -8399,7 +8448,16 @@
       "lessonUrl": "Lesson link",
       "newAnswersCount": "New answers",
       "pendingAnswersCount": "Answers waiting for review",
-      "gradingQueueUrl": "Grading queue link"
+      "gradingQueueUrl": "Grading queue link",
+      "topicTitle": "Topic title",
+      "topicUrl": "Topic link",
+      "discussionName": "Discussion name",
+      "replyCount": "Number of new replies",
+      "replyAuthors": "Reply authors",
+      "latestReply": "Latest reply",
+      "discussionUrl": "Discussion link",
+      "unsubscribeUrl": "Unsubscribe link",
+      "unfollowUrl": "Stop following link"
     },
     "simulation": {
       "title": "Simulation Result",
@@ -9823,10 +9881,15 @@
     "description": "Ask questions and share knowledge with everyone in your organization.",
     "newTopic": "New topic",
     "searchPlaceholder": "Search topics",
-    "filter": {
-      "label": "Show topics",
-      "all": "All topics",
-      "general": "General"
+    "courseDiscussions": {
+      "title": "Course discussions",
+      "heading": "Discussion: {{course}}",
+      "messages_one": "{{count}} message",
+      "messages_other": "{{count}} messages",
+      "viewAll": "All course discussions ({{count}})",
+      "searchPlaceholder": "Search courses",
+      "empty": "None of your courses has a discussion yet.",
+      "noResults": "No course discussions match your search."
     },
     "sort": {
       "label": "Sort topics",
@@ -9851,7 +9914,6 @@
     },
     "topic": {
       "backToForum": "Back to forum",
-      "courseThreadTitle": "Discussion in {{course}}",
       "noReplies": "No replies yet.",
       "replyPlaceholder": "Write a reply",
       "replySubmit": "Reply",
@@ -9864,15 +9926,100 @@
     "toast": {
       "createTopicError": "The topic could not be created.",
       "createPostError": "The reply could not be sent.",
-      "deletePostError": "The post could not be deleted."
+      "deletePostError": "The post could not be deleted.",
+      "mentioned": "Someone mentioned you in the forum.",
+      "reactionError": "The reaction could not be saved."
     },
     "errors": {
       "topicNotFound": "This topic doesn't exist or you don't have access to it.",
+      "courseDiscussionNotFound": "This course discussion doesn't exist or you don't have access to it.",
       "postNotFound": "This post no longer exists.",
       "cannotDeletePost": "You can only delete your own posts.",
       "topicDeleted": "Replies are closed because the first post was deleted.",
       "emptyTitle": "Enter a title.",
-      "emptyContent": "Enter a message."
+      "emptyContent": "Enter a message.",
+      "invalidReaction": "Choose one of the available reactions."
+    }
+  },
+  "a11y": {
+    "goToHomepage": "Go to homepage",
+    "platformLogo": "Platform logo",
+    "uploadedImage": "Uploaded image",
+    "uploadQueue": "Upload queue",
+    "formattingOptions": "Formatting options",
+    "switchToLightMode": "Switch to light mode",
+    "switchToDarkMode": "Switch to dark mode",
+    "videoPlayer": "Video player",
+    "videoQuality": "Video quality",
+    "breadcrumb": "Breadcrumb",
+    "more": "More",
+    "carousel": "carousel",
+    "slide": "slide",
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "remove": "Remove",
+    "clearAll": "Clear all",
+    "expandOptions": "Expand options",
+    "collapseOptions": "Collapse options",
+    "selectAll": "Select all",
+    "selectRow": "Select row",
+    "deleteChapter": "Delete chapter",
+    "cancelEditing": "Cancel editing",
+    "removeFile": "Remove file",
+    "editSection": "Edit section",
+    "deleteSection": "Delete section",
+    "avatar": "Avatar",
+    "avatarFor": "Avatar for {{name}}",
+    "selectGroup": "Select group {{name}}",
+    "lessonWithTitle": "Lesson: {{title}}"
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Discussion notifications",
+      "saving": "Saving…",
+      "replyInApp": {
+        "label": "Replies – in the application",
+        "description": "Show a notification when someone replies in a discussion you follow."
+      },
+      "replyEmails": {
+        "label": "Replies – by email",
+        "description": "Send one email with the new replies in a discussion you follow."
+      },
+      "mentionEmails": {
+        "label": "Mentions – by email",
+        "description": "Send an email when someone mentions you in a discussion."
+      },
+      "toast": {
+        "saved": "Notification settings saved.",
+        "error": "Could not save the notification settings."
+      }
+    },
+    "following": {
+      "follow": "Follow",
+      "following": "Following",
+      "followHint": "Get notified about new replies in this discussion.",
+      "unfollowHint": "Stop notifications about new replies in this discussion.",
+      "toast": {
+        "followed": "You follow this discussion.",
+        "unfollowed": "You no longer follow this discussion.",
+        "error": "Could not change following."
+      }
+    },
+    "unsubscribe": {
+      "title": "Discussion notifications",
+      "confirmDescription": "Confirm that you want to turn these notifications off.",
+      "confirm": "Confirm",
+      "invalidLink": "This link is invalid or has expired.",
+      "manageInSettings": "Manage notifications in settings",
+      "done": {
+        "replies": "You will no longer get emails about replies in discussions.",
+        "mentions": "You will no longer get emails about mentions.",
+        "thread": "You no longer follow this discussion."
+      },
+      "tryAgain": "Something went wrong. Try again in a moment."
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "This link is invalid or has expired."
     }
   }
 }

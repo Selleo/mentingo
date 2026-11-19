@@ -82,6 +82,8 @@ import {
   updateMFAEnforcedRolesSchema,
   UpdateSettingsBody,
   updateSettingsBodySchema,
+  UpdateNotificationPreferencesBody,
+  updateNotificationPreferencesBodySchema,
   updateConfigWarningDismissedSchema,
   UpdateConfigWarningDismissedBody,
   updateAgeLimitSchema,
@@ -166,6 +168,24 @@ export class SettingsController {
   ): Promise<BaseResponse<SettingsJSONContentSchema>> {
     return new BaseResponse(
       toPublicUserSettings(await this.settingsService.updateUserSettings(userId, updatedSettings)),
+    );
+  }
+
+  @Patch("notifications")
+  @UseGuards(DisallowInSupportModeGuard)
+  @RequirePermission(PERMISSIONS.SETTINGS_UPDATE_SELF)
+  @Validate({
+    request: [{ type: "body", schema: updateNotificationPreferencesBodySchema }],
+    response: baseResponse(settingsJSONContentSchema),
+  })
+  async updateNotificationPreferences(
+    @Body() preferences: UpdateNotificationPreferencesBody,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<SettingsJSONContentSchema>> {
+    return new BaseResponse(
+      toPublicUserSettings(
+        await this.settingsService.updateNotificationPreferences(userId, preferences),
+      ),
     );
   }
 

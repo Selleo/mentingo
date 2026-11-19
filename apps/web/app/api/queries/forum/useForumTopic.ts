@@ -1,32 +1,26 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 
 import { ApiClient } from "~/api/api-client";
 
 import { FORUM_QUERY_KEY } from "./forumQueryKeys";
+import { isMissingForumResourceError } from "./isMissingForumResourceError";
 
-import type { SupportedLanguages } from "@repo/shared";
-
-const MISSING_TOPIC_STATUSES = [400, 404];
-
-export const forumTopicQueryOptions = (topicId: string, language: SupportedLanguages) =>
+export const forumTopicQueryOptions = (topicId: string) =>
   queryOptions({
-    queryKey: [...FORUM_QUERY_KEY, "topic", topicId, language],
+    queryKey: [...FORUM_QUERY_KEY, "topic", topicId],
     queryFn: async () => {
       try {
-        const response = await ApiClient.api.forumControllerGetTopic(topicId, { language });
+        const response = await ApiClient.api.forumControllerGetTopic(topicId);
 
         return response.data.data;
       } catch (error) {
-        const status = isAxiosError(error) ? error.response?.status : undefined;
-
-        if (status && MISSING_TOPIC_STATUSES.includes(status)) return null;
+        if (isMissingForumResourceError(error)) return null;
 
         throw error;
       }
     },
   });
 
-export function useForumTopicSuspense(topicId: string, language: SupportedLanguages) {
-  return useSuspenseQuery(forumTopicQueryOptions(topicId, language));
+export function useForumTopicSuspense(topicId: string) {
+  return useSuspenseQuery(forumTopicQueryOptions(topicId));
 }

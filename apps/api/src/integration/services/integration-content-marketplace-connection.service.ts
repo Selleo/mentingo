@@ -52,6 +52,24 @@ export class IntegrationContentMarketplaceConnectionService {
     return { tenantId };
   }
 
+  async clearContentMarketplaceConnection(
+    tenantId: UUIDType,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationPluginConfigured> {
+    assertCanManageTenants(actor, keyTenant);
+    await this.assertTenantExists(tenantId);
+
+    await this.tenantDbRunner.runWithTenantTransaction(tenantId, () =>
+      this.envService.removeEnvValues(Object.values(CONTENT_MARKETPLACE_ENV), {
+        ...actor,
+        tenantId,
+      }),
+    );
+
+    return { tenantId };
+  }
+
   /** Reports whether the tenant reaches the plugin with its saved credentials; never returns them. */
   async checkContentMarketplaceConnection(
     tenantId: UUIDType,

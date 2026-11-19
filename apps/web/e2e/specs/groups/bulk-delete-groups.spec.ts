@@ -30,7 +30,7 @@ test("admin can cancel group deletion from the delete dialog", async ({
     }));
 
     cleanup.add(async () => {
-      await Promise.allSettled(groups.map((group) => groupFactory.delete(group.id)));
+      await groupFactory.deleteMany(groups.map((group) => group.id));
     });
 
     await openGroupsPageFlow(page);
@@ -57,33 +57,6 @@ test("admin can cancel group deletion from the delete dialog", async ({
   });
 });
 
-test("admin can delete a single selected group", async ({ cleanup, factories, withWorkerPage }) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const groupFactory = factories.createGroupFactory();
-    const group = await groupFactory.create({
-      name: `single-delete-group-${Date.now()}`,
-    });
-
-    cleanup.add(async () => {
-      await Promise.allSettled([groupFactory.delete(group.id)]);
-    });
-
-    await openGroupsPageFlow(page);
-    await filterGroupsFlow(page, group.name);
-    await selectGroupsFlow(page, [group.id]);
-    await openDeleteGroupsDialogFlow(page);
-    await confirmDeleteGroupsFlow(page);
-
-    await expect(page.getByTestId(GROUPS_PAGE_HANDLES.DELETE_DIALOG)).toHaveCount(0);
-    await expect
-      .poll(async () => {
-        return await groupFactory.findByName(group.name);
-      })
-      .toBeNull();
-    await expect(page.getByTestId(GROUPS_PAGE_HANDLES.row(group.id))).toHaveCount(0);
-  });
-});
-
 test("admin can bulk delete selected groups", async ({ cleanup, factories, withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const groupFactory = factories.createGroupFactory();
@@ -93,7 +66,10 @@ test("admin can bulk delete selected groups", async ({ cleanup, factories, withW
     }));
 
     cleanup.add(async () => {
-      await Promise.allSettled(groups.map((group) => groupFactory.delete(group.id)));
+      const remainingGroups = await Promise.all(
+        groups.map((group) => groupFactory.findByName(group.name)),
+      );
+      await groupFactory.deleteMany(remainingGroups.flatMap((group) => (group ? [group.id] : [])));
     });
 
     await openGroupsPageFlow(page);

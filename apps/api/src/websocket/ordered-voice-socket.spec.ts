@@ -1,4 +1,4 @@
-import { UseGuards } from "@nestjs/common";
+import { UnauthorizedException, UseGuards } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import {
   ConnectedSocket,
@@ -64,7 +64,8 @@ it.each([false, true])(
       await firstAuth;
       return claims;
     });
-    if (revoked) verify.mockRejectedValue(new Error("Synthetic session revocation"));
+    if (revoked)
+      verify.mockRejectedValue(new UnauthorizedException("Synthetic session revocation"));
     else verify.mockResolvedValue(claims);
     const module = await Test.createTestingModule({
       providers: [

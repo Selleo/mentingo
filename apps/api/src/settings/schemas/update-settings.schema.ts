@@ -8,6 +8,7 @@ import { ALLOWED_CURRENCIES } from "../constants/settings.constants";
 import {
   dashboardLayoutWidgetSchema,
   adminSettingsJSONContentSchema,
+  discussionNotificationPreferencesSchema,
   studentSettingsJSONContentSchema,
 } from "./settings.schema";
 
@@ -27,6 +28,11 @@ export const updateSettingsBodySchema = Type.Partial(
     },
     { additionalProperties: false },
   ),
+);
+
+export const updateNotificationPreferencesBodySchema = Type.Object(
+  discussionNotificationPreferencesSchema.properties,
+  { additionalProperties: false, minProperties: 1 },
 );
 
 export const updateDashboardSettingsBodySchema = Type.Object({
@@ -89,6 +95,9 @@ export const updateLeaderboardSettingsSchema = Type.Partial(
 );
 
 export type UpdateSettingsBody = Static<typeof updateSettingsBodySchema>;
+export type UpdateNotificationPreferencesBody = Static<
+  typeof updateNotificationPreferencesBodySchema
+>;
 export type UpdateDashboardSettingsBody = Static<typeof updateDashboardSettingsBodySchema>;
 export type ResetDashboardSettingsBody = Static<typeof resetDashboardSettingsBodySchema>;
 export type UpdateMFAEnforcedRolesRequest = Static<typeof updateMFAEnforcedRolesSchema>;

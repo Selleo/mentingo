@@ -27,10 +27,14 @@ export const useCourseAuthoringSession = (
   );
 
   /** Refreshes the current durable snapshot when a session is available. */
-  const refetchSnapshot = useCallback(async () => {
-    if (!sessionId) return undefined;
-    return refreshAuthoringSession(courseId, sessionId);
-  }, [courseId, sessionId]);
+  const refetchSnapshot = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!sessionId) return undefined;
+      if (signal) return refreshAuthoringSession(courseId, sessionId, undefined, signal);
+      return refreshAuthoringSession(courseId, sessionId);
+    },
+    [courseId, sessionId],
+  );
 
   const commandMutation = useCourseAuthoringCommand({
     courseId,

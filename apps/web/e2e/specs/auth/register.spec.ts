@@ -1,70 +1,75 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { REGISTER_PAGE_HANDLES } from "../../data/auth/handles";
+import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
+import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { login, logout } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
 import { fillRegisterFormFlow } from "../../flows/auth/fill-register-form.flow";
 import { openRegisterPageFlow } from "../../flows/auth/open-register-page.flow";
 import { submitRegisterFormFlow } from "../../flows/auth/submit-register-form.flow";
+import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
+import { setInviteOnlyRegistrationFlow } from "../../flows/settings/set-invite-only-registration.flow";
 
-const REGISTER_PASSWORD = "Password123@";
+test("visitor can register a new account", async ({
+  cleanup,
+  createWorkspacePage,
+  factories,
+  withWorkerPage,
+}) => {
+  const email = `register-${Date.now()}@example.com`;
 
-test("visitor can register a new account", async ({ cleanup, factories, withWorkerPage }) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+  await withWorkerPage(USER_ROLE.admin, async () => {
     const userFactory = factories.createUserFactory();
-    const email = `register-${Date.now()}@example.com`;
-
-    await openRegisterPageFlow(page);
-    await fillRegisterFormFlow(page, {
-      firstName: "Register",
-      lastName: "User",
-      email,
-      password: REGISTER_PASSWORD,
-    });
-    await submitRegisterFormFlow(page);
-
-    await expect
-      .poll(async () => {
-        const createdUser = await userFactory.getByEmail(email);
-        return createdUser?.id ?? null;
-      })
-      .not.toBeNull();
 
     cleanup.add(async () => {
       const createdUser = await userFactory.getByEmail(email);
 
       if (createdUser) await userFactory.delete(createdUser.id);
     });
-
-    const createdUser = await userFactory.getByEmail(email);
-
-    if (!createdUser) throw new Error(`Expected registered user ${email} to exist`);
-
-    await expect(page).toHaveURL("/dashboard");
-    await logout(page);
-    await login(page, email, REGISTER_PASSWORD);
-    await expect(page).toHaveURL("/dashboard");
   });
+
+  const { context, page } = await createWorkspacePage();
+  cleanup.add(() => context.close());
+
+  await openRegisterPageFlow(page);
+  await fillRegisterFormFlow(page, {
+    firstName: "Register",
+    lastName: "User",
+    email,
+    password: TEST_PASSWORD,
+  });
+  await submitRegisterFormFlow(page);
+
+  await expect(page).toHaveURL("/dashboard");
+  await logout(page);
+  await login(page, email, TEST_PASSWORD);
+  await expect(page).toHaveURL("/dashboard");
 });
 
-test("visitor cannot submit invalid registration data", async ({ withWorkerPage }) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await openRegisterPageFlow(page);
+test("visitor cannot submit invalid registration data", async ({
+  cleanup,
+  createWorkspacePage,
+}) => {
+  const { context, page } = await createWorkspacePage();
+  cleanup.add(() => context.close());
 
-    await fillRegisterFormFlow(page, {
-      firstName: "A",
-      lastName: "B",
-      email: "not-an-email",
-      password: "short",
-    });
+  await openRegisterPageFlow(page);
 
-    await expect(page.getByTestId(REGISTER_PAGE_HANDLES.SUBMIT)).toBeDisabled();
+  await fillRegisterFormFlow(page, {
+    firstName: "A",
+    lastName: "B",
+    email: "not-an-email",
+    password: "short",
   });
+
+  await expect(page.getByTestId(REGISTER_PAGE_HANDLES.SUBMIT)).toBeDisabled();
 });
 
-test("visitor sees an explanation and sign-in link when registration is invite-only", async ({
+test("enabling invite-only registration shows visitors the invite-only screen", async ({
   apiClient,
   cleanup,
+  createWorkspacePage,
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
@@ -80,24 +85,20 @@ test("visitor sees an explanation and sign-in link when registration is invite-o
       }
     });
 
-    if (!originalValue) {
-      await apiClient.api.settingsControllerUpdateInviteOnlyRegistration();
-    }
+    await openSettingsPageFlow(page);
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB).click();
+    await setInviteOnlyRegistrationFlow(page, { current: originalValue, enabled: true });
+    await expect.poll(getInviteOnlyRegistration).toBe(true);
 
-    await page.context().clearCookies();
-    await page.addInitScript(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-    });
-    await page.goto("/auth/register");
+    const visitor = await createWorkspacePage();
+    cleanup.add(() => visitor.context.close());
 
-    await expect(page).toHaveURL("/auth/register");
-    await expect(
-      page.getByRole("heading", { name: "Registration is only possible by invitation." }),
-    ).toBeVisible();
-    await expect(page.getByTestId(REGISTER_PAGE_HANDLES.PAGE)).toHaveCount(0);
+    await visitor.page.goto("/auth/register");
 
-    await page.getByRole("link", { name: "Sign in" }).click();
-    await expect(page).toHaveURL("/auth/login");
+    await expect(visitor.page.getByTestId(REGISTER_PAGE_HANDLES.INVITE_ONLY)).toBeVisible();
+    await expect(visitor.page.getByTestId(REGISTER_PAGE_HANDLES.PAGE)).toHaveCount(0);
+
+    await visitor.page.getByTestId(REGISTER_PAGE_HANDLES.INVITE_ONLY_SIGN_IN_LINK).click();
+    await expect(visitor.page).toHaveURL("/auth/login");
   });
 });

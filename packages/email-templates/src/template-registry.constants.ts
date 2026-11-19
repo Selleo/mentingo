@@ -220,4 +220,22 @@ export const EMAIL_TEMPLATE_NAMES: Record<
     es: "Respuestas pendientes de revisión",
     fr: "Réponses en attente d’évaluation",
   },
+  FORUM_MENTION: {
+    en: "Forum mention",
+    pl: "Wzmianka na forum",
+    de: "Erwähnung im Forum",
+    lt: "Paminėjimas forume",
+    cs: "Zmínka ve fóru",
+    es: "Mención en el foro",
+    fr: "Mention sur le forum",
+  },
+  DISCUSSION_REPLY: {
+    en: "New replies in a discussion",
+    pl: "Nowe odpowiedzi w dyskusji",
+    de: "Neue Antworten in einer Diskussion",
+    lt: "Nauji atsakymai diskusijoje",
+    cs: "Nové odpovědi v diskusi",
+    es: "Nuevas respuestas en una discusión",
+    fr: "Nouvelles réponses dans une discussion",
+  },
 };

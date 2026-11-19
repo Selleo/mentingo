@@ -57,7 +57,8 @@ describe("plugin connection (e2e)", () => {
     const cookies = await cookieFor(admin, app);
     await dbAdmin.update(tenants).set({ isManaging }).where(eq(tenants.id, admin.tenantId));
     const response = await request(app.getHttpServer())
-      .post("/api/integration/key")
+      .post("/api/integration/keys")
+      .send({ name: "Test integration key" })
       .set("Cookie", cookies)
       .expect(201);
     return { admin, apiKey: response.body.data.key as string };

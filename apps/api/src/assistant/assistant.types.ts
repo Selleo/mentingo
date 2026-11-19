@@ -18,7 +18,10 @@ export type AssistantRun = typeof assistantRuns.$inferSelect;
 export type AssistantRunCursor = Pick<AssistantRun, "createdAt" | "id">;
 export type AssistantRunIdentity = { runId: string; tenantId: string };
 export type AssistantActorIdentity = { tenantId: string; userId: string };
-export type AssistantTenantState = Pick<typeof tenants.$inferSelect, "host" | "status">;
+export type AssistantTenantState = Pick<
+  typeof tenants.$inferSelect,
+  "host" | "status" | "accessEndsAt"
+>;
 export type AssistantStartInput = AssistantRunIdentity & {
   threadId: string;
   userId: string;

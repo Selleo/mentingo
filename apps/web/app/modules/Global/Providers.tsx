@@ -8,6 +8,7 @@ import { useCourseDuplicationNotifications } from "~/hooks/useCourseDuplicationN
 import { useGlobalCourseAuthoringNotifications } from "~/hooks/useGlobalCourseAuthoringNotifications";
 import { useGlobalScormImportNotifications } from "~/hooks/useGlobalScormImportNotifications";
 import { useGlobalVideoUploadNotifications } from "~/hooks/useGlobalVideoUploadNotifications";
+import { useLiveNotifications } from "~/hooks/useLiveNotifications";
 import { useLiveTrainingInvalidationSocket } from "~/hooks/useLiveTrainingInvalidationSocket";
 import { useSessionRevocationNotifications } from "~/hooks/useSessionRevocationNotifications";
 import { useVideoUploadResumeStore } from "~/modules/common/store/useVideoUploadResumeStore";
@@ -63,6 +64,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useCourseDuplicationNotifications();
   useLiveTrainingInvalidationSocket();
   useSessionRevocationNotifications();
+  useLiveNotifications();
   const { pruneExpiredUploads } = useVideoUploadResumeStore();
 
   useEffect(() => {

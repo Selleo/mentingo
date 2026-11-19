@@ -8,8 +8,10 @@ import {
 import {
   COURSE_CHAT_ALLOWED_REACTIONS,
   COURSE_CHAT_SOCKET_EVENTS,
+  FORUM_SOCKET_EVENTS,
   PERMISSIONS,
   getCourseChatRoom,
+  getForumRoom,
 } from "@repo/shared";
 
 import { AnnouncementsService } from "src/announcements/announcements.service";
@@ -26,9 +28,9 @@ import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 import type { PermissionKey } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { CourseChatDeletedMessage } from "src/course-chat/course-chat.types";
 import type {
   CourseChatMessageResponse,
+  CourseChatThreadFollowingResponse,
   CourseChatUserResponse,
   CreateCourseChatMessageBody,
   DeleteCourseChatMessageResponse,
@@ -64,12 +66,21 @@ export class CourseChatService {
     userId: UUIDType;
     page?: number;
     perPage?: number;
+    aroundMessageId?: UUIDType;
   }): Promise<PaginatedResponse<CourseChatMessageResponse[]>> {
     await this.assertUserEnrolledInCourse(params.courseId, params.userId);
 
+    const page = params.aroundMessageId
+      ? await this.courseChatRepository.findTopLevelMessagePage(
+          params.courseId,
+          params.aroundMessageId,
+          params.perPage,
+        )
+      : params.page;
+
     const messages = await this.courseChatRepository.getTopLevelMessages(
       params.courseId,
-      params.page,
+      page,
       params.perPage,
     );
 
@@ -185,6 +196,7 @@ export class CourseChatService {
           actorUserId: currentUser.userId,
           messageId: createdMessageId,
           parentMessageId: body.parentMessageId,
+          mentionedUserIds,
         },
         trx,
       );
@@ -210,6 +222,7 @@ export class CourseChatService {
       getCourseChatRoom(courseId),
       message,
     );
+    this.realtimePublisher.emitToRoom(FORUM_SOCKET_EVENTS.CHANGED, getForumRoom(tenantId), {});
     this.emitMentionRealtimeNotifications({
       courseId,
       message,
@@ -217,6 +230,25 @@ export class CourseChatService {
     });
 
     return new BaseResponse(message);
+  }
+
+  async setThreadFollowing(
+    messageId: UUIDType,
+    userId: UUIDType,
+    isFollowing: boolean,
+  ): Promise<BaseResponse<CourseChatThreadFollowingResponse>> {
+    const message = await this.courseChatRepository.getMessageContext(messageId);
+
+    if (!message || message.deletedAt) {
+      throw new NotFoundException("courseChat.errors.messageNotFound");
+    }
+
+    await this.assertUserEnrolledInCourse(message.courseId, userId);
+
+    if (isFollowing) await this.courseChatRepository.followThread(message.threadId, userId);
+    else await this.courseChatRepository.unfollowThread(message.threadId, userId);
+
+    return new BaseResponse({ messageId, isFollowing });
   }
 
   async toggleMessageReaction(
@@ -265,16 +297,6 @@ export class CourseChatService {
     userId: UUIDType,
     permissions: PermissionKey[],
   ): Promise<BaseResponse<DeleteCourseChatMessageResponse>> {
-    const { payload } = await this.deleteCourseMessage(messageId, userId, permissions);
-
-    return new BaseResponse(payload);
-  }
-
-  async deleteCourseMessage(
-    messageId: UUIDType,
-    userId: UUIDType,
-    permissions: PermissionKey[],
-  ): Promise<CourseChatDeletedMessage> {
     const message = await this.courseChatRepository.getMessageContext(messageId);
     if (!message || message.deletedAt || !message.userId) {
       throw new NotFoundException("courseChat.errors.messageNotFound");
@@ -307,8 +329,13 @@ export class CourseChatService {
       getCourseChatRoom(message.courseId),
       payload,
     );
+    this.realtimePublisher.emitToRoom(
+      FORUM_SOCKET_EVENTS.CHANGED,
+      getForumRoom(message.tenantId),
+      {},
+    );
 
-    return { payload, threadRemoved: deletion.threadRemoved };
+    return new BaseResponse(payload);
   }
 
   private async getAccessibleMessage(messageId: UUIDType, userId: UUIDType) {
@@ -348,7 +375,7 @@ export class CourseChatService {
     return normalized;
   }
 
-  private isAllowedReaction(reaction: string) {
+  isAllowedReaction(reaction: string) {
     return (COURSE_CHAT_ALLOWED_REACTIONS as readonly string[]).includes(reaction);
   }
 
@@ -358,6 +385,7 @@ export class CourseChatService {
       actorUserId: UUIDType;
       messageId: UUIDType;
       parentMessageId?: UUIDType;
+      mentionedUserIds: UUIDType[];
     },
     dbInstance?: DatabasePg,
   ) {
@@ -368,6 +396,7 @@ export class CourseChatService {
           actorUserId: params.actorUserId,
           messageId: params.messageId,
           parentMessageId: params.parentMessageId,
+          mentionedUserIds: params.mentionedUserIds,
         }),
         dbInstance,
       );

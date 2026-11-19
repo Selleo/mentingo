@@ -50,6 +50,7 @@ export type CreateTenantRecord = {
   name: string;
   host: string;
   status: TenantStatus;
+  accessEndsAt: string | null;
 };
 
 export type CreateTenantOptions = {
@@ -60,4 +61,5 @@ export type UpdateTenantRecord = {
   name?: string;
   host?: string;
   status?: TenantStatus;
+  accessEndsAt?: string | null;
 };
