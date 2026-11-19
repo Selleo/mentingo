@@ -31,12 +31,23 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
       {question.options?.map(({ optionText, id, studentAnswer, isCorrect }, index) => {
         const isAnswered = studentAnswer === "true" || studentAnswer === "false";
         const isCorrectAnswer = isAnswered && studentAnswer === String(isCorrect);
-        // Chrome paints disabled native radios light grey, so review mode draws its own radio;
-        // forced-colors mode keeps the native one, which the system colours correctly.
+        const showsFeedback = !isQuizFeedbackRedacted && isCompleted;
+        const isCorrectCard = showsFeedback && isCorrectAnswer;
+        const isWrongCard = showsFeedback && isAnswered && !isCorrectAnswer;
+        // Browsers paint disabled native radios grey (and Input adds disabled:opacity-50), so review
+        // mode draws its own radio; forced-colors mode keeps the native one, which the system colours correctly.
         const radioClassName = cn("size-4", {
           grayscale: isQuizFeedbackRedacted && isQuizSubmitted,
-          "appearance-none rounded-full border-2 border-neutral-950 p-0 checked:bg-neutral-950 checked:shadow-[inset_0_0_0_2px_white] disabled:opacity-100 forced-colors:appearance-auto":
+          "appearance-none rounded-full border-2 p-0 checked:shadow-[inset_0_0_0_2px_var(--color-white)] disabled:opacity-100 forced-colors:appearance-auto":
             isCompleted,
+          "border-neutral-950 checked:bg-neutral-950":
+            isCompleted && !isCorrectCard && !isWrongCard,
+          "border-success-700 checked:bg-success-700": isCorrectCard,
+          "border-error-700 checked:bg-error-700": isWrongCard,
+        });
+        const labelClassName = cn("flex items-center gap-x-1", {
+          "text-success-700": isCorrectCard,
+          "text-error-700": isWrongCard,
         });
 
         return (
@@ -46,10 +57,8 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
               "body-base flex w-full gap-x-4 rounded-lg border border-neutral-200 px-4 py-3 text-neutral-950 flex-col sm:flex-row",
               {
                 "border-neutral-400 bg-neutral-100": isQuizFeedbackRedacted && isQuizSubmitted,
-                "border-success-700 bg-success-50":
-                  !isQuizFeedbackRedacted && isCompleted && isCorrectAnswer,
-                "border-error-700 bg-error-50":
-                  !isQuizFeedbackRedacted && isCompleted && isAnswered && !isCorrectAnswer,
+                "border-success-700 bg-success-50": isCorrectCard,
+                "border-error-700 bg-error-50": isWrongCard,
                 "has-[input:checked]:bg-primary-50 [&]:has-[input:checked]:border-primary-500":
                   !isCompleted,
                 "pointer-events-none": isCompleted,
@@ -64,7 +73,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
               aria-labelledby={`true-or-false-statement-${id}`}
               className="flex gap-x-4"
             >
-              <label className="flex items-center gap-x-1">
+              <label className={labelClassName}>
                 <Input
                   className={radioClassName}
                   type="radio"
@@ -76,7 +85,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
                 />
                 {t("studentLessonView.other.true")}
               </label>
-              <label className="flex items-center gap-x-1">
+              <label className={labelClassName}>
                 <Input
                   className={radioClassName}
                   {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
