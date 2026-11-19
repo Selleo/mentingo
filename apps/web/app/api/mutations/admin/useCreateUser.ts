@@ -7,6 +7,7 @@ import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
+import { invalidateTenantUserCountQueries } from "~/api/utils/invalidateTenantUserCountQueries";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { CreateUserBody } from "~/api/generated-api";
@@ -29,6 +30,7 @@ export function useCreateUser() {
       });
       await queryClient.invalidateQueries(globalSettingsQueryOptions);
       await invalidateLearningPathEnrollmentData();
+      await invalidateTenantUserCountQueries();
 
       return response.data;
     },

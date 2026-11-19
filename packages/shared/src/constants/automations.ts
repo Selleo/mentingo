@@ -41,6 +41,7 @@ export const AUTOMATION_EVENT_KINDS = {
   QUIZ_GRADING_DIGEST: "quiz_grading_digest",
   FORUM_MENTION: "forum_mention",
   DISCUSSION_REPLY: "discussion_reply",
+  TENANT_USER_CAPACITY: "tenant_user_capacity",
 } as const;
 
 /** Stable resource keys, deliberately separate from the notification catalog. */
@@ -78,6 +79,7 @@ export const BUILT_IN_EMAIL_TEMPLATE_KEYS = {
   QUIZ_GRADING_DIGEST: "quiz_grading_digest",
   FORUM_MENTION: "forum_mention",
   DISCUSSION_REPLY: "discussion_reply",
+  TENANT_USER_CAPACITY: "tenant_user_capacity",
 } as const;
 
 export const AUTOMATION_RUN_STATUSES = {

@@ -189,9 +189,9 @@ export class IntegrationService {
     if (!currentTenant) throw new UnauthorizedException("integrationApiKey.errors.invalidApiKey");
 
     if (!currentTenant.isManaging) {
-      const { id, name, host, status, accessEndsAt } = currentTenant;
+      const { isManaging: _isManaging, ...tenant } = currentTenant;
 
-      return [withIsoAccessEndsAt({ id, name, host, status, accessEndsAt })];
+      return [withIsoAccessEndsAt(tenant)];
     }
 
     const allTenants = await this.integrationRepository.getAllTenants();

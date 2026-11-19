@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { TENANT_STATUSES } from "@repo/shared";
+import { TENANT_STATUSES, TENANT_USER_CAPACITY_ALERT_LEVELS } from "@repo/shared";
 import { Factory } from "fishery";
 
 import { tenants } from "../../src/storage/schema";
@@ -25,6 +25,9 @@ export const createTenantFactory = (dbAdmin: DatabasePg) => {
       status: TENANT_STATUSES.ACTIVE,
       isManaging: false,
       accessEndsAt: null,
+      maxUsers: null,
+      maxUsersOverflowPercentage: 0,
+      userCapacityAlertLevel: TENANT_USER_CAPACITY_ALERT_LEVELS.WITHIN_LIMIT,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

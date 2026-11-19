@@ -20,6 +20,7 @@ export const ANNOUNCEMENT_SOURCE_TYPES = {
   COURSE_CHAT: "course_chat",
   QUIZ_GRADING: "quiz_grading",
   FORUM: "forum",
+  TENANT_USER_CAPACITY: "tenant_user_capacity",
 } as const;
 
 export type AnnouncementSourceType =

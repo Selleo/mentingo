@@ -16,8 +16,10 @@ import { StatisticsModule } from "src/statistics/statistics.module";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { UserImportRepository } from "src/user/repositories/user-import.repository";
+import { UserLimitRepository } from "src/user/repositories/user-limit.repository";
 import { UserPasswordEmailRepository } from "src/user/repositories/user-password-email.repository";
 import { UserImportService } from "src/user/services/user-import.service";
+import { UserLimitService } from "src/user/services/user-limit.service";
 import { UserPasswordEmailService } from "src/user/services/user-password-email.service";
 import { UserInactivityEmailCron } from "src/user/user-inactivity-email-cron";
 
@@ -43,6 +45,8 @@ import { UserService } from "./user.service";
     UserImportService,
     UserPasswordEmailService,
     UserImportRepository,
+    UserLimitRepository,
+    UserLimitService,
     UserPasswordEmailRepository,
     S3Service,
     BunnyStreamService,
@@ -51,6 +55,13 @@ import { UserService } from "./user.service";
     TenantDbRunnerService,
     UserInactivityEmailCron,
   ],
-  exports: [UserService, UserImportService, UserPasswordEmailService, StatisticsService],
+  exports: [
+    UserService,
+    UserImportService,
+    UserLimitService,
+    UserLimitRepository,
+    UserPasswordEmailService,
+    StatisticsService,
+  ],
 })
 export class UserModule {}

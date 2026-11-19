@@ -6,12 +6,12 @@ import type { FixtureApiClient } from "../utils/api-client";
 import type {
   CreateTenantBody,
   FindAllTenantsResponse,
-  FindTenantByIdResponse,
   UpdateTenantByIdBody,
+  UpdateTenantByIdResponse,
 } from "~/api/generated-api";
 
 export type TenantFactoryListRecord = FindAllTenantsResponse["data"][number];
-export type TenantFactoryRecord = FindTenantByIdResponse["data"];
+export type TenantFactoryRecord = UpdateTenantByIdResponse["data"];
 export type TenantFactoryCreateInput = Partial<CreateTenantBody>;
 export type TenantFactoryUpdateInput = UpdateTenantByIdBody;
 

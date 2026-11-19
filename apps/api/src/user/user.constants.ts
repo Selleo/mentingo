@@ -9,3 +9,5 @@ export const AVATAR_ASPECT_RATIO = 1 / 1;
 
 export const USER_SHORT_INACTIVITY_DAYS = 14;
 export const USER_LONG_INACTIVITY_DAYS = 30;
+
+export const ADMIN_USERS_PAGE_PATH = "/admin/users";

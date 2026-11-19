@@ -31,6 +31,7 @@ import {
   supportRolesSchema,
   supportUserScopeSchema,
   supportUsersSchema,
+  tenantDetailsResponseSchema,
   tenantListSortSchema,
   tenantResponseSchema,
   tenantsListSchema,
@@ -48,6 +49,7 @@ import type {
   CreateSupportSessionResponse,
   SupportRolesResponse,
   SupportUsersResponse,
+  TenantDetailsResponse,
   TenantResponse,
   TenantsListResponse,
   ListSupportUsersQuery,
@@ -94,9 +96,9 @@ export class TenantsController {
   @Get(":id")
   @Validate({
     request: [{ type: "param", name: "id", schema: Type.String({ format: "uuid" }) }],
-    response: baseResponse(tenantResponseSchema),
+    response: baseResponse(tenantDetailsResponseSchema),
   })
-  async findTenantById(@Param("id") id: string): Promise<BaseResponse<TenantResponse>> {
+  async findTenantById(@Param("id") id: string): Promise<BaseResponse<TenantDetailsResponse>> {
     const tenant = await this.tenantsService.findTenantById(id);
     return new BaseResponse(tenant);
   }
