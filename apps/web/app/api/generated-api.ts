@@ -32265,10 +32265,13 @@ export interface RunReportBody {
             | "eq"
             | "neq"
             | "in"
+            | "notIn"
             | "contains"
+            | "notContains"
             | "gte"
             | "lte"
             | "between"
+            | "notBetween"
             | "isEmpty"
             | "isNotEmpty";
           value?: string | number | (string | number)[];
@@ -32297,10 +32300,13 @@ export interface RunReportBody {
               | "eq"
               | "neq"
               | "in"
+              | "notIn"
               | "contains"
+              | "notContains"
               | "gte"
               | "lte"
               | "between"
+              | "notBetween"
               | "isEmpty"
               | "isNotEmpty";
             value?: string | number | (string | number)[];
@@ -32359,6 +32365,46 @@ export interface RunReportResponse {
         lastActivityAt: string | null;
         inactiveDays: number | null;
       }[];
+    };
+    pathActivity?: {
+      popular: {
+        /** @format uuid */
+        id: string;
+        label: string;
+        /** @min 0 */
+        activeLearners: number;
+        lastActivityAt: string | null;
+        inactiveDays: number | null;
+      }[];
+      inactive: {
+        /** @format uuid */
+        id: string;
+        label: string;
+        /** @min 0 */
+        activeLearners: number;
+        lastActivityAt: string | null;
+        inactiveDays: number | null;
+      }[];
+    };
+    learningInsights?: {
+      activityTrend: {
+        /** @pattern ^\d{4}-\d{2}$ */
+        month: string;
+        /** @min 0 */
+        activeLearners: number;
+      }[];
+      funnel: {
+        /** @min 0 */
+        learners: number;
+        /** @min 0 */
+        loggedIn: number;
+        /** @min 0 */
+        started: number;
+        /** @min 0 */
+        completed: number;
+      };
+      /** @min 0 */
+      aiMentorConversations: number;
     };
     rows: {
       id: string;
@@ -32432,6 +32478,12 @@ export interface RunReportResponse {
         courseEnrollments: number;
         /** @min 0 */
         courseCompletions: number;
+        /** @min 0 */
+        courseInProgress: number;
+        /** @min 0 */
+        courseCount: number;
+        averageProgress: number | null;
+        averageScore: number | null;
         completionRate: number | null;
       }[];
       courses: {
@@ -32443,6 +32495,12 @@ export interface RunReportResponse {
         courseEnrollments: number;
         /** @min 0 */
         courseCompletions: number;
+        /** @min 0 */
+        courseInProgress: number;
+        /** @min 0 */
+        courseCount: number;
+        averageProgress: number | null;
+        averageScore: number | null;
         completionRate: number | null;
       }[];
       paths: {
@@ -32454,6 +32512,12 @@ export interface RunReportResponse {
         courseEnrollments: number;
         /** @min 0 */
         courseCompletions: number;
+        /** @min 0 */
+        courseInProgress: number;
+        /** @min 0 */
+        courseCount: number;
+        averageProgress: number | null;
+        averageScore: number | null;
         completionRate: number | null;
       }[];
     };
@@ -32542,10 +32606,13 @@ export interface ListReportConfigurationsResponse {
                 | "eq"
                 | "neq"
                 | "in"
+                | "notIn"
                 | "contains"
+                | "notContains"
                 | "gte"
                 | "lte"
                 | "between"
+                | "notBetween"
                 | "isEmpty"
                 | "isNotEmpty";
               value?: string | number | (string | number)[];
@@ -32574,10 +32641,13 @@ export interface ListReportConfigurationsResponse {
                   | "eq"
                   | "neq"
                   | "in"
+                  | "notIn"
                   | "contains"
+                  | "notContains"
                   | "gte"
                   | "lte"
                   | "between"
+                  | "notBetween"
                   | "isEmpty"
                   | "isNotEmpty";
                 value?: string | number | (string | number)[];
@@ -32643,10 +32713,13 @@ export interface CreateReportConfigurationBody {
               | "eq"
               | "neq"
               | "in"
+              | "notIn"
               | "contains"
+              | "notContains"
               | "gte"
               | "lte"
               | "between"
+              | "notBetween"
               | "isEmpty"
               | "isNotEmpty";
             value?: string | number | (string | number)[];
@@ -32675,10 +32748,13 @@ export interface CreateReportConfigurationBody {
                 | "eq"
                 | "neq"
                 | "in"
+                | "notIn"
                 | "contains"
+                | "notContains"
                 | "gte"
                 | "lte"
                 | "between"
+                | "notBetween"
                 | "isEmpty"
                 | "isNotEmpty";
               value?: string | number | (string | number)[];
@@ -32734,10 +32810,13 @@ export interface CreateReportConfigurationResponse {
                 | "eq"
                 | "neq"
                 | "in"
+                | "notIn"
                 | "contains"
+                | "notContains"
                 | "gte"
                 | "lte"
                 | "between"
+                | "notBetween"
                 | "isEmpty"
                 | "isNotEmpty";
               value?: string | number | (string | number)[];
@@ -32766,10 +32845,13 @@ export interface CreateReportConfigurationResponse {
                   | "eq"
                   | "neq"
                   | "in"
+                  | "notIn"
                   | "contains"
+                  | "notContains"
                   | "gte"
                   | "lte"
                   | "between"
+                  | "notBetween"
                   | "isEmpty"
                   | "isNotEmpty";
                 value?: string | number | (string | number)[];
@@ -32835,10 +32917,13 @@ export interface UpdateReportConfigurationBody {
               | "eq"
               | "neq"
               | "in"
+              | "notIn"
               | "contains"
+              | "notContains"
               | "gte"
               | "lte"
               | "between"
+              | "notBetween"
               | "isEmpty"
               | "isNotEmpty";
             value?: string | number | (string | number)[];
@@ -32867,10 +32952,13 @@ export interface UpdateReportConfigurationBody {
                 | "eq"
                 | "neq"
                 | "in"
+                | "notIn"
                 | "contains"
+                | "notContains"
                 | "gte"
                 | "lte"
                 | "between"
+                | "notBetween"
                 | "isEmpty"
                 | "isNotEmpty";
               value?: string | number | (string | number)[];
@@ -32926,10 +33014,13 @@ export interface UpdateReportConfigurationResponse {
                 | "eq"
                 | "neq"
                 | "in"
+                | "notIn"
                 | "contains"
+                | "notContains"
                 | "gte"
                 | "lte"
                 | "between"
+                | "notBetween"
                 | "isEmpty"
                 | "isNotEmpty";
               value?: string | number | (string | number)[];
@@ -32958,10 +33049,13 @@ export interface UpdateReportConfigurationResponse {
                   | "eq"
                   | "neq"
                   | "in"
+                  | "notIn"
                   | "contains"
+                  | "notContains"
                   | "gte"
                   | "lte"
                   | "between"
+                  | "notBetween"
                   | "isEmpty"
                   | "isNotEmpty";
                 value?: string | number | (string | number)[];
@@ -33023,10 +33117,13 @@ export interface CreateReportExportBody {
               | "eq"
               | "neq"
               | "in"
+              | "notIn"
               | "contains"
+              | "notContains"
               | "gte"
               | "lte"
               | "between"
+              | "notBetween"
               | "isEmpty"
               | "isNotEmpty";
             value?: string | number | (string | number)[];
@@ -33055,10 +33152,13 @@ export interface CreateReportExportBody {
                 | "eq"
                 | "neq"
                 | "in"
+                | "notIn"
                 | "contains"
+                | "notContains"
                 | "gte"
                 | "lte"
                 | "between"
+                | "notBetween"
                 | "isEmpty"
                 | "isNotEmpty";
               value?: string | number | (string | number)[];

@@ -19,8 +19,10 @@ import { CourseAdminStatistics } from "../CourseAdminStatistics/CourseAdminStati
 import { CourseChatTab } from "../CourseChat/CourseChatTab";
 
 import CourseOverviewTabs, {
+  COURSE_OVERVIEW_TAB_SEARCH_PARAM,
   COURSE_OVERVIEW_TABS,
   type CourseOverviewTab,
+  isCourseOverviewTab,
 } from "./CourseOverviewTabs";
 
 type TableOfContentProps = {
@@ -45,9 +47,12 @@ export function TableOfContent({ language }: TableOfContentProps) {
     searchParams.get(COURSE_DISCUSSION_URL_PARAMS.TAB) === COURSE_DISCUSSION_URL_PARAMS.TAB_VALUE;
   const linkedThreadId = searchParams.get(COURSE_DISCUSSION_URL_PARAMS.THREAD) ?? undefined;
 
-  const [selectedTab, setActiveTab] = useState<CourseOverviewTab>(
-    isDiscussionLinked ? COURSE_OVERVIEW_TABS.CHAT : COURSE_OVERVIEW_TABS.TOC,
-  );
+  const [selectedTab, setActiveTab] = useState<CourseOverviewTab>(() => {
+    if (isDiscussionLinked) return COURSE_OVERVIEW_TABS.CHAT;
+
+    const requestedTab = searchParams.get(COURSE_OVERVIEW_TAB_SEARCH_PARAM);
+    return isCourseOverviewTab(requestedTab) ? requestedTab : COURSE_OVERVIEW_TABS.TOC;
+  });
   const [threadRequest, setThreadRequest] = useState({
     threadId: isDiscussionLinked ? linkedThreadId : undefined,
     count: 0,
@@ -115,10 +120,10 @@ export function TableOfContent({ language }: TableOfContentProps) {
   );
 
   useEffect(() => {
-    if (!canShowStatistics && activeTab === COURSE_OVERVIEW_TABS.STATISTICS) {
+    if (currentUser && !canShowStatistics && activeTab === COURSE_OVERVIEW_TABS.STATISTICS) {
       setActiveTab(COURSE_OVERVIEW_TABS.TOC);
     }
-  }, [activeTab, canShowStatistics]);
+  }, [activeTab, canShowStatistics, currentUser]);
 
   return (
     <div data-section="toc" className="rounded-2xl bg-white p-4 shadow-sm md:p-6">

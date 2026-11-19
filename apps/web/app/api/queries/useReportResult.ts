@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
-import type { ReportsQuery } from "~/modules/Reports/reports-api.types";
+import type { ReportsQuery } from "~/modules/Reports/types/reports-api.types";
 
 export const REPORT_RESULT_QUERY_KEY = ["reports", "result"];
 

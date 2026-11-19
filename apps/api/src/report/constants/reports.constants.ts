@@ -26,12 +26,23 @@ export const REPORT_FILTER_OPERATORS = {
   EQ: "eq",
   NEQ: "neq",
   IN: "in",
+  NOT_IN: "notIn",
   CONTAINS: "contains",
+  NOT_CONTAINS: "notContains",
   GTE: "gte",
   LTE: "lte",
   BETWEEN: "between",
+  NOT_BETWEEN: "notBetween",
   IS_EMPTY: "isEmpty",
   IS_NOT_EMPTY: "isNotEmpty",
+} as const;
+
+/** Each excluding operator and the matching operator it negates. */
+export const REPORT_NEGATED_FILTER_OPERATORS = {
+  [REPORT_FILTER_OPERATORS.NEQ]: REPORT_FILTER_OPERATORS.EQ,
+  [REPORT_FILTER_OPERATORS.NOT_IN]: REPORT_FILTER_OPERATORS.IN,
+  [REPORT_FILTER_OPERATORS.NOT_CONTAINS]: REPORT_FILTER_OPERATORS.CONTAINS,
+  [REPORT_FILTER_OPERATORS.NOT_BETWEEN]: REPORT_FILTER_OPERATORS.BETWEEN,
 } as const;
 
 export const REPORT_FILTER_MATCH = {
@@ -86,7 +97,13 @@ export const REPORT_FAILURE_CODE = {
   EXPORT_FAILED: REPORT_ERRORS.EXPORT_GENERATION_FAILED,
 } as const;
 
-export const REPORT_LIMITS = { CONDITIONS: 30, SELECTOR_OPTIONS: 100, PAGE_SIZE: 100 } as const;
+export const REPORT_LIMITS = {
+  CONDITIONS: 30,
+  SELECTOR_OPTIONS: 100,
+  PAGE_SIZE: 100,
+  COURSE_ACTIVITY_RANKING: 8,
+  ACTIVITY_TREND_MONTHS: 12,
+} as const;
 
 export type ReportConfigurationVisibility =
   (typeof REPORT_CONFIGURATION_VISIBILITY)[keyof typeof REPORT_CONFIGURATION_VISIBILITY];

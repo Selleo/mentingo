@@ -187,7 +187,7 @@ function describeCondition(
   return match(condition.operator)
     .with(P.union(OPERATOR.IS_EMPTY, OPERATOR.IS_NOT_EMPTY), () => `${field} ${operator}`)
     .with(
-      OPERATOR.BETWEEN,
+      P.union(OPERATOR.BETWEEN, OPERATOR.NOT_BETWEEN),
       () =>
         `${field} ${operator} ${describeValue(values[0])} ${labels.rangeAnd} ${describeValue(
           values[1],
@@ -247,10 +247,13 @@ function getOperatorLabel(
     .with(OPERATOR.EQ, () => labels.opEq)
     .with(OPERATOR.NEQ, () => labels.opNeq)
     .with(OPERATOR.IN, () => labels.opIn)
+    .with(OPERATOR.NOT_IN, () => labels.opNotIn)
     .with(OPERATOR.CONTAINS, () => labels.opContains)
+    .with(OPERATOR.NOT_CONTAINS, () => labels.opNotContains)
     .with(OPERATOR.GTE, () => labels.opGte)
     .with(OPERATOR.LTE, () => labels.opLte)
     .with(OPERATOR.BETWEEN, () => labels.opBetween)
+    .with(OPERATOR.NOT_BETWEEN, () => labels.opNotBetween)
     .with(OPERATOR.IS_EMPTY, () => labels.opIsEmpty)
     .with(OPERATOR.IS_NOT_EMPTY, () => labels.opIsNotEmpty)
     .exhaustive();

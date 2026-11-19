@@ -1,29 +1,18 @@
 import { faker } from "@faker-js/faker";
 import {
-  ASSESSMENT_ATTEMPT_GRADING_STATUSES,
-  ASSESSMENT_ATTEMPT_RESULTS,
-  ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES,
-  CERTIFICATE_ARCHIVE_REASONS,
-  CERTIFICATE_STATUSES,
-  COURSE_ENROLLMENT,
+  COURSE_STATUSES,
   LEARNING_PATH_ENROLLMENT_TYPES,
-  LEARNING_PATH_PROGRESS_STATUSES,
   LEARNING_PATH_STATUSES,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import * as dotenv from "dotenv";
-import { and, asc, eq, inArray, ne, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, ne } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { sampleSize } from "lodash";
 import postgres from "postgres";
-import { match } from "ts-pattern";
-
-import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import {
-  assessmentAttempts,
   assessments,
-  certificates,
   chapters,
   courses,
   groupUsers,
@@ -31,28 +20,24 @@ import {
   learningPathCourses,
   learningPaths,
   lessons,
-  studentCourses,
   studentLearningPathCourses,
   studentLearningPaths,
-  studentLessonProgress,
   tenants,
   users,
 } from "../storage/schema";
 
 import {
-  REPORTS_SEED_CERTIFICATE_CHANCE,
-  REPORTS_SEED_ENROLLED_DAYS_AGO,
+  REPORTS_SEED_COURSE_IDLE_DAYS,
   REPORTS_SEED_ENROLLMENTS_PER_LEARNER,
   REPORTS_SEED_GROUPS,
   REPORTS_SEED_LEARNER_COUNT,
   REPORTS_SEED_MARKER_EMAIL,
-  REPORTS_SEED_OUTCOME_CHANCE,
   REPORTS_SEED_PATH,
-  REPORTS_SEED_QUIZ_ATTEMPTS,
-  REPORTS_SEED_QUIZ_PASS_PERCENT,
-  REPORTS_SEED_QUIZ_SCORE,
   REPORTS_SEED_RANDOM_SEED,
+  REPORTS_SEED_OUTCOMES,
 } from "./reports-seed-data";
+import { enrollLearner } from "./reports-seed-enrollments";
+import { localizedText, pickOutcome, toPathProgress } from "./reports-seed.utils";
 import {
   addEmailSuffix,
   assignSystemRoleToUser,
@@ -60,7 +45,7 @@ import {
   getTenantEmailSuffix,
 } from "./seed-helpers";
 
-import type { ReportsSeedCourse, ReportsSeedOutcome } from "./seed.types";
+import type { ReportsSeedCourse } from "./seed.types";
 import type { DatabasePg, UUIDType } from "../common";
 
 dotenv.config({ path: "./.env" });
@@ -119,7 +104,7 @@ async function seedTenant(origin: string) {
   for (const learnerId of learnerIds) {
     const enrollmentCount = faker.number.int(REPORTS_SEED_ENROLLMENTS_PER_LEARNER);
     for (const course of sampleSize(seedCourses, enrollmentCount)) {
-      await enrollLearner(tenant.id, learnerId, course, pickOutcome());
+      await enrollLearner(db, tenant.id, learnerId, course, pickOutcome());
     }
   }
 
@@ -142,7 +127,7 @@ async function findPublishedCourses(tenantId: UUIDType): Promise<ReportsSeedCour
       and(
         eq(courses.tenantId, tenantId),
         eq(courses.isArchived, false),
-        ne(courses.status, "draft"),
+        ne(courses.status, COURSE_STATUSES.DRAFT),
       ),
     )
     .orderBy(asc(courses.createdAt));
@@ -170,8 +155,9 @@ async function findPublishedCourses(tenantId: UUIDType): Promise<ReportsSeedCour
     .orderBy(asc(chapters.displayOrder), asc(lessons.displayOrder));
 
   return publishedCourses
-    .map((course) => ({
+    .map((course, index) => ({
       ...course,
+      idleDays: REPORTS_SEED_COURSE_IDLE_DAYS[index % REPORTS_SEED_COURSE_IDLE_DAYS.length],
       lessons: courseLessons.filter(({ courseId }) => courseId === course.id),
     }))
     .filter(({ lessons: courseLessonList }) => courseLessonList.length > 0);
@@ -241,116 +227,6 @@ async function findGroupMembers(
   return members.map(({ userId }) => userId);
 }
 
-async function enrollLearner(
-  tenantId: UUIDType,
-  learnerId: UUIDType,
-  course: ReportsSeedCourse,
-  outcome: ReportsSeedOutcome,
-) {
-  const enrolledAt = faker.date.recent({ days: faker.number.int(REPORTS_SEED_ENROLLED_DAYS_AGO) });
-  const completedLessonCount = getCompletedLessonCount(course, outcome);
-  const completedAt =
-    outcome === "completed" ? faker.date.between({ from: enrolledAt, to: new Date() }) : null;
-  const lastOpenedAt =
-    outcome === "notStarted" ? null : (completedAt ?? faker.date.recent({ days: 45 }));
-
-  const [enrollment] = await db
-    .insert(studentCourses)
-    .values({
-      studentId: learnerId,
-      courseId: course.id,
-      status: COURSE_ENROLLMENT.ENROLLED,
-      progress: toCourseProgress(outcome),
-      enrolledAt: enrolledAt.toISOString(),
-      completedAt: completedAt?.toISOString() ?? null,
-      lastOpenedAt: lastOpenedAt?.toISOString() ?? null,
-      tenantId,
-    })
-    .onConflictDoNothing()
-    .returning({ id: studentCourses.id });
-  if (!enrollment) return;
-
-  const completedLessons = course.lessons.slice(0, completedLessonCount);
-  if (completedLessons.length) {
-    await db.insert(studentLessonProgress).values(
-      completedLessons.map((lesson) => ({
-        studentId: learnerId,
-        lessonId: lesson.id,
-        chapterId: lesson.chapterId,
-        isStarted: true,
-        completedAt: faker.date
-          .between({ from: enrolledAt, to: completedAt ?? new Date() })
-          .toISOString(),
-        tenantId,
-      })),
-    );
-  }
-
-  await createQuizAttempts(tenantId, learnerId, completedLessons, enrolledAt);
-  if (outcome === "completed" && completedAt) {
-    await createCertificate(tenantId, learnerId, course.id, completedAt);
-  }
-}
-
-async function createQuizAttempts(
-  tenantId: UUIDType,
-  learnerId: UUIDType,
-  completedLessons: ReportsSeedCourse["lessons"],
-  enrolledAt: Date,
-) {
-  const attempts = completedLessons.flatMap(({ assessmentId }) => {
-    if (!assessmentId) return [];
-
-    const attemptCount = faker.number.int(REPORTS_SEED_QUIZ_ATTEMPTS);
-    return Array.from({ length: attemptCount }, (_, index) => {
-      const scorePercentage = faker.number.int(REPORTS_SEED_QUIZ_SCORE);
-      const submittedAt = faker.date.between({ from: enrolledAt, to: new Date() });
-      return {
-        assessmentId,
-        learnerId,
-        language: "en" as const,
-        attemptNumber: index + 1,
-        submissionStatus: ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED,
-        gradingStatus: ASSESSMENT_ATTEMPT_GRADING_STATUSES.GRADED,
-        result:
-          scorePercentage >= REPORTS_SEED_QUIZ_PASS_PERCENT
-            ? ASSESSMENT_ATTEMPT_RESULTS.PASSED
-            : ASSESSMENT_ATTEMPT_RESULTS.FAILED,
-        availablePoints: "100",
-        awardedPoints: String(scorePercentage),
-        scorePercentage: String(scorePercentage),
-        startedAt: submittedAt.toISOString(),
-        submittedAt: submittedAt.toISOString(),
-        gradedAt: submittedAt.toISOString(),
-        tenantId,
-      };
-    });
-  });
-
-  if (attempts.length) await db.insert(assessmentAttempts).values(attempts).onConflictDoNothing();
-}
-
-async function createCertificate(
-  tenantId: UUIDType,
-  learnerId: UUIDType,
-  courseId: UUIDType,
-  completedAt: Date,
-) {
-  if (!faker.datatype.boolean(REPORTS_SEED_CERTIFICATE_CHANCE.issued)) return;
-
-  const isExpired = faker.datatype.boolean(REPORTS_SEED_CERTIFICATE_CHANCE.expired);
-  await db.insert(certificates).values({
-    userId: learnerId,
-    courseId,
-    status: isExpired ? CERTIFICATE_STATUSES.ARCHIVED : CERTIFICATE_STATUSES.ACTIVE,
-    issuedAt: completedAt.toISOString(),
-    expiresAt: isExpired ? faker.date.recent({ days: 10 }).toISOString() : null,
-    archiveReason: isExpired ? CERTIFICATE_ARCHIVE_REASONS.EXPIRED : null,
-    archivedAt: isExpired ? new Date().toISOString() : null,
-    tenantId,
-  });
-}
-
 /** One published path over the first courses, with every member of one group enrolled. */
 async function createDevelopmentPath(
   tenantId: UUIDType,
@@ -381,11 +257,11 @@ async function createDevelopmentPath(
   for (const learnerId of learnerIds) {
     const outcomes = pathCourses.map(() => pickOutcome());
     for (const [index, course] of pathCourses.entries()) {
-      await enrollLearner(tenantId, learnerId, course, outcomes[index]);
+      await enrollLearner(db, tenantId, learnerId, course, outcomes[index]);
     }
 
-    const isCompleted = outcomes.every((outcome) => outcome === "completed");
-    const isStarted = outcomes.some((outcome) => outcome !== "notStarted");
+    const isCompleted = outcomes.every((outcome) => outcome === REPORTS_SEED_OUTCOMES.COMPLETED);
+    const isStarted = outcomes.some((outcome) => outcome !== REPORTS_SEED_OUTCOMES.NOT_STARTED);
     await db.insert(studentLearningPaths).values({
       studentId: learnerId,
       learningPathId: path.id,
@@ -403,41 +279,6 @@ async function createDevelopmentPath(
       })),
     );
   }
-}
-
-/** Built in SQL so postgres-js does not encode the JSON object a second time, as a string. */
-function localizedText(value: string) {
-  return sql`json_build_object('en', ${value}::text)`;
-}
-
-function pickOutcome(): ReportsSeedOutcome {
-  const roll = faker.number.float({ min: 0, max: 1 });
-  if (roll < REPORTS_SEED_OUTCOME_CHANCE.completed) return "completed";
-  if (roll < REPORTS_SEED_OUTCOME_CHANCE.completed + REPORTS_SEED_OUTCOME_CHANCE.inProgress) {
-    return "inProgress";
-  }
-  return "notStarted";
-}
-
-function getCompletedLessonCount(course: ReportsSeedCourse, outcome: ReportsSeedOutcome): number {
-  return match(outcome)
-    .with("completed", () => course.lessons.length)
-    .with("notStarted", () => 0)
-    .otherwise(() => faker.number.int({ min: 1, max: Math.max(1, course.lessons.length - 1) }));
-}
-
-function toCourseProgress(outcome: ReportsSeedOutcome) {
-  return match(outcome)
-    .with("completed", () => PROGRESS_STATUSES.COMPLETED)
-    .with("inProgress", () => PROGRESS_STATUSES.IN_PROGRESS)
-    .otherwise(() => PROGRESS_STATUSES.NOT_STARTED);
-}
-
-function toPathProgress(isCompleted: boolean, isStarted: boolean) {
-  return match({ isCompleted, isStarted })
-    .with({ isCompleted: true }, () => LEARNING_PATH_PROGRESS_STATUSES.COMPLETED)
-    .with({ isStarted: true }, () => LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS)
-    .otherwise(() => LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED);
 }
 
 if (require.main === module) {

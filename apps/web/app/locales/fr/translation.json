@@ -7479,6 +7479,41 @@
     }
   },
   "reports": {
+    "courseResults": {
+      "course": "Cours",
+      "enrolled": "Inscrits",
+      "completionRate": "Achèvement",
+      "averageProgress": "Progression moyenne",
+      "averageQuizScore": "Score aux quiz",
+      "empty": "Aucun cours ne correspond aux filtres actuels"
+    },
+    "pathActivity": {
+      "title": "Activité des parcours",
+      "popular": "Parcours les plus populaires · top 8",
+      "inactive": "Parcours inactifs depuis le plus longtemps · top 8",
+      "topPath": "Parcours le plus populaire",
+      "neverActive": "Parcours jamais utilisés"
+    },
+    "paths": {
+      "coursesAndLearners": "Cours : {{courses}} · Apprenants : {{learners}}",
+      "details": "Voir les détails",
+      "empty": "Aucun parcours de développement ne correspond aux filtres actuels",
+      "enrollmentsByStatus": "Inscriptions aux cours par statut",
+      "completedShare": "{{percent}} terminé"
+    },
+    "insights": {
+      "activityTrend": "Activité dans le temps",
+      "activityTrendSubtitle": "Apprenants avec une activité enregistrée par mois",
+      "changeVsPreviousMonth": "{{change}} par rapport au mois dernier",
+      "funnel": "Entonnoir d'apprentissage",
+      "funnelSubtitle": "Comment les apprenants correspondants progressent dans leur apprentissage",
+      "funnelSteps": {
+        "learners": "Dans le périmètre",
+        "loggedIn": "Connectés",
+        "started": "Apprentissage commencé",
+        "completed": "Cours terminé"
+      }
+    },
     "activity": {
       "title": "Activité des cours",
       "popular": "Cours les plus populaires · top 8",
@@ -7490,9 +7525,30 @@
       "from": "Du",
       "to": "Au",
       "apply": "Appliquer la période",
-      "period": "Période de popularité : {{from}} – {{to}} (fuseau horaire du rapport).",
+      "period": "Période de popularité : {{from}} - {{to}} (fuseau horaire du rapport).",
       "definition": "La popularité compte chaque participant correspondant une fois par cours. L’inactivité utilise la dernière activité apprenant enregistrée, toutes dates confondues, dans le périmètre sélectionné. La modification du contenu n’est pas une activité apprenant. Aucun archivage automatique.",
-      "limitation": "L’activité inclut la dernière ouverture du cours, les cours et leçons terminés et les quiz soumis (y compris les cycles précédents). Les anciennes ouvertures ne sont pas conservées : la popularité passée peut être sous-estimée. Les brouillons et cours archivés sont exclus. Les cours sans inscription n’apparaissent que sans filtres de groupes, participants ou apprentissage. La période ne concerne que ces graphiques ; elle n’est ni enregistrée ni exportée."
+      "limitation": "L’activité inclut la dernière ouverture du cours, les cours et leçons terminés et les quiz soumis (y compris les cycles précédents). Les anciennes ouvertures ne sont pas conservées : la popularité passée peut être sous-estimée. Les brouillons et cours archivés sont exclus. Les cours sans inscription n’apparaissent que sans filtres de groupes, participants ou apprentissage. La période ne concerne que ces graphiques ; elle n’est ni enregistrée ni exportée.",
+      "periodLabel": "Période de popularité",
+      "custom": "Période personnalisée",
+      "lastDays_one": "Dernier {{count}} jour",
+      "lastDays_other": "{{count}} derniers jours",
+      "highlights": {
+        "topCourse": "Cours le plus populaire",
+        "longestGap": "Le plus longtemps sans activité",
+        "neverActive": "Cours jamais utilisés",
+        "days_one": "{{count}} jour",
+        "days_other": "{{count}} jours"
+      },
+      "levels": {
+        "recent": "Moins de 30 jours",
+        "stale": "30-89 jours",
+        "dormant": "90+ jours"
+      },
+      "tooltip": {
+        "learners_one": "{{count}} apprenant actif",
+        "learners_other": "{{count}} apprenants actifs",
+        "lastActivity": "Dernière activité : {{date}}"
+      }
     },
     "errors": {
       "invalidQuery": "Les critères du rapport sont invalides.",
@@ -7550,7 +7606,6 @@
     },
     "scope": {
       "groupLabel": "Groupes",
-      "boundaryNote": "Les résultats et les exports restent limités à vos droits de reporting et aux filtres actuels.",
       "allGroups": "Tous les groupes",
       "groupsCount": "{{count}} groupes"
     },
@@ -7604,12 +7659,15 @@
       "eq": "Est",
       "neq": "N’est pas",
       "in": "Est parmi",
+      "notIn": "N’est aucun de",
       "contains": "Contient",
+      "notContains": "Ne contient pas",
       "gte": "Au moins",
       "lte": "Au plus",
       "between": "Entre",
-      "isEmpty": "Sans valeur",
-      "isNotEmpty": "Avec une valeur"
+      "notBetween": "Pas entre",
+      "isEmpty": "Est vide",
+      "isNotEmpty": "N’est pas vide"
     },
     "values": {
       "notStarted": "Non commencé",
@@ -7678,7 +7736,10 @@
       "activeCertificateContext": "Certificats actuellement valides",
       "outcomesTitle": "Résultats d’apprentissage",
       "platformCourses": "Cours",
-      "platformCoursesContext": "Sur la plateforme, hors brouillons et cours archivés"
+      "platformCoursesContext": "Sur la plateforme, hors brouillons et cours archivés",
+      "activeShare": "{{percent}} des apprenants correspondants",
+      "aiMentorConversations": "Conversations avec le Mentor IA",
+      "aiMentorConversationsContext": "Dans les cours correspondants"
     },
     "breakdowns": {
       "learnersAndEnrollments": "{{learners}} apprenants · {{enrollments}} inscriptions",
@@ -7690,7 +7751,10 @@
         "courses": "Cours",
         "groups": "Groupes",
         "paths": "Parcours"
-      }
+      },
+      "statusTitle": "Achèvements",
+      "statusSubtitle": "Statut d'inscription de l'apprentissage correspondant",
+      "statusChartLabel": "Statut d'inscription par {{breakdown}}"
     },
     "exports": {
       "spreadsheet": "Tableur",
@@ -7718,14 +7782,12 @@
       "attempts": "Nombre total de tentatives",
       "lastActivity": "Dernière activité",
       "pathCourseStatus": "État du cours dans le parcours",
-      "sortAscending": "Trier par ordre croissant",
-      "sortDescending": "Trier par ordre décroissant"
+      "group": "Groupe"
     },
     "help": {
       "title": "À propos du rapport",
       "scope": "La sélection de groupes limite la population d’apprenants. Pour les apprenants correspondants, leurs formations individuelles et celles d’autres groupes sont également incluses.",
-      "metrics": "Tous les indicateurs, lignes du tableau et exports utilisent les mêmes conditions appliquées. Les taux et moyennes vides s’affichent sous la forme —.",
-      "timezone": "Les dates utilisent le fuseau horaire {{timezone}}."
+      "metrics": "Tous les indicateurs, lignes du tableau et exports utilisent les mêmes conditions appliquées. Les taux et moyennes vides s’affichent sous la forme —."
     },
     "title": "Rapports",
     "description": "Suivez la progression de l’organisation dans les parcours, les cours et auprès des apprenants."

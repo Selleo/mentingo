@@ -1,7 +1,10 @@
 import { sql } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
 
-import { buildCourseActivityCtes, buildCourseActivityProjection } from "./reports-course-activity";
+import {
+  buildActivityRankingsProjection,
+  buildCourseActivityCtes,
+} from "./reports-course-activity";
 
 const period = { from: "2026-01-01", to: "2026-01-31" };
 
@@ -25,8 +28,8 @@ describe("course activity aggregation", () => {
     expect(statement.params).toContain("2026-01-31");
     expect(statement.sql).toContain("LEFT JOIN");
     expect(statement.sql).not.toContain("updated_at");
-    expect(new PgDialect().sqlToQuery(buildCourseActivityProjection()).sql).toContain(
-      "NULLS FIRST",
-    );
+    expect(
+      new PgDialect().sqlToQuery(buildActivityRankingsProjection(sql`activity_rankings`)).sql,
+    ).toContain("NULLS FIRST");
   });
 });

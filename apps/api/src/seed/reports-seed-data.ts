@@ -17,8 +17,20 @@ export const REPORTS_SEED_PATH = {
 
 export const REPORTS_SEED_ENROLLMENTS_PER_LEARNER = { min: 2, max: 4 };
 
+export const REPORTS_SEED_OUTCOMES = {
+  COMPLETED: "completed",
+  IN_PROGRESS: "inProgress",
+  NOT_STARTED: "notStarted",
+} as const;
+
 /** Chance of each enrollment outcome; the rest are not started. */
 export const REPORTS_SEED_OUTCOME_CHANCE = { completed: 0.45, inProgress: 0.35 };
+
+/**
+ * Days since each course last saw learner activity, assigned to courses in order and cycled,
+ * so course activity reports show a spread of fresh, stale, dormant and never-started courses.
+ */
+export const REPORTS_SEED_COURSE_IDLE_DAYS = [0, 3, 12, 24, 41, 68, 105, null, 160, 230];
 
 export const REPORTS_SEED_ENROLLED_DAYS_AGO = { min: 20, max: 240 };
 

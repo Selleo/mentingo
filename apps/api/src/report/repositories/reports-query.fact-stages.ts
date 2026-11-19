@@ -84,11 +84,11 @@ function buildScopedEnrollments({ db, query, access, managedGroupIds }: ReportQu
         eq(courses.isArchived, false),
         accessScope,
         explicitGroupMembership,
-        query.view === REPORT_VIEWS.COURSE
-          ? eq(studentCourses.courseId, query.subjectId!)
+        query.view === REPORT_VIEWS.COURSE && query.subjectId
+          ? eq(studentCourses.courseId, query.subjectId)
           : undefined,
-        query.view === REPORT_VIEWS.LEARNER
-          ? eq(studentCourses.studentId, query.subjectId!)
+        query.view === REPORT_VIEWS.LEARNER && query.subjectId
+          ? eq(studentCourses.studentId, query.subjectId)
           : undefined,
       ),
     );

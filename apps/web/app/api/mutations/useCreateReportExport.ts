@@ -7,7 +7,7 @@ import { ApiClient } from "../api-client";
 import { getTranslatedApiErrorMessage } from "../utils/getTranslatedApiErrorMessage";
 
 import type { SupportedLanguages } from "@repo/shared";
-import type { ReportsQuery } from "~/modules/Reports/reports-api.types";
+import type { ReportsQuery } from "~/modules/Reports/types/reports-api.types";
 
 export function useCreateReportExport() {
   const { t } = useTranslation();

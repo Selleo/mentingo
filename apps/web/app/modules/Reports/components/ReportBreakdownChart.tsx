@@ -7,21 +7,25 @@ import { ChartContainer, ChartTooltip } from "~/components/ui/chart";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { cn } from "~/lib/utils";
 
-import { formatReportPercent } from "../reports.utils";
+import {
+  BREAKDOWN_KINDS,
+  BREAKDOWN_STATUS_COLORS,
+  BREAKDOWN_STATUSES,
+  MAX_BREAKDOWN_BARS,
+} from "../constants/reportCharts.constants";
+import { toBreakdownStatusBar } from "../utils/reportCharts.utils";
+import { formatReportPercent } from "../utils/reports.utils";
 
-import type { RunReportResponse } from "~/api/generated-api";
+import type { BreakdownKind, BreakdownStatusBar } from "../types/reportCharts.types";
+import type { ReportResult } from "../types/reports-api.types";
 import type { ChartConfig } from "~/components/ui/chart";
 
-type Breakdowns = RunReportResponse["data"]["breakdowns"];
-type BreakdownKind = keyof Breakdowns;
-
 type ReportBreakdownChartProps = {
-  breakdowns: Breakdowns;
+  breakdowns: ReportResult["breakdowns"];
+  kinds?: BreakdownKind[];
   className?: string;
 };
 
-const BREAKDOWN_KINDS: BreakdownKind[] = ["courses", "groups", "paths"];
-const MAX_BARS = 8;
 const MIN_BAR_ROW_HEIGHT = 36;
 const MAX_BAR_ROW_HEIGHT = 56;
 const CHART_PADDING = 24;
@@ -30,20 +34,23 @@ const LABEL_MAX_LENGTH = 24;
 const truncateLabel = (value: string) =>
   value.length > LABEL_MAX_LENGTH ? `${value.slice(0, LABEL_MAX_LENGTH - 1)}…` : value;
 
-export function ReportBreakdownChart({ breakdowns, className }: ReportBreakdownChartProps) {
+export function ReportBreakdownChart({
+  breakdowns,
+  kinds = BREAKDOWN_KINDS,
+  className,
+}: ReportBreakdownChartProps) {
   const { t } = useTranslation();
-  const availableKinds = BREAKDOWN_KINDS.filter((kind) => breakdowns[kind].length > 0);
-  const [selectedKind, setSelectedKind] = useState<BreakdownKind>("courses");
+  const availableKinds = kinds.filter((kind) => breakdowns[kind].length > 0);
+  const [selectedKind, setSelectedKind] = useState<BreakdownKind>(kinds[0]);
   const activeKind = availableKinds.includes(selectedKind) ? selectedKind : availableKinds[0];
   const items = activeKind ? breakdowns[activeKind] : [];
-  const chartData = items.slice(0, MAX_BARS).map((item) => ({
-    ...item,
-    completionRate: item.completionRate ?? 0,
-    rateLabel: formatReportPercent(item.completionRate),
-  }));
-  const chartConfig = {
-    completionRate: { label: t("reports.metrics.completionRate"), color: "var(--primary-600)" },
-  } satisfies ChartConfig;
+  const chartData = items.slice(0, MAX_BREAKDOWN_BARS).map(toBreakdownStatusBar);
+  const chartConfig = Object.fromEntries(
+    Object.values(BREAKDOWN_STATUSES).map((status) => [
+      status,
+      { label: t(`reports.values.${status}`), color: BREAKDOWN_STATUS_COLORS[status] },
+    ]),
+  ) satisfies ChartConfig;
 
   return (
     <section
@@ -56,12 +63,15 @@ export function ReportBreakdownChart({ breakdowns, className }: ReportBreakdownC
         <div>
           <h3 className="body-base-md flex items-center gap-2 text-neutral-950">
             <ChartColumnBig className="size-4 text-neutral-500" aria-hidden="true" />
-            {t("reports.breakdowns.title")}
+            {t("reports.breakdowns.statusTitle")}
           </h3>
           <p className="details text-neutral-500">
-            {items.length > MAX_BARS
-              ? t("reports.breakdowns.showingTop", { shown: MAX_BARS, count: items.length })
-              : t("reports.breakdowns.subtitle")}
+            {items.length > MAX_BREAKDOWN_BARS
+              ? t("reports.breakdowns.showingTop", {
+                  shown: MAX_BREAKDOWN_BARS,
+                  count: items.length,
+                })
+              : t("reports.breakdowns.statusSubtitle")}
           </p>
         </div>
         {availableKinds.length > 1 && (
@@ -79,6 +89,18 @@ export function ReportBreakdownChart({ breakdowns, className }: ReportBreakdownC
           </Tabs>
         )}
       </div>
+      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+        {Object.values(BREAKDOWN_STATUSES).map((status) => (
+          <li key={status} className="details flex items-center gap-1.5 text-neutral-600">
+            <span
+              className="size-2.5 rounded-sm"
+              style={{ backgroundColor: BREAKDOWN_STATUS_COLORS[status] }}
+              aria-hidden="true"
+            />
+            {t(`reports.values.${status}`)}
+          </li>
+        ))}
+      </ul>
       {chartData.length ? (
         <ChartContainer
           key={activeKind}
@@ -89,7 +111,7 @@ export function ReportBreakdownChart({ breakdowns, className }: ReportBreakdownC
             maxHeight: chartData.length * MAX_BAR_ROW_HEIGHT + CHART_PADDING,
           }}
           role="img"
-          aria-label={t("reports.breakdowns.chartLabel", {
+          aria-label={t("reports.breakdowns.statusChartLabel", {
             breakdown: t(`reports.breakdowns.tabs.${activeKind}`),
           })}
         >
@@ -126,38 +148,45 @@ export function ReportBreakdownChart({ breakdowns, className }: ReportBreakdownC
               cursor={{ fill: "var(--neutral-50)" }}
               content={({ active, payload }) => {
                 if (!active || !payload?.length) return null;
-                const item = payload[0].payload as (typeof chartData)[number];
+                const bar = payload[0].payload as BreakdownStatusBar;
                 return (
                   <div className="rounded-lg border border-neutral-200 bg-background px-3 py-2 shadow-sm">
-                    <p className="body-sm-md text-neutral-950">{item.label}</p>
-                    <p className="details text-neutral-700">
-                      {t("reports.metrics.completionRate")}: {item.rateLabel}
-                    </p>
+                    <p className="body-sm-md text-neutral-950">{bar.label}</p>
+                    {Object.values(BREAKDOWN_STATUSES).map((status) => (
+                      <p key={status} className="details text-neutral-700">
+                        {t(`reports.values.${status}`)}: {formatReportPercent(bar[status])}
+                      </p>
+                    ))}
                     <p className="details text-neutral-500">
                       {t("reports.breakdowns.learnersAndEnrollments", {
-                        learners: item.learners,
-                        enrollments: item.courseEnrollments,
+                        learners: bar.learners,
+                        enrollments: bar.courseEnrollments,
                       })}
                     </p>
                   </div>
                 );
               }}
             />
-            <Bar
-              dataKey="completionRate"
-              fill="var(--color-completionRate)"
-              radius={4}
-              maxBarSize={18}
-              background={{ fill: "var(--neutral-100)", radius: 4 }}
-            >
-              <LabelList
-                dataKey="rateLabel"
-                position="right"
-                offset={8}
-                className="fill-neutral-700"
-                fontSize={12}
-              />
-            </Bar>
+            {Object.values(BREAKDOWN_STATUSES).map((status, index, statuses) => (
+              <Bar
+                key={status}
+                dataKey={status}
+                stackId="status"
+                fill={`var(--color-${status})`}
+                maxBarSize={18}
+                radius={index === statuses.length - 1 ? [0, 4, 4, 0] : 0}
+              >
+                {index === statuses.length - 1 && (
+                  <LabelList
+                    dataKey="completionLabel"
+                    position="right"
+                    offset={8}
+                    className="fill-neutral-700"
+                    fontSize={12}
+                  />
+                )}
+              </Bar>
+            ))}
           </BarChart>
         </ChartContainer>
       ) : (
