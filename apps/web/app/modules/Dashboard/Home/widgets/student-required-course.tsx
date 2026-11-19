@@ -74,7 +74,7 @@ export function WidgetStudentRequiredCourse({
                 to={`/course/${course.slug}`}
                 data-testid={DASHBOARD_STUDENT_HANDLES.requiredCourse(course.courseId)}
                 className={cn(
-                  "group flex items-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "group flex items-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-2",
                   isCompact ? "min-h-0 gap-2 p-2" : "min-h-24 gap-3 p-3",
                   {
                     "border-error-100 bg-error-50 hover:border-error-300":

@@ -80,7 +80,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
         onClick={onToggle}
         data-testid={DASHBOARD_TODO_HANDLES.TASK_TOGGLE}
         className={cn(
-          "flex size-5 shrink-0 items-center justify-center rounded border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "flex size-5 shrink-0 items-center justify-center rounded border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-2",
           task.completed
             ? "border-primary-700 bg-primary-700 text-white"
             : "border-neutral-300 text-transparent hover:border-primary-500",
@@ -92,7 +92,7 @@ function SortableTask({ task, compact, onToggle, onSave, onDelete }: SortableTas
 
       <button
         type="button"
-        className="mt-0.5 cursor-grab touch-none text-neutral-400 hover:text-neutral-700 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="mt-0.5 cursor-grab touch-none text-neutral-400 hover:text-neutral-700 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-2"
         {...attributes}
         {...listeners}
         data-testid={DASHBOARD_TODO_HANDLES.TASK_REORDER}

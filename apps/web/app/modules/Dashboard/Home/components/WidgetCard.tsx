@@ -130,7 +130,7 @@ export function DashboardWidgetHeader({
                     type="button"
                     aria-label={scopeLabel}
                     title={scopeLabel}
-                    className="inline-flex size-5 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+                    className="inline-flex size-5 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-1"
                   >
                     <ScopeIcon className="size-3.5" aria-hidden="true" />
                   </button>
@@ -153,7 +153,7 @@ export function DashboardWidgetHeader({
                   <button
                     type="button"
                     aria-label={info}
-                    className="inline-flex size-5 shrink-0 items-center justify-center rounded-full text-neutral-400 transition-colors hover:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+                    className="inline-flex size-5 shrink-0 items-center justify-center rounded-full text-neutral-400 transition-colors hover:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-1"
                   >
                     <Info className="size-3.5" aria-hidden="true" />
                   </button>

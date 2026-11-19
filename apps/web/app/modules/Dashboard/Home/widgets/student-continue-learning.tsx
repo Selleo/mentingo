@@ -75,7 +75,7 @@ export function WidgetStudentContinueLearning({
                   to={destination}
                   data-testid={DASHBOARD_STUDENT_HANDLES.continueCourse(course.courseId)}
                   className={cn(
-                    "group grid items-center rounded-lg border border-neutral-100 transition-colors hover:border-primary-200 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    "group grid items-center rounded-lg border border-neutral-100 transition-colors hover:border-primary-200 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700",
                     isCompact
                       ? "grid-cols-[3rem_minmax(0,1fr)_auto] gap-2 p-2"
                       : "grid-cols-[5rem_minmax(0,1fr)_auto] gap-3 p-3",
