@@ -2,7 +2,7 @@ import { SYSTEM_ROLE_SLUGS, SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
-import { CREATE_USER_PAGE_HANDLES, USER_PAGE_HANDLES } from "../../data/users/handles";
+import { CREATE_USER_PAGE_HANDLES, USERS_PAGE_HANDLES } from "../../data/users/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { fillCreateUserFormFlow } from "../../flows/users/fill-create-user-form.flow";
 import { openCreateUserPageFlow } from "../../flows/users/open-create-user-page.flow";
@@ -39,8 +39,11 @@ test("admin can create a user from the create page", async ({
 
     if (!createdUser) throw new Error(`Expected user ${email} to exist`);
 
-    await expect(page).toHaveURL(new RegExp(`/admin/users/${createdUser.id}$`));
-    await expect(page.getByTestId(USER_PAGE_HANDLES.EMAIL_INPUT)).toHaveValue(email);
+    await assertToastVariantVisible(page, "default");
+    await expect(page).toHaveURL(/\/admin\/users$/);
+    await expect(page.getByTestId(USERS_PAGE_HANDLES.PAGE)).toBeVisible();
+    await page.getByTestId(USERS_PAGE_HANDLES.SEARCH_INPUT).fill(email);
+    await expect(page.getByTestId(USERS_PAGE_HANDLES.row(createdUser.id))).toContainText(email);
   });
 });
 
