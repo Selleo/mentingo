@@ -86,7 +86,14 @@ class Workflow(unittest.TestCase):
         job = self.workflow["jobs"]["attach"]
         self.assertEqual(job["needs"], "film")
         self.assertEqual(job["permissions"]["pull-requests"], "write")
-        self.assertNotIn("secrets.", str(job))
+        self.assertEqual(job["environment"], "release-film")
+        self.assertNotIn("PR_VIDEO_UPLOAD_TOKEN", str(self.workflow["jobs"]["film"]))
+        self.assertEqual(
+            [step["env"]["PR_VIDEO_UPLOAD_TOKEN"] for step in job["steps"]
+             if "PR_VIDEO_UPLOAD_TOKEN" in step.get("env", {})],
+            ["${{ secrets.PR_VIDEO_UPLOAD_TOKEN }}"],
+        )
+        self.assertNotIn("env", job)
         self.assertNotIn("CLAUDE_CODE", str(job))
         self.assertNotIn("ELEVENLABS", str(job))
         self.assertIn("needs.film.outputs.record == 'true'", job["if"])
@@ -132,15 +139,10 @@ class Workflow(unittest.TestCase):
         self.assertEqual(
             called_events["workflow_call"]["inputs"]["pr_number"]["type"], "string"
         )
-        self.assertEqual(
-            set(called_events["workflow_call"]["secrets"]), set(expected_secrets)
-        )
-        self.assertTrue(
-            all(
-                value["required"]
-                for value in called_events["workflow_call"]["secrets"].values()
-            )
-        )
+        declared_secrets = called_events["workflow_call"]["secrets"]
+        self.assertEqual(set(declared_secrets), set(expected_secrets) | {"PR_VIDEO_UPLOAD_TOKEN"})
+        self.assertTrue(all(declared_secrets[name]["required"] for name in expected_secrets))
+        self.assertFalse(declared_secrets["PR_VIDEO_UPLOAD_TOKEN"]["required"])
         self.assertIs(
             called_events["workflow_call"]["inputs"]["branch_test"]["default"], False
         )

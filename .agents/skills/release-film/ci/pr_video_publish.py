@@ -241,7 +241,8 @@ def _skip_reason(pull: dict[str, object], repository: str, head_sha: str) -> str
     return None
 
 
-def publish(folder: str | Path, repository: str, number: int, head_sha: str, run_id: str) -> dict[str, object]:
+def publish(folder: str | Path, repository: str, number: int, head_sha: str, run_id: str,
+            *, upload_token: str | None = None) -> dict[str, object]:
     """Validate immutable bundle identity, upload/reuse once, then update a fresh eligible PR body."""
     _require(_matches(REPOSITORY, repository) and type(number) is int and number > 0
              and _matches(SHA, head_sha) and _matches(RUN_ID, run_id), 'Invalid publishing job identity')
@@ -254,7 +255,9 @@ def publish(folder: str | Path, repository: str, number: int, head_sha: str, run
             return {**identity, 'status': 'skipped', 'reason': reason}
         previous = managed_section(current.get('body') or '')
         try:
-            attachment = release_assets.upload_video(bundle.video, repository, previous, bundle.checksum)
+            attachment = release_assets.upload_video(
+                bundle.video, repository, previous, bundle.checksum, upload_token=upload_token
+            )
         except (OSError, ValueError, TypeError, KeyError, RuntimeError, subprocess.SubprocessError, SystemExit) as error:
             # Retain only the status, never gh stderr or a provider response body.
             # This distinguishes rejected credentials from network/format failures.
@@ -287,8 +290,10 @@ def main() -> None:
     parser.add_argument('--run-id', required=True)
     arguments = parser.parse_args()
     try:
+        # Remove the PAT from the inherited environment before invoking any GitHub CLI subprocess.
+        upload_token = os.environ.pop('PR_VIDEO_UPLOAD_TOKEN', None)
         result = publish(arguments.bundle, arguments.repository, arguments.number,
-                         arguments.head_sha, arguments.run_id)
+                         arguments.head_sha, arguments.run_id, upload_token=upload_token)
     except PublicationError as failed:
         # Every PublicationError is fixed diagnostic text, never provider/artifact values.
         raise SystemExit(f'::error::{failed}') from None

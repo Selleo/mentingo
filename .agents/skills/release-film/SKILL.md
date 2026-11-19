@@ -439,6 +439,10 @@ The Release film caller forwards only the existing `CLAUDE_CODE_OAUTH_TOKEN` and
 job uses the protected `release-film` environment, where these secrets are configured.
 Missing values fail before planning.
 No provider credentials enter the metadata dispatcher or attachment job.
+Store the user token for native GitHub media uploads as `PR_VIDEO_UPLOAD_TOKEN`
+in the protected `release-film` environment. The attachment job passes it only
+to the media upload request. Metadata reads and the PR body update use
+`GITHUB_TOKEN`.
 
 To test the complete pipeline before merging, manually dispatch Release film on
 the fix branch with `pr_number`, `pr_video_branch_test=true` and `publish=false`.

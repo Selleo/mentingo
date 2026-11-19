@@ -16,6 +16,9 @@ on:
         required: true
       ELEVENLABS_API_KEY:
         required: true
+      PR_VIDEO_UPLOAD_TOKEN:
+        description: Native media token supplied by the attachment job environment
+        required: false
   pull_request:
     types: [opened, ready_for_review]
     branches: [staging, main]
@@ -189,6 +192,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && needs.film.outputs.record == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    environment: release-film
     permissions:
       contents: read
       pull-requests: write
@@ -205,9 +209,14 @@ jobs:
       - name: Append or replace the generated video section
         env:
           GH_TOKEN: ${{ github.token }}
+          PR_VIDEO_UPLOAD_TOKEN: ${{ secrets.PR_VIDEO_UPLOAD_TOKEN }}
           NUMBER: ${{ needs.film.outputs.number }}
           HEAD_SHA: ${{ needs.film.outputs.head }}
         run: |
+          if [ -z "${PR_VIDEO_UPLOAD_TOKEN}" ]; then
+            echo "::error::Missing PR_VIDEO_UPLOAD_TOKEN in the release-film environment"
+            exit 1
+          fi
           python3 .agents/skills/release-film/ci/pr_video_publish.py \
             --bundle "$RUNNER_TEMP/pr-video-bundle" --repository "$GITHUB_REPOSITORY" \
             --number "$NUMBER" --head-sha "$HEAD_SHA" --run-id "$GITHUB_RUN_ID"
