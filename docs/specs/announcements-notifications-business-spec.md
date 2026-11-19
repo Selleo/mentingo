@@ -6,7 +6,7 @@ Announcements and Notifications give Mentingo a built-in communication channel f
 
 For HR and L&D teams, this supports planned and targeted communication: onboarding reminders, course-related updates, live-training notices, compliance nudges, and group-specific messages that should stay close to the learning experience.
 
-The main workflow has two sides. A manager creates a localized announcement, chooses the audience, decides whether it should publish now or later, and optionally enables email delivery. Users can review All, Admin announcements, or System notifications, then mark personal deliveries as read. The feeds refresh every five minutes while remaining manually refreshable.
+The main workflow has two sides. A manager creates a localized announcement, chooses the audience, decides whether it should publish now or later, and optionally enables email delivery. Users can review All, Admin announcements, or System notifications, then mark personal deliveries as read. The feeds refresh every five minutes while remaining manually refreshable. Notifications about replies and mentions in discussions arrive at once: the unread counter and the lists update without reloading the page.
 
 ## Who Uses It
 
@@ -22,6 +22,7 @@ The main workflow has two sides. A manager creates a localized announcement, cho
 - Publish announcements immediately or schedule them for future delivery.
 - Optionally send email copies when an announcement is published.
 - Show unread counts and highlighted unread messages in the notification experience.
+- Notify the people taking part in a course discussion thread or a forum topic when someone replies, with a link that opens that thread or topic.
 - Separate all messages into All, Admin announcements, and System feeds.
 - Notify only users enrolled in a course containing the linked live-training lesson, including administrators who are enrolled as learners.
 - Let learners mark one announcement or all announcements as read.
@@ -44,6 +45,8 @@ Administrators and users with full announcement-management permission can review
 
 When a learner is mentioned in a course discussion, Mentingo creates the system notification in every supported language and uses the course title translated for each language, falling back to the course's base language when a translation is unavailable.
 
+When someone replies in a course discussion thread or a forum topic, Mentingo notifies the author of the thread and everyone who replied in it earlier. The person who wrote the reply is never notified, and a participant mentioned in the reply gets only the mention notification, not a second one. People who can no longer open the discussion are left out: learners who are no longer enrolled in the course, were archived or lost access to course discussions, and users without access to the forum. The notification opens the thread in the course's Discussion tab, on whichever page of the discussion it is, or the forum topic. The link is used once: reopening the Discussion tab later does not jump back to that thread, and following the same notification again opens it again. For the recipients the unread counter and the notification lists update at once, in every open session.
+
 ## Key Technical Context
 
 - Frontend notification center lives at `/notifications` in `apps/web/app/modules/Notifications`.
@@ -54,11 +57,16 @@ When a learner is mentioned in a course discussion, Mentingo creates the system 
 - Announcement statuses are `scheduled` and `published`; source types include manual announcements, live training, and course due-date reminders.
 - `manual` source types identify Admin announcements; every other source type identifies System notifications. Live-training notifications use a selected-user audience resolved from qualifying course enrollment.
 - Course-discussion mention notifications resolve every localized course title in one tenant-scoped query before creating the multilingual notification.
+- Reply notifications are created by `DiscussionReplyNotificationHandler` in `apps/api/src/discussion-notifications`, which handles `CourseChatReplyCreatedEvent` and `ForumReplyCreatedEvent` from the outbox with one service for both kinds of discussion.
+- `announcements.link_path` stores the in-app path a notification opens when the source type and id cannot name it, such as a single course discussion thread. The web app follows it only when it stays inside the application.
+- A reply or mention notification is stored together with a `UserNotificationsCreatedEvent`. Its handler runs after that transaction is committed and sends `NOTIFICATION_SOCKET_EVENTS.CREATED`, a signal without content, to each recipient's user room, so a client never refreshes before the notification can be read; `useLiveNotifications` then refreshes the unread counter and the lists. Other system notifications still rely on the five-minute refresh.
 - The frontend queries each feed independently and revalidates announcement data every five minutes.
 - Announcement creation and read activity publish events that activity logs and email delivery consume.
 
 ## Test Evidence
 
-API E2E coverage verifies the three feed classifications, administrator visibility of manual announcements, content-creator ownership and recipient visibility, personal system eligibility, manager group read state, localized responses, unread counts, creation validation, scheduling, read/read-all actions, soft deletion, and permission denial for unauthorized users. Live-training E2E coverage verifies that enrolled learners and enrolled administrators receive notifications while unrelated users do not.
+API E2E coverage verifies the three feed classifications, administrator visibility of manual announcements, content-creator ownership and recipient visibility, personal system eligibility, manager group read state, localized responses, unread counts, creation validation, scheduling, read/read-all actions, soft deletion, and permission denial for unauthorized users. Live-training E2E coverage verifies that enrolled learners and enrolled administrators receive notifications while unrelated users do not. Discussion reply E2E coverage verifies the recipients in course threads and forum topics (thread author and earlier repliers), that the reply's author and bystanders get nothing, that a mentioned participant is not notified twice, that learners who left the course, archived users and users without access to course discussions are skipped, that a reply event stored without its mentions is still delivered, the link to the thread, the live signal sent only to recipients, and that a reply event cannot notify users of another organization.
+
+Web unit tests cover the live refresh of the counter and lists (also after a reconnect), following a stored notification link only inside the application (protocol-relative addresses are rejected), and opening the linked thread in a course's Discussion tab on the page that holds it, once per link.
 
 Web E2E coverage verifies the three tabs, manual announcement classification, admin creation, localized creation, group announcements, deletion, learner reading from the popover, notification-center navigation, mark-one and mark-all read flows, pagination, localized content, and group visibility.

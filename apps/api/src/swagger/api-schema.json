@@ -15716,6 +15716,15 @@
               "minimum": 1,
               "type": "number"
             }
+          },
+          {
+            "name": "aroundMessageId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -71466,6 +71475,16 @@
                     }
                   ]
                 },
+                "linkPath": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "title": {
                   "type": "string"
                 },
@@ -71573,6 +71592,7 @@
                 "emailTemplate",
                 "sourceType",
                 "sourceId",
+                "linkPath",
                 "title",
                 "content",
                 "baseLanguage",
@@ -71725,6 +71745,16 @@
                     }
                   ]
                 },
+                "linkPath": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "title": {
                   "type": "string"
                 },
@@ -71825,6 +71855,7 @@
                 "emailTemplate",
                 "sourceType",
                 "sourceId",
+                "linkPath",
                 "title",
                 "content",
                 "baseLanguage",
@@ -72080,6 +72111,16 @@
                   }
                 ]
               },
+              "linkPath": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "title": {
                 "type": "string"
               },
@@ -72177,6 +72218,7 @@
               "emailTemplate",
               "sourceType",
               "sourceId",
+              "linkPath",
               "title",
               "content",
               "baseLanguage",

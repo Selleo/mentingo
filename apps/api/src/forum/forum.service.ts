@@ -233,6 +233,7 @@ export class ForumService {
           postId: createdPostId,
           firstPostId: thread.firstPostId,
           actorUserId: currentUser.userId,
+          mentionedUserIds,
         }),
         trx,
       );

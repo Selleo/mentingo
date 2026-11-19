@@ -32,6 +32,33 @@ describe("getNotificationHref", () => {
     ).toBe("/course/course-1");
   });
 
+  it("prefers the link stored with the notification, such as a discussion thread", () => {
+    expect(
+      getNotificationHref(
+        buildAnnouncement({
+          sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_CHAT,
+          sourceId: "course-1",
+          linkPath: "/course/course-1?tab=Discussion&thread=message-1",
+        }),
+      ),
+    ).toBe("/course/course-1?tab=Discussion&thread=message-1");
+  });
+
+  it.each(["https://example.com/forum", "//example.com/forum", "/\\example.com/forum"])(
+    "ignores the stored link %s, which leaves the application",
+    (linkPath) => {
+      expect(
+        getNotificationHref(
+          buildAnnouncement({
+            sourceType: ANNOUNCEMENT_SOURCE_TYPES.FORUM,
+            sourceId: "topic-1",
+            linkPath,
+          }),
+        ),
+      ).toBe("/forum/topics/topic-1");
+    },
+  );
+
   it("gives manual announcements no link", () => {
     expect(getNotificationHref(buildAnnouncement({}))).toBeNull();
   });

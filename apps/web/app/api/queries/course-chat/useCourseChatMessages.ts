@@ -12,22 +12,31 @@ export const getCourseChatMessagesQueryKey = (courseId: string, page = 1, perPag
   perPage,
 ];
 
-export const courseChatMessagesQueryOptions = (courseId: string, page = 1) =>
+export const courseChatMessagesQueryOptions = (
+  courseId: string,
+  page = 1,
+  threadMessageId?: string,
+) =>
   queryOptions({
-    queryKey: getCourseChatMessagesQueryKey(courseId, page, COURSE_CHAT_MESSAGES_PER_PAGE),
+    queryKey: threadMessageId
+      ? [...COURSE_CHAT_MESSAGES_QUERY_KEY, courseId, "thread", threadMessageId]
+      : getCourseChatMessagesQueryKey(courseId, page, COURSE_CHAT_MESSAGES_PER_PAGE),
     queryFn: async () => {
-      const response = await ApiClient.api.courseChatControllerGetMessages(courseId, {
-        page,
-        perPage: COURSE_CHAT_MESSAGES_PER_PAGE,
-      });
+      const response = await ApiClient.api.courseChatControllerGetMessages(
+        courseId,
+        threadMessageId
+          ? { aroundMessageId: threadMessageId, perPage: COURSE_CHAT_MESSAGES_PER_PAGE }
+          : { page, perPage: COURSE_CHAT_MESSAGES_PER_PAGE },
+      );
 
       return response.data;
     },
+    ...(threadMessageId && { gcTime: 0 }),
   });
 
-export function useCourseChatMessages(courseId: string, page = 1) {
+export function useCourseChatMessages(courseId: string, page = 1, threadMessageId?: string) {
   return useQuery({
-    ...courseChatMessagesQueryOptions(courseId, page),
+    ...courseChatMessagesQueryOptions(courseId, page, threadMessageId),
     enabled: Boolean(courseId),
   });
 }

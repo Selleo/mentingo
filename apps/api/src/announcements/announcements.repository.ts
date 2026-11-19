@@ -194,6 +194,7 @@ export class AnnouncementsRepository {
         emailTemplate: input.emailTemplate,
         sourceType: input.sourceType,
         sourceId: input.sourceId,
+        linkPath: input.linkPath ?? null,
       })
       .returning();
 

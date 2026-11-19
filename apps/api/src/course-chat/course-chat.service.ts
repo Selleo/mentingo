@@ -65,12 +65,21 @@ export class CourseChatService {
     userId: UUIDType;
     page?: number;
     perPage?: number;
+    aroundMessageId?: UUIDType;
   }): Promise<PaginatedResponse<CourseChatMessageResponse[]>> {
     await this.assertUserEnrolledInCourse(params.courseId, params.userId);
 
+    const page = params.aroundMessageId
+      ? await this.courseChatRepository.findTopLevelMessagePage(
+          params.courseId,
+          params.aroundMessageId,
+          params.perPage,
+        )
+      : params.page;
+
     const messages = await this.courseChatRepository.getTopLevelMessages(
       params.courseId,
-      params.page,
+      page,
       params.perPage,
     );
 
@@ -186,6 +195,7 @@ export class CourseChatService {
           actorUserId: currentUser.userId,
           messageId: createdMessageId,
           parentMessageId: body.parentMessageId,
+          mentionedUserIds,
         },
         trx,
       );
@@ -355,6 +365,7 @@ export class CourseChatService {
       actorUserId: UUIDType;
       messageId: UUIDType;
       parentMessageId?: UUIDType;
+      mentionedUserIds: UUIDType[];
     },
     dbInstance?: DatabasePg,
   ) {
@@ -365,6 +376,7 @@ export class CourseChatService {
           actorUserId: params.actorUserId,
           messageId: params.messageId,
           parentMessageId: params.parentMessageId,
+          mentionedUserIds: params.mentionedUserIds,
         }),
         dbInstance,
       );

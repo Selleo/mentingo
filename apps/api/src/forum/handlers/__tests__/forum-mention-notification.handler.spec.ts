@@ -1,5 +1,6 @@
 import { ANNOUNCEMENT_SOURCE_TYPES, SUPPORTED_LANGUAGES } from "@repo/shared";
 
+import { UserNotificationsCreatedEvent } from "src/events/announcement/user-notifications-created.event";
 import { ForumUserMentionedEvent } from "src/events/forum/forum-user-mentioned.event";
 import { ForumMentionNotificationHandler } from "src/forum/handlers/forum-mention-notification.handler";
 
@@ -11,6 +12,7 @@ describe("ForumMentionNotificationHandler", () => {
 
   const createHandler = (topicTitle: string | null) => {
     const createAnnouncement = jest.fn().mockResolvedValue(undefined);
+    const publish = jest.fn().mockResolvedValue(undefined);
     const runWithTenant = jest.fn(async (_tenantId: string, callback: () => Promise<void>) =>
       callback(),
     );
@@ -21,9 +23,10 @@ describe("ForumMentionNotificationHandler", () => {
       } as never,
       { createAnnouncement } as never,
       { runWithTenant } as never,
+      { publish } as never,
     );
 
-    return { handler, createAnnouncement, runWithTenant };
+    return { handler, createAnnouncement, runWithTenant, publish };
   };
 
   const buildEvent = (mentionedUserIds: string[]) =>
@@ -58,6 +61,16 @@ describe("ForumMentionNotificationHandler", () => {
     );
   });
 
+  it("asks for the mentioned users' notification counters to be refreshed", async () => {
+    const { handler, publish } = createHandler("Release notes");
+
+    await handler.handleOutboxEvent(buildEvent([mentionedUserId]));
+
+    expect(publish).toHaveBeenCalledWith(
+      new UserNotificationsCreatedEvent({ userIds: [mentionedUserId] }),
+    );
+  });
+
   it("escapes the topic title, which is shown as HTML in the notification", async () => {
     const { handler, createAnnouncement } = createHandler(
       '<a href="https://evil.example">Click</a>',
@@ -78,6 +91,7 @@ describe("ForumMentionNotificationHandler", () => {
     const withoutMentions = createHandler("Release notes");
     await withoutMentions.handler.handleOutboxEvent(buildEvent([]));
     expect(withoutMentions.createAnnouncement).not.toHaveBeenCalled();
+    expect(withoutMentions.publish).not.toHaveBeenCalled();
 
     const withoutTopic = createHandler(null);
     await withoutTopic.handler.handleOutboxEvent(buildEvent([mentionedUserId]));

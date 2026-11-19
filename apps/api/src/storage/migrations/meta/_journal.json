@@ -1772,6 +1772,13 @@
       "when": 1794924528389,
       "tag": "0252_require_integration_api_key_name",
       "breakpoints": true
+    },
+    {
+      "idx": 253,
+      "version": "7",
+      "when": 1795009857876,
+      "tag": "0253_add_announcement_link_path",
+      "breakpoints": true
     }
   ]
 }

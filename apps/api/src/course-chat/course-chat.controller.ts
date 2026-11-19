@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Query } from "@nestjs/common";
 import { FEATURES, PERMISSIONS, type PermissionKey } from "@repo/shared";
+import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -45,6 +46,7 @@ export class CourseChatController {
       { type: "param", name: "courseId", schema: UUIDSchema },
       { type: "query", name: "page", schema: courseChatPaginationQuerySchema },
       { type: "query", name: "perPage", schema: courseChatPaginationQuerySchema },
+      { type: "query", name: "aroundMessageId", schema: Type.Optional(UUIDSchema) },
     ],
     response: paginatedResponse(courseChatMessagesResponseSchema),
   })
@@ -52,9 +54,10 @@ export class CourseChatController {
     @Param("courseId") courseId: UUIDType,
     @Query("page") page: number | undefined,
     @Query("perPage") perPage: number | undefined,
+    @Query("aroundMessageId") aroundMessageId: UUIDType | undefined,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<PaginatedResponse<CourseChatMessageResponse[]>> {
-    return this.courseChatService.getMessages({ courseId, userId, page, perPage });
+    return this.courseChatService.getMessages({ courseId, userId, page, perPage, aroundMessageId });
   }
 
   @Get(":courseId/users")

@@ -51,6 +51,7 @@ export * from "./user/user-welcome.event";
 export * from "./announcement/create-announcement.event";
 export * from "./announcement/view-announcement.event";
 export * from "./announcement/announcement-published.event";
+export * from "./announcement/user-notifications-created.event";
 export * from "./calendar/group-course-due-dates-removed.event";
 export * from "./calendar/group-course-due-dates-synced.event";
 export * from "./category/create-category.event";

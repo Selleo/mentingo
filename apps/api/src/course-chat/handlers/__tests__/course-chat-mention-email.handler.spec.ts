@@ -1,6 +1,7 @@
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { CourseChatMentionEmailHandler } from "src/course-chat/handlers/course-chat-mention-email.handler";
+import { UserNotificationsCreatedEvent } from "src/events/announcement/user-notifications-created.event";
 import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
 
 describe("CourseChatMentionEmailHandler", () => {
@@ -19,6 +20,7 @@ describe("CourseChatMentionEmailHandler", () => {
       fr: "Sécurité",
     };
     const createAnnouncement = jest.fn().mockResolvedValue(undefined);
+    const publish = jest.fn().mockResolvedValue(undefined);
     const courseChatRepository = {
       getMessageById: jest.fn().mockResolvedValue(null),
       getMentionEmailRecipients: jest.fn().mockResolvedValue([]),
@@ -49,6 +51,7 @@ describe("CourseChatMentionEmailHandler", () => {
         publishCollectedNotifications: (_eventId: string, prepare: () => Promise<void>) =>
           prepare(),
       } as never,
+      { publish } as never,
     );
 
     await handler.handleOutboxEvent(
@@ -69,6 +72,9 @@ describe("CourseChatMentionEmailHandler", () => {
     );
 
     expect(courseChatRepository.getLocalizedCourseTitles).toHaveBeenCalledWith(courseId);
+    expect(publish).toHaveBeenCalledWith(
+      new UserNotificationsCreatedEvent({ userIds: [mentionedUserId] }),
+    );
     expect(createAnnouncement).toHaveBeenCalledWith(
       expect.objectContaining({
         availableLocales: Object.values(SUPPORTED_LANGUAGES),

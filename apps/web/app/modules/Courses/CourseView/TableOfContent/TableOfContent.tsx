@@ -1,6 +1,11 @@
-import { useNavigate } from "@remix-run/react";
-import { COURSE_ORIGIN_TYPES, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
-import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "@remix-run/react";
+import {
+  COURSE_DISCUSSION_URL_PARAMS,
+  COURSE_ORIGIN_TYPES,
+  PERMISSIONS,
+  type SupportedLanguages,
+} from "@repo/shared";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCurrentUser } from "~/api/queries";
@@ -34,7 +39,20 @@ export function TableOfContent({ language }: TableOfContentProps) {
     isAdminExperience,
   );
 
-  const [activeTab, setActiveTab] = useState<CourseOverviewTab>(COURSE_OVERVIEW_TABS.TOC);
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isDiscussionLinked =
+    searchParams.get(COURSE_DISCUSSION_URL_PARAMS.TAB) === COURSE_DISCUSSION_URL_PARAMS.TAB_VALUE;
+  const linkedThreadId = searchParams.get(COURSE_DISCUSSION_URL_PARAMS.THREAD) ?? undefined;
+
+  const [selectedTab, setActiveTab] = useState<CourseOverviewTab>(
+    isDiscussionLinked ? COURSE_OVERVIEW_TABS.CHAT : COURSE_OVERVIEW_TABS.TOC,
+  );
+  const [threadRequest, setThreadRequest] = useState({
+    threadId: isDiscussionLinked ? linkedThreadId : undefined,
+    count: 0,
+  });
+  const handledLinkKey = useRef(isDiscussionLinked ? location.key : null);
 
   const permissions = currentUser?.permissions ?? [];
   const canManageCourse = canManageCourseByAuthor({
@@ -48,6 +66,11 @@ export function TableOfContent({ language }: TableOfContentProps) {
       currentUser &&
       hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_READ),
   );
+
+  const activeTab =
+    selectedTab === COURSE_OVERVIEW_TABS.CHAT && !canShowChat
+      ? COURSE_OVERVIEW_TABS.TOC
+      : selectedTab;
 
   const canDeleteAnyMessage = hasPermission(
     permissions,
@@ -64,6 +87,32 @@ export function TableOfContent({ language }: TableOfContentProps) {
   const navigateToCourseEditor = () => {
     navigate(`/admin/beta-courses/${course.id}`);
   };
+
+  useEffect(() => {
+    if (!isDiscussionLinked) return;
+
+    if (handledLinkKey.current !== location.key) {
+      handledLinkKey.current = location.key;
+      setActiveTab(COURSE_OVERVIEW_TABS.CHAT);
+      setThreadRequest(({ count }) => ({ threadId: linkedThreadId, count: count + 1 }));
+    }
+
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        next.delete(COURSE_DISCUSSION_URL_PARAMS.TAB);
+        next.delete(COURSE_DISCUSSION_URL_PARAMS.THREAD);
+
+        return next;
+      },
+      { replace: true },
+    );
+  }, [isDiscussionLinked, linkedThreadId, location.key, setSearchParams]);
+
+  const forgetRequestedThread = useCallback(
+    () => setThreadRequest(({ count }) => ({ threadId: undefined, count })),
+    [],
+  );
 
   useEffect(() => {
     if (!canShowStatistics && activeTab === COURSE_OVERVIEW_TABS.STATISTICS) {
@@ -101,9 +150,12 @@ export function TableOfContent({ language }: TableOfContentProps) {
 
       {canShowChat && activeTab === COURSE_OVERVIEW_TABS.CHAT && currentUser && (
         <CourseChatTab
+          key={threadRequest.count}
           courseId={course.id}
           currentUserId={currentUser.id}
           canDeleteAnyMessage={canDeleteAnyMessage}
+          requestedThreadId={threadRequest.threadId}
+          onRequestedThreadShown={forgetRequestedThread}
         />
       )}
     </div>
