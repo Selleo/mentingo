@@ -31,6 +31,13 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
       {question.options?.map(({ optionText, id, studentAnswer, isCorrect }, index) => {
         const isAnswered = studentAnswer === "true" || studentAnswer === "false";
         const isCorrectAnswer = isAnswered && studentAnswer === String(isCorrect);
+        // Chrome paints disabled native radios light grey, so review mode draws its own radio;
+        // forced-colors mode keeps the native one, which the system colours correctly.
+        const radioClassName = cn("size-4", {
+          grayscale: isQuizFeedbackRedacted && isQuizSubmitted,
+          "appearance-none rounded-full border-2 border-neutral-950 p-0 checked:bg-neutral-950 checked:shadow-[inset_0_0_0_2px_white] disabled:opacity-100 forced-colors:appearance-auto":
+            isCompleted,
+        });
 
         return (
           <div
@@ -59,9 +66,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
             >
               <label className="flex items-center gap-x-1">
                 <Input
-                  className={cn("size-4", {
-                    grayscale: isQuizFeedbackRedacted && isQuizSubmitted,
-                  })}
+                  className={radioClassName}
                   type="radio"
                   value="true"
                   data-testid={LEARNING_HANDLES.trueOrFalseOption(id, "true")}
@@ -73,9 +78,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
               </label>
               <label className="flex items-center gap-x-1">
                 <Input
-                  className={cn("size-4", {
-                    grayscale: isQuizFeedbackRedacted && isQuizSubmitted,
-                  })}
+                  className={radioClassName}
                   {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
                   name={`trueOrFalseQuestions.${question.id}.${id}`}
                   disabled={isCompleted}
