@@ -24,7 +24,7 @@ describe("EmailTemplateBlockSettings image upload", () => {
     expect(
       screen.queryByRole("textbox", { name: "Image URL or uploaded asset reference" }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("img", { name: "Uploaded" })).toHaveAttribute(
+    expect(screen.getByRole("img", { name: "Uploaded image" })).toHaveAttribute(
       "src",
       "https://example.com/preview.png",
     );

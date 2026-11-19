@@ -103,7 +103,7 @@ export const GroupUnenrollModal = ({
                       onCheckedChange={(currentValue) =>
                         toggleGroupSelection(group.id, !!currentValue)
                       }
-                      aria-label={`select-group-${group.id}`}
+                      aria-label={t("a11y.selectGroup", { name: group.name })}
                     />
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-md bg-neutral-100">

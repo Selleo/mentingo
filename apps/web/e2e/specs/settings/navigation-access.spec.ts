@@ -2,9 +2,10 @@ import { USER_ROLE } from "~/config/userRoles";
 
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
 import { expect, test } from "../../fixtures/test.fixture";
+import { mockEnvConfigurationIssuesFlow } from "../../flows/settings/mock-settings-env.flow";
 import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
 
-test("user can open settings from the profile menu and lands on account tab", async ({
+test("student opens settings from the profile menu and sees only their own account settings", async ({
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.student, async ({ page }) => {
@@ -15,18 +16,20 @@ test("user can open settings from the profile menu and lands on account tab", as
       "active",
     );
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.ACCOUNT_CONTENT)).toBeVisible();
-  });
-});
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.LANGUAGE_SELECT)).toBeVisible();
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_OLD)).toBeVisible();
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_NEW)).toBeVisible();
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.PASSWORD_CONFIRM)).toBeVisible();
 
-test("user without settings management permission sees only account settings", async ({
-  withWorkerPage,
-}) => {
-  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
-    await openSettingsPageFlow(page);
-
-    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.ACCOUNT_TAB)).toBeVisible();
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB)).toHaveCount(0);
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB)).toHaveCount(0);
+    await expect(
+      page.getByTestId(SETTINGS_PAGE_HANDLES.REGISTRATION_FORM_BUILDER_CARD),
+    ).toHaveCount(0);
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.INTEGRATION_API_KEY_CARD)).toHaveCount(0);
+    await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.NOTIFICATION_PREFERENCES_CARD)).toHaveCount(
+      0,
+    );
   });
 });
 
@@ -46,22 +49,7 @@ test("organization tab shows warning indicator when configuration issues are not
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    await page.route("**/api/env/config/setup", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          data: {
-            fullyConfigured: [],
-            partiallyConfigured: [{ service: "smtp", missingKeys: ["SMTP_HOST"] }],
-            notConfigured: [],
-            hasIssues: true,
-            isWarningDismissed: false,
-          },
-        }),
-      });
-    });
-
+    await mockEnvConfigurationIssuesFlow(page);
     await openSettingsPageFlow(page);
 
     await expect(

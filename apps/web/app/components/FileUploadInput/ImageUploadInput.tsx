@@ -75,7 +75,7 @@ const ImageUploadInput = ({
         {safeImageUrl && (
           <img
             src={safeImageUrl}
-            alt="Uploaded"
+            alt={t("a11y.uploadedImage")}
             className={cn(
               "h-full w-full",
               imageFit === "cover" ? "object-cover" : "object-contain p-4",

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { cn } from "~/lib/utils";
 
@@ -16,6 +18,8 @@ export function ParticipantAvatar({
   size,
   accentColor = "var(--primary-700)",
 }: ParticipantAvatarProps) {
+  const { t } = useTranslation();
+
   return (
     <Avatar
       className={cn("shrink-0 ring-1 ring-white/20", {
@@ -28,7 +32,7 @@ export function ParticipantAvatar({
       {profilePictureUrl && (
         <AvatarImage
           src={profilePictureUrl}
-          alt={`${participantName} profile`}
+          alt={t("a11y.avatarFor", { name: participantName })}
           className="size-full object-cover"
         />
       )}

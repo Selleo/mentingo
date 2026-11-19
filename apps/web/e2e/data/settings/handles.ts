@@ -21,6 +21,7 @@ export const SETTINGS_PAGE_HANDLES = {
   NO_AVAILABLE_SETTINGS: "settings-no-available-settings",
   ORGANIZATION_WARNING_INDICATOR: "settings-organization-warning-indicator",
   LANGUAGE_SELECT: "settings-language-select",
+  languageOption: (language: string) => `settings-language-option-${language}`,
   USER_DETAILS_DESCRIPTION: "settings-user-details-description",
   USER_DETAILS_CONTACT_EMAIL: "settings-user-details-contact-email",
   USER_DETAILS_CONTACT_EMAIL_ERROR: "settings-user-details-contact-email-error",

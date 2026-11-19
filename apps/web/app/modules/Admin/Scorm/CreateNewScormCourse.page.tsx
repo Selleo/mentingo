@@ -108,7 +108,7 @@ const CreateNewScormCourse = () => {
       className="flex h-screen overflow-auto bg-white px-20 py-8"
     >
       <div className="flex w-full items-center justify-center">
-        <img src={SplashScreenImage} alt="splashScreenImage" className="rounded" />
+        <img src={SplashScreenImage} alt="" className="rounded" />
       </div>
       <div className="flex w-full max-w-[820px] flex-col gap-y-6 px-8">
         <Breadcrumb

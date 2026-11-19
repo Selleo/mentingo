@@ -4428,7 +4428,8 @@
       "dndOnStart": "Picked up the word {{word}}.",
       "dndOnOver": "Word {{word}} is over {{blank}}.",
       "dndOnEnd": "Word {{word}} was placed in {{blank}}.",
-      "dndOnCancel": "Dragging cancelled. Word {{word}} returned to its previous position."
+      "dndOnCancel": "Dragging cancelled. Word {{word}} returned to its previous position.",
+      "questionTitleNotProvided": "Question title not provided"
     },
     "aiMentor": {
       "title": "AI Mentor Session",
@@ -9932,5 +9933,37 @@
       "emptyContent": "Enter a message.",
       "invalidReaction": "Choose one of the available reactions."
     }
+  },
+  "a11y": {
+    "goToHomepage": "Go to homepage",
+    "platformLogo": "Platform logo",
+    "uploadedImage": "Uploaded image",
+    "uploadQueue": "Upload queue",
+    "formattingOptions": "Formatting options",
+    "switchToLightMode": "Switch to light mode",
+    "switchToDarkMode": "Switch to dark mode",
+    "videoPlayer": "Video player",
+    "videoQuality": "Video quality",
+    "breadcrumb": "Breadcrumb",
+    "more": "More",
+    "carousel": "carousel",
+    "slide": "slide",
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "remove": "Remove",
+    "clearAll": "Clear all",
+    "expandOptions": "Expand options",
+    "collapseOptions": "Collapse options",
+    "selectAll": "Select all",
+    "selectRow": "Select row",
+    "deleteChapter": "Delete chapter",
+    "cancelEditing": "Cancel editing",
+    "removeFile": "Remove file",
+    "editSection": "Edit section",
+    "deleteSection": "Delete section",
+    "avatar": "Avatar",
+    "avatarFor": "Avatar for {{name}}",
+    "selectGroup": "Select group {{name}}",
+    "lessonWithTitle": "Lesson: {{title}}"
   }
 }

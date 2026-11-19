@@ -46,7 +46,11 @@ export default function LanguageSelect() {
           </SelectTrigger>
           <SelectContent>
             {Object.values(SUPPORTED_LANGUAGES).map((language) => (
-              <SelectItem key={language} value={language}>
+              <SelectItem
+                key={language}
+                value={language}
+                data-testid={SETTINGS_PAGE_HANDLES.languageOption(language)}
+              >
                 {t(`common.languages.${language}`)}
               </SelectItem>
             ))}

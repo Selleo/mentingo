@@ -6,6 +6,7 @@ export const QUIZ_GRADING_HANDLES = {
   LESSON_FILTER: "quiz-grading-lesson-filter",
   STUDENT_FILTER: "quiz-grading-student-filter",
   ROW: "quiz-grading-row",
+  EMPTY_STATE: "quiz-grading-empty-state",
   ANSWER_PAGE: "quiz-grading-answer-page",
   QUESTION_TITLE: "quiz-grading-question-title",
   STUDENT_ANSWER: "quiz-grading-student-answer",

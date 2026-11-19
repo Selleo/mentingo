@@ -384,9 +384,9 @@
     }
   },
   "dashboardHome": {
-    "title": "Twój dashboard",
+    "title": "Twój panel główny",
     "subtitle": "Najważniejsze informacje i działania związane z nauką zawsze pod ręką.",
-    "customize": "Dostosuj dashboard",
+    "customize": "Dostosuj panel główny",
     "edit": {
       "badge": "Edycja",
       "widgetsButton": "Widżety",
@@ -405,33 +405,33 @@
         "4x3": "Wyróżniony wysoki"
       },
       "drag": "Przenieś kafelek {{title}}",
-      "widgetLibrary": "Kafelki dashboardu",
-      "widgetLibraryDescription": "Wybierz kafelki, które mają być widoczne na Twoim dashboardzie.",
+      "widgetLibrary": "Kafelki panelu głównego",
+      "widgetLibraryDescription": "Wybierz kafelki, które mają być widoczne w Twoim panelu głównym.",
       "required": "Wymagany",
       "toggle": "Przełącz kafelek {{title}}",
       "confirm": "Tak",
       "cancel": "Nie"
     },
     "empty": {
-      "title": "Twój dashboard jest pusty",
-      "description": "Dostosuj dashboard i dodaj najważniejsze dla Ciebie kafelki.",
+      "title": "Twój panel główny jest pusty",
+      "description": "Dostosuj panel główny i dodaj najważniejsze dla Ciebie kafelki.",
       "editDescription": "Włącz co najmniej jeden kafelek z powyższej listy."
     },
     "error": {
-      "invalidWidgetLayout": "Układ dashboardu zawiera niedostępne lub zduplikowane kafelki.",
+      "invalidWidgetLayout": "Układ panelu głównego zawiera niedostępne lub zduplikowane kafelki.",
       "invalidWidgetSize": "Ten rozmiar nie jest dozwolony dla wybranego kafelka.",
-      "requiredWidgetMissing": "Brakuje wymaganego kafelka dashboardu.",
-      "title": "Nie udało się wczytać dashboardu",
+      "requiredWidgetMissing": "Brakuje wymaganego kafelka panelu głównego.",
+      "title": "Nie udało się wczytać panelu głównego",
       "description": "Spróbuj ponownie za chwilę.",
       "retry": "Spróbuj ponownie",
       "invalidWidgetWidth": "Ten rozmiar nie jest dozwolony dla wybranego kafelka.",
       "staleLayout": "Układ panelu został zmieniony w innym miejscu. Odśwież stronę i spróbuj ponownie."
     },
     "toast": {
-      "layoutSaved": "Zmiany w dashboardzie zostały zapisane.",
-      "layoutSaveError": "Nie udało się zapisać zmian w dashboardzie.",
-      "layoutReset": "Przywrócono domyślny układ dashboardu.",
-      "layoutResetError": "Nie udało się przywrócić domyślnego układu dashboardu."
+      "layoutSaved": "Zmiany w panelu głównym zostały zapisane.",
+      "layoutSaveError": "Nie udało się zapisać zmian w panelu głównym.",
+      "layoutReset": "Przywrócono domyślny układ panelu głównego.",
+      "layoutResetError": "Nie udało się przywrócić domyślnego układu panelu głównego."
     },
     "widgets": {
       "loadError": "Nie udało się wczytać tego kafelka.",
@@ -2593,7 +2593,7 @@
         "automation": "automatyzacje",
         "automation_log": "logi automatyzacji",
         "content_marketplace": "katalog kursów",
-        "dashboard": "pulpit",
+        "dashboard": "panel główny",
         "email_template": "szablony e-mail",
         "managed_group_results": "wyniki zarządzanych grup",
         "phishing": "symulacje phishingu",
@@ -2610,7 +2610,7 @@
         "user_manage": "Może zarządzać użytkownikami, w tym rolami i statusem kont.",
         "settings_read_self": "Może przeglądać własne ustawienia profilu i preferencji.",
         "settings_update_self": "Może aktualizować własne ustawienia profilu i preferencji.",
-        "dashboard_read": "Może wyświetlać swój dashboard.",
+        "dashboard_read": "Może wyświetlać swój panel główny.",
         "todo_task_manage_self": "Może tworzyć i zarządzać własnymi zadaniami.",
         "settings_manage": "Może zarządzać globalnymi ustawieniami platformy.",
         "email_template_manage": "Może zarządzać szablonami wiadomości e-mail, publikować je, przesyłać obrazy i wysyłać wiadomości testowe.",
@@ -4229,7 +4229,7 @@
       "draftHeader": "Wersja robocza",
       "draftBody": "Studenci nie mogą zakupić ani zapisać się na ten kurs. Dla tych, którzy już się zapisali, kurs nie będzie widoczny na ich liście kursów.",
       "publishedHeader": "Opublikowany",
-      "publishedBody": "Studenci mogą zakupić, zapisać się i uzyskać dostęp do treści kursu. Po zapisaniu kurs będzie widoczny na ich dashboardzie.",
+      "publishedBody": "Studenci mogą zakupić, zapisać się i uzyskać dostęp do treści kursu. Po zapisaniu kurs będzie widoczny w ich panelu głównym.",
       "privateHeader": "Niepubliczny",
       "privateBody": "Studenci nie mogą zakupić ani zapisać się na ten kurs. Dla tych, którzy są na niego zapisani (np. przez admina) kurs będzie widoczny na ich liście kursów i będą mogli z niego korzystać."
     },
@@ -4697,7 +4697,8 @@
       "dndOnStart": "Podniesiono słowo {{word}}.",
       "dndOnOver": "Słowo {{word}} znajduje się nad {{blank}}.",
       "dndOnEnd": "Słowo {{word}} zostało umieszczone w {{blank}}.",
-      "dndOnCancel": "Przeciąganie anulowane. Słowo {{word}} wróciło na poprzednie miejsce."
+      "dndOnCancel": "Przeciąganie anulowane. Słowo {{word}} wróciło na poprzednie miejsce.",
+      "questionTitleNotProvided": "Nie podano treści pytania"
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",
@@ -10045,5 +10046,37 @@
       "emptyContent": "Wpisz wiadomość.",
       "invalidReaction": "Wybierz jedną z dostępnych reakcji."
     }
+  },
+  "a11y": {
+    "goToHomepage": "Przejdź do strony głównej",
+    "platformLogo": "Logo platformy",
+    "uploadedImage": "Przesłany obraz",
+    "uploadQueue": "Kolejka przesyłania",
+    "formattingOptions": "Opcje formatowania",
+    "switchToLightMode": "Przełącz na tryb jasny",
+    "switchToDarkMode": "Przełącz na tryb ciemny",
+    "videoPlayer": "Odtwarzacz wideo",
+    "videoQuality": "Jakość wideo",
+    "breadcrumb": "Ścieżka nawigacji",
+    "more": "Więcej",
+    "carousel": "karuzela",
+    "slide": "slajd",
+    "previousSlide": "Poprzedni slajd",
+    "nextSlide": "Następny slajd",
+    "remove": "Usuń",
+    "clearAll": "Wyczyść wszystko",
+    "expandOptions": "Rozwiń opcje",
+    "collapseOptions": "Zwiń opcje",
+    "selectAll": "Zaznacz wszystko",
+    "selectRow": "Zaznacz wiersz",
+    "deleteChapter": "Usuń rozdział",
+    "cancelEditing": "Anuluj edycję",
+    "removeFile": "Usuń plik",
+    "editSection": "Edytuj sekcję",
+    "deleteSection": "Usuń sekcję",
+    "avatar": "Awatar",
+    "avatarFor": "Awatar: {{name}}",
+    "selectGroup": "Zaznacz grupę {{name}}",
+    "lessonWithTitle": "Lekcja: {{title}}"
   }
 }

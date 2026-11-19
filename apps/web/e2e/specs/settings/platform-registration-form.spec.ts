@@ -1,97 +1,24 @@
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
-
 import { USER_ROLE } from "~/config/userRoles";
 
+import { REGISTER_PAGE_HANDLES } from "../../data/auth/handles";
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
+import { TEST_PASSWORD } from "../../data/test-data/credentials.data";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
+import { fillRegisterFormFlow } from "../../flows/auth/fill-register-form.flow";
+import { openRegisterPageFlow } from "../../flows/auth/open-register-page.flow";
+import { addRegistrationFieldFlow } from "../../flows/settings/add-registration-field.flow";
+import { openRegistrationFormBuilderFlow } from "../../flows/settings/open-registration-form-builder.flow";
+import { recordApiRequests, waitForApiResponse } from "../../utils/api-requests";
+import {
+  findRegistrationFieldByLabel,
+  getRegistrationForm,
+  restoreRegistrationForm,
+} from "../../utils/registration-form";
 
-import type { FixtureApiClient } from "../../utils/api-client";
-import type { Page } from "@playwright/test";
-import type {
-  GetAdminRegistrationFormResponse,
-  UpdateRegistrationFormBody,
-} from "~/api/generated-api";
-
-type RegistrationField = GetAdminRegistrationFormResponse["data"]["fields"][number];
-
-const openPlatformCustomizationSettings = async (page: Page) => {
-  await openSettingsPageFlow(page);
-  await page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB).click();
-  await expect(
-    page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_CONTENT),
-  ).toBeVisible();
-  await expect(
-    page.getByTestId(SETTINGS_PAGE_HANDLES.REGISTRATION_FORM_BUILDER_CARD),
-  ).toBeVisible();
-};
-
-const getRegistrationForm = async (apiClient: FixtureApiClient) => {
-  const response = await apiClient.api.settingsControllerGetAdminRegistrationForm();
-
-  return response.data.data;
-};
-
-const toUpdateRegistrationFormBody = (fields: RegistrationField[]): UpdateRegistrationFormBody => ({
-  fields: fields.map((field, index) => ({
-    id: field.id,
-    type: "checkbox",
-    label: field.label,
-    required: field.required,
-    archived: field.archived,
-    displayOrder: index,
-  })),
-});
-
-/** The update endpoint keeps fields missing from the body, so fields added by a test are archived. */
-const restoreRegistrationForm = async (
-  apiClient: FixtureApiClient,
-  originalFields: RegistrationField[],
-) => {
-  const originalFieldIds = new Set(originalFields.map((field) => field.id));
-  const { fields: currentFields } = await getRegistrationForm(apiClient);
-  const addedFields = currentFields
-    .filter((field) => !originalFieldIds.has(field.id))
-    .map((field) => ({ ...field, archived: true }));
-
-  await apiClient.api.settingsControllerUpdateRegistrationForm(
-    toUpdateRegistrationFormBody([...originalFields, ...addedFields]),
-  );
-};
-
-const fillRegistrationFieldLabels = async (page: Page, index: number, baseLabel: string) => {
-  for (const language of Object.values(SUPPORTED_LANGUAGES)) {
-    await page
-      .getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldLabel(index, language))
-      .fill(`${baseLabel} ${language}`);
-  }
-};
-
-const addAndSaveRegistrationField = async (
-  page: Page,
-  apiClient: FixtureApiClient,
-  index: number,
-  baseLabel: string,
-) => {
-  await page.getByTestId(SETTINGS_PAGE_HANDLES.REGISTRATION_FORM_ADD_FIELD).click();
-  await page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldEdit(index)).click();
-  await fillRegistrationFieldLabels(page, index, baseLabel);
-  await page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldRequired(index)).click();
-  await page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldClose(index)).click();
-  await page.getByTestId(SETTINGS_PAGE_HANDLES.REGISTRATION_FORM_SAVE).click();
-
-  await expect
-    .poll(async () => {
-      const form = await getRegistrationForm(apiClient);
-
-      return form.fields.some((field) => field.label.en?.includes(baseLabel));
-    })
-    .toBe(true);
-};
-
-test("admin can add and edit registration form checkbox labels and required state", async ({
+test("admin adds, archives and restores a registration checkbox that visitors see on the register page", async ({
   apiClient,
   cleanup,
+  createWorkspacePage,
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
@@ -101,13 +28,19 @@ test("admin can add and edit registration form checkbox labels and required stat
 
     cleanup.add(async () => restoreRegistrationForm(apiClient, originalForm.fields));
 
-    await openPlatformCustomizationSettings(page);
-    await addAndSaveRegistrationField(page, apiClient, fieldIndex, fieldLabel);
+    const visitor = await createWorkspacePage();
+    cleanup.add(() => visitor.context.close());
+
+    await openRegistrationFormBuilderFlow(page, fieldIndex);
+    await addRegistrationFieldFlow(page, fieldIndex, fieldLabel);
+
+    await expect.poll(() => findRegistrationFieldByLabel(apiClient, fieldLabel)).toBeTruthy();
+    const field = await findRegistrationFieldByLabel(apiClient, fieldLabel);
+    if (!field) throw new Error(`Registration field "${fieldLabel}" was not saved.`);
 
     await page.reload();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB).click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldEdit(fieldIndex)).click();
-
     await expect(
       page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldLabel(fieldIndex, "en")),
     ).toContainText(`${fieldLabel} en`);
@@ -117,6 +50,54 @@ test("admin can add and edit registration form checkbox labels and required stat
     await expect(
       page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldRequired(fieldIndex)),
     ).toBeChecked();
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldClose(fieldIndex)).click();
+
+    const visitorField = visitor.page.getByTestId(REGISTER_PAGE_HANDLES.formField(field.id));
+    const visitorCheckbox = visitor.page.getByTestId(
+      REGISTER_PAGE_HANDLES.formFieldCheckbox(field.id),
+    );
+    const visitorFieldError = visitor.page.getByTestId(
+      REGISTER_PAGE_HANDLES.formFieldError(field.id),
+    );
+
+    await openRegisterPageFlow(visitor.page);
+    await expect(visitorField).toContainText(`${fieldLabel} en`);
+
+    // A required field left unticked blocks registration.
+    await fillRegisterFormFlow(visitor.page, {
+      firstName: "Required",
+      lastName: "Field",
+      email: `registration-required-${Date.now()}@example.com`,
+      password: TEST_PASSWORD,
+    });
+    await visitorCheckbox.click();
+    await visitorCheckbox.click();
+    await expect(visitorFieldError).toContainText(/\S/);
+    await expect(visitor.page.getByTestId(REGISTER_PAGE_HANDLES.SUBMIT)).toBeDisabled();
+    await visitorCheckbox.click();
+    await expect(visitorFieldError).toHaveCount(0);
+
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldArchive(fieldIndex)).click();
+    await expect
+      .poll(async () => (await findRegistrationFieldByLabel(apiClient, fieldLabel))?.archived)
+      .toBe(true);
+
+    const archivedFormLoaded = waitForApiResponse(
+      visitor.page,
+      "GET",
+      "/api/settings/registration-form",
+    );
+    await openRegisterPageFlow(visitor.page);
+    await archivedFormLoaded;
+    await expect(visitorField).toHaveCount(0);
+
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldRestore(fieldIndex)).click();
+    await expect
+      .poll(async () => (await findRegistrationFieldByLabel(apiClient, fieldLabel))?.archived)
+      .toBe(false);
+
+    await openRegisterPageFlow(visitor.page);
+    await expect(visitorField).toBeVisible();
   });
 });
 
@@ -131,7 +112,8 @@ test("registration form builder blocks saving when required labels are missing",
 
     cleanup.add(async () => restoreRegistrationForm(apiClient, originalForm.fields));
 
-    await openPlatformCustomizationSettings(page);
+    await openRegistrationFormBuilderFlow(page, fieldIndex);
+    const saveRequests = recordApiRequests(page, "PATCH", "/api/settings/admin/registration-form");
     await page.getByTestId(SETTINGS_PAGE_HANDLES.REGISTRATION_FORM_ADD_FIELD).click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.REGISTRATION_FORM_SAVE).click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldEdit(fieldIndex)).click();
@@ -139,43 +121,7 @@ test("registration form builder blocks saving when required labels are missing",
     await expect(
       page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldLabelError(fieldIndex, "en")),
     ).toContainText(/\S/);
-    await expect
-      .poll(async () => (await getRegistrationForm(apiClient)).fields.length)
-      .toBe(originalForm.fields.length);
-  });
-});
-
-test("admin can archive and restore a persisted registration form field", async ({
-  apiClient,
-  cleanup,
-  withWorkerPage,
-}) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const originalForm = await getRegistrationForm(apiClient);
-    const fieldIndex = originalForm.fields.length;
-    const fieldLabel = `Settings archive ${Date.now()}`;
-
-    cleanup.add(async () => restoreRegistrationForm(apiClient, originalForm.fields));
-
-    await openPlatformCustomizationSettings(page);
-    await addAndSaveRegistrationField(page, apiClient, fieldIndex, fieldLabel);
-
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldArchive(fieldIndex)).click();
-    await expect
-      .poll(async () => {
-        const form = await getRegistrationForm(apiClient);
-
-        return form.fields.find((field) => field.label.en?.includes(fieldLabel))?.archived;
-      })
-      .toBe(true);
-
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.registrationFormFieldRestore(fieldIndex)).click();
-    await expect
-      .poll(async () => {
-        const form = await getRegistrationForm(apiClient);
-
-        return form.fields.find((field) => field.label.en?.includes(fieldLabel))?.archived;
-      })
-      .toBe(false);
+    expect(saveRequests).toHaveLength(0);
+    expect((await getRegistrationForm(apiClient)).fields).toHaveLength(originalForm.fields.length);
   });
 });

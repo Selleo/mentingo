@@ -1,4 +1,8 @@
+import { useTranslation } from "react-i18next";
+
 export const FileLoader = () => {
+  const { t } = useTranslation();
+
   return (
     <div role="status">
       <svg
@@ -17,7 +21,7 @@ export const FileLoader = () => {
           fill="currentFill"
         />
       </svg>
-      <span className="sr-only">Loading...</span>
+      <span className="sr-only">{t("common.button.loading")}</span>
     </div>
   );
 };

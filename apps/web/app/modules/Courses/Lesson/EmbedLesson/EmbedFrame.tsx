@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import Loader from "~/modules/common/Loader/Loader";
 
+import { LEARNING_HANDLES } from "../../../../../e2e/data/learning/handles";
+
 import type { LessonResource } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 interface EmbedFrameProps {
@@ -55,6 +57,7 @@ export const EmbedFrame = ({ resource, title }: EmbedFrameProps) => {
       {!hasFailed ? (
         <>
           <iframe
+            data-testid={LEARNING_HANDLES.EMBED_IFRAME}
             src={resource.fileUrl}
             title={title}
             allowFullScreen={resource.allowFullscreen}

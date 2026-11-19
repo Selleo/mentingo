@@ -5,41 +5,18 @@ import { expect, test } from "../../fixtures/test.fixture";
 import { assertQuizLessonProgressFlow } from "../../flows/learning/assert-learning-progress.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { retakeQuizFlow } from "../../flows/learning/retake-quiz.flow";
-import { selectFirstSingleChoiceAnswerFlow } from "../../flows/learning/select-first-single-choice-answer.flow";
+import { selectQuizOptionFlow } from "../../flows/learning/select-quiz-option.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
 import { submitQuizFlow } from "../../flows/learning/submit-quiz.flow";
+import {
+  getCourseCertificateIdFlow,
+  waitForCourseCertificateFlow,
+} from "../../flows/learning/wait-for-course-certificate.flow";
 import {
   getUserQuizAttemptCountFlow,
   waitForUserQuizAttemptCountFlow,
 } from "../../flows/learning/wait-for-quiz-attempt-count.flow";
-
-import { createSingleChoiceQuizLessonCourse } from "./learning-test-helpers";
-
-type LearningApiClient = Parameters<typeof getUserQuizAttemptCountFlow>[0];
-
-const waitForCourseCertificate = async (
-  apiClient: LearningApiClient,
-  input: { courseId: string; studentId: string },
-): Promise<string> => {
-  const getCertificateId = async () => {
-    const response = await apiClient.api.certificatesControllerGetCertificate({
-      courseId: input.courseId,
-      language: "en",
-      userId: input.studentId,
-    });
-
-    return response.data?.id ?? null;
-  };
-
-  await expect.poll(getCertificateId, { timeout: 15_000 }).not.toBeNull();
-
-  const certificateId = await getCertificateId();
-  if (!certificateId) {
-    throw new Error(`Certificate was not created for course ${input.courseId}`);
-  }
-
-  return certificateId;
-};
+import { createSingleChoiceQuizLessonCourse } from "../../utils/learning-courses";
 
 test("student can submit and retake a quiz lesson", async ({
   apiClient,
@@ -58,37 +35,13 @@ test("student can submit and retake a quiz lesson", async ({
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
-  const { quizLesson } = lessons;
+  const { correctOptionId, quizLesson } = lessons;
 
-  await withWorkerPage(
-    USER_ROLE.student,
-    async ({ page }) => {
-      await enrollmentFactory.selfEnroll(courseId);
-      const studentId = await enrollmentFactory.getCurrentUserId();
-
-      await openCourseOverviewFlow(page, courseId);
-      await startLearningFlow(page);
-
-      await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${quizLesson.id}$`));
-      await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(quizLesson.title);
-      await expect(
-        page.getByTestId(LEARNING_HANDLES.lessonSidebarLessonItem(quizLesson.id)),
-      ).toContainText(quizLesson.title);
-      await page.getByTestId(LEARNING_HANDLES.lessonSidebarTypeIcon(quizLesson.id)).hover();
-      await expect(page.getByRole("tooltip")).toHaveText("Quiz");
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_FORM)).toBeVisible();
-
-      const initialQuizAttemptCount = await getUserQuizAttemptCountFlow(apiClient);
-
-      await selectFirstSingleChoiceAnswerFlow(page);
-      await submitQuizFlow(page);
-      quizWasSubmitted = true;
-      const firstExpectedQuizAttemptCount = initialQuizAttemptCount + 1;
-
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeDisabled();
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
-
-      await assertQuizLessonProgressFlow(apiClient, {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
+    await enrollmentFactory.selfEnroll(courseId);
+    const studentId = await enrollmentFactory.getCurrentUserId();
+    const quizProgress = (attempts: number) =>
+      assertQuizLessonProgressFlow(apiClient, {
         courseId,
         lessonId: quizLesson.id,
         studentId,
@@ -96,60 +49,54 @@ test("student can submit and retake a quiz lesson", async ({
           completedLessonCount: 1,
           courseLessonStatus: "completed",
           lessonCompleted: true,
-          attempts: 1,
+          attempts,
         },
       });
 
-      await waitForUserQuizAttemptCountFlow(apiClient, firstExpectedQuizAttemptCount);
+    await openCourseOverviewFlow(page, courseId);
+    await startLearningFlow(page);
 
-      await retakeQuizFlow(page);
+    await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${quizLesson.id}$`));
+    await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(quizLesson.title);
+    await expect(
+      page.getByTestId(LEARNING_HANDLES.lessonSidebarLessonItem(quizLesson.id)),
+    ).toContainText(quizLesson.title);
+    await page.getByTestId(LEARNING_HANDLES.lessonSidebarTypeIcon(quizLesson.id)).hover();
+    await expect(page.getByRole("tooltip")).toBeVisible();
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_FORM)).toBeVisible();
 
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeEnabled();
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeDisabled();
+    const initialQuizAttemptCount = await getUserQuizAttemptCountFlow(apiClient);
 
-      await expect
-        .poll(
-          async () => {
-            const { data } = await apiClient.api.lessonControllerGetLessonById(quizLesson.id, {
-              language: "en",
-              studentId,
-            });
+    await selectQuizOptionFlow(page, correctOptionId);
+    await submitQuizFlow(page);
+    quizWasSubmitted = true;
 
-            const lessonData = data.data;
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeDisabled();
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
+    await quizProgress(1);
+    await waitForUserQuizAttemptCountFlow(apiClient, initialQuizAttemptCount + 1);
 
-            return {
-              attempts: lessonData.attempts ?? 0,
-            };
-          },
-          { timeout: 15_000 },
-        )
-        .toEqual({
-          attempts: 2,
-        });
+    await retakeQuizFlow(page);
 
-      await selectFirstSingleChoiceAnswerFlow(page);
-      await submitQuizFlow(page);
-      const secondExpectedQuizAttemptCount = initialQuizAttemptCount + 2;
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeEnabled();
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeDisabled();
+    await expect(page.getByTestId(LEARNING_HANDLES.quizOption(correctOptionId))).not.toBeChecked();
+    // Starting a retake opens a new attempt; the lesson is back in progress until it is submitted.
+    await assertQuizLessonProgressFlow(apiClient, {
+      courseId,
+      lessonId: quizLesson.id,
+      studentId,
+      expected: { attempts: 2, courseLessonStatus: "in_progress", lessonCompleted: false },
+    });
 
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeDisabled();
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
+    await selectQuizOptionFlow(page, correctOptionId);
+    await submitQuizFlow(page);
 
-      await assertQuizLessonProgressFlow(apiClient, {
-        courseId,
-        lessonId: quizLesson.id,
-        studentId,
-        expected: {
-          completedLessonCount: 1,
-          courseLessonStatus: "completed",
-          lessonCompleted: true,
-          attempts: 2,
-        },
-      });
-
-      await waitForUserQuizAttemptCountFlow(apiClient, secondExpectedQuizAttemptCount);
-    },
-    { root: true },
-  );
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeDisabled();
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
+    await quizProgress(2);
+    await waitForUserQuizAttemptCountFlow(apiClient, initialQuizAttemptCount + 2);
+  });
 });
 
 test("student can retake the final quiz when the completed course already has a certificate", async ({
@@ -170,24 +117,13 @@ test("student can retake the final quiz when the completed course already has a 
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
-  const { quizLesson } = lessons;
+  const { correctOptionId, quizLesson } = lessons;
 
-  await withWorkerPage(
-    USER_ROLE.student,
-    async ({ context, origin, page }) => {
-      await enrollmentFactory.selfEnroll(courseId);
-      const studentId = await enrollmentFactory.getCurrentUserId();
-
-      await openCourseOverviewFlow(page, courseId);
-      await startLearningFlow(page);
-
-      const initialQuizAttemptCount = await getUserQuizAttemptCountFlow(apiClient);
-
-      await selectFirstSingleChoiceAnswerFlow(page);
-      await submitQuizFlow(page);
-      quizWasSubmitted = true;
-
-      await assertQuizLessonProgressFlow(apiClient, {
+  await withWorkerPage(USER_ROLE.student, async ({ context, origin, page }) => {
+    await enrollmentFactory.selfEnroll(courseId);
+    const studentId = await enrollmentFactory.getCurrentUserId();
+    const quizProgress = (attempts: number) =>
+      assertQuizLessonProgressFlow(apiClient, {
         courseId,
         lessonId: quizLesson.id,
         studentId,
@@ -195,58 +131,56 @@ test("student can retake the final quiz when the completed course already has a 
           completedLessonCount: 1,
           courseLessonStatus: "completed",
           lessonCompleted: true,
-          attempts: 1,
+          attempts,
         },
       });
-      await waitForUserQuizAttemptCountFlow(apiClient, initialQuizAttemptCount + 1);
 
-      let certificateId = "";
-      await withWorkerPage(
-        USER_ROLE.admin,
-        async () => {
-          await courseFactory.updateHasCertificate(courseId, true);
-          certificateId = await waitForCourseCertificate(apiClient, { courseId, studentId });
-        },
-        { root: true },
-      );
-      await apiClient.syncFromContext(context, origin ?? new URL(page.url()).origin);
+    await openCourseOverviewFlow(page, courseId);
+    await startLearningFlow(page);
 
-      await retakeQuizFlow(page);
+    const initialQuizAttemptCount = await getUserQuizAttemptCountFlow(apiClient);
 
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeEnabled();
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeDisabled();
+    await selectQuizOptionFlow(page, correctOptionId);
+    await submitQuizFlow(page);
+    quizWasSubmitted = true;
 
-      await selectFirstSingleChoiceAnswerFlow(page);
-      await submitQuizFlow(page);
+    await quizProgress(1);
+    await waitForUserQuizAttemptCountFlow(apiClient, initialQuizAttemptCount + 1);
 
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeDisabled();
-      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
+    let certificateId = "";
+    await withWorkerPage(USER_ROLE.admin, async () => {
+      await courseFactory.updateHasCertificate(courseId, true);
+      certificateId = await waitForCourseCertificateFlow(apiClient, { courseId, studentId });
+    });
+    await apiClient.syncFromContext(context, origin ?? new URL(page.url()).origin);
 
-      await assertQuizLessonProgressFlow(apiClient, {
-        courseId,
-        lessonId: quizLesson.id,
-        studentId,
-        expected: {
-          completedLessonCount: 1,
-          courseLessonStatus: "completed",
-          lessonCompleted: true,
-          attempts: 2,
-        },
-      });
-      await waitForUserQuizAttemptCountFlow(apiClient, initialQuizAttemptCount + 2);
+    await retakeQuizFlow(page);
 
-      await expect
-        .poll(async () => {
-          const response = await apiClient.api.certificatesControllerGetCertificate({
-            courseId,
-            language: "en",
-            userId: studentId,
-          });
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeEnabled();
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeDisabled();
+    // The retake is persisted (lesson back in progress) and the issued certificate is not revoked.
+    await assertQuizLessonProgressFlow(apiClient, {
+      courseId,
+      lessonId: quizLesson.id,
+      studentId,
+      expected: { attempts: 2, courseLessonStatus: "in_progress", lessonCompleted: false },
+    });
+    expect(await getCourseCertificateIdFlow(apiClient, { courseId, studentId })).toBe(
+      certificateId,
+    );
 
-          return response.data?.id ?? null;
-        })
-        .toBe(certificateId);
-    },
-    { root: true },
-  );
+    await selectQuizOptionFlow(page, correctOptionId);
+    await submitQuizFlow(page);
+
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeDisabled();
+    await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
+
+    await quizProgress(2);
+    await waitForUserQuizAttemptCountFlow(apiClient, initialQuizAttemptCount + 2);
+
+    // Completing the retake keeps the certificate that was already issued.
+    expect(await getCourseCertificateIdFlow(apiClient, { courseId, studentId })).toBe(
+      certificateId,
+    );
+  });
 });

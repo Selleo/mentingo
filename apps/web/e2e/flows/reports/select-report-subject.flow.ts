@@ -1,24 +1,28 @@
+import { REPORTS_HANDLES } from "../../data/reports/handles";
+
 import { applyReportFlow } from "./apply-report.flow";
 import { chooseReportOptionFlow } from "./choose-report-option.flow";
 
 import type { Page } from "@playwright/test";
+import type { ReportView } from "~/modules/Reports/reports.types";
 
 type SelectReportSubjectFlowInput = {
-  tab: RegExp;
-  subjectLabel: string;
-  subjectName: string;
+  view: ReportView;
+  subjectId: string;
+  search?: string;
 };
 
 /** Switches to a report tab, picks its subject and applies the report. */
 export const selectReportSubjectFlow = async (
   page: Page,
-  { tab, subjectLabel, subjectName }: SelectReportSubjectFlowInput,
+  { view, subjectId, search }: SelectReportSubjectFlowInput,
 ) => {
-  await page.getByRole("tab", { name: tab }).click();
+  await page.getByTestId(REPORTS_HANDLES.viewTab(view)).click();
   await chooseReportOptionFlow(
     page,
-    page.getByRole("combobox", { name: subjectLabel }),
-    subjectName,
+    page.getByTestId(REPORTS_HANDLES.SUBJECT_PICKER),
+    REPORTS_HANDLES.option(subjectId),
+    search,
   );
   await applyReportFlow(page);
 };
