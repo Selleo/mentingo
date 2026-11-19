@@ -3,6 +3,8 @@ import { MessagesSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
+import { useSetCourseChatThreadFollowing } from "~/api/queries/course-chat/useCourseChat";
+import { FollowDiscussionButton } from "~/components/FollowDiscussionButton/FollowDiscussionButton";
 import { Button } from "~/components/ui/button";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -60,6 +62,9 @@ export function MainThreadMessage({
 }: MainThreadMessageProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
+  const { mutate: setFollowing, isPending: isChangingFollowing } = useSetCourseChatThreadFollowing(
+    message.courseId,
+  );
   const replyCount = message.replyCount;
   const displayedReplyCountText = replyCount
     ? t("studentCourseView.courseChat.repliesCount", {
@@ -131,6 +136,17 @@ export function MainThreadMessage({
           <MessagesSquare className="size-3.5" />
           {replyCount ? displayedReplyCountText : t("studentCourseView.courseChat.reply")}
         </Button>
+        {!message.deletedAt && (
+          <FollowDiscussionButton
+            compact
+            isFollowing={message.isFollowing}
+            isPending={isChangingFollowing}
+            testId={COURSE_DISCUSSION_HANDLES.threadFollowButton(message.id)}
+            onToggle={() =>
+              setFollowing({ messageId: message.id, isFollowing: !message.isFollowing })
+            }
+          />
+        )}
         {latestReplyDistance && (
           <span className="text-[11px] leading-4 text-neutral-500">{latestReplyDistance}</span>
         )}

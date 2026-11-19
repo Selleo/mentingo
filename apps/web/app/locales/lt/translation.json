@@ -5617,7 +5617,8 @@
     "learningPaths": "Tobulėjimo keliai",
     "adminLearningPaths": "Tobulėjimo keliai",
     "adminLearningPathEditor": "Tobulėjimo kelio redaktorius",
-    "gamification": "Žaidybinimas"
+    "gamification": "Žaidybinimas",
+    "notificationUnsubscribe": "Pranešimų nustatymai"
   },
   "courseDuplication": {
     "error": {
@@ -8206,7 +8207,9 @@
       "replyCount": "Naujų atsakymų skaičius",
       "replyAuthors": "Atsakymų autoriai",
       "latestReply": "Naujausias atsakymas",
-      "discussionUrl": "Diskusijos nuoroda"
+      "discussionUrl": "Diskusijos nuoroda",
+      "unsubscribeUrl": "Atsisakymo nuoroda",
+      "unfollowUrl": "Nuoroda nebesekti"
     },
     "simulation": {
       "title": "Simuliacijos rezultatas",
@@ -9992,5 +9995,54 @@
     "avatarFor": "Avataras: {{name}}",
     "selectGroup": "Pažymėti grupę {{name}}",
     "lessonWithTitle": "Pamoka: {{title}}"
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Pranešimai apie diskusijas",
+      "saving": "Išsaugoma…",
+      "replyInApp": {
+        "label": "Atsakymai – programoje",
+        "description": "Rodyti pranešimą, kai kas nors atsako jūsų sekamoje diskusijoje."
+      },
+      "replyEmails": {
+        "label": "Atsakymai – el. paštu",
+        "description": "Siųsti vieną el. laišką su naujais atsakymais jūsų sekamoje diskusijoje."
+      },
+      "mentionEmails": {
+        "label": "Paminėjimai – el. paštu",
+        "description": "Siųsti el. laišką, kai kas nors jus pamini diskusijoje."
+      },
+      "toast": {
+        "saved": "Pranešimų nustatymai išsaugoti.",
+        "error": "Nepavyko išsaugoti pranešimų nustatymų."
+      }
+    },
+    "following": {
+      "follow": "Sekti",
+      "following": "Sekate",
+      "followHint": "Gauti pranešimus apie naujus atsakymus šioje diskusijoje.",
+      "unfollowHint": "Išjungti pranešimus apie naujus atsakymus šioje diskusijoje.",
+      "toast": {
+        "followed": "Sekate šią diskusiją.",
+        "unfollowed": "Šios diskusijos nebesekate.",
+        "error": "Nepavyko pakeisti sekimo."
+      }
+    },
+    "unsubscribe": {
+      "title": "Pranešimai apie diskusijas",
+      "confirmDescription": "Patvirtinkite, kad norite išjungti šiuos pranešimus.",
+      "confirm": "Patvirtinti",
+      "invalidLink": "Ši nuoroda neteisinga arba nebegalioja.",
+      "manageInSettings": "Tvarkyti pranešimus nustatymuose",
+      "done": {
+        "replies": "El. laiškų apie atsakymus diskusijose nebegausite.",
+        "mentions": "El. laiškų apie paminėjimus nebegausite.",
+        "thread": "Šios diskusijos nebesekate."
+      },
+      "tryAgain": "Kažkas nepavyko. Pabandykite dar kartą po akimirkos."
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "Ši nuoroda neteisinga arba nebegalioja."
+    }
   }
 }

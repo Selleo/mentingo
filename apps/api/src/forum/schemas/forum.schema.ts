@@ -54,6 +54,7 @@ export const forumTopicSchema = Type.Composite([
   forumTopicBaseSchema,
   Type.Object({
     firstPost: forumPostSchema,
+    isFollowing: Type.Boolean(),
   }),
 ]);
 
@@ -101,6 +102,11 @@ export const deleteForumPostResponseSchema = Type.Object({
   topicRemoved: Type.Boolean(),
 });
 
+export const forumTopicFollowingSchema = Type.Object({
+  topicId: UUIDSchema,
+  isFollowing: Type.Boolean(),
+});
+
 export const forumPageQuerySchema = Type.Optional(Type.Number({ minimum: 1 }));
 export const forumPerPageQuerySchema = Type.Optional(
   Type.Number({ minimum: 1, maximum: FORUM_MAX_PAGE_SIZE }),
@@ -116,6 +122,7 @@ export type ForumPostReactionsResponse = Static<typeof forumPostReactionsSchema>
 export type ForumUserResponse = Static<typeof forumAuthorSchema>;
 export type ForumTopicListItemResponse = Static<typeof forumTopicListItemSchema>;
 export type ForumTopicResponse = Static<typeof forumTopicSchema>;
+export type ForumTopicFollowingResponse = Static<typeof forumTopicFollowingSchema>;
 export type CreateForumTopicBody = Static<typeof createForumTopicSchema>;
 export type CreateForumPostBody = Static<typeof createForumPostSchema>;
 export type DeleteForumPostResponse = Static<typeof deleteForumPostResponseSchema>;

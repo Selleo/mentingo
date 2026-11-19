@@ -5,6 +5,7 @@ import type {
   AutomationStepTrace,
   AutomationPlaceholderValue,
   AutomationRunStatus,
+  AutomationDefinitionKind,
   AutomationEventKind,
   AutomationPlaceholderMappings,
   AutomationRecipientSelection,
@@ -59,6 +60,20 @@ export interface NotificationAccountActionPreparation {
   purgeUnusedNotificationAccountActionIntents(): Promise<void>;
 }
 
+export type NotificationRecipientFieldsRequest = {
+  eventKind: string;
+  eventFields: Record<string, unknown> | null;
+  mappedFields: string[];
+  recipientEmail: string;
+  tenantId: UUIDType;
+};
+
+export interface NotificationRecipientFieldsPreparation {
+  prepareRecipientFields(
+    request: NotificationRecipientFieldsRequest,
+  ): Promise<Record<string, AutomationPlaceholderValue>>;
+}
+
 export type InterruptedAutomationEmailDelivery = Pick<
   typeof automationEmailDeliveries.$inferSelect,
   "id" | "runId" | "attemptCount" | "status" | "template" | "templateVersion"
@@ -92,6 +107,15 @@ export type DefaultAutomationTranslationUpdate = Omit<
   DefaultAutomationTranslations,
   "id" | "builtInKey"
 >;
+
+export type BuiltInTemplateEmailStep = {
+  id: UUIDType;
+  automationId: UUIDType;
+  definitionKind: AutomationDefinitionKind;
+  templateKey: string;
+  mappings: AutomationPlaceholderMappings;
+  triggerEventKind: string | null;
+};
 
 export type PublishedDefaultCustomization = Pick<
   typeof emailTemplates.$inferSelect,

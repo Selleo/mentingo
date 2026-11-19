@@ -1444,7 +1444,7 @@ export const discussionReplyDigests = pgTable(
       .references(() => courseChatThreads.id, { onDelete: "cascade" })
       .notNull(),
     sendAfter: timestampWithTimezone({ name: "send_after" }).notNull(),
-    replies: jsonb("replies").$type<DiscussionReplyDigestEntry[]>().notNull(),
+    replies: nativeJsonb<DiscussionReplyDigestEntry[]>("replies").notNull(),
     tenantId,
   },
   withTenantIdIndex("discussion_reply_digests", (table) => ({
@@ -1453,6 +1453,27 @@ export const discussionReplyDigests = pgTable(
       table.threadId,
     ),
     sendAfterIdx: index("discussion_reply_digests_send_after_idx").on(table.sendAfter),
+  })),
+);
+
+export const discussionThreadFollowers = pgTable(
+  "discussion_thread_followers",
+  {
+    ...id,
+    ...timestamps,
+    threadId: uuid("thread_id")
+      .references(() => courseChatThreads.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("discussion_thread_followers", (table) => ({
+    threadUserUniqueIdx: uniqueIndex("discussion_thread_followers_thread_id_user_id_unique_idx").on(
+      table.threadId,
+      table.userId,
+    ),
   })),
 );
 

@@ -20,8 +20,9 @@ Administrators turn the forum on in the platform settings. Until they do, nothin
 - Reply to topics and read the replies page by page.
 - React to posts with the same set of reactions as course discussions.
 - Mention colleagues in a topic or a reply; they get a notification that opens the topic.
-- Get a notification when someone replies in a topic you started or replied in, and one grouped email about the replies you have not read.
+- Get a notification when someone replies in a topic you follow, and one grouped email about the replies you have not read. You follow the topics you started or replied in.
 - Get an email when you are mentioned in a topic or a reply.
+- Follow a topic to be notified about its replies without posting, or stop following one you posted in, with the button next to the topic title.
 - See new topics, replies and reactions without reloading the page.
 - Browse topics with search and sorting by latest activity, newest or most replies.
 - See which of your courses have an active discussion and read, post, reply and react in it without leaving the forum.

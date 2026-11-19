@@ -30,8 +30,12 @@ export class CourseChatMessageMapper {
     options: { includeReplySummary: boolean },
   ): Promise<CourseChatMessageResponse[]> {
     const messageIds = messages.map((message) => message.id);
-    const [reactionRows, replySummaries, replyParticipants] = await Promise.all([
+    const [reactionRows, followedThreadIds, replySummaries, replyParticipants] = await Promise.all([
       this.courseChatRepository.getMessageReactionsForMessages(messageIds, viewerUserId),
+      this.courseChatRepository.findFollowedThreadIds(
+        messages.map((message) => message.threadId),
+        viewerUserId,
+      ),
       options.includeReplySummary
         ? this.courseChatRepository.getReplySummaries(messageIds)
         : Promise.resolve([]),
@@ -65,6 +69,7 @@ export class CourseChatMessageMapper {
         replySummaryByMessageId,
         replyParticipantsByMessageId,
         avatarUrlByReference,
+        followedThreadIds.includes(message.threadId),
       ),
     );
   }
@@ -116,11 +121,13 @@ export class CourseChatMessageMapper {
     replySummaryByMessageId: Map<UUIDType, CourseChatReplySummaryRow>,
     replyParticipantsByMessageId: Map<UUIDType, CourseChatReplyParticipantRow[]>,
     avatarUrlByReference: Map<string, string>,
+    isFollowing: boolean,
   ): CourseChatMessageResponse {
     const replySummary = replySummaryByMessageId.get(message.id);
 
     return {
       ...this.mapMessagePreview(message, reactionsByMessageId, avatarUrlByReference),
+      isFollowing,
       replyCount: replySummary?.replyCount ?? 0,
       replyParticipants: (replyParticipantsByMessageId.get(message.id) ?? []).map((user) => ({
         id: user.id,

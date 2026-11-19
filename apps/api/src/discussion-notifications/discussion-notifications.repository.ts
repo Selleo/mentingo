@@ -1,12 +1,16 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, asc, eq, inArray, isNull, lte, ne, sql } from "drizzle-orm";
+import { DISCUSSION_NOTIFICATION_PREFERENCES } from "@repo/shared";
+import { and, asc, eq, inArray, isNull, lte, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { isNotificationPreferenceEnabled } from "src/settings/utils/notification-preference.sql";
 import {
   announcements,
   courseChatMessages,
   courseChatThreads,
   discussionReplyDigests,
+  discussionThreadFollowers,
+  settings,
   userAnnouncements,
   users,
 } from "src/storage/schema";
@@ -17,45 +21,64 @@ import type {
   DiscussionDigestThread,
   DiscussionReplyDigest,
   DiscussionReplyDigestEntry,
+  DiscussionReplyPreferences,
 } from "src/discussion-notifications/discussion-notifications.types";
 
 @Injectable()
 export class DiscussionNotificationsRepository {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
-  async findEarlierParticipantIds(threadId: UUIDType, replyId: UUIDType): Promise<UUIDType[]> {
+  async findFollowerIds(threadId: UUIDType, replyId: UUIDType): Promise<UUIDType[]> {
     const replyCreatedAt = this.db
       .select({ createdAt: courseChatMessages.createdAt })
       .from(courseChatMessages)
       .where(eq(courseChatMessages.id, replyId));
 
-    const participants = await this.db
-      .selectDistinct({ userId: courseChatMessages.userId })
-      .from(courseChatMessages)
+    const followers = await this.db
+      .select({ userId: discussionThreadFollowers.userId })
+      .from(discussionThreadFollowers)
       .where(
         and(
-          eq(courseChatMessages.threadId, threadId),
-          isNull(courseChatMessages.deletedAt),
-          ne(courseChatMessages.id, replyId),
-          lte(courseChatMessages.createdAt, sql`(${replyCreatedAt})`),
+          eq(discussionThreadFollowers.threadId, threadId),
+          lte(discussionThreadFollowers.createdAt, sql`(${replyCreatedAt})`),
         ),
       );
 
-    return participants.map(({ userId }) => userId);
+    return followers.map(({ userId }) => userId);
+  }
+
+  async findReplyPreferences(userIds: UUIDType[]): Promise<DiscussionReplyPreferences[]> {
+    if (!userIds.length) return [];
+
+    return this.db
+      .select({
+        userId: users.id,
+        inAppEnabled: isNotificationPreferenceEnabled(
+          DISCUSSION_NOTIFICATION_PREFERENCES.REPLY_IN_APP,
+        ),
+        emailsEnabled: isNotificationPreferenceEnabled(
+          DISCUSSION_NOTIFICATION_PREFERENCES.REPLY_EMAILS,
+        ),
+      })
+      .from(users)
+      .leftJoin(settings, eq(settings.userId, users.id))
+      .where(inArray(users.id, userIds));
   }
 
   async queueReplyDigests(params: {
-    userIds: UUIDType[];
+    recipients: { userId: UUIDType; reply: DiscussionReplyDigestEntry }[];
     threadId: UUIDType;
-    reply: DiscussionReplyDigestEntry;
     sendAfter: string;
   }) {
-    const { userIds, threadId, reply, sendAfter } = params;
-    const replies = sql<DiscussionReplyDigestEntry[]>`${JSON.stringify([reply])}::text::jsonb`;
+    const { recipients, threadId, sendAfter } = params;
+
+    if (!recipients.length) return;
 
     await this.db
       .insert(discussionReplyDigests)
-      .values(userIds.map((userId) => ({ userId, threadId, sendAfter, replies })))
+      .values(
+        recipients.map(({ userId, reply }) => ({ userId, threadId, sendAfter, replies: [reply] })),
+      )
       .onConflictDoUpdate({
         target: [discussionReplyDigests.userId, discussionReplyDigests.threadId],
         set: { replies: sql`${discussionReplyDigests.replies} || excluded.replies` },

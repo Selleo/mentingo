@@ -1,5 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiClient } from "~/api/api-client";
@@ -17,6 +17,7 @@ vi.mock("~/api/api-client", () => ({
       courseChatControllerGetMessages: vi.fn(),
       courseChatControllerGetReplies: vi.fn(),
       courseChatControllerGetCourseChatUsers: vi.fn(),
+      courseChatControllerFollowThread: vi.fn(),
     },
   },
 }));
@@ -45,6 +46,7 @@ const buildMessage = (id: string, overrides: Record<string, unknown> = {}) => ({
   replyCount: 0,
   latestReply: null,
   replyParticipants: [],
+  isFollowing: false,
   ...overrides,
 });
 
@@ -132,5 +134,21 @@ describe("CourseChatTab", () => {
     expect(await screen.findByText("Content of message-1")).toBeInTheDocument();
     await waitFor(() => expect(messagesRequests()).toEqual([{ page: 1, perPage: 10 }]));
     expect(screen.queryByTestId(COURSE_DISCUSSION_HANDLES.replies("message-1"))).toBeNull();
+  });
+
+  it("follows a thread from the discussion and reloads it", async () => {
+    vi.mocked(ApiClient.api.courseChatControllerFollowThread).mockResolvedValue({
+      data: { data: { messageId: "message-1", isFollowing: true } },
+    } as never);
+
+    renderCourseChat();
+    fireEvent.click(
+      await screen.findByTestId(COURSE_DISCUSSION_HANDLES.threadFollowButton("message-1")),
+    );
+
+    await waitFor(() =>
+      expect(ApiClient.api.courseChatControllerFollowThread).toHaveBeenCalledWith("message-1"),
+    );
+    await waitFor(() => expect(messagesRequests()).toHaveLength(2));
   });
 });

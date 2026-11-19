@@ -46,6 +46,7 @@ import type {
   ForumPostReactionsResponse,
   ForumPostResponse,
   ForumTopicListItemResponse,
+  ForumTopicFollowingResponse,
   ForumTopicResponse,
   ForumUserResponse,
 } from "src/forum/schemas/forum.schema";
@@ -172,6 +173,8 @@ export class ForumService {
         trx,
       );
 
+      await this.courseChatRepository.followThread(createdTopic.topicId, currentUser.userId, trx);
+
       await this.outboxPublisher.publish(
         new ForumTopicCreatedEvent({ ...createdTopic, actorUserId: currentUser.userId }),
         trx,
@@ -185,6 +188,19 @@ export class ForumService {
     this.emitMentions({ topicId, postId, mentionedUserIds });
 
     return new BaseResponse(await this.getTopicResponse(topicId, currentUser.userId));
+  }
+
+  async setTopicFollowing(
+    topicId: UUIDType,
+    userId: UUIDType,
+    isFollowing: boolean,
+  ): Promise<BaseResponse<ForumTopicFollowingResponse>> {
+    const thread = await this.getVisibleThread(topicId);
+
+    if (isFollowing) await this.courseChatRepository.followThread(thread.id, userId);
+    else await this.courseChatRepository.unfollowThread(thread.id, userId);
+
+    return new BaseResponse({ topicId, isFollowing });
   }
 
   async createPost(params: {
@@ -226,6 +242,8 @@ export class ForumService {
         },
         trx,
       );
+
+      await this.courseChatRepository.followThread(thread.id, currentUser.userId, trx);
 
       await this.outboxPublisher.publish(
         new ForumReplyCreatedEvent({
@@ -441,9 +459,16 @@ export class ForumService {
 
     if (!topic) throw new NotFoundException("forum.errors.topicNotFound");
 
-    const [firstPost] = await this.mapPosts([this.toFirstPostRow(topic)], viewerUserId);
+    const [[firstPost], followedThreadIds] = await Promise.all([
+      this.mapPosts([this.toFirstPostRow(topic)], viewerUserId),
+      this.courseChatRepository.findFollowedThreadIds([topicId], viewerUserId),
+    ]);
 
-    return { ...this.mapTopicBase(topic, firstPost.user.avatarReference), firstPost };
+    return {
+      ...this.mapTopicBase(topic, firstPost.user.avatarReference),
+      firstPost,
+      isFollowing: followedThreadIds.includes(topicId),
+    };
   }
 
   private async getPostResponse(postId: UUIDType, viewerUserId: UUIDType) {

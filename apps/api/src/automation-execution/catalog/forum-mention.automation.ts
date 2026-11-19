@@ -33,5 +33,6 @@ export const forumMentionAutomation: BuiltInAutomationDefinition = {
     topic_title: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "topic_title" },
     message: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "message" },
     topic_link: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "topic_link" },
+    unsubscribe_link: { type: AUTOMATION_MAPPING_TYPES.EVENT_FIELD, field: "unsubscribe_link" },
   },
 };

@@ -46,6 +46,7 @@ export type CourseChatMentionEmailRecipient = {
   firstName: string;
   lastName?: string;
   tenantId: UUIDType;
+  mentionEmailsEnabled: boolean;
 };
 
 export type DiscussionEmailRecipient = {
@@ -54,6 +55,8 @@ export type DiscussionEmailRecipient = {
   firstName: string;
   lastName: string;
   language: string | null;
+  replyEmailsEnabled: boolean;
+  mentionEmailsEnabled: boolean;
 };
 
 export type CourseChatEmailContext = {

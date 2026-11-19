@@ -466,6 +466,13 @@ export const AUTOMATION_EVENT_DEFINITIONS: Omit<AutomationEventDefinition, "prov
           sampleValue: "https://example.com/courses/leadership",
           sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
         },
+        {
+          key: "unsubscribe_link",
+          label: "Unsubscribe link",
+          type: AUTOMATION_PLACEHOLDER_TYPES.URL,
+          sampleValue: "https://example.com/notifications/unsubscribe",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
       ],
     },
     {
@@ -689,6 +696,13 @@ export const AUTOMATION_EVENT_DEFINITIONS: Omit<AutomationEventDefinition, "prov
           sampleValue: "https://example.com/forum/topics/onboarding-tips",
           sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
         },
+        {
+          key: "unsubscribe_link",
+          label: "Unsubscribe link",
+          type: AUTOMATION_PLACEHOLDER_TYPES.URL,
+          sampleValue: "https://example.com/notifications/unsubscribe",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
       ],
     },
     {
@@ -732,6 +746,20 @@ export const AUTOMATION_EVENT_DEFINITIONS: Omit<AutomationEventDefinition, "prov
           label: "Discussion link",
           type: AUTOMATION_PLACEHOLDER_TYPES.URL,
           sampleValue: "https://example.com/course/leadership?tab=Discussion",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "unfollow_link",
+          label: "Stop following link",
+          type: AUTOMATION_PLACEHOLDER_TYPES.URL,
+          sampleValue: "https://example.com/notifications/unsubscribe",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "unsubscribe_link",
+          label: "Unsubscribe link",
+          type: AUTOMATION_PLACEHOLDER_TYPES.URL,
+          sampleValue: "https://example.com/notifications/unsubscribe",
           sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
         },
       ],

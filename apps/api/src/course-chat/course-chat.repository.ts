@@ -1,16 +1,23 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  COURSE_ENROLLMENT,
+  DISCUSSION_NOTIFICATION_PREFERENCES,
+  PERMISSIONS,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { and, count, desc, eq, gt, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { userHasPermissionCondition } from "src/common/permissions/permission-sql.utils";
 import { LocalizationService } from "src/localization/localization.service";
+import { isNotificationPreferenceEnabled } from "src/settings/utils/notification-preference.sql";
 import {
   courses,
   courseChatMessageReactions,
   courseChatMessages,
   courseChatThreads,
+  discussionThreadFollowers,
   settings,
   studentCourses,
   users,
@@ -241,6 +248,12 @@ export class CourseChatRepository {
         firstName: users.firstName,
         lastName: users.lastName,
         language: sql<string | null>`${settings.settings}->>'language'`,
+        replyEmailsEnabled: isNotificationPreferenceEnabled(
+          DISCUSSION_NOTIFICATION_PREFERENCES.REPLY_EMAILS,
+        ),
+        mentionEmailsEnabled: isNotificationPreferenceEnabled(
+          DISCUSSION_NOTIFICATION_PREFERENCES.MENTION_EMAILS,
+        ),
       })
       .from(studentCourses)
       .innerJoin(users, eq(users.id, studentCourses.studentId))
@@ -261,9 +274,13 @@ export class CourseChatRepository {
         firstName: users.firstName,
         lastName: users.lastName,
         tenantId: users.tenantId,
+        mentionEmailsEnabled: isNotificationPreferenceEnabled(
+          DISCUSSION_NOTIFICATION_PREFERENCES.MENTION_EMAILS,
+        ),
       })
       .from(studentCourses)
       .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .leftJoin(settings, eq(settings.userId, users.id))
       .where(
         and(
           eq(studentCourses.courseId, courseId),
@@ -359,8 +376,45 @@ export class CourseChatRepository {
       .update(courseChatThreads)
       .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
       .where(eq(courseChatThreads.id, parentMessage.threadId));
+    await this.followThread(parentMessage.threadId, params.userId, db);
 
     return message.id;
+  }
+
+  async followThread(threadId: UUIDType, userId: UUIDType, dbInstance: DatabasePg = this.db) {
+    await dbInstance
+      .insert(discussionThreadFollowers)
+      .values({ threadId, userId })
+      .onConflictDoNothing({
+        target: [discussionThreadFollowers.threadId, discussionThreadFollowers.userId],
+      });
+  }
+
+  async unfollowThread(threadId: UUIDType, userId: UUIDType) {
+    await this.db
+      .delete(discussionThreadFollowers)
+      .where(
+        and(
+          eq(discussionThreadFollowers.threadId, threadId),
+          eq(discussionThreadFollowers.userId, userId),
+        ),
+      );
+  }
+
+  async findFollowedThreadIds(threadIds: UUIDType[], userId: UUIDType): Promise<UUIDType[]> {
+    if (!threadIds.length) return [];
+
+    const followedThreads = await this.db
+      .select({ threadId: discussionThreadFollowers.threadId })
+      .from(discussionThreadFollowers)
+      .where(
+        and(
+          inArray(discussionThreadFollowers.threadId, threadIds),
+          eq(discussionThreadFollowers.userId, userId),
+        ),
+      );
+
+    return followedThreads.map(({ threadId }) => threadId);
   }
 
   async getMessageContext(messageId: UUIDType): Promise<CourseChatMessageContext | null> {
@@ -697,6 +751,8 @@ export class CourseChatRepository {
         content: params.content,
       })
       .returning({ id: courseChatMessages.id });
+
+    await this.followThread(thread.id, params.userId, db);
 
     return { threadId: thread.id, messageId: message.id };
   }

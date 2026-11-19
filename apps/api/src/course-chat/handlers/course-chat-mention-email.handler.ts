@@ -102,10 +102,12 @@ export class CourseChatMentionEmailHandler
         new UserNotificationsCreatedEvent({ userIds: uniqueMentionedUserIds }),
       );
 
-      if (!message || !recipients.length) return;
+      const emailRecipients = recipients.filter((recipient) => recipient.mentionEmailsEnabled);
+
+      if (!message || !emailRecipients.length) return;
 
       await processInBatches(
-        recipients,
+        emailRecipients,
         async (recipient) => {
           const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
             tenantId,

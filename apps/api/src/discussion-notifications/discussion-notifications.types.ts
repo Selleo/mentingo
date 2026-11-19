@@ -14,7 +14,13 @@ export type DiscussionReply = {
 
 export type DiscussionRecipientFilter = (userIds: UUIDType[]) => Promise<UUIDType[]>;
 
-export type DiscussionReplyDigestEntry = { replyId: UUIDType; announcementId: UUIDType };
+export type DiscussionReplyDigestEntry = { replyId: UUIDType; announcementId: UUIDType | null };
+
+export type DiscussionReplyPreferences = {
+  userId: UUIDType;
+  inAppEnabled: boolean;
+  emailsEnabled: boolean;
+};
 
 export type DiscussionReplyDigest = {
   id: UUIDType;

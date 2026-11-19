@@ -39,12 +39,14 @@ export class ForumMentionEmailHandler implements OutboxEventsHandlerOf<ForumUser
     if (!mentionedUserIds.length) return;
 
     await this.tenantDbRunnerService.runWithTenant(tenantId, async () => {
-      const [topicTitle, authorFullName, post, recipients] = await Promise.all([
+      const [topicTitle, authorFullName, post, mentionedUsers] = await Promise.all([
         this.forumRepository.findTopicTitle(topicId),
         this.forumRepository.findUserFullName(actorUserId),
         this.forumRepository.findPostById(postId),
         this.forumRepository.findEmailRecipients(mentionedUserIds),
       ]);
+
+      const recipients = mentionedUsers.filter((user) => user.mentionEmailsEnabled);
 
       if (!topicTitle || !authorFullName || !post || post.deletedAt || !recipients.length) return;
 

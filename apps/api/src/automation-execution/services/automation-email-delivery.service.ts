@@ -3,12 +3,14 @@ import { getUsedEmailTemplateVariables } from "@repo/email-templates";
 import {
   AUTOMATION_MAX_EMAIL_DELIVERY_ATTEMPTS,
   AUTOMATION_EMAIL_DELIVERY_STATUSES,
+  AUTOMATION_MAPPING_TYPES,
   SUPPORTED_LANGUAGES,
   type AutomationPlaceholderValue,
 } from "@repo/shared";
 
 import {
   NOTIFICATION_ACCOUNT_ACTION_PREPARATION,
+  NOTIFICATION_RECIPIENT_FIELDS_PREPARATION,
   AUTOMATION_EMAIL_DELIVERY_REASON_CODES,
 } from "src/automation-execution/automation-execution.constants";
 import { findAutomationEventDefinition } from "src/automations/catalog/automation-event-catalog";
@@ -22,6 +24,7 @@ import { EmailTemplateValidationService } from "src/email-templates/services/ema
 
 import {
   NotificationAccountActionPreparation,
+  NotificationRecipientFieldsPreparation,
   type ClaimedAutomationEmailDelivery,
   type AutomationEmailDeliveryRecord,
 } from "../automation-execution.types";
@@ -37,6 +40,8 @@ export class AutomationEmailDeliveryService {
     private readonly emailTemplateRenderingService: EmailTemplateRenderingService,
     private readonly emailTemplateValidationService: EmailTemplateValidationService,
     private readonly emailService: EmailService,
+    @Inject(NOTIFICATION_RECIPIENT_FIELDS_PREPARATION)
+    private readonly notificationRecipientFieldsPreparation: NotificationRecipientFieldsPreparation,
     @Inject(NOTIFICATION_ACCOUNT_ACTION_PREPARATION)
     private readonly notificationAccountActionService: NotificationAccountActionPreparation,
   ) {}
@@ -52,7 +57,7 @@ export class AutomationEmailDeliveryService {
     const { delivery } = claim;
 
     try {
-      const fields = await this.prepareAutomationRecipientFields(claim);
+      const fields = await this.prepareAutomationRecipientFields(claim, tenantId);
 
       if (!fields) {
         await this.automationEmailDeliveryStateService.recordAutomationEmailDeliveryResult(
@@ -113,10 +118,22 @@ export class AutomationEmailDeliveryService {
     }
   }
 
-  private async prepareAutomationRecipientFields({
-    delivery,
-  }: ClaimedAutomationEmailDelivery): Promise<Record<string, AutomationPlaceholderValue> | null> {
-    const fields = { ...(delivery.eventFields ?? {}) };
+  private async prepareAutomationRecipientFields(
+    { delivery, run, step }: ClaimedAutomationEmailDelivery,
+    tenantId: UUIDType,
+  ): Promise<Record<string, AutomationPlaceholderValue> | null> {
+    const fields = {
+      ...(delivery.eventFields ?? {}),
+      ...(await this.notificationRecipientFieldsPreparation.prepareRecipientFields({
+        eventKind: run.eventKind,
+        eventFields: delivery.eventFields,
+        mappedFields: Object.values(step.config.mappings ?? {}).flatMap((mapping) =>
+          mapping.type === AUTOMATION_MAPPING_TYPES.EVENT_FIELD ? [mapping.field] : [],
+        ),
+        recipientEmail: delivery.recipientEmail,
+        tenantId,
+      })),
+    };
 
     if (!delivery.accountActionIntentId) {
       return fields;

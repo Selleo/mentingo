@@ -24,6 +24,13 @@ export const EMAIL_TEMPLATE_TEST_POLICY: ResolvedRateLimitPolicy = {
   windowSec: RATE_LIMIT_WINDOW_SEC,
 };
 
+export const DISCUSSION_UNSUBSCRIBE_PATH = "/api/discussion-notifications/unsubscribe";
+export const DISCUSSION_UNSUBSCRIBE_POLICY: ResolvedRateLimitPolicy = {
+  key: "discussion-notifications.unsubscribe",
+  limit: 10,
+  windowSec: RATE_LIMIT_WINDOW_SEC,
+};
+
 export const AUTH_PATHS_LIMIT_5_PER_MINUTE = new Set([
   "/api/auth/login",
   "/api/auth/forgot-password",

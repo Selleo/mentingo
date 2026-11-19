@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
 import {
   FEATURES,
   FORUM_TOPIC_SORTS,
@@ -40,6 +40,7 @@ import {
   forumPostSchema,
   forumSearchQuerySchema,
   forumTopicListSchema,
+  forumTopicFollowingSchema,
   forumTopicSchema,
   forumTopicSortQuerySchema,
   forumUserListSchema,
@@ -50,6 +51,7 @@ import {
   type ForumPostReactionsResponse,
   type ForumPostResponse,
   type ForumTopicListItemResponse,
+  type ForumTopicFollowingResponse,
   type ForumTopicResponse,
   type ForumUserResponse,
 } from "src/forum/schemas/forum.schema";
@@ -146,6 +148,30 @@ export class ForumController {
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<ForumTopicResponse>> {
     return this.forumService.getTopic(topicId, currentUser);
+  }
+
+  @Put("topics/:topicId/follow")
+  @Validate({
+    request: [{ type: "param", name: "topicId", schema: UUIDSchema }],
+    response: baseResponse(forumTopicFollowingSchema),
+  })
+  async followTopic(
+    @Param("topicId") topicId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<ForumTopicFollowingResponse>> {
+    return this.forumService.setTopicFollowing(topicId, userId, true);
+  }
+
+  @Delete("topics/:topicId/follow")
+  @Validate({
+    request: [{ type: "param", name: "topicId", schema: UUIDSchema }],
+    response: baseResponse(forumTopicFollowingSchema),
+  })
+  async unfollowTopic(
+    @Param("topicId") topicId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<ForumTopicFollowingResponse>> {
+    return this.forumService.setTopicFollowing(topicId, userId, false);
   }
 
   /** Replies only; the first post is returned with the topic. */

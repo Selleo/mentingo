@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { useCreateForumPost } from "~/api/mutations/useCreateForumPost";
 import { useDeleteForumPost } from "~/api/mutations/useDeleteForumPost";
+import { useSetForumTopicFollowing } from "~/api/mutations/useSetForumTopicFollowing";
 import { useToggleForumPostReaction } from "~/api/mutations/useToggleForumPostReaction";
 import {
   FORUM_POSTS_PER_PAGE,
@@ -15,6 +16,7 @@ import { useForumUsers } from "~/api/queries/forum/useForumUsers";
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
 import { hasAnyPermission, hasPermission } from "~/common/permissions/permission.utils";
 import { useClampedPage } from "~/components/DataTable";
+import { FollowDiscussionButton } from "~/components/FollowDiscussionButton/FollowDiscussionButton";
 import { Pagination } from "~/components/Pagination/Pagination";
 import { useToast } from "~/components/ui/use-toast";
 import { getMentionedUserIds } from "~/modules/Courses/CourseView/CourseChat/courseChatUtils";
@@ -47,6 +49,7 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
   const { mutate: createPost, isPending: isSendingReply } = useCreateForumPost(topic.id);
   const { mutate: deletePost, isPending: isDeletingPost } = useDeleteForumPost();
   const { mutate: toggleReaction, isPending: isReacting } = useToggleForumPostReaction();
+  const { mutate: setFollowing, isPending: isChangingFollowing } = useSetForumTopicFollowing();
 
   const isClosed = Boolean(topic.firstPost.deletedAt);
   const canReply = !isClosed && hasPermission(permissions, PERMISSIONS.FORUM_POST_CREATE);
@@ -131,9 +134,20 @@ export function ForumTopicDetails({ topic }: ForumTopicDetailsProps) {
           <ArrowLeft className="size-4" aria-hidden />
           {t("forum.topic.backToForum")}
         </Link>
-        <h1 className="h4 break-words text-neutral-950" data-testid={FORUM_HANDLES.TOPIC_TITLE}>
-          {topic.title}
-        </h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h1
+            className="h4 min-w-0 break-words text-neutral-950"
+            data-testid={FORUM_HANDLES.TOPIC_TITLE}
+          >
+            {topic.title}
+          </h1>
+          <FollowDiscussionButton
+            isFollowing={topic.isFollowing}
+            isPending={isChangingFollowing}
+            testId={FORUM_HANDLES.TOPIC_FOLLOW_BUTTON}
+            onToggle={() => setFollowing({ topicId: topic.id, isFollowing: !topic.isFollowing })}
+          />
+        </div>
       </div>
 
       <ForumPostCard

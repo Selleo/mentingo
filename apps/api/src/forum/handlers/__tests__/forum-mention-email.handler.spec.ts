@@ -16,6 +16,7 @@ describe("ForumMentionEmailHandler", () => {
     firstName: "Bea",
     lastName: "Target",
     language: "pl",
+    mentionEmailsEnabled: true,
   };
 
   const createHandler = (overrides: { post?: object | null; recipient?: object } = {}) => {
@@ -97,6 +98,16 @@ describe("ForumMentionEmailHandler", () => {
       { to: mentionedUser.email },
       expect.objectContaining({ template: expect.objectContaining({ language: "en" }) }),
     );
+  });
+
+  it("sends nothing to a user who turned mention emails off", async () => {
+    const { handle, captureNotificationRecipient } = createHandler({
+      recipient: { ...mentionedUser, mentionEmailsEnabled: false },
+    });
+
+    await handle();
+
+    expect(captureNotificationRecipient).not.toHaveBeenCalled();
   });
 
   it("sends nothing when the post was deleted", async () => {

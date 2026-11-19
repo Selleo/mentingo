@@ -24,6 +24,8 @@ vi.mock("~/api/api-client", () => ({
       forumControllerCreatePost: vi.fn(),
       forumControllerTogglePostReaction: vi.fn(),
       forumControllerGetMentionableUsers: vi.fn(),
+      forumControllerFollowTopic: vi.fn(),
+      forumControllerUnfollowTopic: vi.fn(),
     },
   },
 }));
@@ -76,6 +78,7 @@ const buildTopic = (firstPostOverrides: Record<string, unknown> = {}) => ({
   lastActivityAt: "2026-11-01T10:00:00.000Z",
   createdAt: "2026-11-01T10:00:00.000Z",
   firstPost: buildPost(firstPostOverrides),
+  isFollowing: false,
 });
 
 const mockTopic = (topic: ReturnType<typeof buildTopic>) =>
@@ -165,6 +168,36 @@ describe("ForumTopicPage", () => {
     fireEvent.click(await screen.findByTestId(FORUM_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON));
 
     expect(await screen.findByText("forum list")).toBeInTheDocument();
+  });
+
+  it("follows a topic and stops following it from the topic page", async () => {
+    vi.mocked(ApiClient.api.forumControllerFollowTopic).mockResolvedValue({
+      data: { data: { topicId: TOPIC_ID, isFollowing: true } },
+    } as never);
+    vi.mocked(ApiClient.api.forumControllerUnfollowTopic).mockResolvedValue({
+      data: { data: { topicId: TOPIC_ID, isFollowing: false } },
+    } as never);
+
+    renderTopic();
+    const followButton = await screen.findByTestId(FORUM_HANDLES.TOPIC_FOLLOW_BUTTON);
+    expect(followButton).toHaveAttribute("aria-pressed", "false");
+
+    mockTopic({ ...buildTopic(), isFollowing: true });
+    fireEvent.click(followButton);
+
+    await waitFor(() =>
+      expect(screen.getByTestId(FORUM_HANDLES.TOPIC_FOLLOW_BUTTON)).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      ),
+    );
+    expect(ApiClient.api.forumControllerFollowTopic).toHaveBeenCalledWith(TOPIC_ID);
+
+    fireEvent.click(screen.getByTestId(FORUM_HANDLES.TOPIC_FOLLOW_BUTTON));
+
+    await waitFor(() =>
+      expect(ApiClient.api.forumControllerUnfollowTopic).toHaveBeenCalledWith(TOPIC_ID),
+    );
   });
 
   it("reacts to a post when the user may react", async () => {

@@ -3,6 +3,7 @@ import {
   DASHBOARD_SCHEMA_VERSION,
   DASHBOARD_WIDGET_SIZES,
   DASHBOARD_WIDGET_TYPES,
+  DISCUSSION_NOTIFICATION_PREFERENCES,
   LEADERBOARD_VISIBILITY,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
@@ -84,10 +85,17 @@ export const dashboardSettingsResponseSchema = Type.Object({
   catalog: Type.Array(dashboardWidgetCatalogEntrySchema),
 });
 
+export const discussionNotificationPreferencesSchema = Type.Object({
+  [DISCUSSION_NOTIFICATION_PREFERENCES.REPLY_EMAILS]: Type.Optional(Type.Boolean()),
+  [DISCUSSION_NOTIFICATION_PREFERENCES.REPLY_IN_APP]: Type.Optional(Type.Boolean()),
+  [DISCUSSION_NOTIFICATION_PREFERENCES.MENTION_EMAILS]: Type.Optional(Type.Boolean()),
+});
+
 export const studentSettingsJSONContentSchema = Type.Object({
   language: Type.Enum(SUPPORTED_LANGUAGES),
   isMFAEnabled: Type.Boolean({ default: false }),
   MFASecret: Type.Union([Type.String({ default: null }), Type.Null()]),
+  ...discussionNotificationPreferencesSchema.properties,
 });
 
 export const adminSettingsJSONContentSchema = Type.Object({

@@ -26,6 +26,7 @@ export const FORUM_HANDLES = {
   CREATE_SUBMIT_BUTTON: "forum-create-topic-submit-button",
   TOPIC_PAGE: "forum-topic-page",
   TOPIC_TITLE: "forum-topic-title",
+  TOPIC_FOLLOW_BUTTON: "forum-topic-follow-button",
   TOPIC_NOT_FOUND: "forum-topic-not-found",
   TOPIC_CLOSED: "forum-topic-closed",
   NO_REPLIES: "forum-no-replies",

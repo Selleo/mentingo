@@ -30,6 +30,7 @@ import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
   CourseChatMessageResponse,
+  CourseChatThreadFollowingResponse,
   CourseChatUserResponse,
   CreateCourseChatMessageBody,
   DeleteCourseChatMessageResponse,
@@ -229,6 +230,25 @@ export class CourseChatService {
     });
 
     return new BaseResponse(message);
+  }
+
+  async setThreadFollowing(
+    messageId: UUIDType,
+    userId: UUIDType,
+    isFollowing: boolean,
+  ): Promise<BaseResponse<CourseChatThreadFollowingResponse>> {
+    const message = await this.courseChatRepository.getMessageContext(messageId);
+
+    if (!message || message.deletedAt) {
+      throw new NotFoundException("courseChat.errors.messageNotFound");
+    }
+
+    await this.assertUserEnrolledInCourse(message.courseId, userId);
+
+    if (isFollowing) await this.courseChatRepository.followThread(message.threadId, userId);
+    else await this.courseChatRepository.unfollowThread(message.threadId, userId);
+
+    return new BaseResponse({ messageId, isFollowing });
   }
 
   async toggleMessageReaction(

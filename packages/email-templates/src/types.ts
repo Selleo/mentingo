@@ -6,10 +6,13 @@ export type DefaultEmailSettings = {
   language: SupportedLanguages;
 };
 
+export type EmailContentLink = { text: string; url: string };
+
 export type EmailContent = {
   heading: string;
   paragraphs: string[];
   buttonText: string;
+  links?: EmailContentLink[];
 };
 
 export type BaseEmailSettings = Omit<DefaultEmailSettings, "language">;

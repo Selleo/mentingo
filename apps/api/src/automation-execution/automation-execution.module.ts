@@ -1,9 +1,14 @@
 import { Global, Module } from "@nestjs/common";
 
-import { NOTIFICATION_ACCOUNT_ACTION_PREPARATION } from "src/automation-execution/automation-execution.constants";
+import {
+  NOTIFICATION_ACCOUNT_ACTION_PREPARATION,
+  NOTIFICATION_RECIPIENT_FIELDS_PREPARATION,
+} from "src/automation-execution/automation-execution.constants";
 import { AutomationDefinitionStorageModule } from "src/automations/automation-definition-storage.module";
 import { AUTOMATION_RUNTIME } from "src/automations/automation.constants";
 import { EmailModule } from "src/common/emails/emails.module";
+import { DiscussionEmailLinkService } from "src/discussion-notifications/discussion-email-link.service";
+import { DiscussionEmailLinksModule } from "src/discussion-notifications/discussion-email-links.module";
 import { EmailTemplateRenderingModule } from "src/email-templates/email-template-rendering.module";
 import { EMAIL_TEMPLATE_DEPENDENCIES } from "src/email-templates/email-template.types";
 
@@ -30,7 +35,12 @@ import { AutomationEmailWorker } from "./workers/automation-email.worker";
 
 @Global()
 @Module({
-  imports: [AutomationDefinitionStorageModule, EmailModule, EmailTemplateRenderingModule],
+  imports: [
+    AutomationDefinitionStorageModule,
+    DiscussionEmailLinksModule,
+    EmailModule,
+    EmailTemplateRenderingModule,
+  ],
   providers: [
     AutomationEmailDeliveryRepository,
     AutomationRunCreationRepository,
@@ -56,6 +66,10 @@ import { AutomationEmailWorker } from "./workers/automation-email.worker";
     {
       provide: NOTIFICATION_ACCOUNT_ACTION_PREPARATION,
       useExisting: NotificationAccountActionService,
+    },
+    {
+      provide: NOTIFICATION_RECIPIENT_FIELDS_PREPARATION,
+      useExisting: DiscussionEmailLinkService,
     },
     { provide: EMAIL_TEMPLATE_DEPENDENCIES, useExisting: EmailTemplateAutomationUsageService },
   ],

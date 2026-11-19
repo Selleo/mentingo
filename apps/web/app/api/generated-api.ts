@@ -560,11 +560,17 @@ export interface GetUserSettingsResponse {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
@@ -584,11 +590,46 @@ export interface UpdateUserSettingsResponse {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
       }
     | {
         language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
         /** @default false */
         isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
+        adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
+        configWarningDismissed: boolean;
+      };
+}
+
+export interface UpdateNotificationPreferencesBody {
+  discussionReplyEmails?: boolean;
+  discussionReplyInApp?: boolean;
+  mentionEmails?: boolean;
+}
+
+export interface UpdateNotificationPreferencesResponse {
+  data:
+    | {
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @default false */
+        isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
+      }
+    | {
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+        /** @default false */
+        isMFAEnabled: boolean;
+        discussionReplyEmails?: boolean;
+        discussionReplyInApp?: boolean;
+        mentionEmails?: boolean;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
         configWarningDismissed: boolean;
@@ -751,6 +792,9 @@ export interface UpdateAdminNewUserNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
+    discussionReplyEmails?: boolean;
+    discussionReplyInApp?: boolean;
+    mentionEmails?: boolean;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1352,6 +1396,9 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
+    discussionReplyEmails?: boolean;
+    discussionReplyInApp?: boolean;
+    mentionEmails?: boolean;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1363,6 +1410,9 @@ export interface UpdateAdminOverdueCourseNotificationResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
+    discussionReplyEmails?: boolean;
+    discussionReplyInApp?: boolean;
+    mentionEmails?: boolean;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -1588,6 +1638,9 @@ export interface UpdateConfigWarningDismissedResponse {
     language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
     /** @default false */
     isMFAEnabled: boolean;
+    discussionReplyEmails?: boolean;
+    discussionReplyInApp?: boolean;
+    mentionEmails?: boolean;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
@@ -31109,6 +31162,7 @@ export interface GetMessagesResponse {
       lastName: string;
       avatarReference: string | null;
     }[];
+    isFollowing: boolean;
   }[];
   pagination: {
     totalItems: number;
@@ -31198,6 +31252,7 @@ export interface CreateMessageResponse {
       lastName: string;
       avatarReference: string | null;
     }[];
+    isFollowing: boolean;
   };
 }
 
@@ -31259,6 +31314,7 @@ export interface GetRepliesResponse {
       lastName: string;
       avatarReference: string | null;
     }[];
+    isFollowing: boolean;
   }[];
   pagination: {
     totalItems: number;
@@ -31287,6 +31343,22 @@ export interface ToggleMessageReactionResponse {
       count: number;
       reactedByCurrentUser: boolean;
     }[];
+  };
+}
+
+export interface FollowThreadResponse {
+  data: {
+    /** @format uuid */
+    messageId: string;
+    isFollowing: boolean;
+  };
+}
+
+export interface UnfollowThreadResponse {
+  data: {
+    /** @format uuid */
+    messageId: string;
+    isFollowing: boolean;
   };
 }
 
@@ -31409,6 +31481,7 @@ export interface CreateTopicResponse {
         reactedByCurrentUser: boolean;
       }[];
     };
+    isFollowing: boolean;
   };
 }
 
@@ -31452,6 +31525,23 @@ export interface GetTopicResponse {
         reactedByCurrentUser: boolean;
       }[];
     };
+    isFollowing: boolean;
+  };
+}
+
+export interface FollowTopicResponse {
+  data: {
+    /** @format uuid */
+    topicId: string;
+    isFollowing: boolean;
+  };
+}
+
+export interface UnfollowTopicResponse {
+  data: {
+    /** @format uuid */
+    topicId: string;
+    isFollowing: boolean;
   };
 }
 
@@ -31569,6 +31659,20 @@ export interface DeletePostResponse {
     removed: boolean;
     deletedAt: string | null;
     topicRemoved: boolean;
+  };
+}
+
+export interface UnsubscribeBody {
+  /**
+   * @minLength 1
+   * @maxLength 2048
+   */
+  token: string;
+}
+
+export interface UnsubscribeResponse {
+  data: {
+    type: "replies" | "mentions" | "thread";
   };
 }
 
@@ -39931,6 +40035,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerUpdateNotificationPreferences
+     * @request PATCH:/api/settings/notifications
+     */
+    settingsControllerUpdateNotificationPreferences: (
+      data: UpdateNotificationPreferencesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateNotificationPreferencesResponse, any>({
+        path: `/api/settings/notifications`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerGetDashboardSettings
      * @request GET:/api/settings/dashboard
      */
@@ -46727,6 +46850,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseChatControllerFollowThread
+     * @request PUT:/api/course-chat/messages/{messageId}/follow
+     */
+    courseChatControllerFollowThread: (messageId: string, params: RequestParams = {}) =>
+      this.request<FollowThreadResponse, any>({
+        path: `/api/course-chat/messages/${messageId}/follow`,
+        method: "PUT",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerUnfollowThread
+     * @request DELETE:/api/course-chat/messages/{messageId}/follow
+     */
+    courseChatControllerUnfollowThread: (messageId: string, params: RequestParams = {}) =>
+      this.request<UnfollowThreadResponse, any>({
+        path: `/api/course-chat/messages/${messageId}/follow`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseChatControllerDeleteMessage
      * @request DELETE:/api/course-chat/messages/{messageId}
      */
@@ -46852,6 +47003,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name ForumControllerFollowTopic
+     * @request PUT:/api/forum/topics/{topicId}/follow
+     */
+    forumControllerFollowTopic: (topicId: string, params: RequestParams = {}) =>
+      this.request<FollowTopicResponse, any>({
+        path: `/api/forum/topics/${topicId}/follow`,
+        method: "PUT",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ForumControllerUnfollowTopic
+     * @request DELETE:/api/forum/topics/{topicId}/follow
+     */
+    forumControllerUnfollowTopic: (topicId: string, params: RequestParams = {}) =>
+      this.request<UnfollowTopicResponse, any>({
+        path: `/api/forum/topics/${topicId}/follow`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ForumControllerGetTopicPosts
      * @request GET:/api/forum/topics/{topicId}/posts
      */
@@ -46940,6 +47119,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<DeletePostResponse, any>({
         path: `/api/forum/posts/${postId}`,
         method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DiscussionNotificationsControllerUnsubscribe
+     * @request POST:/api/discussion-notifications/unsubscribe
+     */
+    discussionNotificationsControllerUnsubscribe: (
+      data: UnsubscribeBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UnsubscribeResponse, any>({
+        path: `/api/discussion-notifications/unsubscribe`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

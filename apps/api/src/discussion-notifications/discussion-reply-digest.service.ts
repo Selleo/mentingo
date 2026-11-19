@@ -17,6 +17,7 @@ import {
   DISCUSSION_REPLY_DIGEST_BATCH_SIZE,
   DISCUSSION_REPLY_DIGEST_DELAY_MINUTES,
   DISCUSSION_REPLY_EXCERPT_LENGTH,
+  DISCUSSION_REPLY_THREAD_FIELD,
 } from "src/discussion-notifications/discussion-notifications.constants";
 import { DiscussionNotificationsRepository } from "src/discussion-notifications/discussion-notifications.repository";
 import { getForumTopicPath } from "src/forum/forum.constants";
@@ -138,19 +139,24 @@ export class DiscussionReplyDigestService {
 
     if (!thread) return null;
 
-    const recipient = await this.findDiscussionReader(thread, digest.userId, run);
+    const [recipient, followedThreadIds] = await Promise.all([
+      this.findDiscussionReader(thread, digest.userId, run),
+      this.courseChatRepository.findFollowedThreadIds([digest.threadId], digest.userId),
+    ]);
 
-    if (!recipient) return null;
+    if (!recipient?.replyEmailsEnabled || !followedThreadIds.length) return null;
 
     const unreadAnnouncementIds = new Set(
       await this.discussionNotificationsRepository.findUnreadAnnouncementIds(
         recipient.id,
-        digest.replies.map(({ announcementId }) => announcementId),
+        digest.replies.flatMap(({ announcementId }) => announcementId ?? []),
       ),
     );
     const replies = await this.discussionNotificationsRepository.findVisibleReplies(
       digest.replies
-        .filter(({ announcementId }) => unreadAnnouncementIds.has(announcementId))
+        .filter(
+          ({ announcementId }) => !announcementId || unreadAnnouncementIds.has(announcementId),
+        )
         .map(({ replyId }) => replyId),
     );
     const latestReply = replies.at(-1);
@@ -171,6 +177,7 @@ export class DiscussionReplyDigestService {
       reply_authors: uniq(replies.map(({ authorFullName }) => authorFullName)).join(", "),
       latest_reply: truncate(latestReply.content, { length: DISCUSSION_REPLY_EXCERPT_LENGTH }),
       discussion_link: `${run.tenantOrigin}${this.getDiscussionPath(thread, digest.threadId)}`,
+      [DISCUSSION_REPLY_THREAD_FIELD]: digest.threadId,
     };
 
     return {

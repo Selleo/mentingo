@@ -29,6 +29,7 @@ export * from "./constants/courseDuplication";
 export * from "./constants/courseEnrollment";
 export * from "./constants/courseLearningState";
 export * from "./constants/dashboard";
+export * from "./constants/discussionNotifications";
 export * from "./constants/emailBranding";
 export * from "./constants/entityTypes";
 export * from "./constants/features";

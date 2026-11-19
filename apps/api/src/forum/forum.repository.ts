@@ -1,5 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, DISCUSSION_SCOPES, FORUM_TOPIC_SORTS, PERMISSIONS } from "@repo/shared";
+import {
+  COURSE_ENROLLMENT,
+  DISCUSSION_NOTIFICATION_PREFERENCES,
+  DISCUSSION_SCOPES,
+  FORUM_TOPIC_SORTS,
+  PERMISSIONS,
+} from "@repo/shared";
 import { and, asc, count, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { match } from "ts-pattern";
@@ -7,6 +13,7 @@ import { match } from "ts-pattern";
 import { DatabasePg } from "src/common";
 import { userHasPermissionCondition } from "src/common/permissions/permission-sql.utils";
 import { LocalizationService } from "src/localization/localization.service";
+import { isNotificationPreferenceEnabled } from "src/settings/utils/notification-preference.sql";
 import {
   courseChatMessages,
   courseChatThreads,
@@ -236,6 +243,12 @@ export class ForumRepository {
         firstName: users.firstName,
         lastName: users.lastName,
         language: sql<string | null>`${settings.settings}->>'language'`,
+        replyEmailsEnabled: isNotificationPreferenceEnabled(
+          DISCUSSION_NOTIFICATION_PREFERENCES.REPLY_EMAILS,
+        ),
+        mentionEmailsEnabled: isNotificationPreferenceEnabled(
+          DISCUSSION_NOTIFICATION_PREFERENCES.MENTION_EMAILS,
+        ),
       })
       .from(users)
       .leftJoin(settings, eq(settings.userId, users.id))

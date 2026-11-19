@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
 import { FEATURES, PERMISSIONS, type PermissionKey } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
@@ -20,6 +20,7 @@ import {
   courseChatMessageReactionsUpdatedSchema,
   courseChatMessageSchema,
   courseChatMessagesResponseSchema,
+  courseChatThreadFollowingSchema,
   courseChatPaginationQuerySchema,
   courseChatRepliesResponseSchema,
   courseChatUsersResponseSchema,
@@ -28,6 +29,7 @@ import {
   toggleCourseChatMessageReactionSchema,
   type CourseChatMessageReactionsUpdatedResponse,
   type CourseChatMessageResponse,
+  type CourseChatThreadFollowingResponse,
   type CourseChatUserResponse,
   type CreateCourseChatMessageBody,
   type DeleteCourseChatMessageResponse,
@@ -125,6 +127,32 @@ export class CourseChatController {
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<CourseChatMessageReactionsUpdatedResponse>> {
     return this.courseChatService.toggleMessageReaction(messageId, userId, body);
+  }
+
+  @Put("messages/:messageId/follow")
+  @RequirePermission(PERMISSIONS.COURSE_DISCUSSION_READ)
+  @Validate({
+    request: [{ type: "param", name: "messageId", schema: UUIDSchema }],
+    response: baseResponse(courseChatThreadFollowingSchema),
+  })
+  async followThread(
+    @Param("messageId") messageId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<CourseChatThreadFollowingResponse>> {
+    return this.courseChatService.setThreadFollowing(messageId, userId, true);
+  }
+
+  @Delete("messages/:messageId/follow")
+  @RequirePermission(PERMISSIONS.COURSE_DISCUSSION_READ)
+  @Validate({
+    request: [{ type: "param", name: "messageId", schema: UUIDSchema }],
+    response: baseResponse(courseChatThreadFollowingSchema),
+  })
+  async unfollowThread(
+    @Param("messageId") messageId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<CourseChatThreadFollowingResponse>> {
+    return this.courseChatService.setThreadFollowing(messageId, userId, false);
   }
 
   @Delete("messages/:messageId")

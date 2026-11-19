@@ -5363,7 +5363,8 @@
     "learningPaths": "Parcours de développement",
     "adminLearningPaths": "Parcours de développement",
     "adminLearningPathEditor": "Éditeur de parcours de développement",
-    "gamification": "Gamification"
+    "gamification": "Gamification",
+    "notificationUnsubscribe": "Paramètres des notifications"
   },
   "learningPathsView": {
     "hero": {
@@ -8025,7 +8026,9 @@
       "replyCount": "Nombre de nouvelles réponses",
       "replyAuthors": "Auteurs des réponses",
       "latestReply": "Dernière réponse",
-      "discussionUrl": "Lien vers la discussion"
+      "discussionUrl": "Lien vers la discussion",
+      "unsubscribeUrl": "Lien de désabonnement",
+      "unfollowUrl": "Lien pour ne plus suivre"
     },
     "simulation": {
       "title": "Résultat de la simulation",
@@ -9459,5 +9462,54 @@
     "avatarFor": "Avatar de {{name}}",
     "selectGroup": "Sélectionner le groupe {{name}}",
     "lessonWithTitle": "Leçon : {{title}}"
+  },
+  "discussionNotifications": {
+    "preferences": {
+      "title": "Notifications des discussions",
+      "saving": "Enregistrement…",
+      "replyInApp": {
+        "label": "Réponses – dans l'application",
+        "description": "Afficher une notification lorsque quelqu'un répond dans une discussion que vous suivez."
+      },
+      "replyEmails": {
+        "label": "Réponses – par e-mail",
+        "description": "Envoyer un e-mail avec les nouvelles réponses d'une discussion que vous suivez."
+      },
+      "mentionEmails": {
+        "label": "Mentions – par e-mail",
+        "description": "Envoyer un e-mail lorsque quelqu'un vous mentionne dans une discussion."
+      },
+      "toast": {
+        "saved": "Paramètres des notifications enregistrés.",
+        "error": "Impossible d'enregistrer les paramètres des notifications."
+      }
+    },
+    "following": {
+      "follow": "Suivre",
+      "following": "Suivi",
+      "followHint": "Recevoir des notifications sur les nouvelles réponses de cette discussion.",
+      "unfollowHint": "Ne plus recevoir de notifications sur les nouvelles réponses de cette discussion.",
+      "toast": {
+        "followed": "Vous suivez cette discussion.",
+        "unfollowed": "Vous ne suivez plus cette discussion.",
+        "error": "Impossible de modifier le suivi."
+      }
+    },
+    "unsubscribe": {
+      "title": "Notifications des discussions",
+      "confirmDescription": "Confirmez que vous souhaitez désactiver ces notifications.",
+      "confirm": "Confirmer",
+      "invalidLink": "Ce lien est invalide ou a expiré.",
+      "manageInSettings": "Gérer les notifications dans les paramètres",
+      "done": {
+        "replies": "Vous ne recevrez plus d'e-mails sur les réponses dans les discussions.",
+        "mentions": "Vous ne recevrez plus d'e-mails sur les mentions.",
+        "thread": "Vous ne suivez plus cette discussion."
+      },
+      "tryAgain": "Une erreur s'est produite. Réessayez dans un instant."
+    },
+    "errors": {
+      "invalidUnsubscribeLink": "Ce lien est invalide ou a expiré."
+    }
   }
 }
