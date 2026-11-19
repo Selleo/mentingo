@@ -1,7 +1,7 @@
 import { createRemixStub } from "@remix-run/testing";
 import { FORUM_SOCKET_EVENTS } from "@repo/shared";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { screen, waitFor } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiClient } from "~/api/api-client";
@@ -122,10 +122,16 @@ describe("ForumCourseDiscussionListPage", () => {
     await screen.findByTestId(FORUM_HANDLES.courseDiscussion(COURSE_ID));
     vi.mocked(ApiClient.api.forumControllerGetCourseDiscussions).mockClear();
 
-    fakeSocket.receive(FORUM_SOCKET_EVENTS.CHANGED, {});
+    vi.useFakeTimers();
+    try {
+      await act(async () => {
+        fakeSocket.receive(FORUM_SOCKET_EVENTS.CHANGED, {});
+        await vi.runOnlyPendingTimersAsync();
+      });
 
-    await waitFor(() =>
-      expect(ApiClient.api.forumControllerGetCourseDiscussions).toHaveBeenCalled(),
-    );
+      expect(ApiClient.api.forumControllerGetCourseDiscussions).toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
