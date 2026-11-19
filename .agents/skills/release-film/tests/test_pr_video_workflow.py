@@ -58,17 +58,42 @@ class Workflow(unittest.TestCase):
         )
         self.assertIn("steps.plan.outputs.record == 'true'", installer["if"])
         artifact = next(
-            step for step in job["steps"] if "upload-artifact" in step.get("uses", "")
+            step
+            for step in job["steps"]
+            if step.get("name") == "Preserve only the verified PR video bundle"
         )
         self.assertEqual(artifact["with"]["path"].count("\n"), 2)
         self.assertNotIn("checkout", artifact["with"]["path"])
         self.assertNotIn("pr-input.json", artifact["with"]["path"])
 
+    def test_failed_recordings_preserve_only_the_redacted_report(self):
+        steps = self.workflow["jobs"]["film"]["steps"]
+        report = next(
+            step
+            for step in steps
+            if step.get("name") == "Preserve the redacted recording report"
+        )
+        self.assertIn("always()", report["if"])
+        self.assertEqual(
+            report["with"]["path"],
+            "${{ runner.temp }}/pr-video/pr-video-recording-report.json",
+        )
+        self.assertNotIn("checkout", report["with"]["path"])
+        self.assertNotIn("worker.log", report["with"]["path"])
+        self.assertNotIn("keeper.env", report["with"]["path"])
+
     def test_only_separate_publisher_can_modify_the_pr(self):
         job = self.workflow["jobs"]["attach"]
         self.assertEqual(job["needs"], "film")
         self.assertEqual(job["permissions"]["pull-requests"], "write")
-        self.assertNotIn("secrets.", str(job))
+        self.assertEqual(job["environment"], "release-film")
+        self.assertNotIn("PR_VIDEO_UPLOAD_TOKEN", str(self.workflow["jobs"]["film"]))
+        self.assertEqual(
+            [step["env"]["PR_VIDEO_UPLOAD_TOKEN"] for step in job["steps"]
+             if "PR_VIDEO_UPLOAD_TOKEN" in step.get("env", {})],
+            ["${{ secrets.PR_VIDEO_UPLOAD_TOKEN }}"],
+        )
+        self.assertNotIn("env", job)
         self.assertNotIn("CLAUDE_CODE", str(job))
         self.assertNotIn("ELEVENLABS", str(job))
         self.assertIn("needs.film.outputs.record == 'true'", job["if"])
@@ -89,9 +114,25 @@ class Workflow(unittest.TestCase):
         self.assertIn("refs/heads/staging", self.workflow["jobs"]["film"]["if"])
         self.assertIn("refs/heads/main", self.workflow["jobs"]["film"]["if"])
         self.assertEqual(
-            caller["with"], {"pr_number": "${{ format('{0}', inputs.pr_number) }}"}
+            caller["with"],
+            {
+                "pr_number": "${{ format('{0}', inputs.pr_number) }}",
+                "branch_test": "${{ inputs.pr_video_branch_test == true }}",
+                "retry_run_id": "${{ inputs.pr_video_retry_run_id }}",
+            },
         )
-        self.assertNotIn("secrets", caller)
+        expected_secrets = {
+            "CLAUDE_CODE_OAUTH_TOKEN": "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}",
+            "ELEVENLABS_API_KEY": "${{ secrets.ELEVENLABS_API_KEY }}",
+        }
+        self.assertEqual(
+            caller["secrets"],
+            {**expected_secrets, "PR_VIDEO_UPLOAD_TOKEN": "${{ secrets.PR_VIDEO_UPLOAD_TOKEN }}"},
+        )
+        self.assertEqual(
+            events["workflow_dispatch"]["inputs"]["pr_video_branch_test"]["default"],
+            False,
+        )
         for field in ("expected_head", "requested_by"):
             self.assertEqual(
                 events["workflow_dispatch"]["inputs"][field]["type"], "string"
@@ -101,4 +142,77 @@ class Workflow(unittest.TestCase):
         called_events = self.workflow.get("on", self.workflow.get(True))
         self.assertEqual(
             called_events["workflow_call"]["inputs"]["pr_number"]["type"], "string"
+        )
+        declared_secrets = called_events["workflow_call"]["secrets"]
+        self.assertEqual(set(declared_secrets), set(expected_secrets) | {"PR_VIDEO_UPLOAD_TOKEN"})
+        self.assertTrue(all(declared_secrets[name]["required"] for name in expected_secrets))
+        self.assertFalse(declared_secrets["PR_VIDEO_UPLOAD_TOKEN"]["required"])
+        self.assertIs(
+            called_events["workflow_call"]["inputs"]["branch_test"]["default"], False
+        )
+        self.assertIn("inputs.branch_test == true", self.workflow["jobs"]["film"]["if"])
+        self.assertEqual(self.workflow["jobs"]["film"]["environment"], "release-film")
+        self.assertIn("!inputs.pr_video_branch_test", release["jobs"]["film"]["if"])
+        self.assertIn("!inputs.pr_video_branch_test", release["jobs"]["publish"]["if"])
+
+    def test_attachment_retry_uses_a_verified_prior_run_without_recording_again(self):
+        recorder = self.workflow["jobs"]["film"]
+        publisher = self.workflow["jobs"]["attach"]
+        self.assertIn("!inputs.retry_run_id", recorder["if"])
+        self.assertIn("inputs.retry_run_id != ''", publisher["if"])
+        verify = next(step for step in publisher["steps"] if step.get("name") == "Verify the previous PR video run")
+        restore = next(step for step in publisher["steps"] if "download-artifact" in step.get("uses", ""))
+        self.assertLess(publisher["steps"].index(verify), publisher["steps"].index(restore))
+        for guard in ('.event == "workflow_dispatch"', '.status == "completed"',
+                      '.path == ".github/workflows/release-film.yml"',
+                      '.head_repository.full_name == env.GITHUB_REPOSITORY',
+                      '.conclusion == "success"'):
+            self.assertIn(guard, verify["run"])
+        self.assertEqual(restore["with"]["run-id"], "${{ inputs.retry_run_id || github.run_id }}")
+        self.assertIn('--run-id "$SOURCE_RUN"', publisher["steps"][-1]["run"])
+
+    def test_missing_credentials_fail_before_any_model_or_voice_call(self):
+        import os
+        import subprocess
+        import sys
+
+        steps = self.workflow["jobs"]["film"]["steps"]
+        guard = next(
+            step
+            for step in steps
+            if step.get("name") == "Validate the existing recording credentials"
+        )
+        script = guard["run"].split("<<'PY'\n", 1)[1].rsplit("\nPY", 1)[0]
+        self.assertIn("steps.inspect.outputs.eligible == 'true'", guard["if"])
+        self.assertLess(
+            steps.index(guard),
+            next(index for index, step in enumerate(steps) if step.get("id") == "plan"),
+        )
+        environment = dict(
+            os.environ,
+            CLAUDE_CODE_OAUTH_TOKEN="test-claude",
+            ELEVENLABS_API_KEY="test-eleven",
+        )
+        for missing in ("CLAUDE_CODE_OAUTH_TOKEN", "ELEVENLABS_API_KEY"):
+            with self.subTest(missing=missing):
+                result = subprocess.run(
+                    [sys.executable, "-c", script],
+                    env=dict(environment, **{missing: ""}),
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(missing, result.stderr)
+                self.assertNotIn("test-claude", result.stderr)
+                self.assertNotIn("test-eleven", result.stderr)
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            env=environment,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertEqual(
+            result.stdout.strip(), "Both existing recording credentials are configured."
         )

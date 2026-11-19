@@ -20,6 +20,7 @@ import time
 import zlib
 
 from prepare_captions import prepare_captions
+import core
 import mentingo_frame
 import tutorial_focus
 
@@ -155,12 +156,12 @@ def load_plan(path, enforce_duration=True, strict=True):
     data = json.loads(path.read_text())
     fields(data, ['font', 'chapters', 'language', 'colors', 'mode', 'frameTheme', 'captionFont'], ['font', 'chapters'])
     mode = data.get('mode', 'release')
-    if mode not in ('release', 'tutorial'):
+    if mode not in ('release', *core.TUTORIAL_PRESENTATION_MODES):
         raise ValueError('Unknown film mode')
     colors = colors_of(data.get('colors'))
     theme = data.get('frameTheme')
-    if theme not in (None, 'mentingo') or theme and mode != 'tutorial':
-        raise ValueError('Mentingo frame theme is supported only for tutorial films')
+    if theme not in (None, 'mentingo') or theme and mode not in core.TUTORIAL_PRESENTATION_MODES:
+        raise ValueError('Mentingo frame theme is supported only for tutorial and pull-request films')
     def asset(name):
         if not isinstance(name, str) or not name:
             raise ValueError('Input path must be a nonempty string')
@@ -220,7 +221,7 @@ def load_plan(path, enforce_duration=True, strict=True):
             duration = round(duration * 30) / 30
             segment.update(start=cursor, duration=duration)
             segments.append(segment)
-            if start == 0 and 'opening' not in card:
+            if (start == 0 or mode == 'pull-request') and 'opening' not in card:
                 # Hold the first demonstrated screen under the title, fully visible from frame zero.
                 info = next(stream for stream in input_probe(source)['streams'] if stream['codec_type'] == 'video')
                 card['source'] = source
@@ -775,7 +776,7 @@ def prepare(path, out, enforce_duration=True, strict=True):
             raise ValueError('Narration has no audio stream')
         prepared = prepare_captions(srt.read_text(encoding='utf-8-sig'),
             float(info['format']['duration']), chapter.get('audio_offset', 2), limits=limits,
-            end_tolerance_ms=None if data.get('mode') == 'tutorial' else 1)
+            end_tolerance_ms=None if data.get('mode') in core.TUTORIAL_PRESENTATION_MODES else 1)
         copied['captions'] = [{key: cue[key] for key in ['start', 'end', 'text']} for cue in prepared]
         caption_timing.append(dict(chapter=len(result['chapters'])+1, cues=[cue['timing'] for cue in prepared]))
         copied['clips'] = []

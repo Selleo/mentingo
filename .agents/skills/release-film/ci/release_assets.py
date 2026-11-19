@@ -150,7 +150,7 @@ def notes_section(tag, code, links, base_url=None, video_url=None, video_sha256=
     return f'{MARK_START}\n## 🎬 Release film\n\n{preview}{" · ".join(parts)}\n{MARK_END}'
 
 
-def upload_video(path, repo, body, checksum):
+def upload_video(path, repo, body, checksum, *, upload_token=None):
     """Use the same media endpoint as github.com/cli/cli internal/attachments/client.go.
 
     A release asset URL downloads; a bare media attachment URL renders an inline player.
@@ -165,9 +165,15 @@ def upload_video(path, repo, body, checksum):
     repository_id = json.loads(gh('api', f'repos/{repo}'))['id']
     check(isinstance(repository_id, int) and repository_id > 0, 'GitHub returned no valid repository ID')
     query = urllib.parse.urlencode({'name': path.name, 'content_type': 'video/mp4', 'repository_id': repository_id})
+    upload_options = {}
+    if upload_token:
+        upload_env = os.environ.copy()
+        upload_env.pop('PR_VIDEO_UPLOAD_TOKEN', None)
+        upload_env['GH_TOKEN'] = upload_token
+        upload_options['env'] = upload_env
     answer = json.loads(gh('api', f'https://uploads.github.com/user-attachments/assets?{query}', '--method', 'POST',
                            '-H', 'Content-Type: application/octet-stream', '-H', 'Accept: application/vnd.github+json',
-                           '--input', str(path)))
+                           '--input', str(path), **upload_options))
     check(isinstance(answer, dict), 'GitHub returned no media attachment')
     url = answer.get('url', '')
     check(isinstance(url, str) and re.fullmatch(r'https://github\.com/user-attachments/assets/[a-fA-F0-9-]+', url),
@@ -183,8 +189,8 @@ def with_section(body, section):
     return section + ('\n\n' + notes if notes else '') + '\n'
 
 
-def gh(*args, input_text=None):
-    done = subprocess.run(['gh', *args], capture_output=True, text=True, input=input_text)
+def gh(*args, input_text=None, env=None):
+    done = subprocess.run(['gh', *args], capture_output=True, text=True, input=input_text, env=env)
     check(done.returncode == 0, f'gh {" ".join(args[:3])} failed: {done.stderr.strip()[:300]}')
     return done.stdout
 

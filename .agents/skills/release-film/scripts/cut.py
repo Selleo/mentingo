@@ -127,6 +127,13 @@ def tutorial_font(addon, text, repo_slug):
     return font
 
 
+def mentingo_presentation(repo_slug, font):
+    """The shared frame and caption face for Mentingo flow videos."""
+    if repo_slug == 'Selleo/mentingo':
+        return {'frameTheme': 'mentingo', 'captionFont': font}
+    return {}
+
+
 def film_colors(addon):
     """({'frame': …, 'accent': …} or None, warning): the add-on's brand colours (``brand.colors``, #rrggbb) for the
     film; colours the renderer does not take leave it in its own (a warning, never a lost film)."""
@@ -198,7 +205,8 @@ def narration_addon(run, addon, persist=False):
 
 def narration_jobs(run, story, addon, root):
     """Build the complete nonsecret cache identity for each chapter's speech and word captions."""
-    said = language.texts(core.load(Path(run) / 'sources.json') or {})
+    sources = core.load(Path(run) / 'sources.json') or {}
+    said = language.texts(sources)
     words, selected = lexicon(addon, said['code']), engine()
     reference = VOXCPM / f"narrator-{said['code']}.wav"
     provider = {}
@@ -217,7 +225,7 @@ def narration_jobs(run, story, addon, root):
         jobs.append({'text': text, 'sentences': sentences, 'out': str(root / f'c{index + 1}'), 'engine': selected,
                      'language': said['code'], 'lexicon': {term: words[term] for term in used},
                      'voice': narrator, 'pause': PAUSE, **provider,
-                     **({'audio_profile': 'pcm-48000-v1'} if (core.load(Path(run) / 'sources.json') or {}).get('mode') == 'tutorial' else {})})
+                     **({'audio_profile': 'pcm-48000-v1'} if sources.get('mode') in core.TUTORIAL_PRESENTATION_MODES else {})})
     return jobs
 
 
@@ -560,18 +568,19 @@ def chapter_film(chapter, folder, voice_dir, last=False, cached_only=False, lang
     return spec, capture, words, speech, film, spans
 
 
-def chapter_metrics(chapter, folder, voice_dir, last=False, language=None):
+def chapter_metrics(chapter, folder, voice_dir, last=False, language=None, mode='release'):
     """A chapter's measures (metrics.chapter) from the montage the render uses."""
     _, capture, words, speech, film, spans = chapter_film(chapter, folder, voice_dir, last, cached_only=True,
-                                                          language=language)
-    return metrics.chapter(film, spans, metrics.captions_of(words, film, speech), capture)
+                                                          language=language, tutorial=mode in core.TUTORIAL_PRESENTATION_MODES)
+    return metrics.chapter(film, spans, metrics.captions_of(words, film, speech, mode=mode), capture)
 
 
 def chapter_cut(ffmpeg, chapter, folder, voice_dir, sources, retimed=None, last=False, cached_only=False):
     """``retimed``: the folder for the voice retimed around its waits (default the voice's own)."""
     said = language.texts(sources)
+    tutorial = sources.get('mode') in core.TUTORIAL_PRESENTATION_MODES
     spec, capture, words, speech, film, spans = chapter_film(chapter, folder, voice_dir, last, cached_only=cached_only,
-                                                             language=said['code'], tutorial=sources.get('mode') == 'tutorial')
+                                                             language=said['code'], tutorial=tutorial)
     camera = []
     for span in spans:
         entry = {'start': span['start'], 'end': span['end']}
@@ -591,7 +600,7 @@ def chapter_cut(ffmpeg, chapter, folder, voice_dir, sources, retimed=None, last=
                                          'pointer': film['pointer']},
                                         **({'labels': film['labels']} if film.get('labels') else {}),
                                         **({'keys': film['keys']} if film.get('keys') else {}),
-                                        **({'focus': tutorial_focus.from_film(film, capture)} if sources.get('mode') == 'tutorial' else {}))}],
+                                        **({'focus': tutorial_focus.from_film(film, capture)} if tutorial else {}))}],
              'review_points': {}}
     if film['insert_from'] is not None:
         doc, _ = document(chapter, capture)
@@ -678,10 +687,17 @@ def make(run, story, sources, addon, jobs=8, out=None):
                                    last=index == len(story['chapters']), cached_only=recutting)
         chapters.append(entry)
         notes[f'{index}. {chapter["title"]}'] = stats
-    font, family, warning = film_font(addon, drawn_text(chapters).translate(render_demo.LOOKALIKES))
+    text = drawn_text(chapters).translate(render_demo.LOOKALIKES)
+    pr_video = sources.get('mode') == 'pull-request'
+    if pr_video and sources['repo'] == 'Selleo/mentingo':
+        font = tutorial_font(addon, text, sources['repo'])
+        family, warning = 'all-round-gothic', None
+    else:
+        font, family, warning = film_font(addon, text)
+    presentation = {'mode': 'pull-request', **mentingo_presentation(sources['repo'], font)} if pr_video else {}
     authored = out / 'film-plan' / 'authored.json'
-    core.save(authored, dict({'font': font, 'chapters': chapters, 'language': language.texts(sources)['code']},
-                             **({'colors': colors} if colors else {})))
+    core.save(authored, {'font': font, 'chapters': chapters, 'language': language.texts(sources)['code'],
+                         **presentation, **({'colors': colors} if colors else {})})
     core.mark(out, 'cut', 'end')
     core.mark(out, 'render', 'start')
     for folder in (out / 'film-plan' / 'prepared', out / 'film'):  # a new make replaces the previous film

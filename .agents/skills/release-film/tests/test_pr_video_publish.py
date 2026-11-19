@@ -3,6 +3,7 @@ import copy
 import hashlib
 import io
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -63,8 +64,12 @@ class Publish(unittest.TestCase):
     def publish(self):
         return publisher.publish(self.folder, REPOSITORY, NUMBER, HEAD_SHA, RUN_ID)
 
-    def fake_gh(self, *arguments, input_text=None):
+    def fake_gh(self, *arguments, input_text=None, env=None):
         self.calls.append(arguments)
+        self.assertNotIn("PR_VIDEO_UPLOAD_TOKEN", os.environ)
+        if env is not None:
+            self.assertTrue(arguments[1].startswith("https://uploads.github.com/"))
+            self.assertEqual(env["GH_TOKEN"], "test-upload-token")
         if arguments == ('api', f'repos/{REPOSITORY}/pulls/{NUMBER}'):
             self.reads += 1
             return json.dumps(self.current)
@@ -329,12 +334,32 @@ class Publish(unittest.TestCase):
         self.assertNotIn('private-token', str(failure.exception))
         self.assertFalse(self.patches)
 
+    def test_upload_failure_keeps_http_status_without_leaking_response(self):
+        with mock.patch.object(
+            release_assets, 'upload_video',
+            side_effect=SystemExit('private-token response body: Not Found (HTTP 404)'),
+        ):
+            with self.assertRaises(publisher.PublicationError) as failure:
+                self.publish()
+        self.assertIn('HTTP 404', str(failure.exception))
+        self.assertNotIn('private-token', str(failure.exception))
+        self.assertNotIn('response body', str(failure.exception))
+        self.assertFalse(self.patches)
+
     def test_cli_returns_json_or_a_safe_failure(self):
         arguments = ['pr_video_publish.py', '--bundle', str(self.folder), '--repository', REPOSITORY,
                      '--number', str(NUMBER), '--head-sha', HEAD_SHA, '--run-id', RUN_ID]
-        with mock.patch.object(sys, 'argv', arguments), mock.patch('sys.stdout', new_callable=io.StringIO) as output:
+        with (
+            mock.patch.dict(os.environ, {'PR_VIDEO_UPLOAD_TOKEN': 'test-upload-token', 'GH_TOKEN': 'workflow-token'}),
+            mock.patch.object(sys, 'argv', arguments),
+            mock.patch('sys.stdout', new_callable=io.StringIO) as output,
+        ):
             publisher.main()
             self.assertEqual(json.loads(output.getvalue())['status'], 'published')
+            self.assertEqual(os.environ['GH_TOKEN'], 'workflow-token')
+            self.assertNotIn('PR_VIDEO_UPLOAD_TOKEN', os.environ)
+            upload_calls = [call for call in self.github.call_args_list if call.kwargs.get('env') is not None]
+            self.assertEqual(len(upload_calls), 1)
         with (
             mock.patch.object(sys, 'argv', arguments),
             mock.patch.object(publisher, 'publish', side_effect=publisher.PublicationError('Safe failure')),

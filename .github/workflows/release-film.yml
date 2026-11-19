@@ -18,6 +18,15 @@ on:
         required: false
         type: number
         default: 0
+      pr_video_branch_test:
+        description: Full PR video test from a branch explicitly allowed by the release-film environment
+        required: false
+        type: boolean
+        default: false
+      pr_video_retry_run_id:
+        description: Reuse the verified bundle from this PR video run (requires pr_number and expected_head)
+        required: false
+        type: string
       expected_head:
         description: Expected PR commit for a readiness-triggered recording (optional)
         required: false
@@ -61,8 +70,8 @@ concurrency:
 jobs:
   pr_video:
     name: Test the PR video from the selected trusted branch
-    # The reusable recorder itself restricts execution to staging/main. Other refs
-    # can validate the call graph without starting recording or accessing its environment.
+    # Normal recording uses staging/main. A manual branch test also requires an
+    # explicit release-film environment allowance; the opt-in flag bypasses no policy.
     if: inputs.pr_number > 0
     permissions:
       actions: write # reusable workflow contains a metadata dispatcher; skipped for this call
@@ -71,9 +80,15 @@ jobs:
     uses: ./.github/workflows/pr-flow-video.yml
     with:
       pr_number: ${{ format('{0}', inputs.pr_number) }}
+      branch_test: ${{ inputs.pr_video_branch_test == true }}
+      retry_run_id: ${{ inputs.pr_video_retry_run_id }}
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+      PR_VIDEO_UPLOAD_TOKEN: ${{ secrets.PR_VIDEO_UPLOAD_TOKEN }}
 
   film:
-    if: ${{ !inputs.pr_number }}
+    if: ${{ !inputs.pr_number && !inputs.pr_video_branch_test && !inputs.pr_video_retry_run_id }}
     name: Record the release film
     runs-on: ubuntu-24.04
     timeout-minutes: 150
@@ -324,7 +339,7 @@ jobs:
   publish:
     name: Publish the film
     needs: film
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.pr_number && inputs.publish }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.pr_number && !inputs.pr_video_branch_test && !inputs.pr_video_retry_run_id && inputs.publish }}
     permissions:
       actions: read
       contents: write

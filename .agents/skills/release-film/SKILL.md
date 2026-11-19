@@ -432,3 +432,49 @@ and replacing only its managed section. Changed heads are rejected. No release o
 Helpdesk publication is performed. Native-upload permission failures preserve the
 previous section and downloadable MP4 artifact; never call an artifact link a player.
 No repository admin settings or environment policies are changed by these workflows.
+
+
+The Release film caller forwards the named `CLAUDE_CODE_OAUTH_TOKEN`,
+`ELEVENLABS_API_KEY` and `PR_VIDEO_UPLOAD_TOKEN` secrets into the reusable PR workflow. The recording
+job uses the protected `release-film` environment, where these secrets are configured.
+Missing values fail before planning.
+No provider credentials enter the metadata dispatcher or attachment job.
+Store the user token for native GitHub media uploads as `PR_VIDEO_UPLOAD_TOKEN`
+in the protected `release-film` environment. The attachment job passes it only
+to the media upload request. Metadata reads and the PR body update use
+`GITHUB_TOKEN`. For an attachment failure after successful recording, dispatch
+Release film with the same `pr_number`, recorded `expected_head` and
+`pr_video_retry_run_id`. This mode verifies the prior recorder run and reuses its
+artifact while it is retained. A changed, closed, draft or external PR remains
+ineligible.
+
+To test the complete pipeline before merging, manually dispatch Release film on
+the fix branch with `pr_number`, `pr_video_branch_test=true` and `publish=false`.
+The target PR head is recorded, while control scripts come from the selected fix
+branch. The `release-film` environment must explicitly allow that branch; the flag
+does not bypass its protection. Adding a temporary environment branch policy is
+an admin-level change requiring explicit user authorization. Remove that exact
+temporary policy after the test. Normal readiness runs omit the flag and continue
+on staging/main. Test mode never starts release recording/publication.
+
+
+Mentingo PR videos share the self-onboarding frame, rounded viewport, caption
+font, and narration-aligned focus. The browser records the pinned PR head with
+demo data. Its chapters cite the PR and open directly on the visible change.
+
+A PR video is one MP4 with one chapter per selected flow (up to four). All these
+chapters may cite the same single PR; release films retain their one-PR-per-chapter
+rule. The PR publisher refuses a reviewed story that silently drops or duplicates
+one of the selected flow chapters. Recording logs phase transitions and preserves
+`pr-video-recording-report.json` even when recording/review fails. It contains
+bounded results and worker/keeper log tails redacted against the recording step's
+credential values; raw authentication state, checkout and worker logs are never
+uploaded. A generic wrapper error alone is not sufficient evidence of why a run
+failed: inspect this report before attributing a recording failure.
+
+PR course setup uses the trusted `createPrVideoCourse` helper copied into the isolated
+checkout. It reuses seeded categories, uploads a real tenant-owned SVG cover through
+the generated API, and registers owned cleanup immediately with an admin session.
+Existing categories are never deleted. Do not fabricate cover keys or recreate seed
+categories. AI Mentor/Judge/voice flows additionally require the app AI providers;
+Claude narration credentials alone do not configure those services.

@@ -513,7 +513,7 @@ class WorkflowsTest(unittest.TestCase):
         entry = self.load('release-film.yml')
         self.assertNotIn('helpdesk_test', entry['jobs'])
         self.assertNotIn('helpdesk_spec', entry['on']['workflow_dispatch']['inputs'])
-        self.assertEqual(entry['jobs']['film']['if'], '${{ !inputs.pr_number }}')
+        self.assertEqual(entry['jobs']['film']['if'], '${{ !inputs.pr_number && !inputs.pr_video_branch_test && !inputs.pr_video_retry_run_id }}')
         workflow = self.load('self-onboarding.yml')
         self.assertIn('workflow_dispatch', workflow['on'])
         self.assertNotIn('workflow_call', workflow['on'])

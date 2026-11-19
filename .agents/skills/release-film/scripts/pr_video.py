@@ -16,6 +16,7 @@ import film
 import gaps
 import harness
 import pr_video_plan
+import pr_video_report
 import sources
 
 SHA = re.compile(r"[a-f0-9]{40}")
@@ -127,6 +128,24 @@ def classify(run):
     return pr_video_plan.plan(data["inputs"], run)
 
 
+def prepare_pr_helpers(checkout, repo):
+    """Copy only the trusted PR setup helper into the isolated app version."""
+    checkout, repo = Path(checkout).resolve(), Path(repo).resolve()
+    name = "apps/web/e2e/utils/pr-video-data.ts"
+    source, target = repo / name, checkout / name
+    if (
+        checkout == repo
+        or not source.is_file()
+        or source.is_symlink()
+        or not source.resolve().is_relative_to(repo)
+        or target.is_symlink()
+        or not target.resolve().is_relative_to(checkout)
+    ):
+        raise ValueError("Invalid trusted PR helper path")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, target)
+
+
 def prepare(run, repo):
     run, repo = Path(run), Path(repo)
     metadata, plan = (
@@ -150,6 +169,7 @@ def prepare(run, repo):
     import self_onboarding_recording
 
     self_onboarding_recording.prepare_demo_checkout(checkout, repo)
+    prepare_pr_helpers(checkout, repo)
     info = {
         "repo": metadata["repository"],
         "tag": f"pr-{metadata['number']}-{metadata['headSha'][:12]}",
@@ -210,6 +230,14 @@ def prepare(run, repo):
                         "This flow was selected only from the PR overview and cited business specs. "
                         "Inspect only the relevant implementation and existing browser helpers to verify this flow. "
                         "Do not derive additional flows from code or expand into a product tour. "
+                        "Start narration with the actual change and end on the visible result. "
+                        "Use each sentence's action pin for the control or outcome it describes. "
+                        "Leave release introductions and conclusions out of the story. "
+                        "For off-camera course setup, use createPrVideoCourse from "
+                        "e2e/utils/pr-video-data.ts inside withWorkerPage(USER_ROLE.admin, ...). "
+                        "It reuses seeded categories, uploads a tenant-owned cover and registers cleanup "
+                        "immediately. Pass apiClient, factories, cleanup, withWorkerPage, categoryTitle "
+                        "and title. Never invent an image key or recreate an existing category. "
                         "Prove the described visible outcome on screen; report a scene failure if it is unsupported."
                     ),
                 ),
@@ -226,29 +254,66 @@ def prepare(run, repo):
 def record(run, repo, bundle):
     run, bundle = Path(run), Path(bundle)
     os.environ["RELEASE_FILM_RUN"] = str(run)
-    info = prepare(run, repo)
     args = SimpleNamespace(run=str(run), jobs=2, learn="off", provider="cli")
+    phase, prepared = "prepare", False
     try:
+        pr_video_report.checkpoint(run, phase)
+        info = prepare(run, repo)
+        prepared = True
+        phase = "setup"
+        pr_video_report.checkpoint(run, phase)
+        print("PR video: preparing the demo environment", flush=True)
         harness.setup(run, info["addon"]["harness"])
-        # Bring up auth/demo data before workers attempt their browser takes.
+        phase = "capture"
+        pr_video_report.checkpoint(run, phase)
         film.capture(args)
+        phase = "scene-workers"
+        pr_video_report.checkpoint(run, phase)
         selected = film.gap_scenes(args)
         if not selected.get("ok") or not selected.get("workers"):
-            raise RuntimeError("PR scene workers did not start")
+            pr_video_report.checkpoint(run, phase, selected)
+            raise RuntimeError(
+                "PR scene workers did not start: " + pr_video_report.reason(selected)
+            )
+        phase = "narration"
+        pr_video_report.checkpoint(run, phase)
+        print("PR video: recording and narrating the selected flows", flush=True)
         film.write(args)
+        phase = "finish"
+        pr_video_report.checkpoint(run, phase)
+        print("PR video: reviewing and assembling one film", flush=True)
         finished = film.finish(args)
+        pr_video_report.checkpoint(run, phase, finished)
         if not finished.get("ok") or finished.get("degraded"):
-            raise RuntimeError("PR film did not finish a reviewed recording")
+            raise RuntimeError(
+                "PR recording review failed: " + pr_video_report.reason(finished)
+            )
+        count = len(core.load(run / "pr-video-plan.json")["flows"])
         passed = [
             scene
             for scene in finished.get("scenes", [])
             if scene.get("filmed") and scene.get("narrated")
         ]
-        if len(passed) != len(core.load(run / "pr-video-plan.json")["flows"]):
+        if len(passed) != count:
             raise RuntimeError("Not every selected PR flow was recorded and narrated")
+        # Four flows must survive review as four chapters of the one final film.
+        # Successful worker takes alone do not prove the review kept those chapters.
+        chapters = (core.load(run / "story.json") or {}).get("chapters", [])
+        actual = [chapter.get("source", {}).get("file") for chapter in chapters]
+        expected = [f"gaps/pr-flow-{index}/story.txt" for index in range(1, count + 1)]
+        if len(actual) != count or set(actual) != set(expected):
+            raise RuntimeError(
+                "The reviewed film does not contain every selected flow exactly once"
+            )
+        phase = "stage"
+        pr_video_report.checkpoint(run, phase)
         return stage(run, bundle)
+    except BaseException as error:
+        pr_video_report.checkpoint(run, phase, error=error)
+        raise
     finally:
-        film.stop(args)
+        if prepared:
+            film.stop(args)
 
 
 def stage(run, bundle):

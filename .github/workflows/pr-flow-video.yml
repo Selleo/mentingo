@@ -6,6 +6,23 @@ on:
         description: Same-repository PR to demonstrate through a trusted caller
         required: true
         type: string
+      branch_test:
+        description: Manual full recording test; the environment must explicitly allow this branch
+        required: false
+        type: boolean
+        default: false
+      retry_run_id:
+        description: Completed recording run whose verified bundle should be attached
+        required: false
+        type: string
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN:
+        required: true
+      ELEVENLABS_API_KEY:
+        required: true
+      PR_VIDEO_UPLOAD_TOKEN:
+        description: Native media token supplied by the attachment job environment
+        required: false
   pull_request:
     types: [opened, ready_for_review]
     branches: [staging, main]
@@ -73,7 +90,7 @@ jobs:
             -f "pr_number=$NUMBER" -f "expected_head=$HEAD_SHA" -f "requested_by=$REQUESTED_BY" -f publish=false
 
   film:
-    if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main')
+    if: github.event_name == 'workflow_dispatch' && !inputs.retry_run_id && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || inputs.branch_test == true)
     name: Analyze and record visible PR flows
     runs-on: ubuntu-24.04
     timeout-minutes: 150
@@ -109,6 +126,20 @@ jobs:
       - name: Validate PR identity and collect its overview and business specs
         id: inspect
         run: python3 "$S/pr_video.py" inspect --run "$RUNNER_TEMP/pr-video"
+      - name: Validate the existing recording credentials
+        if: steps.inspect.outputs.eligible == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: |
+          python3 - <<'PY'
+          import os
+          required = ('CLAUDE_CODE_OAUTH_TOKEN', 'ELEVENLABS_API_KEY')
+          missing = [name for name in required if not os.environ.get(name, '').strip()]
+          if missing:
+              raise SystemExit('Missing recording secrets: ' + ', '.join(missing))
+          print('Both existing recording credentials are configured.')
+          PY
       - name: Install the pinned semantic planner
         if: steps.inspect.outputs.eligible == 'true'
         working-directory: ${{ runner.temp }}
@@ -141,6 +172,14 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
         run: python3 "$S/pr_video.py" record --run "$RUNNER_TEMP/pr-video" --bundle "$RUNNER_TEMP/pr-video-bundle"
+      - name: Preserve the redacted recording report
+        if: always() && steps.plan.outputs.record == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pr-flow-video-report-${{ github.run_id }}
+          path: ${{ runner.temp }}/pr-video/pr-video-recording-report.json
+          if-no-files-found: warn
+          retention-days: 14
       - name: Preserve only the verified PR video bundle
         if: steps.plan.outputs.record == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -154,9 +193,14 @@ jobs:
   attach:
     name: Attach the matching PR video
     needs: film
-    if: github.event_name == 'workflow_dispatch' && needs.film.outputs.record == 'true'
+    if: >-
+      ${{ !cancelled() && github.event_name == 'workflow_dispatch' &&
+          (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main' || inputs.branch_test == true) &&
+          (inputs.retry_run_id != '' ||
+           (needs.film.result == 'success' && needs.film.outputs.record == 'true')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    environment: release-film
     permissions:
       contents: read
       pull-requests: write
@@ -166,16 +210,47 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Verify the previous PR video run
+        if: inputs.retry_run_id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN: ${{ inputs.retry_run_id }}
+          NUMBER: ${{ inputs.pr_number }}
+          HEAD_SHA: ${{ github.event.inputs.expected_head }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_RUN" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$NUMBER" =~ ^[1-9][0-9]*$ ]]
+          [[ "$HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
+          safe_run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN" --jq '
+            .event == "workflow_dispatch" and .status == "completed"
+            and .path == ".github/workflows/release-film.yml"
+            and .head_repository.full_name == env.GITHUB_REPOSITORY
+            and (.head_branch == "main" or .head_branch == "staging" or .head_branch == env.GITHUB_REF_NAME)')
+          [[ "$safe_run" == true ]]
+          # Only the successful recorder may supply a bundle for this publisher.
+          recorded=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN/jobs" --jq '
+            any(.jobs[]; (.name | endswith(" / Analyze and record visible PR flows"))
+                         and .conclusion == "success")')
+          [[ "$recorded" == true ]]
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: pr-flow-video-${{ github.run_id }}
+          name: pr-flow-video-${{ inputs.retry_run_id || github.run_id }}
           path: ${{ runner.temp }}/pr-video-bundle
+          run-id: ${{ inputs.retry_run_id || github.run_id }}
+          github-token: ${{ github.token }}
       - name: Append or replace the generated video section
         env:
           GH_TOKEN: ${{ github.token }}
-          NUMBER: ${{ needs.film.outputs.number }}
-          HEAD_SHA: ${{ needs.film.outputs.head }}
+          PR_VIDEO_UPLOAD_TOKEN: ${{ secrets.PR_VIDEO_UPLOAD_TOKEN }}
+          NUMBER: ${{ inputs.retry_run_id && inputs.pr_number || needs.film.outputs.number }}
+          HEAD_SHA: ${{ inputs.retry_run_id && github.event.inputs.expected_head || needs.film.outputs.head }}
+          SOURCE_RUN: ${{ inputs.retry_run_id || github.run_id }}
         run: |
+          if [ -z "${PR_VIDEO_UPLOAD_TOKEN}" ]; then
+            echo "::error::Missing PR_VIDEO_UPLOAD_TOKEN in the release-film environment"
+            exit 1
+          fi
           python3 .agents/skills/release-film/ci/pr_video_publish.py \
             --bundle "$RUNNER_TEMP/pr-video-bundle" --repository "$GITHUB_REPOSITORY" \
-            --number "$NUMBER" --head-sha "$HEAD_SHA" --run-id "$GITHUB_RUN_ID"
+            --number "$NUMBER" --head-sha "$HEAD_SHA" --run-id "$SOURCE_RUN"
