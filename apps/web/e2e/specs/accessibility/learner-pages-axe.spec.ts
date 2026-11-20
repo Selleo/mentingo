@@ -62,8 +62,7 @@ test("learner pages have no WCAG 2.2 A/AA axe violations", async ({
         .getByTestId(DASHBOARD_WIDGET_HANDLES.CHART),
     ).toBeVisible();
     await assertNoAxeViolationsFlow(page, {
-      // Donut chart text alternative: https://github.com/Selleo/mentingo/issues/2287
-      disabledRules: [...RULES_DISABLED_ON_ALL_PAGES, "svg-img-alt"],
+      disabledRules: RULES_DISABLED_ON_ALL_PAGES,
       // Calendar days outside the month stay grey: https://github.com/Selleo/mentingo/issues/2311
       exclude: [`[data-testid="${DASHBOARD_WIDGET_HANDLES.EVENT_CALENDAR}"] .day-outside`],
     });
@@ -152,10 +151,7 @@ test("embed and live training lessons have no WCAG 2.2 A/AA axe violations", asy
       lessons.embedLesson.title,
     );
     await expect(page.getByTestId(LEARNING_HANDLES.EMBED_IFRAME)).toBeVisible();
-    await assertNoAxeViolationsFlow(page, {
-      // Embed fullscreen button has no name: https://github.com/Selleo/mentingo/issues/2287
-      disabledRules: [...RULES_DISABLED_ON_ALL_PAGES, "button-name"],
-    });
+    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_ON_ALL_PAGES });
 
     await openLessonFromSidebarFlow(page, lessons.liveTrainingLesson.id);
     await expect(page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.ROOT)).toBeVisible();
@@ -169,12 +165,6 @@ test("a quiz with every question type has no WCAG 2.2 A/AA axe violations before
   withWorkerPage,
 }) => {
   const enrollmentFactory = factories.createEnrollmentFactory();
-  const QUIZ_DISABLED_RULES = [
-    ...RULES_DISABLED_ON_ALL_PAGES,
-    // Fill-in-the-blanks text input and 1-5 scale slider have no label:
-    // https://github.com/Selleo/mentingo/issues/2287
-    "label",
-  ];
   let quizWasSubmitted = false;
   const { courseId, lessons } = await createAllRenderedQuestionTypesQuizCourse({
     cleanup,
@@ -195,12 +185,12 @@ test("a quiz with every question type has no WCAG 2.2 A/AA axe violations before
       lessons.quizLesson.title,
     );
     await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_FORM)).toBeVisible();
-    await assertNoAxeViolationsFlow(page, { disabledRules: QUIZ_DISABLED_RULES });
+    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_ON_ALL_PAGES });
 
     await answerAllRenderedQuizQuestionTypesFlow(page, lessons.answers);
     await submitQuizFlow(page);
     quizWasSubmitted = true;
     await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
-    await assertNoAxeViolationsFlow(page, { disabledRules: QUIZ_DISABLED_RULES });
+    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_ON_ALL_PAGES });
   });
 });
