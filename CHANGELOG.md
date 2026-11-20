@@ -1,3 +1,57 @@
+<a name="v4.35.0"></a>
+
+## [v4.35.0] - 20.11.2026
+
+### Features:
+
+- add discussion notification preferences and follow controls ([#2291](https://github.com/Selleo/mentingo/issues/2291))
+
+- email forum mentions and grouped discussion replies ([#2289](https://github.com/Selleo/mentingo/issues/2289))
+
+- notify discussion participants about new replies ([#2283](https://github.com/Selleo/mentingo/issues/2283))
+
+- give pages and lessons unique titles and a lesson heading ([#2279](https://github.com/Selleo/mentingo/issues/2279))
+
+### Bug Fixes:
+
+- let screen reader and voice users find search and use the profile menu ([#2322](https://github.com/Selleo/mentingo/issues/2322))
+
+- let screen reader and phone users use quiz fields, embeds, toasts, charts and breadcrumbs ([#2319](https://github.com/Selleo/mentingo/issues/2319))
+
+- show which quiz answer has keyboard focus ([#2318](https://github.com/Selleo/mentingo/issues/2318))
+
+- make grey text and link focus readable for low-vision learners ([#2284](https://github.com/Selleo/mentingo/issues/2284))
+
+- take admins back to the users list after creating a new user ([#2310](https://github.com/Selleo/mentingo/issues/2310))
+
+- record PR flows together with existing film credentials ([#2272](https://github.com/Selleo/mentingo/issues/2272))
+
+- let learners see their true/false answer clearly in quiz review ([#2308](https://github.com/Selleo/mentingo/issues/2308))
+
+- recover course generation and restore Voice Mentor streaming ([#2258](https://github.com/Selleo/mentingo/issues/2258))
+
+- screen readers and the video player speak the user's language ([#2282](https://github.com/Selleo/mentingo/issues/2282))
+
+- stop search boxes from dropping letters as you type ([#2281](https://github.com/Selleo/mentingo/issues/2281))
+
+### Chores:
+
+- support file drops across AI course creator ([#2316](https://github.com/Selleo/mentingo/issues/2316))
+
+### Tests:
+
+- catch accessibility regressions in the learner app before release ([#2295](https://github.com/Selleo/mentingo/issues/2295))
+
+- unblock E2E checks blocked by an outdated AI mentor preview expectation ([#2320](https://github.com/Selleo/mentingo/issues/2320))
+
+- stop random failures in the course translation check for AI Judge lessons ([#2280](https://github.com/Selleo/mentingo/issues/2280))
+
+- check that platform settings really change what users see ([#2271](https://github.com/Selleo/mentingo/issues/2271))
+
+- catch broken dashboards and reports earlier ([#2270](https://github.com/Selleo/mentingo/issues/2270))
+
+- catch broken learning, AI mentor, live training and statistics earlier ([#2267](https://github.com/Selleo/mentingo/issues/2267))
+
 <a name="v4.34.0"></a>
 
 ## [v4.34.0] - 18.11.2026
@@ -49,6 +103,10 @@
 - give course discussions their own dedicated forum pages ([#2241](https://github.com/Selleo/mentingo/issues/2241))
 
 - improve automated testing to catch issues earlier ([#2254](https://github.com/Selleo/mentingo/issues/2254))
+
+### Documentation:
+
+- update changelog for version v4.34.0
 
 ### Tests:
 
@@ -3920,7 +3978,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.34.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.35.0...HEAD
+[v4.35.0]: https://github.com/Selleo/mentingo/compare/v4.34.0...v4.35.0
 [v4.34.0]: https://github.com/Selleo/mentingo/compare/v4.33.0...v4.34.0
 [v4.33.0]: https://github.com/Selleo/mentingo/compare/v4.32.0...v4.33.0
 [v4.32.0]: https://github.com/Selleo/mentingo/compare/v4.31.1...v4.32.0
