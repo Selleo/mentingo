@@ -36,22 +36,16 @@ export function getCompetenciesSuccessMessageKey(command: CompetenciesCommand) {
       () => "competencies.notifications.competencyDeleted",
     )
     .with(
-      { operation: OPERATIONS.SAVE_PROFILE, id: P.string },
-      () => "competencies.notifications.profileUpdated",
+      { operation: OPERATIONS.SAVE_TRACK, id: P.string },
+      () => "competencies.notifications.trackUpdated",
     )
-    .with({ operation: OPERATIONS.SAVE_PROFILE }, () => "competencies.notifications.profileCreated")
+    .with({ operation: OPERATIONS.SAVE_TRACK }, () => "competencies.notifications.trackCreated")
+    .with({ operation: OPERATIONS.DELETE_TRACK }, () => "competencies.notifications.trackDeleted")
     .with(
-      { operation: OPERATIONS.DELETE_PROFILE },
-      () => "competencies.notifications.profileDeleted",
+      { operation: OPERATIONS.ASSIGN_TRACKS, trackIds: [] },
+      () => "competencies.notifications.trackRemoved",
     )
-    .with(
-      { operation: OPERATIONS.ASSIGN_PROFILE, profileId: null },
-      () => "competencies.notifications.profileRemoved",
-    )
-    .with(
-      { operation: OPERATIONS.ASSIGN_PROFILE },
-      () => "competencies.notifications.profileAssigned",
-    )
+    .with({ operation: OPERATIONS.ASSIGN_TRACKS }, () => "competencies.notifications.trackAssigned")
     .with(
       { operation: OPERATIONS.SUBMIT_EVIDENCE, value: { kind: EVIDENCE.DOCUMENT } },
       () => "competencies.notifications.documentSubmitted",
@@ -102,9 +96,9 @@ export function getCompetenciesFailureMessageKey(command: CompetenciesCommand) {
     .with(OPERATIONS.DELETE_CATEGORY, () => "competencies.notifications.categoryDeleteFailed")
     .with(OPERATIONS.SAVE_COMPETENCY, () => "competencies.notifications.competencySaveFailed")
     .with(OPERATIONS.DELETE_COMPETENCY, () => "competencies.notifications.competencyDeleteFailed")
-    .with(OPERATIONS.SAVE_PROFILE, () => "competencies.notifications.profileSaveFailed")
-    .with(OPERATIONS.DELETE_PROFILE, () => "competencies.notifications.profileDeleteFailed")
-    .with(OPERATIONS.ASSIGN_PROFILE, () => "competencies.notifications.profileAssignmentFailed")
+    .with(OPERATIONS.SAVE_TRACK, () => "competencies.notifications.trackSaveFailed")
+    .with(OPERATIONS.DELETE_TRACK, () => "competencies.notifications.trackDeleteFailed")
+    .with(OPERATIONS.ASSIGN_TRACKS, () => "competencies.notifications.trackAssignmentFailed")
     .with(OPERATIONS.SUBMIT_EVIDENCE, () => "competencies.notifications.evidenceSubmitFailed")
     .with(OPERATIONS.REVIEW_EVIDENCE, () => "competencies.notifications.reviewFailed")
     .with(OPERATIONS.REVOKE_CONFIRMATION, () => "competencies.notifications.revocationFailed")

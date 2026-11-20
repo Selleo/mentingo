@@ -8919,7 +8919,7 @@
   },
   "competencies": {
     "deleteCompetency": "Kompetenz löschen",
-    "deleteCompetencyConfirmation": "„{{name}}“ löschen? Dadurch wird die Kompetenz dauerhaft aus allen Stellenprofilen entfernt. Ihr Bestätigungsverlauf und die angehängten Dokumente werden ebenfalls gelöscht. Dies kann nicht rückgängig gemacht werden.",
+    "deleteCompetencyConfirmation": "„{{name}}“ löschen? Dadurch wird die Kompetenz dauerhaft aus allen Kompetenzpfaden entfernt. Ihr Bestätigungsverlauf und die angehängten Dokumente werden ebenfalls gelöscht. Dies kann nicht rückgängig gemacht werden.",
     "notifications": {
       "categoryCreated": "Kategorie erstellt.",
       "categoryUpdated": "Kategorie aktualisiert.",
@@ -8927,11 +8927,11 @@
       "competencyCreated": "Kompetenz erstellt.",
       "competencyUpdated": "Kompetenz aktualisiert.",
       "competencyDeleted": "Kompetenz gelöscht.",
-      "profileCreated": "Stellenprofil erstellt.",
-      "profileUpdated": "Stellenprofil aktualisiert.",
-      "profileDeleted": "Stellenprofil gelöscht.",
-      "profileAssigned": "Stellenprofil zugewiesen.",
-      "profileRemoved": "Zuweisung des Stellenprofils entfernt.",
+      "trackCreated": "Kompetenzpfad erstellt.",
+      "trackUpdated": "Kompetenzpfad aktualisiert.",
+      "trackDeleted": "Kompetenzpfad gelöscht.",
+      "trackAssigned": "Kompetenzpfade zugewiesen.",
+      "trackRemoved": "Zuweisungen der Kompetenzpfade entfernt.",
       "documentSubmitted": "Dokument zur Prüfung eingereicht.",
       "observationConfirmed": "Beobachtung bestätigt.",
       "qualificationsRecognized": "Vorhandene Qualifikationen anerkannt.",
@@ -8946,9 +8946,9 @@
       "categoryDeleteFailed": "Die Kategorie konnte nicht gelöscht werden. Bitte erneut versuchen.",
       "competencySaveFailed": "Die Kompetenz konnte nicht gespeichert werden. Bitte erneut versuchen.",
       "competencyDeleteFailed": "Die Kompetenz konnte nicht gelöscht werden. Bitte erneut versuchen.",
-      "profileSaveFailed": "Das Stellenprofil konnte nicht gespeichert werden. Bitte erneut versuchen.",
-      "profileDeleteFailed": "Das Stellenprofil konnte nicht gelöscht werden. Bitte erneut versuchen.",
-      "profileAssignmentFailed": "Die Stellenprofilzuweisung konnte nicht geändert werden. Bitte erneut versuchen.",
+      "trackSaveFailed": "Der Kompetenzpfad konnte nicht gespeichert werden. Bitte erneut versuchen.",
+      "trackDeleteFailed": "Der Kompetenzpfad konnte nicht gelöscht werden. Bitte erneut versuchen.",
+      "trackAssignmentFailed": "Die Zuweisung der Kompetenzpfade konnte nicht geändert werden. Bitte erneut versuchen.",
       "evidenceSubmitFailed": "Die Bestätigung konnte nicht eingereicht werden. Bitte erneut versuchen.",
       "reviewFailed": "Die Prüfentscheidung konnte nicht gespeichert werden. Bitte erneut versuchen.",
       "revocationFailed": "Die Bestätigung konnte nicht widerrufen werden. Bitte erneut versuchen.",
@@ -8990,7 +8990,7 @@
       "saveChange": "Änderung speichern"
     },
     "searchCatalog": "Kompetenzen suchen…",
-    "searchProfiles": "Stellenprofile suchen…",
+    "searchTracks": "Kompetenzpfade suchen…",
     "noSearchResults": "Keine Treffer. Versuchen Sie einen anderen Suchbegriff.",
     "documents": "Dokumente",
     "requiredDocuments": "Einzureichende Dokumente",
@@ -9012,16 +9012,16 @@
     "own": "Meine Kompetenzen",
     "team": "Teamkompetenzen",
     "people": "Mitarbeitende",
-    "peopleDescription": "Zugewiesene Profile und aktuelle Kompetenzstatus prüfen.",
+    "peopleDescription": "Zugewiesene Kompetenzpfade und aktuelle Kompetenzstatus prüfen.",
     "review": "Zur Genehmigung",
     "plans": "Entwicklungspläne",
     "catalog": "Kompetenzen",
-    "profiles": "Stellenprofile",
+    "tracks": "Kompetenzpfade",
     "person": "Person",
-    "profile": "Stellenprofil",
-    "compareProfile": "Mit Profil vergleichen",
-    "assignedProfile": "Zugewiesenes Profil",
-    "noProfile": "Kein Profil zugewiesen",
+    "track": "Kompetenzpfad",
+    "compareTrack": "Mit Pfad vergleichen",
+    "assignedTrack": "Zugewiesene Pfade",
+    "noTrack": "Kein Kompetenzpfad",
     "loading": "Kompetenzen werden geladen...",
     "retry": "Erneut versuchen",
     "serviceError": "Kompetenzen konnten nicht geladen oder gespeichert werden. Versuchen Sie es erneut.",
@@ -9074,7 +9074,7 @@
     "unavailableLevel": "Historische Stufe",
     "archivedAccount": "Archiviertes Konto",
     "coverageValue": "{{value}}%",
-    "coverage": "Profilabdeckung",
+    "coverage": "Anforderungsabdeckung",
     "notEvaluated": "Nicht bewertet",
     "searchPeople": "Person suchen",
     "inspectCompetency": "Kompetenz prüfen",
@@ -9090,13 +9090,14 @@
     "noManualConditions": "Keine Bedingungen dieser Art.",
     "noEvidence": "Keine Nachweise zur Prüfung.",
     "reasonLabel": "Begründung",
-    "editProfile": "Stellenprofil bearbeiten",
-    "newProfile": "Neues Profil",
+    "editTrack": "Kompetenzpfad bearbeiten",
+    "newTrack": "Neuer Pfad",
     "requiredCompetencies": "Erforderliche Kompetenzen",
-    "deleteProfile": "Profil löschen",
-    "deleteProfileConfirmation": "Profil \"{{name}}\" löschen?",
-    "profileInUse": "Heben Sie vor dem Löschen die Zuweisungen zu Mitarbeitern auf.",
-    "noProfiles": "Noch keine Stellenprofile.",
+    "deleteTrack": "Pfad löschen",
+    "deleteTrackConfirmation": "Pfad \"{{name}}\" löschen?",
+    "trackInUse": "Heben Sie vor dem Löschen dieses Pfads die Zuweisungen zu Mitarbeitern auf.",
+    "trackLimitReached": "Eine Person kann höchstens {{count}} Kompetenzpfade haben.",
+    "noTracks": "Noch keine Kompetenzpfade.",
     "requiredLevel": "Erforderliche Stufe",
     "newAction": "Entwicklungsaktion hinzufügen",
     "noActions": "Noch keine Entwicklungsaktionen.",
@@ -9195,11 +9196,11 @@
       "plans": "Schließen Sie Lücken durch Kurse, praktische Übungen, Mentoring und Rezertifizierung.",
       "people": "Mitarbeitende und ihre bestätigten Kompetenzen durchsuchen.",
       "catalog": "Ein gemeinsamer Katalog für Kompetenzen, Stufen und Bestätigungsverfahren.",
-      "profiles": "Definieren Sie, was Mitarbeitende für eine sichere und selbstständige Ausübung der Rolle benötigen.",
+      "tracks": "Definieren Sie, was Mitarbeitende für eine sichere und selbstständige Ausübung der Rolle benötigen.",
       "settings": "Konfigurieren Sie Ablaufwarnungen.",
-      "overview": "Sehen Sie, wer die Anforderungen seines Stellenprofils erfüllt und wo Handlungsbedarf besteht.",
-      "setup": "Definieren Sie Kompetenzen, fassen Sie sie zu Stellenprofilen zusammen und konfigurieren Sie Ablauferinnerungen.",
-      "ownWithoutProfile": "Verfolgen Sie die für Ihre Rolle erforderlichen Kompetenzen und reichen Sie Nachweise ein."
+      "overview": "Sehen Sie, wer die Anforderungen seiner Kompetenzpfade erfüllt und wo Handlungsbedarf besteht.",
+      "setup": "Definieren Sie Kompetenzen, fassen Sie sie zu Kompetenzpfaden zusammen und konfigurieren Sie Ablauferinnerungen.",
+      "ownWithoutTrack": "Verfolgen Sie die für Ihre Rolle erforderlichen Kompetenzen und reichen Sie Nachweise ein."
     },
     "setup": "Kompetenzen einrichten",
     "levelComparison": "Ihr Stand / erforderlich",
@@ -9235,9 +9236,9 @@
       "statusGaps": "Einige Anforderungen müssen noch bestätigt werden. Prüfen Sie die Lücken und Ihren Entwicklungsplan.",
       "count_one": "{{count}} Kompetenz",
       "count_other": "{{count}} Kompetenzen",
-      "noProfileTitle": "Noch kein Stellenprofil zugewiesen",
-      "noProfileSelf": "Sobald Ihnen ein Stellenprofil zugewiesen wird, sehen Sie die erforderlichen Kompetenzen und die nächsten Schritte.",
-      "noProfileOther": "Weisen Sie in der Übersicht ein Stellenprofil zu, um zu sehen, welche Kompetenzen diese Person benötigt.",
+      "noTrackTitle": "Noch kein Kompetenzpfad zugewiesen",
+      "noTrackSelf": "Sobald Ihnen Kompetenzpfade zugewiesen werden, sehen Sie die erforderlichen Kompetenzen und die nächsten Schritte.",
+      "noTrackOther": "Weisen Sie in der Übersicht Kompetenzpfade zu, um zu sehen, welche Kompetenzen diese Person benötigt.",
       "requirementsTitle": "Erforderliche Kompetenzen",
       "filters": {
         "all": "Alle",
@@ -9275,7 +9276,7 @@
       "ready": "Erfüllt Anforderungen",
       "expiring": "Läuft bald ab",
       "missing": "Fehlende Kompetenzen",
-      "noProfile": "Kein Stellenprofil",
+      "noTrack": "Kein Kompetenzpfad",
       "missingCount_one": "{{count}} fehlt",
       "missingCount_other": "{{count}} fehlen",
       "gaps": "Fehlende Kompetenzen"
@@ -9287,20 +9288,20 @@
       "expiringOff": "Ablauferinnerungen sind deaktiviert",
       "expiringNote_one": "Eine Bestätigung läuft innerhalb von {{count}} Tag ab",
       "expiringNote_other": "Eine Bestätigung läuft innerhalb von {{count}} Tagen ab",
-      "noProfileNote": "Weisen Sie ein Stellenprofil zu, um die Bereitschaft zu verfolgen",
+      "noTrackNote": "Weisen Sie Kompetenzpfade zu, um die Bereitschaft zu verfolgen",
       "peopleTitle": "Personen",
-      "peopleDescription": "Weisen Sie Stellenprofile zu und prüfen Sie, wer alle benötigten Kompetenzen hat.",
+      "peopleDescription": "Weisen Sie Kompetenzpfade zu und prüfen Sie, wer alle benötigten Kompetenzen hat.",
       "teamDescription": "Prüfen Sie, wer in Ihrem Team alle benötigten Kompetenzen hat.",
       "viewMode": "Ansicht",
       "views": {
         "list": "Liste",
         "matrix": "Matrix"
       },
-      "allProfiles": "Alle Stellenprofile",
+      "allTracks": "Alle Kompetenzpfade",
       "clearFilters": "Filter zurücksetzen",
       "readiness": "Bereitschaft",
       "noMatches": "Keine Personen entsprechen den gewählten Filtern.",
-      "noMatrixPeople": "Diesem Stellenprofil ist noch niemand zugewiesen.",
+      "noMatrixPeople": "Diesem Kompetenzpfad ist noch niemand zugewiesen.",
       "allPeople": "Alle"
     },
     "gettingStarted": {
@@ -9319,30 +9320,30 @@
           "description": "Beschreiben Sie eine Fähigkeit, ihre Stufen und wie jede Stufe bestätigt wird: Kurs, Dokument oder Beobachtung.",
           "action": "Kompetenz hinzufügen"
         },
-        "profiles": {
-          "title": "Stellenprofil erstellen",
+        "tracks": {
+          "title": "Kompetenzpfad erstellen",
           "description": "Wählen Sie die Kompetenzen und Stufen, die eine Rolle erfordert.",
-          "action": "Stellenprofil erstellen"
+          "action": "Kompetenzpfad erstellen"
         },
         "assignments": {
           "title": "Personen zuweisen",
-          "description": "Weisen Sie jeder Person ein Stellenprofil zu, um ihre Bereitschaft zu verfolgen.",
-          "action": "Stellenprofile zuweisen"
+          "description": "Weisen Sie jeder Person Kompetenzpfade zu, um ihre Bereitschaft zu verfolgen.",
+          "action": "Kompetenzpfade zuweisen"
         }
       }
     },
     "setupSection": {
       "competenciesTitle": "Kompetenzen",
       "competenciesDescription": "Fähigkeiten mit Stufen. Jede Stufe legt fest, was sie bestätigt: ein abgeschlossener Kurs, ein freigegebenes Dokument oder eine Beobachtung.",
-      "profilesTitle": "Stellenprofile",
-      "profilesDescription": "Kombinieren Sie Kompetenzen und erforderliche Stufen für eine Rolle und weisen Sie das Profil in der Übersicht Personen zu.",
+      "tracksTitle": "Kompetenzpfade",
+      "tracksDescription": "Kombinieren Sie Kompetenzen und erforderliche Stufen für eine Rolle und weisen Sie die Pfade in der Übersicht Personen zu. Eine Person kann mehrere Pfade haben.",
       "settingsTitle": "Ablauferinnerungen",
       "settingsDescription": "Legen Sie fest, wie früh ablaufende Bestätigungen markiert werden.",
       "emptyCompetenciesTitle": "Noch keine Kompetenzen",
-      "emptyCompetencies": "Fügen Sie zuerst die Fähigkeiten hinzu, die Ihre Organisation verfolgt. Danach fassen Sie sie zu Stellenprofilen zusammen.",
-      "emptyProfilesTitle": "Noch keine Stellenprofile",
-      "emptyProfiles": "Erstellen Sie ein Stellenprofil, um festzulegen, welche Kompetenzen eine Rolle erfordert.",
-      "emptyProfilesNeedsCompetencies": "Fügen Sie vor dem Erstellen eines Stellenprofils mindestens eine Kompetenz mit einer Stufe hinzu.",
+      "emptyCompetencies": "Fügen Sie zuerst die Fähigkeiten hinzu, die Ihre Organisation verfolgt. Danach fassen Sie sie zu Kompetenzpfaden zusammen.",
+      "emptyTracksTitle": "Noch keine Kompetenzpfade",
+      "emptyTracks": "Erstellen Sie einen Kompetenzpfad, um festzulegen, welche Kompetenzen eine Rolle erfordert.",
+      "emptyTracksNeedsCompetencies": "Fügen Sie vor dem Erstellen eines Kompetenzpfads mindestens eine Kompetenz mit einer Stufe hinzu.",
       "requiredCompetenciesCount": "Erforderliche Kompetenzen",
       "assignedPeople": "Zugewiesene Personen",
       "expiryOff": "Aus",
@@ -9351,13 +9352,13 @@
       "progressTitle": "Einrichtungsfortschritt",
       "competenciesNav_one": "{{count}} einsatzbereit",
       "competenciesNav_other": "{{count}} einsatzbereit",
-      "profilesNav_one": "{{count}} Person zugewiesen",
-      "profilesNav_other": "{{count}} Personen zugewiesen",
+      "tracksNav_one": "{{count}} Person zugewiesen",
+      "tracksNav_other": "{{count}} Personen zugewiesen",
       "expiryNav_one": "{{count}} Tag vor Ablauf warnen",
       "expiryNav_other": "{{count}} Tage vor Ablauf warnen",
       "expiryNavOff": "Nicht konfiguriert"
     },
-    "compareWithAssigned": "Vergleichen mit: zugewiesenes Profil",
+    "compareWithAssigned": "Vergleichen mit: zugewiesene Pfade",
     "select": {
       "search": "Suchen…",
       "noResults": "Keine Ergebnisse."
@@ -9371,10 +9372,10 @@
       "pending_other": "{{count}} ausstehend",
       "notSubmitted": "Nicht eingereicht"
     },
-    "profileEditor": {
+    "trackEditor": {
       "addCompetency": "Kompetenz hinzufügen…",
       "requirementsHelp": "Fügen Sie jede Kompetenz hinzu, die die Rolle erfordert, und wählen Sie die erforderliche Stufe.",
-      "noRequirements": "Noch keine Kompetenzen hinzugefügt. Nutzen Sie „Kompetenz hinzufügen“, um das Profil aufzubauen."
+      "noRequirements": "Noch keine Kompetenzen hinzugefügt. Nutzen Sie „Kompetenz hinzufügen“, um den Pfad aufzubauen."
     },
     "editor": {
       "levelsHelp": "Stufen bauen aufeinander auf. Wählen Sie eine Stufe, um festzulegen, was sie bestätigt.",
@@ -9432,7 +9433,7 @@
       "planGaps": "Diese Kompetenzen planen",
       "emptyPlan": "Dieser Plan hat noch keine Schritte.",
       "emptyTitle": "Noch keine Entwicklungspläne",
-      "empty": "Pläne erscheinen hier für Personen, deren Stellenprofil fehlende Kompetenzen hat. Weisen Sie zuerst in der Übersicht Stellenprofile zu."
+      "empty": "Pläne erscheinen hier für Personen, denen Kompetenzen aus ihren Kompetenzpfaden fehlen. Weisen Sie zuerst in der Übersicht Kompetenzpfade zu."
     },
     "planBuilder": {
       "title": "Schritte zum Plan hinzufügen",
@@ -9441,7 +9442,7 @@
       "stepsTitle": "Schritte",
       "stepsHelp": "Jeder Schritt zielt auf eine fehlende Kompetenzstufe. Planverantwortliche Person und Zieldatum gelten für alle Schritte.",
       "choosePerson": "Wählen Sie eine Person, um ihre fehlenden Kompetenzen zu sehen.",
-      "noGaps": "Diese Person erfüllt alle Anforderungen ihres Stellenprofils.",
+      "noGaps": "Diese Person erfüllt alle Anforderungen ihrer Kompetenzpfade.",
       "addStep": "Schritt hinzufügen",
       "submit_one": "Plan mit {{count}} Schritt erstellen",
       "submit_other": "Plan mit {{count}} Schritten erstellen",
@@ -9458,7 +9459,7 @@
     "stepEditor": {
       "title": "Schritt bearbeiten"
     },
-    "profilesTable": {
+    "tracksTable": {
       "allCompetencies": "Alle Kompetenzen"
     },
     "reviewTable": {

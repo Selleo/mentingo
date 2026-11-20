@@ -13,9 +13,9 @@ import {
 import { CompetenciesCatalogEditor } from "./CompetenciesCatalog";
 import { CompetenciesOverview } from "./CompetenciesOverview";
 import { CompetenciesPerson } from "./CompetenciesPerson";
-import { CompetenciesProfileEditor } from "./CompetenciesProfiles";
 import { CompetenciesReview } from "./CompetenciesReview";
 import { CompetenciesSetup } from "./CompetenciesSetup";
+import { CompetenciesTrackEditor } from "./CompetenciesTracks";
 import { CompetenciesWorkspaceTabs } from "./CompetenciesWorkspaceTabs";
 import { CompetencyCategoryEditor } from "./CompetencyCategoryEditor";
 
@@ -35,8 +35,8 @@ export function CompetenciesWorkspace({ capabilities }: CompetenciesWorkspacePro
     setCategoryEditorOpen,
     catalogEditor,
     setCatalogEditor,
-    profileEditor,
-    setProfileEditor,
+    trackEditor,
+    setTrackEditor,
     summary,
     isPending,
     isError,
@@ -132,7 +132,7 @@ export function CompetenciesWorkspace({ capabilities }: CompetenciesWorkspacePro
                       updateSearchParams({ [WORKSPACE_SEARCH_PARAMS.SECTION]: section })
                     }
                     onCompetencyEdit={(value) => setCatalogEditor({ value })}
-                    onProfileEdit={(profile) => setProfileEditor({ profile })}
+                    onTrackEdit={(track) => setTrackEditor({ track })}
                   />
                 </TabsContent>
               )}
@@ -142,11 +142,8 @@ export function CompetenciesWorkspace({ capabilities }: CompetenciesWorkspacePro
         {capabilities.canManage && categoryEditorOpen && (
           <CompetencyCategoryEditor onClose={() => setCategoryEditorOpen(false)} />
         )}
-        {capabilities.canManage && profileEditor && (
-          <CompetenciesProfileEditor
-            profile={profileEditor.profile}
-            close={() => setProfileEditor(null)}
-          />
+        {capabilities.canManage && trackEditor && (
+          <CompetenciesTrackEditor track={trackEditor.track} close={() => setTrackEditor(null)} />
         )}
         {capabilities.canManage && catalogEditor && (
           <CompetenciesCatalogEditor
