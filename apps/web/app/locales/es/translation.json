@@ -7569,6 +7569,32 @@
     "back": "Volver a campañas",
     "name": "Nombre de campaña",
     "scenario": "Escenario",
+    "scenarios": {
+      "course-reminder": {
+        "name": "Recordatorio de curso",
+        "description": "Un recordatorio para terminar un curso asignado"
+      },
+      "account-check": {
+        "name": "Verificación de la cuenta",
+        "description": "Una solicitud para confirmar el acceso a la cuenta"
+      },
+      "password-reset": {
+        "name": "Restablecimiento de contraseña",
+        "description": "Una solicitud para restablecer la contraseña de la cuenta"
+      },
+      "course-reminder-pair": {
+        "name": "Recordatorio de curso (2 correos)",
+        "description": "Un recordatorio para terminar un curso asignado, seguido de un segundo correo tres días después"
+      },
+      "account-check-pair": {
+        "name": "Verificación de la cuenta (2 correos)",
+        "description": "Una solicitud para confirmar el acceso a la cuenta, seguido de un segundo correo tres días después"
+      },
+      "password-reset-pair": {
+        "name": "Restablecimiento de contraseña (2 correos)",
+        "description": "Una solicitud para restablecer la contraseña de la cuenta, seguido de un segundo correo tres días después"
+      }
+    },
     "choose": "Elige una opción",
     "course": "Curso de seguimiento",
     "courseHelp": "Se asigna automáticamente a quien haga clic en el enlace o envíe datos. Solo se muestran cursos publicados y gratuitos.",

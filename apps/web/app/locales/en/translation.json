@@ -7631,6 +7631,32 @@
     "back": "Back to campaigns",
     "name": "Campaign name",
     "scenario": "Scenario",
+    "scenarios": {
+      "course-reminder": {
+        "name": "Course reminder",
+        "description": "A reminder to finish an assigned course"
+      },
+      "account-check": {
+        "name": "Account verification",
+        "description": "A request to confirm access to the account"
+      },
+      "password-reset": {
+        "name": "Password reset",
+        "description": "A request to reset the account password"
+      },
+      "course-reminder-pair": {
+        "name": "Course reminder (2 emails)",
+        "description": "A reminder to finish an assigned course, followed by a second email three days later"
+      },
+      "account-check-pair": {
+        "name": "Account verification (2 emails)",
+        "description": "A request to confirm access to the account, followed by a second email three days later"
+      },
+      "password-reset-pair": {
+        "name": "Password reset (2 emails)",
+        "description": "A request to reset the account password, followed by a second email three days later"
+      }
+    },
     "choose": "Choose an option",
     "course": "Follow-up course",
     "courseHelp": "Assigned automatically to anyone who clicks the link or submits data. Only published, free courses are listed.",

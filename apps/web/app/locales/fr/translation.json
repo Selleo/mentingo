@@ -7363,6 +7363,32 @@
     "back": "Retour aux campagnes",
     "name": "Nom de la campagne",
     "scenario": "Scénario",
+    "scenarios": {
+      "course-reminder": {
+        "name": "Rappel de formation",
+        "description": "Un rappel pour terminer une formation assignée"
+      },
+      "account-check": {
+        "name": "Vérification du compte",
+        "description": "Une demande de confirmation de l'accès au compte"
+      },
+      "password-reset": {
+        "name": "Réinitialisation du mot de passe",
+        "description": "Une demande de réinitialisation du mot de passe du compte"
+      },
+      "course-reminder-pair": {
+        "name": "Rappel de formation (2 e-mails)",
+        "description": "Un rappel pour terminer une formation assignée, suivi d'un second e-mail trois jours plus tard"
+      },
+      "account-check-pair": {
+        "name": "Vérification du compte (2 e-mails)",
+        "description": "Une demande de confirmation de l'accès au compte, suivi d'un second e-mail trois jours plus tard"
+      },
+      "password-reset-pair": {
+        "name": "Réinitialisation du mot de passe (2 e-mails)",
+        "description": "Une demande de réinitialisation du mot de passe du compte, suivi d'un second e-mail trois jours plus tard"
+      }
+    },
     "choose": "Choisir une option",
     "course": "Formation de suivi",
     "courseHelp": "Attribuée automatiquement à toute personne qui clique sur le lien ou soumet des données. Seules les formations publiées et gratuites sont proposées.",
