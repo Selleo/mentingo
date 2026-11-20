@@ -30,15 +30,12 @@ import {
 // when it fails on every page, otherwise inline at the failing scan, each with its ticket link.
 // Disabling a rule turns it off for the whole page, not only for the known element; that is
 // deliberate. Remove the disable and its comment when the ticket closes.
+// Excluded elements: only for a failure the owner decided to keep, at the scan that hits it, with
+// its ticket link. `exclude` hides those elements from every rule, so keep the selector narrow.
 const RULES_DISABLED_ON_ALL_PAGES = [
   // At 2xl (>=1536px) the search button shows "Search" but is named "Find in application":
   // https://github.com/Selleo/mentingo/issues/2292
   "label-content-name-mismatch",
-];
-const RULES_DISABLED_UNTIL_CONTRAST_FIX = [
-  ...RULES_DISABLED_ON_ALL_PAGES,
-  // Text contrast, ticket https://github.com/Selleo/mentingo/issues/2213.
-  "color-contrast",
 ];
 
 test("learner pages have no WCAG 2.2 A/AA axe violations", async ({
@@ -70,7 +67,9 @@ test("learner pages have no WCAG 2.2 A/AA axe violations", async ({
     ).toBeVisible();
     await assertNoAxeViolationsFlow(page, {
       // Donut chart text alternative: https://github.com/Selleo/mentingo/issues/2287
-      disabledRules: [...RULES_DISABLED_UNTIL_CONTRAST_FIX, "svg-img-alt"],
+      disabledRules: [...RULES_DISABLED_ON_ALL_PAGES, "svg-img-alt"],
+      // Calendar days outside the month stay grey: https://github.com/Selleo/mentingo/issues/2311
+      exclude: [`[data-testid="${DASHBOARD_WIDGET_HANDLES.EVENT_CALENDAR}"] .day-outside`],
     });
 
     await clickHandleAndExpectUrlFlow(page, NAVIGATION_HANDLES.COURSES_LINK, "/courses");
@@ -78,11 +77,11 @@ test("learner pages have no WCAG 2.2 A/AA axe violations", async ({
     await expect(
       page.getByTestId(COURSES_PAGE_HANDLES.courseCard(`${prefix}-course`)).first(),
     ).toBeVisible();
-    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_UNTIL_CONTRAST_FIX });
+    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_ON_ALL_PAGES });
 
     await openCourseOverviewFlow(page, courseId);
     await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.HERO_TITLE)).toBeVisible();
-    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_UNTIL_CONTRAST_FIX });
+    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_ON_ALL_PAGES });
 
     await startLearningFlow(page);
     await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(
@@ -91,7 +90,7 @@ test("learner pages have no WCAG 2.2 A/AA axe violations", async ({
     await expect(
       page.getByTestId(LEARNING_HANDLES.lessonSidebarLessonItem(lessons.secondLesson.id)),
     ).toBeVisible();
-    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_UNTIL_CONTRAST_FIX });
+    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_ON_ALL_PAGES });
 
     await page.getByTestId(NAVIGATION_HANDLES.PROFILE_FOOTER).click();
     await clickHandleAndExpectUrlFlow(
@@ -158,12 +157,12 @@ test("embed and live training lessons have no WCAG 2.2 A/AA axe violations", asy
     await expect(page.getByTestId(LEARNING_HANDLES.EMBED_IFRAME)).toBeVisible();
     await assertNoAxeViolationsFlow(page, {
       // Embed fullscreen button has no name: https://github.com/Selleo/mentingo/issues/2287
-      disabledRules: [...RULES_DISABLED_UNTIL_CONTRAST_FIX, "button-name"],
+      disabledRules: [...RULES_DISABLED_ON_ALL_PAGES, "button-name"],
     });
 
     await openLessonFromSidebarFlow(page, lessons.liveTrainingLesson.id);
     await expect(page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.ROOT)).toBeVisible();
-    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_UNTIL_CONTRAST_FIX });
+    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_ON_ALL_PAGES });
   });
 });
 
@@ -174,7 +173,7 @@ test("a quiz with every question type has no WCAG 2.2 A/AA axe violations before
 }) => {
   const enrollmentFactory = factories.createEnrollmentFactory();
   const QUIZ_DISABLED_RULES = [
-    ...RULES_DISABLED_UNTIL_CONTRAST_FIX,
+    ...RULES_DISABLED_ON_ALL_PAGES,
     // Fill-in-the-blanks text input and 1-5 scale slider have no label:
     // https://github.com/Selleo/mentingo/issues/2287
     "label",
@@ -242,13 +241,13 @@ test("an AI mentor lesson has no WCAG 2.2 A/AA axe violations", async ({
     await expect(
       page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION_DIALOG),
     ).toBeVisible();
-    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_UNTIL_CONTRAST_FIX });
+    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_ON_ALL_PAGES });
 
     await dismissAiMentorTaskDescriptionFlow(page);
     await expect(
       page.getByTestId(LEARNING_HANDLES.aiMentorMessageRole("assistant")).first(),
     ).toBeVisible({ timeout: 60_000 });
-    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_UNTIL_CONTRAST_FIX });
+    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_ON_ALL_PAGES });
   });
 });
 
@@ -283,6 +282,6 @@ test("a SCORM lesson has no WCAG 2.2 A/AA axe violations", async ({
         .contentFrame()
         .getByTestId(SCORM_PACKAGE_HANDLES.SINGLE_TITLE),
     ).toBeVisible();
-    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_UNTIL_CONTRAST_FIX });
+    await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_ON_ALL_PAGES });
   });
 });

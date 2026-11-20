@@ -7,6 +7,8 @@ const DEFAULT_WCAG_LEVEL: WcagLevel = "AA";
 
 type AssertNoAxeViolationsOptions = {
   disabledRules?: string[];
+  /** CSS selectors of elements left out of the scan, for every rule. */
+  exclude?: string[];
   level?: WcagLevel;
 };
 
@@ -18,12 +20,17 @@ type AssertNoAxeViolationsOptions = {
  */
 export const assertNoAxeViolationsFlow = async (
   page: Page,
-  { disabledRules = [], level = DEFAULT_WCAG_LEVEL }: AssertNoAxeViolationsOptions = {},
+  {
+    disabledRules = [],
+    exclude = [],
+    level = DEFAULT_WCAG_LEVEL,
+  }: AssertNoAxeViolationsOptions = {},
 ) => {
-  const { incomplete, passes, violations } = await new AxeBuilder({ page })
+  const axeBuilder = new AxeBuilder({ page })
     .withTags(WCAG_LEVEL_TAGS[level])
-    .disableRules(disabledRules)
-    .analyze();
+    .disableRules(disabledRules);
+  exclude.forEach((selector) => axeBuilder.exclude(selector));
+  const { incomplete, passes, violations } = await axeBuilder.analyze();
   const url = page.url();
 
   expect(passes.length, `axe checked nothing on ${url}`).toBeGreaterThan(0);
