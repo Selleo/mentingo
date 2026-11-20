@@ -94,11 +94,12 @@ const QuestionSelector = ({ addQuestion, disabled = false }: QuestionSelectorPro
         <Button
           data-testid={QUIZ_LESSON_FORM_HANDLES.ADD_QUESTION_BUTTON}
           type="button"
-          className="mb-4 mt-3 bg-primary-700"
+          variant="outline"
+          className="mb-4 mt-3"
           disabled={disabled}
         >
           {t("adminCourseView.curriculum.lesson.button.addQuestion")}{" "}
-          <Icon name={showOptions ? "ArrowUp" : "ArrowDown"} className="text-color-white ml-2" />
+          <Icon name={showOptions ? "ArrowUp" : "ArrowDown"} className="ml-2" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64 rounded bg-white p-2 text-black shadow-lg transition-all duration-200">
