@@ -1,5 +1,6 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
@@ -14,11 +15,6 @@ vi.mock("~/api/queries", () => ({
 }));
 vi.mock("~/hooks/usePermissions", () => ({ usePermissions: () => ({ hasAccess: false }) }));
 vi.mock("./MobileNavigationFooterItems", () => ({ MobileNavigationFooterItems: () => null }));
-vi.mock("./NavigationMenuItemLink", () => ({
-  NavigationMenuItemLink: ({ item }: { item: { label: string; link: string } }) => (
-    <a href={item.link}>{item.label}</a>
-  ),
-}));
 vi.mock("../UserProfile/UserAvatar", () => ({ UserAvatar: () => null }));
 vi.mock("~/components/Icon", () => ({ Icon: () => null }));
 vi.mock("~/modules/SelfOnboarding/SelfOnboardingContent", () => ({
@@ -27,12 +23,14 @@ vi.mock("~/modules/SelfOnboarding/SelfOnboardingContent", () => ({
 
 const renderFooter = () =>
   renderWith().render(
-    <NavigationFooter
-      setIsMobileNavOpen={vi.fn()}
-      showNavigationLabels
-      shouldShowTooltips={false}
-      isSidebarCollapsed={false}
-    />,
+    <MemoryRouter>
+      <NavigationFooter
+        setIsMobileNavOpen={vi.fn()}
+        showNavigationLabels
+        shouldShowTooltips={false}
+        isSidebarCollapsed={false}
+      />
+    </MemoryRouter>,
   );
 
 describe("NavigationFooter profile dropdown", () => {
@@ -87,5 +85,25 @@ describe("NavigationFooter profile dropdown", () => {
     expect(trigger).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("menu")).toBeVisible();
     await user.keyboard("{Escape}");
+  });
+
+  it("makes the profile links the menu items themselves, not links nested in a menu item", async () => {
+    const user = userEvent.setup();
+
+    renderFooter();
+    await user.click(screen.getByTestId(NAVIGATION_HANDLES.PROFILE_FOOTER));
+    const menu = screen.getByRole("menu");
+
+    expect(within(menu).queryAllByRole("link")).toHaveLength(0);
+    expect(within(menu).getByRole("menuitem", { name: "Profile" })).toHaveAttribute(
+      "href",
+      "/profile/user-1",
+    );
+    within(menu)
+      .getAllByRole("menuitem")
+      .forEach((menuItem) => {
+        // No menu item or list between a menu item and its menu.
+        expect(menuItem.parentElement?.closest("[role], menu, ul, ol")).toBe(menu);
+      });
   });
 });

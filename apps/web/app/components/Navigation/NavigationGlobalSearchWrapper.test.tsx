@@ -12,6 +12,9 @@ vi.mock("~/api/queries/useAIConfigured", () => ({
   useAIConfigured: () => ({ data: aiConfiguration.data }),
 }));
 vi.mock("../../api/queries/useGlobalSettings", () => ({ useGlobalSettings: () => ({ data: {} }) }));
+const screenSize = vi.hoisted(() => ({ isWide: false }));
+
+vi.mock("../../hooks/useMediaQuery", () => ({ useMediaQuery: () => screenSize.isWide }));
 vi.mock("~/hooks/useHandleKeyboardShortcut", () => ({ useHandleKeyboardShortcut: vi.fn() }));
 vi.mock("../ui/dialog", () => ({
   Dialog: ({ open, children }: { open: boolean; children: React.ReactNode }) =>
@@ -67,6 +70,29 @@ const askAi = () => screen.getByRole("button", { name: /^globalSearch\.aiSearch:
 const queryAskAi = () => screen.queryByRole("button", { name: /^globalSearch\.aiSearch:/ });
 
 const request = () => JSON.parse(screen.getByTestId("request").textContent ?? "{}");
+
+describe("global search button", () => {
+  afterEach(() => {
+    screenSize.isWide = false;
+  });
+
+  it("is named by the text it shows on wide screens, so the name matches in every language", () => {
+    screenSize.isWide = true;
+    render(<NavigationGlobalSearchWrapper />);
+    const button = screen.getByRole("button", { name: "globalSearch.search" });
+
+    expect(button).not.toHaveAttribute("aria-label");
+    expect(button).toHaveTextContent("globalSearch.search");
+  });
+
+  it("keeps its descriptive name when only the icon is shown", () => {
+    render(<NavigationGlobalSearchWrapper />);
+
+    expect(
+      screen.getByRole("button", { name: "navigationSideBar.findInApplication" }),
+    ).toBeInTheDocument();
+  });
+});
 
 describe("global search mode", () => {
   beforeEach(() => {

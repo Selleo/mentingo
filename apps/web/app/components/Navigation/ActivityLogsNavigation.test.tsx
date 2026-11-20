@@ -47,7 +47,7 @@ describe("Activity logs in the user navigation", () => {
     const user = userEvent.setup();
     renderFooter();
     await user.click(screen.getByTestId(NAVIGATION_HANDLES.PROFILE_FOOTER));
-    const links = within(screen.getByRole("menu")).getAllByRole("link");
+    const links = within(screen.getByRole("menu")).getAllByRole("menuitem");
     const index = links.findIndex((link) => link.textContent === "navigationSideBar.settings");
     expect(links[index - 1]).toHaveTextContent("navigationSideBar.activityLogs");
     expect(links[index - 1]).toHaveAttribute("href", "/admin/activity-logs");
@@ -72,7 +72,7 @@ describe("Activity logs in the user navigation", () => {
     ).not.toBeInTheDocument();
     await userEvent.setup().click(screen.getByTestId(NAVIGATION_HANDLES.PROFILE_FOOTER));
     expect(
-      screen.queryByRole("link", { name: "navigationSideBar.activityLogs" }),
+      screen.queryByRole("menuitem", { name: "navigationSideBar.activityLogs" }),
     ).not.toBeInTheDocument();
   });
 });
