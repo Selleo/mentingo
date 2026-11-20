@@ -86,7 +86,7 @@ test("admin can create and preview an AI mentor lesson", async ({
     const voiceAction = page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_ACTION_BUTTON);
     await expect(voiceAction).toHaveAttribute("data-mode", "voice");
     await expect(voiceAction).toBeEnabled();
-    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeDisabled();
+    await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeEnabled();
     await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGES)).toContainText(mentorName);
     await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION).click();
     await expect(
