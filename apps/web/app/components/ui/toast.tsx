@@ -2,6 +2,7 @@ import * as ToastPrimitives from "@radix-ui/react-toast";
 import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
 
@@ -13,11 +14,16 @@ const ToastViewport = React.forwardRef<
 >(({ className, queueSlot, ...props }, ref) => (
   <div className="pointer-events-none fixed top-0 z-[100] flex w-full flex-col-reverse gap-3 p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]">
     {queueSlot}
+    {/* Radix still renders each toast as an li with role="status"; a div viewport avoids invalid
+        list semantics, and the explicit role keeps those li valid outside a list. */}
     <ToastPrimitives.Viewport
       ref={ref}
       className={cn("flex max-h-screen w-full flex-col-reverse gap-2 sm:flex-col", className)}
       {...props}
-    />
+      asChild
+    >
+      <div />
+    </ToastPrimitives.Viewport>
   </div>
 ));
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
@@ -72,19 +78,24 @@ ToastAction.displayName = ToastPrimitives.Action.displayName;
 const ToastClose = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Close>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Close
-    ref={ref}
-    className={cn(
-      "text-foreground/50 absolute right-2 top-2 rounded-md p-1 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
-      className,
-    )}
-    toast-close=""
-    {...props}
-  >
-    <X className="size-4" />
-  </ToastPrimitives.Close>
-));
+>(({ className, ...props }, ref) => {
+  const { t } = useTranslation();
+
+  return (
+    <ToastPrimitives.Close
+      ref={ref}
+      aria-label={t("common.button.close")}
+      className={cn(
+        "text-foreground/50 absolute right-2 top-2 rounded-md p-1 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+        className,
+      )}
+      toast-close=""
+      {...props}
+    >
+      <X className="size-4" />
+    </ToastPrimitives.Close>
+  );
+});
 ToastClose.displayName = ToastPrimitives.Close.displayName;
 
 const ToastTitle = React.forwardRef<

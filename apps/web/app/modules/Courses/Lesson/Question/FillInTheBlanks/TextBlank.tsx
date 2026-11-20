@@ -12,6 +12,7 @@ import type { QuizForm } from "~/modules/Courses/Lesson/types";
 
 type TextBlankProps = {
   index: number;
+  blankCount: number;
   studentAnswer?: QuizQuestionOption;
   isQuizSubmitted?: boolean;
   questionId: string;
@@ -19,6 +20,7 @@ type TextBlankProps = {
 
 export const TextBlank = ({
   index,
+  blankCount,
   studentAnswer,
   isQuizSubmitted,
   questionId,
@@ -68,6 +70,10 @@ export const TextBlank = ({
       key={index}
       type="text"
       data-testid={LEARNING_HANDLES.textBlank(index + 1)}
+      aria-label={t("studentLessonView.other.blankLabel", {
+        current: index + 1,
+        total: blankCount,
+      })}
       placeholder={isUnanswered ? t("studentLessonView.other.notAnswered") : undefined}
       className={textBlankClasses}
       {...(studentAnswer?.studentAnswer && { defaultValue: studentAnswer.studentAnswer })}

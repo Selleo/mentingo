@@ -27,7 +27,7 @@ import { ProfileAchievements } from "../Gamification/ProfileAchievements";
 import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
 import { studentProfileSteps } from "../Onboarding/routes/student";
 
-import CertificatePreview from "./Certificates/CertificatePreview";
+import { CertificatePreviewModal } from "./Certificates/CertificatePreviewModal";
 import Certificates from "./Certificates/Certificates";
 import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components";
 
@@ -221,36 +221,23 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
         { href: `/profile/${id}`, title: `${userDetails?.firstName} ${userDetails?.lastName}` },
       ]}
     >
-      {certificatePreview.isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
-          onClick={handleCloseCertificatePreview}
-          onKeyDown={(e) => {
-            if (e.key === "Escape" || e.key === "Enter") {
-              handleCloseCertificatePreview();
-            }
-          }}
-          role="button"
-          tabIndex={0}
-        >
-          <div role="presentation" onClick={(event) => event.stopPropagation()}>
-            <CertificatePreview
-              certificateId={certificatePreview.certData?.id}
-              studentName={certificatePreview.certData?.fullName || ""}
-              courseName={certificatePreview.certData?.courseTitle || ""}
-              completionDate={formatedDate}
-              expiryDate={certificatePreview.expiryDate}
-              onClose={handleCloseCertificatePreview}
-              platformLogo={globalSettings?.platformLogoS3Key}
-              certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage || null}
-              certificateSignatureUrl={certificatePreview.certData?.certificateSignatureUrl || null}
-              initialColor={certificatePreview.certData?.certificateFontColor || null}
-              showDownloadButton={isProfileOwner}
-              showShareButton={Boolean(certificatePreview.certData?.id)}
-            />
-          </div>
-        </div>
-      )}
+      <CertificatePreviewModal
+        open={certificatePreview.isOpen}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) handleCloseCertificatePreview();
+        }}
+        certificateId={certificatePreview.certData?.id}
+        studentName={certificatePreview.certData?.fullName || ""}
+        courseName={certificatePreview.certData?.courseTitle || ""}
+        completionDate={formatedDate}
+        expiryDate={certificatePreview.expiryDate}
+        platformLogo={globalSettings?.platformLogoS3Key}
+        certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage || null}
+        certificateSignatureUrl={certificatePreview.certData?.certificateSignatureUrl || null}
+        initialColor={certificatePreview.certData?.certificateFontColor || null}
+        showDownloadButton={isProfileOwner}
+        showShareButton={Boolean(certificatePreview.certData?.id)}
+      />
       <div className="flex flex-col items-center gap-6">
         <section className="flex w-full max-w-[720px] flex-col justify-between gap-2 md:flex-row">
           <h2 className="h5 md:h3 text-neutral-950">{t("contentCreatorView.other.pageTitle")}</h2>

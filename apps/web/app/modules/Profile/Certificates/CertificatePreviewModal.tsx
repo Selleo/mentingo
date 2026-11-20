@@ -1,4 +1,6 @@
-import { Dialog, DialogContent } from "~/components/ui/dialog";
+import { useTranslation } from "react-i18next";
+
+import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 
 import CertificatePreview from "./CertificatePreview";
 
@@ -14,6 +16,7 @@ export function CertificatePreviewModal({
   onOpenChange,
   ...certificatePreviewProps
 }: CertificatePreviewModalProps) {
+  const { t } = useTranslation();
   const close = () => onOpenChange(false);
 
   return (
@@ -21,7 +24,12 @@ export function CertificatePreviewModal({
       <DialogContent
         className="flex w-[min(1120px,95vw)] items-center justify-center max-w-none border-0 bg-transparent p-0 shadow-none"
         noCloseButton
+        aria-describedby={undefined}
       >
+        <DialogTitle className="sr-only">
+          {certificatePreviewProps.courseName ||
+            t("adminCourseView.settings.other.certificatePreviewTitle")}
+        </DialogTitle>
         <CertificatePreview {...certificatePreviewProps} onClose={close} />
       </DialogContent>
     </Dialog>

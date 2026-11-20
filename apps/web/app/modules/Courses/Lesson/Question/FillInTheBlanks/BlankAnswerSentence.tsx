@@ -8,7 +8,7 @@ import {
 
 type BlankAnswerSentenceProps = {
   content: string;
-  replacement: (index: number, answerId?: string) => JSX.Element;
+  replacement: (index: number, answerId: string | undefined, blankCount: number) => JSX.Element;
 };
 
 const inlineViewerClassName =
@@ -16,13 +16,14 @@ const inlineViewerClassName =
 
 export const BlankAnswerSentence: FC<BlankAnswerSentenceProps> = ({ content, replacement }) => {
   const parts = splitByBlankAnswerMarkers(normalizeBlankAnswerLineBreaks(content));
+  const blankCount = parts.filter((part) => part.answerId).length;
 
   return (
     <div className="body-base leading-9 text-neutral-900">
       {parts.map((part, index) => (
         <Fragment key={index}>
           {part.text && <Viewer content={part.text} className={inlineViewerClassName} />}
-          {part.answerId && replacement(index, part.answerId)}
+          {part.answerId && replacement(index, part.answerId, blankCount)}
         </Fragment>
       ))}
     </div>

@@ -6,6 +6,8 @@ import { describe, expect, it, vi } from "vitest";
 import { QuizContextProvider } from "~/modules/Courses/components/QuizContextProvider";
 import i18next from "~/utils/mocks/i18next.mock";
 
+import { makeQuizQuestion, makeQuizQuestionOption } from "../testFactories";
+
 import { FillInTheBlanksDnd } from "./dnd/FillInTheBlanksDnd";
 import { FillInTheBlanks } from "./FillInTheBlanks";
 
@@ -138,5 +140,26 @@ describe("FillInTheBlanks", () => {
 
     expect(screen.getByText("Correct sentence:")).toBeInTheDocument();
     expect(screen.getByText("correct")).toBeInTheDocument();
+  });
+});
+
+describe("FillInTheBlanks text blanks", () => {
+  it("names each text blank by its position among the blanks", () => {
+    renderQuestion(
+      <FillInTheBlanks
+        isCompleted={false}
+        question={makeQuizQuestion({
+          type: "fill_in_the_blanks_text",
+          description: "The <blank-answer-answer-1> and <blank-answer-answer-2> answers.",
+          options: [
+            makeQuizQuestionOption({ id: "answer-1", displayOrder: 1 }),
+            makeQuizQuestionOption({ id: "answer-2", displayOrder: 2 }),
+          ],
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("textbox", { name: "Blank 1 of 2" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Blank 2 of 2" })).toBeInTheDocument();
   });
 });

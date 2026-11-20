@@ -48,11 +48,12 @@ export function WidgetStudentCourseCompletion({
       color: "var(--neutral-300)",
     },
   } satisfies ChartConfig;
-  const chartData = STATUS_STYLES.map(({ key, fill }) => ({
-    status: key,
-    value: completion?.[key] ?? 0,
-    fill,
-  }));
+  const chartData = STATUS_STYLES.map(({ key, fill }) => {
+    const value = completion?.[key] ?? 0;
+
+    // Recharts renders each segment as role="img"; it passes this through to the segment path.
+    return { status: key, value, fill, "aria-label": `${chartConfig[key].label}: ${value}` };
+  });
 
   return (
     <DashboardWidgetCard
