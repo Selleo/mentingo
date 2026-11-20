@@ -89,7 +89,8 @@ test("learner pages have no WCAG 2.2 A/AA axe violations", async ({
     await assertNoAxeViolationsFlow(page, {
       disabledRules: RULES_DISABLED_ON_ALL_PAGES,
       // Scan the open menu only: the page behind it was scanned above, and Radix marks it
-      // aria-hidden while trapping focus in the menu, which aria-hidden-focus cannot see.
+      // aria-hidden while trapping focus in the menu, which aria-hidden-focus cannot see:
+      // https://github.com/Selleo/mentingo/issues/2321
       exclude: ['[data-aria-hidden="true"]'],
     });
 

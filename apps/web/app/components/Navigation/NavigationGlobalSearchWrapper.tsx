@@ -9,6 +9,7 @@ import { useHandleKeyboardShortcut } from "~/hooks/useHandleKeyboardShortcut";
 import { useGlobalSettings } from "../../api/queries/useGlobalSettings";
 import { GlobalSearchMac, GlobalSearchWin, Search } from "../../assets/svgs";
 import { useDebounce } from "../../hooks/useDebounce";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { cn } from "../../lib/utils";
 import { SearchInput } from "../SearchInput/SearchInput";
 import { Dialog, DialogContent } from "../ui/dialog";
@@ -22,6 +23,9 @@ import {
 } from "./GlobalSearch/globalSearchQuery";
 import { GlobalSearchResults } from "./GlobalSearch/GlobalSearchResults";
 import { NavigationMenuButton } from "./NavigationMenuButton";
+
+// Matches the `2xl` screen in tailwind.config.ts, where the button shows its text label.
+const TAILWIND_2XL = "(min-width: 1440px)";
 
 export type NavigationGlobalSearchWrapperProps = {
   containerClassName?: string;
@@ -49,6 +53,7 @@ export const NavigationGlobalSearchWrapper = ({
   const { t } = useTranslation();
   const { data: globalSettings } = useGlobalSettings();
   const [isGlobalSearchDialogOpen, setIsGlobalSearchDialogOpen] = useState(false);
+  const isWide = useMediaQuery(TAILWIND_2XL);
 
   useHandleKeyboardShortcut({
     shortcuts: [
@@ -166,8 +171,8 @@ export const NavigationGlobalSearchWrapper = ({
         />
       ) : (
         <button
-          // Same text as the label shown at 2xl, so the name always contains the visible text.
-          aria-label={t("globalSearch.search")}
+          // At 2xl the visible text names the button; an aria-label there would not match it.
+          aria-label={isWide ? undefined : t("navigationSideBar.findInApplication")}
           onClick={() => setIsGlobalSearchDialogOpen(true)}
           className={cn(
             "flex size-10 items-center justify-center rounded-lg bg-neutral-50 p-2 text-neutral-800 transition-colors hover:text-primary-500",

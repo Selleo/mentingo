@@ -12,6 +12,9 @@ vi.mock("~/api/queries/useAIConfigured", () => ({
   useAIConfigured: () => ({ data: aiConfiguration.data }),
 }));
 vi.mock("../../api/queries/useGlobalSettings", () => ({ useGlobalSettings: () => ({ data: {} }) }));
+const screenSize = vi.hoisted(() => ({ isWide: false }));
+
+vi.mock("../../hooks/useMediaQuery", () => ({ useMediaQuery: () => screenSize.isWide }));
 vi.mock("~/hooks/useHandleKeyboardShortcut", () => ({ useHandleKeyboardShortcut: vi.fn() }));
 vi.mock("../ui/dialog", () => ({
   Dialog: ({ open, children }: { open: boolean; children: React.ReactNode }) =>
@@ -59,7 +62,7 @@ vi.mock("./GlobalSearch/GlobalSearchResults", () => ({
 
 const openSearch = () => {
   render(<NavigationGlobalSearchWrapper />);
-  fireEvent.click(screen.getByRole("button", { name: "globalSearch.search" }));
+  fireEvent.click(screen.getByRole("button", { name: "navigationSideBar.findInApplication" }));
   return screen.getByRole("textbox", { name: "globalSearch.search" });
 };
 
@@ -69,11 +72,25 @@ const queryAskAi = () => screen.queryByRole("button", { name: /^globalSearch\.ai
 const request = () => JSON.parse(screen.getByTestId("request").textContent ?? "{}");
 
 describe("global search button", () => {
-  it("is named by the text it shows, so the name matches in every language", () => {
+  afterEach(() => {
+    screenSize.isWide = false;
+  });
+
+  it("is named by the text it shows on wide screens, so the name matches in every language", () => {
+    screenSize.isWide = true;
     render(<NavigationGlobalSearchWrapper />);
     const button = screen.getByRole("button", { name: "globalSearch.search" });
 
+    expect(button).not.toHaveAttribute("aria-label");
     expect(button).toHaveTextContent("globalSearch.search");
+  });
+
+  it("keeps its descriptive name when only the icon is shown", () => {
+    render(<NavigationGlobalSearchWrapper />);
+
+    expect(
+      screen.getByRole("button", { name: "navigationSideBar.findInApplication" }),
+    ).toBeInTheDocument();
   });
 });
 
@@ -110,7 +127,7 @@ describe("global search mode", () => {
 
   it("returns to keyword mode if configuration is removed during hybrid search", () => {
     const view = render(<NavigationGlobalSearchWrapper />);
-    fireEvent.click(screen.getByRole("button", { name: "globalSearch.search" }));
+    fireEvent.click(screen.getByRole("button", { name: "navigationSideBar.findInApplication" }));
     fireEvent.change(screen.getByRole("textbox", { name: "globalSearch.search" }), {
       target: { value: "policy" },
     });
