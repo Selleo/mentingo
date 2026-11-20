@@ -156,6 +156,7 @@
     "zustand": "4.5.4"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.49.0",
     "@remix-run/dev": "2.15.0",
     "@remix-run/testing": "2.15.0",
