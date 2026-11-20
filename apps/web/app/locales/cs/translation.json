@@ -7628,6 +7628,32 @@
     "back": "Zpět na kampaně",
     "name": "Název kampaně",
     "scenario": "Scénář",
+    "scenarios": {
+      "course-reminder": {
+        "name": "Připomenutí kurzu",
+        "description": "Připomenutí dokončení přiřazeného kurzu"
+      },
+      "account-check": {
+        "name": "Ověření účtu",
+        "description": "Žádost o potvrzení přístupu k účtu"
+      },
+      "password-reset": {
+        "name": "Obnovení hesla",
+        "description": "Žádost o obnovení hesla k účtu"
+      },
+      "course-reminder-pair": {
+        "name": "Připomenutí kurzu (2 e-maily)",
+        "description": "Připomenutí dokončení přiřazeného kurzu, po třech dnech následuje druhý e-mail"
+      },
+      "account-check-pair": {
+        "name": "Ověření účtu (2 e-maily)",
+        "description": "Žádost o potvrzení přístupu k účtu, po třech dnech následuje druhý e-mail"
+      },
+      "password-reset-pair": {
+        "name": "Obnovení hesla (2 e-maily)",
+        "description": "Žádost o obnovení hesla k účtu, po třech dnech následuje druhý e-mail"
+      }
+    },
     "choose": "Vyberte možnost",
     "course": "Navazující kurz",
     "courseHelp": "Automaticky se přiřadí každému, kdo klikne na odkaz nebo odešle data. Zobrazují se pouze zveřejněné bezplatné kurzy.",

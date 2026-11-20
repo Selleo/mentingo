@@ -7688,6 +7688,32 @@
     "back": "Powrót do kampanii",
     "name": "Nazwa kampanii",
     "scenario": "Scenariusz",
+    "scenarios": {
+      "course-reminder": {
+        "name": "Przypomnienie o kursie",
+        "description": "Przypomnienie o dokończeniu przypisanego kursu"
+      },
+      "account-check": {
+        "name": "Weryfikacja konta",
+        "description": "Prośba o potwierdzenie dostępu do konta"
+      },
+      "password-reset": {
+        "name": "Reset hasła",
+        "description": "Prośba o zresetowanie hasła do konta"
+      },
+      "course-reminder-pair": {
+        "name": "Przypomnienie o kursie (2 e-maile)",
+        "description": "Przypomnienie o dokończeniu przypisanego kursu, a po trzech dniach drugi e-mail"
+      },
+      "account-check-pair": {
+        "name": "Weryfikacja konta (2 e-maile)",
+        "description": "Prośba o potwierdzenie dostępu do konta, a po trzech dniach drugi e-mail"
+      },
+      "password-reset-pair": {
+        "name": "Reset hasła (2 e-maile)",
+        "description": "Prośba o zresetowanie hasła do konta, a po trzech dniach drugi e-mail"
+      }
+    },
     "choose": "Wybierz opcję",
     "course": "Kurs uzupełniający",
     "courseHelp": "Przypisywany automatycznie każdemu, kto kliknie link lub prześle dane. Lista zawiera tylko opublikowane, bezpłatne kursy.",

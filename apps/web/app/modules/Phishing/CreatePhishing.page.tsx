@@ -19,6 +19,7 @@ import { formatLocalizedDate } from "~/utils/formatLocalizedDate";
 
 import { PhishingGate } from "./PhishingGate";
 import { PhishingOptionSelect } from "./PhishingOptionSelect";
+import { getLocalizedPhishingScenario } from "./phishingScenario.utils";
 import { PhishingLoading, PhishingError, PhishingEmpty, PhishingHeader } from "./PhishingStates";
 
 import type { LucideIcon } from "lucide-react";
@@ -150,6 +151,8 @@ function CreateCampaign() {
       /* Mutation hook displays the translated error. */
     }
   }
+  const reviewedScenario = scenarios?.find(({ id }) => id === review?.scenarioId);
+
   if (loadingScenarios) return <PhishingLoading />;
   if (scenariosError) return <PhishingError />;
   if (!scenarios?.length) return <PhishingEmpty message={t("phishing.noOptions")} />;
@@ -172,10 +175,10 @@ function CreateCampaign() {
                 <PhishingOptionSelect
                   id="scenarioId"
                   label={t("phishing.scenario")}
-                  options={scenarios.map((scenario) => ({
-                    value: scenario.id,
-                    label: `${scenario.name} - ${scenario.description}`,
-                  }))}
+                  options={scenarios.map((scenario) => {
+                    const { name, description } = getLocalizedPhishingScenario(scenario, t);
+                    return { value: scenario.id, label: `${name} - ${description}` };
+                  })}
                   value={selectedScenario}
                   onChange={setSelectedScenario}
                 />
@@ -287,7 +290,7 @@ function CreateCampaign() {
                 <span className="break-words font-medium">{review.name}</span>
               </ReviewItem>
               <ReviewItem icon={Mail} label={t("phishing.scenario")}>
-                {scenarios?.find((s) => s.id === review.scenarioId)?.name}
+                {reviewedScenario && getLocalizedPhishingScenario(reviewedScenario, t).name}
               </ReviewItem>
               <ReviewItem icon={GraduationCap} label={t("phishing.course")}>
                 {selectedCourse[0]?.label}
