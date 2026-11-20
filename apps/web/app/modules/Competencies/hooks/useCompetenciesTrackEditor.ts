@@ -6,23 +6,23 @@ import { useCompetencyCatalog } from "~/api/queries/useCompetencyCatalog";
 
 import { SELECTED_RECORDS_PAGE } from "../utils/competenciesPicker.utils";
 
-import type { CompetenciesProfileEditorOptions } from "./competencies-hooks.types";
+import type { CompetenciesTrackEditorOptions } from "./competencies-hooks.types";
 import type {
   CompetencyCatalogItem,
   CompetencyInput,
-  CompetencyProfileInput,
+  CompetencyTrackInput,
   CompetencyRequirementOption,
 } from "../competencies.types";
 import type { FormEvent } from "react";
 
-export function useCompetenciesProfileEditor({ profile, close }: CompetenciesProfileEditorOptions) {
+export function useCompetenciesTrackEditor({ track, close }: CompetenciesTrackEditorOptions) {
   const { t } = useTranslation();
   const { mutateAsync: execute, isPending } = useExecuteCompetenciesCommand();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [competencyEditorOpen, setCompetencyEditorOpen] = useState(false);
-  const assigned = Boolean(profile?.assignedPeopleCount);
+  const assigned = Boolean(track?.assignedPeopleCount);
   const [savedRequirementIds] = useState(() =>
-    (profile?.requirements ?? []).map((requirement) => requirement.competencyId),
+    (track?.requirements ?? []).map((requirement) => requirement.competencyId),
   );
   const savedRequirements = useCompetencyCatalog(
     { ...SELECTED_RECORDS_PAGE, ids: savedRequirementIds },
@@ -31,10 +31,10 @@ export function useCompetenciesProfileEditor({ profile, close }: CompetenciesPro
   const [pickedCompetencies, setPickedCompetencies] = useState<CompetencyRequirementOption[]>([]);
   const catalog = [...pickedCompetencies, ...(savedRequirements.data?.data ?? [])];
   const isResolvingRequirements = savedRequirements.isPending && savedRequirements.isFetching;
-  const [value, setValue] = useState<CompetencyProfileInput>({
-    name: profile?.name ?? "",
-    description: profile?.description ?? "",
-    requirements: (profile?.requirements ?? []).map(({ competencyId, levelId }) => ({
+  const [value, setValue] = useState<CompetencyTrackInput>({
+    name: track?.name ?? "",
+    description: track?.description ?? "",
+    requirements: (track?.requirements ?? []).map(({ competencyId, levelId }) => ({
       competencyId,
       levelId,
     })),
@@ -43,14 +43,14 @@ export function useCompetenciesProfileEditor({ profile, close }: CompetenciesPro
     item.levels.length > 0 &&
     !value.requirements.some((requirement) => requirement.competencyId === item.id);
 
-  const saveProfileDraft = async (event: FormEvent<HTMLFormElement>) => {
+  const saveTrackDraft = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (event.target !== event.currentTarget || competencyEditorOpen || isPending) return;
     try {
       await execute({
-        operation: "save_profile",
-        id: profile?.id,
-        revision: profile?.revision,
+        operation: "save_track",
+        id: track?.id,
+        revision: track?.revision,
         value,
       });
       close();
@@ -100,9 +100,9 @@ export function useCompetenciesProfileEditor({ profile, close }: CompetenciesPro
     value,
     setValue,
     isAvailableCompetency,
-    profile,
+    track,
     close,
-    saveProfileDraft,
+    saveTrackDraft,
     addRequirement,
     removeRequirement,
     updateRequirementLevel,

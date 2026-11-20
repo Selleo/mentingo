@@ -21,14 +21,15 @@ export type CompetencyRequirementOption = Pick<
 export type CompetencyCategory = ResponseData<
   typeof ApiClient.api.competenciesControllerGetCompetencyCategories
 >["data"][number];
-export type CompetencyProfileItem = ResponseData<
-  typeof ApiClient.api.competenciesControllerGetCompetencyProfiles
+export type CompetencyTrackItem = ResponseData<
+  typeof ApiClient.api.competenciesControllerGetCompetencyTracks
 >["data"][number];
 export type CompetencyPeoplePage = ResponseData<
   typeof ApiClient.api.competenciesControllerGetCompetencyPeople
 >;
 export type CompetencyPersonReadiness = CompetencyPeoplePage["data"][number];
 export type CompetencyReadiness = CompetencyPersonReadiness["readiness"];
+export type CompetencyPersonTrack = CompetencyPersonReadiness["tracks"][number];
 export type CompetencyMatrixPage = ResponseData<
   typeof ApiClient.api.competenciesControllerGetCompetencyMatrix
 >;
@@ -47,7 +48,7 @@ export type CompetencyConditionAssessment =
   CompetencyStanding["levels"][number]["conditions"][number];
 export type CompetencyEvidence = CompetencySubjectWorkspace["evidence"][number];
 export type CompetencyConditionOverride = CompetencySubjectWorkspace["overrides"][number];
-export type CompetencyProfile = NonNullable<CompetencySubjectWorkspace["profile"]>;
+export type CompetencyTrack = CompetencySubjectWorkspace["tracks"][number];
 
 export type CompetenciesCommand = Parameters<
   typeof ApiClient.api.competenciesControllerExecuteCompetenciesCommand
@@ -57,9 +58,9 @@ export type CompetencyInput = Extract<
   { operation: "save_competency" }
 >["value"];
 
-export type CompetencyProfileInput = Extract<
+export type CompetencyTrackInput = Extract<
   CompetenciesCommand,
-  { operation: "save_profile" }
+  { operation: "save_track" }
 >["value"];
 export type CompetencyReviewDecision = Extract<
   CompetenciesCommand,

@@ -14,15 +14,15 @@ import {
 
 import { COMPETENCIES_HANDLES } from "../../../../e2e/data/competencies/handles";
 import { CompetenciesEmpty, CompetenciesError, CompetenciesLoading } from "../CompetenciesStates";
-import { useCompetenciesProfiles } from "../hooks/useCompetenciesProfiles";
+import { useCompetenciesTracks } from "../hooks/useCompetenciesTracks";
 
 import { CompetenciesCompetencyPicker } from "./CompetenciesCompetencyPicker";
 
-import type { CompetenciesProfilesOptions } from "../hooks/competencies-hooks.types";
+import type { CompetenciesTracksOptions } from "../hooks/competencies-hooks.types";
 
-export type CompetenciesProfilesProps = CompetenciesProfilesOptions;
+export type CompetenciesTracksProps = CompetenciesTracksOptions;
 
-export function CompetenciesProfiles({ onEdit, onCreate }: CompetenciesProfilesProps) {
+export function CompetenciesTracks({ onEdit, onCreate }: CompetenciesTracksProps) {
   const {
     t,
     search,
@@ -35,10 +35,10 @@ export function CompetenciesProfiles({ onEdit, onCreate }: CompetenciesProfilesP
     setPerPage,
     hasCompetencies,
     query,
-    profiles,
+    tracks,
     totalItems,
     hasFilters,
-  } = useCompetenciesProfiles();
+  } = useCompetenciesTracks();
   if (query.isPending)
     return (
       <div className="p-6">
@@ -59,17 +59,17 @@ export function CompetenciesProfiles({ onEdit, onCreate }: CompetenciesProfilesP
     return (
       <div className="p-6">
         <CompetenciesEmpty
-          title={t("competencies.setupSection.emptyProfilesTitle")}
+          title={t("competencies.setupSection.emptyTracksTitle")}
           message={t(
             onCreate
-              ? "competencies.setupSection.emptyProfiles"
-              : "competencies.setupSection.emptyProfilesNeedsCompetencies",
+              ? "competencies.setupSection.emptyTracks"
+              : "competencies.setupSection.emptyTracksNeedsCompetencies",
           )}
           action={
             onCreate && (
               <Button onClick={onCreate}>
                 <Plus className="mr-2 size-4" aria-hidden="true" />
-                {t("competencies.newProfile")}
+                {t("competencies.newTrack")}
               </Button>
             )
           }
@@ -78,11 +78,11 @@ export function CompetenciesProfiles({ onEdit, onCreate }: CompetenciesProfilesP
     );
 
   return (
-    <div aria-label={t("competencies.profiles")} className="min-w-0 overflow-hidden">
+    <div aria-label={t("competencies.tracks")} className="min-w-0 overflow-hidden">
       <div className="flex flex-col gap-3 px-6 pb-6 pt-4 sm:flex-row sm:items-center">
         <SearchInput
-          aria-label={t("competencies.searchProfiles")}
-          placeholder={t("competencies.searchProfiles")}
+          aria-label={t("competencies.searchTracks")}
+          placeholder={t("competencies.searchTracks")}
           value={search}
           onChange={(event) => {
             setSearch(event.target.value);
@@ -97,7 +97,7 @@ export function CompetenciesProfiles({ onEdit, onCreate }: CompetenciesProfilesP
             hideLabel
             className="w-full sm:w-56"
             value={competencyId}
-            emptyLabel={t("competencies.profilesTable.allCompetencies")}
+            emptyLabel={t("competencies.tracksTable.allCompetencies")}
             onChange={(value) => {
               setCompetencyId(value);
               setPage(1);
@@ -107,15 +107,15 @@ export function CompetenciesProfiles({ onEdit, onCreate }: CompetenciesProfilesP
         {onCreate && (
           <Button
             className="sm:ml-auto"
-            data-testid={COMPETENCIES_HANDLES.ADD_PROFILE}
+            data-testid={COMPETENCIES_HANDLES.ADD_TRACK}
             onClick={onCreate}
           >
             <Plus className="mr-2 size-4" aria-hidden="true" />
-            {t("competencies.newProfile")}
+            {t("competencies.newTrack")}
           </Button>
         )}
       </div>
-      {profiles.length === 0 ? (
+      {tracks.length === 0 ? (
         <p className="body-sm border-t border-neutral-200 px-6 py-10 text-center text-neutral-800">
           {t("competencies.noSearchResults")}
         </p>
@@ -128,7 +128,7 @@ export function CompetenciesProfiles({ onEdit, onCreate }: CompetenciesProfilesP
                   scope="col"
                   className="details-md whitespace-nowrap pl-6 text-neutral-800"
                 >
-                  {t("competencies.profile")}
+                  {t("competencies.track")}
                 </TableHead>
                 <TableHead scope="col" className="details-md whitespace-nowrap text-neutral-800">
                   {t("competencies.setupSection.requiredCompetenciesCount")}
@@ -142,35 +142,31 @@ export function CompetenciesProfiles({ onEdit, onCreate }: CompetenciesProfilesP
               </TableRow>
             </TableHeader>
             <TableBody>
-              {profiles.map((profile) => (
-                <TableRow
-                  key={profile.id}
-                  className="cursor-pointer"
-                  onClick={() => onEdit(profile)}
-                >
+              {tracks.map((track) => (
+                <TableRow key={track.id} className="cursor-pointer" onClick={() => onEdit(track)}>
                   <TableCell className="min-w-64 max-w-md pl-6">
                     <button
                       type="button"
-                      aria-label={`${t("competencies.edit")}: ${profile.name}`}
+                      aria-label={`${t("competencies.edit")}: ${track.name}`}
                       className="flex flex-col rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
                       onClick={(event) => {
                         event.stopPropagation();
-                        onEdit(profile);
+                        onEdit(track);
                       }}
                     >
-                      <span className="body-sm-md text-neutral-950">{profile.name}</span>
-                      {profile.description && (
+                      <span className="body-sm-md text-neutral-950">{track.name}</span>
+                      {track.description && (
                         <span className="details line-clamp-1 text-neutral-700">
-                          {profile.description}
+                          {track.description}
                         </span>
                       )}
                     </button>
                   </TableCell>
                   <TableCell className="body-sm text-neutral-900">
-                    {profile.requirements.length}
+                    {track.requirements.length}
                   </TableCell>
                   <TableCell className="body-sm pr-6 text-neutral-900">
-                    {profile.assignedPeopleCount}
+                    {track.assignedPeopleCount}
                   </TableCell>
                 </TableRow>
               ))}
@@ -195,4 +191,4 @@ export function CompetenciesProfiles({ onEdit, onCreate }: CompetenciesProfilesP
   );
 }
 
-export { CompetenciesProfileEditor } from "./CompetenciesProfileEditor";
+export { CompetenciesTrackEditor } from "./CompetenciesTrackEditor";

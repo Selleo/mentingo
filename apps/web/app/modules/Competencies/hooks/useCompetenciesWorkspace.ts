@@ -15,7 +15,7 @@ import {
 } from "../utils/competenciesWorkspace.utils";
 
 import type { CompetenciesWorkspaceOptions } from "./competencies-hooks.types";
-import type { CompetencyCatalogItem, CompetencyProfileItem } from "../competencies.types";
+import type { CompetencyCatalogItem, CompetencyTrackItem } from "../competencies.types";
 import type { CompetenciesSetupStep } from "../utils/competenciesReadiness.utils";
 import type { WorkspaceSearchParam, WorkspaceTab } from "../utils/competenciesWorkspace.utils";
 
@@ -30,9 +30,7 @@ export function useCompetenciesWorkspace({ capabilities }: CompetenciesWorkspace
   const [catalogEditor, setCatalogEditor] = useState<{ value?: CompetencyCatalogItem } | null>(
     null,
   );
-  const [profileEditor, setProfileEditor] = useState<{ profile?: CompetencyProfileItem } | null>(
-    null,
-  );
+  const [trackEditor, setTrackEditor] = useState<{ track?: CompetencyTrackItem } | null>(null);
   const { data: summary, isPending, isError, refetch } = useCompetenciesSummary();
   const userId = user?.id ?? "";
   const canSeeTeam = capabilities.canManage || capabilities.canPlan;
@@ -70,9 +68,9 @@ export function useCompetenciesWorkspace({ capabilities }: CompetenciesWorkspace
         openTab(WORKSPACE_TABS.SETUP, SETUP_SECTIONS.COMPETENCIES);
         setCatalogEditor({});
       })
-      .with(COMPETENCIES_SETUP_STEPS.PROFILES, () => {
-        openTab(WORKSPACE_TABS.SETUP, SETUP_SECTIONS.PROFILES);
-        setProfileEditor({});
+      .with(COMPETENCIES_SETUP_STEPS.TRACKS, () => {
+        openTab(WORKSPACE_TABS.SETUP, SETUP_SECTIONS.TRACKS);
+        setTrackEditor({});
       })
       .with(COMPETENCIES_SETUP_STEPS.ASSIGNMENTS, () => openTab(WORKSPACE_TABS.OVERVIEW))
       .exhaustive();
@@ -87,8 +85,8 @@ export function useCompetenciesWorkspace({ capabilities }: CompetenciesWorkspace
     setCategoryEditorOpen,
     catalogEditor,
     setCatalogEditor,
-    profileEditor,
-    setProfileEditor,
+    trackEditor,
+    setTrackEditor,
     summary,
     isPending,
     isError,

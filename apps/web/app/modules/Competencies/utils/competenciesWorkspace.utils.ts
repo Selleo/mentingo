@@ -116,7 +116,7 @@ export function getWorkspacePresentation(
           : "competencies.descriptionByView.team",
       ),
     )
-    .with(WORKSPACE_TABS.OWN, () => t("competencies.descriptionByView.ownWithoutProfile"))
+    .with(WORKSPACE_TABS.OWN, () => t("competencies.descriptionByView.ownWithoutTrack"))
     .with(WORKSPACE_TABS.REVIEW, () => t("competencies.descriptionByView.review"))
     .with(WORKSPACE_TABS.SETUP, () => t("competencies.descriptionByView.setup"))
     .exhaustive();

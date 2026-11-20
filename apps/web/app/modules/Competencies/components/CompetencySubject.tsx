@@ -34,11 +34,11 @@ export function CompetencySubject({
     assessment,
     personName,
     profilePictureUrl,
-    profileName,
+    trackNames,
     summaryMessage,
     activeDefinitions,
     canInspectCompetencies,
-    hasNoProfile,
+    hasNoTrack,
     requirementRows,
     visibleRequirementRows,
     statusMessage,
@@ -49,11 +49,11 @@ export function CompetencySubject({
         assessment={assessment}
         personName={personName}
         profilePictureUrl={profilePictureUrl}
-        profileName={profileName}
+        trackNames={trackNames}
         summaryMessage={summaryMessage}
         headerAction={headerAction}
       />
-      {hasNoProfile && canInspectCompetencies && activeDefinitions.length > 0 && (
+      {hasNoTrack && canInspectCompetencies && activeDefinitions.length > 0 && (
         <div className="max-w-sm">
           <CompetenciesSelect
             label={t("competencies.inspectCompetency")}
@@ -68,17 +68,17 @@ export function CompetencySubject({
           />
         </div>
       )}
-      {hasNoProfile && (
+      {hasNoTrack && (
         <CompetenciesEmpty
-          title={t("competencies.employee.noProfileTitle")}
+          title={t("competencies.employee.noTrackTitle")}
           message={t(
             subjectId === userId
-              ? "competencies.employee.noProfileSelf"
-              : "competencies.employee.noProfileOther",
+              ? "competencies.employee.noTrackSelf"
+              : "competencies.employee.noTrackOther",
           )}
         />
       )}
-      {!hasNoProfile && (
+      {!hasNoTrack && (
         <>
           <CompetencyRequirementTable
             setSelectedId={setSelectedId}

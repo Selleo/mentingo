@@ -12,7 +12,7 @@ type CompetencySubjectHeaderProps = Pick<
   | "assessment"
   | "personName"
   | "profilePictureUrl"
-  | "profileName"
+  | "trackNames"
   | "summaryMessage"
   | "headerAction"
 >;
@@ -21,7 +21,7 @@ export function CompetencySubjectHeader({
   assessment,
   personName,
   profilePictureUrl,
-  profileName,
+  trackNames,
   summaryMessage,
   headerAction,
 }: CompetencySubjectHeaderProps) {
@@ -36,7 +36,7 @@ export function CompetencySubjectHeader({
       <div className="min-w-0 flex-1">
         <h2 className="h6 text-neutral-950">{personName}</h2>
         <p className="body-sm mt-0.5 text-neutral-800">
-          {profileName && <span className="body-sm-md text-neutral-950">{profileName} · </span>}
+          {trackNames && <span className="body-sm-md text-neutral-950">{trackNames} · </span>}
           {summaryMessage}
         </p>
       </div>

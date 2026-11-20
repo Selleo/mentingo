@@ -1,4 +1,5 @@
 import {
+  COMPETENCIES_MAX_TRACKS_PER_PERSON,
   COMPETENCY_READINESS,
   CONDITION_ASSESSMENT_REASONS,
   CONDITION_KINDS,
@@ -74,7 +75,7 @@ const competencyWithCategorySchema = Type.Composite([
 ]);
 const catalogItemSchema = Type.Composite([
   competencyWithCategorySchema,
-  Type.Object({ profileCount: Type.Integer() }),
+  Type.Object({ trackCount: Type.Integer() }),
 ]);
 const categorySchema = Type.Object({
   id: UUIDSchema,
@@ -86,7 +87,7 @@ const requirementSchema = Type.Object(
   { competencyId: UUIDSchema, levelId: Type.String({ minLength: 1, maxLength: 100 }) },
   { additionalProperties: false },
 );
-const profileInputSchema = Type.Object(
+const trackInputSchema = Type.Object(
   {
     name: Type.String({ minLength: 1, maxLength: 200 }),
     description: Type.String({ maxLength: 10000 }),
@@ -94,15 +95,15 @@ const profileInputSchema = Type.Object(
   },
   { additionalProperties: false },
 );
-const profileSchema = Type.Object({
+const trackSchema = Type.Object({
   id: UUIDSchema,
   revision: Type.Integer(),
   name: Type.String(),
   description: Type.String(),
   requirements: Type.Array(requirementSchema),
 });
-const profileListItemSchema = Type.Composite([
-  profileSchema,
+const trackListItemSchema = Type.Composite([
+  trackSchema,
   Type.Object({ assignedPeopleCount: Type.Integer() }),
 ]);
 export const evidenceInputSchema = Type.Object(
@@ -177,8 +178,7 @@ const standingSchema = Type.Object({
 });
 const assessmentSchema = Type.Object({
   subjectId: UUIDSchema,
-  profileId: nullableUUID,
-  profileRevision: nullableNumber,
+  tracks: Type.Array(Type.Object({ id: UUIDSchema, revision: Type.Integer() })),
   asOf: Type.String(),
   coverage: nullableNumber,
   metCount: Type.Integer(),
@@ -187,6 +187,7 @@ const assessmentSchema = Type.Object({
   requirements: Type.Array(
     Type.Object({
       requirement: requirementSchema,
+      trackIds: Type.Array(UUIDSchema),
       met: Type.Boolean(),
       expiring: Type.Boolean(),
       standing: standingSchema,
@@ -216,6 +217,7 @@ const revocationSchema = Type.Object({
   revokedBy: UUIDSchema,
 });
 const personNameSchema = Type.Object({ id: UUIDSchema, name: Type.String() });
+const trackReferenceSchema = Type.Object({ id: UUIDSchema, name: Type.String() });
 const personWithAvatarSchema = Type.Composite([
   personNameSchema,
   Type.Object({ profilePictureUrl: nullableString }),
@@ -260,16 +262,16 @@ export const competenciesCommandSchema = Type.Union([
   ),
   Type.Object(
     {
-      operation: Type.Literal(COMPETENCIES_COMMAND_OPERATIONS.SAVE_PROFILE),
+      operation: Type.Literal(COMPETENCIES_COMMAND_OPERATIONS.SAVE_TRACK),
       id: Type.Optional(UUIDSchema),
       revision: optionalRevision,
-      value: profileInputSchema,
+      value: trackInputSchema,
     },
     { additionalProperties: false },
   ),
   Type.Object(
     {
-      operation: Type.Literal(COMPETENCIES_COMMAND_OPERATIONS.DELETE_PROFILE),
+      operation: Type.Literal(COMPETENCIES_COMMAND_OPERATIONS.DELETE_TRACK),
       id: UUIDSchema,
       revision: requiredRevision,
     },
@@ -277,9 +279,12 @@ export const competenciesCommandSchema = Type.Union([
   ),
   Type.Object(
     {
-      operation: Type.Literal(COMPETENCIES_COMMAND_OPERATIONS.ASSIGN_PROFILE),
+      operation: Type.Literal(COMPETENCIES_COMMAND_OPERATIONS.ASSIGN_TRACKS),
       subjectId: UUIDSchema,
-      profileId: nullableUUID,
+      trackIds: Type.Array(UUIDSchema, {
+        maxItems: COMPETENCIES_MAX_TRACKS_PER_PERSON,
+        uniqueItems: true,
+      }),
     },
     { additionalProperties: false },
   ),
@@ -358,20 +363,20 @@ export const competencyCatalogQuerySchema = Type.Object({
   archived: booleanQuery,
   ids: idsQuery,
 });
-export const competencyProfilesQuerySchema = Type.Object({
+export const competencyTracksQuerySchema = Type.Object({
   ...pageQuery,
   competencyId: Type.Optional(UUIDSchema),
   ids: idsQuery,
 });
 export const competencyPeopleQuerySchema = Type.Object({
   ...pageQuery,
-  profileId: Type.Optional(UUIDSchema),
+  trackId: Type.Optional(UUIDSchema),
   readiness: Type.Optional(readinessSchema),
   teamOnly: booleanQuery,
 });
 export const competencyMatrixQuerySchema = Type.Object({
   ...pageQuery,
-  profileId: UUIDSchema,
+  trackId: UUIDSchema,
   teamOnly: booleanQuery,
 });
 export const competencyReviewsQuerySchema = Type.Object({
@@ -384,7 +389,7 @@ export const competencyDocumentsQuerySchema = Type.Object({
   perPage: pageQuery.perPage,
 });
 export const competencySubjectQuerySchema = Type.Object({
-  profileId: Type.Optional(UUIDSchema),
+  trackId: Type.Optional(UUIDSchema),
 });
 export const competencyOptionsQuerySchema = Type.Object({
   language: Type.Optional(Type.Enum(SUPPORTED_LANGUAGES)),
@@ -394,6 +399,7 @@ export const competenciesConfigurationSchema = Type.Object({
   enabled: Type.Boolean(),
   canManage: Type.Boolean(),
   canPlan: Type.Boolean(),
+  maxTracksPerPerson: Type.Integer(),
 });
 export const competenciesSummarySchema = Type.Object({
   warningDays: nullableNumber,
@@ -401,8 +407,8 @@ export const competenciesSummarySchema = Type.Object({
   pendingReviewCount: Type.Integer(),
   setup: Type.Object({
     competencies: Type.Integer(),
-    profiles: Type.Integer(),
-    assignments: Type.Integer(),
+    tracks: Type.Integer(),
+    assignedPeople: Type.Integer(),
   }),
 });
 export const competencyCategoriesPageSchema = Type.Object({
@@ -413,13 +419,13 @@ export const competencyCatalogPageSchema = Type.Object({
   data: Type.Array(catalogItemSchema),
   pagination,
 });
-export const competencyProfilesPageSchema = Type.Object({
-  data: Type.Array(profileListItemSchema),
+export const competencyTracksPageSchema = Type.Object({
+  data: Type.Array(trackListItemSchema),
   pagination,
 });
 const readinessCountsSchema = Type.Object({
   all: Type.Integer(),
-  no_profile: Type.Integer(),
+  no_track: Type.Integer(),
   missing: Type.Integer(),
   expiring: Type.Integer(),
   met: Type.Integer(),
@@ -429,8 +435,7 @@ export const competencyPeoplePageSchema = Type.Object({
     Type.Object({
       id: UUIDSchema,
       name: Type.String(),
-      profileId: nullableUUID,
-      profileName: nullableString,
+      tracks: Type.Array(trackReferenceSchema),
       profilePictureUrl: nullableString,
       metCount: Type.Integer(),
       requirementCount: Type.Integer(),
@@ -457,7 +462,7 @@ export const competencyMatrixPageSchema = Type.Object({
     }),
   ),
   pagination,
-  profile: profileSchema,
+  track: trackSchema,
   competencies: Type.Array(competencyWithCategorySchema),
 });
 export const competencyReviewsPageSchema = Type.Object({
@@ -478,7 +483,7 @@ export const competencySubjectSchema = Type.Object({
   asOf: Type.String(),
   warningDays: nullableNumber,
   person: Type.Union([personWithAvatarSchema, Type.Null()]),
-  profile: Type.Union([profileSchema, Type.Null()]),
+  tracks: Type.Array(trackSchema),
   assessment: Type.Union([assessmentSchema, Type.Null()]),
   competencies: Type.Array(competencyWithCategorySchema),
   standings: Type.Array(standingSchema),
@@ -513,8 +518,8 @@ export type CompetencyCategoriesQuery = Static<typeof competencyCategoriesQueryS
 export type CompetencyCategoriesPageResponse = Static<typeof competencyCategoriesPageSchema>;
 export type CompetencyCatalogQuery = Static<typeof competencyCatalogQuerySchema>;
 export type CompetencyCatalogPageResponse = Static<typeof competencyCatalogPageSchema>;
-export type CompetencyProfilesQuery = Static<typeof competencyProfilesQuerySchema>;
-export type CompetencyProfilesPageResponse = Static<typeof competencyProfilesPageSchema>;
+export type CompetencyTracksQuery = Static<typeof competencyTracksQuerySchema>;
+export type CompetencyTracksPageResponse = Static<typeof competencyTracksPageSchema>;
 export type CompetencyPeopleQuery = Static<typeof competencyPeopleQuerySchema>;
 export type CompetencyPeoplePageResponse = Static<typeof competencyPeoplePageSchema>;
 export type CompetencyMatrixQuery = Static<typeof competencyMatrixQuerySchema>;
