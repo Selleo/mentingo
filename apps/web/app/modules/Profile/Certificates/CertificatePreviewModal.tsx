@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 
 import CertificatePreview from "./CertificatePreview";
 
@@ -22,6 +22,7 @@ export function CertificatePreviewModal({
         className="flex w-[min(1120px,95vw)] items-center justify-center max-w-none border-0 bg-transparent p-0 shadow-none"
         noCloseButton
       >
+        <DialogTitle className="sr-only">{certificatePreviewProps.courseName}</DialogTitle>
         <CertificatePreview {...certificatePreviewProps} onClose={close} />
       </DialogContent>
     </Dialog>
