@@ -328,13 +328,13 @@ describe("quiz answers grouped per question", () => {
     expect(within(getQuestionGroup("Second single choice")).getAllByRole("radio")[0]).toHaveFocus();
   });
 
-  it("marks the answer that has keyboard focus, in every choice question type", () => {
+  it("gives every choice answer card the keyboard focus ring", () => {
     renderQuiz();
 
     const answers = [...screen.getAllByRole("radio"), ...screen.getAllByRole("checkbox")];
     const answerLabels = answers.map((answer) => answer.closest("label"));
 
-    // jsdom has no :focus-visible, so check the card carries the keyboard-only ring utilities.
+    // jsdom applies no Tailwind CSS (and :focus-visible is unreliable there), so assert the card carries the keyboard-only ring classes.
     answerLabels.forEach((label) => expect(label).toHaveClass(QUIZ_ANSWER_FOCUS_RING));
   });
 
