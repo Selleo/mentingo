@@ -14,7 +14,8 @@ const ToastViewport = React.forwardRef<
 >(({ className, queueSlot, ...props }, ref) => (
   <div className="pointer-events-none fixed top-0 z-[100] flex w-full flex-col-reverse gap-3 p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]">
     {queueSlot}
-    {/* Radix renders an ol, but toasts are role="status" items, which is invalid list markup. */}
+    {/* Radix still renders each toast as an li with role="status"; a div viewport avoids invalid
+        list semantics, and the explicit role keeps those li valid outside a list. */}
     <ToastPrimitives.Viewport
       ref={ref}
       className={cn("flex max-h-screen w-full flex-col-reverse gap-2 sm:flex-col", className)}

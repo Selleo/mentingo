@@ -1,9 +1,10 @@
 import { createRemixStub } from "@remix-run/testing";
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 
 import ProfilePage from "~/modules/Profile/Profile.page";
+import i18next from "~/utils/mocks/i18next.mock";
 import { renderWith } from "~/utils/testUtils";
 
 import type { CertificateType } from "~/types/certificate";
@@ -49,15 +50,44 @@ describe("ProfilePage", () => {
     expect(text.length).toBeGreaterThan(0);
   });
 
-  it("opens the certificate preview as a dialog, not inside a clickable overlay", async () => {
+  const openCertificatePreview = async () => {
     renderWith({ withQuery: true }).render(<RemixStub initialEntries={["/profile/1234"]} />);
 
     await userEvent.click(await screen.findByRole("button", { name: /Safety basics/ }));
 
-    const dialog = await screen.findByRole("dialog", { name: "Safety basics" });
+    return screen.findByRole("dialog", { name: "Safety basics" });
+  };
 
-    expect(within(dialog).getAllByRole("button").length).toBeGreaterThan(0);
-    expect(dialog.closest('[role="button"]')).toBeNull();
+  it("opens the certificate preview as a dialog with its own controls and no clickable overlay", async () => {
+    const dialog = await openCertificatePreview();
+
+    expect(
+      within(dialog).getByRole("button", {
+        name: i18next.t("studentCertificateView.button.shareLinkedIn"),
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole("button", { name: i18next.t("common.button.close") }),
+    ).toBeInTheDocument();
+    expect(document.querySelector('[role="button"]')).toBeNull();
+  });
+
+  it("closes the certificate preview with Escape", async () => {
+    await openCertificatePreview();
+
+    await userEvent.keyboard("{Escape}");
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("closes the certificate preview with its close button", async () => {
+    const dialog = await openCertificatePreview();
+
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: i18next.t("common.button.close") }),
+    );
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 
   it("redirect if forbidden", () => {
