@@ -33,7 +33,7 @@ const CourseProgress = ({
     <div className="flex flex-col gap-2">
       {!redactProgress && (
         <>
-          <p className="text-xs text-neutral-600">
+          <p className="text-xs text-neutral-800">
             {label} {completedLessonCount}/{courseLessonCount}
           </p>
           <div className="flex items-center justify-between gap-px">{courseProgressParts}</div>

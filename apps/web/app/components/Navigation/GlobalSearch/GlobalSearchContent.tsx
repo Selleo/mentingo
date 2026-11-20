@@ -245,7 +245,7 @@ export const GlobalSearchContent = ({
           <SearchX className="size-5" aria-hidden />
         </span>
         <span className="body-sm-md text-neutral-950">{t("globalSearch.notFound")}</span>
-        <span className="max-w-[340px] details text-neutral-600">
+        <span className="max-w-[340px] details text-neutral-800">
           {isAiRanked ? t("globalSearch.aiTryAgain") : t("globalSearch.tryAgain")}
         </span>
         {emptyAction && (
@@ -290,7 +290,7 @@ export const GlobalSearchContent = ({
             className={cn(sectionIndex > 0 && "mt-2 border-t border-neutral-100 pt-2")}
           >
             {section.heading && (
-              <h3 className="flex items-center gap-1.5 px-2.5 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wider text-neutral-600">
+              <h3 className="flex items-center gap-1.5 px-2.5 pb-1 pt-1 text-xs font-semibold uppercase tracking-wider text-neutral-800">
                 {section.heading}
               </h3>
             )}

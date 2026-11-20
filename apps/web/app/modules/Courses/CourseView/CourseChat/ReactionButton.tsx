@@ -30,7 +30,7 @@ export function ReactionButton({
             type="button"
             aria-label={tooltip}
             className={cn(
-              "inline-flex h-6 items-center gap-1 rounded-full border border-neutral-200 bg-background text-[11px] leading-none text-neutral-700 shadow-sm transition hover:border-primary-200 hover:bg-primary-50",
+              "inline-flex h-6 items-center gap-1 rounded-full border border-neutral-200 bg-background text-xs leading-none text-neutral-800 shadow-sm transition hover:border-primary-200 hover:bg-primary-50",
               {
                 "w-6 justify-center p-0": compact,
                 "px-1.5": !compact,

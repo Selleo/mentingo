@@ -64,7 +64,7 @@ function CalendarEventList({
             type="button"
             onClick={() => openDialog(event.id)}
             className={cn(
-              "w-full rounded-lg border border-neutral-100 p-3 text-left transition-colors hover:border-primary-200 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2",
+              "w-full rounded-lg border border-neutral-100 p-3 text-left transition-colors hover:border-primary-200 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-2",
               highlighted && "bg-primary-50",
               showDateIcon && "flex items-start gap-3",
             )}
@@ -84,7 +84,7 @@ function CalendarEventList({
             )}
             <span className="min-w-0 flex-1">
               {showDateIcon && (
-                <span className="block text-[10px] font-semibold uppercase leading-4 tracking-wide text-neutral-500">
+                <span className="block truncate text-[10px] font-semibold uppercase leading-4 tracking-wide text-neutral-800">
                   {eventType}
                 </span>
               )}
@@ -97,7 +97,7 @@ function CalendarEventList({
                 {event.title}
               </span>
               {!showDateIcon && (
-                <span className="details mt-0.5 block truncate text-neutral-500">
+                <span className="details mt-0.5 block truncate text-neutral-800">
                   {eventType}
                   {" · "}
                   {new Intl.DateTimeFormat(i18n.language, {
@@ -183,7 +183,7 @@ export function WidgetEventCalendar() {
             <Link
               to="/calendar"
               data-testid={DASHBOARD_CALENDAR_HANDLES.OPEN_CALENDAR}
-              className="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 transition-[color,transform] duration-75 hover:text-primary-700 active:scale-95 active:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1 motion-reduce:transition-none"
+              className="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 transition-[color,transform] duration-75 hover:text-primary-700 active:scale-95 active:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-1 motion-reduce:transition-none"
               aria-label={t("navigationSideBar.calendar")}
               title={t("navigationSideBar.calendar")}
             >
@@ -242,7 +242,7 @@ export function WidgetEventCalendar() {
                   nav_button_next: "absolute right-0 top-0.5",
                   table: "flex min-h-0 flex-1 flex-col pt-3",
                   head_row: "flex h-6 w-full shrink-0 items-center",
-                  head_cell: "flex-1 text-center text-[0.7rem] font-medium text-neutral-500",
+                  head_cell: "flex-1 text-center text-xs font-medium text-neutral-800",
                   tbody: "grid min-h-0 flex-1 grid-rows-6",
                   row: "flex min-h-0 w-full",
                   cell: "min-h-0 flex-1 p-0 text-center text-xs",
@@ -277,7 +277,7 @@ export function WidgetEventCalendar() {
                   ) : upcomingEvents.length === 0 ? (
                     <p
                       data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE}
-                      className="flex min-h-24 items-center justify-center px-3 text-center text-neutral-500"
+                      className="flex min-h-24 items-center justify-center px-3 text-center text-neutral-800"
                     >
                       {t("dashboardHome.widgets.event_calendar.empty")}
                     </p>

@@ -48,7 +48,7 @@ export default function ErrorPage({
         </div>
         <h1 className="h4 text-neutral-950 dark:text-neutral-50">{title}</h1>
         {description && (
-          <p className="mx-auto mt-2 max-w-sm body-base text-neutral-600 dark:text-neutral-300">
+          <p className="mx-auto mt-2 max-w-sm body-base text-neutral-800 dark:text-neutral-300">
             {description}
           </p>
         )}

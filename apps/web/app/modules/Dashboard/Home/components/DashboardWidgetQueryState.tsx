@@ -36,7 +36,7 @@ export function DashboardWidgetQueryState({
       data-testid={DASHBOARD_WIDGET_HANDLES.ERROR_STATE}
       className={cn("flex size-full flex-col items-center justify-center gap-3", className)}
     >
-      <p className="text-neutral-600 text-center">{t("dashboardHome.widgets.loadError")}</p>
+      <p className="text-neutral-800 text-center">{t("dashboardHome.widgets.loadError")}</p>
       <Button
         type="button"
         variant="outline"

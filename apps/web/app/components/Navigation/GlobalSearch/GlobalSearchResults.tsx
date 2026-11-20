@@ -113,7 +113,7 @@ export const GlobalSearchResults = ({
       {semanticNotice && (
         <p
           role="status"
-          className="mx-2.5 mb-2 border-l-2 border-primary-200 py-1 pl-3 text-xs leading-5 text-neutral-600"
+          className="mx-2.5 mb-2 border-l-2 border-primary-200 py-1 pl-3 text-xs leading-5 text-neutral-800"
         >
           {semanticNotice}
         </p>

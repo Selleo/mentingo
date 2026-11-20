@@ -37,7 +37,7 @@ const RetakeModal: React.FC<RetakeModalProps> = ({ open, onOpenChange, onConfirm
           <DialogTitle className="text-lg font-semibold text-neutral-950">
             {t("studentCourseView.lesson.aiMentorLesson.retakeModalTitle")}
           </DialogTitle>
-          <DialogDescription className="text-sm leading-relaxed text-neutral-600">
+          <DialogDescription className="text-sm leading-relaxed text-neutral-800">
             {t("studentCourseView.lesson.aiMentorLesson.retakeModalDescription")}
           </DialogDescription>
         </DialogHeader>

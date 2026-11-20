@@ -35,7 +35,7 @@ export default function ProgressStatCard({
       <div className="absolute inset-y-0 left-0 w-1.5 bg-success-500" aria-hidden="true" />
       <div
         className={cn("flex w-full items-center gap-4 transition-all duration-200", {
-          "opacity-45 group-hover:blur-[2px]": isAdminExperience,
+          "group-hover:blur-[2px]": isAdminExperience,
         })}
       >
         <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-success-50">
@@ -73,7 +73,7 @@ export default function ProgressStatCard({
                     total: courseChapterCount,
                   })}
                 </span>
-                <span className="text-xs font-semibold text-success-500">
+                <span className="text-xs font-semibold text-success-700">
                   {progressPercentage}%
                 </span>
               </div>

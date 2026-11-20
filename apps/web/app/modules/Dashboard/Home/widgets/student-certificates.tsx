@@ -90,7 +90,7 @@ export function WidgetStudentCertificates({
             <div
               data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE}
               className={cn(
-                "flex h-full items-center justify-center px-4 text-center text-neutral-600",
+                "flex h-full items-center justify-center px-4 text-center text-neutral-800",
                 !isCompact && "min-h-32",
               )}
             >
@@ -131,14 +131,14 @@ export function WidgetStudentCertificates({
                       {certificate.courseTitle ??
                         t("dashboardHome.widgets.studentTiles.certificates.title")}
                     </span>
-                    <span className="details block truncate text-neutral-500">
+                    <span className="details block truncate text-neutral-800">
                       {formatDate(certificate.completionDate ?? certificate.issuedAt)}
                     </span>
                   </span>
                 </Button>
               ))}
               {isFetching && (
-                <p className="details px-2 py-2 text-center text-neutral-500">
+                <p className="details px-2 py-2 text-center text-neutral-800">
                   {t("common.button.loading")}
                 </p>
               )}

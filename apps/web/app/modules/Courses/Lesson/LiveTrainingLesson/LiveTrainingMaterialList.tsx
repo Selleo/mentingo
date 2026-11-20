@@ -24,7 +24,7 @@ export function LiveTrainingMaterialList({
 
   if (materials.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-neutral-200 bg-neutral-50 p-5 text-sm text-neutral-600">
+      <div className="rounded-md border border-dashed border-neutral-200 bg-neutral-50 p-5 text-sm text-neutral-800">
         {emptyMessage}
       </div>
     );
@@ -57,7 +57,7 @@ export function LiveTrainingMaterialList({
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 gap-1.5 rounded px-2 text-xs text-neutral-600 hover:text-primary-700"
+              className="h-8 gap-1.5 rounded px-2 text-xs text-neutral-800 hover:text-primary-700"
               aria-label={t("liveTrainingView.files.download")}
               onClick={() => onOpen(material)}
             >

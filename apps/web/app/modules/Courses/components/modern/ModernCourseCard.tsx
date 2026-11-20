@@ -434,7 +434,7 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
             </h3>
 
             {nonFormattedDescription && (
-              <p className="line-clamp-2 text-sm leading-relaxed text-neutral-600">
+              <p className="line-clamp-2 text-sm leading-relaxed text-neutral-800">
                 {nonFormattedDescription}
               </p>
             )}

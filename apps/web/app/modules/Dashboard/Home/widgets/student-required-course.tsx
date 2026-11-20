@@ -60,7 +60,7 @@ export function WidgetStudentRequiredCourse({
           <div
             data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE}
             className={cn(
-              "flex h-full items-center justify-center text-center text-neutral-600",
+              "flex h-full items-center justify-center text-center text-neutral-800",
               !isCompact && "min-h-32",
             )}
           >
@@ -74,14 +74,14 @@ export function WidgetStudentRequiredCourse({
                 to={`/course/${course.slug}`}
                 data-testid={DASHBOARD_STUDENT_HANDLES.requiredCourse(course.courseId)}
                 className={cn(
-                  "group flex items-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                  "group flex items-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-2",
                   isCompact ? "min-h-0 gap-2 p-2" : "min-h-24 gap-3 p-3",
                   {
-                    "border-error-100 bg-error-50 hover:border-error-300 focus-visible:ring-error-300":
+                    "border-error-100 bg-error-50 hover:border-error-300":
                       course.urgency === STUDENT_COURSE_URGENCY.OVERDUE,
-                    "border-warning-100 bg-warning-50 hover:border-warning-300 focus-visible:ring-warning-300":
+                    "border-warning-100 bg-warning-50 hover:border-warning-300":
                       course.urgency === STUDENT_COURSE_URGENCY.DUE_SOON,
-                    "border-neutral-100 hover:border-primary-200 hover:bg-primary-50 focus-visible:ring-primary-300":
+                    "border-neutral-100 hover:border-primary-200 hover:bg-primary-50":
                       course.urgency === STUDENT_COURSE_URGENCY.SCHEDULED ||
                       course.urgency === STUDENT_COURSE_URGENCY.NO_DEADLINE,
                   },
@@ -101,7 +101,7 @@ export function WidgetStudentRequiredCourse({
                 <div className="min-w-0 flex-1">
                   <span
                     data-testid={DASHBOARD_STUDENT_HANDLES.requiredCourseUrgency(course.urgency)}
-                    className={cn("details font-medium text-neutral-500", {
+                    className={cn("details font-medium text-neutral-800", {
                       "text-error-700": course.urgency === STUDENT_COURSE_URGENCY.OVERDUE,
                       "text-warning-700": course.urgency === STUDENT_COURSE_URGENCY.DUE_SOON,
                     })}
@@ -116,7 +116,7 @@ export function WidgetStudentRequiredCourse({
                   >
                     {course.title}
                   </h3>
-                  <p className="details mt-1 text-neutral-500">
+                  <p className="details mt-1 text-neutral-800">
                     {course.dueDate
                       ? t("dashboardHome.widgets.studentTiles.requiredCourse.dueDate", {
                           date: new Intl.DateTimeFormat(i18n.language, {

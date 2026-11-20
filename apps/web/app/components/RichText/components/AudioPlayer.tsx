@@ -261,7 +261,7 @@ export const AudioPlayer = ({ src, name, coverage, onAudioElementChange }: Audio
             <Play className="size-4" aria-hidden />
           )}
         </Button>
-        <span className="shrink-0 text-xs tabular-nums text-neutral-600">
+        <span className="shrink-0 text-xs tabular-nums text-neutral-800">
           {formatPlaybackTime(currentTime)} / {formatPlaybackTime(duration)}
         </span>
         {shouldShowCoverageMarkers ? (
@@ -321,7 +321,7 @@ export const AudioPlayer = ({ src, name, coverage, onAudioElementChange }: Audio
               type="button"
               size="xs"
               variant="ghost"
-              className="h-7 shrink-0 rounded-full px-2 text-xs tabular-nums text-neutral-700 hover:bg-neutral-200"
+              className="h-7 shrink-0 rounded-full px-2 text-xs tabular-nums text-neutral-800 hover:bg-neutral-200"
               aria-label={t("richText.audio.playbackSpeed")}
               title={t("richText.audio.playbackSpeed")}
               data-testid={RICH_TEXT_HANDLES.AUDIO_PLAYBACK_SPEED_BUTTON}
@@ -373,7 +373,7 @@ export const AudioPlayer = ({ src, name, coverage, onAudioElementChange }: Audio
         />
       </div>
       {status === AUDIO_PLAYBACK_STATUS.LOADING && (
-        <p role="status" className="m-0 text-xs text-neutral-600">
+        <p role="status" className="m-0 text-xs text-neutral-800">
           {t("richText.audio.loading")}
         </p>
       )}

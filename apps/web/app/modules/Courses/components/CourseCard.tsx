@@ -98,7 +98,7 @@ const CourseCard = ({
             />
           )}
           {enrolled && repetitionCompletedChapterCount != null && (
-            <p className="mt-1 text-sm text-neutral-700">
+            <p className="mt-1 text-sm text-neutral-800">
               {t("courseRepetition.progress", {
                 completed: repetitionCompletedChapterCount,
                 total: courseChapterCount,
@@ -118,7 +118,7 @@ const CourseCard = ({
               <span className="body-sm text-neutral-950">{author}</span>
             </div>
           )}
-          <div className="flex-grow body-sm text-neutral-500">
+          <div className="flex-grow body-sm text-neutral-800">
             <span className="line-clamp-3">
               <CourseDescriptionSummary content={description ?? ""} />
             </span>

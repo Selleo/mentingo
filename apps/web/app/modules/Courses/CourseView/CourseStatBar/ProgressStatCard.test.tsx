@@ -60,6 +60,8 @@ describe("ProgressStatCard", () => {
     );
 
     expect(screen.queryByText("1 / 3 chapters")).not.toBeInTheDocument();
+    // WCAG 1.4.3: the admin view keeps text readable instead of fading it with opacity.
+    expect(screen.getByText("Your progress").closest("[class*='opacity-']")).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Enter learning mode" }));
 

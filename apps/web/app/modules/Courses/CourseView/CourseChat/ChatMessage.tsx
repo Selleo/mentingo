@@ -56,7 +56,7 @@ export function ChatMessage({
   const messageBubbleClassName = match({ isDeleted, isOwnMessage })
     .with(
       { isDeleted: true },
-      () => "border border-dashed border-neutral-200 bg-neutral-100 text-neutral-500 shadow-none",
+      () => "border border-dashed border-neutral-200 bg-neutral-100 text-neutral-800 shadow-none",
     )
     .with({ isOwnMessage: true }, () => "border border-primary-100 bg-primary-50 text-neutral-950")
     .otherwise(() => "border border-neutral-100 bg-background text-neutral-950");
@@ -86,7 +86,7 @@ export function ChatMessage({
         {showMeta && !isDeleted && (
           <div className="mb-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <span className="body-sm-md text-neutral-950">{authorName}</span>
-            <span className="text-[11px] leading-4 text-neutral-500">
+            <span className="text-xs leading-4 text-neutral-800">
               {format(new Date(message.createdAt), "dd.MM.yyyy HH:mm")}
             </span>
           </div>

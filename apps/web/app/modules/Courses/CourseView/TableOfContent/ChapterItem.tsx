@@ -37,7 +37,7 @@ const getChapterStyle = ({
     return {
       bg: "bg-success-50/50 hover:bg-success-50",
       icon: "text-success-500",
-      title: "text-success-500",
+      title: "text-success-700",
     };
   }
 
@@ -115,14 +115,7 @@ export default function ChapterItem({
           ) : isCurrent ? (
             <span className="text-base font-bold text-white md:text-sm">{chapterNumber}</span>
           ) : (
-            <span
-              className={cn(
-                "text-base font-bold md:text-sm",
-                isAdminExperience ? "text-neutral-800" : "text-neutral-400",
-              )}
-            >
-              {chapterNumber}
-            </span>
+            <span className="text-base font-bold text-neutral-800 md:text-sm">{chapterNumber}</span>
           )}
         </div>
 
