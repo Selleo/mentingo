@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { usersQueryOptions } from "~/api/queries";
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
+import { invalidateTenantUserCountQueries } from "~/api/utils/invalidateTenantUserCountQueries";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -39,6 +40,7 @@ export function useBulkArchiveUsers() {
       await queryClient.invalidateQueries({ queryKey: ["users", "admin"] });
       await queryClient.invalidateQueries(globalSettingsQueryOptions);
       await invalidateLearningPathEnrollmentData();
+      await invalidateTenantUserCountQueries();
     },
     onError: () => {
       toast({

@@ -16,6 +16,7 @@ import { passwordRecoveryAutomation } from "./password-recovery.automation";
 import { passwordReminderAutomation } from "./password-reminder.automation";
 import { quizAttemptGradedAutomation } from "./quiz-attempt-graded.automation";
 import { quizGradingDigestAutomation } from "./quiz-grading-digest.automation";
+import { tenantUserCapacityAutomation } from "./tenant-user-capacity.automation";
 import { userAssignedToCourseAutomation } from "./user-assigned-to-course.automation";
 import { userFinishedChapterAutomation } from "./user-finished-chapter.automation";
 import { userFinishedCourseAutomation } from "./user-finished-course.automation";
@@ -52,4 +53,5 @@ export const BUILT_IN_AUTOMATIONS = [
   quizGradingDigestAutomation,
   forumMentionAutomation,
   discussionReplyAutomation,
+  tenantUserCapacityAutomation,
 ];

@@ -1,5 +1,17 @@
 import { Link } from "@remix-run/react";
-import { Check, Minus, MoreVertical, Pencil, Trash2, TrendingDown, TrendingUp } from "lucide-react";
+import { calculateTenantAllowedUsersCount } from "@repo/shared";
+import { formatDistanceToNow } from "date-fns";
+import {
+  Check,
+  Globe,
+  Minus,
+  MoreVertical,
+  Pencil,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
+import { match } from "ts-pattern";
 
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
@@ -10,9 +22,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Progress } from "~/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { SupportModePopover } from "~/modules/SuperAdmin/SupportModePopover";
+import { hasAccessEnded } from "~/modules/SuperAdmin/utils/accessEnd.utils";
+import { getDateLocale } from "~/utils/getDateLocale";
 
 import { TENANTS_PAGE_HANDLES } from "../../../e2e/data/tenants/handles";
 
@@ -47,6 +62,150 @@ const HostPreview = ({ host }: { host: string }) => {
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
+  );
+};
+
+const OrganizationPreview = ({ tenant }: { tenant: Tenant }) => {
+  const isHostSameAsName =
+    tenant.host.replace(HOST_PROTOCOL_PATTERN, "").toLowerCase() === tenant.name.toLowerCase();
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="font-medium text-neutral-900">{tenant.name}</span>
+      {!isHostSameAsName && (
+        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Globe className="size-3 shrink-0" aria-hidden="true" />
+          <HostPreview host={tenant.host} />
+        </span>
+      )}
+    </div>
+  );
+};
+
+const USER_CAPACITY_WARNING_PERCENTAGE = 80;
+const USER_CAPACITY_CRITICAL_PERCENTAGE = 95;
+
+const USER_CAPACITY_STATES = {
+  WITHIN_LIMIT: "withinLimit",
+  WARNING: "warning",
+  CRITICAL: "critical",
+} as const;
+
+const USER_CAPACITY_BAR_CLASS_NAMES = {
+  [USER_CAPACITY_STATES.WITHIN_LIMIT]: "bg-primary-600",
+  [USER_CAPACITY_STATES.WARNING]: "bg-warning-500",
+  [USER_CAPACITY_STATES.CRITICAL]: "bg-error-600",
+} as const;
+
+const USER_CAPACITY_TEXT_CLASS_NAMES = {
+  [USER_CAPACITY_STATES.WITHIN_LIMIT]: "text-neutral-900",
+  [USER_CAPACITY_STATES.WARNING]: "text-warning-800",
+  [USER_CAPACITY_STATES.CRITICAL]: "text-error-700",
+} as const;
+
+const UserCapacity = ({ tenant, t }: { tenant: Tenant; t: typeof i18next.t }) => {
+  const { maxUsers, maxUsersOverflowPercentage, totalUsers } = tenant;
+
+  if (maxUsers === null) {
+    return (
+      <div
+        className="flex min-w-32 flex-col gap-1 whitespace-nowrap"
+        data-testid={TENANTS_PAGE_HANDLES.userCapacity(tenant.id)}
+      >
+        <span className="font-medium tabular-nums text-neutral-900">
+          {t("superAdminTenantsView.table.userCapacityUnlimitedValue", { used: totalUsers })}
+        </span>
+      </div>
+    );
+  }
+
+  const allowedUsersCount = calculateTenantAllowedUsersCount(maxUsers, maxUsersOverflowPercentage);
+  const usedPercentage = Math.round((totalUsers / allowedUsersCount) * 100);
+
+  const capacityState = match(usedPercentage)
+    .when(
+      (percentage) => percentage >= USER_CAPACITY_CRITICAL_PERCENTAGE,
+      () => USER_CAPACITY_STATES.CRITICAL,
+    )
+    .when(
+      (percentage) => percentage >= USER_CAPACITY_WARNING_PERCENTAGE,
+      () => USER_CAPACITY_STATES.WARNING,
+    )
+    .otherwise(() => USER_CAPACITY_STATES.WITHIN_LIMIT);
+
+  return (
+    <div
+      className="flex min-w-32 flex-col gap-1.5 whitespace-nowrap"
+      data-testid={TENANTS_PAGE_HANDLES.userCapacity(tenant.id)}
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <span
+          className={cn("font-medium tabular-nums", USER_CAPACITY_TEXT_CLASS_NAMES[capacityState])}
+        >
+          {t("superAdminTenantsView.table.userCapacityValue", {
+            used: totalUsers,
+            allowed: allowedUsersCount,
+          })}
+        </span>
+        <span className="text-xs tabular-nums text-muted-foreground">{usedPercentage}%</span>
+      </div>
+      <Progress
+        value={Math.min(100, usedPercentage)}
+        aria-label={t("superAdminTenantsView.table.userCapacity")}
+        className="h-1.5 bg-neutral-100"
+        indicatorClassName={USER_CAPACITY_BAR_CLASS_NAMES[capacityState]}
+      />
+    </div>
+  );
+};
+
+const AccessEnd = ({
+  tenant,
+  dateFormatter,
+  language,
+  t,
+}: {
+  tenant: Tenant;
+  dateFormatter: Intl.DateTimeFormat;
+  language: string;
+  t: typeof i18next.t;
+}) => {
+  if (!tenant.accessEndsAt) {
+    return (
+      <span
+        className="whitespace-nowrap text-muted-foreground"
+        data-testid={TENANTS_PAGE_HANDLES.accessEndsAt(tenant.id)}
+      >
+        {t("superAdminTenantsView.table.unlimitedAccess")}
+      </span>
+    );
+  }
+
+  const accessEndsAt = new Date(tenant.accessEndsAt);
+  const accessEnded = hasAccessEnded(tenant.accessEndsAt);
+  const relativeAccessEnd = formatDistanceToNow(accessEndsAt, {
+    addSuffix: true,
+    locale: getDateLocale(language),
+  });
+
+  return (
+    <span
+      className="flex items-baseline gap-1.5 whitespace-nowrap"
+      data-testid={TENANTS_PAGE_HANDLES.accessEndsAt(tenant.id)}
+    >
+      <span
+        className={cn("font-medium tabular-nums text-neutral-900", {
+          "text-error-700": accessEnded,
+        })}
+      >
+        {dateFormatter.format(accessEndsAt)}
+      </span>
+      <span className={cn("text-xs text-muted-foreground", { "text-error-700": accessEnded })}>
+        {accessEnded
+          ? t("superAdminTenantsView.table.accessEndedAgo", { relativeTime: relativeAccessEnd })
+          : relativeAccessEnd}
+      </span>
+    </span>
   );
 };
 
@@ -163,16 +322,13 @@ export const getTenantsColumns = (
     dateStyle: "medium",
     timeStyle: "short",
   });
+  const dateFormatter = new Intl.DateTimeFormat(language, { dateStyle: "medium" });
 
   return [
     {
       accessorKey: "name",
-      header: t("superAdminTenantsView.table.name"),
-    },
-    {
-      accessorKey: "host",
-      header: t("superAdminTenantsView.table.host"),
-      cell: ({ row }) => <HostPreview host={row.original.host} />,
+      header: t("superAdminTenantsView.table.organization"),
+      cell: ({ row }) => <OrganizationPreview tenant={row.original} />,
     },
     {
       accessorKey: "status",
@@ -186,6 +342,13 @@ export const getTenantsColumns = (
 
         return <Badge variant={isActive ? "success" : "notStarted"}>{label}</Badge>;
       },
+    },
+    {
+      accessorKey: "accessEndsAt",
+      header: t("superAdminTenantsView.table.accessEndsAt"),
+      cell: ({ row }) => (
+        <AccessEnd tenant={row.original} dateFormatter={dateFormatter} language={language} t={t} />
+      ),
     },
     {
       accessorKey: "isManaging",
@@ -269,6 +432,11 @@ export const getTenantsColumns = (
           })}
         </span>
       ),
+    },
+    {
+      id: "userCapacity",
+      header: t("superAdminTenantsView.table.userCapacity"),
+      cell: ({ row }) => <UserCapacity tenant={row.original} t={t} />,
     },
     {
       id: "actions",

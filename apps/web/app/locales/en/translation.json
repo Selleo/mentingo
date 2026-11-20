@@ -349,7 +349,8 @@
       "quiz_attempt_graded": "Quiz graded by a reviewer",
       "quiz_grading_digest": "New answers waiting for review (daily)",
       "forum_mention": "User mentioned in a forum topic",
-      "discussion_reply": "New replies in a discussion (grouped)"
+      "discussion_reply": "New replies in a discussion (grouped)",
+      "tenant_user_capacity": "User capacity alert"
     },
     "errors": {
       "incompleteButton": "Enter a button label and URL.",
@@ -4288,7 +4289,8 @@
   },
   "user": {
     "error": {
-      "archived": "Your account has been archived."
+      "archived": "Your account has been archived.",
+      "userLimitReached": "Your organization has reached its user limit. Archive or delete users, or contact support to raise the limit."
     }
   },
   "studentCoursesView": {
@@ -6155,8 +6157,6 @@
       "placeholder": "Search organizations..."
     },
     "table": {
-      "name": "Name",
-      "host": "Host",
       "status": "Status",
       "managing": "Managing",
       "lastActivity": "Last activity",
@@ -6174,7 +6174,14 @@
         "title": "Actions",
         "enterSupportMode": "Enter support mode",
         "impersonateUser": "Impersonate user"
-      }
+      },
+      "organization": "Organization",
+      "accessEndsAt": "Access ends",
+      "unlimitedAccess": "Unlimited",
+      "userCapacity": "User capacity",
+      "userCapacityValue": "{{used}} / {{allowed}}",
+      "userCapacityUnlimitedValue": "{{used}} / ∞",
+      "accessEndedAgo": "ended {{relativeTime}}"
     },
     "activityTrend": {
       "noActivity": "No activity",
@@ -6231,14 +6238,22 @@
         "firstAdmin": "First admin"
       },
       "accessEndsAtPlaceholder": "Unlimited access",
-      "accessEndsAtClear": "Remove end date"
+      "accessEndsAtClear": "Remove end date",
+      "maxUsers": "Maximum users",
+      "maxUsersHint": "Archived and deleted users don't count. Leave empty for no limit.",
+      "maxUsersPlaceholder": "No limit",
+      "maxUsersOverflowPercentage": "Allowed overflow (%)",
+      "maxUsersOverflowPercentageHint": "Extra users allowed above the maximum, e.g. 200 users + 10% allows 220.",
+      "userLimitBelowUsage": "This organization has {{activeUsersCount}} active users, but this limit allows {{allowedUsersCount}}. Nobody loses access, but users can't be added or unarchived until {{excessUsersCount}} are archived. Admins will be notified."
     },
     "validation": {
       "nameRequired": "Name is required",
       "hostInvalid": "Host must be a valid URL",
       "adminEmailRequired": "Admin email is required",
       "adminFirstNameRequired": "Admin first name is required",
-      "adminLastNameRequired": "Admin last name is required"
+      "adminLastNameRequired": "Admin last name is required",
+      "maxUsersInvalid": "Maximum users must be a whole number of at least 1",
+      "maxUsersOverflowPercentageInvalid": "Overflow must be a whole number from 0 to 100"
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organization created successfully",
@@ -8184,7 +8199,8 @@
         "quiz_attempt_graded": "The learner whose quiz answers were graded.",
         "quiz_grading_digest": "Users who can grade quiz answers.",
         "forum_mention": "The users mentioned in the forum post.",
-        "discussion_reply": "Participants of the thread or topic who have not read the replies in the application."
+        "discussion_reply": "Participants of the thread or topic who have not read the replies in the application.",
+        "tenant_user_capacity": "Active administrators of the organization."
       }
     },
     "mapping": {
@@ -8286,7 +8302,8 @@
       "quizAttemptGraded": "Quiz graded",
       "quizGradingDigest": "Grading queue digest",
       "forumUserMentioned": "Forum mention",
-      "discussionReply": "New replies in a discussion"
+      "discussionReply": "New replies in a discussion",
+      "tenantUserCapacity": "User capacity alert"
     },
     "canvas": {
       "emptyTitle": "Your automation canvas is empty",
@@ -8457,7 +8474,13 @@
       "latestReply": "Latest reply",
       "discussionUrl": "Discussion link",
       "unsubscribeUrl": "Unsubscribe link",
-      "unfollowUrl": "Stop following link"
+      "unfollowUrl": "Stop following link",
+      "capacityTitle": "Capacity alert title",
+      "capacityMessage": "Capacity alert message",
+      "activeUsersCount": "Active users",
+      "maxUsers": "Users in plan",
+      "allowedUsersCount": "Allowed users (with overflow)",
+      "usersUrl": "Users page link"
     },
     "simulation": {
       "title": "Simulation Result",

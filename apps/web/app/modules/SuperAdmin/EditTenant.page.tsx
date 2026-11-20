@@ -25,6 +25,11 @@ import {
   toAccessEndDate,
   toAccessEndsAt,
 } from "~/modules/SuperAdmin/utils/accessEnd.utils";
+import {
+  toMaxUsers,
+  toMaxUsersOverflowPercentage,
+  toUserCapacityFormValue,
+} from "~/modules/SuperAdmin/utils/userCapacity.utils";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { TENANT_FORM_HANDLES, TENANT_PAGE_HANDLES } from "../../../e2e/data/tenants/handles";
@@ -58,13 +63,25 @@ export default function EditTenantPage() {
       host: tenant.host,
       status: tenant.status as TenantStatus,
       accessEndsAt: toAccessEndDate(tenant.accessEndsAt),
+      maxUsers: toUserCapacityFormValue(tenant.maxUsers),
+      maxUsersOverflowPercentage: toUserCapacityFormValue(tenant.maxUsersOverflowPercentage),
     });
   }, [tenant, form]);
 
-  const onSubmit = async ({ accessEndsAt, ...values }: EditTenantFormValues) => {
+  const onSubmit = async ({
+    accessEndsAt,
+    maxUsers,
+    maxUsersOverflowPercentage,
+    ...values
+  }: EditTenantFormValues) => {
     await updateTenant({
       id: tenantId ?? "",
-      data: { ...values, accessEndsAt: toAccessEndsAt(accessEndsAt) },
+      data: {
+        ...values,
+        accessEndsAt: toAccessEndsAt(accessEndsAt),
+        maxUsers: toMaxUsers(maxUsers),
+        maxUsersOverflowPercentage: toMaxUsersOverflowPercentage(maxUsersOverflowPercentage),
+      },
     });
 
     navigate(TENANTS_PATH);
@@ -147,7 +164,7 @@ export default function EditTenantPage() {
                 {t("superAdminTenantsView.edit.submit")}
               </Button>
             </div>
-            <TenantDetailsFields />
+            <TenantDetailsFields activeUsersCount={tenant.activeUsersCount} />
           </form>
         </Form>
       </div>

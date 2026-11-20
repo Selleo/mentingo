@@ -210,6 +210,15 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     es: "Nuevas respuestas en {{discussionName}}",
     fr: "Nouvelles réponses dans {{discussionName}}",
   },
+  tenantUserCapacityEmail: {
+    en: "{{capacityTitle}}",
+    pl: "{{capacityTitle}}",
+    de: "{{capacityTitle}}",
+    lt: "{{capacityTitle}}",
+    cs: "{{capacityTitle}}",
+    es: "{{capacityTitle}}",
+    fr: "{{capacityTitle}}",
+  },
 } as const;
 
 export const getEmailSubject = (

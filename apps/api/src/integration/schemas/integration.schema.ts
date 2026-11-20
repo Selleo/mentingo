@@ -8,6 +8,8 @@ import { INTEGRATION_TRAINING_RESULTS_SCOPES } from "src/integration/integration
 import {
   createTenantSchema,
   tenantAccessEndsAtSchema,
+  tenantMaxUsersOverflowPercentageSchema,
+  tenantMaxUsersSchema,
   tenantResponseSchema,
   updateTenantSchema,
 } from "src/super-admin/schemas/tenant.schema";
@@ -33,6 +35,8 @@ export const integrationTenantSchema = Type.Object({
   host: Type.String(),
   status: Type.Enum(TENANT_STATUSES),
   accessEndsAt: tenantAccessEndsAtSchema,
+  maxUsers: tenantMaxUsersSchema,
+  maxUsersOverflowPercentage: tenantMaxUsersOverflowPercentageSchema,
 });
 
 export const integrationTenantsSchema = Type.Array(integrationTenantSchema);

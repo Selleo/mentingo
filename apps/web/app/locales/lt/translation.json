@@ -349,7 +349,8 @@
       "quiz_attempt_graded": "Testą įvertino vertintojas",
       "quiz_grading_digest": "Nauji atsakymai laukia įvertinimo (kasdien)",
       "forum_mention": "Naudotojas paminėtas forumo temoje",
-      "discussion_reply": "Nauji atsakymai diskusijoje (sugrupuoti)"
+      "discussion_reply": "Nauji atsakymai diskusijoje (sugrupuoti)",
+      "tenant_user_capacity": "Įspėjimas apie naudotojų talpą"
     },
     "errors": {
       "incompleteButton": "Įveskite mygtuko tekstą ir URL.",
@@ -4289,7 +4290,8 @@
   },
   "user": {
     "error": {
-      "archived": "Jūsų paskyra suarchyvuota."
+      "archived": "Jūsų paskyra suarchyvuota.",
+      "userLimitReached": "Jūsų organizacija pasiekė naudotojų limitą. Suarchyvuokite arba ištrinkite naudotojus arba susisiekite su pagalba, kad limitas būtų padidintas."
     }
   },
   "studentCoursesView": {
@@ -6343,8 +6345,6 @@
       "placeholder": "Ieškoti organizacijų..."
     },
     "table": {
-      "name": "Vardas",
-      "host": "Šeimininkas",
       "status": "Būsena",
       "managing": "Valdymas",
       "lastActivity": "Paskutinė veikla",
@@ -6362,7 +6362,14 @@
         "title": "Veiksmai",
         "enterSupportMode": "Įjunkite palaikymo režimą",
         "impersonateUser": "Apsimesti naudotoju"
-      }
+      },
+      "organization": "Organizacija",
+      "accessEndsAt": "Prieiga baigiasi",
+      "unlimitedAccess": "Neribota",
+      "userCapacity": "Naudotojų talpa",
+      "userCapacityValue": "{{used}} / {{allowed}}",
+      "userCapacityUnlimitedValue": "{{used}} / ∞",
+      "accessEndedAgo": "baigėsi {{relativeTime}}"
     },
     "activityTrend": {
       "noActivity": "Veiklos nėra",
@@ -6419,14 +6426,22 @@
         "firstAdmin": "Pirmasis administratorius"
       },
       "accessEndsAtPlaceholder": "Neribota prieiga",
-      "accessEndsAtClear": "Pašalinti pabaigos datą"
+      "accessEndsAtClear": "Pašalinti pabaigos datą",
+      "maxUsers": "Didžiausias naudotojų skaičius",
+      "maxUsersHint": "Suarchyvuoti ir ištrinti naudotojai neskaičiuojami. Palikite tuščią, jei limito nėra.",
+      "maxUsersPlaceholder": "Be limito",
+      "maxUsersOverflowPercentage": "Leidžiamas viršijimas (%)",
+      "maxUsersOverflowPercentageHint": "Papildomi naudotojai virš maksimumo, pvz., 200 naudotojų + 10 % leidžia 220.",
+      "userLimitBelowUsage": "Šioje organizacijoje yra {{activeUsersCount}} aktyvių naudotojų, o šis limitas leidžia {{allowedUsersCount}}. Niekas nepraras prieigos, tačiau naudotojų pridėti ar išarchyvuoti nebus galima, kol nebus suarchyvuota {{excessUsersCount}}. Administratoriai bus informuoti."
     },
     "validation": {
       "nameRequired": "Reikalingas vardas",
       "hostInvalid": "Priegloba turi būti galiojantis URL",
       "adminEmailRequired": "Reikalingas administratoriaus el",
       "adminFirstNameRequired": "Būtinas administratoriaus vardas",
-      "adminLastNameRequired": "Reikalinga administratoriaus pavardė"
+      "adminLastNameRequired": "Reikalinga administratoriaus pavardė",
+      "maxUsersInvalid": "Didžiausias naudotojų skaičius turi būti sveikasis skaičius, ne mažesnis nei 1",
+      "maxUsersOverflowPercentageInvalid": "Viršijimas turi būti sveikasis skaičius nuo 0 iki 100"
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organizacija sėkmingai sukurta",
@@ -7942,7 +7957,8 @@
         "quiz_attempt_graded": "Besimokantysis, kurio testo atsakymai buvo įvertinti.",
         "quiz_grading_digest": "Naudotojai, galintys vertinti testų atsakymus.",
         "forum_mention": "Forumo įraše paminėti naudotojai.",
-        "discussion_reply": "Gijos arba temos dalyviai, kurie neperskaitė atsakymų programoje."
+        "discussion_reply": "Gijos arba temos dalyviai, kurie neperskaitė atsakymų programoje.",
+        "tenant_user_capacity": "Aktyvūs organizacijos administratoriai."
       }
     },
     "mapping": {
@@ -8045,7 +8061,8 @@
       "quizAttemptGraded": "Testas įvertintas",
       "quizGradingDigest": "Vertinimo eilės suvestinė",
       "forumUserMentioned": "Paminėjimas forume",
-      "discussionReply": "Nauji atsakymai diskusijoje"
+      "discussionReply": "Nauji atsakymai diskusijoje",
+      "tenantUserCapacity": "Įspėjimas apie naudotojų talpą"
     },
     "canvas": {
       "emptyTitle": "Jūsų automatizavimo drobė tuščia",
@@ -8213,7 +8230,13 @@
       "latestReply": "Naujausias atsakymas",
       "discussionUrl": "Diskusijos nuoroda",
       "unsubscribeUrl": "Atsisakymo nuoroda",
-      "unfollowUrl": "Nuoroda nebesekti"
+      "unfollowUrl": "Nuoroda nebesekti",
+      "capacityTitle": "Įspėjimo apie talpą pavadinimas",
+      "capacityMessage": "Įspėjimo apie talpą tekstas",
+      "activeUsersCount": "Aktyvūs naudotojai",
+      "maxUsers": "Naudotojai plane",
+      "allowedUsersCount": "Leidžiami naudotojai (su viršijimu)",
+      "usersUrl": "Naudotojų puslapio nuoroda"
     },
     "simulation": {
       "title": "Simuliacijos rezultatas",
