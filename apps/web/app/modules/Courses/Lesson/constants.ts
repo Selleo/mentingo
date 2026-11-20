@@ -7,3 +7,8 @@ export const SELECT_OPTION_VARIANTS = {
   incorrectAnswerSelected: "border-error-700 bg-error-50 text-error-700",
   redactedAnswerSelected: "border-neutral-400 bg-neutral-100 text-neutral-800",
 };
+
+// Input makes its focus outline transparent, so the answer card shows keyboard focus with a ring instead.
+// Forced-colors mode removes box-shadow rings but paints that outline in a system colour, so focus stays visible there.
+export const QUIZ_ANSWER_FOCUS_RING =
+  "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary-700 has-[:focus-visible]:ring-offset-2";
