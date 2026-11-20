@@ -166,7 +166,8 @@ export const NavigationGlobalSearchWrapper = ({
         />
       ) : (
         <button
-          aria-label={t("navigationSideBar.findInApplication")}
+          // Same text as the label shown at 2xl, so the name always contains the visible text.
+          aria-label={t("globalSearch.search")}
           onClick={() => setIsGlobalSearchDialogOpen(true)}
           className={cn(
             "flex size-10 items-center justify-center rounded-lg bg-neutral-50 p-2 text-neutral-800 transition-colors hover:text-primary-500",

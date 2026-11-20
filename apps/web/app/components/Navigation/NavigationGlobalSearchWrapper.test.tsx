@@ -59,7 +59,7 @@ vi.mock("./GlobalSearch/GlobalSearchResults", () => ({
 
 const openSearch = () => {
   render(<NavigationGlobalSearchWrapper />);
-  fireEvent.click(screen.getByRole("button", { name: "navigationSideBar.findInApplication" }));
+  fireEvent.click(screen.getByRole("button", { name: "globalSearch.search" }));
   return screen.getByRole("textbox", { name: "globalSearch.search" });
 };
 
@@ -67,6 +67,15 @@ const askAi = () => screen.getByRole("button", { name: /^globalSearch\.aiSearch:
 const queryAskAi = () => screen.queryByRole("button", { name: /^globalSearch\.aiSearch:/ });
 
 const request = () => JSON.parse(screen.getByTestId("request").textContent ?? "{}");
+
+describe("global search button", () => {
+  it("is named by the text it shows, so the name matches in every language", () => {
+    render(<NavigationGlobalSearchWrapper />);
+    const button = screen.getByRole("button", { name: "globalSearch.search" });
+
+    expect(button).toHaveTextContent("globalSearch.search");
+  });
+});
 
 describe("global search mode", () => {
   beforeEach(() => {
@@ -101,7 +110,7 @@ describe("global search mode", () => {
 
   it("returns to keyword mode if configuration is removed during hybrid search", () => {
     const view = render(<NavigationGlobalSearchWrapper />);
-    fireEvent.click(screen.getByRole("button", { name: "navigationSideBar.findInApplication" }));
+    fireEvent.click(screen.getByRole("button", { name: "globalSearch.search" }));
     fireEvent.change(screen.getByRole("textbox", { name: "globalSearch.search" }), {
       target: { value: "policy" },
     });

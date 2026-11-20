@@ -28,11 +28,7 @@ import {
 // deliberate. Remove the disable and its comment when the ticket closes.
 // Excluded elements: only for a failure the owner decided to keep, at the scan that hits it, with
 // its ticket link. `exclude` hides those elements from every rule, so keep the selector narrow.
-const RULES_DISABLED_ON_ALL_PAGES = [
-  // At 2xl (>=1536px) the search button shows "Search" but is named "Find in application":
-  // https://github.com/Selleo/mentingo/issues/2292
-  "label-content-name-mismatch",
-];
+const RULES_DISABLED_ON_ALL_PAGES: string[] = [];
 
 test("learner pages have no WCAG 2.2 A/AA axe violations", async ({
   cleanup,
@@ -89,6 +85,14 @@ test("learner pages have no WCAG 2.2 A/AA axe violations", async ({
     await assertNoAxeViolationsFlow(page, { disabledRules: RULES_DISABLED_ON_ALL_PAGES });
 
     await page.getByTestId(NAVIGATION_HANDLES.PROFILE_FOOTER).click();
+    await expect(page.getByTestId(NAVIGATION_HANDLES.PROFILE_LINK)).toBeVisible();
+    await assertNoAxeViolationsFlow(page, {
+      disabledRules: RULES_DISABLED_ON_ALL_PAGES,
+      // Scan the open menu only: the page behind it was scanned above, and Radix marks it
+      // aria-hidden while trapping focus in the menu, which aria-hidden-focus cannot see.
+      exclude: ['[data-aria-hidden="true"]'],
+    });
+
     await clickHandleAndExpectUrlFlow(
       page,
       NAVIGATION_HANDLES.PROFILE_LINK,
