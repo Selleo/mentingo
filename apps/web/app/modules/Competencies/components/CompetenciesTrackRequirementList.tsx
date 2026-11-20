@@ -5,24 +5,24 @@ import { Button } from "~/components/ui/button";
 
 import { CompetenciesSelect } from "./CompetenciesSelect";
 
-import type { CompetenciesProfileEditorModel } from "../hooks/competencies-hook-models.types";
+import type { CompetenciesTrackEditorModel } from "../hooks/competencies-hook-models.types";
 
-type CompetenciesProfileRequirementListProps = Pick<
-  CompetenciesProfileEditorModel,
+type CompetenciesTrackRequirementListProps = Pick<
+  CompetenciesTrackEditorModel,
   "catalog" | "isResolvingRequirements" | "value" | "removeRequirement" | "updateRequirementLevel"
 >;
 
-export function CompetenciesProfileRequirementList({
+export function CompetenciesTrackRequirementList({
   catalog,
   isResolvingRequirements,
   value,
   removeRequirement,
   updateRequirementLevel,
-}: CompetenciesProfileRequirementListProps) {
+}: CompetenciesTrackRequirementListProps) {
   const { t } = useTranslation();
   return (
     <ul
-      aria-labelledby="profile-requirements-label"
+      aria-labelledby="track-requirements-label"
       className="divide-y divide-neutral-200 overflow-hidden rounded-lg border border-neutral-200"
     >
       {value.requirements.map((requirement) => {

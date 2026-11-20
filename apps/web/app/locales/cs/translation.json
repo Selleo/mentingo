@@ -8863,7 +8863,7 @@
   },
   "competencies": {
     "deleteCompetency": "Smazat kompetenci",
-    "deleteCompetencyConfirmation": "Smazat „{{name}}“? Kompetence bude trvale odebrána ze všech pracovních profilů spolu s historií potvrzení a přiloženými dokumenty. Tuto akci nelze vrátit zpět.",
+    "deleteCompetencyConfirmation": "Smazat „{{name}}“? Kompetence bude trvale odebrána ze všech kompetenčních drah spolu s historií potvrzení a přiloženými dokumenty. Tuto akci nelze vrátit zpět.",
     "notifications": {
       "categoryCreated": "Kategorie vytvořena.",
       "categoryUpdated": "Kategorie aktualizována.",
@@ -8871,11 +8871,11 @@
       "competencyCreated": "Kompetence vytvořena.",
       "competencyUpdated": "Kompetence aktualizována.",
       "competencyDeleted": "Kompetence smazána.",
-      "profileCreated": "Pracovní profil vytvořen.",
-      "profileUpdated": "Pracovní profil aktualizován.",
-      "profileDeleted": "Pracovní profil smazán.",
-      "profileAssigned": "Pracovní profil přiřazen.",
-      "profileRemoved": "Přiřazení pracovního profilu odebráno.",
+      "trackCreated": "Kompetenční dráha vytvořena.",
+      "trackUpdated": "Kompetenční dráha aktualizována.",
+      "trackDeleted": "Kompetenční dráha smazána.",
+      "trackAssigned": "Kompetenční dráhy přiřazeny.",
+      "trackRemoved": "Přiřazení kompetenčních drah odebráno.",
       "documentSubmitted": "Dokument odeslán ke kontrole.",
       "observationConfirmed": "Pozorování potvrzeno.",
       "qualificationsRecognized": "Předchozí kvalifikace uznány.",
@@ -8890,9 +8890,9 @@
       "categoryDeleteFailed": "Kategorii se nepodařilo smazat. Zkuste to znovu.",
       "competencySaveFailed": "Kompetenci se nepodařilo uložit. Zkuste to znovu.",
       "competencyDeleteFailed": "Kompetenci se nepodařilo smazat. Zkuste to znovu.",
-      "profileSaveFailed": "Pracovní profil se nepodařilo uložit. Zkuste to znovu.",
-      "profileDeleteFailed": "Pracovní profil se nepodařilo smazat. Zkuste to znovu.",
-      "profileAssignmentFailed": "Přiřazení pracovního profilu se nepodařilo změnit. Zkuste to znovu.",
+      "trackSaveFailed": "Kompetenční dráhu se nepodařilo uložit. Zkuste to znovu.",
+      "trackDeleteFailed": "Kompetenční dráhu se nepodařilo smazat. Zkuste to znovu.",
+      "trackAssignmentFailed": "Přiřazení kompetenčních drah se nepodařilo změnit. Zkuste to znovu.",
       "evidenceSubmitFailed": "Potvrzení se nepodařilo odeslat. Zkuste to znovu.",
       "reviewFailed": "Rozhodnutí kontroly se nepodařilo uložit. Zkuste to znovu.",
       "revocationFailed": "Potvrzení se nepodařilo zrušit. Zkuste to znovu.",
@@ -8934,7 +8934,7 @@
       "saveChange": "Uložit změnu"
     },
     "searchCatalog": "Hledat kompetence…",
-    "searchProfiles": "Hledat pracovní profily…",
+    "searchTracks": "Hledat kompetenční dráhy…",
     "noSearchResults": "Žádné výsledky. Zkuste jiný hledaný výraz.",
     "documents": "Dokumenty",
     "requiredDocuments": "Dokumenty k předložení",
@@ -8956,16 +8956,16 @@
     "own": "Moje kompetence",
     "team": "Kompetence týmu",
     "people": "Zaměstnanci",
-    "peopleDescription": "Prohlížejte přiřazené profily a aktuální stavy kompetencí.",
+    "peopleDescription": "Prohlížejte přiřazené kompetenční dráhy a aktuální stavy kompetencí.",
     "review": "Ke schválení",
     "plans": "Plány rozvoje",
     "catalog": "Kompetence",
-    "profiles": "Pracovní profily",
+    "tracks": "Kompetenční dráhy",
     "person": "Osoba",
-    "profile": "Pracovní profil",
-    "compareProfile": "Porovnat s profilem",
-    "assignedProfile": "Přiřazený profil",
-    "noProfile": "Bez přiřazeného profilu",
+    "track": "Kompetenční dráha",
+    "compareTrack": "Porovnat s dráhou",
+    "assignedTrack": "Přiřazené dráhy",
+    "noTrack": "Bez kompetenční dráhy",
     "loading": "Načítání kompetencí...",
     "retry": "Zkusit znovu",
     "serviceError": "Kompetence se nepodařilo načíst nebo uložit. Zkuste to znovu.",
@@ -9018,7 +9018,7 @@
     "unavailableLevel": "Historická úroveň",
     "archivedAccount": "Archivovaný účet",
     "coverageValue": "{{value}} %",
-    "coverage": "Pokrytí profilu",
+    "coverage": "Pokrytí požadavků",
     "notEvaluated": "Nehodnoceno",
     "searchPeople": "Vyhledat osobu",
     "inspectCompetency": "Prohlédnout kompetenci",
@@ -9034,13 +9034,14 @@
     "noManualConditions": "Žádné podmínky tohoto typu.",
     "noEvidence": "Žádné důkazy k ověření.",
     "reasonLabel": "Odůvodnění",
-    "editProfile": "Upravit pracovní profil",
-    "newProfile": "Nový profil",
+    "editTrack": "Upravit kompetenční dráhu",
+    "newTrack": "Nová dráha",
     "requiredCompetencies": "Požadované kompetence",
-    "deleteProfile": "Odstranit profil",
-    "deleteProfileConfirmation": "Odstranit profil \"{{name}}\"?",
-    "profileInUse": "Před odstraněním profilu zrušte jeho přiřazení zaměstnancům.",
-    "noProfiles": "Zatím žádné pracovní profily.",
+    "deleteTrack": "Odstranit dráhu",
+    "deleteTrackConfirmation": "Odstranit dráhu \"{{name}}\"?",
+    "trackInUse": "Před odstraněním dráhy zrušte její přiřazení zaměstnancům.",
+    "trackLimitReached": "Maximální počet kompetenčních drah na osobu: {{count}}.",
+    "noTracks": "Zatím žádné kompetenční dráhy.",
     "requiredLevel": "Požadovaná úroveň",
     "newAction": "Přidat rozvojovou aktivitu",
     "noActions": "Zatím žádné rozvojové aktivity.",
@@ -9139,11 +9140,11 @@
       "plans": "Řešte nedostatky pomocí kurzů, praxe, mentoringu a recertifikace.",
       "people": "Procházejte zaměstnance a jejich potvrzené kompetence.",
       "catalog": "Společný katalog kompetencí, úrovní a způsobů potvrzení.",
-      "profiles": "Určete, co zaměstnanec potřebuje k bezpečnému a samostatnému výkonu role.",
+      "tracks": "Určete, co zaměstnanec potřebuje k bezpečnému a samostatnému výkonu role.",
       "settings": "Nastavte upozornění na vypršení platnosti.",
-      "overview": "Podívejte se, kdo splňuje požadavky svého pracovního profilu a kde je potřeba jednat.",
-      "setup": "Definujte kompetence, spojte je do pracovních profilů a nastavte připomínky vypršení.",
-      "ownWithoutProfile": "Sledujte kompetence požadované pro vaši roli a odesílejte dokumenty, které je potvrzují."
+      "overview": "Podívejte se, kdo splňuje požadavky svých kompetenčních drah a kde je potřeba jednat.",
+      "setup": "Definujte kompetence, spojte je do kompetenčních drah a nastavte připomínky vypršení.",
+      "ownWithoutTrack": "Sledujte kompetence požadované pro vaši roli a odesílejte dokumenty, které je potvrzují."
     },
     "setup": "Nastavení kompetencí",
     "levelComparison": "Vaše / požadované",
@@ -9181,9 +9182,9 @@
       "count_other": "{{count}} kompetencí",
       "count_few": "{{count}} kompetence",
       "count_many": "{{count}} kompetence",
-      "noProfileTitle": "Zatím není přiřazen pracovní profil",
-      "noProfileSelf": "Jakmile vám administrátor přiřadí pracovní profil, uvidíte požadované kompetence a další kroky.",
-      "noProfileOther": "Přiřaďte pracovní profil na kartě Přehled a uvidíte, jaké kompetence tato osoba potřebuje.",
+      "noTrackTitle": "Zatím není přiřazena kompetenční dráha",
+      "noTrackSelf": "Jakmile vám administrátor přiřadí kompetenční dráhy, uvidíte požadované kompetence a další kroky.",
+      "noTrackOther": "Přiřaďte kompetenční dráhy na kartě Přehled a uvidíte, jaké kompetence tato osoba potřebuje.",
       "requirementsTitle": "Požadované kompetence",
       "filters": {
         "all": "Vše",
@@ -9221,7 +9222,7 @@
       "ready": "Splňuje požadavky",
       "expiring": "Brzy vyprší",
       "missing": "Chybějící kompetence",
-      "noProfile": "Bez pracovního profilu",
+      "noTrack": "Bez kompetenční dráhy",
       "missingCount_one": "Chybí {{count}}",
       "missingCount_few": "Chybí {{count}}",
       "missingCount_many": "Chybí {{count}}",
@@ -9239,20 +9240,20 @@
       "expiringNote_few": "Potvrzení vyprší do {{count}} dnů",
       "expiringNote_many": "Potvrzení vyprší do {{count}} dnů",
       "expiringNote_other": "Potvrzení vyprší do {{count}} dnů",
-      "noProfileNote": "Přiřaďte pracovní profil a sledujte připravenost",
+      "noTrackNote": "Přiřaďte kompetenční dráhy a sledujte připravenost",
       "peopleTitle": "Lidé",
-      "peopleDescription": "Přiřazujte pracovní profily a kontrolujte, kdo má všechny potřebné kompetence.",
+      "peopleDescription": "Přiřazujte kompetenční dráhy a kontrolujte, kdo má všechny potřebné kompetence.",
       "teamDescription": "Zkontrolujte, kdo ve vašem týmu má všechny potřebné kompetence.",
       "viewMode": "Zobrazení",
       "views": {
         "list": "Seznam",
         "matrix": "Matice"
       },
-      "allProfiles": "Všechny pracovní profily",
+      "allTracks": "Všechny kompetenční dráhy",
       "clearFilters": "Vymazat filtry",
       "readiness": "Připravenost",
       "noMatches": "Vybraným filtrům neodpovídá nikdo.",
-      "noMatrixPeople": "Tento pracovní profil zatím nikdo nemá přiřazený.",
+      "noMatrixPeople": "Tuto kompetenční dráhu zatím nikdo nemá přiřazenou.",
       "allPeople": "Všichni"
     },
     "gettingStarted": {
@@ -9271,30 +9272,30 @@
           "description": "Popište dovednost, její úrovně a způsob potvrzení každé úrovně: kurz, dokument nebo pozorování.",
           "action": "Přidat kompetenci"
         },
-        "profiles": {
-          "title": "Sestavte pracovní profil",
+        "tracks": {
+          "title": "Sestavte kompetenční dráhu",
           "description": "Vyberte kompetence a úrovně, které role vyžaduje.",
-          "action": "Vytvořit pracovní profil"
+          "action": "Vytvořit kompetenční dráhu"
         },
         "assignments": {
           "title": "Přiřaďte lidi",
-          "description": "Přiřaďte každému zaměstnanci pracovní profil a začněte sledovat jeho připravenost.",
-          "action": "Přiřadit pracovní profily"
+          "description": "Přiřaďte každému zaměstnanci kompetenční dráhy a začněte sledovat jeho připravenost.",
+          "action": "Přiřadit kompetenční dráhy"
         }
       }
     },
     "setupSection": {
       "competenciesTitle": "Kompetence",
       "competenciesDescription": "Dovednosti s úrovněmi. Každá úroveň určuje, co ji potvrzuje: dokončený kurz, schválený dokument nebo pozorování.",
-      "profilesTitle": "Pracovní profily",
-      "profilesDescription": "Spojte kompetence a požadované úrovně pro roli a poté profil přiřaďte lidem na kartě Přehled.",
+      "tracksTitle": "Kompetenční dráhy",
+      "tracksDescription": "Spojte kompetence a požadované úrovně pro roli a poté dráhy přiřaďte lidem na kartě Přehled. Jedna osoba může mít několik drah.",
       "settingsTitle": "Připomínky vypršení",
       "settingsDescription": "Zvolte, s jakým předstihem označovat potvrzení, která brzy vyprší.",
       "emptyCompetenciesTitle": "Zatím žádné kompetence",
-      "emptyCompetencies": "Začněte přidáním dovedností, které vaše organizace sleduje. Poté je seskupíte do pracovních profilů.",
-      "emptyProfilesTitle": "Zatím žádné pracovní profily",
-      "emptyProfiles": "Vytvořte pracovní profil a určete, jaké kompetence role vyžaduje.",
-      "emptyProfilesNeedsCompetencies": "Před vytvořením pracovního profilu přidejte alespoň jednu kompetenci s úrovní.",
+      "emptyCompetencies": "Začněte přidáním dovedností, které vaše organizace sleduje. Poté je seskupíte do kompetenčních drah.",
+      "emptyTracksTitle": "Zatím žádné kompetenční dráhy",
+      "emptyTracks": "Vytvořte kompetenční dráhu a určete, jaké kompetence role vyžaduje.",
+      "emptyTracksNeedsCompetencies": "Před vytvořením kompetenční dráhy přidejte alespoň jednu kompetenci s úrovní.",
       "requiredCompetenciesCount": "Požadované kompetence",
       "assignedPeople": "Přiřazení lidé",
       "expiryOff": "Vyp.",
@@ -9307,17 +9308,17 @@
       "competenciesNav_few": "{{count}} připravené k použití",
       "competenciesNav_many": "{{count}} připravených k použití",
       "competenciesNav_other": "{{count}} připravených k použití",
-      "profilesNav_one": "{{count}} přiřazená osoba",
-      "profilesNav_few": "{{count}} přiřazené osoby",
-      "profilesNav_many": "{{count}} přiřazených osob",
-      "profilesNav_other": "{{count}} přiřazených osob",
+      "tracksNav_one": "{{count}} přiřazená osoba",
+      "tracksNav_few": "{{count}} přiřazené osoby",
+      "tracksNav_many": "{{count}} přiřazených osob",
+      "tracksNav_other": "{{count}} přiřazených osob",
       "expiryNav_one": "Upozornit {{count}} den před vypršením",
       "expiryNav_few": "Upozornit {{count}} dny před vypršením",
       "expiryNav_many": "Upozornit {{count}} dní před vypršením",
       "expiryNav_other": "Upozornit {{count}} dní před vypršením",
       "expiryNavOff": "Nenastaveno"
     },
-    "compareWithAssigned": "Porovnat s: přiřazený profil",
+    "compareWithAssigned": "Porovnat s: přiřazené dráhy",
     "select": {
       "search": "Hledat…",
       "noResults": "Nic nenalezeno."
@@ -9337,10 +9338,10 @@
       "pending_other": "{{count}} čeká",
       "notSubmitted": "Neodesláno"
     },
-    "profileEditor": {
+    "trackEditor": {
       "addCompetency": "Přidat kompetenci…",
       "requirementsHelp": "Přidejte každou kompetenci, kterou role vyžaduje, a zvolte požadovanou úroveň.",
-      "noRequirements": "Zatím nejsou přidány žádné kompetence. Profil sestavíte pomocí „Přidat kompetenci“."
+      "noRequirements": "Zatím nejsou přidány žádné kompetence. Dráhu sestavíte pomocí „Přidat kompetenci“."
     },
     "editor": {
       "levelsHelp": "Úrovně na sebe navazují. Vyberte úroveň a určete, co ji potvrzuje.",
@@ -9408,7 +9409,7 @@
       "planGaps": "Naplánovat tyto kompetence",
       "emptyPlan": "Tento plán zatím nemá kroky.",
       "emptyTitle": "Zatím žádné plány rozvoje",
-      "empty": "Plány se zde zobrazí u lidí, jejichž pracovní profil má chybějící kompetence. Začněte přiřazením profilů na kartě Přehled."
+      "empty": "Plány se zde zobrazí u lidí, kterým chybí kompetence z jejich kompetenčních drah. Začněte přiřazením drah na kartě Přehled."
     },
     "planBuilder": {
       "title": "Přidat kroky do plánu",
@@ -9417,7 +9418,7 @@
       "stepsTitle": "Kroky",
       "stepsHelp": "Každý krok cílí na jednu chybějící úroveň kompetence. Vlastník plánu a cílové datum platí pro všechny kroky.",
       "choosePerson": "Vyberte osobu a uvidíte její chybějící kompetence.",
-      "noGaps": "Tato osoba splňuje všechny požadavky svého pracovního profilu.",
+      "noGaps": "Tato osoba splňuje všechny požadavky svých kompetenčních drah.",
       "addStep": "Přidat krok",
       "submit_one": "Vytvořit plán s {{count}} krokem",
       "submit_few": "Vytvořit plán se {{count}} kroky",
@@ -9440,7 +9441,7 @@
     "stepEditor": {
       "title": "Upravit krok"
     },
-    "profilesTable": {
+    "tracksTable": {
       "allCompetencies": "Všechny kompetence"
     },
     "reviewTable": {

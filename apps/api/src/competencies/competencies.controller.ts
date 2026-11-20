@@ -45,8 +45,8 @@ import {
   competencyOptionsSchema,
   competencyPeoplePageSchema,
   competencyPeopleQuerySchema,
-  competencyProfilesPageSchema,
-  competencyProfilesQuerySchema,
+  competencyTracksPageSchema,
+  competencyTracksQuerySchema,
   competencyReviewsPageSchema,
   competencyReviewsQuerySchema,
   competencySubjectQuerySchema,
@@ -66,8 +66,8 @@ import {
   type CompetencyOptionsResponse,
   type CompetencyPeoplePageResponse,
   type CompetencyPeopleQuery,
-  type CompetencyProfilesPageResponse,
-  type CompetencyProfilesQuery,
+  type CompetencyTracksPageResponse,
+  type CompetencyTracksQuery,
   type CompetencyReviewsPageResponse,
   type CompetencyReviewsQuery,
   type CompetencySubjectResponse,
@@ -142,22 +142,22 @@ export class CompetenciesController {
     );
   }
 
-  @Get("profiles")
+  @Get("tracks")
   @RequirePermission(PERMISSIONS.COMPETENCIES_USE)
   @Validate({
-    request: queryParameters(competencyProfilesQuerySchema),
-    response: baseResponse(competencyProfilesPageSchema),
+    request: queryParameters(competencyTracksQuerySchema),
+    response: baseResponse(competencyTracksPageSchema),
   })
-  async getCompetencyProfiles(
+  async getCompetencyTracks(
     @Query("page") page: number | undefined,
     @Query("perPage") perPage: number | undefined,
     @Query("search") search: string | undefined,
     @Query("competencyId") competencyId: string | undefined,
-    @Query("ids") ids: CompetencyProfilesQuery["ids"],
+    @Query("ids") ids: CompetencyTracksQuery["ids"],
     @CurrentUser() actor: CurrentUserType,
-  ): Promise<BaseResponse<CompetencyProfilesPageResponse>> {
+  ): Promise<BaseResponse<CompetencyTracksPageResponse>> {
     return new BaseResponse(
-      await this.competenciesService.getProfiles(actor, {
+      await this.competenciesService.getTracks(actor, {
         page,
         perPage,
         search,
@@ -177,7 +177,7 @@ export class CompetenciesController {
     @Query("page") page: number | undefined,
     @Query("perPage") perPage: number | undefined,
     @Query("search") search: string | undefined,
-    @Query("profileId") profileId: string | undefined,
+    @Query("trackId") trackId: string | undefined,
     @Query("readiness") readiness: CompetencyPeopleQuery["readiness"],
     @Query("teamOnly") teamOnly: CompetencyPeopleQuery["teamOnly"],
     @CurrentUser() actor: CurrentUserType,
@@ -187,7 +187,7 @@ export class CompetenciesController {
         page,
         perPage,
         search,
-        profileId,
+        trackId,
         readiness,
         teamOnly,
       }),
@@ -204,7 +204,7 @@ export class CompetenciesController {
     @Query("page") page: number | undefined,
     @Query("perPage") perPage: number | undefined,
     @Query("search") search: string | undefined,
-    @Query("profileId") profileId: string,
+    @Query("trackId") trackId: string,
     @Query("teamOnly") teamOnly: CompetencyMatrixQuery["teamOnly"],
     @CurrentUser() actor: CurrentUserType,
   ): Promise<BaseResponse<CompetencyMatrixPageResponse>> {
@@ -213,7 +213,7 @@ export class CompetenciesController {
         page,
         perPage,
         search,
-        profileId,
+        trackId,
         teamOnly,
       }),
     );
@@ -273,11 +273,11 @@ export class CompetenciesController {
   })
   async getCompetencySubject(
     @Param("subjectId") subjectId: string,
-    @Query("profileId") profileId: string | undefined,
+    @Query("trackId") trackId: string | undefined,
     @CurrentUser() actor: CurrentUserType,
   ): Promise<BaseResponse<CompetencySubjectResponse>> {
     return new BaseResponse(
-      await this.competenciesService.getSubjectCompetencies(actor, subjectId, { profileId }),
+      await this.competenciesService.getSubjectCompetencies(actor, subjectId, { trackId }),
     );
   }
 

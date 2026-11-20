@@ -14,8 +14,8 @@ import { OVERVIEW_VIEWS } from "../utils/competenciesOverview.utils";
 import { CompetenciesGettingStarted } from "./CompetenciesGettingStarted";
 import { CompetenciesMatrix } from "./CompetenciesMatrix";
 import { CompetenciesPeopleTable } from "./CompetenciesPeopleTable";
-import { CompetenciesProfilePicker } from "./CompetenciesProfilePicker";
 import { CompetenciesReadinessFilters } from "./CompetenciesReadinessFilters";
+import { CompetenciesTrackPicker } from "./CompetenciesTrackPicker";
 
 import type { CompetenciesOverviewOptions } from "../hooks/competencies-hooks.types";
 
@@ -34,7 +34,7 @@ export function CompetenciesOverview({
     peopleSectionRef,
     search,
     setSearch,
-    setProfileFilter,
+    setTrackFilter,
     statusFilter,
     setStatusFilter,
     view,
@@ -43,8 +43,8 @@ export function CompetenciesOverview({
     setPage,
     perPage,
     setPerPage,
-    profiles,
-    activeProfileFilter,
+    tracks,
+    activeTrackFilter,
     matrixQuery,
     activeQuery,
     people,
@@ -82,7 +82,7 @@ export function CompetenciesOverview({
                   role="tab"
                   aria-selected={view === item}
                   data-testid={COMPETENCIES_HANDLES.OVERVIEW_VIEW(item)}
-                  disabled={item === OVERVIEW_VIEWS.MATRIX && !profiles.length}
+                  disabled={item === OVERVIEW_VIEWS.MATRIX && !tracks.length}
                   onClick={() => {
                     setView(item);
                     resetPage();
@@ -109,19 +109,17 @@ export function CompetenciesOverview({
                 resetPage();
               }}
             />
-            {profiles.length > 0 && (
+            {tracks.length > 0 && (
               <div className="w-full sm:w-64">
-                <CompetenciesProfilePicker
-                  label={t("competencies.profile")}
+                <CompetenciesTrackPicker
+                  label={t("competencies.track")}
                   hideLabel
-                  value={activeProfileFilter}
+                  value={activeTrackFilter}
                   emptyLabel={
-                    view === OVERVIEW_VIEWS.LIST
-                      ? t("competencies.overview.allProfiles")
-                      : undefined
+                    view === OVERVIEW_VIEWS.LIST ? t("competencies.overview.allTracks") : undefined
                   }
                   onChange={(value) => {
-                    setProfileFilter(value);
+                    setTrackFilter(value);
                     resetPage();
                   }}
                 />
@@ -134,7 +132,7 @@ export function CompetenciesOverview({
                 className="self-start sm:self-auto"
                 onClick={() => {
                   setSearch("");
-                  setProfileFilter("");
+                  setTrackFilter("");
                   setStatusFilter(null);
                   resetPage();
                 }}
@@ -174,7 +172,7 @@ export function CompetenciesOverview({
                 <CompetenciesPeopleTable
                   execute={execute}
                   isPending={isPending}
-                  profiles={profiles}
+                  tracks={tracks}
                   people={people}
                   canManage={canManage}
                   onPersonOpen={onPersonOpen}

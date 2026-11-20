@@ -1,6 +1,7 @@
 import {
   COMPETENCIES_ALLOWED_ATTACHMENT_CONTENT_TYPES,
   COMPETENCIES_MAX_ATTACHMENT_BYTES,
+  COMPETENCIES_MAX_TRACKS_PER_PERSON,
   CONDITION_KINDS,
   type ActorContext,
   type CompetenciesCommand,
@@ -37,7 +38,7 @@ import type {
   CompetencyMatrixQuery,
   CompetencyOptionsResponse,
   CompetencyPeopleQuery,
-  CompetencyProfilesQuery,
+  CompetencyTracksQuery,
   CompetencyReviewsQuery,
   CompetencySubjectQuery,
   CompetencySubjectResponse,
@@ -107,6 +108,7 @@ export class CompetenciesService {
       enabled,
       canManage: context.canManage,
       canPlan: context.canManage || context.managedSubjectIds.length > 0,
+      maxTracksPerPerson: COMPETENCIES_MAX_TRACKS_PER_PERSON,
     };
   }
 
@@ -138,10 +140,10 @@ export class CompetenciesService {
     );
   }
 
-  async getProfiles(actor: CurrentUserType, query: CompetencyProfilesQuery) {
+  async getTracks(actor: CurrentUserType, query: CompetencyTracksQuery) {
     const context = await this.buildActorContext(actor);
     return this.competenciesClientService.requestWithClient((client) =>
-      client.profiles(context, {
+      client.tracks(context, {
         ...normalizePageQuery(query),
         competencyId: query.competencyId,
         ids: query.ids,
@@ -155,7 +157,7 @@ export class CompetenciesService {
     const page = await this.competenciesClientService.requestWithClient((client) =>
       client.people(context, {
         ...normalizePageQuery(query),
-        profileId: query.profileId,
+        trackId: query.trackId,
         readiness: query.readiness,
         teamOnly: query.teamOnly === COMPETENCIES_BOOLEAN_QUERY_VALUES.TRUE,
       }),
@@ -176,7 +178,7 @@ export class CompetenciesService {
     return this.competenciesClientService.requestWithClient((client) =>
       client.matrix(context, {
         ...normalizePageQuery(query),
-        profileId: query.profileId,
+        trackId: query.trackId,
         teamOnly: query.teamOnly === COMPETENCIES_BOOLEAN_QUERY_VALUES.TRUE,
       }),
     );
@@ -278,7 +280,7 @@ export class CompetenciesService {
     query: CompetencySubjectQuery,
   ): Promise<CompetencySubjectWorkspace> {
     return this.competenciesClientService.requestWithClient((client) =>
-      client.subject(context, { subjectId, profileId: query.profileId }),
+      client.subject(context, { subjectId, trackId: query.trackId }),
     );
   }
 
