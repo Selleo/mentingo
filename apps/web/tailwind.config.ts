@@ -201,12 +201,16 @@ const config = {
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 4px)",
+        sm: "calc(var(--radius) - 8px)",
       },
       dropShadow: {
-        card: "2px 4px 16px 0px rgba(34, 41, 73, 0.08)",
-        primary: "2px 4px 16px rgba(34, 41, 73, 0.08)",
+        card: "0 12px 28px rgba(34, 41, 73, 0.10)",
+        primary: "0 12px 28px rgba(34, 41, 73, 0.14)",
+      },
+      boxShadow: {
+        card: "0 1px 2px rgba(34, 41, 73, 0.04), 0 12px 32px -12px rgba(34, 41, 73, 0.16)",
+        "card-hover": "0 1px 2px rgba(34, 41, 73, 0.06), 0 24px 48px -20px rgba(34, 41, 73, 0.32)",
       },
       keyframes: {
         "accordion-down": {
@@ -217,10 +221,15 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "pop-in": {
+          "0%": { opacity: "0", transform: "translateY(8px) scale(0.98)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pop-in": "pop-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both",
       },
     },
   },

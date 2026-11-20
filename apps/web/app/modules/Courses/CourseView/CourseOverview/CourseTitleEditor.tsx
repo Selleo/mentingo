@@ -103,7 +103,7 @@ export default function CourseTitleEditor({
   return (
     <h1
       data-testid={COURSE_OVERVIEW_HANDLES.HERO_TITLE}
-      className="relative z-10 mb-4 min-w-0 max-w-full text-lg font-bold leading-snug text-white min-[360px]:text-xl md:text-3xl md:leading-tight lg:text-4xl"
+      className="relative z-10 mb-4 min-w-0 max-w-full font-gothic text-lg font-extrabold leading-snug tracking-tight text-white min-[360px]:text-xl md:text-3xl md:leading-tight lg:text-4xl"
     >
       {titleContent}
     </h1>

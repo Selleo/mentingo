@@ -50,20 +50,20 @@ const CourseCard = ({
       data-testid={title}
       to={isScormCreatePage ? "#" : `/course/${slug || id}`}
       className={cn(
-        "flex h-auto w-full max-w-[320px] flex-col overflow-hidden rounded-lg border bg-white transition hover:shadow-primary lg:bg-none",
+        "lift-on-hover group flex h-auto w-full max-w-[320px] flex-col overflow-hidden rounded-2xl border-2 bg-white shadow-card lg:bg-none",
         {
           "border-secondary-200 hover:border-secondary-500": enrolled,
           "border-primary-200 hover:border-primary-500": !enrolled,
         },
       )}
     >
-      <div className="relative">
+      <div className="relative overflow-hidden">
         <img
           src={thumbnailUrl || DefaultPhotoCourse}
           alt=""
           loading="eager"
           decoding="async"
-          className="aspect-video w-full rounded-t-lg object-cover"
+          className="aspect-video w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           onError={(e) => {
             (e.target as HTMLImageElement).src = DefaultPhotoCourse;
           }}

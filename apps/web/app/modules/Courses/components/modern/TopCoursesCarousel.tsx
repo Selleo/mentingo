@@ -51,11 +51,11 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
           y="50%"
           dominantBaseline="middle"
           textAnchor="middle"
-          className="fill-zinc-200 stroke-zinc-300"
+          className="fill-primary-100 stroke-primary-500"
           style={{
             fontSize: "230px",
             fontWeight: "900",
-            strokeWidth: "2px",
+            strokeWidth: "3px",
           }}
         >
           {rank}

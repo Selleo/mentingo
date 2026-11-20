@@ -59,7 +59,7 @@ export function DashboardWidgetCard({ children, className, testId }: WidgetCardP
     <article
       data-testid={testId}
       className={cn(
-        "flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-white drop-shadow-card",
+        "lift-on-hover flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-primary-100 bg-white shadow-card hover:border-primary-200",
         className,
       )}
     >
@@ -76,13 +76,13 @@ export function DashboardWidgetIcon({
   return (
     <div
       className={cn(
-        "flex size-8 shrink-0 items-center justify-center text-primary-700",
+        "flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand brand-gradient text-contrast brand-glow",
         iconContainerClassName,
       )}
     >
       <Icon
-        className={cn("size-[18px] text-primary-700", iconClassName)}
-        strokeWidth={1.8}
+        className={cn("size-[18px]", iconClassName, "text-contrast")}
+        strokeWidth={2.2}
         aria-hidden="true"
       />
     </div>
@@ -110,7 +110,7 @@ export function DashboardWidgetHeader({
     : undefined;
 
   return (
-    <header className="flex min-h-14 items-center gap-2 border-b border-neutral-100 px-4 py-2.5">
+    <header className="flex min-h-16 items-center gap-3 border-b border-primary-100 px-4 py-3">
       {showIcon && (
         <DashboardWidgetIcon
           icon={icon}
@@ -120,7 +120,9 @@ export function DashboardWidgetHeader({
       )}
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-2">
-          <h2 className="body-sm-md min-w-0 truncate text-neutral-950">{title}</h2>
+          <h2 className="min-w-0 truncate font-gothic text-base font-extrabold tracking-tight text-neutral-950">
+            {title}
+          </h2>
           {titleBadge}
           {dataScope && scopeLabel && scopeTooltip && (
             <TooltipProvider delayDuration={0}>

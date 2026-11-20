@@ -42,9 +42,9 @@ export default function CertificateStatCard({
       disabled={!isInteractive}
       onClick={isInteractive ? onOpen : undefined}
       className={cn(
-        "relative h-full w-full overflow-hidden rounded-2xl bg-white p-4 pl-6 text-left shadow-sm",
+        "relative h-full w-full overflow-hidden rounded-2xl bg-white p-4 pl-6 text-left shadow-card",
         {
-          "cursor-pointer transition-all hover:bg-neutral-50 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success-500 focus-visible:ring-offset-2":
+          "lift-on-hover cursor-pointer hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success-500 focus-visible:ring-offset-2":
             isInteractive,
           "opacity-50 hover:bg-neutral-100 hover:opacity-75": isAdminExperience && !hasCertificate,
         },
@@ -56,7 +56,7 @@ export default function CertificateStatCard({
           <Award className="size-6 text-success-500" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="mb-0.5 text-xs uppercase tracking-wider text-neutral-800">
+          <p className="mb-0.5 text-xs font-bold uppercase tracking-widest text-neutral-800">
             {t("modernCourseView.stats.certificate")}
           </p>
           {isCertificateAvailable && completionDate ? (

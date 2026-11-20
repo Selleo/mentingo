@@ -66,7 +66,7 @@ export const Badge = ({
       className={cn(
         badgeVariants({ variant, outline, fontWeight }),
         {
-          "flex h-min shrink-0 items-center gap-x-2 rounded-lg px-2 py-1 text-sm": children,
+          "flex h-min shrink-0 items-center gap-x-2 rounded-full px-2.5 py-1 text-sm": children,
         },
         className,
       )}

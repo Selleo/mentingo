@@ -9,7 +9,7 @@ export default function AuthLayout() {
   useSyncUserAfterLogin(user);
 
   return (
-    <main className="flex min-h-screen w-screen items-center justify-center">
+    <main className="auth-canvas isolate flex min-h-screen w-screen items-center justify-center p-4">
       <MFAGuard mode="auth">
         <Outlet />
       </MFAGuard>

@@ -167,10 +167,10 @@ html {
     --accent-foreground: var(--primary-800);
     --destructive: var(--error-500);
     --destructive-foreground: var(--primary-50);
-    --border: var(--neutral-200);
-    --input: var(--neutral-300);
+    --border: color-mix(in srgb, var(--primary-200) 55%, var(--neutral-200));
+    --input: color-mix(in srgb, var(--primary-300) 45%, var(--neutral-300));
     --ring: var(--neutral-900);
-    --radius: 0.5rem;
+    --radius: 0.875rem;
     --chart-1: var(--warning-400);
     --chart-2: var(--success-500);
     --chart-3: var(--primary-400);
@@ -226,22 +226,22 @@ html {
 
 @layer components {
   .h1 {
-    @apply text-4xl font-semibold font-gothic leading-relaxed;
+    @apply text-4xl font-extrabold font-gothic leading-snug tracking-tight;
   }
   .h2 {
-    @apply text-[32px] font-semibold font-gothic leading-relaxed;
+    @apply text-[32px] font-extrabold font-gothic leading-snug tracking-tight;
   }
   .h3 {
-    @apply text-[29px] font-semibold font-gothic leading-relaxed;
+    @apply text-[29px] font-extrabold font-gothic leading-snug tracking-tight;
   }
   .h4 {
-    @apply text-[26px] font-semibold font-gothic leading-relaxed;
+    @apply text-[26px] font-extrabold font-gothic leading-snug tracking-tight;
   }
   .h5 {
-    @apply text-[23px] font-semibold font-gothic leading-relaxed;
+    @apply text-[23px] font-extrabold font-gothic leading-snug tracking-tight;
   }
   .h6 {
-    @apply text-xl font-semibold font-gothic leading-relaxed;
+    @apply text-xl font-extrabold font-gothic leading-snug tracking-tight;
   }
   .body-lg {
     @apply text-lg leading-relaxed;
@@ -355,6 +355,130 @@ html {
 
   .color-picker-field .react-colorful__hue-pointer {
     z-index: 2;
+  }
+}
+
+@layer components {
+  /* Bold visual language. Every colour derives from tenant palette vars, so branding still applies. */
+  .brand-gradient {
+    background-image: linear-gradient(
+      135deg,
+      var(--brand) 0%,
+      color-mix(in srgb, var(--brand) 55%, var(--primary-400)) 100%
+    );
+  }
+
+  .brand-gradient-text {
+    background-image: linear-gradient(
+      100deg,
+      var(--primary-900) 0%,
+      var(--brand) 45%,
+      var(--primary-400) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .brand-glow {
+    box-shadow:
+      0 1px 0 0 color-mix(in srgb, white 25%, transparent) inset,
+      0 10px 28px -10px color-mix(in srgb, var(--brand) 70%, transparent);
+  }
+
+  .app-canvas {
+    background-color: var(--primary-50);
+    background-image: radial-gradient(
+        1100px 560px at 105% -12%,
+        color-mix(in srgb, var(--primary-300) 60%, transparent),
+        transparent 62%
+      ),
+      radial-gradient(
+        900px 520px at -12% 112%,
+        color-mix(in srgb, var(--secondary-300) 40%, transparent),
+        transparent 60%
+      );
+    background-repeat: no-repeat;
+  }
+
+  .auth-canvas {
+    background-color: var(--primary-950);
+    background-image: radial-gradient(
+        900px 600px at 0% 0%,
+        color-mix(in srgb, var(--brand) 85%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        700px 520px at 100% 100%,
+        color-mix(in srgb, var(--secondary-500) 55%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        520px 420px at 85% 10%,
+        color-mix(in srgb, var(--primary-400) 50%, transparent),
+        transparent 65%
+      );
+  }
+
+  /* Auth pages render a single shadcn Card; lift it off the gradient backdrop. */
+  .auth-canvas .bg-card {
+    @apply animate-pop-in rounded-3xl;
+    border-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 40px 80px -32px rgba(10, 14, 40, 0.65);
+  }
+
+  .lift-on-hover {
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 220ms ease;
+  }
+
+  .lift-on-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 22px 44px -22px color-mix(in srgb, var(--primary-900) 45%, transparent);
+  }
+
+  .progress-shine {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 20%,
+      color-mix(in srgb, white 55%, transparent) 50%,
+      transparent 80%
+    );
+    transform: translateX(-100%);
+    animation: progress-shine 2.4s ease-in-out infinite;
+  }
+}
+
+@keyframes progress-shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift-on-hover,
+  .lift-on-hover:hover {
+    transform: none;
+    transition: none;
+  }
+
+  .progress-shine::after {
+    animation: none;
+    display: none;
   }
 }
 

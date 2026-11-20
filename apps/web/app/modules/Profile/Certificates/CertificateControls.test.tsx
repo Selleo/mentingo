@@ -27,7 +27,7 @@ describe("CertificateControls", () => {
     const downloadButton = screen.getByRole("button", { name: "Download certificate (PDF)" });
 
     expect(downloadButton).toHaveTextContent("Download certificate (PDF)");
-    expect(downloadButton).toHaveClass("h-11");
+    expect(downloadButton).toHaveClass("h-12");
   });
 
   it("downloads the certificate and closes the preview when the buttons are clicked", async () => {

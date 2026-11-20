@@ -225,7 +225,7 @@ describe("Phishing design system", () => {
     );
     expect(screen.getByRole("table", { name: "phishing.title" })).toHaveClass("border");
     expect(screen.getByText("Example campaign").closest("tr")).toHaveAttribute("tabindex", "0");
-    expect(screen.getByText("phishing.status.scheduled")).toHaveClass("rounded-lg");
+    expect(screen.getByText("phishing.status.scheduled")).toHaveClass("rounded-full");
   });
   it("removes selected recipients without submitting the form and names the removal", async () => {
     const submit = vi.fn((event) => event.preventDefault());

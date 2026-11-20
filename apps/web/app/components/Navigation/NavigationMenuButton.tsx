@@ -34,7 +34,7 @@ export function NavigationMenuButton({
             type="button"
             onClick={onClick}
             className={cn(
-              "flex w-full items-center gap-x-3 rounded-lg bg-white px-4 py-3.5 text-neutral-900 hover:bg-primary-700 hover:text-white 2xl:p-2",
+              "flex w-full items-center gap-x-3 rounded-xl bg-transparent px-4 py-3.5 text-neutral-900 transition-all duration-200 ease-out hover:bg-primary-50 hover:text-primary-800 2xl:p-2.5",
               className,
             )}
           >

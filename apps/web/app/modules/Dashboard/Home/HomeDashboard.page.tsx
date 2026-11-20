@@ -173,8 +173,16 @@ export default function HomeDashboardPage() {
   return (
     <PageWrapper className="min-w-0">
       <div className="mx-auto w-full max-w-[1600px] space-y-6">
-        <header className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <h1 className="h4">{t("dashboardHome.title")}</h1>
+        <header className="relative isolate flex flex-col gap-5 overflow-hidden rounded-3xl bg-brand brand-gradient px-6 py-8 brand-glow md:px-10 md:py-10 lg:flex-row lg:items-center lg:justify-between">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 -top-24 -z-10 size-72 rounded-full bg-white opacity-15 blur-2xl"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-28 left-1/3 -z-10 size-72 rounded-full bg-secondary-400 opacity-40 blur-3xl"
+          />
+          <h1 className="h1 text-contrast">{t("dashboardHome.title")}</h1>
 
           {!isError && (
             <div className="flex flex-wrap items-center gap-2">
@@ -213,6 +221,7 @@ export default function HomeDashboardPage() {
                     type="button"
                     data-testid={DASHBOARD_EDIT_HANDLES.FINISH_EDITING}
                     onClick={() => setIsEditing(false)}
+                    className="bg-white bg-none text-primary-800 shadow-lg hover:bg-primary-50"
                   >
                     {t("common.button.close")}
                   </Button>
@@ -222,6 +231,7 @@ export default function HomeDashboardPage() {
                   type="button"
                   data-testid={DASHBOARD_EDIT_HANDLES.CUSTOMIZE}
                   onClick={handleStartEditing}
+                  className="bg-white bg-none text-primary-800 shadow-lg hover:bg-primary-50"
                 >
                   <Settings2 className="mr-2 size-4" aria-hidden="true" />
                   {t("dashboardHome.customize")}

@@ -31,7 +31,7 @@ export default function ProgressStatCard({
   const timeLeftLabel = isAdminExperience ? 0 : formatDuration(timeLeftSeconds, t);
 
   return (
-    <div className="group relative flex h-full items-center overflow-hidden rounded-2xl bg-white p-4 pl-6 shadow-sm">
+    <div className="group relative flex h-full items-center overflow-hidden rounded-2xl bg-white p-4 pl-6 shadow-card lift-on-hover">
       <div className="absolute inset-y-0 left-0 w-1.5 bg-success-500" aria-hidden="true" />
       <div
         className={cn("flex w-full items-center gap-4 transition-all duration-200", {
@@ -42,7 +42,7 @@ export default function ProgressStatCard({
           <Clock className="size-6 text-success-500" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="mb-0.5 text-xs uppercase tracking-wider text-neutral-800">
+          <p className="mb-0.5 text-xs font-bold uppercase tracking-widest text-neutral-800">
             {t("modernCourseView.stats.yourProgress")}
           </p>
 
@@ -73,13 +73,13 @@ export default function ProgressStatCard({
                     total: courseChapterCount,
                   })}
                 </span>
-                <span className="text-xs font-semibold text-success-700">
+                <span className="text-sm font-extrabold text-success-700">
                   {progressPercentage}%
                 </span>
               </div>
-              <div className="h-1.5 rounded-full bg-primary-100">
+              <div className="h-2.5 overflow-hidden rounded-full bg-primary-100">
                 <div
-                  className="h-1.5 rounded-full bg-success-500 transition-all"
+                  className="progress-shine h-2.5 rounded-full bg-gradient-to-r from-success-500 to-success-300 shadow-[0_0_10px_var(--success-400)] transition-all duration-700"
                   style={{ width: `${progressPercentage}%` }}
                 />
               </div>

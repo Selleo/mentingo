@@ -38,10 +38,11 @@ export function NavigationMenuItem({
               onClick={() => setIsMobileNavOpen(false)}
               className={({ isActive }) =>
                 cn(
-                  "relative flex items-center gap-x-3 rounded-lg border border-transparent px-4 py-3.5 hover:border-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
+                  "relative flex items-center gap-x-3 rounded-xl border border-transparent px-4 py-3.5 transition-all duration-200 ease-out 2xl:p-2.5 body-sm-md",
                   {
-                    "border-primary-200 bg-white text-primary-800 2xl:bg-primary-50": isActive,
-                    "bg-white text-neutral-900": !isActive,
+                    "bg-brand brand-gradient font-bold text-contrast brand-glow": isActive,
+                    "bg-transparent text-neutral-900 hover:translate-x-0.5 hover:bg-primary-50 hover:text-primary-800":
+                      !isActive,
                     "flex-col sm:flex-row gap-y-1 sm:gap-y-0": isFooter,
                     "justify-center": !showLabel,
                   },
@@ -52,8 +53,8 @@ export function NavigationMenuItem({
                 <>
                   <Icon
                     name={item.iconName}
-                    className={cn("size-6", {
-                      "text-primary-700": isActive,
+                    className={cn("size-6 shrink-0", {
+                      "text-contrast": isActive,
                     })}
                   />
                   <span

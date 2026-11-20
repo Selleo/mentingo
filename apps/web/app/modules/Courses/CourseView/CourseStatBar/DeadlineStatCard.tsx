@@ -34,10 +34,13 @@ export default function DeadlineStatCard({
           onOpen();
         }
       }}
-      className={cn("relative overflow-hidden rounded-2xl bg-white p-4 pl-6 text-left shadow-sm", {
-        "cursor-pointer transition-all hover:bg-neutral-50 hover:shadow-xl": isAdminExperience,
-        "opacity-50 hover:bg-neutral-100 hover:opacity-75": isAdminExperience && !hasDeadline,
-      })}
+      className={cn(
+        "relative overflow-hidden rounded-2xl bg-white p-4 pl-6 text-left shadow-card lift-on-hover",
+        {
+          "cursor-pointer transition-all hover:bg-neutral-50 hover:shadow-xl": isAdminExperience,
+          "opacity-50 hover:bg-neutral-100 hover:opacity-75": isAdminExperience && !hasDeadline,
+        },
+      )}
     >
       <div className="absolute inset-y-0 left-0 w-1.5 bg-secondary-500" aria-hidden="true" />
       <div className="flex items-center gap-4">
@@ -45,7 +48,7 @@ export default function DeadlineStatCard({
           <Calendar className="size-6 text-secondary-500" />
         </div>
         <div className="flex-1">
-          <p className="mb-0.5 text-xs uppercase tracking-wider text-neutral-800">
+          <p className="mb-0.5 text-xs font-bold uppercase tracking-widest text-neutral-800">
             {t("modernCourseView.stats.deadline")}
           </p>
           {isAdminExperience ? (

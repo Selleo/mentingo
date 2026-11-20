@@ -290,7 +290,7 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
     <>
       <div
         className={cn(
-          "relative aspect-video overflow-hidden border border-gray-200 bg-white shadow-md transition-all rounded-lg",
+          "relative aspect-video overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-card transition-all",
           {
             "rounded-b-none shadow-none": isHovered && popoutEnabled,
           },
@@ -376,9 +376,9 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
         )}
 
         {showProgress && (
-          <div className="absolute bottom-0 left-0 right-0 z-30 h-1 bg-white/20">
+          <div className="absolute bottom-0 left-0 right-0 z-30 h-1.5 bg-[rgba(0,0,0,0.4)]">
             <div
-              className="h-full bg-red-600 transition-all ease-out"
+              className="progress-shine h-full rounded-r-full bg-brand brand-gradient shadow-[0_0_12px_var(--primary-400)] transition-all ease-out"
               style={{
                 width: `${progressPercent}%`,
                 transitionDuration: CONTENT_TRANSITION_DURATION,
@@ -390,7 +390,7 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
         {!isPicker && (
           <div
             aria-hidden
-            className="absolute bottom-3 left-3 z-30 flex size-9 items-center justify-center rounded-full bg-primary-700 text-white shadow-md transition-[opacity,transform]"
+            className="absolute bottom-3 left-3 z-30 flex size-10 items-center justify-center rounded-full bg-brand brand-gradient text-contrast brand-glow transition-[opacity,transform]"
             style={{
               opacity: isHovered ? 1 : 0,
               transform: isHovered ? "scale(1)" : "scale(0.8)",
@@ -410,7 +410,7 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
             transitionDuration: CONTENT_TRANSITION_DURATION,
           }}
         >
-          <h3 className="line-clamp-2 text-base font-semibold text-white drop-shadow-lg">
+          <h3 className="line-clamp-2 text-base font-extrabold tracking-tight text-white drop-shadow-lg">
             {title}
           </h3>
         </div>
@@ -419,7 +419,7 @@ const ModernCourseCard = (props: ModernCourseCardProps) => {
       {!isPicker && (
         <div
           ref={panelRef}
-          className="overflow-hidden rounded-b-lg bg-white shadow-xl transition-all"
+          className="overflow-hidden rounded-b-2xl bg-white shadow-xl transition-all"
           style={{
             maxHeight: isHovered ? `${PANEL_MAX_HEIGHT_PX}px` : "0px",
             opacity: isHovered ? 1 : 0,

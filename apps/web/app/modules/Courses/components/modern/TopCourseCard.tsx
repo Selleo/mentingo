@@ -82,11 +82,11 @@ const TopCourseCard = ({
             y="50%"
             dominantBaseline="middle"
             textAnchor="middle"
-            className="fill-zinc-200 stroke-zinc-300"
+            className="fill-primary-100 stroke-primary-500"
             style={{
               fontSize: "230px",
               fontWeight: "900",
-              strokeWidth: "2px",
+              strokeWidth: "3px",
             }}
           >
             {rank}
@@ -95,7 +95,7 @@ const TopCourseCard = ({
       </div>
 
       <Link to={`/course/${id}`} className="block relative">
-        <div className="relative aspect-video overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md transition-transform duration-300 group-hover:-translate-y-1">
+        <div className="relative aspect-video overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-card transition-transform duration-300 group-hover:-translate-y-1">
           {trailerUrl ? (
             <>
               <img
@@ -236,11 +236,11 @@ const TopCourseCard = ({
     //         y="50%"
     //         dominantBaseline="middle"
     //         textAnchor="middle"
-    //         className="fill-zinc-200 stroke-zinc-300"
+    //         className="fill-primary-100 stroke-primary-500"
     //         style={{
     //           fontSize: "190px",
     //           fontWeight: "900",
-    //           strokeWidth: "2px",
+    //           strokeWidth: "3px",
     //         }}
     //       >
     //         {rank}
