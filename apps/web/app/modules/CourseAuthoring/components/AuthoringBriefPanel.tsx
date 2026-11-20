@@ -438,7 +438,10 @@ export const AuthoringBriefPanel = ({
           className="flex min-w-0 max-w-sm items-center gap-2.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-2 shadow-sm"
         >
           <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary-50 text-primary-700">
-            {attachment.uploading ? (
+            {attachment.uploading ||
+            !["ready", "partial", "failed"].includes(
+              sourceById.get(attachment.id)?.status ?? "",
+            ) ? (
               <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
             ) : (
               <FileText className="size-4" aria-hidden="true" />
