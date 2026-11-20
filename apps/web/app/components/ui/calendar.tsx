@@ -151,7 +151,7 @@ function Calendar({
       day_selected:
         "bg-primary-700 !text-white hover:bg-primary-600 hover:!text-white focus:bg-primary-700 focus:!text-white rounded-md",
       day_today: "bg-neutral-100 text-neutral-900 rounded-md",
-      day_outside: "text-neutral-400 opacity-50",
+      day_outside: "day-outside text-neutral-400 opacity-50",
       day_disabled: "text-neutral-300 opacity-50",
       day_range_middle: "aria-selected:bg-neutral-100 aria-selected:text-neutral-900 rounded-none",
       day_hidden: "invisible",

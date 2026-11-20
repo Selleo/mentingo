@@ -99,3 +99,7 @@ export const USERS_IMPORT_MODAL_HANDLES = {
   RESULT_CLOSE: "users-import-modal-result-close",
   resultEmail: (email: string) => `users-import-modal-result-email-${email}`,
 } as const;
+
+export const PROFILE_PAGE_HANDLES = {
+  USERNAME: "username",
+} as const;
