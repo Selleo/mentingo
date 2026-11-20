@@ -377,7 +377,7 @@ const ModernCoursesView = () => {
 
     if (!heroCourse) {
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center gap-4 text-neutral-600">
+        <div className="flex min-h-screen flex-col items-center justify-center gap-4 text-neutral-800">
           {t("studentCoursesView.other.cannotFindCourses")}
           {canCreateCourse && (
             <Button asChild>

@@ -48,11 +48,12 @@ export function WidgetStudentCourseCompletion({
       color: "var(--neutral-300)",
     },
   } satisfies ChartConfig;
-  const chartData = STATUS_STYLES.map(({ key, fill }) => ({
-    status: key,
-    value: completion?.[key] ?? 0,
-    fill,
-  }));
+  const chartData = STATUS_STYLES.map(({ key, fill }) => {
+    const value = completion?.[key] ?? 0;
+
+    // Recharts renders each segment as role="img"; it passes this through to the segment path.
+    return { status: key, value, fill, "aria-label": `${chartConfig[key].label}: ${value}` };
+  });
 
   return (
     <DashboardWidgetCard
@@ -75,7 +76,7 @@ export function WidgetStudentCourseCompletion({
         {!isLoading && !isError && completion?.total === 0 && (
           <div
             data-testid={DASHBOARD_WIDGET_HANDLES.EMPTY_STATE}
-            className="flex flex-1 items-center justify-center text-center text-neutral-600"
+            className="flex flex-1 items-center justify-center text-center text-neutral-800"
           >
             {t("dashboardHome.widgets.studentTiles.courseCompletion.empty")}
           </div>
@@ -137,7 +138,7 @@ export function WidgetStudentCourseCompletion({
                             <tspan
                               x={viewBox.cx}
                               y={(viewBox.cy ?? 0) + 16}
-                              className="details fill-neutral-500"
+                              className="details fill-neutral-800"
                             >
                               {completion.completed}/{completion.total}
                             </tspan>

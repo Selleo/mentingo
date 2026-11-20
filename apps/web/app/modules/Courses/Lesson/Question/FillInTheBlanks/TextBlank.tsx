@@ -12,6 +12,7 @@ import type { QuizForm } from "~/modules/Courses/Lesson/types";
 
 type TextBlankProps = {
   index: number;
+  blankCount: number;
   studentAnswer?: QuizQuestionOption;
   isQuizSubmitted?: boolean;
   questionId: string;
@@ -19,6 +20,7 @@ type TextBlankProps = {
 
 export const TextBlank = ({
   index,
+  blankCount,
   studentAnswer,
   isQuizSubmitted,
   questionId,
@@ -50,14 +52,14 @@ export const TextBlank = ({
   const textBlankClasses = cn(
     "mx-1.5 w-20 align-middle bg-transparent border-b border-dashed border-b-accent-foreground text-accent-foreground focus:outline-none focus:ring-0",
     {
-      "border-b-neutral-400 text-neutral-600": isQuizFeedbackRedacted && isQuizSubmitted,
-      "border-b-success-500 text-success-500":
+      "border-b-neutral-400 text-neutral-800": isQuizFeedbackRedacted && isQuizSubmitted,
+      "border-b-success-500 text-success-700":
         !isQuizFeedbackRedacted && isCorrectAnswer && studentAnswer?.isStudentAnswer,
-      "border-b-error-500 text-error-500":
+      "border-b-error-500 text-error-700":
         !isQuizFeedbackRedacted &&
         ((typeof studentAnswer?.isStudentAnswer === "boolean" && !studentAnswer.isStudentAnswer) ||
           isUnanswered),
-      "w-28 italic placeholder:text-error-500": !isQuizFeedbackRedacted && isUnanswered,
+      "w-28 italic placeholder:text-error-700": !isQuizFeedbackRedacted && isUnanswered,
     },
   );
 
@@ -68,6 +70,10 @@ export const TextBlank = ({
       key={index}
       type="text"
       data-testid={LEARNING_HANDLES.textBlank(index + 1)}
+      aria-label={t("studentLessonView.other.blankLabel", {
+        current: index + 1,
+        total: blankCount,
+      })}
       placeholder={isUnanswered ? t("studentLessonView.other.notAnswered") : undefined}
       className={textBlankClasses}
       {...(studentAnswer?.studentAnswer && { defaultValue: studentAnswer.studentAnswer })}

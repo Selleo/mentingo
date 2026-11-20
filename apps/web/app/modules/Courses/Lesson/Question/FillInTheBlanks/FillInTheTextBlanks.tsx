@@ -2,7 +2,7 @@ import { BlankAnswerSentence } from "./BlankAnswerSentence";
 
 type FillInTheTextBlanksProps = {
   content: string;
-  replacement: (index: number, answerId?: string) => JSX.Element;
+  replacement: (index: number, answerId: string | undefined, blankCount: number) => JSX.Element;
 };
 
 export const FillInTheTextBlanks = ({ content, replacement }: FillInTheTextBlanksProps) => {

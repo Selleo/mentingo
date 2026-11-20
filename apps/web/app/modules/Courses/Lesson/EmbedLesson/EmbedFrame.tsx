@@ -70,6 +70,7 @@ export const EmbedFrame = ({ resource, title }: EmbedFrameProps) => {
               variant="primary"
               size="icon"
               className="absolute bottom-2 right-2"
+              aria-label={t("common.enterFullscreen")}
               onClick={handleFullscreen}
             >
               <Maximize2 className="size-5 text-white" />

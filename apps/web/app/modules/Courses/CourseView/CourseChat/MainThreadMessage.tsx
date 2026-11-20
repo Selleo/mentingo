@@ -129,7 +129,7 @@ export function MainThreadMessage({
           type="button"
           variant="ghost"
           size="sm"
-          className="h-6 gap-1.5 px-2 text-xs text-neutral-600"
+          className="h-6 gap-1.5 px-2 text-xs text-neutral-800"
           data-testid={COURSE_DISCUSSION_HANDLES.repliesToggle(message.id)}
           onClick={onToggle}
         >
@@ -148,7 +148,7 @@ export function MainThreadMessage({
           />
         )}
         {latestReplyDistance && (
-          <span className="text-[11px] leading-4 text-neutral-500">{latestReplyDistance}</span>
+          <span className="text-xs leading-4 text-neutral-800">{latestReplyDistance}</span>
         )}
       </div>
 
@@ -165,7 +165,7 @@ export function MainThreadMessage({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-7 self-start px-2 text-xs text-neutral-600"
+                className="h-7 self-start px-2 text-xs text-neutral-800"
                 disabled={isFetchingMoreReplies}
                 data-testid={COURSE_DISCUSSION_HANDLES.LOAD_MORE_REPLIES_BUTTON}
                 onClick={onLoadMoreReplies}

@@ -18,7 +18,7 @@ export function LiveTrainingLocationNotice({ location }: LiveTrainingLocationNot
       <span className="flex size-7 shrink-0 items-center justify-center rounded bg-neutral-50 text-primary-700">
         <MapPin className="size-4" />
       </span>
-      <span className="shrink-0 text-sm text-neutral-500">
+      <span className="shrink-0 text-sm text-neutral-800">
         {t("studentLessonView.liveTraining.locationNotice")}
       </span>
       <span className="min-w-0 truncate text-sm font-medium text-neutral-950" title={location}>

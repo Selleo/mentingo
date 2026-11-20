@@ -16,7 +16,7 @@ export function AiMentorEvaluationLoader() {
           <p className="text-sm font-semibold text-neutral-950">
             {t("studentCourseView.lesson.aiMentorLesson.evaluation.loadingTitle")}
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-neutral-600">
+          <p className="mt-1 text-sm leading-relaxed text-neutral-800">
             {t("studentCourseView.lesson.aiMentorLesson.evaluation.loadingDescription")}
           </p>
           <div className="mt-3 h-1 overflow-hidden rounded-full bg-neutral-100">

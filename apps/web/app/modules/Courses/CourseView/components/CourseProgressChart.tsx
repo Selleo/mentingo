@@ -33,20 +33,24 @@ export const CourseProgressChart = ({
   completedChaptersCount = 0,
 }: CourseProgressChartProps) => {
   const { t } = useTranslation();
+  const remainingChaptersCount = chaptersCount - completedChaptersCount;
   const chartData = useMemo(
     () => [
       {
         state: t(chartConfig.completed.label),
         chaptersCount: completedChaptersCount,
         fill: "var(--success-500)",
+        // Recharts renders each segment as role="img"; it passes this through to the segment path.
+        "aria-label": `${t(chartConfig.completed.label)}: ${completedChaptersCount}`,
       },
       {
         state: t(chartConfig.notCompleted.label),
-        chaptersCount: chaptersCount - completedChaptersCount,
+        chaptersCount: remainingChaptersCount,
         fill: "var(--primary-100)",
+        "aria-label": `${t(chartConfig.notCompleted.label)}: ${remainingChaptersCount}`,
       },
     ],
-    [completedChaptersCount, chaptersCount, t],
+    [completedChaptersCount, remainingChaptersCount, t],
   );
 
   const isEmptyChart = chartData.every(({ chaptersCount }) => !chaptersCount);
@@ -62,7 +66,17 @@ export const CourseProgressChart = ({
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
           )}
           <Pie
-            data={isEmptyChart ? [emptyChartData, ...chartData] : chartData}
+            data={
+              isEmptyChart
+                ? [
+                    {
+                      ...emptyChartData,
+                      "aria-label": t("studentCourseView.sideSection.other.noData"),
+                    },
+                    ...chartData,
+                  ]
+                : chartData
+            }
             dataKey="chaptersCount"
             nameKey="state"
             innerRadius={84}

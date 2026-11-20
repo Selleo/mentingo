@@ -7610,6 +7610,32 @@
     "back": "Zurück zu Kampagnen",
     "name": "Kampagnenname",
     "scenario": "Szenario",
+    "scenarios": {
+      "course-reminder": {
+        "name": "Kurserinnerung",
+        "description": "Eine Erinnerung, einen zugewiesenen Kurs abzuschließen"
+      },
+      "account-check": {
+        "name": "Kontoüberprüfung",
+        "description": "Eine Aufforderung, den Zugriff auf das Konto zu bestätigen"
+      },
+      "password-reset": {
+        "name": "Passwort zurücksetzen",
+        "description": "Eine Aufforderung, das Kontopasswort zurückzusetzen"
+      },
+      "course-reminder-pair": {
+        "name": "Kurserinnerung (2 E-Mails)",
+        "description": "Eine Erinnerung, einen zugewiesenen Kurs abzuschließen, gefolgt von einer zweiten E-Mail drei Tage später"
+      },
+      "account-check-pair": {
+        "name": "Kontoüberprüfung (2 E-Mails)",
+        "description": "Eine Aufforderung, den Zugriff auf das Konto zu bestätigen, gefolgt von einer zweiten E-Mail drei Tage später"
+      },
+      "password-reset-pair": {
+        "name": "Passwort zurücksetzen (2 E-Mails)",
+        "description": "Eine Aufforderung, das Kontopasswort zurückzusetzen, gefolgt von einer zweiten E-Mail drei Tage später"
+      }
+    },
     "choose": "Option wählen",
     "course": "Folgekurs",
     "courseHelp": "Wird automatisch allen zugewiesen, die auf den Link klicken oder Daten übermitteln. Es werden nur veröffentlichte, kostenlose Kurse angezeigt.",

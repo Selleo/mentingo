@@ -313,12 +313,17 @@ const correctOptionIds = (options: ReturnType<typeof choiceOptions>) =>
   options.filter((option) => option.isCorrect).map((option) => option.id);
 
 export const createAllRenderedQuestionTypesQuizCourse = async ({
+  includeScaleQuestion = false,
   openQuestionsRequireReview = false,
   ...input
 }: LearningCourseInput<{
   answers: AnswerAllRenderedQuizQuestionTypesFlowInput;
   quizLesson: CurriculumCourseLessonRecord;
-}> & { openQuestionsRequireReview?: boolean }) =>
+}> & {
+  /** Appends an ungraded 1-5 scale question; it is answered by its default value. */
+  includeScaleQuestion?: boolean;
+  openQuestionsRequireReview?: boolean;
+}) =>
   createPublishedLearningCourse({
     ...input,
     categoryTitle: (prefix) => `Learning All Quiz Types Category ${prefix}`,
@@ -428,6 +433,21 @@ export const createAllRenderedQuestionTypesQuizCourse = async ({
               isCorrect: true,
             })),
           },
+          ...(includeScaleQuestion
+            ? [
+                {
+                  type: "scale_1_5" as const,
+                  title: `${prefix}-scale`,
+                  displayOrder: 11,
+                  options: [1, 2, 3, 4, 5].map((scaleAnswer) => ({
+                    optionText: `${prefix}-scale-${scaleAnswer}`,
+                    scaleAnswer,
+                    displayOrder: scaleAnswer,
+                    isCorrect: false,
+                  })),
+                },
+              ]
+            : []),
         ],
       });
 

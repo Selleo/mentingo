@@ -350,7 +350,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
               <div className="grid w-full gap-2 border-y border-neutral-200 py-3 text-sm">
                 <dl className="grid gap-2">
                   <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
-                    <dt className="text-neutral-500">
+                    <dt className="text-neutral-800">
                       {t("studentLessonView.timedQuiz.timeLimit")}
                     </dt>
                     <dd className="font-medium text-neutral-900">
@@ -358,13 +358,13 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
                     </dd>
                   </div>
                   <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
-                    <dt className="text-neutral-500">
+                    <dt className="text-neutral-800">
                       {t("studentLessonView.timedQuiz.questions")}
                     </dt>
                     <dd className="font-medium text-neutral-900">{questions.length}</dd>
                   </div>
                 </dl>
-                <p className="text-neutral-500">{t("studentLessonView.timedQuiz.info")}</p>
+                <p className="text-neutral-800">{t("studentLessonView.timedQuiz.info")}</p>
               </div>
               <Button
                 data-testid={LEARNING_HANDLES.QUIZ_START_BUTTON}

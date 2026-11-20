@@ -16,7 +16,7 @@ const GroupManagerModernCoursesView = () => {
 
   if (!heroCourse) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-neutral-600">
+      <div className="flex min-h-screen items-center justify-center text-neutral-800">
         {t("studentCoursesView.other.cannotFindCourses")}
       </div>
     );

@@ -35,6 +35,8 @@ export const COURSES_PAGE_HANDLES = {
   PAGE: "courses-page",
   MODERN_VIEW: "courses-page-modern-view",
   LEGACY_VIEW: "courses-page-legacy-view",
+  /** Learner course cards carry the course title as their test id. */
+  courseCard: (title: string) => title,
   HEADING: "courses-page-heading",
   CREATE_BUTTON: "courses-page-create-button",
   TITLE_FILTER: "courses-page-title-filter",

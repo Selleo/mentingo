@@ -130,7 +130,7 @@ export function DashboardWidgetHeader({
                     type="button"
                     aria-label={scopeLabel}
                     title={scopeLabel}
-                    className="inline-flex size-5 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1"
+                    className="inline-flex size-5 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-1"
                   >
                     <ScopeIcon className="size-3.5" aria-hidden="true" />
                   </button>
@@ -153,7 +153,7 @@ export function DashboardWidgetHeader({
                   <button
                     type="button"
                     aria-label={info}
-                    className="inline-flex size-5 shrink-0 items-center justify-center rounded-full text-neutral-400 transition-colors hover:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-1"
+                    className="inline-flex size-5 shrink-0 items-center justify-center rounded-full text-neutral-400 transition-colors hover:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-1"
                   >
                     <Info className="size-3.5" aria-hidden="true" />
                   </button>
@@ -170,7 +170,7 @@ export function DashboardWidgetHeader({
             </TooltipProvider>
           )}
         </div>
-        {description && <p className="details truncate text-neutral-500">{description}</p>}
+        {description && <p className="details truncate text-neutral-800">{description}</p>}
       </div>
       {headerAction && !isEditing && (
         <div className="flex shrink-0 items-center">{headerAction}</div>
@@ -182,7 +182,7 @@ export function DashboardWidgetHeader({
 export function DashboardWidgetContent({ children, className }: DashboardWidgetCardProps) {
   return (
     <div
-      className={cn("body-sm min-h-0 w-full flex-1 overflow-y-auto text-neutral-700", className)}
+      className={cn("body-sm min-h-0 w-full flex-1 overflow-y-auto text-neutral-800", className)}
     >
       {children}
     </div>
@@ -193,7 +193,7 @@ export function DashboardWidgetFooter({ children, className }: DashboardWidgetFo
   return (
     <footer
       className={cn(
-        "details shrink-0 border-t border-neutral-100 px-5 py-3 text-neutral-500 md:px-6",
+        "details shrink-0 border-t border-neutral-100 px-5 py-3 text-neutral-800 md:px-6",
         className,
       )}
     >

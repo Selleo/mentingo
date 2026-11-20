@@ -6,7 +6,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
-import { SELECT_OPTION_VARIANTS } from "~/modules/Courses/Lesson/constants";
+import { QUIZ_ANSWER_FOCUS_RING, SELECT_OPTION_VARIANTS } from "~/modules/Courses/Lesson/constants";
 
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 
@@ -73,6 +73,7 @@ export const SingleSelect = ({
       htmlFor={answerId}
       className={cn(
         "flex items-center space-x-3 rounded-lg border border-primary-200 px-4 py-3 cursor-pointer *:cursor-pointer",
+        QUIZ_ANSWER_FOCUS_RING,
         { "pointer-events-none cursor-not-allowed": isFieldDisabled },
         classes,
       )}

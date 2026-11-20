@@ -45,7 +45,7 @@ The tenant needs a service URL, API key and webhook secret, plus phishing enable
 - `apps/api/src/phishing/phishing.service.ts` scopes manager reports; the webhook controller validates notifications before assigning training.
 - The configuration query caches availability for 30 seconds; menu visibility is refreshed through ordinary query refetches rather than a live Mission Control subscription.
 - The plugin requests rendered emails through the HMAC-authenticated, server-only `/api/phishing/webhook/email` endpoint. Core verifies campaign membership and renders the subject, HTML, plain text and branding attachments. Rendering failures retry rather than falling back to independent plugin HTML. Deploy this core endpoint before the updated plugin.
-- The plugin uses additive SQLite tables for second-message delivery and course destinations; existing campaigns remain readable. The new redirect is available for messages rendered through core. Scenario descriptions and landing-page explanations remain English; email content follows the learner's supported language.
+- The plugin uses additive SQLite tables for second-message delivery and course destinations; existing campaigns remain readable. The new redirect is available for messages rendered through core. The web app translates the names and descriptions of the six known scenarios by scenario ID into every supported interface language and falls back to the service's English copy for unknown scenarios. Landing-page explanations remain English; email content follows the learner's supported language.
 
 ## Test Evidence
 

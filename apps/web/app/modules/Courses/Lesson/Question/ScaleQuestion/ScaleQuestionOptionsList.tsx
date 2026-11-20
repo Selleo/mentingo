@@ -6,6 +6,7 @@ import type { QuizQuestionOption } from "../types";
 type ScaleQuestionOptionsListProps = {
   options: QuizQuestionOption[];
   questionId: string;
+  labelledBy: string;
   isCompleted: boolean;
   isPreviewMode: boolean;
 };
@@ -13,6 +14,7 @@ type ScaleQuestionOptionsListProps = {
 export const ScaleQuestionOptionsList = ({
   options,
   questionId,
+  labelledBy,
   isCompleted,
   isPreviewMode,
 }: ScaleQuestionOptionsListProps) => {
@@ -82,6 +84,8 @@ export const ScaleQuestionOptionsList = ({
           max={totalSteps - 1}
           step="1"
           value={currentIndex}
+          aria-labelledby={labelledBy}
+          aria-valuetext={visibleOptions[currentIndex]?.optionText ?? undefined}
           aria-disabled={isDisabled}
           onChange={handleChange}
           className={`
@@ -108,7 +112,7 @@ export const ScaleQuestionOptionsList = ({
               <span
                 className={`
                 text-center transition-all duration-150 select-none 
-                ${isSelected ? "text-blue-600 font-bold scale-105" : "text-gray-500 opacity-60"}
+                ${isSelected ? "text-blue-600 font-bold scale-105" : "text-neutral-800"}
               `}
               >
                 {option.optionText}

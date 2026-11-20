@@ -89,7 +89,7 @@ export function CoursesViewToggle({ active, className }: CoursesViewToggleProps)
           "flex h-full items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors [&_svg]:size-4",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
           isActive && "bg-primary-50 text-primary-800",
-          !isActive && "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-950",
+          !isActive && "text-neutral-800 hover:bg-neutral-50 hover:text-neutral-950",
         );
         const optionContent = (
           <>

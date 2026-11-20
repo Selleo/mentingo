@@ -83,9 +83,9 @@ export default function CreateNewUserPage() {
   });
 
   const onSubmit = (values: FormValues) => {
-    createUser({ data: values }).then(({ data }) => {
+    createUser({ data: values }).then(() => {
       queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
-      navigate(`/admin/users/${data.id}`);
+      navigate("/admin/users");
     });
   };
 

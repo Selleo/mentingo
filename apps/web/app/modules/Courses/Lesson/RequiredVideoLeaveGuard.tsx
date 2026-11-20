@@ -150,7 +150,7 @@ export const RequiredVideoLeaveGuard = ({
           <DialogTitle>{t(translationKeys.title)}</DialogTitle>
           <DialogDescription>{t(translationKeys.description)}</DialogDescription>
         </DialogHeader>
-        <div className="flex items-center gap-2 text-sm text-neutral-700">
+        <div className="flex items-center gap-2 text-sm text-neutral-800">
           <Checkbox
             id="required-video-leave-dismiss"
             checked={rememberDecision}

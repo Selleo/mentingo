@@ -6,6 +6,7 @@ import { I18nextProvider } from "react-i18next";
 import { describe, expect, it, vi } from "vitest";
 
 import { QuizContextProvider } from "~/modules/Courses/components/QuizContextProvider";
+import { QUIZ_ANSWER_FOCUS_RING } from "~/modules/Courses/Lesson/constants";
 import {
   getEmptyQuizAnswers,
   getUserAnswers,
@@ -325,6 +326,16 @@ describe("quiz answers grouped per question", () => {
     await user.tab();
 
     expect(within(getQuestionGroup("Second single choice")).getAllByRole("radio")[0]).toHaveFocus();
+  });
+
+  it("gives every choice answer card the keyboard focus ring", () => {
+    renderQuiz();
+
+    const answers = [...screen.getAllByRole("radio"), ...screen.getAllByRole("checkbox")];
+    const answerLabels = answers.map((answer) => answer.closest("label"));
+
+    // jsdom applies no Tailwind CSS (and :focus-visible is unreliable there), so assert the card carries the keyboard-only ring classes.
+    answerLabels.forEach((label) => expect(label).toHaveClass(QUIZ_ANSWER_FOCUS_RING));
   });
 
   describe("after the quiz is graded", () => {

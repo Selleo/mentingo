@@ -22,6 +22,8 @@ type QuestionCardProps = {
     | "matching";
   isAwaitingReview?: boolean;
   reviewerFeedback?: QuizQuestion["reviewerFeedback"];
+  /** Lets a single answer control inside the card be labelled by the question title. */
+  titleId?: string;
   children: ReactNode;
 };
 
@@ -32,9 +34,11 @@ export const QuestionCard = ({
   isAwaitingReview = false,
   reviewerFeedback,
   title,
+  titleId: providedTitleId,
 }: QuestionCardProps) => {
   const { t } = useTranslation();
-  const titleId = useId();
+  const generatedTitleId = useId();
+  const titleId = providedTitleId ?? generatedTitleId;
   const instructionId = useId();
 
   // A fieldset labelled by the title lets screen readers announce the question with its answers.

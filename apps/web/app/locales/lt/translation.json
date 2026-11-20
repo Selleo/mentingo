@@ -7623,6 +7623,32 @@
     "back": "Grįžti į kampanijas",
     "name": "Kampanijos pavadinimas",
     "scenario": "Scenarijus",
+    "scenarios": {
+      "course-reminder": {
+        "name": "Kurso priminimas",
+        "description": "Priminimas užbaigti priskirtą kursą"
+      },
+      "account-check": {
+        "name": "Paskyros patvirtinimas",
+        "description": "Prašymas patvirtinti prieigą prie paskyros"
+      },
+      "password-reset": {
+        "name": "Slaptažodžio atkūrimas",
+        "description": "Prašymas atkurti paskyros slaptažodį"
+      },
+      "course-reminder-pair": {
+        "name": "Kurso priminimas (2 el. laiškai)",
+        "description": "Priminimas užbaigti priskirtą kursą, o po trijų dienų – antras el. laiškas"
+      },
+      "account-check-pair": {
+        "name": "Paskyros patvirtinimas (2 el. laiškai)",
+        "description": "Prašymas patvirtinti prieigą prie paskyros, o po trijų dienų – antras el. laiškas"
+      },
+      "password-reset-pair": {
+        "name": "Slaptažodžio atkūrimas (2 el. laiškai)",
+        "description": "Prašymas atkurti paskyros slaptažodį, o po trijų dienų – antras el. laiškas"
+      }
+    },
     "choose": "Pasirinkite",
     "course": "Tęstinis kursas",
     "courseHelp": "Automatiškai priskiriamas kiekvienam, kuris paspaudžia nuorodą arba pateikia duomenis. Rodomi tik paskelbti nemokami kursai.",

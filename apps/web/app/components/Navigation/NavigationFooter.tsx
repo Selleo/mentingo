@@ -125,8 +125,8 @@ export function NavigationFooter({
                 if (isHelpdeskOpen) event.preventDefault();
               }}
             >
-              <menu className="flex flex-col gap-2 p-1">
-                <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
+              <div className="flex flex-col gap-2 p-1">
+                <DropdownMenuItem asChild onClick={() => setIsDropdownOpen(false)}>
                   <NavigationMenuItemLink
                     item={{
                       iconName: "Info",
@@ -138,7 +138,7 @@ export function NavigationFooter({
                 </DropdownMenuItem>
 
                 {!user?.isSupportMode && (
-                  <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
+                  <DropdownMenuItem asChild onClick={() => setIsDropdownOpen(false)}>
                     <NavigationMenuItemLink
                       item={{
                         iconName: "User",
@@ -163,7 +163,7 @@ export function NavigationFooter({
                 </DropdownMenuItem>
 
                 {canViewActivityLogs && (
-                  <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
+                  <DropdownMenuItem asChild onClick={() => setIsDropdownOpen(false)}>
                     <NavigationMenuItemLink
                       item={{
                         iconName: "Timeline",
@@ -175,7 +175,7 @@ export function NavigationFooter({
                   </DropdownMenuItem>
                 )}
 
-                <DropdownMenuItem onClick={() => setIsDropdownOpen(false)} className="relative">
+                <DropdownMenuItem asChild onClick={() => setIsDropdownOpen(false)}>
                   <NavigationMenuItemLink
                     item={{
                       iconName: "Settings",
@@ -183,10 +183,11 @@ export function NavigationFooter({
                       link: `/settings`,
                       testId: NAVIGATION_HANDLES.SETTINGS_LINK,
                     }}
-                  />
-                  {hasConfigurationIssues && (
-                    <span className="absolute right-2 top-2 size-2 rounded-full bg-red-500" />
-                  )}
+                  >
+                    {hasConfigurationIssues && (
+                      <span className="absolute right-2 top-2 size-2 rounded-full bg-red-500" />
+                    )}
+                  </NavigationMenuItemLink>
                 </DropdownMenuItem>
 
                 <Separator className="my-1 bg-neutral-200" />
@@ -206,7 +207,7 @@ export function NavigationFooter({
                     </span>
                   </div>
                 </DropdownMenuItem>
-              </menu>
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

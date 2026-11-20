@@ -172,7 +172,7 @@ export const LanguageSelector = ({
                 <Icon name={item.iconName} className="size-4" />
                 <span className="font-semibold">{t(item.translationKey)}</span>
                 {!isCreateMode && baseLanguage === item.key && (
-                  <span className="rounded bg-neutral-200 px-2 text-[11px] font-medium text-neutral-700">
+                  <span className="rounded bg-neutral-200 px-2 text-xs font-medium text-neutral-900">
                     {t(labelKeys.baseLanguage)}
                   </span>
                 )}
@@ -184,7 +184,7 @@ export const LanguageSelector = ({
 
           {notAddedItems.length > 0 && (
             <>
-              <div className="px-2 py-1 text-xs uppercase text-neutral-500">
+              <div className="px-2 py-1 text-xs uppercase text-neutral-800">
                 {t(labelKeys.notAddedLanguages)}
               </div>
               {notAddedItems.map((item) => (

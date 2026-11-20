@@ -19,16 +19,16 @@ export function LessonEmojiPicker({ setInput, input }: Props) {
       />
 
       <EmojiPicker.Viewport className="relative flex-1 outline-hidden">
-        <EmojiPicker.Loading className="absolute inset-0 flex items-center justify-center text-neutral-400 text-sm dark:text-neutral-500">
+        <EmojiPicker.Loading className="absolute inset-0 flex items-center justify-center text-neutral-800 text-sm dark:text-neutral-500">
           {t("adminCourseView.curriculum.lesson.other.emoji.loading")}
         </EmojiPicker.Loading>
-        <EmojiPicker.Empty className="absolute inset-0 flex items-center justify-center text-neutral-400 text-sm dark:text-neutral-500"></EmojiPicker.Empty>
+        <EmojiPicker.Empty className="absolute inset-0 flex items-center justify-center text-neutral-800 text-sm dark:text-neutral-500"></EmojiPicker.Empty>
         <EmojiPicker.List
           className="select-none pb-1.5"
           components={{
             CategoryHeader: ({ category }, props) => (
               <div
-                className="bg-white px-3 pt-3 pb-1.5 font-medium text-neutral-600 text-xs dark:bg-neutral-900 dark:text-neutral-400"
+                className="bg-white px-3 pt-3 pb-1.5 font-medium text-neutral-800 text-xs dark:bg-neutral-900 dark:text-neutral-400"
                 {...props}
               >
                 {category.label}

@@ -49,7 +49,11 @@ const BreadcrumbLink = React.forwardRef<
   return (
     <Comp
       ref={ref}
-      className={cn("transition-colors hover:text-foreground", className)}
+      // inline-flex lets min-h-6 apply, keeping the tap target at least 24px tall (WCAG 2.5.8).
+      className={cn(
+        "inline-flex min-h-6 items-center transition-colors hover:text-foreground",
+        className,
+      )}
       {...props}
     />
   );
