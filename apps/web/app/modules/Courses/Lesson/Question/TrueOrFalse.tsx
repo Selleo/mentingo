@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
+import { QUIZ_ANSWER_FOCUS_RING } from "~/modules/Courses/Lesson/constants";
 
 import { LEARNING_HANDLES } from "../../../../../e2e/data/learning/handles";
 
@@ -45,7 +46,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
           "border-success-700 checked:bg-success-700": isCorrectCard,
           "border-error-700 checked:bg-error-700": isWrongCard,
         });
-        const labelClassName = cn("flex items-center gap-x-1", {
+        const labelClassName = cn("flex items-center gap-x-1 rounded-sm", QUIZ_ANSWER_FOCUS_RING, {
           "text-success-700": isCorrectCard,
           "text-error-700": isWrongCard,
         });
