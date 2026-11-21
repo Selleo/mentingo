@@ -29,6 +29,11 @@ on:
         required: false
         type: string
         default: all
+      suite:
+        description: "e2e runs the sharded Playwright specs; a11y-audit runs the WCAG 2.1 AA audit and uploads its report"
+        required: false
+        type: string
+        default: e2e
     secrets:
         STRIPE_SECRET_KEY:
           required: true
@@ -93,7 +98,7 @@ jobs:
           retention-days: 1
 
   playwright:
-    name: Playwright Tests (shard ${{ matrix.shard }}/7)
+    name: ${{ inputs.suite == 'a11y-audit' && 'WCAG 2.1 AA audit' || format('Playwright Tests (shard {0}/7)', matrix.shard) }}
     needs: build-images
     runs-on: ubuntu-latest
     environment:
@@ -101,10 +106,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6,7]
+        shard: ${{ fromJSON(inputs.suite == 'a11y-audit' && '[1]' || '[1, 2, 3, 4, 5, 6, 7]') }}
     env:
       E2E_BROWSER: ${{ github.event_name == 'push' && 'chromium' || (inputs.browser || 'all') }}
       PLAYWRIGHT_SHARD: ${{ matrix.shard }}
+      E2E_SUITE: ${{ inputs.suite || 'e2e' }}
 
     services:
       postgres:
@@ -302,6 +308,11 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
+          if [ "$E2E_SUITE" = "a11y-audit" ]; then
+            pnpm test:a11y-audit
+            exit $?
+          fi
+
           case "$E2E_BROWSER" in
             chromium)
               VITE_TEST=true pnpm playwright test --project chromium --shard="${PLAYWRIGHT_SHARD}/7"
@@ -325,6 +336,15 @@ jobs:
           NODE_ENV: test
           E2E_APP_IMAGES: "true"
           API_URL: http://localhost:3000
+
+      - name: Upload accessibility report
+        if: ${{ always() && env.E2E_SUITE == 'a11y-audit' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcag-audit-report
+          path: apps/web/a11y-report
+          if-no-files-found: warn
+          retention-days: 30
 
       - name: Collect app logs
         if: failure()
