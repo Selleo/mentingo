@@ -35,6 +35,7 @@ overrides:
   workflow>@workflow/next: '-'
   cacache>tar: 7.5.23
   tinypool@<2.1.2: 2.2.0
+  toml@<5.0.1: 5.0.1
 
 packageExtensionsChecksum: sha256-v36u0YheWby3JsLGCkdr+taPlBvAiaAXTMe6dhYbXN4=
 
@@ -259,8 +260,8 @@ importers:
         specifier: 2.0.6
         version: 2.0.6
       adm-zip:
-        specifier: 0.5.16
-        version: 0.5.16
+        specifier: 0.6.1
+        version: 0.6.1
       ai:
         specifier: 7.0.148
         version: 7.0.148(zod@4.6.6)
@@ -463,9 +464,6 @@ importers:
       '@swc/core':
         specifier: 1.15.3
         version: 1.15.3(@swc/helpers@0.5.23)
-      '@types/adm-zip':
-        specifier: 0.5.7
-        version: 0.5.7
       '@types/archiver':
         specifier: 6.0.3
         version: 6.0.3
@@ -9433,9 +9431,6 @@ packages:
   '@types/acorn@4.0.6':
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
 
-  '@types/adm-zip@0.5.7':
-    resolution: {integrity: sha512-DNEs/QvmyRLurdQPChqq0Md4zGvPwHerAJYWk9l2jCbD1VPpnzRJorOdiq4zsw09NFbYnhfsoEhWtxIzXpn2yw==}
-
   '@types/archiver@6.0.3':
     resolution: {integrity: sha512-a6wUll6k3zX6qs5KlxIggs1P1JcYJaTCx2gnlr+f0S1yd2DoaEwoIK10HmBaLnZwWneBz+JBm0dwcZu0zECBcQ==}
 
@@ -10387,9 +10382,9 @@ packages:
   add@2.0.6:
     resolution: {integrity: sha512-j5QzrmsokwWWp6kUcJQySpbG+xfOBqqKnup3OIk1pz+kB/80SLorZ9V8zHFLO92Lcd+hbvq8bT+zOGoPkmBV0Q==}
 
-  adm-zip@0.5.16:
-    resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
-    engines: {node: '>=12.0'}
+  adm-zip@0.6.1:
+    resolution: {integrity: sha512-Xwrja8nx9e5o2N1my4DsKCeKpdrnACyr1wtbPxBDgGzKzKyE9kRtBFA8mWldI+RVlD7CBZNWY/wQ2+ydwOR6kQ==}
+    engines: {node: '>=14.0'}
 
   aes-decrypter@4.0.2:
     resolution: {integrity: sha512-lc+/9s6iJvuaRe5qDlMTpCFjnwpkeOXp8qP3oiZ5jsj1MRg+SBVUmmICrhxHvc8OELSmc+fEyyxAuppY6hrWzw==}
@@ -17961,8 +17956,9 @@ packages:
     resolution: {integrity: sha512-dRXchy+C0IgK8WPC6xvCHFRIWYUbqqdEIKPaKo/AcTUNzwLTK6AH7RjdLWsEZcAN/TBdtfUw3PYEgPr5VPr6ww==}
     engines: {node: '>=14.16'}
 
-  toml@3.0.0:
-    resolution: {integrity: sha512-y/mWCZinnvxjTKYhJ+pYxwD0mRLVvOtdS2Awbgxln6iEnt4rk0yBxeSBHkGJcPucRiG0e55mwWp+g/05rsrd6w==}
+  toml@5.0.1:
+    resolution: {integrity: sha512-EqYNA/YvUNndrA2B3O2ojzLQoTQrBxeZ9UIjQwk8t10oe6n7dwclBwd9IdZQTOKwe6vWX+AXtl6IntXRbepdxQ==}
+    engines: {node: '>=20'}
 
   totalist@3.0.1:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
@@ -27748,10 +27744,6 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.10
 
-  '@types/adm-zip@0.5.7':
-    dependencies:
-      '@types/node': 24.19.2
-
   '@types/archiver@6.0.3':
     dependencies:
       '@types/readdir-glob': 1.1.5
@@ -29230,7 +29222,7 @@ snapshots:
 
   add@2.0.6: {}
 
-  adm-zip@0.5.16: {}
+  adm-zip@0.6.1: {}
 
   aes-decrypter@4.0.2:
     dependencies:
@@ -37296,7 +37288,7 @@ snapshots:
       estree-util-is-identifier-name: 1.1.0
       estree-util-value-to-estree: 1.3.0
       js-yaml: 4.3.2
-      toml: 3.0.0
+      toml: 5.0.1
 
   remark-mdx@2.3.0:
     dependencies:
@@ -38740,7 +38732,7 @@ snapshots:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
 
-  toml@3.0.0: {}
+  toml@5.0.1: {}
 
   totalist@3.0.1: {}
 
