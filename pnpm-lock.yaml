@@ -17,6 +17,7 @@ overrides:
   path-to-regexp@>=0.1.0 <0.1.13: 0.1.13
   qs@>=6.0.0 <6.17.1: 6.17.1
   prosemirror-view: 1.42.3
+  geckodriver>@wdio/logger: 9.1.3
 
 packageExtensionsChecksum: sha256-v36u0YheWby3JsLGCkdr+taPlBvAiaAXTMe6dhYbXN4=
 
@@ -10299,9 +10300,9 @@ packages:
     resolution: {integrity: sha512-kcHL86RmNbcQP+Gq/vQUGlArfU6IIcbbnNp32rRIraitomZow+iEoc519rdQmSVusDozMS5DZthkgDdxK+vz6Q==}
     engines: {node: ^16.13 || >=18}
 
-  '@wdio/logger@9.33.1':
-    resolution: {integrity: sha512-f2H2lK283MW/ATsWNyE8pEEeIOXUMlpzkVrdbjCYL0lEvj5FEdZG3s+0hnst2R5CM4YWoPj7CIJa1HaSw1W6zQ==}
-    engines: {node: '>=18.20.8 <19 || >=20.20.2 <21 || >=22.23.4 <23 || >=24.22.1 <25 || >=26.12.1'}
+  '@wdio/logger@9.1.3':
+    resolution: {integrity: sha512-cumRMK/gE1uedBUw3WmWXOQ7HtB6DR8EyKQioUz2P0IJtRRpglMBdZV7Svr3b++WWawOuzZHMfbTkJQmaVt8Gw==}
+    engines: {node: '>=18.20.0'}
 
   '@wdio/protocols@8.40.3':
     resolution: {integrity: sha512-wK7+eyrB3TAei8RwbdkcyoNk2dPu+mduMBOdPJjp8jf/mavd15nIUXLID1zA+w5m1Qt1DsT1NbvaeO9+aJQ33A==}
@@ -17456,10 +17457,6 @@ packages:
     resolution: {integrity: sha512-oMA2dcrw6u0YfxJQXm342bFKX/E4sG9rbTzO9ptUcR/e8A33cHuvStiYOwH7fszkZlZ1z/ta9AAoPk2F4qIOHA==}
     engines: {node: '>=18'}
 
-  ret@0.5.1:
-    resolution: {integrity: sha512-Z/nyvABwcRnRD2mMP7Kz6G1dFZZqX1mNErOnxF42OCQKE07b9k9hK9SQxHL3LFEZUdzQaLM4dId1E/E6Vm4WhA==}
-    engines: {node: '>=10'}
-
   retry-axios@2.6.0:
     resolution: {integrity: sha512-pOLi+Gdll3JekwuFjXO3fTq+L9lzMQGcSq7M5gIjExcl3Gu1hd4XXuf5o3+LuSBsaULQH7DiNbsqPd1chVpQGQ==}
     engines: {node: '>=10.7.0'}
@@ -17579,10 +17576,6 @@ packages:
   safe-regex-test@1.1.0:
     resolution: {integrity: sha512-x/+Cz4YrimQxQccJf5mKEbIa1NzeCRNI5Ecl/ekmlYaampdNLPalVyIcCZNNH3MvmqBugV5TMYZXv0ljslUlaw==}
     engines: {node: '>= 0.4'}
-
-  safe-regex2@5.1.2:
-    resolution: {integrity: sha512-tAtCGFPPP02VroDVzp4daGi6bC7jWG+41D47GKf18FeH/ubvKQHT9VmhAkvtjNOmJwqtApzWeUpEhkyEYULvmw==}
-    hasBin: true
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
@@ -27368,7 +27361,7 @@ snapshots:
       pidtree: 0.6.0
       postcss: 8.4.49
       postcss-discard-duplicates: 5.1.0(postcss@8.4.49)
-      postcss-load-config: 4.0.2(postcss@8.4.49)(ts-node@10.9.1(@swc/core@1.15.3)(@types/node@22.15.0)(typescript@5.4.5))
+      postcss-load-config: 4.0.2(postcss@8.4.49)(ts-node@10.9.1(@swc/core@1.15.3(@swc/helpers@0.5.2))(@types/node@22.15.0)(typescript@5.4.5))
       postcss-modules: 6.0.1(postcss@8.4.49)
       prettier: 2.8.8
       pretty-ms: 7.0.1
@@ -29591,12 +29584,11 @@ snapshots:
       strip-ansi: 7.2.0
     optional: true
 
-  '@wdio/logger@9.33.1':
+  '@wdio/logger@9.1.3':
     dependencies:
       chalk: 5.6.2
       loglevel: 1.9.2
       loglevel-plugin-prefix: 0.8.4
-      safe-regex2: 5.1.2
       strip-ansi: 7.2.0
     optional: true
 
@@ -33577,7 +33569,7 @@ snapshots:
 
   geckodriver@4.5.1(bare-buffer@3.7.3):
     dependencies:
-      '@wdio/logger': 9.33.1
+      '@wdio/logger': 9.1.3
       '@zip.js/zip.js': 2.25.0
       decamelize: 6.0.1
       http-proxy-agent: 7.0.2
@@ -37716,7 +37708,7 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.4.49
 
-  postcss-load-config@4.0.2(postcss@8.4.49)(ts-node@10.9.1(@swc/core@1.15.3)(@types/node@22.15.0)(typescript@5.4.5)):
+  postcss-load-config@4.0.2(postcss@8.4.49)(ts-node@10.9.1(@swc/core@1.15.3(@swc/helpers@0.5.2))(@types/node@22.15.0)(typescript@5.4.5)):
     dependencies:
       lilconfig: 3.1.2
       yaml: 2.4.2
@@ -39038,9 +39030,6 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  ret@0.5.1:
-    optional: true
-
   retry-axios@2.6.0(axios@1.21.1):
     dependencies:
       axios: 1.21.1(debug@4.4.3)
@@ -39204,11 +39193,6 @@ snapshots:
       call-bound: 1.0.4
       es-errors: 1.3.0
       is-regex: 1.2.1
-
-  safe-regex2@5.1.2:
-    dependencies:
-      ret: 0.5.1
-    optional: true
 
   safer-buffer@2.1.2: {}
 
@@ -40155,7 +40139,7 @@ snapshots:
       postcss: 8.4.49
       postcss-import: 15.1.0(postcss@8.4.49)
       postcss-js: 4.0.1(postcss@8.4.49)
-      postcss-load-config: 4.0.2(postcss@8.4.49)(ts-node@10.9.1(@swc/core@1.15.3)(@types/node@22.15.0)(typescript@5.4.5))
+      postcss-load-config: 4.0.2(postcss@8.4.49)(ts-node@10.9.1(@swc/core@1.15.3(@swc/helpers@0.5.2))(@types/node@22.15.0)(typescript@5.4.5))
       postcss-nested: 6.2.0(postcss@8.4.49)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.12
@@ -40182,7 +40166,7 @@ snapshots:
       postcss: 8.4.49
       postcss-import: 15.1.0(postcss@8.4.49)
       postcss-js: 4.0.1(postcss@8.4.49)
-      postcss-load-config: 4.0.2(postcss@8.4.49)(ts-node@10.9.1(@swc/core@1.15.3)(@types/node@22.15.0)(typescript@5.4.5))
+      postcss-load-config: 4.0.2(postcss@8.4.49)(ts-node@10.9.1(@swc/core@1.15.3(@swc/helpers@0.5.2))(@types/node@22.15.0)(typescript@5.4.5))
       postcss-nested: 6.2.0(postcss@8.4.49)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.12
