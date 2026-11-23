@@ -1,8 +1,8 @@
-FROM node:22.15.0-alpine AS base
+FROM node:24.22.3-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV TURBO_TELEMETRY_DISABLED=1
-RUN npm install -g pnpm@10.22.0 turbo@2.3.3
+RUN npm install -g pnpm@10.34.9 turbo@2.3.3
 WORKDIR /app
 
 FROM base AS pruner
@@ -16,7 +16,7 @@ COPY --from=pruner /app/out/full/ .
 RUN pnpm build --filter=api
 RUN pnpm deploy --filter=api pnpm-deploy-output --prod --legacy --prefer-offline
 
-FROM node:22.15.0-alpine AS runtime
+FROM node:24.22.3-alpine AS runtime
 RUN apk add --no-cache \
     chromium \
     nss \

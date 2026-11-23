@@ -7,6 +7,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2021",
+    "lib": ["ES2023"],
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
