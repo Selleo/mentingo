@@ -20,7 +20,6 @@ import { WsJwtGuard } from "src/websocket/guards/ws-jwt.guard";
 import { AuthenticatedSocket } from "src/websocket/websocket.types";
 
 import { CourseAuthoringContextBridgeService } from "./course-authoring-context-bridge.service";
-import { CourseAuthoringContextService } from "./course-authoring-context.service";
 import { CourseAuthoringSessionService } from "./course-authoring-session.service";
 import { LumaService } from "./luma.service";
 
@@ -49,7 +48,6 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
   /** Injects the session service and shared realtime infrastructure. */
   constructor(
     private readonly sessions: CourseAuthoringSessionService,
-    private readonly context: CourseAuthoringContextService,
     private readonly luma: LumaService,
     private readonly tenants: TenantDbRunnerService,
     private readonly authentication: WsJwtGuard,
@@ -69,7 +67,7 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
       return await this.tenants.runWithTenant(actor.tenantId, async () => {
         const snapshot = await this.sessions.get(payload.courseId, payload.sessionId, actor);
         if (socket.disconnected) throw new WsException("courseAuthoring.errors.socketDisconnected");
-        const key = `${actor.tenantId}:${payload.sessionId}`;
+        const key = `${actor.tenantId}:${payload.courseId}:${payload.sessionId}`;
         let subscription = this.subscriptions.get(key);
         const startStream = !subscription;
         // Register before replay. The client deduplicates by sequence and recovers any gap.
@@ -136,102 +134,114 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
   /** Consumes session events and emits only data authorized at delivery time. */
   private async consume(key: string, subscription: CourseAuthoringSubscription) {
     let backoff = 500;
-    let needsReconcile = false;
-    while (!subscription.abort.signal.aborted && subscription.members.size) {
-      if (needsReconcile) {
-        try {
-          const recovered = await this.tenants.runWithTenant(subscription.tenantId, () =>
-            this.reconcile(subscription),
-          );
-          needsReconcile = !recovered;
-        } catch (error) {
-          this.logStreamIssue("reconcile_failed", subscription, error);
-        }
-        if (subscription.abort.signal.aborted || !subscription.members.size) break;
+    const heartbeat = setInterval(() => {
+      void this.tenants
+        .runWithTenant(subscription.tenantId, async () => {
+          for (const socket of [...subscription.members.values()])
+            await this.authorizeMember(subscription, socket);
+        })
+        .catch(() => this.emitResync(subscription));
+    }, 60_000);
+    try {
+      let needsReconcile = false;
+      while (!subscription.abort.signal.aborted && subscription.members.size) {
         if (needsReconcile) {
-          if (!(await this.waitForRetry(subscription, backoff))) break;
-          backoff = Math.min(backoff * 2, 10000);
-          continue;
+          try {
+            const recovered = await this.tenants.runWithTenant(subscription.tenantId, () =>
+              this.reconcile(subscription),
+            );
+            needsReconcile = !recovered;
+          } catch (error) {
+            this.logStreamIssue("reconcile_failed", subscription, error);
+          }
+          if (subscription.abort.signal.aborted || !subscription.members.size) break;
+          if (needsReconcile) {
+            if (!(await this.waitForRetry(subscription, backoff))) break;
+            backoff = Math.min(backoff * 2, 10000);
+            continue;
+          }
         }
-      }
-      const streamAbort = new AbortController();
-      const abortStream = () => streamAbort.abort(subscription.abort.signal.reason);
-      subscription.abort.signal.addEventListener("abort", abortStream, { once: true });
-      const connectedAt = Date.now();
-      try {
-        await this.tenants.runWithTenant(subscription.tenantId, async () => {
-          const client = await this.luma.getLumaClient();
-          await client.authoring.subscribeEvents({
-            sessionId: subscription.sessionId,
-            afterSequence: subscription.cursor,
-            signal: streamAbort.signal,
-            onEvent: async (event) => {
-              if (
-                event.sessionId !== subscription.sessionId ||
-                event.sequence <= subscription.cursor
-              )
-                return;
-              if (event.sequence !== subscription.cursor + 1) {
-                needsReconcile = true;
-                streamAbort.abort();
-                return;
-              }
-              if (event.type === "context.requested") {
-                try {
-                  await this.contextBridge.acceptRealtimeEvent(subscription.tenantId, event);
-                } catch {
-                  this.logger.warn(
-                    "A live context request will be replayed by the durable scanner",
-                  );
+        const streamAbort = new AbortController();
+        const abortStream = () => streamAbort.abort(subscription.abort.signal.reason);
+        subscription.abort.signal.addEventListener("abort", abortStream, { once: true });
+        const connectedAt = Date.now();
+        try {
+          await this.tenants.runWithTenant(subscription.tenantId, async () => {
+            const client = await this.luma.getLumaClient();
+            await client.authoring.subscribeEvents({
+              sessionId: subscription.sessionId,
+              afterSequence: subscription.cursor,
+              signal: streamAbort.signal,
+              onEvent: async (event) => {
+                if (
+                  event.sessionId !== subscription.sessionId ||
+                  event.sequence <= subscription.cursor
+                )
+                  return;
+                if (event.sequence !== subscription.cursor + 1) {
+                  needsReconcile = true;
+                  streamAbort.abort();
+                  return;
                 }
-              }
-              try {
-                await this.deliverEvent(subscription, event);
-              } catch (error) {
-                // A transient authorization failure must neither deliver the event nor
-                // advance its cursor. Reconcile before reading more from this stream.
-                this.logStreamIssue("authorization_unavailable", subscription, error);
+                if (event.type === "context.requested") {
+                  try {
+                    await this.contextBridge.acceptRealtimeEvent(subscription.tenantId, event);
+                  } catch {
+                    this.logger.warn(
+                      "A live context request will be replayed by the durable scanner",
+                    );
+                  }
+                }
+                try {
+                  await this.deliverEvent(subscription, event);
+                } catch (error) {
+                  // A transient authorization failure must neither deliver the event nor
+                  // advance its cursor. Reconcile before reading more from this stream.
+                  this.logStreamIssue("authorization_unavailable", subscription, error);
+                  needsReconcile = true;
+                  streamAbort.abort();
+                  return;
+                }
+                subscription.cursor = event.sequence;
+                backoff = 500;
+              },
+              onError: (error) => {
+                if (error.code === "permission_revoked") {
+                  this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.PERMISSION_REVOKED);
+                  return;
+                }
                 needsReconcile = true;
-                streamAbort.abort();
-                return;
-              }
-              subscription.cursor = event.sequence;
-              backoff = 500;
-            },
-            onError: (error) => {
-              if (error.code === "permission_revoked") {
-                this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.PERMISSION_REVOKED);
-                return;
-              }
-              needsReconcile = true;
-              this.emitResync(subscription);
-            },
+                this.emitResync(subscription);
+              },
+            });
           });
-        });
-        if (!subscription.abort.signal.aborted && !needsReconcile)
-          this.logStreamIssue("disconnected", subscription, undefined, Date.now() - connectedAt);
-      } catch (error) {
-        if (!subscription.abort.signal.aborted) {
-          const status = this.errorStatus(error);
-          if (status === 404)
-            this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND);
-          else if (this.isAccessError(error))
-            this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.PERMISSION_REVOKED);
-          else this.logStreamIssue("disconnected", subscription, error, Date.now() - connectedAt);
+          if (!subscription.abort.signal.aborted && !needsReconcile)
+            this.logStreamIssue("disconnected", subscription, undefined, Date.now() - connectedAt);
+        } catch (error) {
+          if (!subscription.abort.signal.aborted) {
+            const status = this.errorStatus(error);
+            if (status === 404)
+              this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND);
+            else if (this.isAccessError(error))
+              this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.PERMISSION_REVOKED);
+            else this.logStreamIssue("disconnected", subscription, error, Date.now() - connectedAt);
+          }
+        } finally {
+          subscription.abort.signal.removeEventListener("abort", abortStream);
+          streamAbort.abort();
         }
-      } finally {
-        subscription.abort.signal.removeEventListener("abort", abortStream);
-        streamAbort.abort();
+        if (subscription.abort.signal.aborted) break;
+        // EOF and ordinary transport errors can hide a terminal event just as a
+        // sequence gap can. A fresh snapshot closes that turn before resubscribing.
+        needsReconcile = true;
+        this.emitResync(subscription);
+        if (!(await this.waitForRetry(subscription, backoff))) break;
+        backoff = Math.min(backoff * 2, 10000);
       }
-      if (subscription.abort.signal.aborted) break;
-      // EOF and ordinary transport errors can hide a terminal event just as a
-      // sequence gap can. A fresh snapshot closes that turn before resubscribing.
-      needsReconcile = true;
-      this.emitResync(subscription);
-      if (!(await this.waitForRetry(subscription, backoff))) break;
-      backoff = Math.min(backoff * 2, 10000);
+    } finally {
+      clearInterval(heartbeat);
+      if (this.subscriptions.get(key) === subscription) this.subscriptions.delete(key);
     }
-    if (this.subscriptions.get(key) === subscription) this.subscriptions.delete(key);
   }
 
   /** Waits between reconnects without keeping a released subscription alive. */
@@ -293,8 +303,16 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
         (await this.authorizeMember(subscription, socket)) &&
         !subscription.abort.signal.aborted &&
         subscription.members.has(socket.id)
-      )
+      ) {
         this.emit(socket, "authoring.event", event);
+        if (
+          event &&
+          typeof event === "object" &&
+          "type" in event &&
+          event.type === "session.course_attached"
+        )
+          this.emit(socket, "authoring.resync", { sessionId: subscription.sessionId });
+      }
     }
   }
 
@@ -308,7 +326,11 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
       await this.authentication.authenticateCurrent(socket);
       if (socket.data.user.tenantId !== subscription.tenantId)
         throw new ForbiddenException("common.toast.noAccess");
-      await this.context.authorize(subscription.courseId, socket.data.user);
+      await this.sessions.authorizeAccess(
+        subscription.courseId,
+        subscription.sessionId,
+        socket.data.user,
+      );
       return true;
     } catch (error) {
       if (this.errorStatus(error) === 404) {

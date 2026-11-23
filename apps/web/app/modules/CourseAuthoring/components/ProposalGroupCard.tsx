@@ -54,6 +54,7 @@ const emptyStatuses: Record<string, ProposalApplicationStatus> = {};
 const operationKind = (type: string): ChangedKind =>
   match(type)
     .with(
+      AUTHORING_OPERATION_TYPE.COURSE_CREATE,
       AUTHORING_OPERATION_TYPE.LESSON_CREATE,
       AUTHORING_OPERATION_TYPE.COURSE_LESSON_CREATE,
       AUTHORING_OPERATION_TYPE.CHAPTER_CREATE,
@@ -72,6 +73,7 @@ const operationKind = (type: string): ChangedKind =>
     .otherwise(() => REVIEW_CHANGE_KIND.EDITED);
 
 const COURSE_LEVEL_TYPES = new Set<string>([
+  AUTHORING_OPERATION_TYPE.COURSE_CREATE,
   AUTHORING_OPERATION_TYPE.COURSE_METADATA_UPDATE,
   AUTHORING_OPERATION_TYPE.COURSE_SETTINGS_UPDATE,
 ]);
@@ -193,7 +195,8 @@ export const ProposalGroup = ({
     );
 
   const courseTitleChange = (operation: AuthoringOperation) =>
-    operation.type === AUTHORING_OPERATION_TYPE.COURSE_METADATA_UPDATE &&
+    (operation.type === AUTHORING_OPERATION_TYPE.COURSE_CREATE ||
+      operation.type === AUTHORING_OPERATION_TYPE.COURSE_METADATA_UPDATE) &&
     typeof operation.payload.title === "string"
       ? operation.payload.title
       : null;

@@ -45,6 +45,8 @@ import {
   lessons,
 } from "src/storage/schema";
 
+import { CourseAuthoringDraftContextService } from "./course-authoring-draft-context.service";
+
 import type {
   AuthoringChapterContext,
   AuthoringContextAssessmentRow,
@@ -95,6 +97,7 @@ export class CourseAuthoringContextService {
     private readonly quizAuthoring: QuizAuthoringService,
     private readonly mentorConfigurations: AiMentorConfigurationService,
     private readonly judgeConfigurations: AiJudgeConfigurationService,
+    private readonly draftContext: CourseAuthoringDraftContextService,
   ) {}
 
   /** Re-resolves permissions and course access for each request or background command. */
@@ -296,6 +299,7 @@ export class CourseAuthoringContextService {
     return {
       courseId,
       language: query.language,
+      tenantPalette: await this.draftContext.tenantPalette(actor.tenantId),
       course: {
         id: course.id,
         status: course.status,

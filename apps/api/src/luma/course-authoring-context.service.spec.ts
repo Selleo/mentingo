@@ -26,6 +26,7 @@ describe("CourseAuthoringContextService authorization", () => {
     {} as QuizAuthoringService,
     {} as AiMentorConfigurationService,
     {} as AiJudgeConfigurationService,
+    { tenantPalette: jest.fn().mockResolvedValue([]) } as never,
   );
   const actor: CurrentUserType = {
     userId: "00000000-0000-4000-8000-000000000001",
@@ -97,6 +98,7 @@ describe("CourseAuthoringContextService legacy block preparation", () => {
       {} as QuizAuthoringService,
       {} as AiMentorConfigurationService,
       {} as AiJudgeConfigurationService,
+      { tenantPalette: jest.fn().mockResolvedValue([]) } as never,
     );
     await service.prepareBlockIdentities("00000000-0000-4000-8000-000000000005", "en", {
       userId: "00000000-0000-4000-8000-000000000001",
@@ -168,6 +170,7 @@ describe("CourseAuthoringContextService selected lesson details", () => {
       quizAuthoring,
       mentorConfigurations as unknown as AiMentorConfigurationService,
       judgeConfigurations as unknown as AiJudgeConfigurationService,
+      { tenantPalette: jest.fn().mockResolvedValue([]) } as never,
     );
     return { service, select, quizAuthoring, mentorConfigurations, judgeConfigurations };
   };

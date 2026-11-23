@@ -1,13 +1,14 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { PERMISSIONS, type PermissionKey, type SupportedLanguages } from "@repo/shared";
-import { and, count, eq, getTableColumns, inArray, ne, sql } from "drizzle-orm";
+import { and, count, eq, getTableColumns, inArray, ne, or, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 
 import { DatabasePg } from "src/common";
@@ -129,14 +130,7 @@ export class CategoryService {
       throw new ConflictException({ message: "adminCategoryView.toast.alreadyExists" });
     }
 
-    const [newCategory] = await this.db
-      .insert(categories)
-      .values({
-        title: buildJsonbField(language, createCategoryBody.title),
-        baseLanguage: language,
-        availableLocales: [language],
-      })
-      .returning();
+    const newCategory = await this.insertCategory(createCategoryBody, this.db);
 
     if (!newCategory) {
       throw new UnprocessableEntityException({
@@ -153,6 +147,89 @@ export class CategoryService {
     );
 
     return this.getCategoryById(newCategory.id, language);
+  }
+
+  /** Reuses the approved tenant category or creates the requested localized title atomically. */
+  async resolveForCourseAuthoring(
+    selection: { categoryId?: string | null; categoryTitle?: string | null },
+    language: SupportedLanguages,
+    actor: CurrentUserType,
+    transaction: DatabasePg,
+  ): Promise<UUIDType> {
+    const categoryTitle = selection.categoryTitle?.trim();
+    if (selection.categoryId && categoryTitle)
+      throw new BadRequestException("courseAuthoring.errors.invalidOperations");
+    if (selection.categoryId) {
+      const [category] = await transaction
+        .select({ id: categories.id })
+        .from(categories)
+        .where(
+          and(eq(categories.tenantId, actor.tenantId), eq(categories.id, selection.categoryId)),
+        )
+        .for("key share");
+      if (!category) throw new NotFoundException("adminCourseView.errors.notFound.category");
+      return category.id;
+    }
+    if (!categoryTitle) throw new BadRequestException("courseAuthoring.errors.invalidOperations");
+    if (!hasPermission(actor.permissions, PERMISSIONS.CATEGORY_MANAGE))
+      throw new ForbiddenException("common.toast.noAccess");
+
+    const [matchingCategory] = await transaction
+      .select({ id: categories.id })
+      .from(categories)
+      .where(
+        and(
+          eq(categories.tenantId, actor.tenantId),
+          or(
+            sql`${categories.title}->>${language}::text = ${categoryTitle}`,
+            sql`${categories.title}->>${categories.baseLanguage} = ${categoryTitle}`,
+          ),
+        ),
+      )
+      .orderBy(categories.id)
+      .limit(1)
+      .for("key share");
+    if (matchingCategory) return matchingCategory.id;
+
+    const newCategory = await this.insertCategory({ title: categoryTitle, language }, transaction);
+    if (newCategory) {
+      await this.outboxPublisher.publish(
+        new CreateCategoryEvent({
+          categoryId: newCategory.id,
+          actor,
+          category: { id: newCategory.id, title: categoryTitle },
+        }),
+        transaction,
+      );
+      return newCategory.id;
+    }
+
+    // A concurrent manual or authoring request may have inserted the same base title.
+    const [existing] = await transaction
+      .select({ id: categories.id })
+      .from(categories)
+      .where(
+        and(
+          eq(categories.tenantId, actor.tenantId),
+          sql`${categories.title}->>${categories.baseLanguage} = ${categoryTitle}`,
+        ),
+      )
+      .for("key share");
+    if (!existing) throw new ConflictException("courseAuthoring.errors.applicationFailed");
+    return existing.id;
+  }
+
+  private async insertCategory(input: CategoryInsert, db: DatabasePg) {
+    const [category] = await db
+      .insert(categories)
+      .values({
+        title: buildJsonbField(input.language, input.title),
+        baseLanguage: input.language,
+        availableLocales: [input.language],
+      })
+      .onConflictDoNothing()
+      .returning({ id: categories.id });
+    return category;
   }
 
   public async updateCategory(

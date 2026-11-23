@@ -135,6 +135,8 @@ describe("CourseAuthoringSessionService source refresh", () => {
       } as unknown as LumaService,
       context as unknown as CourseAuthoringContextService,
       { bind: jest.fn() } as never,
+      { access: jest.fn().mockResolvedValue(null) } as never,
+      {} as never,
     );
     const input: AuthoringCommandBody = {
       schemaVersion: 1,
@@ -525,6 +527,8 @@ describe("CourseAuthoringSessionService list", () => {
       } as unknown as LumaService,
       { authorize } as unknown as CourseAuthoringContextService,
       { bind: jest.fn() } as never,
+      { access: jest.fn().mockResolvedValue(null) } as never,
+      {} as never,
     );
     return { service, authorize, listSessions };
   }

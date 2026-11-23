@@ -47,6 +47,7 @@ export const CONTENT_VIEW_MODE = {
 } as const;
 
 export const AUTHORING_OPERATION_TYPE = {
+  COURSE_CREATE: "course.create",
   COURSE_METADATA_UPDATE: "course.metadata.update",
   COURSE_SETTINGS_UPDATE: "course.settings.update",
   CHAPTER_CREATE: "chapter.create",

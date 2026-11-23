@@ -4,7 +4,6 @@ import { validate } from "uuid";
 
 import { CourseAuthoringGateway } from "./course-authoring.gateway";
 
-import type { CourseAuthoringContextService } from "./course-authoring-context.service";
 import type { CourseAuthoringSessionService } from "./course-authoring-session.service";
 import type { LumaService } from "./luma.service";
 import type { SubscribeAuthoringEventsOptions } from "@mentingo/luma-sdk";
@@ -55,8 +54,7 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
     const authorize = jest.fn().mockResolvedValue(undefined);
     const acceptRealtimeEvent = jest.fn().mockResolvedValue(undefined);
     const gateway = new CourseAuthoringGateway(
-      { get } as unknown as CourseAuthoringSessionService,
-      { authorize } as unknown as CourseAuthoringContextService,
+      { get, authorizeAccess: authorize } as unknown as CourseAuthoringSessionService,
       {
         getLumaClient: jest.fn().mockResolvedValue({ authoring: { subscribeEvents } }),
       } as unknown as LumaService,

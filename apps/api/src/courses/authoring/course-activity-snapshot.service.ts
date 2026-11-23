@@ -27,7 +27,7 @@ export class CourseActivitySnapshotService {
       language: resolvedLanguage,
       baseLanguage,
       availableLocales,
-    } = await this.localizationService.getBaseLanguage(ENTITY_TYPE.COURSE, courseId, language);
+    } = await this.localizationService.getBaseLanguage(ENTITY_TYPE.COURSE, courseId, language, db);
 
     const course = await this.courseEditingRepository.findCourseActivitySnapshot(
       courseId,

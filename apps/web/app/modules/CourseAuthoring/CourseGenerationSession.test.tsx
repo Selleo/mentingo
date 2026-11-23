@@ -25,6 +25,7 @@ const state = vi.hoisted(() => ({
   proposalRevision: 1,
   outlineOnly: false,
   groupedReview: false,
+  courseCreationDecision: null as "pending" | "applied" | null,
   additionalRequestProposals: 0,
   siblingTasks: [] as Array<{
     taskId: string;
@@ -62,6 +63,43 @@ const state = vi.hoisted(() => ({
 vi.mock("./hooks/useCourseAuthoringSession", () => ({
   useCourseAuthoringSession: () => {
     const records = [
+      ...(state.courseCreationDecision
+        ? [
+            {
+              id: "course-proposal",
+              kind: "proposal",
+              payload: {
+                id: "course-proposal",
+                taskId: "create-task",
+                revision: 1,
+                summary: "New course",
+                operations: [
+                  {
+                    operationId: "create-operation",
+                    targetId: "draft",
+                    type: "course.create",
+                    dependencies: [],
+                    payload: { title: "Working safely", language: "en" },
+                  },
+                ],
+              },
+            },
+            ...(state.courseCreationDecision === "applied"
+              ? [
+                  {
+                    id: "applied-course-proposal",
+                    kind: "decision",
+                    payload: {
+                      proposalId: "course-proposal",
+                      sequence: 1,
+                      accepted: true,
+                      status: "applied",
+                    },
+                  },
+                ]
+              : []),
+          ]
+        : []),
       {
         id: "content-proposal",
         kind: "proposal",
@@ -360,21 +398,23 @@ vi.mock("./components/AuthoringAssistantMessages", () => ({
     </>
   ),
 }));
-vi.mock("./components/ProposalGroupCard", () => ({
-  ProposalGroup: ({
-    busy,
-    generationPending,
-    onReview,
-  }: {
-    busy: boolean;
-    generationPending: boolean;
-    onReview: () => void;
-  }) => (
-    <button type="button" disabled={busy || generationPending} onClick={onReview}>
-      Review grouped changes
-    </button>
-  ),
-}));
+vi.mock("./components/ProposalGroupCard", async (importOriginal) => {
+  const { ProposalGroup } = await importOriginal<typeof import("./components/ProposalGroupCard")>();
+  return {
+    ProposalGroup: (props: Parameters<typeof ProposalGroup>[0]) =>
+      state.courseCreationDecision ? (
+        <ProposalGroup {...props} />
+      ) : (
+        <button
+          type="button"
+          disabled={props.busy || props.generationPending}
+          onClick={() => props.onReview?.()}
+        >
+          Review grouped changes
+        </button>
+      ),
+  };
+});
 
 vi.mock("./components/ProposalReview", () => ({
   ProposalReview: ({
@@ -409,6 +449,7 @@ describe("CourseGenerationSession proposal decisions", () => {
     state.accepted = false;
     state.outlineOnly = false;
     state.groupedReview = false;
+    state.courseCreationDecision = null;
     state.siblingTasks = [];
     state.additionalRequestProposals = 0;
     state.malformedProposal = false;
@@ -431,6 +472,75 @@ describe("CourseGenerationSession proposal decisions", () => {
     state.chatMessages = [];
     state.renderWork = false;
     window.sessionStorage.clear();
+  });
+
+  it("shows a failed routing task in a pre-course conversation", () => {
+    state.renderWork = true;
+    state.siblingTasks = [
+      {
+        taskId: "failed-route",
+        requestId: "draft-request",
+        kind: "route",
+        status: "failed",
+        errorCode: null,
+        outputId: null,
+      },
+    ];
+
+    renderWith().render(
+      <CourseGenerationSession
+        courseId="draft"
+        language="en"
+        sessionId="session"
+        embedded
+        isDraft
+      />,
+    );
+
+    const work = within(screen.getByTestId("request-draft-request-request"));
+    expect(work.getByText(/Reading your request/)).toBeInTheDocument();
+    expect(work.getByText("failed")).toBeInTheDocument();
+  });
+
+  it("keeps the created course in chat after the editor opens and the outline is approved", () => {
+    state.courseCreationDecision = "pending";
+    state.groupedReview = true;
+    state.outlineOnly = true;
+    state.siblingTasks = [
+      {
+        taskId: "create-task",
+        requestId: "request-1",
+        kind: "edit",
+        status: "succeeded",
+        errorCode: null,
+        outputId: null,
+      },
+    ];
+    const rendered = renderWith({ withQuery: true }).render(
+      <CourseGenerationSession
+        courseId="draft"
+        language="en"
+        sessionId="session"
+        embedded
+        isDraft
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Create course" })).toBeInTheDocument();
+
+    state.courseCreationDecision = "applied";
+    rendered.rerender(
+      <CourseGenerationSession courseId="course" language="en" sessionId="session" embedded />,
+    );
+    expect(screen.getByText("Course created")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Working safely" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Create course" })).not.toBeInTheDocument();
+
+    state.accepted = true;
+    rendered.rerender(
+      <CourseGenerationSession courseId="course" language="en" sessionId="session" embedded />,
+    );
+    expect(screen.getByText("Approved", { exact: true })).toBeInTheDocument();
+    expect(screen.getByText("Course created")).toBeInTheDocument();
   });
 
   it("shows a request's web research and generation tasks in one live work group", async () => {

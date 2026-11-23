@@ -1,5 +1,6 @@
 import { Module, forwardRef } from "@nestjs/common";
 
+import { CategoryModule } from "src/category/category.module";
 import { ChapterModule } from "src/chapter/chapter.module";
 import { CourseModule } from "src/courses/course.module";
 import { FileModule } from "src/file/files.module";
@@ -22,6 +23,12 @@ import { CourseAuthoringContextBridgeRepository } from "./course-authoring-conte
 import { CourseAuthoringContextBridgeService } from "./course-authoring-context-bridge.service";
 import { CourseAuthoringContextBridgeWorker } from "./course-authoring-context-bridge.worker";
 import { CourseAuthoringContextService } from "./course-authoring-context.service";
+import { CourseAuthoringDraftApplyService } from "./course-authoring-draft-apply.service";
+import { CourseAuthoringDraftContextService } from "./course-authoring-draft-context.service";
+import { CourseAuthoringDraftLifecycleService } from "./course-authoring-draft-lifecycle.service";
+import { CourseAuthoringDraftTransitionService } from "./course-authoring-draft-transition.service";
+import { CourseAuthoringDraftController } from "./course-authoring-draft.controller";
+import { CourseAuthoringDraftRepository } from "./course-authoring-draft.repository";
 import { CourseAuthoringLinkPreviewController } from "./course-authoring-link-preview.controller";
 import { CourseAuthoringLinkPreviewService } from "./course-authoring-link-preview.service";
 import { CourseAuthoringReceiptService } from "./course-authoring-receipt.service";
@@ -38,6 +45,7 @@ import { LumaService } from "./luma.service";
     QuizModule,
     PermissionsModule,
     ChapterModule,
+    CategoryModule,
     FileModule,
     IngestionModule,
     LessonModule,
@@ -47,6 +55,11 @@ import { LumaService } from "./luma.service";
   ],
   providers: [
     CourseAuthoringApplyService,
+    CourseAuthoringDraftApplyService,
+    CourseAuthoringDraftContextService,
+    CourseAuthoringDraftRepository,
+    CourseAuthoringDraftLifecycleService,
+    CourseAuthoringDraftTransitionService,
     CourseAuthoringApplicationService,
     CourseAuthoringApplicationWorker,
     CourseAuthoringAutonomousFailureService,
@@ -64,6 +77,10 @@ import { LumaService } from "./luma.service";
     LumaService,
   ],
   exports: [LumaService],
-  controllers: [CourseAuthoringController, CourseAuthoringLinkPreviewController],
+  controllers: [
+    CourseAuthoringController,
+    CourseAuthoringDraftController,
+    CourseAuthoringLinkPreviewController,
+  ],
 })
 export class LumaModule {}

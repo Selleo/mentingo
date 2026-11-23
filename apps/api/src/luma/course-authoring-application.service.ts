@@ -6,6 +6,7 @@ import {
   BadGatewayException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -24,6 +25,8 @@ import { S3Service } from "src/s3/s3.service";
 import { CourseAuthoringApplicationRepository } from "./course-authoring-application.repository";
 import { CourseAuthoringApplyService } from "./course-authoring-apply.service";
 import { CourseAuthoringContextService } from "./course-authoring-context.service";
+import { CourseAuthoringDraftApplyService } from "./course-authoring-draft-apply.service";
+import { CourseAuthoringDraftTransitionService } from "./course-authoring-draft-transition.service";
 import { courseAuthoringExportHash } from "./course-authoring-export-hash";
 import {
   buildMentorCourseContextDocument,
@@ -83,6 +86,8 @@ export class CourseAuthoringApplicationService {
     private readonly apply: CourseAuthoringApplyService,
     private readonly storage: S3Service,
     private readonly ingestion: IngestionProcessingService,
+    private readonly draftApply: CourseAuthoringDraftApplyService,
+    private readonly draftTransition: CourseAuthoringDraftTransitionService,
   ) {}
 
   /** Persists a proposal decision; the explicit applications endpoint owns export queueing. */
@@ -104,7 +109,10 @@ export class CourseAuthoringApplicationService {
     actor: CurrentUserType,
     autonomousFence?: CourseAuthoringAutonomousFence,
   ): Promise<AuthoringApplyStatus> {
+    const access = await this.sessions.authorizeAccess(courseId, sessionId, actor);
     await this.sessions.get(courseId, sessionId, actor);
+    if (access.draft?.courseId)
+      throw new ConflictException("courseAuthoring.errors.selectionAlreadyApplied");
     const pendingReceipts = await this.receipts.pendingSessionReceipts(
       actor.tenantId,
       courseId,
@@ -212,6 +220,7 @@ export class CourseAuthoringApplicationService {
         exportId: exported.exportId,
         actor,
         acknowledgeAssessmentChanges: input.acknowledgeAssessmentChanges,
+        ...(access.draft ? { draftCourseId: access.draft.id } : {}),
       },
       {
         jobId,
@@ -320,6 +329,7 @@ export class CourseAuthoringApplicationService {
     const result = await this.receipts.recordFailureOnce(
       {
         tenantId: data.actor.tenantId,
+        ...(data.draftCourseId ? { draftCourseId: data.draftCourseId } : {}),
         actorId: data.actor.userId,
         courseId: data.courseId,
         sessionId: data.sessionId,
@@ -362,7 +372,13 @@ export class CourseAuthoringApplicationService {
 
   /** Downloads and verifies a frozen export before applying it and recording its receipt. */
   async process(data: CourseAuthoringApplyJob) {
-    const actor = await this.context.authorize(data.courseId, data.actor);
+    const { actor, draft } = await this.sessions.authorizeAccess(
+      data.courseId,
+      data.sessionId,
+      data.actor,
+    );
+    if ((draft?.id ?? undefined) !== data.draftCourseId)
+      throw new ForbiddenException("common.toast.noAccess");
     await this.sessions.get(data.courseId, data.sessionId, actor);
     const client = await this.luma.getLumaClient();
     const exported = await client.authoring.getExport({
@@ -378,6 +394,11 @@ export class CourseAuthoringApplicationService {
       throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
     if (courseAuthoringExportHash(exported) !== exported.exportHash)
       throw new BadGatewayException("courseAuthoring.errors.exportHashMismatch");
+    const courseCreate = exported.operations.some(
+      (operation) => operation.type === "course.create",
+    );
+    if (courseCreate !== Boolean(draft) || (courseCreate && exported.operations.length !== 1))
+      throw new BadRequestException("courseAuthoring.errors.invalidOperations");
     const existing = await this.receipts.findReceipt(data.courseId, data.exportId, actor.tenantId);
     if (existing && existing.status !== "applied")
       throw new ConflictException(existing.reason ?? "courseAuthoring.errors.applicationFailed");
@@ -514,18 +535,18 @@ export class CourseAuthoringApplicationService {
         }
       }
     }
+    const application = {
+      ...exported,
+      assetMappings: assets,
+      preparedDocumentIds,
+      assetMimeTypes,
+      acknowledgeAssessmentChanges: data.acknowledgeAssessmentChanges,
+    };
     const receipt =
       existing ??
-      (await this.apply.applyPreparedExport(
-        {
-          ...exported,
-          assetMappings: assets,
-          preparedDocumentIds,
-          assetMimeTypes,
-          acknowledgeAssessmentChanges: data.acknowledgeAssessmentChanges,
-        },
-        actor,
-      ));
+      (await (draft
+        ? this.draftApply.applyPreparedExport(application, actor)
+        : this.apply.applyPreparedExport(application, actor)));
     await client.authoring.recordReceipt({
       sessionId: data.sessionId,
       receipt: {
@@ -539,6 +560,19 @@ export class CourseAuthoringApplicationService {
         reason: null,
       },
     });
+    const nativeCourseId = receipt.entityMappings[data.courseId];
+    if (draft && nativeCourseId) {
+      await this.draftTransition.resume(
+        {
+          tenantId: actor.tenantId,
+          courseId: data.courseId,
+          sessionId: data.sessionId,
+          exportId: data.exportId,
+          exportHash: receipt.exportHash,
+        },
+        nativeCourseId,
+      );
+    }
     await this.receipts.markDelivered(actor.tenantId, data.exportId, receipt.exportHash);
     return receipt;
   }

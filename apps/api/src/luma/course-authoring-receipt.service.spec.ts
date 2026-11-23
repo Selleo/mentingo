@@ -39,6 +39,7 @@ function setup() {
     {
       reconcileFailedApplications: jest.fn().mockResolvedValue(0),
     } as unknown as CourseAuthoringApplicationService,
+    {} as never,
   );
   return { service, recordReceipt, markDelivered, findReceipt, enqueue };
 }

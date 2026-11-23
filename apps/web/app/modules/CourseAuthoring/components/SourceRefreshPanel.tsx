@@ -29,7 +29,7 @@ type Props = {
   sourceRefreshes: SourceRefreshView[];
   sources: SourceView[];
   sourcePolicy: SourcePolicy | null;
-  course?: CourseContext;
+  course?: Pick<CourseContext, "chapters">;
   disabled?: boolean;
   onRefreshSource: (
     oldSourceVersionId: string,

@@ -3,12 +3,13 @@ import {
   BadGatewayException,
   BadRequestException,
   ForbiddenException,
+  GoneException,
   ConflictException,
   NotFoundException,
   Injectable,
   Logger,
 } from "@nestjs/common";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, PERMISSIONS, hasPermission } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { isAxiosError } from "axios";
 
@@ -16,6 +17,8 @@ import { FileGuard } from "src/file/guards/file.guard";
 
 import { CourseAuthoringContextBridgeService } from "./course-authoring-context-bridge.service";
 import { CourseAuthoringContextService } from "./course-authoring-context.service";
+import { CourseAuthoringDraftContextService } from "./course-authoring-draft-context.service";
+import { CourseAuthoringDraftRepository } from "./course-authoring-draft.repository";
 import { toWireAuthoringOperation } from "./course-authoring-operation.mapper";
 import { LumaService } from "./luma.service";
 import { authoringSourceUploadResponseSchema } from "./schema/course-authoring-application.schema";
@@ -48,6 +51,8 @@ export class CourseAuthoringSessionService {
     private readonly lumaService: LumaService,
     private readonly context: CourseAuthoringContextService,
     private readonly contextBridge: CourseAuthoringContextBridgeService,
+    private readonly draftContext: CourseAuthoringDraftContextService,
+    private readonly drafts: CourseAuthoringDraftRepository,
   ) {}
 
   /** Prepares identities and native context before creating a durable authoring session. */
@@ -79,6 +84,52 @@ export class CourseAuthoringSessionService {
     return session;
   }
 
+  /** Allocates a private placeholder and binds it to one producer session. */
+  async openDraft(input: CreateAuthoringSessionBody, actor: CurrentUserType) {
+    const currentActor = await this.draftContext.authorize(actor);
+    const draft = await this.drafts.open({
+      tenantId: actor.tenantId,
+      ownerId: actor.userId,
+      creationCommandId: input.commandId,
+    });
+    if (draft.lumaSessionId) return this.get(draft.id, draft.lumaSessionId, currentActor);
+    const [categories, tenantPalette] = await Promise.all([
+      this.draftContext.categories(actor.tenantId),
+      this.draftContext.tenantPalette(actor.tenantId),
+    ]);
+    const client = await this.lumaService.getLumaClient();
+    const session = this.validateSession(
+      await this.call(() =>
+        client.authoring.createSession({
+          commandId: input.commandId,
+          courseId: draft.id,
+          actorId: actor.userId,
+          language: input.language,
+          context: {
+            draftCourse: true,
+            courseId: draft.id,
+            language: input.language,
+            categories,
+            tenantPalette,
+            canCreateCategory: hasPermission(currentActor.permissions, PERMISSIONS.CATEGORY_MANAGE),
+          },
+        }),
+      ),
+    );
+    if (session.courseId !== draft.id)
+      throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
+    await this.drafts.bindSession(actor.tenantId, draft.id, session.sessionId);
+    return session;
+  }
+
+  /** Applies owner checks to a placeholder and course-editor checks to a native course. */
+  async authorizeAccess(courseId: UUIDType, sessionId: UUIDType, actor: CurrentUserType) {
+    const access = await this.draftContext.access(courseId, sessionId, actor);
+    if (access) return access;
+    const currentActor = await this.context.authorize(courseId, actor);
+    return { draft: null, actor: currentActor };
+  }
+
   /** Lists one server-filtered, offset-paginated page of authorized course conversations in Luma's stable activity order. */
   async list(
     courseId: UUIDType,
@@ -107,12 +158,15 @@ export class CourseAuthoringSessionService {
 
   /** Loads a session after rechecking tenant and course access. */
   async get(courseId: UUIDType, sessionId: UUIDType, actor: CurrentUserType) {
-    await this.context.authorize(courseId, actor);
+    const { draft } = await this.authorizeAccess(courseId, sessionId, actor);
     const client = await this.lumaService.getLumaClient();
     const snapshot = this.validateSession(
       await this.call(() => client.authoring.getSession({ sessionId })),
     );
-    if (snapshot.courseId !== courseId) throw new ForbiddenException("common.toast.noAccess");
+    if (snapshot.courseId !== courseId && snapshot.courseId !== draft?.courseId)
+      throw new ForbiddenException("common.toast.noAccess");
+    if (draft && snapshot.status === "discarded")
+      throw new GoneException("courseAuthoring.draft.expired");
     if (snapshot.sessionId !== sessionId)
       throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
     return snapshot;
@@ -125,13 +179,14 @@ export class CourseAuthoringSessionService {
     beforeRequestId: UUIDType,
     actor: CurrentUserType,
   ) {
-    await this.context.authorize(courseId, actor);
+    const { draft } = await this.authorizeAccess(courseId, sessionId, actor);
     const client = await this.lumaService.getLumaClient();
     const page = this.validate(
       authoringTurnHistorySchema,
       await this.call(() => client.authoring.getOlderTurns({ sessionId, beforeRequestId })),
     );
-    if (page.courseId !== courseId) throw new ForbiddenException("common.toast.noAccess");
+    if (page.courseId !== courseId && page.courseId !== draft?.courseId)
+      throw new ForbiddenException("common.toast.noAccess");
     return page;
   }
 
@@ -157,7 +212,12 @@ export class CourseAuthoringSessionService {
     input: AuthoringCommandBody,
     actor: CurrentUserType,
   ) {
+    const access = await this.authorizeAccess(courseId, sessionId, actor);
     const snapshot = await this.get(courseId, sessionId, actor);
+    if (access.draft?.courseId)
+      throw new ConflictException("courseAuthoring.errors.invalidSession");
+    if (access.draft && "request" in input && input.request?.targets.length)
+      throw new BadRequestException("courseAuthoring.errors.targetOutsideCourse");
     let request:
       | (NonNullable<
           Exclude<
@@ -168,7 +228,9 @@ export class CourseAuthoringSessionService {
           context?: AuthoringCourseContext;
         })
       | undefined = undefined;
-    if ("request" in input && input.request) {
+    if (access.draft && "request" in input && input.request) {
+      request = { ...input.request, targets: [] };
+    } else if ("request" in input && input.request) {
       const selectedLessonIds = input.request.targets
         .filter((target) => ["lesson", "block", "question"].includes(target.kind))
         .map((target) => target.targetId);
@@ -307,7 +369,11 @@ export class CourseAuthoringSessionService {
     if (typeof value !== "object" || value === null || Array.isArray(value)) {
       return this.validate(authoringSessionSchema, value);
     }
-    const { usage: _usage, ...snapshot } = value as Record<string, unknown>;
+    const {
+      usage: _usage,
+      pendingWork: _pendingWork,
+      ...snapshot
+    } = value as Record<string, unknown>;
     return this.validate(authoringSessionSchema, snapshot);
   }
 

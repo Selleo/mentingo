@@ -25364,6 +25364,33 @@
         }
       }
     },
+    "/api/luma/authoring/drafts": {
+      "post": {
+        "operationId": "CourseAuthoringDraftController_openAuthoringDraft",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenAuthoringDraftBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenAuthoringDraftResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/luma/authoring/link-preview": {
       "get": {
         "operationId": "CourseAuthoringLinkPreviewController_getAuthoringLinkPreview",
@@ -186047,6 +186074,10 @@
                               "type": "string"
                             },
                             {
+                              "const": "source_vision",
+                              "type": "string"
+                            },
+                            {
                               "const": "asset",
                               "type": "string"
                             },
@@ -186909,6 +186940,10 @@
                             },
                             {
                               "const": "source",
+                              "type": "string"
+                            },
+                            {
+                              "const": "source_vision",
                               "type": "string"
                             },
                             {
@@ -195457,6 +195492,13 @@
                   }
                 }
               },
+              "tenantPalette": {
+                "maxItems": 2,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
               "chapters": {
                 "type": "array",
                 "items": {
@@ -196619,6 +196661,796 @@
               "baselineHash",
               "fieldHashes",
               "chapters"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "OpenAuthoringDraftBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "commandId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "commandId",
+          "language"
+        ]
+      },
+      "OpenAuthoringDraftResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "reasoningControlAvailable": {
+                "type": "boolean"
+              },
+              "applicationDelta": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "appliedOperationIds": {
+                    "type": "array",
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "idMappings": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "format": "uuid",
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "appliedOperationIds",
+                  "idMappings"
+                ]
+              },
+              "schemaVersion": {
+                "const": 1,
+                "type": "number"
+              },
+              "sessionId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "language": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fr",
+                    "type": "string"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "paused",
+                    "type": "string"
+                  },
+                  {
+                    "const": "stopped",
+                    "type": "string"
+                  },
+                  {
+                    "const": "discarded",
+                    "type": "string"
+                  }
+                ]
+              },
+              "snapshotSequence": {
+                "type": "integer"
+              },
+              "workspaceRevision": {
+                "type": "integer"
+              },
+              "records": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string"
+                    },
+                    "payload": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^(.*)$": {}
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "payload"
+                  ]
+                }
+              },
+              "turns": {
+                "type": "array",
+                "items": {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "properties": {
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "messageId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "queued",
+                          "type": "string"
+                        },
+                        {
+                          "const": "running",
+                          "type": "string"
+                        },
+                        {
+                          "const": "waiting_author",
+                          "type": "string"
+                        },
+                        {
+                          "const": "completed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "failed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "stopped",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "taskIds": {
+                      "type": "array",
+                      "items": {
+                        "format": "uuid",
+                        "type": "string"
+                      }
+                    },
+                    "parts": {
+                      "type": "array",
+                      "items": {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "requestId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "messageId": {
+                            "type": "string"
+                          },
+                          "partId": {
+                            "type": "string"
+                          },
+                          "partKind": {
+                            "anyOf": [
+                              {
+                                "const": "text",
+                                "type": "string"
+                              },
+                              {
+                                "const": "tool",
+                                "type": "string"
+                              },
+                              {
+                                "const": "proposal",
+                                "type": "string"
+                              },
+                              {
+                                "const": "question",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "taskId": {
+                            "anyOf": [
+                              {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "status": {
+                            "anyOf": [
+                              {
+                                "const": "streaming",
+                                "type": "string"
+                              },
+                              {
+                                "const": "completed",
+                                "type": "string"
+                              },
+                              {
+                                "const": "failed",
+                                "type": "string"
+                              },
+                              {
+                                "const": "stopped",
+                                "type": "string"
+                              },
+                              {
+                                "const": "review",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "firstSequence": {
+                            "minimum": 1,
+                            "type": "integer"
+                          },
+                          "updatedSequence": {
+                            "minimum": 1,
+                            "type": "integer"
+                          },
+                          "text": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "planSteps": {
+                            "maxItems": 6,
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "answer": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "tool": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "toolCallId": {
+                                    "type": "string"
+                                  },
+                                  "toolName": {
+                                    "type": "string"
+                                  },
+                                  "display": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "anyOf": [
+                                      {
+                                        "const": "started",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "completed",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "failed",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "stopped",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "result": {
+                                    "anyOf": [
+                                      {
+                                        "additionalProperties": false,
+                                        "type": "object",
+                                        "properties": {
+                                          "query": {
+                                            "anyOf": [
+                                              {
+                                                "maxLength": 12000,
+                                                "type": "string"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "queries": {
+                                            "anyOf": [
+                                              {
+                                                "maxItems": 64,
+                                                "type": "array",
+                                                "items": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "sources": {
+                                            "anyOf": [
+                                              {
+                                                "maxItems": 64,
+                                                "type": "array",
+                                                "items": {
+                                                  "additionalProperties": false,
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "url": {
+                                                      "minLength": 1,
+                                                      "maxLength": 2048,
+                                                      "type": "string"
+                                                    },
+                                                    "title": {
+                                                      "anyOf": [
+                                                        {
+                                                          "maxLength": 600,
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "type": "null"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "url"
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "sourceCount": {
+                                            "anyOf": [
+                                              {
+                                                "minimum": 0,
+                                                "type": "integer"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          },
+                                          "findingCount": {
+                                            "anyOf": [
+                                              {
+                                                "minimum": 0,
+                                                "type": "integer"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "toolCallId",
+                                  "toolName",
+                                  "display",
+                                  "status"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "artifact": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "artifactKind": {
+                                    "anyOf": [
+                                      {
+                                        "const": "proposal",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "question",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "artifactId": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "artifactKind",
+                                  "artifactId"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "requestId",
+                          "messageId",
+                          "partId",
+                          "partKind",
+                          "status",
+                          "firstSequence",
+                          "updatedSequence"
+                        ]
+                      }
+                    },
+                    "firstSequence": {
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "updatedSequence": {
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "requestId",
+                    "messageId",
+                    "status",
+                    "taskIds",
+                    "parts",
+                    "firstSequence",
+                    "updatedSequence"
+                  ]
+                }
+              },
+              "hasMoreTurns": {
+                "type": "boolean"
+              },
+              "nextBeforeRequestId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "taskId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "const": "plan",
+                              "type": "string"
+                            },
+                            {
+                              "const": "route",
+                              "type": "string"
+                            },
+                            {
+                              "const": "research",
+                              "type": "string"
+                            },
+                            {
+                              "const": "detailed_plan",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lesson",
+                              "type": "string"
+                            },
+                            {
+                              "const": "edit",
+                              "type": "string"
+                            },
+                            {
+                              "const": "source",
+                              "type": "string"
+                            },
+                            {
+                              "const": "source_vision",
+                              "type": "string"
+                            },
+                            {
+                              "const": "asset",
+                              "type": "string"
+                            },
+                            {
+                              "const": "course_review",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "errorCode": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "failure": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "category": {
+                              "anyOf": [
+                                {
+                                  "const": "generation",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "evidence",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "author_decision",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "provider",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "configuration",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "internal",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "stage": {
+                              "type": "string"
+                            },
+                            "recoveryAction": {
+                              "anyOf": [
+                                {
+                                  "const": "retry_failed_parts",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "answer_question",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "retry_provider",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "service_fix",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "retryable": {
+                              "type": "boolean"
+                            },
+                            "affectedChapterIds": {
+                              "type": "array",
+                              "items": {
+                                "format": "uuid",
+                                "type": "string"
+                              }
+                            },
+                            "affectedLessonIds": {
+                              "type": "array",
+                              "items": {
+                                "format": "uuid",
+                                "type": "string"
+                              }
+                            },
+                            "correlationId": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "detailKey": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "generationRevision": {
+                              "minimum": 0,
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "code",
+                            "category",
+                            "stage",
+                            "recoveryAction",
+                            "retryable",
+                            "affectedChapterIds",
+                            "affectedLessonIds",
+                            "correlationId",
+                            "detailKey",
+                            "generationRevision"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "outputId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "taskId",
+                    "requestId",
+                    "status",
+                    "errorCode",
+                    "outputId"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "sessionId",
+              "courseId",
+              "language",
+              "status",
+              "snapshotSequence",
+              "workspaceRevision",
+              "records",
+              "tasks"
             ]
           }
         },

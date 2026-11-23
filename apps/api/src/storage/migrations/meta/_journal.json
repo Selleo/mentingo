@@ -1814,6 +1814,20 @@
       "when": 1795021830114,
       "tag": "0258_enable_discussion_thread_followers_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 259,
+      "version": "7",
+      "when": 1795178411486,
+      "tag": "0259_course_authoring_drafts",
+      "breakpoints": true
+    },
+    {
+      "idx": 260,
+      "version": "7",
+      "when": 1795178415137,
+      "tag": "0260_course_authoring_draft_tenant_isolation",
+      "breakpoints": true
     }
   ]
 }

@@ -114,6 +114,7 @@ export class CourseEditingService {
     currentUser: CurrentUserType,
     isPlaywrightTest: boolean,
     trx: DatabasePg,
+    stripeIdempotencyKey?: string,
   ) {
     const categoryExists = await this.courseEditingRepository.categoryExists(
       createCourseBody.categoryId,
@@ -136,7 +137,11 @@ export class CourseEditingService {
 
     const { productId, priceId } =
       !isPlaywrightTest && isStripeConfigured
-        ? await this.createStripeProductForNewCourse(createCourseBody, finalCurrency)
+        ? await this.createStripeProductForNewCourse(
+            createCourseBody,
+            finalCurrency,
+            stripeIdempotencyKey,
+          )
         : { productId: null, priceId: null };
 
     const isScormCourse = createCourseBody.isScorm === true;
@@ -192,9 +197,14 @@ export class CourseEditingService {
     courseId: UUIDType,
     language: SupportedLanguages,
     currentUser: CurrentUserType,
+    transaction?: DatabasePg,
   ) {
     const createdCourseSnapshot =
-      await this.courseActivitySnapshotService.buildCourseActivitySnapshot(courseId, language);
+      await this.courseActivitySnapshotService.buildCourseActivitySnapshot(
+        courseId,
+        language,
+        transaction,
+      );
 
     await this.outboxPublisher.publish(
       new CreateCourseEvent({
@@ -202,6 +212,7 @@ export class CourseEditingService {
         actor: currentUser,
         createdCourse: createdCourseSnapshot,
       }),
+      transaction,
     );
   }
 
@@ -642,13 +653,17 @@ export class CourseEditingService {
   private async createStripeProductForNewCourse(
     createCourseBody: CreateCourseBody,
     currency: string,
+    idempotencyKey?: string,
   ) {
-    const { productId, priceId } = await this.stripeService.createProduct({
-      name: createCourseBody.title,
-      description: createCourseBody?.description ?? "",
-      currency,
-      amountInCents: createCourseBody?.priceInCents ?? 0,
-    });
+    const { productId, priceId } = await this.stripeService.createProduct(
+      {
+        name: createCourseBody.title,
+        description: createCourseBody?.description ?? "",
+        currency,
+        amountInCents: createCourseBody?.priceInCents ?? 0,
+      },
+      idempotencyKey,
+    );
 
     if (!productId || !priceId) {
       throw new InternalServerErrorException("adminCourseView.errors.create.stripeProductFailed");

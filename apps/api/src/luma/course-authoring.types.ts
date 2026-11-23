@@ -2,7 +2,16 @@
 import type { AuthoringOperation } from "./schema/course-authoring-operations.schema";
 import type { UUIDType } from "src/common";
 
+export type CourseAuthoringDraftIdentity = {
+  tenantId: UUIDType;
+  placeholderCourseId: UUIDType;
+  sessionId: UUIDType;
+  ownerId: UUIDType;
+};
+
 export type CourseAuthoringApplicationClaim = {
+  /** Placeholder identity for a pre-course export or failure receipt. */
+  draftCourseId?: UUIDType;
   tenantId: UUIDType;
   courseId: UUIDType;
   sessionId: UUIDType;
@@ -39,6 +48,7 @@ export interface CourseAuthoringSubscription {
 }
 
 export interface CourseAuthoringApplyJob {
+  draftCourseId?: UUIDType;
   acknowledgeAssessmentChanges?: boolean;
   courseId: UUIDType;
   sessionId: UUIDType;

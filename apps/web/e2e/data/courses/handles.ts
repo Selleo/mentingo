@@ -90,6 +90,7 @@ export const COURSES_PAGE_HANDLES = {
 export const CREATE_COURSE_PAGE_HANDLES = {
   PAGE: "create-course-page",
   HEADING: "create-course-page-heading",
+  CREATE_WITH_AI_BUTTON: "create-course-with-ai-button",
   TITLE_INPUT: "create-course-title-input",
   CATEGORY_SELECT: "create-course-category-select",
   categoryOption: (categoryTitle: string) => `create-course-category-option-${categoryTitle}`,

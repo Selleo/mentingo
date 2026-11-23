@@ -5,6 +5,7 @@ import {
   COURSE_STATUSES,
   COURSE_TYPE,
   isCourseFeatureEnabledForCourseType,
+  isSupportedLanguage,
   type SupportedLanguages,
 } from "@repo/shared";
 import { isAxiosError } from "axios";
@@ -91,14 +92,17 @@ const EditCourse = () => {
   );
 
   const { language } = useLanguageStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedLanguage = searchParams.get("language");
 
-  const [courseLanguage, setCourseLanguage] = useState<SupportedLanguages>(language);
+  const [courseLanguage, setCourseLanguage] = useState<SupportedLanguages>(
+    requestedLanguage && isSupportedLanguage(requestedLanguage) ? requestedLanguage : language,
+  );
 
   const [openGenerateTranslationModal, setOpenGenerateTranslationModal] = useState(false);
   const { mutateAsync: generateTranslations, isPending: isGenerationPending } =
     useGenerateMissingTranslations();
 
-  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const duplicationJobId = searchParams.get("duplicationJobId");
   const { data: duplicationJobStatus } = useCourseDuplicationJobStatus(duplicationJobId);

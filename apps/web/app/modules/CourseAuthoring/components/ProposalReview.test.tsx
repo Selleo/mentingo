@@ -841,7 +841,7 @@ describe("ProposalReview", () => {
     await user.click(screen.getByLabelText("Select Add required diagram"));
     expect(screen.queryByLabelText("Omit optional asset Required safety diagram")).toBeNull();
     expect(screen.getByRole("button", { name: "Apply selected" })).toBeDisabled();
-    expect(screen.getByText(/Required asset is not ready/)).toBeVisible();
+    expect(screen.getByText(/A required image isn't ready/)).toBeVisible();
   });
 
   it("can leave proposal cards to the owning conversation turn", () => {

@@ -10,7 +10,6 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { WsJwtGuard } from "src/websocket/guards/ws-jwt.guard";
 
 import { CourseAuthoringContextBridgeService } from "./course-authoring-context-bridge.service";
-import { CourseAuthoringContextService } from "./course-authoring-context.service";
 import { CourseAuthoringSessionService } from "./course-authoring-session.service";
 import { CourseAuthoringGateway } from "./course-authoring.gateway";
 import { LumaService } from "./luma.service";
@@ -73,8 +72,7 @@ it("recovers the same authoring session across browser reconnects, stream closur
       CourseAuthoringGateway,
       WsJwtGuard,
       { provide: SessionService, useValue: { verifySessionToken } },
-      { provide: CourseAuthoringSessionService, useValue: { get } },
-      { provide: CourseAuthoringContextService, useValue: { authorize: jest.fn() } },
+      { provide: CourseAuthoringSessionService, useValue: { get, authorizeAccess: jest.fn() } },
       {
         provide: CourseAuthoringContextBridgeService,
         useValue: { acceptRealtimeEvent: jest.fn() },

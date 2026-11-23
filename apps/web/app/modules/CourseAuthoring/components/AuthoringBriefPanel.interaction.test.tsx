@@ -152,11 +152,13 @@ describe("AuthoringBriefPanel", () => {
     expect(screen.getByText("Attach files")).toBeVisible();
     expect(
       screen.getByRole("alert", {
-        name: "Choose a source or enable a source permission before sending.",
+        name: "Choose a source, or allow Public web or General knowledge, before sending.",
       }),
     ).toBeVisible();
     expect(
-      screen.getByText("Choose a source or enable a source permission before sending."),
+      screen.getByText(
+        "Choose a source, or allow Public web or General knowledge, before sending.",
+      ),
     ).toBeVisible();
   });
 

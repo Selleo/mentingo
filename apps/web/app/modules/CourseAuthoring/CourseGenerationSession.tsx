@@ -45,6 +45,10 @@ import { AuthoringActivityRail } from "./components/AuthoringActivityRail";
 import { AuthoringAssistantMessages } from "./components/AuthoringAssistantMessages";
 import { AuthoringBriefPanel, freshSessionPolicy } from "./components/AuthoringBriefPanel";
 import { AuthoringConnectionNotice } from "./components/AuthoringConnectionNotice";
+import {
+  CourseCreationProposal,
+  isCourseCreationApplied,
+} from "./components/CourseCreationProposal";
 import { CourseGenerationInteraction } from "./components/CourseGenerationInteraction";
 import { ProposalGroup } from "./components/ProposalGroupCard";
 import { ProposalReview } from "./components/ProposalReview";
@@ -74,6 +78,7 @@ import { useCourseAuthoringSession } from "./hooks/useCourseAuthoringSession";
 import { useCourseAuthoringSocket } from "./hooks/useCourseAuthoringSocket";
 import { targetedMentorOperationIds } from "./mentorReferenceFiles";
 import {
+  AUTHORING_OPERATION_TYPE,
   PROPOSAL_APPLICATION_STATUS,
   PROPOSAL_DECISION,
 } from "./review/curriculumReview.constants";
@@ -219,6 +224,7 @@ export const CourseGenerationSession = ({
   language,
   sessionId,
   embedded = false,
+  isDraft = false,
   onPreviewProposalInCurriculum,
   onCurriculumPreviewChange,
   onSessionUnavailable,
@@ -227,6 +233,7 @@ export const CourseGenerationSession = ({
   language: SupportedLanguages;
   sessionId: string;
   embedded?: boolean;
+  isDraft?: boolean;
   onPreviewProposalInCurriculum?: (
     preview: CurriculumPreview,
     actions: CurriculumPreviewActions,
@@ -282,7 +289,7 @@ export const CourseGenerationSession = ({
     new Set<(event: import("./courseAuthoring.types").AuthoringEvent) => void>(),
   );
   const { sessionQuery, contextQuery, commandMutation, refetchSnapshot } =
-    useCourseAuthoringSession(id, language, sessionId);
+    useCourseAuthoringSession(id, language, sessionId, !isDraft);
   const refetchAuthoringContext = contextQuery.refetch;
   const refreshAfterConfirmedApply = useCallback(
     async (applicationExportId: string) => {
@@ -290,14 +297,14 @@ export const CourseGenerationSession = ({
       refreshedAppliedExportsRef.current.add(applicationExportId);
       try {
         await invalidateCourseCurriculumData();
-        await refetchAuthoringContext({ throwOnError: true });
+        if (!isDraft) await refetchAuthoringContext({ throwOnError: true });
         await refetchSnapshot();
       } catch (error) {
         refreshedAppliedExportsRef.current.delete(applicationExportId);
         throw error;
       }
     },
-    [refetchAuthoringContext, refetchSnapshot],
+    [isDraft, refetchAuthoringContext, refetchSnapshot],
   );
   const session = sessionQuery.data;
   const historyQuery = useCourseAuthoringTurnHistoryQuery(
@@ -1295,11 +1302,14 @@ export const CourseGenerationSession = ({
     }
   };
 
-  if (!accessUnavailable && (sessionQuery.isError || contextQuery.isError)) {
+  if (!accessUnavailable && (sessionQuery.isError || (!isDraft && contextQuery.isError))) {
     return (
       <PageWrapper>
         <ErrorState
-          onRetry={() => void Promise.all([sessionQuery.refetch(), contextQuery.refetch()])}
+          onRetry={() => {
+            void sessionQuery.refetch();
+            if (!isDraft) void contextQuery.refetch();
+          }}
         />
       </PageWrapper>
     );
@@ -1320,7 +1330,7 @@ export const CourseGenerationSession = ({
     session?.tasks.filter(
       (task) =>
         !sourceTaskIds.has(task.taskId) &&
-        ![AUTHORING_TASK_KIND.ROUTE, AUTHORING_TASK_KIND.SOURCE].some((kind) => kind === task.kind),
+        (task.kind !== AUTHORING_TASK_KIND.ROUTE || task.status === AUTHORING_TASK_STATUS.FAILED),
     ) ?? [],
     session?.records ?? [],
   );
@@ -1603,6 +1613,38 @@ export const CourseGenerationSession = ({
     },
     new Map(),
   );
+  const renderCourseCreation = (
+    proposal: ProposalView,
+    waiting: boolean,
+    onDiscard: (proposal: ProposalView) => Promise<void>,
+  ) => {
+    const applicationStatus = applicationStatusByProposalId[proposal.id];
+    if (!isDraft && !isCourseCreationApplied(proposal, applicationStatus)) return null;
+    const operation = proposal.operations.find(
+      (operation) => operation.type === AUTHORING_OPERATION_TYPE.COURSE_CREATE,
+    );
+    if (!operation) return null;
+    return (
+      <CourseCreationProposal
+        key={proposal.id}
+        courseId={id}
+        sessionId={sessionId}
+        operation={operation}
+        proposal={proposal}
+        readyAssetIds={projection.readyAssetIds}
+        applicationStatus={applicationStatus}
+        waiting={waiting}
+        busy={reviewBusy}
+        onCreate={() => applyProposal(proposal)}
+        onDiscard={() => onDiscard(proposal)}
+        onRetry={
+          applicationStatus === PROPOSAL_APPLICATION_STATUS.FAILED && pendingApplyRequest
+            ? () => void retryPendingApply()
+            : undefined
+        }
+      />
+    );
+  };
   const proposalById = Object.fromEntries(
     projection.proposals.flatMap((proposal) => {
       const requestId = proposal.taskId ? requestIdByTaskId.get(proposal.taskId) : undefined;
@@ -1615,45 +1657,68 @@ export const CourseGenerationSession = ({
       return [
         [
           proposal.id,
-          <ProposalGroup
-            key={proposal.id}
-            requestId={proposal.id}
-            proposals={[proposal]}
-            busy={reviewBusy}
-            generationPending={Boolean(requestId && generationPending(requestId))}
-            onReview={() => previewProposalInCurriculum(proposal)}
-            onDiscard={() => void decideProposal(proposal, false)}
-            targetLabelById={targetLabelById}
-            applicationStatusByProposalId={applicationStatusByProposalId}
-            onRetryApply={canRetryApplication ? () => void retryPendingApply() : undefined}
-            retryDisabled={busy || applyMutation.isPending}
-          />,
+          renderCourseCreation(proposal, false, (item) => decideProposal(item, false)) ?? (
+            <ProposalGroup
+              key={proposal.id}
+              requestId={proposal.id}
+              proposals={[proposal]}
+              busy={reviewBusy}
+              generationPending={Boolean(requestId && generationPending(requestId))}
+              onReview={() => previewProposalInCurriculum(proposal)}
+              onDiscard={() => void decideProposal(proposal, false)}
+              targetLabelById={targetLabelById}
+              applicationStatusByProposalId={applicationStatusByProposalId}
+              onRetryApply={canRetryApplication ? () => void retryPendingApply() : undefined}
+              retryDisabled={busy || applyMutation.isPending}
+            />
+          ),
         ],
       ];
     }),
   );
   const proposalGroups = [...proposalsByRequest.entries()].flatMap(
     ([requestId, requestProposals]) => {
-      const taskId = requestProposals[0]?.taskId;
-      if (!taskId) return [];
+      const waiting = generationPending(requestId);
+      const courseCreationGroups = [];
+      const changeProposals: ProposalView[] = [];
+      for (const proposal of requestProposals) {
+        const card = renderCourseCreation(proposal, waiting, (item) =>
+          reviewGroupAndApply(requestId, requestProposals, [], {
+            rejectedProposalIds: [item.id],
+          }),
+        );
+        if (card && proposal.taskId) {
+          courseCreationGroups.push({
+            taskId: proposal.taskId,
+            requestId,
+            proposalIds: [proposal.id],
+            content: card,
+          });
+        } else {
+          changeProposals.push(proposal);
+        }
+      }
+      const firstChangeTaskId = changeProposals[0]?.taskId;
+      if (!firstChangeTaskId) return courseCreationGroups;
       return [
+        ...courseCreationGroups,
         {
-          taskId,
+          taskId: firstChangeTaskId,
           requestId,
-          proposalIds: requestProposals.map((proposal) => proposal.id),
+          proposalIds: changeProposals.map((proposal) => proposal.id),
           content: (
             <ProposalGroup
               key={`proposal-group-${requestId}`}
               requestId={requestId}
-              proposals={requestProposals}
+              proposals={changeProposals}
               busy={reviewBusy}
-              generationPending={generationPending(requestId)}
+              generationPending={waiting}
               onReview={(focusProposalId) =>
-                previewProposalGroupInCurriculum(requestId, requestProposals, focusProposalId)
+                previewProposalGroupInCurriculum(requestId, changeProposals, focusProposalId)
               }
               onDiscard={() =>
-                void reviewGroupAndApply(requestId, requestProposals, [], {
-                  rejectedProposalIds: requestProposals.map((proposal) => proposal.id),
+                void reviewGroupAndApply(requestId, changeProposals, [], {
+                  rejectedProposalIds: changeProposals.map((proposal) => proposal.id),
                 }).catch(() => undefined)
               }
               targetLabelById={targetLabelById}
@@ -1671,14 +1736,14 @@ export const CourseGenerationSession = ({
     <PageWrapper
       isBarebones
       data-testid={COURSE_AUTHORING_HANDLES.ROOT}
-      wrapperClassName={cn(
-        "min-h-0 bg-white [&>div]:min-h-0",
-        embedded ? "h-full" : "h-[calc(100dvh-64px)]",
-      )}
+      wrapperClassName={cn("min-h-0 bg-white [&>div]:min-h-0", {
+        "h-full": embedded,
+        "h-[calc(100dvh-64px)]": !embedded,
+      })}
       className="flex min-h-0 flex-1 flex-col px-4 py-3 md:px-6"
     >
-      <header className="mb-3 flex shrink-0 items-center">
-        {!embedded && (
+      {!embedded && (
+        <header className="mb-3 flex shrink-0 items-center">
           <Button
             asChild
             variant="ghost"
@@ -1689,8 +1754,8 @@ export const CourseGenerationSession = ({
               <ArrowLeft className="size-4" />
             </Link>
           </Button>
-        )}
-      </header>
+        </header>
+      )}
 
       {(session || accessUnavailable) && (
         <AuthoringConnectionNotice
@@ -1699,10 +1764,10 @@ export const CourseGenerationSession = ({
         />
       )}
 
-      {!accessUnavailable && (!session || !context) && <LoadingState />}
-      {!accessUnavailable && session && context && (
+      {!accessUnavailable && (!session || (!isDraft && !context)) && <LoadingState />}
+      {!accessUnavailable && session && (isDraft || context) && (
         <CourseGenerationInteraction
-          hasExistingContent={context.chapters.length > 0}
+          hasExistingContent={Boolean(context?.chapters.length)}
           hasWork={
             projection.requests.length > 0 ||
             agentTasks.length > 0 ||
@@ -1745,7 +1810,7 @@ export const CourseGenerationSession = ({
           }
           composer={
             <AuthoringBriefPanel
-              course={context}
+              course={context ?? { language: session.language, chapters: [] }}
               initialSourcePolicy={projection.sourcePolicy}
               sourcePolicySequence={projection.sourcePolicySequence}
               sources={projection.sources}

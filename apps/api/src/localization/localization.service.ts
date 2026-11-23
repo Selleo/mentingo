@@ -28,12 +28,13 @@ export class LocalizationService {
     entityType: EntityType,
     entityId: UUIDType,
     language?: SupportedLanguages,
+    db: DatabasePg = this.db,
   ): Promise<EntityLocalization> {
     let query;
 
     switch (entityType) {
       case ENTITY_TYPE.COURSE:
-        query = this.db
+        query = db
           .select({
             baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
             availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
@@ -42,7 +43,7 @@ export class LocalizationService {
           .where(eq(courses.id, entityId));
         break;
       case ENTITY_TYPE.CHAPTER:
-        query = this.db
+        query = db
           .select({
             baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
             availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
@@ -52,7 +53,7 @@ export class LocalizationService {
           .where(eq(chapters.id, entityId));
         break;
       case ENTITY_TYPE.LESSON:
-        query = this.db
+        query = db
           .select({
             baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
             availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
@@ -63,7 +64,7 @@ export class LocalizationService {
           .where(eq(lessons.id, entityId));
         break;
       case ENTITY_TYPE.QA:
-        query = this.db
+        query = db
           .select({
             baseLanguage: sql<SupportedLanguages>`${questionsAndAnswers.baseLanguage}`,
             availableLocales: sql<SupportedLanguages[]>`${questionsAndAnswers.availableLocales}`,
@@ -72,7 +73,7 @@ export class LocalizationService {
           .where(eq(questionsAndAnswers.id, entityId));
         break;
       case ENTITY_TYPE.LEARNING_PATH:
-        query = this.db
+        query = db
           .select({
             baseLanguage: sql<SupportedLanguages>`${learningPaths.baseLanguage}`,
             availableLocales: sql<SupportedLanguages[]>`${learningPaths.availableLocales}`,

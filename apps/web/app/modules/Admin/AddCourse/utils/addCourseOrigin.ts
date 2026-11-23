@@ -4,6 +4,9 @@ export const ADD_COURSE_PARAMS = { CATEGORY_ID: "categoryId", FROM: "from" } as 
 
 export const ADD_COURSE_ORIGINS = { COURSES: "courses" } as const;
 
+export const STANDARD_COURSE_CREATION_PATH = "/admin/beta-courses/new/standard";
+export const AI_COURSE_CREATION_PATH = `${STANDARD_COURSE_CREATION_PATH}/ai`;
+
 const COURSES_PATH = "/courses";
 
 export const buildAddCourseFromCategoryPath = (categoryId: string) =>
@@ -30,4 +33,15 @@ export const withAddCourseContext = (path: string, searchParams: URLSearchParams
   const query = context.toString();
 
   return query ? `${path}?${query}` : path;
+};
+
+/** Keeps an open draft available when switching between the form and its drawer. */
+export const withCourseDraft = (path: string, searchParams: URLSearchParams) => {
+  const destination = withAddCourseContext(path, searchParams);
+  const draftId = searchParams.get("draftId");
+  const sessionId = searchParams.get("sessionId");
+  if (!draftId || !sessionId) return destination;
+
+  const draft = new URLSearchParams({ draftId, sessionId });
+  return `${destination}${destination.includes("?") ? "&" : "?"}${draft}`;
 };

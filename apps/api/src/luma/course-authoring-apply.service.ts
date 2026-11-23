@@ -103,7 +103,10 @@ export class CourseAuthoringApplyService {
       throw new ServiceUnavailableException("courseAuthoring.errors.outboxUnavailable");
     if (
       !input.operations.length ||
-      input.operations.some((operation) => !Value.Check(authoringOperationSchema, operation))
+      input.operations.some(
+        (operation) =>
+          !Value.Check(authoringOperationSchema, operation) || operation.type === "course.create",
+      )
     ) {
       throw new BadRequestException("courseAuthoring.errors.invalidOperations");
     }

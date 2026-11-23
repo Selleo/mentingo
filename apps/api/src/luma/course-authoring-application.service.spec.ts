@@ -98,6 +98,7 @@ function setup() {
   const service = new CourseAuthoringApplicationService(
     {
       get: jest.fn().mockResolvedValue({ courseId, sessionId }),
+      authorizeAccess: jest.fn().mockResolvedValue({ draft: null, actor }),
       command,
     } as unknown as CourseAuthoringSessionService,
     {
@@ -121,6 +122,8 @@ function setup() {
       prepareUnassignedDocument,
       prepareUnassignedMentorContextDocument,
     } as unknown as IngestionProcessingService,
+    {} as never,
+    {} as never,
   );
   return {
     exported,

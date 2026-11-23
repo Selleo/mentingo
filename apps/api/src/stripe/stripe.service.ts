@@ -128,18 +128,25 @@ export class StripeService {
 
   async createProduct(
     data: Stripe.ProductCreateParams & { amountInCents: number; currency: string },
+    idempotencyKey?: string,
   ) {
     const client = await this.getClient();
-    const product = await client.products.create({
-      name: data?.name,
-      description: data?.description,
-    });
+    const product = await client.products.create(
+      {
+        name: data?.name,
+        description: data?.description,
+      },
+      idempotencyKey ? { idempotencyKey: `${idempotencyKey}:product` } : undefined,
+    );
 
-    const price = await this.createPrice({
-      product: product.id,
-      unit_amount: data.amountInCents,
-      currency: data.currency,
-    });
+    const price = await this.createPrice(
+      {
+        product: product.id,
+        unit_amount: data.amountInCents,
+        currency: data.currency,
+      },
+      idempotencyKey ? { idempotencyKey: `${idempotencyKey}:price` } : undefined,
+    );
 
     return {
       productId: product.id,
@@ -159,9 +166,9 @@ export class StripeService {
     return prices;
   }
 
-  async createPrice(data: Stripe.PriceCreateParams) {
+  async createPrice(data: Stripe.PriceCreateParams, options?: Stripe.RequestOptions) {
     const client = await this.getClient();
-    const price = await client.prices.create(data);
+    const price = await client.prices.create(data, options);
     return price;
   }
 
