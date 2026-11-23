@@ -175,8 +175,7 @@
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
     "@vitejs/plugin-react": "4.3.4",
-    "@vitest/browser": "2.1.9",
-    "@vitest/ui": "2.1.9",
+    "@vitest/ui": "3.2.7",
     "autoprefixer": "10.4.20",
     "cross-env": "7.0.3",
     "eslint": "8.57.1",
@@ -197,7 +196,7 @@
     "vite": "5.4.11",
     "vite-plugin-static-copy": "1.0.6",
     "vite-tsconfig-paths": "5.0.0",
-    "vitest": "2.1.9"
+    "vitest": "3.2.7"
   },
   "engines": {
     "node": ">=24.22.3"
