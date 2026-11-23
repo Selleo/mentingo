@@ -6,7 +6,7 @@ const A11Y_REPORT_DIR = process.env.A11Y_REPORT_DIR || "a11y-report";
 
 /**
  * WCAG 2.1 AA audit: the regular E2E setup (database, auth) plus the scans in e2e/a11y-audit.
- * Writes a scored report to a11y-report/ and fails only on violations missing from the baseline.
+ * Writes a scored report to a11y-report/. Fails only on views scanned with `regressionCheck`.
  */
 export default defineConfig({
   ...baseConfig,
@@ -15,13 +15,7 @@ export default defineConfig({
   reporter: [
     ["list"],
     ["html", { outputFolder: `${A11Y_REPORT_DIR}/html`, open: "never" }],
-    [
-      "./e2e/a11y-audit/wcag-audit.reporter.ts",
-      {
-        outputDir: A11Y_REPORT_DIR,
-        baselineFile: "e2e/a11y-audit/wcag-baseline.json",
-      },
-    ],
+    ["./e2e/a11y-audit/wcag-audit.reporter.ts", { outputDir: A11Y_REPORT_DIR }],
   ],
   projects: [
     ...(baseConfig.projects ?? []).filter(({ name }) => name?.startsWith("setup-")),

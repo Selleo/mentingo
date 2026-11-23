@@ -1,7 +1,10 @@
 # WCAG 2.1 AA audit
 
-Automated accessibility audit of Mentingo's key views and user paths. It is separate from the E2E
-suite: it does not fail on known violations, it scores them.
+Automated accessibility audit of Mentingo's key views and user paths. It reports and scores
+violations; it does not fail on them, except for views that opt into the regression check.
+
+It shares the axe scan (`e2e/utils/axe-scan.ts`) with the E2E accessibility specs
+(`e2e/specs/accessibility`), which block regressions on the learner pages in every E2E run.
 
 ## What it checks
 
@@ -63,18 +66,16 @@ Output in `apps/web/a11y-report/` (git-ignored):
 - `wcag-scans.json` — raw results per view (every axe rule and check);
 - `html/` — Playwright HTML report.
 
-## Baseline
+## Regression check
 
-`wcag-baseline.json` lists the known violations as `<viewId>::<ruleId>`. A run fails when a
-violation appears that is not listed (a regression, or a known problem on a new view). Fixed
-violations are only reported; remove them from the baseline in the fixing PR:
+`scanView` / `AuditedView` take `regressionCheck`. With it, any axe WCAG A/AA violation in that
+view fails the test (the same check as `assertNoAxeViolationsFlow`); the view is still scored in
+the report. Turn it on for views that have no violations left, so they stay clean:
 
-```bash
-A11Y_UPDATE_BASELINE=true pnpm --filter=web test:a11y-audit   # rewrite the baseline from this run
-A11Y_ENFORCE_BASELINE=false pnpm --filter=web test:a11y-audit # report new violations without failing
+```ts
+{ viewId: "student-news", path: "/news", ready: ..., regressionCheck: {} }
+{ ..., regressionCheck: { disabledRules: ["color-contrast"] } } // with a ticket link
 ```
-
-Only update the baseline to remove fixed entries or, deliberately, to accept a new known issue.
 
 ## CI
 
@@ -85,11 +86,11 @@ Only update the baseline to remove fixed entries or, deliberately, to accept a n
 - every Monday at 03:00 UTC,
 - manual dispatch.
 
-The report is uploaded as the `wcag-audit-report` artifact and shown in the job summary.
+The report is uploaded as the `wcag-audit-report` artifact and shown in the job summary. The job
+fails only when a view with `regressionCheck` has a violation.
 
 ## Adding a view
 
 Add an `AuditedView` (stable `viewId`, a `ready` locator from a `data-testid` handle) to the
-matching `*.audit.ts`, or call `scanView` after a flow step for a state. A new view with an
-already-known violation fails the baseline check on purpose: decide whether to fix it or add it to
-the baseline.
+matching `*.audit.ts`, or call `scanView` after a flow step for a state. Add `regressionCheck`
+once the view has no violations.

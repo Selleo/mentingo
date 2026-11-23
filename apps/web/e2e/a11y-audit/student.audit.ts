@@ -164,6 +164,8 @@ test("student quiz path: every question type before and after submitting", async
   });
 });
 
+// Views without axe WCAG violations keep `regressionCheck` so they stay clean. Learner pages
+// (dashboard, course, lessons, quiz, profile) are guarded by specs/accessibility instead.
 const STUDENT_COMMUNITY_VIEWS: AuditedView[] = [
   {
     viewId: "student-learning-paths",
@@ -179,18 +181,21 @@ const STUDENT_COMMUNITY_VIEWS: AuditedView[] = [
   },
   {
     viewId: "student-news",
+    regressionCheck: {},
     viewName: "News",
     path: "/news",
     ready: (page) => page.getByTestId(NEWS_PAGE_HANDLES.PAGE),
   },
   {
     viewId: "student-articles",
+    regressionCheck: {},
     viewName: "Articles",
     path: "/articles",
     ready: (page) => page.getByTestId(ARTICLES_PAGE_HANDLES.PAGE),
   },
   {
     viewId: "student-qa",
+    regressionCheck: {},
     viewName: "Q&A",
     path: "/qa",
     ready: (page) => page.getByTestId(QA_PAGE_HANDLES.PAGE),

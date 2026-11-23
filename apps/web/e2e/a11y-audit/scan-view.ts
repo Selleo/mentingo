@@ -1,5 +1,11 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
+
+import {
+  expectNoAxeViolations,
+  scanPageWithAxe,
+  type AxeRegressionCheckOptions,
+  type AxeRuleResult,
+} from "../utils/axe-scan";
 
 import {
   checkKeyboardNavigation,
@@ -19,9 +25,6 @@ import type {
   ViewScan,
 } from "./wcag-audit.types";
 
-type AxeResults = Awaited<ReturnType<AxeBuilder["analyze"]>>;
-type Result = AxeResults["violations"][number];
-
 const MAX_REPORTED_NODES = 50;
 
 type ScanViewOptions = {
@@ -33,9 +36,14 @@ type ScanViewOptions = {
    * (open menus, dialogs) that a resize or Tab press would close.
    */
   layoutAndKeyboardChecks?: boolean;
+  /**
+   * Also fail the test on any axe WCAG violation in this view, like the E2E accessibility specs.
+   * Turn on for views that are clean, so they stay clean; other views are only reported.
+   */
+  regressionCheck?: AxeRegressionCheckOptions;
 };
 
-const toAuditRuleResult = (result: Result, outcome: AuditOutcome): AuditRuleResult => ({
+const toAuditRuleResult = (result: AxeRuleResult, outcome: AuditOutcome): AuditRuleResult => ({
   ruleId: result.id,
   engine: AUDIT_ENGINE.AXE,
   outcome,
@@ -56,12 +64,12 @@ const toAuditRuleResult = (result: Result, outcome: AuditOutcome): AuditRuleResu
 
 /**
  * Audits the current page state against WCAG 2.1 A/AA and attaches the result for the WCAG audit
- * reporter. It never fails the test on findings: the reporter scores them and compares them with
- * the baseline. Callers MUST wait for the view's content first.
+ * reporter, which scores it. Findings fail the test only with `regressionCheck`.
+ * Callers MUST wait for the view's content first.
  */
 export const scanView = async (
   page: Page,
-  { viewId, viewName, role, layoutAndKeyboardChecks = true }: ScanViewOptions,
+  { viewId, viewName, role, layoutAndKeyboardChecks = true, regressionCheck }: ScanViewOptions,
 ) => {
   // Scan settled colors: menus and dialogs fade in even with reduced motion.
   await page.evaluate(() =>
@@ -72,8 +80,8 @@ export const scanView = async (
         .map((animation) => animation.finished.catch(() => animation)),
     ),
   );
-  const axeResults = await new AxeBuilder({ page }).withTags(AUDIT_AXE_TAGS).analyze();
-  expect(axeResults.passes.length, `axe checked nothing on ${page.url()}`).toBeGreaterThan(0);
+  const axeResults = await scanPageWithAxe(page, { tags: AUDIT_AXE_TAGS });
+  if (regressionCheck) expectNoAxeViolations(page, axeResults, regressionCheck);
 
   const { title, result: titleResult } = await checkPageTitle(page);
   const customResults: AuditRuleResult[] = [titleResult];
@@ -120,5 +128,10 @@ export type AuditedView = Omit<ScanViewOptions, "role" | "layoutAndKeyboardCheck
 export const openAndScanView = async (page: Page, role: AuditRole, view: AuditedView) => {
   await page.goto(view.path);
   await expect(view.ready(page).first()).toBeVisible();
-  await scanView(page, { viewId: view.viewId, viewName: view.viewName, role });
+  await scanView(page, {
+    viewId: view.viewId,
+    viewName: view.viewName,
+    role,
+    regressionCheck: view.regressionCheck,
+  });
 };

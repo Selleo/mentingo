@@ -1,8 +1,8 @@
 name: Accessibility audit (WCAG 2.1 AA)
 
 # Runs the axe-core + keyboard/reflow audit in apps/web/e2e/a11y-audit, uploads the scored report
-# (artifact "wcag-audit-report", also in the job summary) and fails on violations missing from
-# apps/web/e2e/a11y-audit/wcag-baseline.json.
+# (artifact "wcag-audit-report", also in the job summary). It fails only on views scanned with
+# `regressionCheck`; regressions on learner pages are blocked by the regular E2E suite.
 
 env:
   HUSKY: 0

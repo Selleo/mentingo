@@ -1,7 +1,7 @@
-import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
-
+import { attachAxeIncomplete, expectNoAxeViolations, scanPageWithAxe } from "../../utils/axe-scan";
 import { WCAG_LEVEL_TAGS, type WcagLevel } from "../../utils/wcag-level-tags";
+
+import type { Page } from "@playwright/test";
 
 const DEFAULT_WCAG_LEVEL: WcagLevel = "AA";
 
@@ -26,32 +26,12 @@ export const assertNoAxeViolationsFlow = async (
     level = DEFAULT_WCAG_LEVEL,
   }: AssertNoAxeViolationsOptions = {},
 ) => {
-  const axeBuilder = new AxeBuilder({ page })
-    .withTags(WCAG_LEVEL_TAGS[level])
-    .disableRules(disabledRules);
-  exclude.forEach((selector) => axeBuilder.exclude(selector));
-  const { incomplete, passes, violations } = await axeBuilder.analyze();
-  const url = page.url();
+  const results = await scanPageWithAxe(page, {
+    tags: WCAG_LEVEL_TAGS[level],
+    disabledRules,
+    exclude,
+  });
 
-  expect(passes.length, `axe checked nothing on ${url}`).toBeGreaterThan(0);
-
-  if (incomplete.length) {
-    test.info().annotations.push({
-      type: "axe-incomplete",
-      description: `${url}: ${incomplete.map(({ id }) => id).join(", ")}`,
-    });
-    await test.info().attach(`axe-incomplete ${url}`, {
-      body: JSON.stringify(incomplete, null, 2),
-      contentType: "application/json",
-    });
-  }
-
-  const report = violations.flatMap(({ id, impact, help, nodes }) =>
-    nodes.map(
-      ({ target, html }) =>
-        `${id} (${impact ?? "unknown"}) ${target.flat().join(" >>> ")}: ${help} | ${html.slice(0, 200)}`,
-    ),
-  );
-
-  expect.soft(report, `axe WCAG ${level} violations on ${url}`).toEqual([]);
+  await attachAxeIncomplete(page, results);
+  expectNoAxeViolations(page, results, { level });
 };

@@ -1,37 +1,26 @@
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import { VIEW_SCAN_ATTACHMENT } from "./wcag-audit.types";
-import {
-  buildWcagAuditSummary,
-  compareWithBaseline,
-  findingKeys,
-  renderWcagAuditMarkdown,
-} from "./wcag-report";
+import { buildWcagAuditSummary, renderWcagAuditMarkdown } from "./wcag-report";
 
 import type { ViewScan } from "./wcag-audit.types";
-import type { FullResult, Reporter, TestCase, TestResult } from "@playwright/test/reporter";
+import type { Reporter, TestCase, TestResult } from "@playwright/test/reporter";
 
 type WcagAuditReporterOptions = {
   outputDir?: string;
-  baselineFile?: string;
 };
 
 /**
- * Collects the scans attached by `scanView`, writes `wcag-report.md` / `wcag-report.json`, and
- * fails the run when a violation appears that the baseline does not list.
- *
- * Env: `A11Y_UPDATE_BASELINE=true` rewrites the baseline from this run;
- * `A11Y_ENFORCE_BASELINE=false` reports new violations without failing.
+ * Collects the scans attached by `scanView` and writes `wcag-report.md` / `wcag-report.json`.
+ * It never changes the run status: only views scanned with `regressionCheck` fail tests.
  */
 export default class WcagAuditReporter implements Reporter {
   private readonly scansByTest = new Map<string, ViewScan[]>();
   private readonly outputDir: string;
-  private readonly baselineFile: string;
 
-  constructor({ outputDir, baselineFile }: WcagAuditReporterOptions = {}) {
+  constructor({ outputDir }: WcagAuditReporterOptions = {}) {
     this.outputDir = path.resolve(outputDir ?? "a11y-report");
-    this.baselineFile = path.resolve(baselineFile ?? "e2e/a11y-audit/wcag-baseline.json");
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
@@ -42,9 +31,9 @@ export default class WcagAuditReporter implements Reporter {
     this.scansByTest.set(test.id, scans);
   }
 
-  async onEnd(result: FullResult): Promise<{ status?: FullResult["status"] } | undefined> {
+  onEnd() {
     const scans = [...this.scansByTest.values()].flat();
-    if (!scans.length) return undefined;
+    if (!scans.length) return;
 
     const summary = buildWcagAuditSummary(scans);
     const markdown = renderWcagAuditMarkdown(summary);
@@ -63,28 +52,5 @@ export default class WcagAuditReporter implements Reporter {
         `Report: ${path.join(this.outputDir, "wcag-report.md")}`,
       ].join("\n"),
     );
-
-    if (process.env.A11Y_UPDATE_BASELINE === "true") {
-      writeFileSync(this.baselineFile, `${JSON.stringify(findingKeys(summary), null, 2)}\n`);
-      console.log(`Baseline updated: ${this.baselineFile}`);
-      return undefined;
-    }
-
-    // A partial run (one test, a failed test) only proves what it scanned.
-    if (result.status !== "passed") return undefined;
-
-    const baseline: string[] = existsSync(this.baselineFile)
-      ? JSON.parse(readFileSync(this.baselineFile, "utf8"))
-      : [];
-    const { newFindings, resolvedFindings } = compareWithBaseline(summary, baseline);
-    if (resolvedFindings.length) {
-      console.log(
-        `Fixed since the baseline (remove them with A11Y_UPDATE_BASELINE=true):\n  ${resolvedFindings.join("\n  ")}`,
-      );
-    }
-    if (!newFindings.length) return undefined;
-
-    console.error(`New WCAG violations not in the baseline:\n  ${newFindings.join("\n  ")}`);
-    return process.env.A11Y_ENFORCE_BASELINE === "false" ? undefined : { status: "failed" };
   }
 }

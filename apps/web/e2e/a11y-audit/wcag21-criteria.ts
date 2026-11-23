@@ -1,3 +1,5 @@
+import { WCAG_LEVEL_TAGS } from "../utils/wcag-level-tags";
+
 export const WCAG_LEVEL = {
   A: "A",
   AA: "AA",
@@ -104,15 +106,11 @@ export const WCAG21_AA_CRITERIA: WcagCriterion[] = [
   { id: "4.1.3", level: "AA", title: "Status Messages", automation: "manual" },
 ];
 
-/** Axe tags that select the WCAG 2.1 A/AA rules. WCAG 2.2 and best-practice rules run as extra information. */
-export const AUDIT_AXE_TAGS = [
-  "wcag2a",
-  "wcag2aa",
-  "wcag21a",
-  "wcag21aa",
-  "wcag22aa",
-  "best-practice",
-];
+/**
+ * Axe tags of the audit: the same WCAG A/AA tags as the E2E accessibility specs, plus best
+ * practices. Only WCAG 2.1 A/AA rules count towards the score; the rest is reported as extra.
+ */
+export const AUDIT_AXE_TAGS = [...WCAG_LEVEL_TAGS.AA, "best-practice"];
 
 /** Turns an axe tag such as `wcag1410` into `1.4.10`; returns null for non-criterion tags. */
 export const criterionIdFromAxeTag = (tag: string) => {

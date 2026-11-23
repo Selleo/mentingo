@@ -1,11 +1,6 @@
 import { CUSTOM_RULE } from "./custom-checks";
 import { AUDIT_ENGINE, AUDIT_IMPACT, AUDIT_OUTCOME, AUDIT_ROLE } from "./wcag-audit.types";
-import {
-  buildWcagAuditSummary,
-  compareWithBaseline,
-  CRITERION_STATUS,
-  renderWcagAuditMarkdown,
-} from "./wcag-report";
+import { buildWcagAuditSummary, CRITERION_STATUS, renderWcagAuditMarkdown } from "./wcag-report";
 import { criterionIdFromAxeTag, WCAG21_AA_CRITERIA } from "./wcag21-criteria";
 
 import type { AuditRuleResult, ViewScan } from "./wcag-audit.types";
@@ -141,19 +136,6 @@ describe("WCAG audit report", () => {
 
     expect(summary.score.failed).toBe(0);
     expect(summary.otherViolations.map(({ ruleId }) => ruleId)).toEqual(["target-size"]);
-  });
-
-  it("reports violations missing from the baseline as new and missing ones as resolved", () => {
-    const summary = buildWcagAuditSummary([
-      scan({
-        rules: [rule({ outcome: AUDIT_OUTCOME.VIOLATION, impact: AUDIT_IMPACT.SERIOUS })],
-      }),
-    ]);
-
-    expect(compareWithBaseline(summary, ["login::label"])).toEqual({
-      newFindings: ["login::color-contrast"],
-      resolvedFindings: ["login::label"],
-    });
   });
 
   it("renders the score and the location of each violation", () => {

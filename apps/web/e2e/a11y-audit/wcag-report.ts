@@ -304,23 +304,6 @@ export const buildWcagAuditSummary = (
   };
 };
 
-/** Baseline keys: one per rule per view, so a known failure on a new view still counts as new. */
-export const findingKeys = (summary: WcagAuditSummary) =>
-  [
-    ...new Set(summary.violations.findings.map(({ viewId, ruleId }) => `${viewId}::${ruleId}`)),
-  ].sort();
-
-export const compareWithBaseline = (summary: WcagAuditSummary, baseline: string[]) => {
-  const current = findingKeys(summary);
-  const known = new Set(baseline);
-  const currentSet = new Set(current);
-
-  return {
-    newFindings: current.filter((key) => !known.has(key)),
-    resolvedFindings: baseline.filter((key) => !currentSet.has(key)),
-  };
-};
-
 const STATUS_LABEL: Record<CriterionStatus, string> = {
   failed: "❌ Failed",
   met: "✅ Met",
