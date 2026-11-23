@@ -60,7 +60,8 @@
       "path-to-regexp@>=0.1.0 <0.1.13": "0.1.13",
       "qs@>=6.0.0 <6.17.1": "6.17.1",
       "prosemirror-view": "1.42.3",
-      "uuid@>=11.0.0 <11.1.1": "11.1.1"
+      "uuid@>=11.0.0 <11.1.1": "11.1.1",
+      "canvas": "-"
     },
     "packageExtensions": {
       "@hookform/resolvers@3.9.0": {
