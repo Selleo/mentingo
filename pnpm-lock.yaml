@@ -31,6 +31,7 @@ overrides:
   tmp@<0.2.7: 0.2.7
   browserslist@<4.28.7: 4.29.6
   postcss@>=8.0.0 <8.5.18: 8.5.33
+  workflow>@workflow/next: '-'
 
 packageExtensionsChecksum: sha256-v36u0YheWby3JsLGCkdr+taPlBvAiaAXTMe6dhYbXN4=
 
@@ -76,7 +77,7 @@ importers:
         version: 4.0.31
       '@ai-sdk/workflow':
         specifier: 2.0.80
-        version: 2.0.80(workflow@5.2.3(@aws-sdk/credential-provider-web-identity@3.972.49)(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(bare-buffer@3.7.3)(chokidar@3.5.3))(@swc/core@1.15.3)(next@14.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(ws@8.23.0))(zod@4.6.6)
+        version: 2.0.80(workflow@5.2.3(@aws-sdk/credential-provider-web-identity@3.972.49)(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(bare-buffer@3.7.3)(chokidar@3.5.3))(@swc/core@1.15.3)(react@18.3.1)(typescript@5.4.5)(ws@8.23.0))(zod@4.6.6)
       '@aws-sdk/client-s3':
         specifier: 3.1175.0
         version: 3.1175.0
@@ -433,7 +434,7 @@ importers:
         version: 10.0.0
       workflow:
         specifier: 5.2.3
-        version: 5.2.3(@aws-sdk/credential-provider-web-identity@3.972.49)(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(bare-buffer@3.7.3)(chokidar@3.5.3))(@swc/core@1.15.3)(next@14.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(ws@8.23.0)
+        version: 5.2.3(@aws-sdk/credential-provider-web-identity@3.972.49)(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(bare-buffer@3.7.3)(chokidar@3.5.3))(@swc/core@1.15.3)(react@18.3.1)(typescript@5.4.5)(ws@8.23.0)
       write-excel-file:
         specifier: 2.3.10
         version: 2.3.10
@@ -10357,14 +10358,6 @@ packages:
       '@swc/cli': '>=0.4.0'
       '@swc/core': '>=1.5.0'
 
-  '@workflow/next@5.0.6':
-    resolution: {integrity: sha512-kF++0qyzpYiFA5NMYBDO4vGrHOMW+hSvSQATT42sBVidd2estw3S6nxvYUT8wmXn3nl/seWeIiwkR2XQzQrycQ==}
-    peerDependencies:
-      next: '>13'
-    peerDependenciesMeta:
-      next:
-        optional: true
-
   '@workflow/nitro@5.0.6':
     resolution: {integrity: sha512-44gSd219CklRCPcHJavsYs/9Zz2tuelpi6gQGdWhf0yfY70lghaQALzmp7xj/PEiqMcEvQTB9NCnSc3lAWtDoA==}
 
@@ -13737,10 +13730,6 @@ packages:
 
   ignore@7.0.14:
     resolution: {integrity: sha512-wCBiZ77u1tuWde6G/nfOtLaCTYcFDU5yCzARzK10y+rLhzYoL7a7yEemcopcc2Mzow7gZOIjnV2ym1NYmdiJOQ==}
-    engines: {node: '>= 4'}
-
-  ignore@7.0.5:
-    resolution: {integrity: sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg==}
     engines: {node: '>= 4'}
 
   image-q@4.0.0:
@@ -19131,10 +19120,6 @@ packages:
     resolution: {integrity: sha512-TnbFSbcOCcDgjZ4piURLCbJ3nJhznVh9kw6F6iokjiFPl8ONxe9A6nMDVXDiNbrSfLILs6vB07F7wLBrwPYzJw==}
     engines: {node: '>=10.13.0'}
 
-  watchpack@2.5.1:
-    resolution: {integrity: sha512-Zn5uXdcFNIA1+1Ei5McRd+iRzfhENPCe7LeABkJtNulSxjma+l7ltNx55BWZkRlwRnpOgHqxnjyaDgJnNXnqzg==}
-    engines: {node: '>=10.13.0'}
-
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
 
@@ -19679,13 +19664,13 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
-  '@ai-sdk/workflow@2.0.80(workflow@5.2.3(@aws-sdk/credential-provider-web-identity@3.972.49)(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(bare-buffer@3.7.3)(chokidar@3.5.3))(@swc/core@1.15.3)(next@14.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(ws@8.23.0))(zod@4.6.6)':
+  '@ai-sdk/workflow@2.0.80(workflow@5.2.3(@aws-sdk/credential-provider-web-identity@3.972.49)(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(bare-buffer@3.7.3)(chokidar@3.5.3))(@swc/core@1.15.3)(react@18.3.1)(typescript@5.4.5)(ws@8.23.0))(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.31
       '@ai-sdk/provider-utils': 5.0.65(zod@4.6.6)
       ai: 7.0.148(zod@4.6.6)
       ajv: 8.20.0
-      workflow: 5.2.3(@aws-sdk/credential-provider-web-identity@3.972.49)(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(bare-buffer@3.7.3)(chokidar@3.5.3))(@swc/core@1.15.3)(next@14.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(ws@8.23.0)
+      workflow: 5.2.3(@aws-sdk/credential-provider-web-identity@3.972.49)(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(bare-buffer@3.7.3)(chokidar@3.5.3))(@swc/core@1.15.3)(react@18.3.1)(typescript@5.4.5)(ws@8.23.0)
       zod: 4.6.6
 
   '@alloc/quick-lru@5.2.0': {}
@@ -27034,7 +27019,7 @@ snapshots:
       pidtree: 0.6.0
       postcss: 8.5.33
       postcss-discard-duplicates: 5.1.0(postcss@8.5.33)
-      postcss-load-config: 4.0.2(postcss@8.5.33)(ts-node@10.9.1(@swc/core@1.15.3(@swc/helpers@0.5.2))(@types/node@24.19.2)(typescript@5.4.5))
+      postcss-load-config: 4.0.2(postcss@8.5.33)(ts-node@10.9.1(@swc/core@1.15.3)(@types/node@24.19.2)(typescript@5.4.5))
       postcss-modules: 6.0.1(postcss@8.5.33)
       prettier: 2.8.8
       pretty-ms: 7.0.1
@@ -29505,25 +29490,6 @@ snapshots:
       '@workflow/utils': 5.0.2
       esbuild: 0.28.2
       pathe: 2.0.3
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-      - '@swc/helpers'
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-      - ws
-
-  '@workflow/next@5.0.6(@opentelemetry/api@1.9.0)(next@14.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(ws@8.23.0)':
-    dependencies:
-      '@swc/core': 1.15.3(@swc/helpers@0.5.2)
-      '@workflow/builders': 5.0.6(@opentelemetry/api@1.9.0)(ws@8.23.0)
-      '@workflow/core': 5.2.3(@opentelemetry/api@1.9.0)(ws@8.23.0)
-      '@workflow/swc-plugin': 5.0.1(@swc/core@1.15.3)
-      ignore: 7.0.5
-      semver: 7.7.4
-      watchpack: 2.5.1
-    optionalDependencies:
-      next: 14.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - '@swc/helpers'
@@ -33810,8 +33776,6 @@ snapshots:
 
   ignore@7.0.14: {}
 
-  ignore@7.0.5: {}
-
   image-q@4.0.0:
     dependencies:
       '@types/node': 16.9.1
@@ -36340,33 +36304,6 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@14.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-    dependencies:
-      '@next/env': 14.1.4
-      '@swc/helpers': 0.5.2
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001827
-      graceful-fs: 4.2.11
-      postcss: 8.5.33
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(@babel/core@7.26.0)(react@18.3.1)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.1.4
-      '@next/swc-darwin-x64': 14.1.4
-      '@next/swc-linux-arm64-gnu': 14.1.4
-      '@next/swc-linux-arm64-musl': 14.1.4
-      '@next/swc-linux-x64-gnu': 14.1.4
-      '@next/swc-linux-x64-musl': 14.1.4
-      '@next/swc-win32-arm64-msvc': 14.1.4
-      '@next/swc-win32-ia32-msvc': 14.1.4
-      '@next/swc-win32-x64-msvc': 14.1.4
-      '@opentelemetry/api': 1.9.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-    optional: true
-
   nice-grpc-client-middleware-retry@3.1.11:
     dependencies:
       abort-controller-x: 0.4.3
@@ -37132,7 +37069,7 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.5.33
 
-  postcss-load-config@4.0.2(postcss@8.5.33)(ts-node@10.9.1(@swc/core@1.15.3(@swc/helpers@0.5.2))(@types/node@24.19.2)(typescript@5.4.5)):
+  postcss-load-config@4.0.2(postcss@8.5.33)(ts-node@10.9.1(@swc/core@1.15.3)(@types/node@24.19.2)(typescript@5.4.5)):
     dependencies:
       lilconfig: 3.1.4
       yaml: 2.4.2
@@ -39397,14 +39334,6 @@ snapshots:
     optionalDependencies:
       '@babel/core': 7.24.5
 
-  styled-jsx@5.1.1(@babel/core@7.26.0)(react@18.3.1):
-    dependencies:
-      client-only: 0.0.1
-      react: 18.3.1
-    optionalDependencies:
-      '@babel/core': 7.26.0
-    optional: true
-
   stylis@4.3.2: {}
 
   stylis@4.3.4: {}
@@ -39549,7 +39478,7 @@ snapshots:
       postcss: 8.5.33
       postcss-import: 15.1.0(postcss@8.5.33)
       postcss-js: 4.0.1(postcss@8.5.33)
-      postcss-load-config: 4.0.2(postcss@8.5.33)(ts-node@10.9.1(@swc/core@1.15.3(@swc/helpers@0.5.2))(@types/node@24.19.2)(typescript@5.4.5))
+      postcss-load-config: 4.0.2(postcss@8.5.33)(ts-node@10.9.1(@swc/core@1.15.3)(@types/node@24.19.2)(typescript@5.4.5))
       postcss-nested: 6.2.0(postcss@8.5.33)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.12
@@ -39576,7 +39505,7 @@ snapshots:
       postcss: 8.5.33
       postcss-import: 15.1.0(postcss@8.5.33)
       postcss-js: 4.0.1(postcss@8.5.33)
-      postcss-load-config: 4.0.2(postcss@8.5.33)(ts-node@10.9.1(@swc/core@1.15.3(@swc/helpers@0.5.2))(@types/node@24.19.2)(typescript@5.4.5))
+      postcss-load-config: 4.0.2(postcss@8.5.33)(ts-node@10.9.1(@swc/core@1.15.3)(@types/node@24.19.2)(typescript@5.4.5))
       postcss-nested: 6.2.0(postcss@8.5.33)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.12
@@ -40783,11 +40712,6 @@ snapshots:
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
 
-  watchpack@2.5.1:
-    dependencies:
-      glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.11
-
   wcwidth@1.0.1:
     dependencies:
       defaults: 1.0.4
@@ -41260,14 +41184,13 @@ snapshots:
       '@types/trusted-types': 2.0.7
       workbox-core: 7.4.1
 
-  workflow@5.2.3(@aws-sdk/credential-provider-web-identity@3.972.49)(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(bare-buffer@3.7.3)(chokidar@3.5.3))(@swc/core@1.15.3)(next@14.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(ws@8.23.0):
+  workflow@5.2.3(@aws-sdk/credential-provider-web-identity@3.972.49)(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(bare-buffer@3.7.3)(chokidar@3.5.3))(@swc/core@1.15.3)(react@18.3.1)(typescript@5.4.5)(ws@8.23.0):
     dependencies:
       '@workflow/astro': 5.0.6(@opentelemetry/api@1.9.0)(ws@8.23.0)
       '@workflow/cli': 5.0.6(@aws-sdk/credential-provider-web-identity@3.972.49)(@opentelemetry/api@1.9.0)(react@18.3.1)(ws@8.23.0)
       '@workflow/core': 5.2.3(@opentelemetry/api@1.9.0)(ws@8.23.0)
       '@workflow/errors': 5.0.5
       '@workflow/nest': 5.1.4(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(bare-buffer@3.7.3)(chokidar@3.5.3))(@swc/core@1.15.3)(ws@8.23.0)
-      '@workflow/next': 5.0.6(@opentelemetry/api@1.9.0)(next@14.1.4(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(ws@8.23.0)
       '@workflow/nitro': 5.0.6(@opentelemetry/api@1.9.0)(react@18.3.1)(ws@8.23.0)
       '@workflow/nuxt': 5.0.6(@opentelemetry/api@1.9.0)(react@18.3.1)(ws@8.23.0)
       '@workflow/rollup': 5.0.6(@opentelemetry/api@1.9.0)(ws@8.23.0)
@@ -41286,7 +41209,6 @@ snapshots:
       - '@swc/helpers'
       - bufferutil
       - magicast
-      - next
       - react
       - supports-color
       - typescript
