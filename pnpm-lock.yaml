@@ -131,8 +131,8 @@ importers:
         specifier: 5.10.1
         version: 5.10.1(@opentelemetry/api@1.9.0)(ai@7.0.148(zod@4.6.6))(zod@4.6.6)
       '@mentingo/competencies-sdk':
-        specifier: link:../../../mentingo-plugins/packages/competencies
-        version: link:../../../mentingo-plugins/packages/competencies
+        specifier: 0.2.0
+        version: 0.2.0
       '@mentingo/content-marketplace-sdk':
         specifier: 0.2.0
         version: 0.2.0
@@ -4632,6 +4632,10 @@ packages:
 
   '@mdx-js/mdx@2.3.0':
     resolution: {integrity: sha512-jLuwRlz8DQfQNiUCJR50Y09CGPq3fLtmtUQfVrj79E0JWu3dvsVcxVIcfhR5h0iXu+/z++zDrYeiJqifRynJkA==}
+
+  '@mentingo/competencies-sdk@0.2.0':
+    resolution: {integrity: sha512-bJ+loEQM8Y1AEOJeGe1J+7Ne2/eyBoHzB5H6QtGGGnd74fOsZbbcM3eBhlD4GbL6ap5H06r2/Ir3E/rO3EqJng==}
+    engines: {node: '>=22.15.0'}
 
   '@mentingo/content-marketplace-sdk@0.2.0':
     resolution: {integrity: sha512-TN0ufpvmJrEua3hapG4J2h2121Mpa/bXL2RkjwawBrKGNn00RuN8HeVEaDVsdTiIBrHVD7nro0AMOa9ifc6B9w==}
@@ -22171,6 +22175,8 @@ snapshots:
       vfile: 5.3.7
     transitivePeerDependencies:
       - supports-color
+
+  '@mentingo/competencies-sdk@0.2.0': {}
 
   '@mentingo/content-marketplace-sdk@0.2.0': {}
 
