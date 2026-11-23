@@ -15,12 +15,19 @@ Users select an organisation or group population, combine conditions, and review
 
 ## Feature Functions
 
+- Compare the eight most popular courses in a chosen period and the eight courses without learner activity for the longest time, to prioritize a human review for updating or archiving.
 - Review organisation, development-path, course, and learner progress through four report views.
+- Organisation overview: matching learners, learners active in the last 30 days (with their share), course completion rate and average quiz score; completed / in-progress / not-started enrollment shares by course or group; learning outcomes including AI Mentor conversations on matching courses; monthly active learners over the last 12 months; and a learning funnel (in scope, logged in, started learning, completed a course).
+- Development paths: one card per matching path with its course count, learners, completed-course share and average progress, opening that path's learning records; plus the most popular and longest inactive paths for the chosen period.
+- Course performance: one row per matching course with enrollments, completion rate, average progress and average quiz score, followed by the most active and longest unused courses.
+- Learner progress: one row per matching learner and course or path, with the learner's groups, status, progress, quiz results and last activity.
+- Course, development-path and learner views compare every visible subject until one is picked. Path and course views list learning records only once a single path or course is picked; the organisation overview always lists them.
+- Choosing a view opens it immediately with the applied scope and conditions; when a condition does not apply to the new view, the report waits until it is adapted and applied.
 - Scope analysis to selected groups, including their members' individually assigned learning and learning assigned through other groups.
-- Combine applicable conditions using AND/OR groups with one level of nesting, including status, content, learner, progress, dates, quiz results, certificates, and last activity.
+- Combine applicable conditions using AND/OR groups with one level of nesting, including status, content, learner, progress, dates, quiz results, certificates, and last activity. Every matching operator has its excluding counterpart (is / is not, is any of / is none of, contains / does not contain, between / not between, is empty / is not empty); excluding conditions never match a record without a value.
 - Recalculate headline metrics and results from all active conditions, with clear scope and condition labels.
 - Save personal and organisation-wide configurations for reuse with current data and current access rights.
-- Preserve compatible conditions when changing views, explain incompatible conditions, and reset all filters with one button while retaining the report subject.
+- Preserve compatible conditions when changing views, explain incompatible conditions, and reset with one button, which clears the picked subject, groups, conditions and popularity period while keeping the current view.
 - Export every matching result and headline metrics, together with scope, conditions, generation time, and date meaning, as PDF or spreadsheets.
 - Respect reporting access throughout selectors, search, results, metrics, configurations, and exports.
 
@@ -40,6 +47,18 @@ Average quiz score averages available quiz scores within an enrollment, then wei
 
 Last activity includes recorded content openings, quiz submissions, and lesson completions. Active learners are distinct matching learners with activity in the last 30 days, displayed explicitly in the label. Each quiz uses its latest submitted, graded attempt; attempt totals include all submitted attempts. Date ranges include complete calendar days in the saved timezone.
 
+### Course activity and popularity
+
+Path activity applies the same rules to development paths: a path's popularity counts distinct matching learners with recorded activity on its courses in the period, and its inactivity uses the latest such activity across all dates. Monthly active learners use the same recorded-activity signals in the report timezone. The funnel's "logged in" step counts matching learners with a recorded login; tenants whose activity log retention is shorter than their learners' history will under-count it.
+
+HR and L&D choose a popularity period in the existing report, keeping the applied group, learner, course, path and learning conditions. Two horizontal bar charts rank courses across **all** matching records, not just the table page. The initial popularity period is the last 30 calendar days; both endpoints include the entire date in the report timezone. Quick presets select the last 7, 30 or 90 days; a custom range can also be applied. Headline tiles summarize the most popular course, the longest gap without activity and the number of never-used courses. Inactivity bars are banded as under 30 days, 30–89 days and 90+ days, each with a visible legend label. Changing this period changes only these charts, not table filters, saved configurations or exports.
+
+**Most popular** counts distinct matching learners with at least one retained learner-activity timestamp in the period, once per course even when they have several activities or the course appears in multiple learning paths. **Longest inactive** uses the latest retained learner activity across all dates for the matching authorized learner population, independent of the popularity period. Bars show full elapsed 24-hour days as of report generation. Courses with no recorded activity are listed first with a separate “No recorded learner activity” label, never a fabricated number of inactive days. Ties use course title and ID for stable rankings.
+
+Recorded activity means the retained last course opening, course completion, lesson completions and submitted quizzes, including previous learning cycles. Content edits, enrollment dates and generic database update timestamps do not count. There is no complete historical log of course openings: older openings are overwritten, and deleted learning data cannot be reconstructed, so historical-period popularity may be understated. These are recorded-activity indicators, not a content freshness audit or an exact historical visitor analytics product.
+
+Published, non-archived courses with enrollments but no activity remain eligible at zero popularity. Courses without enrollments are included only in an unfiltered organisation/course catalog and only when existing reporting permissions permit visibility. A selected group, learner, path or learning condition requires a matching enrollment; it never adds unrelated catalog courses. Draft, archived and foreign-tenant courses are excluded. For a path view, matching path rows supply their authorized linked course enrollments, consistent with the existing path report. Inactivity is scoped rather than disclosing activity by learners the viewer cannot report on. No course is automatically archived or modified.
+
 Reports use current group membership and current enrollments of existing, non-deleted learners/content. Enrollment-date and completion-date conditions filter current records; they do not reconstruct historical learning or membership. A path selection includes courses linked to a learner's enrollment in that path, using shared course progress where a course belongs to multiple paths.
 
 Organisation-wide reporting users manage shared configurations. Group managers can manage personal configurations and use shared configurations, but an inaccessible reference must be adapted before running the report. Saved configurations reopen current data rather than preserving a snapshot.
@@ -56,6 +75,8 @@ Organisation-wide reporting users manage shared configurations. Group managers c
 
 Backend integration tests exercise real database queries across all four views, group scoping and overlapping membership, nested OR rules, same-enrollment matching, timezone date boundaries, invalid filters, report access, and saved-configuration ownership. Export integration tests verify all matching rows despite pagination, rendered spreadsheet contents, access narrowing before download, and expiry cleanup. Focused tests cover filter validation, configuration/export lifecycle, and PDF/spreadsheet rendering.
 
-Frontend utility tests cover compatible view changes, reset behaviour, and condition counting. A populated browser test passes in Chromium and Firefox with report endpoints mocked: all view subjects, nested OR filters, dates/scores, saved configurations, export completion/download, and reset retaining the subject. Backend tests separately exercise real queries and rendering.
+Frontend utility tests cover compatible view changes, reset behaviour, and condition counting. A populated browser test passes in Chromium and Firefox with report endpoints mocked: all view subjects, nested OR filters, dates/scores, saved configurations, export completion/download, and reset clearing the subject, groups and conditions. Backend tests separately exercise real queries and rendering.
 
-Not yet covered: the 10,000-learner growth target, concurrent report load, and memory use of very large exports have not been measured.
+Course activity HTTP/database tests use the tenant-aware, NOBYPASSRLS application connection and real persisted fixtures. They cover timezone/DST boundaries, distinct learners despite repeated signals and overlapping paths, pagination independence, zero/no-enrollment courses, all-time inactivity independent of popularity dates, selected learner/course/score filters, managed-group and owned-course boundaries, foreign tenants, drafts and archived courses. Component/page tests exercise date selection, request wiring, distinct activity metrics and no-activity labels. All seven UI locales define the metric and data-limit explanations.
+
+Not yet covered: the 10,000-learner growth target, concurrent report load, and memory use of very large exports have not been measured. The new historical activity aggregation has not been capacity-benchmarked.

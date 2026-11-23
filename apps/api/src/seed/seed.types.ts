@@ -1,6 +1,7 @@
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
+import type { REPORTS_SEED_OUTCOMES } from "./reports-seed-data";
 import type { Static } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
 
@@ -15,11 +16,13 @@ const userArray = Type.Array(user);
 
 export type UsersSeed = Static<typeof userArray>;
 
-export type ReportsSeedOutcome = "completed" | "inProgress" | "notStarted";
+export type ReportsSeedOutcome = (typeof REPORTS_SEED_OUTCOMES)[keyof typeof REPORTS_SEED_OUTCOMES];
 
 export type ReportsSeedCourse = {
   id: UUIDType;
   authorId: UUIDType;
+  /** Days since the course's latest learner activity; null means no learner ever started it. */
+  idleDays: number | null;
   lessons: Array<{ id: UUIDType; chapterId: UUIDType; assessmentId: UUIDType | null }>;
 };
 

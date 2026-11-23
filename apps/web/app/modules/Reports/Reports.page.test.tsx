@@ -23,7 +23,16 @@ vi.mock("~/components/PageWrapper", () => ({
 vi.mock("~/api/queries/useReportResult", () => ({
   useReportResult: (query: unknown) => {
     report(query);
-    return { data: { rows: [], total: 50, page: 1, pageSize: 10, capturedAt: "2026-01-01" } };
+    return {
+      data: {
+        rows: [],
+        total: 50,
+        page: 1,
+        pageSize: 10,
+        capturedAt: "2026-01-01",
+        breakdowns: { groups: [], courses: [], paths: [] },
+      },
+    };
   },
 }));
 vi.mock("~/api/queries/useReportOptions", () => ({ useReportOptions: () => ({}) }));
@@ -53,6 +62,20 @@ vi.mock("~/modules/Reports/components/ReportMetrics", () => ({
 vi.mock("~/modules/Reports/components/ReportBreakdownChart", () => ({
   ReportBreakdownChart: () => null,
 }));
+vi.mock("~/modules/Reports/components/ReportCourseActivity", () => ({
+  ReportCourseActivity: ({
+    onPeriodChange,
+  }: {
+    onPeriodChange: (period: { from: string; to: string }) => void;
+  }) => (
+    <button onClick={() => onPeriodChange({ from: "2026-01-01", to: "2026-01-31" })}>
+      january activity
+    </button>
+  ),
+}));
+vi.mock("~/modules/Reports/components/ReportCourseResultsTable", () => ({
+  ReportCourseResultsTable: () => null,
+}));
 vi.mock("~/modules/Reports/components/ReportResultsTable", () => ({
   ReportResultsTable: ({
     onSortChange,
@@ -67,6 +90,37 @@ vi.mock("~/modules/Reports/components/ReportResultsTable", () => ({
     </>
   ),
 }));
+
+const singleCourseConfiguration = encodeURIComponent(
+  JSON.stringify({
+    view: "course",
+    timezone: "UTC",
+    subject: { id: "course-id", name: "Course", type: "course" },
+    groupIds: [],
+    filters: { join: "and", conditions: [], groups: [] },
+  }),
+);
+
+it("sends the selected activity period with the existing applied scope and keeps it when paging", async () => {
+  const Stub = createRemixStub([{ path: "/reports", Component: ReportsPage }]);
+  render(<Stub initialEntries={[`/reports?reportConfig=${singleCourseConfiguration}`]} />);
+  const user = userEvent.setup();
+  await user.click(screen.getByRole("button", { name: "january activity" }));
+  expect(report).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      activityPeriod: { from: "2026-01-01", to: "2026-01-31" },
+      groupIds: [],
+      page: 1,
+    }),
+  );
+  await user.click(screen.getByRole("button", { name: "third page" }));
+  expect(report).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      activityPeriod: { from: "2026-01-01", to: "2026-01-31" },
+      page: 3,
+    }),
+  );
+});
 
 it("requests latest activity initially, resets pagination on sort and exports the active server order", async () => {
   const Stub = createRemixStub([{ path: "/reports", Component: ReportsPage }]);

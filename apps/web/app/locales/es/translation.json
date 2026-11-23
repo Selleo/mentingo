@@ -7685,6 +7685,77 @@
     }
   },
   "reports": {
+    "courseResults": {
+      "course": "Curso",
+      "enrolled": "Inscritos",
+      "completionRate": "Finalización",
+      "averageProgress": "Progreso medio",
+      "averageQuizScore": "Puntuación de cuestionarios",
+      "empty": "Ningún curso coincide con los filtros actuales"
+    },
+    "pathActivity": {
+      "title": "Actividad de rutas",
+      "popular": "Rutas más populares · top 8",
+      "inactive": "Rutas inactivas por más tiempo · top 8",
+      "topPath": "Ruta más popular",
+      "neverActive": "Rutas nunca usadas"
+    },
+    "paths": {
+      "coursesAndLearners": "Cursos: {{courses}} · Alumnos: {{learners}}",
+      "details": "Ver detalles",
+      "empty": "Ninguna ruta de desarrollo coincide con los filtros actuales",
+      "enrollmentsByStatus": "Inscripciones a cursos por estado",
+      "completedShare": "{{percent}} completado"
+    },
+    "insights": {
+      "activityTrend": "Actividad en el tiempo",
+      "activityTrendSubtitle": "Alumnos con actividad registrada por mes",
+      "changeVsPreviousMonth": "{{change}} respecto al mes anterior",
+      "funnel": "Embudo de aprendizaje",
+      "funnelSubtitle": "Cómo avanzan los alumnos coincidentes en su aprendizaje",
+      "funnelSteps": {
+        "learners": "En el alcance",
+        "loggedIn": "Iniciaron sesión",
+        "started": "Empezaron a aprender",
+        "completed": "Completaron un curso"
+      }
+    },
+    "activity": {
+      "title": "Actividad de cursos",
+      "popular": "Cursos más populares · top 8",
+      "inactive": "Cursos inactivos desde hace más tiempo · top 8",
+      "learners": "Participantes activos únicos en el período",
+      "days": "Días completos desde la última actividad del participante",
+      "never": "Sin actividad registrada de participantes",
+      "empty": "No hay cursos coincidentes",
+      "from": "Desde",
+      "to": "Hasta",
+      "apply": "Aplicar período",
+      "period": "Período de popularidad: {{from}} - {{to}} (zona horaria del informe).",
+      "definition": "La popularidad cuenta a cada participante coincidente una vez por curso. La inactividad usa la última actividad registrada de cualquier fecha dentro del alcance seleccionado. Editar contenido no es actividad del participante. Sin archivado automático.",
+      "limitation": "La actividad incluye la última apertura del curso, finalizaciones de cursos y lecciones y cuestionarios enviados (incluidos ciclos anteriores). No se conservan aperturas anteriores, por lo que la popularidad histórica puede estar subestimada. Se excluyen borradores y cursos archivados. Los cursos sin inscripciones solo aparecen sin filtros de grupos, participantes o aprendizaje. El período solo se aplica a estos gráficos; no se guarda ni exporta.",
+      "periodLabel": "Periodo de popularidad",
+      "custom": "Rango personalizado",
+      "lastDays_one": "Último {{count}} día",
+      "lastDays_other": "Últimos {{count}} días",
+      "highlights": {
+        "topCourse": "Curso más popular",
+        "longestGap": "Más tiempo sin actividad",
+        "neverActive": "Cursos nunca usados",
+        "days_one": "{{count}} día",
+        "days_other": "{{count}} días"
+      },
+      "levels": {
+        "recent": "Menos de 30 días",
+        "stale": "30-89 días",
+        "dormant": "90+ días"
+      },
+      "tooltip": {
+        "learners_one": "{{count}} alumno activo",
+        "learners_other": "{{count}} alumnos activos",
+        "lastActivity": "Última actividad: {{date}}"
+      }
+    },
     "errors": {
       "invalidQuery": "Los criterios del informe no son válidos.",
       "invalidConfigurationQuery": "La configuración guardada del informe no es válida.",
@@ -7741,7 +7812,6 @@
     },
     "scope": {
       "groupLabel": "Grupos",
-      "boundaryNote": "Los resultados y las exportaciones se limitan a tus permisos de informes y a los filtros actuales.",
       "allGroups": "Todos los grupos",
       "groupsCount": "{{count}} grupos"
     },
@@ -7795,12 +7865,15 @@
       "eq": "Es",
       "neq": "No es",
       "in": "Es uno de",
+      "notIn": "No es ninguno de",
       "contains": "Contiene",
+      "notContains": "No contiene",
       "gte": "Como mínimo",
       "lte": "Como máximo",
       "between": "Entre",
-      "isEmpty": "No tiene valor",
-      "isNotEmpty": "Tiene valor"
+      "notBetween": "No está entre",
+      "isEmpty": "Está vacío",
+      "isNotEmpty": "No está vacío"
     },
     "values": {
       "notStarted": "Sin empezar",
@@ -7869,7 +7942,10 @@
       "activeCertificateContext": "Certificados válidos actualmente",
       "outcomesTitle": "Resultados de aprendizaje",
       "platformCourses": "Cursos",
-      "platformCoursesContext": "En la plataforma, sin borradores ni cursos archivados"
+      "platformCoursesContext": "En la plataforma, sin borradores ni cursos archivados",
+      "activeShare": "{{percent}} de los alumnos coincidentes",
+      "aiMentorConversations": "Conversaciones con el Mentor IA",
+      "aiMentorConversationsContext": "En cursos coincidentes"
     },
     "breakdowns": {
       "learnersAndEnrollments": "{{learners}} personas · {{enrollments}} inscripciones",
@@ -7881,7 +7957,10 @@
         "courses": "Cursos",
         "groups": "Grupos",
         "paths": "Itinerarios"
-      }
+      },
+      "statusTitle": "Finalizaciones",
+      "statusSubtitle": "Estado de inscripción del aprendizaje coincidente",
+      "statusChartLabel": "Estado de inscripción por {{breakdown}}"
     },
     "exports": {
       "spreadsheet": "Hoja de cálculo",
@@ -7909,14 +7988,12 @@
       "attempts": "Intentos totales",
       "lastActivity": "Última actividad",
       "pathCourseStatus": "Estado del curso en el itinerario",
-      "sortAscending": "Ordenar de forma ascendente",
-      "sortDescending": "Ordenar de forma descendente"
+      "group": "Grupo"
     },
     "help": {
       "title": "Acerca de este informe",
       "scope": "La selección de grupos limita la población de personas. Para las personas coincidentes también se incluye su aprendizaje individual y el de otros grupos.",
-      "metrics": "Todas las métricas, filas de la tabla y exportaciones usan las mismas condiciones aplicadas. Las tasas y medias vacías se muestran como —.",
-      "timezone": "Las fechas usan la zona horaria {{timezone}}."
+      "metrics": "Todas las métricas, filas de la tabla y exportaciones usan las mismas condiciones aplicadas. Las tasas y medias vacías se muestran como —."
     },
     "title": "Informes",
     "description": "Consulta el progreso de la organización en itinerarios, cursos y aprendizaje individual."

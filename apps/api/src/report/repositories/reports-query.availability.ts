@@ -59,9 +59,12 @@ export function buildSavedQueryAvailability(
   const subjectId = sql`(${query} ->> 'subjectId')::uuid`;
   const subjectAllowed = sql`CASE ${query} ->> 'view'
     WHEN ${REPORT_VIEWS.ORGANISATION} THEN ${query} ->> 'subjectId' IS NULL
-    WHEN ${REPORT_VIEWS.COURSE} THEN ${containsReference(db, scope.courses, subjectId)}
-    WHEN ${REPORT_VIEWS.DEVELOPMENT_PATHS} THEN ${containsReference(db, scope.paths, subjectId)}
-    WHEN ${REPORT_VIEWS.LEARNER} THEN ${containsReference(db, scope.learnerSubjects, subjectId)}
+    WHEN ${REPORT_VIEWS.COURSE} THEN ${query} ->> 'subjectId' IS NULL
+      OR ${containsReference(db, scope.courses, subjectId)}
+    WHEN ${REPORT_VIEWS.DEVELOPMENT_PATHS} THEN ${query} ->> 'subjectId' IS NULL
+      OR ${containsReference(db, scope.paths, subjectId)}
+    WHEN ${REPORT_VIEWS.LEARNER} THEN ${query} ->> 'subjectId' IS NULL
+      OR ${containsReference(db, scope.learnerSubjects, subjectId)}
     ELSE FALSE END`;
   return sql<boolean>`${allReferencesAllowed} AND ${subjectAllowed}`;
 }

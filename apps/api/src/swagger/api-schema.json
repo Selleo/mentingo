@@ -168382,7 +168382,15 @@
                               "type": "string"
                             },
                             {
+                              "const": "notIn",
+                              "type": "string"
+                            },
+                            {
                               "const": "contains",
+                              "type": "string"
+                            },
+                            {
+                              "const": "notContains",
                               "type": "string"
                             },
                             {
@@ -168395,6 +168403,10 @@
                             },
                             {
                               "const": "between",
+                              "type": "string"
+                            },
+                            {
+                              "const": "notBetween",
                               "type": "string"
                             },
                             {
@@ -168535,7 +168547,15 @@
                                     "type": "string"
                                   },
                                   {
+                                    "const": "notIn",
+                                    "type": "string"
+                                  },
+                                  {
                                     "const": "contains",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "notContains",
                                     "type": "string"
                                   },
                                   {
@@ -168548,6 +168568,10 @@
                                   },
                                   {
                                     "const": "between",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "notBetween",
                                     "type": "string"
                                   },
                                   {
@@ -168611,6 +168635,24 @@
             "required": [
               "match",
               "rules"
+            ]
+          },
+          "activityPeriod": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "from": {
+                "format": "date",
+                "type": "string"
+              },
+              "to": {
+                "format": "date",
+                "type": "string"
+              }
+            },
+            "required": [
+              "from",
+              "to"
             ]
           },
           "sortBy": {
@@ -168720,6 +168762,277 @@
           "data": {
             "type": "object",
             "properties": {
+              "courseActivity": {
+                "type": "object",
+                "properties": {
+                  "popular": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "activeLearners": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "lastActivityAt": {
+                          "anyOf": [
+                            {
+                              "format": "date-time",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "inactiveDays": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label",
+                        "activeLearners",
+                        "lastActivityAt",
+                        "inactiveDays"
+                      ]
+                    }
+                  },
+                  "inactive": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "activeLearners": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "lastActivityAt": {
+                          "anyOf": [
+                            {
+                              "format": "date-time",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "inactiveDays": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label",
+                        "activeLearners",
+                        "lastActivityAt",
+                        "inactiveDays"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "popular",
+                  "inactive"
+                ]
+              },
+              "pathActivity": {
+                "type": "object",
+                "properties": {
+                  "popular": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "activeLearners": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "lastActivityAt": {
+                          "anyOf": [
+                            {
+                              "format": "date-time",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "inactiveDays": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label",
+                        "activeLearners",
+                        "lastActivityAt",
+                        "inactiveDays"
+                      ]
+                    }
+                  },
+                  "inactive": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "activeLearners": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "lastActivityAt": {
+                          "anyOf": [
+                            {
+                              "format": "date-time",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "inactiveDays": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "label",
+                        "activeLearners",
+                        "lastActivityAt",
+                        "inactiveDays"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "popular",
+                  "inactive"
+                ]
+              },
+              "learningInsights": {
+                "type": "object",
+                "properties": {
+                  "activityTrend": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "month": {
+                          "pattern": "^\\d{4}-\\d{2}$",
+                          "type": "string"
+                        },
+                        "activeLearners": {
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "month",
+                        "activeLearners"
+                      ]
+                    }
+                  },
+                  "funnel": {
+                    "type": "object",
+                    "properties": {
+                      "learners": {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "loggedIn": {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "started": {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "completed": {
+                        "minimum": 0,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "learners",
+                      "loggedIn",
+                      "started",
+                      "completed"
+                    ]
+                  },
+                  "aiMentorConversations": {
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "activityTrend",
+                  "funnel",
+                  "aiMentorConversations"
+                ]
+              },
               "rows": {
                 "type": "array",
                 "items": {
@@ -169122,6 +169435,38 @@
                           "minimum": 0,
                           "type": "integer"
                         },
+                        "courseInProgress": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "courseCount": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "averageProgress": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "averageScore": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
                         "completionRate": {
                           "anyOf": [
                             {
@@ -169141,6 +169486,10 @@
                         "learners",
                         "courseEnrollments",
                         "courseCompletions",
+                        "courseInProgress",
+                        "courseCount",
+                        "averageProgress",
+                        "averageScore",
                         "completionRate"
                       ]
                     }
@@ -169168,6 +169517,38 @@
                           "minimum": 0,
                           "type": "integer"
                         },
+                        "courseInProgress": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "courseCount": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "averageProgress": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "averageScore": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
                         "completionRate": {
                           "anyOf": [
                             {
@@ -169187,6 +169568,10 @@
                         "learners",
                         "courseEnrollments",
                         "courseCompletions",
+                        "courseInProgress",
+                        "courseCount",
+                        "averageProgress",
+                        "averageScore",
                         "completionRate"
                       ]
                     }
@@ -169214,6 +169599,38 @@
                           "minimum": 0,
                           "type": "integer"
                         },
+                        "courseInProgress": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "courseCount": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "averageProgress": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "averageScore": {
+                          "anyOf": [
+                            {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
                         "completionRate": {
                           "anyOf": [
                             {
@@ -169233,6 +169650,10 @@
                         "learners",
                         "courseEnrollments",
                         "courseCompletions",
+                        "courseInProgress",
+                        "courseCount",
+                        "averageProgress",
+                        "averageScore",
                         "completionRate"
                       ]
                     }
@@ -169538,7 +169959,15 @@
                                         "type": "string"
                                       },
                                       {
+                                        "const": "notIn",
+                                        "type": "string"
+                                      },
+                                      {
                                         "const": "contains",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "notContains",
                                         "type": "string"
                                       },
                                       {
@@ -169551,6 +169980,10 @@
                                       },
                                       {
                                         "const": "between",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "notBetween",
                                         "type": "string"
                                       },
                                       {
@@ -169691,7 +170124,15 @@
                                               "type": "string"
                                             },
                                             {
+                                              "const": "notIn",
+                                              "type": "string"
+                                            },
+                                            {
                                               "const": "contains",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "notContains",
                                               "type": "string"
                                             },
                                             {
@@ -169704,6 +170145,10 @@
                                             },
                                             {
                                               "const": "between",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "notBetween",
                                               "type": "string"
                                             },
                                             {
@@ -169977,7 +170422,15 @@
                                   "type": "string"
                                 },
                                 {
+                                  "const": "notIn",
+                                  "type": "string"
+                                },
+                                {
                                   "const": "contains",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "notContains",
                                   "type": "string"
                                 },
                                 {
@@ -169990,6 +170443,10 @@
                                 },
                                 {
                                   "const": "between",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "notBetween",
                                   "type": "string"
                                 },
                                 {
@@ -170130,7 +170587,15 @@
                                         "type": "string"
                                       },
                                       {
+                                        "const": "notIn",
+                                        "type": "string"
+                                      },
+                                      {
                                         "const": "contains",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "notContains",
                                         "type": "string"
                                       },
                                       {
@@ -170143,6 +170608,10 @@
                                       },
                                       {
                                         "const": "between",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "notBetween",
                                         "type": "string"
                                       },
                                       {
@@ -170382,7 +170851,15 @@
                                       "type": "string"
                                     },
                                     {
+                                      "const": "notIn",
+                                      "type": "string"
+                                    },
+                                    {
                                       "const": "contains",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "notContains",
                                       "type": "string"
                                     },
                                     {
@@ -170395,6 +170872,10 @@
                                     },
                                     {
                                       "const": "between",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "notBetween",
                                       "type": "string"
                                     },
                                     {
@@ -170535,7 +171016,15 @@
                                             "type": "string"
                                           },
                                           {
+                                            "const": "notIn",
+                                            "type": "string"
+                                          },
+                                          {
                                             "const": "contains",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "notContains",
                                             "type": "string"
                                           },
                                           {
@@ -170548,6 +171037,10 @@
                                           },
                                           {
                                             "const": "between",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "notBetween",
                                             "type": "string"
                                           },
                                           {
@@ -170821,7 +171314,15 @@
                                   "type": "string"
                                 },
                                 {
+                                  "const": "notIn",
+                                  "type": "string"
+                                },
+                                {
                                   "const": "contains",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "notContains",
                                   "type": "string"
                                 },
                                 {
@@ -170834,6 +171335,10 @@
                                 },
                                 {
                                   "const": "between",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "notBetween",
                                   "type": "string"
                                 },
                                 {
@@ -170974,7 +171479,15 @@
                                         "type": "string"
                                       },
                                       {
+                                        "const": "notIn",
+                                        "type": "string"
+                                      },
+                                      {
                                         "const": "contains",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "notContains",
                                         "type": "string"
                                       },
                                       {
@@ -170987,6 +171500,10 @@
                                       },
                                       {
                                         "const": "between",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "notBetween",
                                         "type": "string"
                                       },
                                       {
@@ -171221,7 +171738,15 @@
                                       "type": "string"
                                     },
                                     {
+                                      "const": "notIn",
+                                      "type": "string"
+                                    },
+                                    {
                                       "const": "contains",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "notContains",
                                       "type": "string"
                                     },
                                     {
@@ -171234,6 +171759,10 @@
                                     },
                                     {
                                       "const": "between",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "notBetween",
                                       "type": "string"
                                     },
                                     {
@@ -171374,7 +171903,15 @@
                                             "type": "string"
                                           },
                                           {
+                                            "const": "notIn",
+                                            "type": "string"
+                                          },
+                                          {
                                             "const": "contains",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "notContains",
                                             "type": "string"
                                           },
                                           {
@@ -171387,6 +171924,10 @@
                                           },
                                           {
                                             "const": "between",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "notBetween",
                                             "type": "string"
                                           },
                                           {
@@ -171686,7 +172227,15 @@
                                   "type": "string"
                                 },
                                 {
+                                  "const": "notIn",
+                                  "type": "string"
+                                },
+                                {
                                   "const": "contains",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "notContains",
                                   "type": "string"
                                 },
                                 {
@@ -171699,6 +172248,10 @@
                                 },
                                 {
                                   "const": "between",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "notBetween",
                                   "type": "string"
                                 },
                                 {
@@ -171839,7 +172392,15 @@
                                         "type": "string"
                                       },
                                       {
+                                        "const": "notIn",
+                                        "type": "string"
+                                      },
+                                      {
                                         "const": "contains",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "notContains",
                                         "type": "string"
                                       },
                                       {
@@ -171852,6 +172413,10 @@
                                       },
                                       {
                                         "const": "between",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "notBetween",
                                         "type": "string"
                                       },
                                       {
@@ -171915,6 +172480,24 @@
                 "required": [
                   "match",
                   "rules"
+                ]
+              },
+              "activityPeriod": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "to": {
+                    "format": "date",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
                 ]
               },
               "sortBy": {

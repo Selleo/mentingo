@@ -8435,6 +8435,83 @@
     }
   },
   "reports": {
+    "courseResults": {
+      "course": "Kursas",
+      "enrolled": "Užsiregistravę",
+      "completionRate": "Užbaigimas",
+      "averageProgress": "Vidutinė pažanga",
+      "averageQuizScore": "Testų rezultatas",
+      "empty": "Dabartinius filtrus atitinkančių kursų nėra"
+    },
+    "pathActivity": {
+      "title": "Kelių veikla",
+      "popular": "Populiariausi keliai · top 8",
+      "inactive": "Ilgiausiai neaktyvūs keliai · top 8",
+      "topPath": "Populiariausias kelias",
+      "neverActive": "Niekada nenaudoti keliai"
+    },
+    "paths": {
+      "coursesAndLearners": "Kursai: {{courses}} · Besimokantieji: {{learners}}",
+      "details": "Rodyti išsamiau",
+      "empty": "Dabartinius filtrus atitinkančių tobulėjimo kelių nėra",
+      "enrollmentsByStatus": "Kursų registracijos pagal būseną",
+      "completedShare": "Užbaigta {{percent}}"
+    },
+    "insights": {
+      "activityTrend": "Veikla laikui bėgant",
+      "activityTrendSubtitle": "Besimokantieji su užfiksuota veikla per mėnesį",
+      "changeVsPreviousMonth": "{{change}} palyginti su praėjusiu mėnesiu",
+      "funnel": "Mokymosi piltuvas",
+      "funnelSubtitle": "Kaip atitinkantys besimokantieji juda per mokymąsi",
+      "funnelSteps": {
+        "learners": "Apimtyje",
+        "loggedIn": "Prisijungę",
+        "started": "Pradėjo mokytis",
+        "completed": "Užbaigė kursą"
+      }
+    },
+    "activity": {
+      "title": "Kursų aktyvumas",
+      "popular": "Populiariausi kursai · 8 pirmieji",
+      "inactive": "Ilgiausiai neaktyvūs kursai · 8 pirmieji",
+      "learners": "Unikalūs aktyvūs dalyviai per laikotarpį",
+      "days": "Pilnos dienos nuo paskutinės dalyvio veiklos",
+      "never": "Nėra užfiksuotos dalyvių veiklos",
+      "empty": "Nėra atitinkančių kursų",
+      "from": "Nuo",
+      "to": "Iki",
+      "apply": "Taikyti laikotarpį",
+      "period": "Populiarumo laikotarpis: {{from}} - {{to}} (ataskaitos laiko juosta).",
+      "definition": "Populiarumas skaičiuoja kiekvieną atitinkantį dalyvį vieną kartą kiekvienam kursui. Neaktyvumas remiasi paskutine užfiksuota dalyvių veikla per visą laiką pasirinktame diapazone. Turinio redagavimas nėra dalyvių veikla. Be automatinio archyvavimo.",
+      "limitation": "Veikla apima paskutinį kurso atidarymą, kursų ir pamokų baigimą bei pateiktus testus (įskaitant ankstesnius mokymosi ciklus). Senesni atidarymai nesaugomi, todėl ankstesnių laikotarpių populiarumas gali būti mažesnis. Juodraščiai ir archyvuoti kursai neįtraukiami. Kursai be registracijų rodomi tik be grupių, dalyvių ir mokymosi filtrų. Laikotarpis taikomas tik šioms diagramoms; jis neišsaugomas ir neeksportuojamas.",
+      "periodLabel": "Populiarumo laikotarpis",
+      "custom": "Pasirinktinis laikotarpis",
+      "lastDays_one": "Paskutinė {{count}} diena",
+      "lastDays_few": "Paskutinės {{count}} dienos",
+      "lastDays_many": "Paskutinių {{count}} dienų",
+      "lastDays_other": "Paskutinių {{count}} dienų",
+      "highlights": {
+        "topCourse": "Populiariausias kursas",
+        "longestGap": "Ilgiausiai be veiklos",
+        "neverActive": "Niekada nenaudoti kursai",
+        "days_one": "{{count}} diena",
+        "days_few": "{{count}} dienos",
+        "days_many": "{{count}} dienų",
+        "days_other": "{{count}} dienų"
+      },
+      "levels": {
+        "recent": "Mažiau nei 30 dienų",
+        "stale": "30-89 dienos",
+        "dormant": "90+ dienų"
+      },
+      "tooltip": {
+        "learners_one": "{{count}} aktyvus besimokantis",
+        "learners_few": "{{count}} aktyvūs besimokantieji",
+        "learners_many": "{{count}} aktyvių besimokančiųjų",
+        "learners_other": "{{count}} aktyvių besimokančiųjų",
+        "lastActivity": "Paskutinė veikla: {{date}}"
+      }
+    },
     "errors": {
       "invalidQuery": "Ataskaitos kriterijai neteisingi.",
       "invalidConfigurationQuery": "Išsaugota ataskaitos konfigūracija neteisinga.",
@@ -8491,7 +8568,6 @@
     },
     "scope": {
       "groupLabel": "Grupės",
-      "boundaryNote": "Rezultatai ir eksportai apsiriboja jūsų ataskaitų teisėmis ir dabartiniais filtrais.",
       "allGroups": "Visos grupės",
       "groupsCount": "Grupės: {{count}}"
     },
@@ -8545,12 +8621,15 @@
       "eq": "Yra",
       "neq": "Nėra",
       "in": "Yra viena iš",
+      "notIn": "Nėra nė viena iš",
       "contains": "Turi",
+      "notContains": "Neturi",
       "gte": "Bent",
       "lte": "Daugiausia",
       "between": "Tarp",
-      "isEmpty": "Neturi reikšmės",
-      "isNotEmpty": "Turi reikšmę"
+      "notBetween": "Ne tarp",
+      "isEmpty": "Yra tuščia",
+      "isNotEmpty": "Nėra tuščia"
     },
     "values": {
       "notStarted": "Nepradėta",
@@ -8619,7 +8698,10 @@
       "activeCertificateContext": "Šiuo metu galiojantys pažymėjimai",
       "outcomesTitle": "Mokymosi rezultatai",
       "platformCourses": "Kursai",
-      "platformCoursesContext": "Platformoje, be juodraščių ir archyvuotų kursų"
+      "platformCoursesContext": "Platformoje, be juodraščių ir archyvuotų kursų",
+      "activeShare": "{{percent}} atitinkančių besimokančiųjų",
+      "aiMentorConversations": "Pokalbiai su DI mentoriumi",
+      "aiMentorConversationsContext": "Atitinkančiuose kursuose"
     },
     "breakdowns": {
       "learnersAndEnrollments": "Besimokančiųjų: {{learners}} · Registracijų: {{enrollments}}",
@@ -8631,7 +8713,10 @@
         "courses": "Kursai",
         "groups": "Grupės",
         "paths": "Keliai"
-      }
+      },
+      "statusTitle": "Užbaigimai",
+      "statusSubtitle": "Atitinkančio mokymosi registracijų būsena",
+      "statusChartLabel": "Registracijų būsena pagal: {{breakdown}}"
     },
     "exports": {
       "spreadsheet": "Skaičiuoklė",
@@ -8659,14 +8744,12 @@
       "attempts": "Visi bandymai",
       "lastActivity": "Paskutinė veikla",
       "pathCourseStatus": "Kurso būsena mokymosi kelyje",
-      "sortAscending": "Rikiuoti didėjimo tvarka",
-      "sortDescending": "Rikiuoti mažėjimo tvarka"
+      "group": "Grupė"
     },
     "help": {
       "title": "Apie ataskaitą",
       "scope": "Pasirinktos grupės apriboja besimokančiųjų imtį. Atitinkantiems besimokantiesiems įtraukiamas ir jų individualus bei kitų grupių mokymasis.",
-      "metrics": "Visiems rodikliams, lentelės eilutėms ir eksportams taikomos tos pačios sąlygos. Tušti rodikliai ir vidurkiai rodomi kaip —.",
-      "timezone": "Datos rodomos laiko juostoje {{timezone}}."
+      "metrics": "Visiems rodikliams, lentelės eilutėms ir eksportams taikomos tos pačios sąlygos. Tušti rodikliai ir vidurkiai rodomi kaip —."
     },
     "title": "Ataskaitos",
     "description": "Stebėkite organizacijos pažangą mokymosi keliuose, kursuose ir tarp besimokančiųjų."

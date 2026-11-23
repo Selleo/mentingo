@@ -2,6 +2,7 @@ import { BadRequestException } from "@nestjs/common";
 
 import { REPORT_FIELD_OPERATORS } from "../constants/reports-field-operators";
 import {
+  REPORT_CALENDAR_DATE_PATTERN,
   REPORT_DATE_FIELDS,
   REPORT_DATE_PATTERN,
   REPORT_IDENTIFIER_FIELDS,
@@ -20,15 +21,31 @@ import { REPORT_ERRORS } from "../constants/reports.errors";
 import { flattenFilterConditions } from "../utils/reports-filter.utils";
 
 import type { ReportFilterValue } from "../reports-filter.types";
-import type { ReportDefinition, ReportFilterCondition } from "../schemas/reports.schema";
+import type {
+  ReportActivityPeriod,
+  ReportDefinition,
+  ReportFilterCondition,
+  ReportsQuery,
+} from "../schemas/reports.schema";
 
 /** Structural input validation lives in TypeBox; these checks enforce report meaning. */
-export function validateReportsQuerySemantics(query: ReportDefinition): void {
+export function validateReportsQuerySemantics(
+  query: ReportDefinition & Pick<ReportsQuery, "activityPeriod">,
+): void {
+  if (query.activityPeriod) assertActivityPeriod(query.activityPeriod);
   assertTimezone(query.timezone);
   assertSubject(query);
   const conditions = flattenFilterConditions(query.filter);
   assertValid(conditions.length <= REPORT_LIMITS.CONDITIONS, REPORT_ERRORS.TOO_MANY_CONDITIONS);
   conditions.forEach(validateCondition);
+}
+
+function assertActivityPeriod({ from, to }: ReportActivityPeriod): void {
+  assertValid(
+    [from, to].every((date) => REPORT_CALENDAR_DATE_PATTERN.test(date) && isValidDate(date)),
+    REPORT_ERRORS.INVALID_DATE,
+  );
+  assertValid(from <= to, REPORT_ERRORS.REVERSED_RANGE);
 }
 
 function assertTimezone(timezone: string): void {
@@ -39,12 +56,11 @@ function assertTimezone(timezone: string): void {
   }
 }
 
+/** Course, path and learner views compare every visible subject unless one is picked. */
 function assertSubject(query: ReportDefinition): void {
   if (query.view === REPORT_VIEWS.ORGANISATION) {
     assertValid(!query.subjectId, REPORT_ERRORS.UNEXPECTED_SUBJECT);
-    return;
   }
-  assertValid(Boolean(query.subjectId), REPORT_ERRORS.SUBJECT_REQUIRED);
 }
 
 function validateCondition(condition: ReportFilterCondition): void {
@@ -58,14 +74,17 @@ function validateCondition(condition: ReportFilterCondition): void {
   }
   const values = readConditionValues(condition);
   validateFieldValues(condition.field, values);
-  if (condition.operator === OPERATOR.BETWEEN) assertOrderedRange(condition.field, values);
+  if (isRangeOperator(condition.operator)) assertOrderedRange(condition.field, values);
 }
+
+const isRangeOperator = (operator: ReportFilterCondition["operator"]) =>
+  operator === OPERATOR.BETWEEN || operator === OPERATOR.NOT_BETWEEN;
 
 function readConditionValues({ operator, value }: ReportFilterCondition): ReportFilterValue[] {
   assertValid(value !== undefined, REPORT_ERRORS.REQUIRED_VALUE);
-  if (operator === OPERATOR.BETWEEN) {
+  if (isRangeOperator(operator)) {
     assertValid(Array.isArray(value) && value.length === 2, REPORT_ERRORS.INVALID_RANGE);
-  } else if (operator === OPERATOR.IN) {
+  } else if (operator === OPERATOR.IN || operator === OPERATOR.NOT_IN) {
     assertValid(Array.isArray(value), REPORT_ERRORS.EXPECTED_LIST);
   } else {
     assertValid(!Array.isArray(value), REPORT_ERRORS.EXPECTED_SINGLE_VALUE);

@@ -8,7 +8,16 @@ export type QueryRow = Record<string, unknown>;
 
 export type ReportData = Pick<
   ReportsResult,
-  "rows" | "metrics" | "breakdowns" | "total" | "page" | "pageSize" | "capturedAt"
+  | "rows"
+  | "metrics"
+  | "breakdowns"
+  | "total"
+  | "page"
+  | "pageSize"
+  | "capturedAt"
+  | "courseActivity"
+  | "pathActivity"
+  | "learningInsights"
 >;
 
 export type ReportStatementContext = {
@@ -17,6 +26,7 @@ export type ReportStatementContext = {
   managedGroupIds: string[];
   authorizedGroupIds: string[];
   filterSql: SQL;
+  activityCourseCandidates: SQL;
   includeNoEnrollmentLearners: boolean;
   pageLimit: SQL;
   pageOffset: SQL;
@@ -55,3 +65,12 @@ export type ReportOption = ReportOptions["groups"][number];
 export type ReportAccessibleReferences = ReturnType<typeof buildAccessibleReferences>;
 
 export type ReportReferenceQuery = ReportAccessibleReferences[keyof ReportAccessibleReferences];
+
+/** SQL aggregates whose meaning differs between path rows and course rows of a report. */
+export type ReportViewAggregates = {
+  courseEnrollments: (rows: SQL) => SQL;
+  courseCompletions: (rows: SQL) => SQL;
+  courseInProgress: (rows: SQL) => SQL;
+  courseCount: (rows: SQL) => SQL;
+  completedPaths: SQL;
+};

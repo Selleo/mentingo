@@ -1,10 +1,10 @@
-import { Activity, Award, BookOpen, CircleCheckBig, Users } from "lucide-react";
+import { Activity, Award, CircleCheckBig, Trophy, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Progress } from "~/components/ui/progress";
 
 import { REPORTS_HANDLES } from "../../../../e2e/data/reports/handles";
-import { formatReportPercent } from "../reports.utils";
+import { formatReportPercent } from "../utils/reports.utils";
 
 import type { LucideIcon } from "lucide-react";
 import type { RunReportResponse } from "~/api/generated-api";
@@ -33,13 +33,6 @@ export function ReportHeadlineMetrics({ metrics }: ReportMetricsProps) {
       context: t("reports.metrics.people"),
     },
     {
-      key: "platformCourses",
-      icon: BookOpen,
-      label: t("reports.metrics.platformCourses"),
-      value: metrics.platformCourses,
-      context: t("reports.metrics.platformCoursesContext"),
-    },
-    {
       key: "courseCompletionRate",
       icon: CircleCheckBig,
       label: t("reports.metrics.completionRate"),
@@ -51,8 +44,20 @@ export function ReportHeadlineMetrics({ metrics }: ReportMetricsProps) {
       key: "activeLearners30d",
       icon: Activity,
       label: t("reports.metrics.activeLearners"),
-      value: metrics.activeLearners30d,
-      context: t("reports.metrics.last30Days"),
+      value: `${metrics.activeLearners30d} / ${metrics.learners}`,
+      context: t("reports.metrics.activeShare", {
+        percent: formatReportPercent(
+          metrics.learners ? (metrics.activeLearners30d * 100) / metrics.learners : null,
+        ),
+      }),
+    },
+    {
+      key: "averageScore",
+      icon: Trophy,
+      label: t("reports.metrics.averageScore"),
+      value: formatReportPercent(metrics.averageScore),
+      context: t("reports.metrics.quizScores"),
+      rate: metrics.averageScore,
     },
   ];
 
@@ -89,7 +94,10 @@ export function ReportHeadlineMetrics({ metrics }: ReportMetricsProps) {
   );
 }
 
-export function ReportOutcomeMetrics({ metrics }: ReportMetricsProps) {
+export function ReportOutcomeMetrics({
+  metrics,
+  aiMentorConversations,
+}: ReportMetricsProps & { aiMentorConversations?: number }) {
   const { t } = useTranslation();
   const outcomes = [
     {
@@ -113,16 +121,16 @@ export function ReportOutcomeMetrics({ metrics }: ReportMetricsProps) {
       value: metrics.activeCertificates,
     },
     {
-      key: "certificatesIssued",
-      label: t("reports.metrics.certificates"),
-      context: t("reports.metrics.issued"),
-      value: metrics.certificatesIssued,
-    },
-    {
       key: "developmentPathsCompleted",
       label: t("reports.metrics.pathsCompleted"),
       context: t("reports.metrics.allActivePaths"),
       value: metrics.developmentPathsCompleted,
+    },
+    {
+      key: "aiMentorConversations",
+      label: t("reports.metrics.aiMentorConversations"),
+      context: t("reports.metrics.aiMentorConversationsContext"),
+      value: aiMentorConversations ?? 0,
     },
   ];
 

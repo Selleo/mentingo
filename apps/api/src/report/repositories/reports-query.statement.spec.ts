@@ -34,6 +34,7 @@ const renderReportStatementSql = (query: Partial<ReportsQuery> = {}) => {
     managedGroupIds: [],
     authorizedGroupIds: [],
     filterSql: sql`true`,
+    activityCourseCandidates: sql`SELECT tenant_id, id AS course_id, title AS label FROM courses`,
     fromSql: sql`course_facts`,
     pathPopulationSql: sql`true`,
     localizedCourseTitle: sql`course_title`,
@@ -51,6 +52,13 @@ const expectRowOrderBeforePaginationAndInResult = (statementSql: string, rowOrde
 };
 
 describe("report row ordering", () => {
+  it("includes server-wide course activity independently of paginated rows when requested", () => {
+    const statement = renderReportStatementSql({
+      activityPeriod: { from: "2026-01-01", to: "2026-01-31" },
+    });
+    expect(statement).toContain("activity_totals AS");
+    expect(statement).toContain("AS course_activity");
+  });
   const sortScenarios = REPORT_SORT_COLUMN_SCENARIOS.flatMap((scenario) =>
     Object.values(REPORT_SORT_DIRECTIONS).map((sortDirection) => ({ ...scenario, sortDirection })),
   );

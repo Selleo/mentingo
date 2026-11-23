@@ -1,5 +1,7 @@
+import { COURSE_STATUSES } from "@repo/shared";
 import { and, count, eq, exists, inArray, ne, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import { match } from "ts-pattern";
 
 import {
   courses,
@@ -27,6 +29,7 @@ import type {
   QueryRow,
 } from "./reports-query.types";
 import type { ReportsAccess, ReportsAccessScope } from "../reports-access.types";
+import type { ReportCourseActivity, ReportLearningInsights } from "../schemas/reports.schema";
 import type { SQL } from "drizzle-orm";
 import type { LocalizationService } from "src/localization/localization.service";
 
@@ -61,6 +64,41 @@ export async function executeReportQuery(
   return mapSummary(result as QueryRow, query, capturedAt, platformCourses);
 }
 
+/** Courses eligible for activity rankings; never widens beyond the viewer's authorized catalog. */
+function buildActivityCourseCandidates(
+  transaction: ReportTransaction,
+  localizationService: LocalizationService,
+  context: ReportQueryExecutionContext,
+): SQL {
+  const { query } = context;
+  const includeUnenrolledCourses =
+    !query.filter &&
+    query.groupIds.length === 0 &&
+    (query.view === REPORT_VIEWS.ORGANISATION || query.view === REPORT_VIEWS.COURSE);
+  return transaction
+    .select({
+      tenant_id: courses.tenantId,
+      course_id: sql`${courses.id}`.as("course_id"),
+      label: localizationService
+        .getLocalizedSqlField(courses.title, query.language, courses)
+        .as("label"),
+    })
+    .from(courses)
+    .where(
+      and(
+        courseIsVisible(transaction, context),
+        ne(courses.status, COURSE_STATUSES.DRAFT),
+        query.view === REPORT_VIEWS.COURSE && query.subjectId
+          ? eq(courses.id, query.subjectId)
+          : undefined,
+        includeUnenrolledCourses
+          ? undefined
+          : sql`${courses.id} IN (SELECT course_id FROM activity_keys)`,
+      ),
+    )
+    .getSQL();
+}
+
 /** Courses on the platform the viewer may report on, leaving out drafts and archived courses. */
 async function countPlatformCourses(
   transaction: ReportTransaction,
@@ -69,7 +107,7 @@ async function countPlatformCourses(
   const [row] = await transaction
     .select({ count: count() })
     .from(courses)
-    .where(and(courseIsVisible(transaction, scope), ne(courses.status, "draft")));
+    .where(and(courseIsVisible(transaction, scope), ne(courses.status, COURSE_STATUSES.DRAFT)));
 
   return row?.count ?? 0;
 }
@@ -125,6 +163,13 @@ function buildStatementContext(
     managedGroupIds,
     authorizedGroupIds,
     filterSql,
+    activityCourseCandidates: buildActivityCourseCandidates(transaction, localizationService, {
+      query,
+      access,
+      managedGroupIds,
+      authorizedGroupIds,
+      allRows,
+    }),
     includeNoEnrollmentLearners,
     pageLimit,
     pageOffset,
@@ -154,6 +199,11 @@ function mapSummary(
   const courseCompletions = Number(record.course_completions ?? 0);
 
   return {
+    ...(query.activityPeriod && {
+      courseActivity: record.course_activity as ReportCourseActivity,
+      pathActivity: record.path_activity as ReportCourseActivity,
+      learningInsights: record.learning_insights as ReportLearningInsights,
+    }),
     rows: (record.rows ?? []) as ReportData["rows"],
     metrics: {
       learners: Number(record.learners ?? 0),
@@ -182,13 +232,25 @@ function mapSummary(
 }
 
 function getViewFromSql(query: ReportQueryExecutionContext["query"]): SQL {
-  if (query.view === REPORT_VIEWS.DEVELOPMENT_PATHS) {
-    return sql`SELECT pf.* FROM path_facts pf WHERE pf.path_id = ${query.subjectId}`;
-  }
-
-  return sql`SELECT cf.* FROM course_facts cf
-    ${query.view === REPORT_VIEWS.COURSE ? sql`WHERE cf.course_id = ${query.subjectId}` : sql``}
-    ${query.view === REPORT_VIEWS.LEARNER ? sql`WHERE cf.learner_id = ${query.subjectId}` : sql``}`;
+  const { subjectId } = query;
+  return match(query.view)
+    .with(REPORT_VIEWS.DEVELOPMENT_PATHS, () =>
+      subjectId
+        ? sql`SELECT pf.* FROM path_facts pf WHERE pf.path_id = ${subjectId}`
+        : sql`SELECT pf.* FROM path_facts pf`,
+    )
+    .with(REPORT_VIEWS.COURSE, () =>
+      subjectId
+        ? sql`SELECT cf.* FROM course_facts cf WHERE cf.course_id = ${subjectId}`
+        : sql`SELECT cf.* FROM course_facts cf`,
+    )
+    .with(REPORT_VIEWS.LEARNER, () =>
+      subjectId
+        ? sql`SELECT cf.* FROM course_facts cf WHERE cf.learner_id = ${subjectId}`
+        : sql`SELECT cf.* FROM course_facts cf`,
+    )
+    .with(REPORT_VIEWS.ORGANISATION, () => sql`SELECT cf.* FROM course_facts cf`)
+    .exhaustive();
 }
 
 function getPathPopulationSql(
