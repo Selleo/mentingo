@@ -79,8 +79,8 @@ the report. Turn it on for views that have no violations left, so they stay clea
 
 ## CI
 
-`.github/workflows/accessibility-audit.yml` runs the audit through the E2E workflow
-(`suite: a11y-audit`) on:
+`.github/workflows/accessibility-audit.yml` is its own workflow, independent of `e2e.yml`: it
+builds the app images, starts the same services and runs only `pnpm test:a11y-audit`. Triggers:
 
 - the `run accessibility audit ♿` PR label,
 - every Monday at 03:00 UTC,

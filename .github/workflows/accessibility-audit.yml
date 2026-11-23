@@ -1,11 +1,29 @@
 name: Accessibility audit (WCAG 2.1 AA)
 
-# Runs the axe-core + keyboard/reflow audit in apps/web/e2e/a11y-audit, uploads the scored report
-# (artifact "wcag-audit-report", also in the job summary). It fails only on views scanned with
-# `regressionCheck`; regressions on learner pages are blocked by the regular E2E suite.
+# Runs apps/web/e2e/a11y-audit against the app images, separately from the E2E workflow. Uploads
+# the scored report (artifact "wcag-audit-report", also in the job summary). It fails only when a
+# view scanned with `regressionCheck` has a violation.
 
 env:
   HUSKY: 0
+  JWT_SECRET: "test_secret"
+  JWT_REFRESH_SECRET: "test_refresh"
+  JWT_EXPIRATION_TIME: "15min"
+  CORS_ORIGIN: "https://localhost:5173"
+  EMAIL_ADAPTER: "mailhog"
+  DATABASE_URL: "postgresql://test_user:test_password@localhost:54321/test_db"
+  REDIS_URL: "redis://localhost:6380"
+  SMTP_HOST: "localhost"
+  SMTP_PORT: "1025"
+  SMTP_USER: ""
+  SMTP_PASSWORD: ""
+  AWS_REGION: "us-east-1"
+  AWS_ACCESS_KEY_ID: "rustfsadmin"
+  AWS_SECRET_ACCESS_KEY: "rustfsadmin"
+  AWS_BUCKET_NAME: "test-bucket"
+  AWS_ENDPOINT_URL: "http://localhost:9100"
+  SMTP_EMAIL_FROM: "noreply@lms.selleo.app"
+  SEED_MANAGE_DB_ROLE: "true"
 
 on:
   pull_request:
@@ -16,16 +34,231 @@ on:
 
 jobs:
   audit:
+    name: WCAG 2.1 AA audit
     if: ${{ github.event_name != 'pull_request' || github.event.label.name == 'run accessibility audit ♿' }}
-    uses: ./.github/workflows/e2e.yml
-    with:
-      browser: chromium
-      suite: a11y-audit
-    secrets:
-      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-      STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
-      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-      MASTER_KEY: ${{ secrets.MASTER_KEY }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      LUMA_API_KEY: ${{ secrets.LUMA_API_KEY }}
-      LUMA_BASE_URL: ${{ secrets.LUMA_BASE_URL }}
+    runs-on: ubuntu-latest
+    environment:
+      name: e2e
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 54321:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:alpine
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mailhog:
+        image: mailhog/mailhog:v1.0.1
+        ports:
+          - 1025:1025
+          - 8025:8025
+        options: >-
+          --health-cmd "nc -z localhost 1025"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Caddy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y caddy
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.22.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.15.0
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build packages
+        run: pnpm -w packages:build
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright
+          restore-keys: |
+            ${{ runner.os }}-playwright
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: ./apps/web
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
+
+      - name: Start RustFS
+        run: |
+          docker run -d --name rustfs \
+            -p 9100:9000 \
+            -e RUSTFS_ACCESS_KEY="$AWS_ACCESS_KEY_ID" \
+            -e RUSTFS_SECRET_KEY="$AWS_SECRET_ACCESS_KEY" \
+            rustfs/rustfs:latest /data
+
+          for i in {1..30}; do
+            if curl -fsS http://localhost:9100/health/ready >/dev/null; then
+              echo "RustFS is ready"
+              break
+            fi
+            if ! docker ps --format '{{.Names}}' | grep -qx rustfs; then
+              docker logs rustfs || true
+              exit 1
+            fi
+            sleep 2
+          done
+          curl -fsS http://localhost:9100/health/ready >/dev/null || { docker logs rustfs; exit 1; }
+
+      - name: Setup RustFS bucket
+        run: |
+          docker run --rm \
+            --network host \
+            --entrypoint /bin/sh \
+            -e S3_ENDPOINT="$AWS_ENDPOINT_URL" \
+            -e S3_BUCKET_NAME="$AWS_BUCKET_NAME" \
+            -e S3_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
+            -e S3_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
+            -e S3_REGION="$AWS_REGION" \
+            -e S3_CONFIGURE_CORS=true \
+            -v "$PWD/create-rustfs-bucket.sh:/create-rustfs-bucket.sh:ro" \
+            amazon/aws-cli:latest /create-rustfs-bucket.sh
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Reads the E2E workflow's layer cache but never writes to it.
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: api.Dockerfile
+          tags: mentingo-e2e-api
+          load: true
+          cache-from: type=gha,scope=e2e-api
+
+      - name: Build web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: web.Dockerfile
+          tags: mentingo-e2e-web
+          build-args: |
+            VITE_TEST=true
+          load: true
+          cache-from: type=gha,scope=e2e-web
+
+      - name: Start app
+        shell: bash
+        env:
+          NODE_ENV: test
+          MODE: test
+          E2E: "true"
+          LMS_DATABASE_URL: postgresql://lms_app_user:replace_with_strong_password@localhost:54321/test_db
+          SCORM_CONTENT_ORIGIN: https://scorm.localhost:5443
+          DISABLE_RATE_LIMITING: "true"
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          MASTER_KEY: ${{ secrets.MASTER_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LUMA_API_KEY: ${{ secrets.LUMA_API_KEY }}
+          LUMA_BASE_URL: ${{ secrets.LUMA_BASE_URL }}
+        run: |
+          set -euo pipefail
+
+          api_env=()
+          for name in NODE_ENV MODE E2E CI GITHUB_ACTIONS \
+            DATABASE_URL LMS_DATABASE_URL REDIS_URL \
+            JWT_SECRET JWT_REFRESH_SECRET JWT_EXPIRATION_TIME \
+            CORS_ORIGIN SCORM_CONTENT_ORIGIN DISABLE_RATE_LIMITING SEED_MANAGE_DB_ROLE \
+            EMAIL_ADAPTER SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD SMTP_EMAIL_FROM \
+            AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_BUCKET_NAME AWS_ENDPOINT_URL \
+            STRIPE_SECRET_KEY STRIPE_PUBLISHABLE_KEY STRIPE_WEBHOOK_SECRET \
+            MASTER_KEY OPENAI_API_KEY LUMA_API_KEY LUMA_BASE_URL; do
+            api_env+=(-e "$name")
+          done
+
+          docker run --rm --network host "${api_env[@]}" mentingo-e2e-api migrate
+          pnpm --filter api db:seed-e2e
+          docker run -d --name e2e-api --network host "${api_env[@]}" mentingo-e2e-api server
+          docker run -d --name e2e-web -p 8080:8080 mentingo-e2e-web
+          caddy start --config apps/web/Caddyfile.e2e-images
+
+          for i in {1..120}; do
+            curl -fsS http://localhost:3000/api/healthcheck >/dev/null && break
+            if [ "$(docker inspect -f '{{.State.Running}}' e2e-api)" != "true" ]; then
+              docker logs e2e-api
+              exit 1
+            fi
+            sleep 2
+          done
+          curl -fsS http://localhost:3000/api/healthcheck >/dev/null || { docker logs e2e-api; exit 1; }
+          curl -fsSk https://localhost:5173/ >/dev/null || { docker logs e2e-web; exit 1; }
+
+      - name: Run WCAG 2.1 AA audit
+        run: pnpm test:a11y-audit
+        working-directory: ./apps/web
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
+          DATABASE_URL: postgresql://test_user:test_password@localhost:54321/test_db
+          REDIS_URL: "redis://localhost:6380"
+          NODE_ENV: test
+          E2E_APP_IMAGES: "true"
+          API_URL: http://localhost:3000
+
+      - name: Collect app logs
+        if: failure()
+        run: |
+          mkdir -p app-logs
+          docker logs e2e-api > app-logs/api.log 2>&1 || true
+          docker logs e2e-web > app-logs/web.log 2>&1 || true
+
+      - name: Upload accessibility report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcag-audit-report
+          path: |
+            apps/web/a11y-report
+            app-logs
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Stop containers
+        if: always()
+        run: docker rm -f rustfs e2e-api e2e-web || true
