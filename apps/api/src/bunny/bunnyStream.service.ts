@@ -351,9 +351,11 @@ export class BunnyStreamService {
         maxBodyLength: Infinity,
       });
 
+      const contentType = response.headers["content-type"];
+
       return {
         stream: response.data,
-        contentType: response.headers["content-type"] ?? "video/mp4",
+        contentType: typeof contentType === "string" ? contentType : "video/mp4",
         filename: `play_${resolution}p.mp4`,
         resolution,
       };
