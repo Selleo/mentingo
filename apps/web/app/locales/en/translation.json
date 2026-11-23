@@ -8961,7 +8961,7 @@
   },
   "competencies": {
     "deleteCompetency": "Delete competency",
-    "deleteCompetencyConfirmation": "Delete “{{name}}”? This permanently removes it from all competency tracks and deletes its confirmation history and attached documents. This cannot be undone.",
+    "deleteCompetencyConfirmation": "Delete “{{name}}”? This permanently removes it from all competency profiles and deletes its confirmation history and attached documents. This cannot be undone.",
     "notifications": {
       "categoryCreated": "Category created.",
       "categoryUpdated": "Category updated.",
@@ -8969,11 +8969,11 @@
       "competencyCreated": "Competency created.",
       "competencyUpdated": "Competency updated.",
       "competencyDeleted": "Competency deleted.",
-      "trackCreated": "Competency track created.",
-      "trackUpdated": "Competency track updated.",
-      "trackDeleted": "Competency track deleted.",
-      "trackAssigned": "Competency tracks assigned.",
-      "trackRemoved": "Competency track assignments removed.",
+      "trackCreated": "Competency profile created.",
+      "trackUpdated": "Competency profile updated.",
+      "trackDeleted": "Competency profile deleted.",
+      "trackAssigned": "Competency profiles assigned.",
+      "trackRemoved": "Competency profile assignments removed.",
       "documentSubmitted": "Document submitted for review.",
       "observationConfirmed": "Observation confirmed.",
       "qualificationsRecognized": "Prior qualifications recognized.",
@@ -8988,9 +8988,9 @@
       "categoryDeleteFailed": "Could not delete the category. Try again.",
       "competencySaveFailed": "Could not save the competency. Try again.",
       "competencyDeleteFailed": "Could not delete the competency. Try again.",
-      "trackSaveFailed": "Could not save the competency track. Try again.",
-      "trackDeleteFailed": "Could not delete the competency track. Try again.",
-      "trackAssignmentFailed": "Could not change the competency track assignments. Try again.",
+      "trackSaveFailed": "Could not save the competency profile. Try again.",
+      "trackDeleteFailed": "Could not delete the competency profile. Try again.",
+      "trackAssignmentFailed": "Could not change the competency profile assignments. Try again.",
       "evidenceSubmitFailed": "Could not submit the confirmation. Try again.",
       "reviewFailed": "Could not save the review decision. Try again.",
       "revocationFailed": "Could not revoke the confirmation. Try again.",
@@ -9032,7 +9032,7 @@
       "saveChange": "Save change"
     },
     "searchCatalog": "Search competencies…",
-    "searchTracks": "Search competency tracks…",
+    "searchTracks": "Search competency profiles…",
     "noSearchResults": "No matches found. Try a different search.",
     "documents": "Documents",
     "requiredDocuments": "Documents to submit",
@@ -9054,16 +9054,16 @@
     "own": "My Competencies",
     "team": "Team Competencies",
     "people": "Employees",
-    "peopleDescription": "Review assigned competency tracks and current competency statuses.",
+    "peopleDescription": "Review assigned competency profiles and current competency statuses.",
     "review": "Pending Approval",
     "plans": "Development Plans",
     "catalog": "Competencies",
-    "tracks": "Competency Tracks",
+    "tracks": "Competency Profiles",
     "person": "Person",
-    "track": "Competency track",
-    "compareTrack": "Compare with track",
-    "assignedTrack": "Assigned tracks",
-    "noTrack": "No competency track",
+    "track": "Competency profile",
+    "compareTrack": "Compare with profile",
+    "assignedTrack": "Assigned profiles",
+    "noTrack": "No competency profile",
     "loading": "Loading competencies...",
     "retry": "Try again",
     "serviceError": "Competencies could not be loaded or saved. Try again.",
@@ -9132,14 +9132,14 @@
     "noManualConditions": "No conditions of this type.",
     "noEvidence": "No evidence awaiting your review.",
     "reasonLabel": "Reason",
-    "editTrack": "Edit competency track",
-    "newTrack": "New track",
+    "editTrack": "Edit competency profile",
+    "newTrack": "New profile",
     "requiredCompetencies": "Required competencies",
-    "deleteTrack": "Delete track",
-    "deleteTrackConfirmation": "Delete track \"{{name}}\"?",
-    "trackInUse": "Unassign employees before deleting this track.",
-    "trackLimitReached": "A person can have at most {{count}} competency tracks.",
-    "noTracks": "No competency tracks yet.",
+    "deleteTrack": "Delete profile",
+    "deleteTrackConfirmation": "Delete profile \"{{name}}\"?",
+    "trackInUse": "Unassign employees before deleting this profile.",
+    "trackLimitReached": "A person can have at most {{count}} competency profiles.",
+    "noTracks": "No competency profiles yet.",
     "requiredLevel": "Required level",
     "newAction": "Add development action",
     "noActions": "No development actions yet.",
@@ -9240,8 +9240,8 @@
       "catalog": "A shared catalog of competencies, levels and validation methods.",
       "tracks": "Define what an employee needs to perform the role safely and independently.",
       "settings": "Configure expiry warnings.",
-      "overview": "See who meets the requirements of their competency tracks and where action is needed.",
-      "setup": "Define competencies, combine them into competency tracks and configure expiry reminders.",
+      "overview": "See who meets the requirements of their competency profiles and where action is needed.",
+      "setup": "Define competencies, combine them into competency profiles and configure expiry reminders.",
       "ownWithoutTrack": "Track the competencies your role requires and submit documents that confirm them."
     },
     "setup": "Competency Setup",
@@ -9278,9 +9278,9 @@
       "statusGaps": "Some requirements still need confirmation. Review the gaps and your development plan.",
       "count_one": "{{count}} competency",
       "count_other": "{{count}} competencies",
-      "noTrackTitle": "No competency track assigned yet",
-      "noTrackSelf": "Once an administrator assigns you competency tracks, you will see the competencies they require and what to do next.",
-      "noTrackOther": "Assign competency tracks on the Overview tab to see which competencies this person needs.",
+      "noTrackTitle": "No competency profile assigned yet",
+      "noTrackSelf": "Once an administrator assigns you competency profiles, you will see the competencies they require and what to do next.",
+      "noTrackOther": "Assign competency profiles on the Overview tab to see which competencies this person needs.",
       "requirementsTitle": "Required competencies",
       "filters": {
         "all": "All",
@@ -9318,7 +9318,7 @@
       "ready": "Meets requirements",
       "expiring": "Expiring soon",
       "missing": "Missing competencies",
-      "noTrack": "No competency track",
+      "noTrack": "No competency profile",
       "missingCount_one": "{{count}} missing",
       "missingCount_other": "{{count}} missing",
       "gaps": "Missing competencies"
@@ -9330,20 +9330,20 @@
       "expiringOff": "Expiry reminders are turned off",
       "expiringNote_one": "A confirmation expires within {{count}} day",
       "expiringNote_other": "A confirmation expires within {{count}} days",
-      "noTrackNote": "Assign competency tracks to monitor readiness",
+      "noTrackNote": "Assign competency profiles to monitor readiness",
       "peopleTitle": "People",
-      "peopleDescription": "Assign competency tracks and check who has every competency they need.",
+      "peopleDescription": "Assign competency profiles and check who has every competency they need.",
       "teamDescription": "Check who in your team has every competency they need.",
       "viewMode": "View",
       "views": {
         "list": "List",
         "matrix": "Matrix"
       },
-      "allTracks": "All competency tracks",
+      "allTracks": "All competency profiles",
       "clearFilters": "Clear filters",
       "readiness": "Readiness",
       "noMatches": "No people match the selected filters.",
-      "noMatrixPeople": "Nobody is assigned to this competency track yet.",
+      "noMatrixPeople": "Nobody is assigned to this competency profile yet.",
       "allPeople": "All"
     },
     "gettingStarted": {
@@ -9363,29 +9363,29 @@
           "action": "Add competency"
         },
         "tracks": {
-          "title": "Build a competency track",
+          "title": "Build a competency profile",
           "description": "Choose the competencies and levels a role requires.",
-          "action": "Create competency track"
+          "action": "Create competency profile"
         },
         "assignments": {
           "title": "Assign people",
-          "description": "Assign competency tracks to each employee to start tracking their readiness.",
-          "action": "Assign competency tracks"
+          "description": "Assign competency profiles to each employee to start tracking their readiness.",
+          "action": "Assign competency profiles"
         }
       }
     },
     "setupSection": {
       "competenciesTitle": "Competencies",
       "competenciesDescription": "Skills with levels. Each level lists what confirms it: completing a course, an approved document or an observation.",
-      "tracksTitle": "Competency tracks",
-      "tracksDescription": "Combine competencies and required levels for a role, then assign tracks to people on the Overview tab. A person can have several tracks.",
+      "tracksTitle": "Competency profiles",
+      "tracksDescription": "Combine competencies and required levels for a role, then assign profiles to people on the Overview tab. A person can have several profiles.",
       "settingsTitle": "Expiry reminders",
       "settingsDescription": "Choose how early confirmations that are about to expire are flagged.",
       "emptyCompetenciesTitle": "No competencies yet",
-      "emptyCompetencies": "Start by adding the skills your organization tracks. You can then group them into competency tracks.",
-      "emptyTracksTitle": "No competency tracks yet",
-      "emptyTracks": "Create a competency track to define which competencies a role requires.",
-      "emptyTracksNeedsCompetencies": "Add at least one competency with a level before creating a competency track.",
+      "emptyCompetencies": "Start by adding the skills your organization tracks. You can then group them into competency profiles.",
+      "emptyTracksTitle": "No competency profiles yet",
+      "emptyTracks": "Create a competency profile to define which competencies a role requires.",
+      "emptyTracksNeedsCompetencies": "Add at least one competency with a level before creating a competency profile.",
       "requiredCompetenciesCount": "Required competencies",
       "assignedPeople": "Assigned people",
       "expiryOff": "Off",
@@ -9400,7 +9400,7 @@
       "expiryNav_other": "Warn {{count}} days before expiry",
       "expiryNavOff": "Not configured"
     },
-    "compareWithAssigned": "Compare with: assigned tracks",
+    "compareWithAssigned": "Compare with: assigned profiles",
     "select": {
       "search": "Search…",
       "noResults": "No results found."
@@ -9417,7 +9417,7 @@
     "trackEditor": {
       "addCompetency": "Add competency…",
       "requirementsHelp": "Add each competency the role needs and choose the level required.",
-      "noRequirements": "No competencies added yet. Use “Add competency” to build the track."
+      "noRequirements": "No competencies added yet. Use “Add competency” to build the profile."
     },
     "editor": {
       "levelsHelp": "Levels build on each other. Select a level to define what confirms it.",
@@ -9475,7 +9475,7 @@
       "planGaps": "Plan these competencies",
       "emptyPlan": "No steps in this plan yet.",
       "emptyTitle": "No development plans yet",
-      "empty": "Plans appear here for people whose competency tracks have missing competencies. Assign competency tracks on the Overview tab to get started."
+      "empty": "Plans appear here for people whose competency profiles have missing competencies. Assign competency profiles on the Overview tab to get started."
     },
     "planBuilder": {
       "title": "Add steps to the plan",
@@ -9484,7 +9484,7 @@
       "stepsTitle": "Steps",
       "stepsHelp": "Each step targets one missing competency level. The plan owner and target date apply to every step.",
       "choosePerson": "Choose a person to see their missing competencies.",
-      "noGaps": "This person meets all requirements of their competency tracks.",
+      "noGaps": "This person meets all requirements of their competency profiles.",
       "addStep": "Add step",
       "submit_one": "Create plan with {{count}} step",
       "submit_other": "Create plan with {{count}} steps",

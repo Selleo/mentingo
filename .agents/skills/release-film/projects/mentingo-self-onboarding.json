@@ -9008,7 +9008,7 @@
           ],
           "goal": "Manage competency categories.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9040,7 +9040,7 @@
           ],
           "goal": "Define competencies and level conditions.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9072,7 +9072,7 @@
           ],
           "goal": "Delete a disposable competency.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9085,8 +9085,8 @@
         },
         {
           "id": "competency-tracks",
-          "title": "Create and update competency tracks",
-          "description": "Create and update competency tracks in Mentingo.",
+          "title": "Create and update competency profiles",
+          "description": "Create and update competency profiles in Mentingo.",
           "audiences": [
             "administrator"
           ],
@@ -9101,24 +9101,24 @@
             "apps/web/app/modules/Competencies/**",
             "apps/api/src/competencies/**"
           ],
-          "goal": "Create and update competency tracks.",
+          "goal": "Create and update competency profiles.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
-            "Create a named competency track.",
+            "Create a named competency profile.",
             "Add competencies with their required levels and save.",
-            "Edit a required level and save the active track."
+            "Edit a required level and save the active profile."
           ],
           "outcomes": [
-            "The saved track displays its required competencies and levels."
+            "The saved profile displays its required competencies and levels."
           ]
         },
         {
           "id": "assign-tracks",
-          "title": "Assign and clear a person’s competency tracks",
-          "description": "Assign and clear a person’s competency tracks in Mentingo.",
+          "title": "Assign and clear a person’s competency profiles",
+          "description": "Assign and clear a person’s competency profiles in Mentingo.",
           "audiences": [
             "administrator"
           ],
@@ -9133,24 +9133,24 @@
             "apps/web/app/modules/Competencies/**",
             "apps/api/src/competencies/**"
           ],
-          "goal": "Assign and clear a person’s competency tracks.",
+          "goal": "Assign and clear a person’s competency profiles.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
             "Open a synthetic employee in Overview.",
-            "Assign two competency tracks and inspect their combined requirements.",
-            "Clear the track assignments."
+            "Assign two competency profiles and inspect their combined requirements.",
+            "Clear the profile assignments."
           ],
           "outcomes": [
-            "The person’s view reflects the combined requirements of their current tracks or the absence of any track."
+            "The person’s view reflects the combined requirements of their current profiles or the absence of any profile."
           ]
         },
         {
           "id": "delete-track",
-          "title": "Delete an unassigned competency track",
-          "description": "Delete an unassigned competency track in Mentingo.",
+          "title": "Delete an unassigned competency profile",
+          "description": "Delete an unassigned competency profile in Mentingo.",
           "audiences": [
             "administrator"
           ],
@@ -9165,17 +9165,17 @@
             "apps/web/app/modules/Competencies/**",
             "apps/api/src/competencies/**"
           ],
-          "goal": "Delete an unassigned competency track.",
+          "goal": "Delete an unassigned competency profile.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
-            "Select a disposable unassigned track.",
+            "Select a disposable unassigned profile.",
             "Confirm deletion from its editor."
           ],
           "outcomes": [
-            "The track is removed without deleting unrelated employee evidence."
+            "The profile is removed without deleting unrelated employee evidence."
           ]
         },
         {
@@ -9198,7 +9198,7 @@
           ],
           "goal": "Inspect personal competency requirements.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [

@@ -8873,7 +8873,7 @@
   },
   "competencies": {
     "deleteCompetency": "Eliminar competencia",
-    "deleteCompetencyConfirmation": "¿Eliminar «{{name}}»? Se eliminará permanentemente de todos los itinerarios de competencias junto con su historial de confirmación y los documentos adjuntos. Esta acción no se puede deshacer.",
+    "deleteCompetencyConfirmation": "¿Eliminar «{{name}}»? Se eliminará permanentemente de todos los perfiles de competencias junto con su historial de confirmación y los documentos adjuntos. Esta acción no se puede deshacer.",
     "notifications": {
       "categoryCreated": "Categoría creada.",
       "categoryUpdated": "Categoría actualizada.",
@@ -8881,11 +8881,11 @@
       "competencyCreated": "Competencia creada.",
       "competencyUpdated": "Competencia actualizada.",
       "competencyDeleted": "Competencia eliminada.",
-      "trackCreated": "Itinerario de competencias creado.",
-      "trackUpdated": "Itinerario de competencias actualizado.",
-      "trackDeleted": "Itinerario de competencias eliminado.",
-      "trackAssigned": "Itinerarios de competencias asignados.",
-      "trackRemoved": "Asignaciones de itinerarios de competencias eliminadas.",
+      "trackCreated": "Perfil de competencias creado.",
+      "trackUpdated": "Perfil de competencias actualizado.",
+      "trackDeleted": "Perfil de competencias eliminado.",
+      "trackAssigned": "Perfiles de competencias asignados.",
+      "trackRemoved": "Asignaciones de perfiles de competencias eliminadas.",
       "documentSubmitted": "Documento enviado para revisión.",
       "observationConfirmed": "Observación confirmada.",
       "qualificationsRecognized": "Cualificaciones previas reconocidas.",
@@ -8900,9 +8900,9 @@
       "categoryDeleteFailed": "No se pudo eliminar la categoría. Inténtalo de nuevo.",
       "competencySaveFailed": "No se pudo guardar la competencia. Inténtalo de nuevo.",
       "competencyDeleteFailed": "No se pudo eliminar la competencia. Inténtalo de nuevo.",
-      "trackSaveFailed": "No se pudo guardar el itinerario de competencias. Inténtalo de nuevo.",
-      "trackDeleteFailed": "No se pudo eliminar el itinerario de competencias. Inténtalo de nuevo.",
-      "trackAssignmentFailed": "No se pudo cambiar la asignación de itinerarios de competencias. Inténtalo de nuevo.",
+      "trackSaveFailed": "No se pudo guardar el perfil de competencias. Inténtalo de nuevo.",
+      "trackDeleteFailed": "No se pudo eliminar el perfil de competencias. Inténtalo de nuevo.",
+      "trackAssignmentFailed": "No se pudo cambiar la asignación de perfiles de competencias. Inténtalo de nuevo.",
       "evidenceSubmitFailed": "No se pudo enviar la confirmación. Inténtalo de nuevo.",
       "reviewFailed": "No se pudo guardar la decisión de revisión. Inténtalo de nuevo.",
       "revocationFailed": "No se pudo revocar la confirmación. Inténtalo de nuevo.",
@@ -8944,7 +8944,7 @@
       "saveChange": "Guardar cambio"
     },
     "searchCatalog": "Buscar competencias…",
-    "searchTracks": "Buscar itinerarios de competencias…",
+    "searchTracks": "Buscar perfiles de competencias…",
     "noSearchResults": "No se encontraron coincidencias. Prueba con otra búsqueda.",
     "documents": "Documentos",
     "requiredDocuments": "Documentos por presentar",
@@ -8966,16 +8966,16 @@
     "own": "Mis competencias",
     "team": "Competencias del equipo",
     "people": "Empleados",
-    "peopleDescription": "Consulta los itinerarios de competencias asignados y los estados actuales de competencia.",
+    "peopleDescription": "Consulta los perfiles de competencias asignados y los estados actuales de competencia.",
     "review": "Pendiente de aprobación",
     "plans": "Planes de desarrollo",
     "catalog": "Competencias",
-    "tracks": "Itinerarios de competencias",
+    "tracks": "Perfiles de competencias",
     "person": "Persona",
-    "track": "Itinerario de competencias",
-    "compareTrack": "Comparar con itinerario",
-    "assignedTrack": "Itinerarios asignados",
-    "noTrack": "Sin itinerario de competencias",
+    "track": "Perfil de competencias",
+    "compareTrack": "Comparar con perfil",
+    "assignedTrack": "Perfiles asignados",
+    "noTrack": "Sin perfil de competencias",
     "loading": "Cargando competencias...",
     "retry": "Reintentar",
     "serviceError": "No se pudieron cargar o guardar las competencias. Reinténtalo.",
@@ -9044,14 +9044,14 @@
     "noManualConditions": "No hay condiciones de este tipo.",
     "noEvidence": "No hay evidencias pendientes de revisión.",
     "reasonLabel": "Motivo",
-    "editTrack": "Editar itinerario de competencias",
-    "newTrack": "Nuevo itinerario",
+    "editTrack": "Editar perfil de competencias",
+    "newTrack": "Nuevo perfil",
     "requiredCompetencies": "Competencias requeridas",
-    "deleteTrack": "Eliminar itinerario",
-    "deleteTrackConfirmation": "¿Eliminar el itinerario \"{{name}}\"?",
-    "trackInUse": "Elimine las asignaciones a empleados antes de eliminar este itinerario.",
-    "trackLimitReached": "Una persona puede tener como máximo {{count}} itinerarios de competencias.",
-    "noTracks": "Aún no hay itinerarios de competencias.",
+    "deleteTrack": "Eliminar perfil",
+    "deleteTrackConfirmation": "¿Eliminar el perfil \"{{name}}\"?",
+    "trackInUse": "Elimine las asignaciones a empleados antes de eliminar este perfil.",
+    "trackLimitReached": "Una persona puede tener como máximo {{count}} perfiles de competencias.",
+    "noTracks": "Aún no hay perfiles de competencias.",
     "requiredLevel": "Nivel requerido",
     "newAction": "Añadir acción de desarrollo",
     "noActions": "Aún no hay acciones de desarrollo.",
@@ -9152,8 +9152,8 @@
       "catalog": "Un catálogo compartido de competencias, niveles y métodos de validación.",
       "tracks": "Define qué necesita cada persona para desempeñar su función con seguridad y autonomía.",
       "settings": "Configura los avisos de vencimiento.",
-      "overview": "Consulta quién cumple los requisitos de sus itinerarios de competencias y dónde hace falta actuar.",
-      "setup": "Define competencias, agrúpalas en itinerarios de competencias y configura los recordatorios de caducidad.",
+      "overview": "Consulta quién cumple los requisitos de sus perfiles de competencias y dónde hace falta actuar.",
+      "setup": "Define competencias, agrúpalas en perfiles de competencias y configura los recordatorios de caducidad.",
       "ownWithoutTrack": "Sigue las competencias que exige tu puesto y envía los documentos que las confirman."
     },
     "setup": "Configuración de competencias",
@@ -9190,9 +9190,9 @@
       "statusGaps": "Algunos requisitos todavía necesitan confirmación. Revisa las brechas y tu plan de desarrollo.",
       "count_one": "{{count}} competencia",
       "count_other": "{{count}} competencias",
-      "noTrackTitle": "Aún no tienes ningún itinerario de competencias asignado",
-      "noTrackSelf": "Cuando un administrador te asigne itinerarios de competencias, verás las competencias requeridas y los siguientes pasos.",
-      "noTrackOther": "Asigna itinerarios de competencias en la pestaña Resumen para ver qué competencias necesita esta persona.",
+      "noTrackTitle": "Aún no tienes ningún perfil de competencias asignado",
+      "noTrackSelf": "Cuando un administrador te asigne perfiles de competencias, verás las competencias requeridas y los siguientes pasos.",
+      "noTrackOther": "Asigna perfiles de competencias en la pestaña Resumen para ver qué competencias necesita esta persona.",
       "requirementsTitle": "Competencias requeridas",
       "filters": {
         "all": "Todas",
@@ -9230,7 +9230,7 @@
       "ready": "Cumple los requisitos",
       "expiring": "Caduca pronto",
       "missing": "Competencias pendientes",
-      "noTrack": "Sin itinerario de competencias",
+      "noTrack": "Sin perfil de competencias",
       "missingCount_one": "Falta {{count}}",
       "missingCount_other": "Faltan {{count}}",
       "gaps": "Competencias pendientes"
@@ -9242,20 +9242,20 @@
       "expiringOff": "Los recordatorios de caducidad están desactivados",
       "expiringNote_one": "Una confirmación caduca en {{count}} día",
       "expiringNote_other": "Una confirmación caduca en {{count}} días",
-      "noTrackNote": "Asigna itinerarios de competencias para seguir la preparación",
+      "noTrackNote": "Asigna perfiles de competencias para seguir la preparación",
       "peopleTitle": "Personas",
-      "peopleDescription": "Asigna itinerarios de competencias y comprueba quién tiene todas las competencias necesarias.",
+      "peopleDescription": "Asigna perfiles de competencias y comprueba quién tiene todas las competencias necesarias.",
       "teamDescription": "Comprueba quién de tu equipo tiene todas las competencias necesarias.",
       "viewMode": "Vista",
       "views": {
         "list": "Lista",
         "matrix": "Matriz"
       },
-      "allTracks": "Todos los itinerarios de competencias",
+      "allTracks": "Todos los perfiles de competencias",
       "clearFilters": "Borrar filtros",
       "readiness": "Preparación",
       "noMatches": "Ninguna persona coincide con los filtros seleccionados.",
-      "noMatrixPeople": "Todavía nadie tiene asignado este itinerario de competencias.",
+      "noMatrixPeople": "Todavía nadie tiene asignado este perfil de competencias.",
       "allPeople": "Todas"
     },
     "gettingStarted": {
@@ -9275,29 +9275,29 @@
           "action": "Añadir competencia"
         },
         "tracks": {
-          "title": "Crea un itinerario de competencias",
+          "title": "Crea un perfil de competencias",
           "description": "Elige las competencias y los niveles que requiere un puesto.",
-          "action": "Crear itinerario de competencias"
+          "action": "Crear perfil de competencias"
         },
         "assignments": {
           "title": "Asigna personas",
-          "description": "Asigna itinerarios de competencias a cada empleado para empezar a seguir su preparación.",
-          "action": "Asignar itinerarios de competencias"
+          "description": "Asigna perfiles de competencias a cada empleado para empezar a seguir su preparación.",
+          "action": "Asignar perfiles de competencias"
         }
       }
     },
     "setupSection": {
       "competenciesTitle": "Competencias",
       "competenciesDescription": "Habilidades con niveles. Cada nivel indica qué lo confirma: completar un curso, un documento aprobado o una observación.",
-      "tracksTitle": "Itinerarios de competencias",
-      "tracksDescription": "Combina competencias y niveles requeridos para un puesto y asigna los itinerarios a las personas en la pestaña Resumen. Una persona puede tener varios itinerarios.",
+      "tracksTitle": "Perfiles de competencias",
+      "tracksDescription": "Combina competencias y niveles requeridos para un puesto y asigna los perfiles a las personas en la pestaña Resumen. Una persona puede tener varios perfiles.",
       "settingsTitle": "Recordatorios de caducidad",
       "settingsDescription": "Elige con cuánta antelación se marcan las confirmaciones a punto de caducar.",
       "emptyCompetenciesTitle": "Aún no hay competencias",
-      "emptyCompetencies": "Empieza añadiendo las habilidades que sigue tu organización. Después podrás agruparlas en itinerarios de competencias.",
-      "emptyTracksTitle": "Aún no hay itinerarios de competencias",
-      "emptyTracks": "Crea un itinerario de competencias para definir qué competencias requiere un puesto.",
-      "emptyTracksNeedsCompetencies": "Añade al menos una competencia con un nivel antes de crear un itinerario de competencias.",
+      "emptyCompetencies": "Empieza añadiendo las habilidades que sigue tu organización. Después podrás agruparlas en perfiles de competencias.",
+      "emptyTracksTitle": "Aún no hay perfiles de competencias",
+      "emptyTracks": "Crea un perfil de competencias para definir qué competencias requiere un puesto.",
+      "emptyTracksNeedsCompetencies": "Añade al menos una competencia con un nivel antes de crear un perfil de competencias.",
       "requiredCompetenciesCount": "Competencias requeridas",
       "assignedPeople": "Personas asignadas",
       "expiryOff": "Desactivado",
@@ -9312,7 +9312,7 @@
       "expiryNav_other": "Avisar {{count}} días antes de caducar",
       "expiryNavOff": "Sin configurar"
     },
-    "compareWithAssigned": "Comparar con: itinerarios asignados",
+    "compareWithAssigned": "Comparar con: perfiles asignados",
     "select": {
       "search": "Buscar…",
       "noResults": "Sin resultados."
@@ -9329,7 +9329,7 @@
     "trackEditor": {
       "addCompetency": "Añadir competencia…",
       "requirementsHelp": "Añade cada competencia que requiere el puesto y elige el nivel necesario.",
-      "noRequirements": "Aún no se han añadido competencias. Usa «Añadir competencia» para crear el itinerario."
+      "noRequirements": "Aún no se han añadido competencias. Usa «Añadir competencia» para crear el perfil."
     },
     "editor": {
       "levelsHelp": "Los niveles se construyen unos sobre otros. Selecciona un nivel para definir qué lo confirma.",
@@ -9387,7 +9387,7 @@
       "planGaps": "Planificar estas competencias",
       "emptyPlan": "Este plan aún no tiene pasos.",
       "emptyTitle": "Aún no hay planes de desarrollo",
-      "empty": "Los planes aparecen aquí para las personas cuyos itinerarios de competencias tienen competencias pendientes. Empieza asignando itinerarios en la pestaña Resumen."
+      "empty": "Los planes aparecen aquí para las personas cuyos perfiles de competencias tienen competencias pendientes. Empieza asignando perfiles en la pestaña Resumen."
     },
     "planBuilder": {
       "title": "Añadir pasos al plan",
@@ -9396,7 +9396,7 @@
       "stepsTitle": "Pasos",
       "stepsHelp": "Cada paso apunta a un nivel de competencia pendiente. El responsable y la fecha objetivo se aplican a todos los pasos.",
       "choosePerson": "Elige una persona para ver sus competencias pendientes.",
-      "noGaps": "Esta persona cumple todos los requisitos de sus itinerarios de competencias.",
+      "noGaps": "Esta persona cumple todos los requisitos de sus perfiles de competencias.",
       "addStep": "Añadir paso",
       "submit_one": "Crear plan con {{count}} paso",
       "submit_other": "Crear plan con {{count}} pasos",

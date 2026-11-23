@@ -8457,7 +8457,7 @@
   },
   "competencies": {
     "deleteCompetency": "Supprimer la compétence",
-    "deleteCompetencyConfirmation": "Supprimer « {{name}} » ? Cette action supprime définitivement la compétence de tous les parcours de compétences, ainsi que son historique de confirmation et les documents joints. Cette action est irréversible.",
+    "deleteCompetencyConfirmation": "Supprimer « {{name}} » ? Cette action supprime définitivement la compétence de tous les profils de compétences, ainsi que son historique de confirmation et les documents joints. Cette action est irréversible.",
     "notifications": {
       "categoryCreated": "Catégorie créée.",
       "categoryUpdated": "Catégorie mise à jour.",
@@ -8465,11 +8465,11 @@
       "competencyCreated": "Compétence créée.",
       "competencyUpdated": "Compétence mise à jour.",
       "competencyDeleted": "Compétence supprimée.",
-      "trackCreated": "Parcours de compétences créé.",
-      "trackUpdated": "Parcours de compétences mis à jour.",
-      "trackDeleted": "Parcours de compétences supprimé.",
-      "trackAssigned": "Parcours de compétences attribués.",
-      "trackRemoved": "Attributions des parcours de compétences supprimées.",
+      "trackCreated": "Profil de compétences créé.",
+      "trackUpdated": "Profil de compétences mis à jour.",
+      "trackDeleted": "Profil de compétences supprimé.",
+      "trackAssigned": "Profils de compétences attribués.",
+      "trackRemoved": "Attributions des profils de compétences supprimées.",
       "documentSubmitted": "Document envoyé pour examen.",
       "observationConfirmed": "Observation confirmée.",
       "qualificationsRecognized": "Qualifications antérieures reconnues.",
@@ -8484,9 +8484,9 @@
       "categoryDeleteFailed": "Impossible de supprimer la catégorie. Réessayez.",
       "competencySaveFailed": "Impossible d’enregistrer la compétence. Réessayez.",
       "competencyDeleteFailed": "Impossible de supprimer la compétence. Réessayez.",
-      "trackSaveFailed": "Impossible d’enregistrer le parcours de compétences. Réessayez.",
-      "trackDeleteFailed": "Impossible de supprimer le parcours de compétences. Réessayez.",
-      "trackAssignmentFailed": "Impossible de modifier l’attribution des parcours de compétences. Réessayez.",
+      "trackSaveFailed": "Impossible d’enregistrer le profil de compétences. Réessayez.",
+      "trackDeleteFailed": "Impossible de supprimer le profil de compétences. Réessayez.",
+      "trackAssignmentFailed": "Impossible de modifier l’attribution des profils de compétences. Réessayez.",
       "evidenceSubmitFailed": "Impossible d’envoyer la confirmation. Réessayez.",
       "reviewFailed": "Impossible d’enregistrer la décision d’examen. Réessayez.",
       "revocationFailed": "Impossible de révoquer la confirmation. Réessayez.",
@@ -8528,7 +8528,7 @@
       "saveChange": "Enregistrer la modification"
     },
     "searchCatalog": "Rechercher des compétences…",
-    "searchTracks": "Rechercher des parcours de compétences…",
+    "searchTracks": "Rechercher des profils de compétences…",
     "noSearchResults": "Aucun résultat. Essayez une autre recherche.",
     "documents": "Documents",
     "requiredDocuments": "Documents à soumettre",
@@ -8550,16 +8550,16 @@
     "own": "Mes compétences",
     "team": "Compétences de l'équipe",
     "people": "Employés",
-    "peopleDescription": "Consultez les parcours de compétences attribués et les états actuels des compétences.",
+    "peopleDescription": "Consultez les profils de compétences attribués et les états actuels des compétences.",
     "review": "En attente de validation",
     "plans": "Plans de développement",
     "catalog": "Compétences",
-    "tracks": "Parcours de compétences",
+    "tracks": "Profils de compétences",
     "person": "Personne",
-    "track": "Parcours de compétences",
-    "compareTrack": "Comparer avec un parcours",
-    "assignedTrack": "Parcours attribués",
-    "noTrack": "Aucun parcours de compétences",
+    "track": "Profil de compétences",
+    "compareTrack": "Comparer avec un profil",
+    "assignedTrack": "Profils attribués",
+    "noTrack": "Aucun profil de compétences",
     "loading": "Chargement des compétences...",
     "retry": "Réessayer",
     "serviceError": "Impossible de charger ou enregistrer les compétences. Réessayez.",
@@ -8628,14 +8628,14 @@
     "noManualConditions": "Aucune condition de ce type.",
     "noEvidence": "Aucune preuve en attente de vérification.",
     "reasonLabel": "Motif",
-    "editTrack": "Modifier le parcours de compétences",
-    "newTrack": "Nouveau parcours",
+    "editTrack": "Modifier le profil de compétences",
+    "newTrack": "Nouveau profil",
     "requiredCompetencies": "Compétences requises",
-    "deleteTrack": "Supprimer le parcours",
-    "deleteTrackConfirmation": "Supprimer le parcours \"{{name}}\" ?",
-    "trackInUse": "Retirez les affectations aux employés avant de supprimer ce parcours.",
-    "trackLimitReached": "Une personne peut avoir au maximum {{count}} parcours de compétences.",
-    "noTracks": "Aucun parcours de compétences.",
+    "deleteTrack": "Supprimer le profil",
+    "deleteTrackConfirmation": "Supprimer le profil \"{{name}}\" ?",
+    "trackInUse": "Retirez les affectations aux employés avant de supprimer ce profil.",
+    "trackLimitReached": "Une personne peut avoir au maximum {{count}} profils de compétences.",
+    "noTracks": "Aucun profil de compétences.",
     "requiredLevel": "Niveau requis",
     "newAction": "Ajouter une action de développement",
     "noActions": "Aucune action de développement.",
@@ -8736,8 +8736,8 @@
       "catalog": "Un catalogue commun de compétences, de niveaux et de méthodes de validation.",
       "tracks": "Définissez ce dont une personne a besoin pour exercer son rôle en sécurité et en autonomie.",
       "settings": "Configurez les alertes d'expiration.",
-      "overview": "Voyez qui répond aux exigences de ses parcours de compétences et où une action est nécessaire.",
-      "setup": "Définissez les compétences, regroupez-les en parcours de compétences et configurez les rappels d'expiration.",
+      "overview": "Voyez qui répond aux exigences de ses profils de compétences et où une action est nécessaire.",
+      "setup": "Définissez les compétences, regroupez-les en profils de compétences et configurez les rappels d'expiration.",
       "ownWithoutTrack": "Suivez les compétences exigées par votre poste et soumettez les documents qui les confirment."
     },
     "setup": "Configuration des compétences",
@@ -8774,9 +8774,9 @@
       "statusGaps": "Certaines exigences doivent encore être confirmées. Consultez les écarts et votre plan de développement.",
       "count_one": "{{count}} compétence",
       "count_other": "{{count}} compétences",
-      "noTrackTitle": "Aucun parcours de compétences attribué pour l'instant",
-      "noTrackSelf": "Dès qu'un administrateur vous attribuera des parcours de compétences, vous verrez les compétences requises et les prochaines étapes.",
-      "noTrackOther": "Attribuez des parcours de compétences dans l'onglet Vue d'ensemble pour voir les compétences dont cette personne a besoin.",
+      "noTrackTitle": "Aucun profil de compétences attribué pour l'instant",
+      "noTrackSelf": "Dès qu'un administrateur vous attribuera des profils de compétences, vous verrez les compétences requises et les prochaines étapes.",
+      "noTrackOther": "Attribuez des profils de compétences dans l'onglet Vue d'ensemble pour voir les compétences dont cette personne a besoin.",
       "requirementsTitle": "Compétences requises",
       "filters": {
         "all": "Toutes",
@@ -8814,7 +8814,7 @@
       "ready": "Répond aux exigences",
       "expiring": "Expire bientôt",
       "missing": "Compétences manquantes",
-      "noTrack": "Aucun parcours de compétences",
+      "noTrack": "Aucun profil de compétences",
       "missingCount_one": "{{count}} manquante",
       "missingCount_other": "{{count}} manquantes",
       "gaps": "Compétences manquantes"
@@ -8826,20 +8826,20 @@
       "expiringOff": "Les rappels d'expiration sont désactivés",
       "expiringNote_one": "Une confirmation expire sous {{count}} jour",
       "expiringNote_other": "Une confirmation expire sous {{count}} jours",
-      "noTrackNote": "Attribuez des parcours de compétences pour suivre la préparation",
+      "noTrackNote": "Attribuez des profils de compétences pour suivre la préparation",
       "peopleTitle": "Personnes",
-      "peopleDescription": "Attribuez des parcours de compétences et vérifiez qui possède toutes les compétences requises.",
+      "peopleDescription": "Attribuez des profils de compétences et vérifiez qui possède toutes les compétences requises.",
       "teamDescription": "Vérifiez qui, dans votre équipe, possède toutes les compétences requises.",
       "viewMode": "Affichage",
       "views": {
         "list": "Liste",
         "matrix": "Matrice"
       },
-      "allTracks": "Tous les parcours de compétences",
+      "allTracks": "Tous les profils de compétences",
       "clearFilters": "Effacer les filtres",
       "readiness": "Préparation",
       "noMatches": "Aucune personne ne correspond aux filtres sélectionnés.",
-      "noMatrixPeople": "Personne n'est encore affecté à ce parcours de compétences.",
+      "noMatrixPeople": "Personne n'est encore affecté à ce profil de compétences.",
       "allPeople": "Tous"
     },
     "gettingStarted": {
@@ -8859,29 +8859,29 @@
           "action": "Ajouter une compétence"
         },
         "tracks": {
-          "title": "Créer un parcours de compétences",
+          "title": "Créer un profil de compétences",
           "description": "Choisissez les compétences et les niveaux qu'exige un poste.",
-          "action": "Créer un parcours de compétences"
+          "action": "Créer un profil de compétences"
         },
         "assignments": {
           "title": "Affecter des personnes",
-          "description": "Attribuez des parcours de compétences à chaque employé pour commencer à suivre sa préparation.",
-          "action": "Attribuer des parcours de compétences"
+          "description": "Attribuez des profils de compétences à chaque employé pour commencer à suivre sa préparation.",
+          "action": "Attribuer des profils de compétences"
         }
       }
     },
     "setupSection": {
       "competenciesTitle": "Compétences",
       "competenciesDescription": "Des compétences avec des niveaux. Chaque niveau indique ce qui le confirme : un cours terminé, un document validé ou une observation.",
-      "tracksTitle": "Parcours de compétences",
-      "tracksDescription": "Combinez les compétences et les niveaux requis pour un poste, puis attribuez les parcours aux personnes dans l'onglet Vue d'ensemble. Une personne peut en avoir plusieurs.",
+      "tracksTitle": "Profils de compétences",
+      "tracksDescription": "Combinez les compétences et les niveaux requis pour un poste, puis attribuez les profils aux personnes dans l'onglet Vue d'ensemble. Une personne peut en avoir plusieurs.",
       "settingsTitle": "Rappels d'expiration",
       "settingsDescription": "Choisissez combien de temps à l'avance signaler les confirmations qui vont expirer.",
       "emptyCompetenciesTitle": "Aucune compétence pour l'instant",
-      "emptyCompetencies": "Commencez par ajouter les compétences suivies par votre organisation. Vous pourrez ensuite les regrouper en parcours de compétences.",
-      "emptyTracksTitle": "Aucun parcours de compétences pour l'instant",
-      "emptyTracks": "Créez un parcours de compétences pour définir les compétences qu'exige un poste.",
-      "emptyTracksNeedsCompetencies": "Ajoutez au moins une compétence avec un niveau avant de créer un parcours de compétences.",
+      "emptyCompetencies": "Commencez par ajouter les compétences suivies par votre organisation. Vous pourrez ensuite les regrouper en profils de compétences.",
+      "emptyTracksTitle": "Aucun profil de compétences pour l'instant",
+      "emptyTracks": "Créez un profil de compétences pour définir les compétences qu'exige un poste.",
+      "emptyTracksNeedsCompetencies": "Ajoutez au moins une compétence avec un niveau avant de créer un profil de compétences.",
       "requiredCompetenciesCount": "Compétences requises",
       "assignedPeople": "Personnes affectées",
       "expiryOff": "Désactivé",
@@ -8896,7 +8896,7 @@
       "expiryNav_other": "Avertir {{count}} jours avant l'expiration",
       "expiryNavOff": "Non configuré"
     },
-    "compareWithAssigned": "Comparer avec : parcours attribués",
+    "compareWithAssigned": "Comparer avec : profils attribués",
     "select": {
       "search": "Rechercher…",
       "noResults": "Aucun résultat."
@@ -8913,7 +8913,7 @@
     "trackEditor": {
       "addCompetency": "Ajouter une compétence…",
       "requirementsHelp": "Ajoutez chaque compétence requise par le poste et choisissez le niveau attendu.",
-      "noRequirements": "Aucune compétence ajoutée. Utilisez « Ajouter une compétence » pour construire le parcours."
+      "noRequirements": "Aucune compétence ajoutée. Utilisez « Ajouter une compétence » pour construire le profil."
     },
     "editor": {
       "levelsHelp": "Les niveaux s'appuient les uns sur les autres. Sélectionnez un niveau pour définir ce qui le confirme.",
@@ -8971,7 +8971,7 @@
       "planGaps": "Planifier ces compétences",
       "emptyPlan": "Ce plan n'a pas encore d'étapes.",
       "emptyTitle": "Aucun plan de développement pour l'instant",
-      "empty": "Les plans apparaissent ici pour les personnes dont les parcours de compétences comportent des compétences manquantes. Commencez par attribuer des parcours dans l'onglet Vue d'ensemble."
+      "empty": "Les plans apparaissent ici pour les personnes dont les profils de compétences comportent des compétences manquantes. Commencez par attribuer des profils dans l'onglet Vue d'ensemble."
     },
     "planBuilder": {
       "title": "Ajouter des étapes au plan",
@@ -8980,7 +8980,7 @@
       "stepsTitle": "Étapes",
       "stepsHelp": "Chaque étape vise un niveau de compétence manquant. Le responsable et la date cible s'appliquent à toutes les étapes.",
       "choosePerson": "Choisissez une personne pour voir ses compétences manquantes.",
-      "noGaps": "Cette personne répond à toutes les exigences de ses parcours de compétences.",
+      "noGaps": "Cette personne répond à toutes les exigences de ses profils de compétences.",
       "addStep": "Ajouter une étape",
       "submit_one": "Créer le plan avec {{count}} étape",
       "submit_other": "Créer le plan avec {{count}} étapes",
