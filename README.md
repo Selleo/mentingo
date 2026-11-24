@@ -14,7 +14,7 @@
   <a href="https://github.com/Selleo/mentingo/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/Selleo/mentingo" /></a>
   <a href="https://github.com/Selleo/mentingo/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/Selleo/mentingo?style=flat" /></a>
   <a href="https://github.com/Selleo/mentingo/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Selleo/mentingo/e2e.yml?label=CI" /></a>
-  <img alt="Node.js" src="https://img.shields.io/badge/Node.js-%3E%3D22.15-brightgreen.svg" />
+  <img alt="Node.js" src="https://img.shields.io/badge/Node.js-%3E%3D24.22-brightgreen.svg" />
   <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-16%20%2B%20pgvector-336791.svg" />
   <a href="https://github.com/Selleo/mentingo/discussions"><img alt="Discussions" src="https://img.shields.io/github/discussions/Selleo/mentingo" /></a>
   <a href="https://aws.amazon.com/marketplace/pp/prodview-dgkpxqyvmyxbw"><img alt="Available on AWS Marketplace" src="https://img.shields.io/badge/AWS%20Marketplace-one--click%20deploy-FF9900?logo=amazonaws&logoColor=white" /></a>
@@ -61,7 +61,7 @@
 
 Runs locally on macOS, Linux or Windows. Full guide: [docs/development-setup.md](docs/development-setup.md). Environment variable reference: [docs/configuration.md](docs/configuration.md).
 
-**Prerequisites:** Node.js >= 22.15 (see `.tool-versions`), pnpm 10, Docker + Docker Compose, [Caddy](https://caddyserver.com/) 2.8.4.
+**Prerequisites:** Node.js >= 24.22 (see `.tool-versions`), pnpm 10, Docker + Docker Compose, [Caddy](https://caddyserver.com/) 2.8.4.
 
 ```bash
 git clone https://github.com/Selleo/mentingo.git
@@ -112,7 +112,7 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 | **Storage & media**  | Any S3-compatible object storage (MinIO, AWS S3, Hetzner) · Bunny Stream video with signed URLs                                                                                                                                       |
 | **Payments**         | Stripe (optional - for selling courses)                                                                                                                                                                                               |
 | **UI languages**     | English, Polish, German, Spanish, French, Czech                                                                                                                                                                                       |
-| **Runtime**          | Node.js >= 22.15, pnpm 10                                                                                                                                                                                                             |
+| **Runtime**          | Node.js >= 24.22, pnpm 10                                                                                                                                                                                                             |
 | **Latest release**   | see [CHANGELOG.md](CHANGELOG.md) and [Releases](https://github.com/Selleo/mentingo/releases)                                                                                                                                          |
 
 ---

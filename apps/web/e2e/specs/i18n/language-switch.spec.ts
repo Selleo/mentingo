@@ -33,6 +33,7 @@ for (const role of [USER_ROLE.admin, USER_ROLE.student]) {
 
       await page.reload();
       await expect(page.locator("html")).toHaveAttribute("lang", SUPPORTED_LANGUAGES.DE);
+      await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.LANGUAGE_SELECT)).toHaveText("Deutsch");
 
       await prepareNavigationPageFlow(page);
       await expect(page.getByTestId(NAVIGATION_HANDLES.COURSES_LINK)).toHaveText("Kurse");
