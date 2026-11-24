@@ -6485,6 +6485,7 @@
     "draft": {
       "starting": "Ouverture du brouillon…",
       "startFailed": "Impossible d’ouvrir le brouillon du cours.",
+      "expired": "Ce brouillon a expiré",
       "expiredTitle": "Ce brouillon a expiré",
       "expiredBody": "Créez un nouveau brouillon pour continuer.",
       "startAgain": "Créer un nouveau brouillon",
@@ -7098,6 +7099,7 @@
       "proposalNotReady": "Certaines modifications sont encore en préparation. Patientez un instant et réessayez.",
       "revisionChanged": "Ce brouillon a changé pendant votre revue. La dernière version a été restaurée.",
       "selectionAlreadyApplied": "Ces modifications ont déjà été appliquées.",
+      "invalidSession": "Cette session de création de cours n’est pas valide.",
       "sessionNotFound": "Cette discussion n’est plus disponible.",
       "targetAlreadyExists": "Une partie de cette modification figure déjà dans le cours.",
       "targetOutsideCourse": "Un élément sélectionné ne fait pas partie de ce cours.",

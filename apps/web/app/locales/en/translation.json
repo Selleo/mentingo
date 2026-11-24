@@ -6754,6 +6754,7 @@
     "draft": {
       "starting": "Opening your draft…",
       "startFailed": "We couldn’t open the course draft.",
+      "expired": "This draft has expired",
       "expiredTitle": "This draft has expired",
       "expiredBody": "Start a new draft to continue.",
       "startAgain": "Start a new draft",
@@ -7364,6 +7365,7 @@
       "proposalNotReady": "Some changes are still being prepared. Wait a moment and try again.",
       "revisionChanged": "This draft changed while you were reviewing it. The latest version has been restored.",
       "selectionAlreadyApplied": "These changes have already been applied.",
+      "invalidSession": "This course authoring session is invalid.",
       "sessionNotFound": "This chat is no longer available.",
       "targetAlreadyExists": "Part of this change is already in the course.",
       "targetOutsideCourse": "Something you selected isn't part of this course.",

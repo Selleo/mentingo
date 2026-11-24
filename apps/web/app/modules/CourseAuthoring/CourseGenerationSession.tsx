@@ -228,6 +228,7 @@ export const CourseGenerationSession = ({
   onPreviewProposalInCurriculum,
   onCurriculumPreviewChange,
   onSessionUnavailable,
+  onPermissionRevoked,
 }: {
   courseId: string;
   language: SupportedLanguages;
@@ -240,6 +241,7 @@ export const CourseGenerationSession = ({
   ) => void;
   onCurriculumPreviewChange?: (preview: CurriculumPreview | null) => void;
   onSessionUnavailable?: (sessionId: string) => void;
+  onPermissionRevoked?: () => void;
 }) => {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -428,6 +430,7 @@ export const CourseGenerationSession = ({
     onEvent: handleEvent,
     onRefresh: refetchSnapshot,
     onSessionUnavailable,
+    onPermissionRevoked,
     reconnectAttempt,
   });
   let displayedConnection = connection;

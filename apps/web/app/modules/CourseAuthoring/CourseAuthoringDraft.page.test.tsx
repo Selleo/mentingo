@@ -91,6 +91,19 @@ describe("AI course draft route", () => {
     expect(mockOpen.mock.calls[1]).toEqual(mockOpen.mock.calls[0]);
   });
 
+  it("uses a fresh creation command after a pending draft expired", async () => {
+    mockOpen
+      .mockRejectedValueOnce({ isAxiosError: true, response: { status: 410 } })
+      .mockResolvedValueOnce({ courseId: "draft-a", sessionId: "session-a" });
+
+    renderDraft();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
+    expect(await screen.findByText("session-a")).toBeInTheDocument();
+    expect(mockOpen).toHaveBeenCalledTimes(2);
+    expect(mockOpen.mock.calls[1]).not.toEqual(mockOpen.mock.calls[0]);
+  });
+
   it("hands off the same session in its selected course language from a saved draft link", async () => {
     mockSnapshot.mockReturnValue({
       data: { courseId: "course-a", status: "active", language: "pl" },
@@ -114,6 +127,21 @@ describe("AI course draft route", () => {
 
     expect(screen.getByRole("heading", { name: "Course created" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Destination")).not.toBeInTheDocument();
+  });
+
+  it("shows completion from the owner-only response without loading a native snapshot", () => {
+    mockSnapshot.mockReturnValue({
+      error: {
+        isAxiosError: true,
+        response: { status: 403, data: { message: "courseAuthoring.draft.courseCreated" } },
+      },
+    });
+
+    renderDraft("?draftId=draft-a&sessionId=session-a");
+
+    expect(screen.getByRole("heading", { name: "Course created" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Destination")).not.toBeInTheDocument();
+    expect(screen.queryByText("session-a")).not.toBeInTheDocument();
   });
 
   it.each([

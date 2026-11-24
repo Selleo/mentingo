@@ -64,9 +64,8 @@ integration("course authoring receipt transaction with native tenant DB", () => 
     for (const filename of [
       "0210_course_authoring_context_and_review.sql",
       "0211_course_authoring_tenant_isolation.sql",
-      "0230_course_authoring_drafts.sql",
-      "0231_course_authoring_draft_tenant_isolation.sql",
-      "0232_course_authoring_draft_event_cursors.sql",
+      "0259_course_authoring_drafts.sql",
+      "0260_course_authoring_draft_tenant_isolation.sql",
     ]) {
       const migration = await readFile(
         resolve(__dirname, "../../storage/migrations", filename),

@@ -109,8 +109,7 @@ export class CourseAuthoringApplicationService {
     actor: CurrentUserType,
     autonomousFence?: CourseAuthoringAutonomousFence,
   ): Promise<AuthoringApplyStatus> {
-    const access = await this.sessions.authorizeAccess(courseId, sessionId, actor);
-    await this.sessions.get(courseId, sessionId, actor);
+    const access = await this.sessions.getWithAccess(courseId, sessionId, actor);
     if (access.draft?.courseId)
       throw new ConflictException("courseAuthoring.errors.selectionAlreadyApplied");
     const pendingReceipts = await this.receipts.pendingSessionReceipts(
@@ -204,7 +203,8 @@ export class CourseAuthoringApplicationService {
       if (existingJob.data.courseId !== courseId || existingJob.data.sessionId !== sessionId)
         throw new ConflictException("courseAuthoring.errors.exportIdentityConflict");
       const state = await existingJob.getState();
-      if (state !== "failed") return this.status(courseId, sessionId, exported.exportId, actor);
+      if (state !== "failed")
+        return this.readStatus(courseId, sessionId, exported.exportId, actor.tenantId);
       await this.recordTerminalFailure(
         existingJob.data as CourseAuthoringApplyJob,
         existingJob.failedReason,
@@ -230,7 +230,7 @@ export class CourseAuthoringApplicationService {
         removeOnFail: { age: 604800 },
       },
     );
-    return this.status(courseId, sessionId, exported.exportId, actor);
+    return this.readStatus(courseId, sessionId, exported.exportId, actor.tenantId);
   }
 
   /** Reports queued, running, failed, conflicted, or durably applied export state. */
@@ -241,7 +241,16 @@ export class CourseAuthoringApplicationService {
     actor: CurrentUserType,
   ): Promise<AuthoringApplyStatus> {
     await this.sessions.get(courseId, sessionId, actor);
-    const receipt = await this.receipts.findReceipt(courseId, exportId, actor.tenantId);
+    return this.readStatus(courseId, sessionId, exportId, actor.tenantId);
+  }
+
+  private async readStatus(
+    courseId: string,
+    sessionId: string,
+    exportId: string,
+    tenantId: string,
+  ): Promise<AuthoringApplyStatus> {
+    const receipt = await this.receipts.findReceipt(courseId, exportId, tenantId);
     if (receipt) {
       if (receipt.sessionId !== sessionId)
         throw new NotFoundException("courseAuthoring.errors.applicationNotFound");
@@ -255,7 +264,7 @@ export class CourseAuthoringApplicationService {
     }
     const job = await this.queue
       .getQueue(QUEUE_NAMES.COURSE_AUTHORING_APPLY)
-      .getJob(`${actor.tenantId}-${exportId}`);
+      .getJob(`${tenantId}-${exportId}`);
     if (!job || job.data.courseId !== courseId || job.data.sessionId !== sessionId)
       throw new NotFoundException("courseAuthoring.errors.applicationNotFound");
     const state = await job.getState();
@@ -372,14 +381,13 @@ export class CourseAuthoringApplicationService {
 
   /** Downloads and verifies a frozen export before applying it and recording its receipt. */
   async process(data: CourseAuthoringApplyJob) {
-    const { actor, draft } = await this.sessions.authorizeAccess(
+    const { actor, draft } = await this.sessions.getWithAccess(
       data.courseId,
       data.sessionId,
       data.actor,
     );
     if ((draft?.id ?? undefined) !== data.draftCourseId)
       throw new ForbiddenException("common.toast.noAccess");
-    await this.sessions.get(data.courseId, data.sessionId, actor);
     const client = await this.luma.getLumaClient();
     const exported = await client.authoring.getExport({
       sessionId: data.sessionId,

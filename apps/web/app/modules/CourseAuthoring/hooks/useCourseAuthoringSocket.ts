@@ -27,6 +27,7 @@ type Options = {
   onEvent?: (session: AuthoringSession, event: AuthoringEvent) => void;
   onRefresh: (signal?: AbortSignal) => Promise<AuthoringSession | void>;
   onSessionUnavailable?: (sessionId: string) => void;
+  onPermissionRevoked?: () => void;
   reconnectAttempt?: number;
 };
 
@@ -38,21 +39,34 @@ export const useCourseAuthoringSocket = ({
   onEvent,
   onRefresh,
   onSessionUnavailable,
+  onPermissionRevoked,
   reconnectAttempt = 0,
 }: Options) => {
   const [connectionState, setConnectionState] = useState<AuthoringConnectionState>("connecting");
   const cursorRef = useRef(session?.snapshotSequence ?? 0);
   const sessionRef = useRef(session);
   const sessionIdRef = useRef(session?.sessionId);
-  const callbacksRef = useRef({ onSnapshot, onEvent, onRefresh, onSessionUnavailable });
+  const callbacksRef = useRef({
+    onSnapshot,
+    onEvent,
+    onRefresh,
+    onSessionUnavailable,
+    onPermissionRevoked,
+  });
   const rearmWatchdogRef = useRef<(() => void) | null>(null);
   const hasActiveWork = Boolean(
     session?.turns?.some((turn) => turn.status === "queued" || turn.status === "running") ||
       session?.tasks.some((task) => task.status === "queued" || task.status === "running"),
   );
   useEffect(() => {
-    callbacksRef.current = { onSnapshot, onEvent, onRefresh, onSessionUnavailable };
-  }, [onSnapshot, onEvent, onRefresh, onSessionUnavailable]);
+    callbacksRef.current = {
+      onSnapshot,
+      onEvent,
+      onRefresh,
+      onSessionUnavailable,
+      onPermissionRevoked,
+    };
+  }, [onSnapshot, onEvent, onRefresh, onSessionUnavailable, onPermissionRevoked]);
 
   useEffect(() => {
     if (sessionIdRef.current !== session?.sessionId) {
@@ -121,6 +135,7 @@ export const useCourseAuthoringSocket = ({
       setConnectionState(state);
       if (socket.connected) socket.emit("leave:course-authoring", { sessionId });
       if (state === "session_unavailable") callbacksRef.current.onSessionUnavailable?.(sessionId);
+      else callbacksRef.current.onPermissionRevoked?.();
     };
 
     /** Bounds a missing join acknowledgement even if the shared socket itself stays connected. */

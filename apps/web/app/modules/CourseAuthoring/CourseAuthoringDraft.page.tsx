@@ -1,5 +1,6 @@
 import { Link, Navigate, useNavigate, useSearchParams } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
+import { isAxiosError } from "axios";
 import { LoaderCircle } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,11 +19,15 @@ import {
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
-import { isUnavailableAuthoringSession } from "./authoringSessionRecovery";
+import {
+  isCompletedAuthoringDraft,
+  isUnavailableAuthoringSession,
+} from "./authoringSessionRecovery";
 import {
   authoringSessionCreateCommandKey,
   authoringSessionSelectionKey,
   getOrCreateAuthoringSessionCommand,
+  readAuthoringSessionSelection,
   writeAuthoringSessionSelection,
 } from "./authoringSessionSelection";
 import { useVisibleAuthoringSession } from "./authoringSessionVisibility";
@@ -45,31 +50,33 @@ const DraftWorkspace = ({ draftId, sessionId }: { draftId: string; sessionId: st
   const { hasAccess: canEditCourse } = usePermissions({
     required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
   });
-  const { data, error } = useCourseAuthoringSessionQuery(
+  const { data, error, refetch } = useCourseAuthoringSessionQuery(
     draftId,
     sessionId,
     DRAFT_POLL_INTERVAL_MS,
   );
   useVisibleAuthoringSession(draftId, sessionId);
 
-  if (data?.courseId && data.courseId !== draftId) {
-    if (!canEditCourse) {
-      return (
-        <div className="mx-auto flex h-full max-w-xl flex-col items-center justify-center gap-3 px-6 text-center">
-          <h1 className="h3">{t("courseAuthoring.draft.courseCreated")}</h1>
-          <Button asChild>
-            <Link to={selectorPath} replace>
-              {t("adminCourseTypeSelector.back")}
-            </Link>
-          </Button>
-        </div>
-      );
-    }
-    const destination = new URLSearchParams({ sessionId, language: data.language });
+  const refetchDraft = useCallback(() => void refetch(), [refetch]);
+  const attachedCourse = data && data.courseId !== draftId ? data : null;
+  if (isCompletedAuthoringDraft(error) || (attachedCourse && !canEditCourse)) {
+    return (
+      <div className="mx-auto flex h-full max-w-xl flex-col items-center justify-center gap-3 px-6 text-center">
+        <h1 className="h3">{t("courseAuthoring.draft.courseCreated")}</h1>
+        <Button asChild>
+          <Link to={selectorPath} replace>
+            {t("adminCourseTypeSelector.back")}
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+  if (attachedCourse) {
+    const destination = new URLSearchParams({ sessionId, language: attachedCourse.language });
     return (
       <Navigate
         replace
-        to={`/admin/beta-courses/${encodeURIComponent(data.courseId)}/authoring?${destination}`}
+        to={`/admin/beta-courses/${encodeURIComponent(attachedCourse.courseId)}/authoring?${destination}`}
       />
     );
   }
@@ -95,6 +102,8 @@ const DraftWorkspace = ({ draftId, sessionId }: { draftId: string; sessionId: st
       language={data?.language ?? uiLanguage}
       embedded
       isDraft
+      onSessionUnavailable={refetchDraft}
+      onPermissionRevoked={refetchDraft}
     />
   );
 };
@@ -117,9 +126,17 @@ const StartDraft = () => {
   );
   const draftPath = withAddCourseContext(AI_COURSE_CREATION_PATH, params);
   const start = useCallback(() => {
-    openDraft(getOrCreateAuthoringSessionCommand(commandKey), {
-      onSuccess: (session) => {
+    const commandId = getOrCreateAuthoringSessionCommand(commandKey);
+    const clearPendingCommand = () => {
+      if (readAuthoringSessionSelection(commandKey) === commandId)
         writeAuthoringSessionSelection(commandKey, null);
+    };
+    openDraft(commandId, {
+      onError: (error) => {
+        if (isAxiosError(error) && error.response?.status === 410) clearPendingCommand();
+      },
+      onSuccess: (session) => {
+        clearPendingCommand();
         const destination = new URL(draftPath, window.location.origin);
         destination.searchParams.set("draftId", session.courseId);
         destination.searchParams.set("sessionId", session.sessionId);

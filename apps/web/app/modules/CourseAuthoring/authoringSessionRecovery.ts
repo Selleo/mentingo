@@ -14,3 +14,9 @@ export const isUnavailableAuthoringSession = (error: unknown) => {
     errorMessage === SESSION_NOT_FOUND_MESSAGE
   );
 };
+
+/** Recognizes the owner-only completion response without receiving the native course snapshot. */
+export const isCompletedAuthoringDraft = (error: unknown) =>
+  isAxiosError(error) &&
+  error.response?.status === 403 &&
+  error.response.data?.message === "courseAuthoring.draft.courseCreated";

@@ -6732,6 +6732,7 @@
     "draft": {
       "starting": "Ihr Entwurf wird geöffnet…",
       "startFailed": "Der Kursentwurf konnte nicht geöffnet werden.",
+      "expired": "Dieser Entwurf ist abgelaufen",
       "expiredTitle": "Dieser Entwurf ist abgelaufen",
       "expiredBody": "Erstellen Sie einen neuen Entwurf, um fortzufahren.",
       "startAgain": "Neuen Entwurf erstellen",
@@ -7343,6 +7344,7 @@
       "proposalNotReady": "Einige Änderungen werden noch vorbereitet. Warten Sie einen Moment und versuchen Sie es erneut.",
       "revisionChanged": "Der Entwurf wurde während Ihrer Prüfung geändert. Die aktuelle Version wurde wiederhergestellt.",
       "selectionAlreadyApplied": "Diese Änderungen wurden bereits übernommen.",
+      "invalidSession": "Diese Sitzung zur Kurserstellung ist ungültig.",
       "sessionNotFound": "Dieser Chat ist nicht mehr verfügbar.",
       "targetAlreadyExists": "Ein Teil dieser Änderung ist bereits im Kurs.",
       "targetOutsideCourse": "Ein ausgewähltes Element gehört nicht zu diesem Kurs.",

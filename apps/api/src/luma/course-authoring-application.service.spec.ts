@@ -95,10 +95,16 @@ function setup() {
     taskIds: null,
     refreshId: null,
   });
+  const get = jest.fn().mockResolvedValue({ courseId, sessionId });
+  const getWithAccess = jest.fn().mockResolvedValue({
+    draft: null,
+    actor,
+    snapshot: { courseId, sessionId },
+  });
   const service = new CourseAuthoringApplicationService(
     {
-      get: jest.fn().mockResolvedValue({ courseId, sessionId }),
-      authorizeAccess: jest.fn().mockResolvedValue({ draft: null, actor }),
+      get,
+      getWithAccess,
       command,
     } as unknown as CourseAuthoringSessionService,
     {
@@ -135,6 +141,8 @@ function setup() {
     pendingSessionReceipts,
     enqueue,
     getJob,
+    get,
+    getWithAccess,
     applyPreparedExport,
     prepareUnassignedDocument,
     prepareUnassignedMentorContextDocument,
@@ -168,6 +176,8 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
     expect(test.client.authoring.prepareExport.mock.calls[0][0].request).not.toHaveProperty(
       "manualApply",
     );
+    expect(test.getWithAccess).toHaveBeenCalledTimes(1);
+    expect(test.get).not.toHaveBeenCalled();
   });
 
   it("uses the same autonomous export identity after another receipt is recorded", async () => {

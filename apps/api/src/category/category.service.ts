@@ -10,6 +10,7 @@ import {
 import { PERMISSIONS, type PermissionKey, type SupportedLanguages } from "@repo/shared";
 import { and, count, eq, getTableColumns, inArray, ne, or, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
+import postgres from "postgres";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -133,9 +134,7 @@ export class CategoryService {
     const newCategory = await this.insertCategory(createCategoryBody, this.db);
 
     if (!newCategory) {
-      throw new UnprocessableEntityException({
-        message: "adminCategoryView.toast.categoryNotCreated",
-      });
+      throw new ConflictException({ message: "adminCategoryView.toast.alreadyExists" });
     }
 
     await this.outboxPublisher.publish(
@@ -171,8 +170,6 @@ export class CategoryService {
       return category.id;
     }
     if (!categoryTitle) throw new BadRequestException("courseAuthoring.errors.invalidOperations");
-    if (!hasPermission(actor.permissions, PERMISSIONS.CATEGORY_MANAGE))
-      throw new ForbiddenException("common.toast.noAccess");
 
     const [matchingCategory] = await transaction
       .select({ id: categories.id })
@@ -190,6 +187,8 @@ export class CategoryService {
       .limit(1)
       .for("key share");
     if (matchingCategory) return matchingCategory.id;
+    if (!hasPermission(actor.permissions, PERMISSIONS.CATEGORY_MANAGE))
+      throw new ForbiddenException("common.toast.noAccess");
 
     const newCategory = await this.insertCategory({ title: categoryTitle, language }, transaction);
     if (newCategory) {
@@ -220,16 +219,29 @@ export class CategoryService {
   }
 
   private async insertCategory(input: CategoryInsert, db: DatabasePg) {
-    const [category] = await db
-      .insert(categories)
-      .values({
-        title: buildJsonbField(input.language, input.title),
-        baseLanguage: input.language,
-        availableLocales: [input.language],
-      })
-      .onConflictDoNothing()
-      .returning({ id: categories.id });
-    return category;
+    try {
+      // Roll back only the insert when an authoring transaction needs to read the winning row.
+      return await db.transaction(async (transaction) => {
+        const [category] = await transaction
+          .insert(categories)
+          .values({
+            title: buildJsonbField(input.language, input.title),
+            baseLanguage: input.language,
+            availableLocales: [input.language],
+          })
+          .returning({ id: categories.id });
+        return category;
+      });
+    } catch (error) {
+      if (
+        error instanceof postgres.PostgresError &&
+        error.code === "23505" &&
+        error.constraint_name === "categories_tenant_id_base_title_unique"
+      ) {
+        return undefined;
+      }
+      throw error;
+    }
   }
 
   public async updateCategory(

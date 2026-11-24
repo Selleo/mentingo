@@ -142,7 +142,9 @@ export class CourseAuthoringController {
     @Param("sessionId") sessionId: UUIDType,
     @CurrentUser() actor: CurrentUserType,
   ): Promise<BaseResponse<AuthoringSession>> {
-    return new BaseResponse(await this.sessionService.get(courseId, sessionId, actor));
+    return new BaseResponse(
+      await this.sessionService.get(courseId, sessionId, actor, { reportDraftCompletion: true }),
+    );
   }
 
   /** Returns an authorized older page without expanding the current session snapshot. */

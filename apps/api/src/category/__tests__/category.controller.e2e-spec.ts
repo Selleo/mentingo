@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 
-import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { PERMISSIONS, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import request from "supertest";
 
+import { CategoryService } from "src/category/category.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -19,6 +20,7 @@ const CATEGORIES_COUNT = 10;
 
 describe("CategoryController (e2e)", () => {
   let app: INestApplication;
+  let testContext: Awaited<ReturnType<typeof createE2ETest>>;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
   let db: DatabasePg;
   let baseDb: DatabasePg;
@@ -27,8 +29,8 @@ describe("CategoryController (e2e)", () => {
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
-    app = testApp;
+    testContext = await createE2ETest();
+    app = testContext.app;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -171,6 +173,54 @@ describe("CategoryController (e2e)", () => {
         .expect(({ body }) => {
           expect(body.message).toBe("adminCategoryView.toast.alreadyExists");
         });
+    });
+
+    it("returns a conflict for a concurrent duplicate category creation", async () => {
+      const user = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const cookie = await cookieFor(user, app);
+      const title = `Concurrent Category ${randomUUID()}`;
+      const create = () =>
+        request(app.getHttpServer())
+          .post("/api/category")
+          .set("Cookie", cookie)
+          .send({ title, language: SUPPORTED_LANGUAGES.EN });
+
+      const responses = await Promise.all([create(), create()]);
+      expect(responses.map((response) => response.status).sort()).toEqual([201, 409]);
+      expect(responses.find((response) => response.status === 409)?.body.message).toBe(
+        "adminCategoryView.toast.alreadyExists",
+      );
+    });
+
+    it("allows course authoring to reuse an existing category title with course-create access", async () => {
+      const category = await categoryFactory.create();
+      const actor = {
+        userId: randomUUID(),
+        email: "creator@example.test",
+        roleSlugs: [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR],
+        permissions: [PERMISSIONS.COURSE_CREATE],
+        tenantId: testContext.defaultTenantId,
+      };
+      const categoryService = app.get(CategoryService);
+      const resolve = (categoryTitle: string) =>
+        testContext.runAsTenant(actor.tenantId, () =>
+          db.transaction((transaction) =>
+            categoryService.resolveForCourseAuthoring(
+              { categoryTitle },
+              SUPPORTED_LANGUAGES.EN,
+              actor,
+              transaction,
+            ),
+          ),
+        );
+
+      await expect(resolve(category.title)).resolves.toBe(category.id);
+      await expect(resolve(`Missing Category ${randomUUID()}`)).rejects.toMatchObject({
+        status: 403,
+      });
     });
 
     it("localizes category details, list responses, and title filters by requested language", async () => {

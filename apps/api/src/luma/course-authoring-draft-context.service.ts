@@ -39,19 +39,26 @@ export class CourseAuthoringDraftContextService {
   }
 
   /** Distinguishes a real course ID from an owner-only placeholder before producer access. */
-  async access(courseId: string, sessionId: string, actor: CurrentUserType) {
+  async access(
+    courseId: string,
+    sessionId: string,
+    actor: CurrentUserType,
+    refreshActivity = true,
+  ) {
     const draft = await this.courseAuthoringDraftRepository.find(actor.tenantId, courseId);
     if (!draft) return null;
     if (draft.ownerId !== actor.userId || draft.lumaSessionId !== sessionId)
       throw new NotFoundException("courseAuthoring.errors.sessionNotFound");
     const currentActor = await this.authorize(actor);
     if (draft.expiredAt) throw new GoneException("courseAuthoring.draft.expired");
-    if (
-      !draft.courseId &&
-      !(await this.courseAuthoringDraftRepository.touch(actor.tenantId, courseId, sessionId))
-    )
-      throw new GoneException("courseAuthoring.draft.expired");
-    return { draft, actor: currentActor };
+    if (draft.courseId || !refreshActivity) return { draft, actor: currentActor };
+    const activeDraft = await this.courseAuthoringDraftRepository.touch(
+      actor.tenantId,
+      courseId,
+      sessionId,
+    );
+    if (!activeDraft) throw new GoneException("courseAuthoring.draft.expired");
+    return { draft: activeDraft, actor: currentActor };
   }
 
   /** Offers each category only for locales with an actual title. */

@@ -14,7 +14,6 @@ import { CourseAuthoringApplicationService } from "src/luma/course-authoring-app
 import { CourseAuthoringApplyService } from "src/luma/course-authoring-apply.service";
 import { CourseAuthoringContextService } from "src/luma/course-authoring-context.service";
 import { courseAuthoringExportHash } from "src/luma/course-authoring-export-hash";
-import { CourseAuthoringSessionService } from "src/luma/course-authoring-session.service";
 import { LumaService } from "src/luma/luma.service";
 import { authoringOperationSchema } from "src/luma/schema/course-authoring-operations.schema";
 import * as outboxConstants from "src/outbox/outbox.constants";
@@ -454,6 +453,17 @@ const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
         const client = {
           authoring: {
             getExport: jest.fn().mockResolvedValue(exported),
+            getSession: jest.fn().mockResolvedValue({
+              schemaVersion: 1,
+              courseId,
+              sessionId: exported.sessionId,
+              language: "en",
+              status: "active",
+              snapshotSequence: 0,
+              workspaceRevision: 0,
+              records: [],
+              tasks: [],
+            }),
             downloadAsset,
             recordReceipt: jest.fn().mockResolvedValue(undefined),
           },
@@ -465,9 +475,6 @@ const enabled = Boolean(process.env.AUTHORING_TEST_DATABASE_URL);
             .mockResolvedValue(
               client as unknown as Awaited<ReturnType<LumaService["getLumaClient"]>>,
             ),
-          jest
-            .spyOn(app.get(CourseAuthoringSessionService), "get")
-            .mockResolvedValue({} as Awaited<ReturnType<CourseAuthoringSessionService["get"]>>),
           jest.spyOn(S3Service.prototype, "uploadFile").mockImplementation(async (buffer, key) => {
             if (!Buffer.isBuffer(buffer)) throw new Error("Expected verified asset bytes");
             stagedBytes.set(key, Buffer.from(buffer));

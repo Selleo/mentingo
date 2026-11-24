@@ -114,6 +114,45 @@ describe(CourseAuthoringDraftLifecycleService.name, () => {
     expect(luma.sendCommand).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["malformed", { ...snapshot, tasks: null }],
+    ["bound to a different course", { ...snapshot, courseId: ownerId }],
+  ])("retires an inactive local draft when the producer session is %s", async (_, invalid) => {
+    const { service, repo, luma, applicationRepo } = setup();
+    luma.getSession.mockResolvedValueOnce(invalid);
+    await service.discardInactiveDrafts();
+    expect(repo.expire).toHaveBeenCalledWith(tenantId, draftId, expect.any(Date));
+    expect(repo.markDiscarded).toHaveBeenCalledWith(tenantId, draftId);
+    expect(luma.sendCommand).not.toHaveBeenCalled();
+    expect(applicationRepo.draftStagedAssets).not.toHaveBeenCalled();
+  });
+
+  it("leaves the draft retryable when the producer is temporarily unavailable", async () => {
+    const { service, repo, luma } = setup();
+    luma.getSession.mockRejectedValueOnce(new Error("Luma temporarily unavailable"));
+    await service.discardInactiveDrafts();
+    expect(repo.expire).not.toHaveBeenCalled();
+    expect(repo.markDiscarded).not.toHaveBeenCalled();
+
+    await service.discardInactiveDrafts();
+    expect(repo.expire).toHaveBeenCalledWith(tenantId, draftId, expect.any(Date));
+    expect(repo.markDiscarded).toHaveBeenCalledWith(tenantId, draftId);
+  });
+
+  it("retries storage cleanup after a failed deletion", async () => {
+    const { service, repo, applicationRepo } = setup();
+    applicationRepo.draftStagedAssets.mockResolvedValue([{ id: eventId, key: "cover" }]);
+    applicationRepo.cleanExpiredStagedAsset.mockRejectedValueOnce(
+      new Error("S3 temporarily unavailable"),
+    );
+    await service.discardInactiveDrafts();
+    expect(repo.markDiscarded).not.toHaveBeenCalled();
+
+    await service.discardInactiveDrafts();
+    expect(applicationRepo.cleanExpiredStagedAsset).toHaveBeenCalledTimes(2);
+    expect(repo.markDiscarded).toHaveBeenCalledWith(tenantId, draftId);
+  });
+
   it("discards an expired draft and retires its unapplied staging", async () => {
     const { service, repo, luma, applicationRepo } = setup();
     applicationRepo.draftStagedAssets.mockResolvedValueOnce([{ id: eventId, key: "cover" }]);
