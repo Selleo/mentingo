@@ -23,6 +23,7 @@ interface CertificateContentProps {
   lang?: SupportedLanguages;
   colorTheme?: CertificateColorTheme;
   certificateKind?: CertificateKind;
+  certificateId?: string;
 }
 
 const CertificateContent = ({
@@ -38,6 +39,7 @@ const CertificateContent = ({
   lang = "en",
   colorTheme = defaultCertificateColorTheme,
   certificateKind = CERTIFICATE_KIND.COURSE,
+  certificateId,
 }: CertificateContentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -75,6 +77,7 @@ const CertificateContent = ({
     lang,
     colorTheme,
     certificateKind,
+    certificateId,
   });
 
   const certificateBody = (

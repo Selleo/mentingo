@@ -31,4 +31,18 @@ describe("CertificateContent", () => {
       unmount();
     }
   });
+
+  it("shows the certificate ID when one is provided", () => {
+    render(
+      <CertificateContent
+        isDownload
+        lang={SUPPORTED_LANGUAGES.EN}
+        certificateId="00000000-0000-0000-0000-000000000001"
+      />,
+    );
+
+    expect(
+      screen.getByText("Certificate ID: 00000000-0000-0000-0000-000000000001"),
+    ).toBeInTheDocument();
+  });
 });
