@@ -360,7 +360,10 @@ export class CourseAuthoringSessionService {
     );
     const bytes = Buffer.from(downloaded.bytes);
     const detected = await FileGuard.getFileType(bytes);
-    if (!detected || !ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(detected.mime))
+    if (
+      !detected ||
+      (!ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(detected.mime) && detected.mime !== "audio/mpeg")
+    )
       throw new BadRequestException("courseAuthoring.errors.assetPreviewUnsupported");
     return { bytes, mimeType: detected.mime };
   }

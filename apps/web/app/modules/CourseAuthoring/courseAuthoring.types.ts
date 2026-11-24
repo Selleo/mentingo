@@ -347,6 +347,9 @@ export type CurriculumPreview = {
   authoringSessionId?: string;
   /** Asset IDs already uploaded and ready for the review preview. */
   readyAssetIds?: string[];
+  /** Podcasts bound to the editable lesson operations in this review. */
+  podcastAssets?: Array<Pick<AssetRequestView, "assetId" | "operationId" | "altText">>;
+  podcastTasks?: AssetTaskView[];
   outline: Array<{
     id: string;
     title: string;
@@ -372,6 +375,7 @@ export type CurriculumReviewSubmission = {
 export type CurriculumPreviewActions = {
   /** Records every staged verdict and applies the accepted changes as one course update. */
   applyReview?: (submission: CurriculumReviewSubmission) => Promise<void>;
+  retryPodcast?: (assetId: string) => Promise<void>;
   /** Starts one revised conversation turn for the reviewed draft. */
   refineBatch?: (feedbacks: Array<{ proposalId: string; feedback: string }>) => Promise<void>;
 };
@@ -379,7 +383,7 @@ export type CurriculumPreviewActions = {
 export type AssetRequestView = {
   assetId: string;
   operationId: string;
-  purpose: "thumbnail" | "lesson" | "diagram" | "avatar" | "signature";
+  purpose: "thumbnail" | "lesson" | "diagram" | "avatar" | "signature" | "podcast";
   required: boolean;
   altText: string;
   source:
@@ -388,6 +392,7 @@ export type AssetRequestView = {
         content: string;
         visualQuery: string;
       }
+    | { type: typeof AUTHORING_ASSET_SOURCE_TYPE.PODCAST; content: string }
     | {
         type: typeof AUTHORING_ASSET_SOURCE_TYPE.SOURCE_IMAGE;
         sourceVersionId: string;

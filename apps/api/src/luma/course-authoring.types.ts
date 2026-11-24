@@ -35,6 +35,7 @@ export type PreparedCourseAuthoringApplication = {
   assetMappings: Record<string, string>;
   preparedDocumentIds: Record<string, string[]>;
   assetMimeTypes: Record<string, string>;
+  audioDurations?: Record<string, number>;
   acknowledgeAssessmentChanges?: boolean;
 };
 
@@ -44,6 +45,7 @@ export interface CourseAuthoringSubscription {
   tenantId: string;
   cursor: number;
   members: Map<string, import("src/websocket/websocket.types").AuthenticatedSocket>;
+  deltaMembers: Set<string>;
   abort: AbortController;
 }
 

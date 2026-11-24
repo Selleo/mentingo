@@ -60,7 +60,7 @@ describe("useCourseAuthoringCommand", () => {
     client.clear();
   });
 
-  it("preserves an accepted command when the following snapshot read fails", async () => {
+  it("uses the stream after a normal command instead of reloading the session", async () => {
     const receipt = {
       commandId: "accepted",
       acceptedSequence: 4,
@@ -90,6 +90,7 @@ describe("useCourseAuthoringCommand", () => {
       commandId: "command-1",
     });
     expect(result.current.isError).toBe(false);
+    expect(refreshAuthoringSession).not.toHaveBeenCalled();
     client.clear();
   });
 

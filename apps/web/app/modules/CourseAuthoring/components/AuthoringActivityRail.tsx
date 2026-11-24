@@ -1369,11 +1369,17 @@ export const AuthoringActivityRail = ({
                   asset={asset}
                   omitted={
                     !asset.request.required &&
+                    asset.request.purpose !== "podcast" &&
                     omittedOptionalAssetIds.includes(asset.request.assetId)
                   }
                   busy={busy}
                   onRetry={() => {
                     if (asset.action) onAssetAction(asset, asset.action);
+                    else if (
+                      asset.request.purpose === "podcast" &&
+                      asset.status === AUTHORING_TASK_STATUS.FAILED
+                    )
+                      onRetry(asset.taskId);
                   }}
                   onSkip={() => onSkipAsset(asset.request.assetId)}
                   onRestore={() => onRestoreAsset?.(asset.request.assetId)}

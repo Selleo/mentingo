@@ -636,6 +636,7 @@
     "invalidOrder": "The task order is no longer current. Refresh and try again."
   },
   "aiMentorPractice": {
+    "voiceEntryPrompt": "Start voice mode and allow microphone access if your browser asks.",
     "form": {
       "title": "Practice a real conversation.",
       "promptEyebrow": "Set the scene",
@@ -7284,6 +7285,8 @@
       "unknown": "Unknown",
       "generatedVisual": "Generated visual: {{content}}",
       "approveRetry": "Retry image",
+      "retryPodcast": "Retry podcast",
+      "retryPodcastApproval": "The provider may have accepted the previous request. Retrying may incur another charge.",
       "requiredScopeChange": "Required: scope change",
       "skipOptionalAsset": "Skip image",
       "requiredCannotSkip": "This image is required and can't be skipped. If it can't be created, ask the AI to change the proposal so it isn't needed.",
@@ -7442,7 +7445,7 @@
         "blockReplace": "Replace lesson content"
       },
       "unknownChange": "Course change",
-      "visualAssets": "Images",
+      "visualAssets": "Lesson media",
       "visualAssetsDescription": "Check each image before applying. You can leave out optional images. Required images must be approved, or ask the AI to change the proposal.",
       "selected": "{{count}} selected",
       "ready": "Ready",
@@ -7451,6 +7454,7 @@
       "purpose": "Purpose: {{value}}",
       "unknownPurpose": "Unspecified",
       "purposes": {
+        "podcast": "Podcast",
         "thumbnail": "Thumbnail",
         "lesson": "Lesson",
         "diagram": "Diagram",
@@ -7462,6 +7466,7 @@
         "identified": "Identified",
         "unknown": "Unknown"
       },
+      "podcastNotReady": "The podcast must be ready before you can apply the lesson.",
       "omitOptionalAsset": "Omit optional asset {{title}}",
       "omit": "Omit",
       "requiredAssetNotReady": "A required image isn't ready. Approve or retry it in the activity panel, or ask the AI to change the proposal.",

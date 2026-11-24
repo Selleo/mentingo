@@ -636,6 +636,7 @@
     "invalidOrder": "Die Aufgabenreihenfolge ist nicht mehr aktuell. Aktualisieren Sie die Seite und versuchen Sie es erneut."
   },
   "aiMentorPractice": {
+    "voiceEntryPrompt": "Starte den Sprachmodus und erlaube den Mikrofonzugriff, falls dein Browser danach fragt.",
     "form": {
       "title": "Ein echtes Gespräch üben.",
       "promptEyebrow": "Szene festlegen",
@@ -7263,6 +7264,8 @@
       "unknown": "Unbekannt",
       "generatedVisual": "Generiertes Bild: {{content}}",
       "approveRetry": "Bild erneut erstellen",
+      "retryPodcast": "Podcast erneut versuchen",
+      "retryPodcastApproval": "Der Anbieter könnte die vorherige Anfrage angenommen haben. Ein erneuter Versuch kann zusätzliche Kosten verursachen.",
       "requiredScopeChange": "Umfang muss geändert werden",
       "skipOptionalAsset": "Bild überspringen",
       "requiredCannotSkip": "Dieses Bild ist erforderlich und kann nicht übersprungen werden. Wenn es nicht erstellt werden kann, bitten Sie die KI, den Vorschlag so zu ändern, dass es nicht nötig ist.",
@@ -7421,7 +7424,7 @@
         "blockReplace": "Lektionsinhalt ersetzen"
       },
       "unknownChange": "Kursänderung",
-      "visualAssets": "Bilder",
+      "visualAssets": "Lektionsmedien",
       "visualAssetsDescription": "Prüfen Sie jedes Bild vor dem Übernehmen. Optionale Bilder können Sie weglassen. Erforderliche Bilder müssen bestätigt werden, oder Sie bitten die KI, den Vorschlag zu ändern.",
       "selected": "{{count}} ausgewählt",
       "ready": "Bereit",
@@ -7430,6 +7433,7 @@
       "purpose": "Zweck: {{value}}",
       "unknownPurpose": "Nicht angegeben",
       "purposes": {
+        "podcast": "Podcast",
         "thumbnail": "Vorschaubild",
         "lesson": "Lektion",
         "diagram": "Diagramm",
@@ -7441,6 +7445,7 @@
         "identified": "Identifiziert",
         "unknown": "Unbekannt"
       },
+      "podcastNotReady": "Der Podcast muss bereit sein, bevor du die Lektion übernehmen kannst.",
       "omitOptionalAsset": "Optionales Material {{title}} auslassen",
       "omit": "Auslassen",
       "requiredAssetNotReady": "Ein erforderliches Bild ist nicht bereit. Bestätigen oder wiederholen Sie es im Aktivitätsbereich oder bitten Sie die KI, den Vorschlag zu ändern.",

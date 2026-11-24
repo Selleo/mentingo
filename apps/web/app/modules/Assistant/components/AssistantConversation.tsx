@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useCancelAssistantRun } from "~/api/mutations/assistant/useCancelAssistantRun";
 import { useCreateAssistantThread } from "~/api/mutations/assistant/useCreateAssistantThread";
 import { useSendAssistantMessage } from "~/api/mutations/assistant/useSendAssistantMessage";
+import { settledAssistantMessages } from "~/api/queries/assistant/assistantTranscriptCache";
 import { useAssistantAvailability } from "~/api/queries/assistant/useAssistantAvailability";
 import { useAssistantMessages } from "~/api/queries/assistant/useAssistantMessages";
 import { useAssistantThread } from "~/api/queries/assistant/useAssistantThread";
@@ -74,9 +75,11 @@ export function AssistantConversation({
   const { mutateAsync: sendMessage, isPending: sending } = useSendAssistantMessage();
   const { mutateAsync: cancelRun, isPending: cancelling } = useCancelAssistantRun(threadId);
   const pages = transcript.data?.pages;
-  const persistedMessages: AssistantMessage[] = pages
-    ? [...pages].reverse().flatMap((page) => page.items)
-    : [];
+  const latestRun = pages ? pages[0]?.latestRun : thread.data?.latestRun;
+  const persistedMessages = settledAssistantMessages(
+    pages ? [...pages].reverse().flatMap((page) => page.items) : [],
+    latestRun,
+  );
   const persistedPendingUser = Boolean(
     pendingDraft &&
       persistedMessages.some(
@@ -98,7 +101,6 @@ export function AssistantConversation({
       clientMessageId: pendingDraft.clientMessageId,
     });
   }
-  const latestRun = pages?.[0]?.latestRun ?? thread.data?.latestRun;
   const running = isAssistantRunActive(latestRun);
   const archived = thread.data?.archived === true;
   const starting = (creating || sending) && !running && !persistedPendingUser;

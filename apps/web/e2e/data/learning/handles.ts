@@ -51,6 +51,7 @@ export const LEARNING_HANDLES = {
   AI_MENTOR_RETAKE_MODAL: "learning-ai-mentor-retake-modal",
   AI_MENTOR_RETAKE_CONFIRM_BUTTON: "learning-ai-mentor-retake-confirm-button",
   AI_MENTOR_RETAKE_CANCEL_BUTTON: "learning-ai-mentor-retake-cancel-button",
+  AI_MENTOR_VOICE_OVERLAY_START_BUTTON: "learning-ai-mentor-voice-overlay-start-button",
   AI_MENTOR_VOICE_OVERLAY: "learning-ai-mentor-voice-overlay",
   AI_MENTOR_VOICE_OVERLAY_MUTE_BUTTON: "learning-ai-mentor-voice-overlay-mute-button",
   AI_MENTOR_VOICE_OVERLAY_MOBILE_TASK_BUTTON: "learning-ai-mentor-voice-overlay-mobile-task-button",

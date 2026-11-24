@@ -34,10 +34,12 @@ vi.mock("~/modules/Courses/Lesson/AiMentorLesson/components/VoiceMentorModeOverl
     onJudge,
     canJudge,
     isJudgePending,
+    notice,
     onExit,
   }: ComponentProps<typeof VoiceMentorModeOverlay>) =>
     open && (
       <>
+        {notice}
         <button data-testid="voice-check" disabled={!canJudge || isJudgePending} onClick={onJudge}>
           Check voice
         </button>
@@ -82,7 +84,7 @@ const props = {
   hasLearnerMessage: true,
   isProcessing: false,
 };
-const renderComposer = (overrides: Partial<typeof props> = {}) =>
+const renderComposer = (overrides: Partial<ComponentProps<typeof AiMentorPracticeComposer>> = {}) =>
   renderWith().render(
     <TooltipProvider>
       <AiMentorPracticeComposer {...props} {...overrides} />
@@ -92,6 +94,7 @@ const renderComposer = (overrides: Partial<typeof props> = {}) =>
 beforeEach(() => {
   vi.clearAllMocks();
   voice.isRecording = false;
+  voice.startVoiceMentor.mockResolvedValue(true);
   vi.mocked(useVoiceMentor).mockReturnValue(voice);
   vi.mocked(useLumaConfigured).mockReturnValue({ data: { voiceMentorEnabled: true } } as ReturnType<
     typeof useLumaConfigured
@@ -99,6 +102,26 @@ beforeEach(() => {
 });
 
 describe("Practice voice composer", () => {
+  it("automatically starts the same attempt when opened in voice mode", async () => {
+    renderComposer({ startInVoice: true });
+
+    await waitFor(() => expect(voice.startVoiceMentor).toHaveBeenCalledOnce());
+    expect(vi.mocked(useVoiceMentor).mock.lastCall?.[0].voiceTarget).toEqual({
+      practiceSessionId: "practice-1",
+      threadId: "attempt-1",
+    });
+  });
+
+  it("keeps a manual start action inside voice mode when startup fails", async () => {
+    voice.startVoiceMentor.mockResolvedValueOnce(false);
+    renderComposer({ startInVoice: true });
+
+    await waitFor(() => expect(voice.startVoiceMentor).toHaveBeenCalledOnce());
+    const start = await screen.findByTestId(LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY_START_BUTTON);
+    fireEvent.click(start);
+    await waitFor(() => expect(voice.startVoiceMentor).toHaveBeenCalledTimes(2));
+  });
+
   it("enables the existing voice action with the Practice attempt target", async () => {
     renderComposer();
     expect(vi.mocked(useVoiceMentor).mock.lastCall?.[0].voiceTarget).toEqual({

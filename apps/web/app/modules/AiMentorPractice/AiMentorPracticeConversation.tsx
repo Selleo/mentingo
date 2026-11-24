@@ -28,6 +28,8 @@ import { ChatReplyAnnouncer } from "~/modules/Courses/Lesson/AiMentorLesson/comp
 
 import { AI_MENTOR_PRACTICE_HANDLES } from "../../../e2e/data/ai-mentor-practice/handles";
 
+import { usePracticeViewport } from "./usePracticeViewport";
+
 import type { GetPracticeResponse } from "~/api/generated-api";
 import type { AiMentorEvaluation } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationDialog.types";
 
@@ -36,10 +38,11 @@ type Practice = GetPracticeResponse["data"];
 type AiMentorPracticeConversationProps = Pick<
   Practice,
   "id" | "threadId" | "threadStatus" | "title" | "aiMentorName" | "taskGoal" | "evaluation"
->;
+> & { startInVoice?: boolean };
 
 export function AiMentorPracticeConversation({
   id,
+  startInVoice = false,
   threadId,
   threadStatus,
   title,
@@ -55,6 +58,11 @@ export function AiMentorPracticeConversation({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const committedLearnerTurnsRef = useRef(new Map<string, string>());
   const resolvedThreadId = threadId ?? "";
+  const voiceEntryThreadId = useRef(startInVoice && threadStatus === "active" ? threadId : null);
+  const entersInVoice = Boolean(
+    resolvedThreadId && voiceEntryThreadId.current === resolvedThreadId,
+  );
+  const viewportRef = usePracticeViewport();
   const transport = useMemo(
     () => createAiMentorChatTransport(resolvedThreadId),
     [resolvedThreadId],
@@ -190,93 +198,100 @@ export function AiMentorPracticeConversation({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <PageWrapper
-        breadcrumbs={[
-          { title: t("navigationSideBar.dashboard"), href: "/dashboard" },
-          { title: t("aiMentorPractice.conversationTitle"), href: `/ai-mentor/practice/${id}` },
-        ]}
-        className="mx-auto flex h-[calc(100dvh-2rem)] max-w-5xl flex-col overflow-hidden pb-6"
-      >
-        {evaluation && (
-          <AiMentorEvaluationDialog
-            evaluation={evaluation}
-            open={showEvaluationDialog}
-            onOpenChange={setShowEvaluationDialog}
-            context={AI_MENTOR_EVALUATION_CONTEXT.PRACTICE}
-          />
-        )}
-
-        <AiMentorPracticeHeader title={title} taskGoal={taskGoal} />
-
-        <section
-          data-testid={AI_MENTOR_PRACTICE_HANDLES.CONVERSATION}
-          aria-label={t("aiMentorPractice.conversationTitle")}
-          className={cn(
-            "flex min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_16px_40px_-28px_rgba(15,23,42,0.45)]",
-            isCompactConversation
-              ? "h-[min(32rem,calc(100dvh-14rem))] min-h-[22rem]"
-              : "min-h-[28rem] flex-1",
-          )}
+      <div ref={viewportRef}>
+        <PageWrapper
+          breadcrumbs={[
+            { title: t("navigationSideBar.dashboard"), href: "/dashboard" },
+            { title: t("aiMentorPractice.conversationTitle"), href: `/ai-mentor/practice/${id}` },
+          ]}
+          className="mx-auto flex h-[var(--practice-viewport-height,100dvh)] max-w-5xl flex-col overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-6"
         >
-          {isReplayPending ? (
-            <AiMentorReplayLoader
-              testId={AI_MENTOR_PRACTICE_HANDLES.REPLAY_LOADER}
-              text={t("aiMentorPractice.replayLoadingTitle")}
-            />
-          ) : (
-            <AiMentorPracticeMessages
-              messages={messages}
-              isMessagesLoading={isMessagesLoading}
-              showChatLoader={showChatLoader}
-              aiMentorName={aiMentorName ?? t("aiMentorPractice.mentorName")}
-              messagesContainerRef={messagesContainerRef}
+          {evaluation && (
+            <AiMentorEvaluationDialog
+              evaluation={evaluation}
+              open={showEvaluationDialog}
+              onOpenChange={setShowEvaluationDialog}
+              context={AI_MENTOR_EVALUATION_CONTEXT.PRACTICE}
             />
           )}
 
-          <ChatReplyAnnouncer messages={messages} status={status} />
+          <AiMentorPracticeHeader
+            title={title}
+            taskGoal={taskGoal}
+            openTaskOnMount={!entersInVoice}
+          />
 
-          {isJudgePending && <AiMentorEvaluationLoader />}
-
-          <div
+          <section
+            data-testid={AI_MENTOR_PRACTICE_HANDLES.CONVERSATION}
+            aria-label={t("aiMentorPractice.conversationTitle")}
             className={cn(
-              "shrink-0 border-t border-neutral-200 bg-neutral-50/70 px-4 pb-4 pt-2 sm:px-5",
-              isReplayPending && "hidden",
+              "flex min-h-40 w-full flex-1 flex-col overflow-y-auto rounded-2xl border border-neutral-200 bg-white shadow-[0_16px_40px_-28px_rgba(15,23,42,0.45)]",
+              isCompactConversation && "sm:max-h-[32rem]",
             )}
           >
-            {isThreadActive && !isJudgePending && !isReplayPending ? (
-              <AiMentorPracticeComposer
-                key={resolvedThreadId}
-                practiceSessionId={id}
-                threadId={resolvedThreadId}
-                mentorName={aiMentorName ?? t("aiMentorPractice.mentorName")}
-                handleSubmit={handleSubmit}
-                onLearnerTranscription={(text, turnId) => appendVoiceMessage("user", text, turnId)}
-                onMentorResponseCompleted={(text) => appendVoiceMessage("assistant", text)}
-                onAudioInterrupted={invalidateMessages}
-                onAudioOutputCompleted={invalidateMessages}
-                onJudge={handleJudge}
-                isJudgePending={isJudgePending}
-                handleInputChange={handleInputChange}
-                messages={messages}
-                input={input}
-                setInput={setInput}
-                hasTaskDescription={Boolean(taskGoal)}
-                taskDescription={taskGoal ?? ""}
-                hasLearnerMessage={hasLearnerMessage}
-                isProcessing={isProcessing}
+            {isReplayPending ? (
+              <AiMentorReplayLoader
+                testId={AI_MENTOR_PRACTICE_HANDLES.REPLAY_LOADER}
+                text={t("aiMentorPractice.replayLoadingTitle")}
               />
             ) : (
-              evaluation && (
-                <AiMentorPracticeCompletion
-                  isReplayPending={isReplayPending}
-                  onViewFeedback={() => setShowEvaluationDialog(true)}
-                  onPracticeAgain={() => void handleReplay()}
-                />
-              )
+              <AiMentorPracticeMessages
+                messages={messages}
+                isMessagesLoading={isMessagesLoading}
+                showChatLoader={showChatLoader}
+                aiMentorName={aiMentorName ?? t("aiMentorPractice.mentorName")}
+                messagesContainerRef={messagesContainerRef}
+              />
             )}
-          </div>
-        </section>
-      </PageWrapper>
+
+            <ChatReplyAnnouncer messages={messages} status={status} />
+
+            {isJudgePending && <AiMentorEvaluationLoader />}
+
+            <div
+              className={cn(
+                "shrink-0 border-t border-neutral-200 bg-neutral-50/70 px-4 pb-4 pt-2 sm:px-5",
+                isReplayPending && "hidden",
+              )}
+            >
+              {isThreadActive && !isJudgePending && !isReplayPending ? (
+                <AiMentorPracticeComposer
+                  key={resolvedThreadId}
+                  startInVoice={entersInVoice}
+                  practiceSessionId={id}
+                  threadId={resolvedThreadId}
+                  mentorName={aiMentorName ?? t("aiMentorPractice.mentorName")}
+                  handleSubmit={handleSubmit}
+                  onLearnerTranscription={(text, turnId) =>
+                    appendVoiceMessage("user", text, turnId)
+                  }
+                  onMentorResponseCompleted={(text) => appendVoiceMessage("assistant", text)}
+                  onAudioInterrupted={invalidateMessages}
+                  onAudioOutputCompleted={invalidateMessages}
+                  onJudge={handleJudge}
+                  isJudgePending={isJudgePending}
+                  handleInputChange={handleInputChange}
+                  messages={messages}
+                  input={input}
+                  setInput={setInput}
+                  hasTaskDescription={Boolean(taskGoal)}
+                  taskDescription={taskGoal ?? ""}
+                  hasLearnerMessage={hasLearnerMessage}
+                  isProcessing={isProcessing}
+                />
+              ) : (
+                evaluation && (
+                  <AiMentorPracticeCompletion
+                    isReplayPending={isReplayPending}
+                    onViewFeedback={() => setShowEvaluationDialog(true)}
+                    onPracticeAgain={() => void handleReplay()}
+                  />
+                )
+              )}
+            </div>
+          </section>
+        </PageWrapper>
+      </div>
     </TooltipProvider>
   );
 }

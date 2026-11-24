@@ -31,6 +31,51 @@ const session: AuthoringSession = {
   tasks: [],
 };
 
+it("attaches the new course and its language directly from the stream", () => {
+  const projected = applyAuthoringEvent(session, {
+    ...event(8),
+    type: "session.course_attached",
+    payload: { courseId: "native-course", language: "pl" },
+  });
+
+  expect(projected).toMatchObject({
+    courseId: "native-course",
+    language: "pl",
+    snapshotSequence: 8,
+  });
+});
+
+it("unblocks a planned podcast from the asset-ready delta alone", () => {
+  const queued = applyAuthoringEvent(session, {
+    ...event(8),
+    type: "asset.queued",
+    payload: {
+      assetId: "episode",
+      taskId: "episode-job",
+      parentTaskId: "lesson",
+      request: {
+        assetId: "episode",
+        operationId: "write-lesson",
+        purpose: "podcast",
+        required: true,
+        altText: "Decisions",
+        source: { type: "podcast", content: "Compare two decisions" },
+      },
+    },
+  });
+  const ready = applyAuthoringEvent(queued, {
+    ...event(9),
+    type: "asset.ready",
+    payload: { assetId: "episode", taskId: "episode-job", revision: 1 },
+  });
+
+  const before = projectWorkspaceRecords(queued.records, queued.tasks);
+  expect(before.assetTasks).toMatchObject([{ ready: false }]);
+  const after = projectWorkspaceRecords(ready.records, ready.tasks);
+  expect(after.readyAssetIds).toEqual(["episode"]);
+  expect(after.assetTasks).toMatchObject([{ ready: true }]);
+});
+
 const event = (sequence: number, sessionId = "session-1"): AuthoringEvent => ({
   schemaVersion: 1,
   eventId: `event-${sequence}`,

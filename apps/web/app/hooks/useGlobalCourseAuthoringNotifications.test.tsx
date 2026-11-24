@@ -26,6 +26,7 @@ import type {
 } from "~/modules/CourseAuthoring/courseAuthoring.types";
 
 const mocks = vi.hoisted(() => ({
+  openSocket: vi.fn(),
   getSession: vi.fn<(...args: unknown[]) => Promise<AuthoringSession>>(),
   toast: vi.fn((_options: Parameters<typeof toast>[0]) => ({
     id: "notice",
@@ -38,6 +39,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("~/modules/CourseAuthoring/courseAuthoring.api", () => ({
   getAuthoringSession: mocks.getSession,
 }));
+vi.mock("~/api/socket", () => ({ openIndependentSocket: mocks.openSocket }));
 vi.mock("~/components/ui/use-toast", () => ({ useToast: () => ({ toast: mocks.toast }) }));
 vi.mock("@remix-run/react", () => ({ useNavigate: () => mocks.navigate }));
 
@@ -71,10 +73,31 @@ const setActor = (id: string | undefined) => {
   });
 };
 
+const createConnection = () => {
+  const listeners = new Map<string, (payload?: unknown) => void>();
+  const emit = vi.fn();
+  const socket = {
+    connected: true,
+    connect: vi.fn(),
+    on: (event: string, listener: (payload?: unknown) => void) => listeners.set(event, listener),
+    emit,
+    timeout: () => ({ emit }),
+  };
+  return {
+    socket,
+    dispose: vi.fn(),
+    receive: (event: string, payload?: unknown) => listeners.get(event)?.(payload),
+  };
+};
+
 describe("global authoring notification ownership", () => {
+  let connection: ReturnType<typeof createConnection>;
+
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
+    connection = createConnection();
+    mocks.openSocket.mockReturnValue(connection);
     queryClient.clear();
     authoringSessionVisibility.setState({}, true);
     setActor("actor-a");
@@ -85,15 +108,86 @@ describe("global authoring notification ownership", () => {
     vi.useRealTimers();
   });
 
-  it("publishes the current actor's polled completion to the shared cache", async () => {
-    mocks.getSession.mockResolvedValue(session("completed", 2));
+  it("publishes a hidden session's completion delta without polling", async () => {
     queryClient.setQueryData(key, session("running"));
     const { unmount } = renderHook(useGlobalCourseAuthoringNotifications);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(10_000);
+    expect(connection.socket.emit).toHaveBeenCalledWith(
+      "join:course-authoring",
+      { courseId: "course-a", sessionId: "session-a", afterSequence: 1, hasSnapshot: true },
+      expect.any(Function),
+    );
+    await act(() => vi.advanceTimersByTimeAsync(10_000));
+    expect(mocks.getSession).not.toHaveBeenCalled();
+    act(() => {
+      connection.receive("authoring.event", {
+        schemaVersion: 1,
+        eventId: "event-a",
+        sessionId: "session-a",
+        sequence: 2,
+        occurredAt: "2026-11-24T00:00:00Z",
+        type: "task.succeeded",
+        payload: { turn: session("completed", 2).turns?.[0] },
+      });
     });
     expect(queryClient.getQueryData<AuthoringSession>(key)?.snapshotSequence).toBe(2);
     expect(mocks.toast).toHaveBeenCalledTimes(1);
+    expect(connection.dispose).toHaveBeenCalledOnce();
+    unmount();
+  });
+
+  it("hands off from an open workspace and reconciles a missed event over the socket", () => {
+    queryClient.setQueryData(key, session("running"));
+    const { rerender, unmount } = renderHook(
+      ({ open }) => {
+        useVisibleAuthoringSession("course-a", "session-a", open);
+        useGlobalCourseAuthoringNotifications();
+      },
+      { initialProps: { open: true } },
+    );
+    expect(mocks.openSocket).not.toHaveBeenCalled();
+    rerender({ open: false });
+    expect(mocks.openSocket).toHaveBeenCalledOnce();
+    act(() => {
+      connection.receive("authoring.event", {
+        schemaVersion: 1,
+        eventId: "event-a",
+        sessionId: "session-a",
+        sequence: 7,
+        occurredAt: "2026-11-24T00:00:00Z",
+        type: "task.succeeded",
+        payload: {},
+      });
+    });
+    expect(connection.socket.emit).toHaveBeenLastCalledWith(
+      "join:course-authoring",
+      { courseId: "course-a", sessionId: "session-a", afterSequence: 1, hasSnapshot: false },
+      expect.any(Function),
+    );
+    act(() => connection.receive("authoring.snapshot", session("completed", 7)));
+    expect(queryClient.getQueryData<AuthoringSession>(key)?.snapshotSequence).toBe(7);
+    expect(mocks.getSession).not.toHaveBeenCalled();
+    unmount();
+  });
+
+  it("rejoins from the last accepted sequence and releases a revoked watch", () => {
+    queryClient.setQueryData(key, session("running"));
+    const { unmount } = renderHook(useGlobalCourseAuthoringNotifications);
+    act(() => {
+      connection.receive("authoring.snapshot", session("running", 4));
+      connection.receive("disconnect");
+      connection.receive("connect");
+    });
+    expect(connection.socket.emit).toHaveBeenLastCalledWith(
+      "join:course-authoring",
+      { courseId: "course-a", sessionId: "session-a", afterSequence: 4, hasSnapshot: true },
+      expect.any(Function),
+    );
+    act(() => {
+      connection.receive("authoring.error", { sessionId: "session-a", code: "permission_revoked" });
+    });
+    expect(connection.dispose).toHaveBeenCalledOnce();
+    expect(mocks.getSession).not.toHaveBeenCalled();
+    expect(mocks.toast).not.toHaveBeenCalled();
     unmount();
   });
 
@@ -256,53 +350,27 @@ describe("global authoring notification ownership", () => {
     unmount();
   });
 
-  it("rejects actor A's delayed poll before it can enter actor B's query cache", async () => {
-    let resolvePoll: (snapshot: AuthoringSession) => void = () => {};
-    const delayed = new Promise<AuthoringSession>((resolve) => {
-      resolvePoll = resolve;
-    });
-    mocks.getSession.mockReturnValue(delayed);
+  it("rejects actor A's delayed socket update before it can enter actor B's query cache", () => {
     queryClient.setQueryData(key, session("running"));
     const { unmount } = renderHook(useGlobalCourseAuthoringNotifications);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(10_000);
-    });
-    expect(mocks.getSession).toHaveBeenCalledTimes(1);
-
+    expect(mocks.openSocket).toHaveBeenCalledOnce();
     act(() => {
       setActor(undefined);
       queryClient.clear();
     });
-    act(() => {
-      setActor("actor-b");
-    });
-    await act(async () => {
-      resolvePoll(session("running", 2));
-      await delayed;
-    });
-
+    act(() => setActor("actor-b"));
+    act(() => connection.receive("authoring.snapshot", session("running", 2)));
     expect(queryClient.getQueryData(key)).toBeUndefined();
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(20_000);
-    });
-    expect(mocks.getSession).toHaveBeenCalledTimes(1);
+    expect(mocks.getSession).not.toHaveBeenCalled();
     expect(mocks.toast).not.toHaveBeenCalled();
     unmount();
   });
 
   it.each(["logout", "switch", "unmount"] as const)(
-    "dismisses owned notices on %s and suppresses a disposed poll's toast and cache write",
-    async (change) => {
-      let resolvePoll: (snapshot: AuthoringSession) => void = () => {};
-      const delayed = new Promise<AuthoringSession>((resolve) => {
-        resolvePoll = resolve;
-      });
-      mocks.getSession.mockReturnValue(delayed);
+    "dismisses owned notices on %s and suppresses a disposed socket's cache write",
+    (change) => {
       queryClient.setQueryData(key, session("running"));
       const { unmount } = renderHook(useGlobalCourseAuthoringNotifications);
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(10_000);
-      });
       act(() => {
         queryClient.setQueryData(
           key,
@@ -318,12 +386,10 @@ describe("global authoring notification ownership", () => {
       });
       expect(notice.dismiss).toHaveBeenCalledTimes(1);
       queryClient.clear();
-      await act(async () => {
-        resolvePoll(session("failed", 3));
-        await delayed;
-      });
+      act(() => connection.receive("authoring.snapshot", session("failed", 3)));
       expect(queryClient.getQueryData(key)).toBeUndefined();
       expect(mocks.toast).toHaveBeenCalledTimes(1);
+      expect(connection.dispose).toHaveBeenCalledOnce();
       unmount();
     },
   );
@@ -331,7 +397,7 @@ describe("global authoring notification ownership", () => {
   it("replaces a persistent attention notice when the request finishes", async () => {
     queryClient.setQueryData(key, session("running"));
     const { unmount } = renderHook(useGlobalCourseAuthoringNotifications);
-    // The current request is long enough to announce completion without starting a poll.
+    // The current request is long enough to announce completion while handling a socket update.
     vi.setSystemTime(Date.now() + 10_000);
     act(() => {
       queryClient.setQueryData(key, session("waiting_author", 2));

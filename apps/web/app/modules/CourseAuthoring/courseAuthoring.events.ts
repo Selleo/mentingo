@@ -1,10 +1,13 @@
 /** Applies durable sequence rules to websocket events and requests snapshot recovery on gaps. */
+import { isSupportedLanguage } from "@repo/shared";
+
 import { parseFetchedResearchSources } from "./authoringSources";
 import { parseAuthoringTaskFailure } from "./authoringTaskFailure";
 import {
   AUTHORING_ARTIFACT_KIND,
   AUTHORING_PART_KIND,
   AUTHORING_PART_STATUS,
+  AUTHORING_SESSION_STATUS,
   AUTHORING_TASK_STATUS,
   AUTHORING_TOOL_STATUS,
   AUTHORING_TURN_STATUS,
@@ -321,10 +324,58 @@ export const applyAuthoringEvent = (
   session: AuthoringSession,
   event: AuthoringEvent,
 ): AuthoringSession => {
-  const next = advanceSessionCursor(session, event);
+  let next = advanceSessionCursor(session, event);
+  const payload = isObject(event.payload) ? event.payload : {};
+  if (event.type === "session.course_attached") {
+    const courseId = stringValue(payload.courseId);
+    const language = stringValue(payload.language);
+    if (courseId && language && isSupportedLanguage(language))
+      next = { ...next, courseId, language };
+  }
+  if (event.type === "session.changed") {
+    const status = payload.status;
+    if (Object.values(AUTHORING_SESSION_STATUS).some((candidate) => candidate === status)) {
+      next = { ...next, status: status as AuthoringSession["status"] };
+    }
+  }
+  if (event.type === "command.accepted") {
+    const action = payload.action;
+    if (action === "session.pause") {
+      next = {
+        ...next,
+        status: AUTHORING_SESSION_STATUS.PAUSED,
+        tasks: next.tasks.map((task) =>
+          [
+            AUTHORING_TASK_STATUS.QUEUED,
+            AUTHORING_TASK_STATUS.RUNNING,
+            AUTHORING_TASK_STATUS.WAITING_DEPENDENCIES,
+          ].some((status) => status === task.status)
+            ? { ...task, status: AUTHORING_TASK_STATUS.PAUSED }
+            : task,
+        ),
+      };
+    } else if (action === "session.resume" || action === "request.create") {
+      next = { ...next, status: AUTHORING_SESSION_STATUS.ACTIVE };
+    } else if (action === "session.stop") {
+      next = { ...next, status: AUTHORING_SESSION_STATUS.STOPPED };
+    } else if (action === "draft.discard") {
+      next = { ...next, status: AUTHORING_SESSION_STATUS.DISCARDED };
+    }
+  }
   const canonicalTurn = parseCanonicalTurn(event);
   const withTurn = canonicalTurn ? { ...next, turns: mergeTurn(next, canonicalTurn) } : next;
-  const payload = isObject(event.payload) ? event.payload : {};
+  const assetRecord = (() => {
+    const assetId = stringValue(payload.assetId);
+    const taskId = stringValue(payload.taskId);
+    if (!assetId || !taskId) return null;
+    if (event.type === "asset.queued" && isObject(payload.request)) {
+      return { id: taskId, kind: "asset_task", payload };
+    }
+    if (event.type === "asset.ready") {
+      return { id: event.eventId, kind: "asset", payload: { ...payload, status: "ready" } };
+    }
+    return null;
+  })();
   const questionAnswerRecord = (() => {
     if (event.type !== "question.answered") return null;
     const taskId = stringValue(payload.taskId);
@@ -376,6 +427,7 @@ export const applyAuthoringEvent = (
     records: mergeEventRecord(
       withTurn.records,
       parseEventRecord(payload) ??
+        assetRecord ??
         questionAnswerRecord ??
         proposalStatusRecord ??
         applicationRecord ??

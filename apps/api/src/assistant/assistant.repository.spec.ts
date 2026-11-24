@@ -37,6 +37,7 @@ describe("Assistant durable progress", () => {
   let set: jest.Mock;
   let repository: AssistantRepository;
   let runWithTenantTransaction: jest.Mock;
+  let publish: jest.Mock;
 
   beforeEach(() => {
     current = { ...base };
@@ -44,10 +45,16 @@ describe("Assistant durable progress", () => {
     set = jest.fn((patch) => ({
       where: () => ({ returning: async () => [{ ...current, ...patch }] }),
     }));
-    runWithTenantTransaction = jest.fn((_tenantId, callback) => callback());
+    publish = jest.fn();
+    runWithTenantTransaction = jest.fn(async (_tenantId, callback) => {
+      const result = await callback();
+      expect(publish).not.toHaveBeenCalled();
+      return result;
+    });
     repository = new AssistantRepository(
       { select: () => query, update: () => ({ set }) } as never,
       { runWithTenantTransaction } as never,
+      { publish } as never,
     );
   });
 
@@ -83,8 +90,24 @@ describe("Assistant durable progress", () => {
     expect(set.mock.calls[0][0].sources).toEqual([source]);
     expect(set.mock.calls[1][0].sources).toBeUndefined();
     set.mockClear();
+    publish.mockClear();
     await repository.updateRun(identity, { text: "Final reply", messageSources: [] });
     expect(set.mock.calls[1][0].sources).toEqual([]);
+  });
+
+  it("publishes the persisted checkpoint only after a successful transaction", async () => {
+    const result = await repository.updateRun(identity, {
+      text: "Saved reply",
+      status: ASSISTANT_RUN_STATUSES.RUNNING,
+    });
+
+    expect(publish).toHaveBeenCalledWith(result, expect.objectContaining({ text: "Saved reply" }));
+    publish.mockClear();
+    runWithTenantTransaction.mockRejectedValueOnce(new Error("rollback"));
+    await expect(repository.updateRun(identity, { text: "Rolled back" })).rejects.toThrow(
+      "rollback",
+    );
+    expect(publish).not.toHaveBeenCalled();
   });
 
   it("persists real activity for an active run without changing its status", async () => {
@@ -148,6 +171,7 @@ describe("Assistant reconciliation scan boundaries", () => {
     const repository = new AssistantRepository(
       { select: () => query } as never,
       { runWithTenant } as never,
+      { publish: jest.fn() } as never,
     );
     const cursor = { createdAt: "2026-10-23T12:00:00Z", id: "run-cursor" };
     await repository.boundActiveRuns("tenant-isolated", cursor);
@@ -186,6 +210,7 @@ describe("Assistant authorization queries", () => {
     repository = new AssistantRepository(
       { select: () => query } as never,
       { runWithTenant } as never,
+      { publish: jest.fn() } as never,
     );
   });
 

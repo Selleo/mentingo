@@ -1,12 +1,17 @@
 import { Node } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import { FileAudio, GripVertical, X } from "lucide-react";
+import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 
 import { AudioPlayer } from "../components/AudioPlayer";
 import { TrackedAudioPlayer } from "../components/TrackedAudioPlayer";
+import {
+  RichTextAuthoringAssetUrlsContext,
+  RichTextMediaUrlsContext,
+} from "../contentPolicyContext";
 
 import {
   getAudioCoverageAttrsFromElement,
@@ -33,11 +38,29 @@ type AudioViewerOptions = {
   };
 };
 
+/** Use temporary preview URLs only inside the authoring media policy that created them. */
+const useAudioNodeSource = (source: unknown, assetId: unknown): string | null => {
+  const allowed = useContext(RichTextMediaUrlsContext);
+  const previews = useContext(RichTextAuthoringAssetUrlsContext);
+  if (typeof assetId === "string" && previews?.[assetId]) return previews[assetId];
+  const resource = safeAudioSrc(source);
+  return resource && (!allowed || allowed.has(resource)) ? resource : null;
+};
+
 const AudioEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   const { t } = useTranslation();
-  const src = safeAudioSrc(node.attrs.src);
+  const src = useAudioNodeSource(node.attrs.src, node.attrs.authoringAssetId);
   const name = node.attrs.name || t("richText.audio.label");
-  if (!src) return null;
+  if (!src && !node.attrs.authoringAssetId) return null;
+  if (!src) {
+    return (
+      <NodeViewWrapper contentEditable={false} role="status">
+        <p>
+          {name} · {t("courseAuthoring.review.waiting")}
+        </p>
+      </NodeViewWrapper>
+    );
+  }
 
   return (
     <NodeViewWrapper className="audio-node my-3 w-full max-w-full" contentEditable={false}>
@@ -74,9 +97,18 @@ const AudioEditorView = ({ node, editor, getPos }: NodeViewProps) => {
 const AudioViewerView = ({ node, extension }: NodeViewProps) => {
   const { t } = useTranslation();
   const { audioCoverageTracking } = extension.options as AudioViewerOptions;
-  const src = safeAudioSrc(node.attrs.src);
+  const src = useAudioNodeSource(node.attrs.src, node.attrs.authoringAssetId);
   const name = node.attrs.name || t("richText.audio.label");
-  if (!src) return null;
+  if (!src && !node.attrs.authoringAssetId) return null;
+  if (!src) {
+    return (
+      <NodeViewWrapper contentEditable={false} role="status">
+        <p>
+          {name} · {t("courseAuthoring.review.waiting")}
+        </p>
+      </NodeViewWrapper>
+    );
+  }
 
   const coverageAttrs = normalizeAudioCoverageAttributes(node.attrs);
 
@@ -130,6 +162,7 @@ export const AudioEmbedEditor = Node.create<RichTextResourceNodeOptions>({
   addAttributes() {
     return {
       src: { default: null },
+      authoringAssetId: { default: null },
       name: { default: null },
       resourceEntityId: { default: null },
       audioCoveragePercent: { default: null },
@@ -144,10 +177,14 @@ export const AudioEmbedEditor = Node.create<RichTextResourceNodeOptions>({
       {
         tag: 'audio[data-node-type="audio"]',
         getAttrs: (element) => {
-          const src = safeAudioSrc(element.getAttribute("src"));
-          return src
+          const rawSrc = element.getAttribute("src");
+          const marker = element.getAttribute("data-authoring-asset-id");
+          const authoringAssetId = marker && /^[0-9a-f-]{36}$/i.test(marker) ? marker : null;
+          const src = safeAudioSrc(rawSrc);
+          return src || authoringAssetId
             ? {
                 src,
+                authoringAssetId,
                 name: element.getAttribute("data-name"),
                 ...getAudioCoverageAttrsFromElement(element),
               }
@@ -162,6 +199,9 @@ export const AudioEmbedEditor = Node.create<RichTextResourceNodeOptions>({
       {
         "data-node-type": "audio",
         src: safeAudioSrc(node.attrs.src),
+        ...(node.attrs.authoringAssetId
+          ? { "data-authoring-asset-id": node.attrs.authoringAssetId }
+          : {}),
         "data-name": node.attrs.name,
         ...getAudioCoverageDataAttributes(normalizeAudioCoverageAttributes(node.attrs)),
         controls: "",

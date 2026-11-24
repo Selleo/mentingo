@@ -9,5 +9,9 @@ export const syncReviewPreview = (
   if (active.proposalId === latest.proposalId) return latest;
   if (!active.authoringSessionId || active.authoringSessionId !== latest.authoringSessionId)
     return active;
-  return { ...active, readyAssetIds: latest.readyAssetIds };
+  return {
+    ...active,
+    readyAssetIds: latest.readyAssetIds,
+    ...(latest.podcastTasks && { podcastTasks: latest.podcastTasks }),
+  };
 };

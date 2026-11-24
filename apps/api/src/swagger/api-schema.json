@@ -25087,6 +25087,12 @@
                   "type": "string",
                   "format": "binary"
                 }
+              },
+              "audio/mpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
               }
             }
           }

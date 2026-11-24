@@ -1,6 +1,10 @@
 import { useTranslation } from "react-i18next";
 
-import { useRichTextContentPolicy } from "~/components/RichText/contentPolicyContext";
+import {
+  RichTextAuthoringAssetUrlsContext,
+  RichTextMediaUrlsContext,
+  useRichTextContentPolicy,
+} from "~/components/RichText/contentPolicyContext";
 import { ContentViewer } from "~/components/RichText/Viever";
 
 import { withAuthoringAssetPreviewUrls } from "./authoringAssetPreview";
@@ -22,12 +26,22 @@ export const AuthoringContentPreview = ({
   const { t } = useTranslation();
   const filter = useRichTextContentPolicy();
   const resolved = withAuthoringAssetPreviewUrls(content, assetPreviewUrls);
+  const localPolicy = buildAuthoringMediaPolicy([trustedContent], assetPreviewUrls);
   const safeContent = filter
     ? filter(resolved)
     : restrictAuthoringMedia(
         resolved,
-        buildAuthoringMediaPolicy([trustedContent], assetPreviewUrls),
+        localPolicy,
         t("courseAuthoring.review.mediaPreviewBlocked"),
       );
-  return <ContentViewer content={safeContent} className={className} />;
+  const viewer = <ContentViewer content={safeContent} className={className} />;
+  return filter ? (
+    viewer
+  ) : (
+    <RichTextMediaUrlsContext.Provider value={localPolicy.urls}>
+      <RichTextAuthoringAssetUrlsContext.Provider value={assetPreviewUrls}>
+        {viewer}
+      </RichTextAuthoringAssetUrlsContext.Provider>
+    </RichTextMediaUrlsContext.Provider>
+  );
 };

@@ -23,7 +23,13 @@ export const frozenAuthoringExportSchema = Type.Object({
       revision: Type.Integer({ minimum: 1 }),
       byteSize: Type.Integer({ minimum: 0 }),
       required: Type.Boolean(),
-      role: Type.Optional(Type.Union([Type.Literal("visual"), Type.Literal("mentor_context")])),
+      role: Type.Optional(
+        Type.Union([
+          Type.Literal("visual"),
+          Type.Literal("mentor_context"),
+          Type.Literal("podcast"),
+        ]),
+      ),
       operationId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
       sourceVersionId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
       sectionIds: Type.Optional(Type.Array(UUIDSchema)),

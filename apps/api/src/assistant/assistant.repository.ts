@@ -21,6 +21,7 @@ import {
 } from "src/storage/schema";
 
 import { getAssistantMessageOrder } from "./assistant-message-order";
+import { AssistantRealtimeService } from "./assistant-realtime.service";
 
 import type {
   AssistantActorIdentity,
@@ -39,6 +40,7 @@ export class AssistantRepository {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
+    private readonly assistantRealtimeService: AssistantRealtimeService,
   ) {}
 
   async findTenantState(tenantId: string): Promise<AssistantTenantState | undefined> {
@@ -70,13 +72,22 @@ export class AssistantRepository {
     });
   }
 
-  private owner(user: CurrentUserType, threadId?: string) {
+  private owner(user: AssistantActorIdentity, threadId?: string) {
     return and(
       eq(assistantThreads.tenantId, user.tenantId),
       eq(assistantThreads.userId, user.userId),
       eq(assistantThreads.source, "mentingo"),
       threadId ? eq(assistantThreads.id, threadId) : undefined,
     );
+  }
+
+  async ownsThread(actor: AssistantActorIdentity, threadId: string): Promise<boolean> {
+    const [thread] = await this.db
+      .select({ id: assistantThreads.id })
+      .from(assistantThreads)
+      .where(this.owner(actor, threadId))
+      .limit(1);
+    return Boolean(thread);
   }
 
   async listThreads(
@@ -191,7 +202,7 @@ export class AssistantRepository {
     input: { clientMessageId: string; text: string; language: SupportedLanguages },
     origin: string,
   ): Promise<AssistantSendResult> {
-    return this.tenantDbRunnerService.transaction(async () => {
+    const result = await this.tenantDbRunnerService.transaction(async () => {
       const [thread] = await this.db
         .select()
         .from(assistantThreads)
@@ -233,7 +244,7 @@ export class AssistantRepository {
             ),
           )
           .limit(1);
-        return { userMessage: existing, assistantMessage, run };
+        return { userMessage: existing, assistantMessage, run, created: false };
       }
       if (thread.archived) throw new ConflictException("assistant.archivedNotice");
       const [active] = await this.db
@@ -296,8 +307,11 @@ export class AssistantRepository {
           updatedAt: new Date(now).toISOString(),
         })
         .where(this.owner(user, threadId));
-      return { userMessage, assistantMessage, run };
+      return { userMessage, assistantMessage, run, created: true };
     });
+    const { created, userMessage, assistantMessage, run } = result;
+    if (created) this.assistantRealtimeService.publish(run, assistantMessage, userMessage);
+    return { userMessage, assistantMessage, run };
   }
 
   async getRun({ tenantId, runId }: AssistantRunIdentity) {
@@ -347,76 +361,82 @@ export class AssistantRepository {
   }
 
   async updateRun(input: AssistantRunIdentity, update: AssistantRunUpdate) {
-    return this.tenantDbRunnerService.runWithTenantTransaction(input.tenantId, async () => {
-      const [run] = await this.db
-        .select()
-        .from(assistantRuns)
-        .where(and(eq(assistantRuns.tenantId, input.tenantId), eq(assistantRuns.id, input.runId)))
-        .for("update");
-      if (!run) throw new NotFoundException("common.toast.notFound");
-      if (
-        run.status !== ASSISTANT_RUN_STATUSES.PENDING &&
-        run.status !== ASSISTANT_RUN_STATUSES.RUNNING
-      )
-        return run;
-      const now = new Date().toISOString();
-      const sources = update.sources
-        ? [
-            ...new Map(
-              [...run.sources, ...update.sources].map((source) => [source.url, source]),
-            ).values(),
-          ].slice(0, 100)
-        : undefined;
-      const [updated] = await this.db
-        .update(assistantRuns)
-        .set({
-          status: update.status,
-          activity:
-            update.status &&
-            (update.status === ASSISTANT_RUN_STATUSES.COMPLETED ||
-              update.status === ASSISTANT_RUN_STATUSES.FAILED ||
-              update.status === ASSISTANT_RUN_STATUSES.CANCELLED)
-              ? null
-              : update.activity,
-          sources,
-          errorCode: update.errorCode,
-          successfulToolCalls: update.recordTool ? run.successfulToolCalls + 1 : undefined,
-          readableToolCalls: update.recordTool?.readable ? run.readableToolCalls + 1 : undefined,
-          updatedAt: now,
-        })
-        .where(and(eq(assistantRuns.tenantId, input.tenantId), eq(assistantRuns.id, input.runId)))
-        .returning();
-      const messageStatus =
-        update.status === ASSISTANT_RUN_STATUSES.COMPLETED
-          ? ASSISTANT_MESSAGE_STATUSES.COMPLETE
-          : update.status;
-      await this.db
-        .update(assistantMessages)
-        .set({
-          status: messageStatus,
-          text: update.text,
-          sources: update.messageSources,
-          updatedAt: now,
-        })
-        .where(
-          and(
-            eq(assistantMessages.tenantId, input.tenantId),
-            eq(assistantMessages.threadId, run.threadId),
-            eq(assistantMessages.id, run.assistantMessageId),
-          ),
-        );
-      await this.db
-        .update(assistantThreads)
-        .set({ updatedAt: now })
-        .where(
-          and(
-            eq(assistantThreads.tenantId, input.tenantId),
-            eq(assistantThreads.userId, run.userId),
-            eq(assistantThreads.id, run.threadId),
-          ),
-        );
-      return updated;
-    });
+    const result = await this.tenantDbRunnerService.runWithTenantTransaction(
+      input.tenantId,
+      async () => {
+        const [run] = await this.db
+          .select()
+          .from(assistantRuns)
+          .where(and(eq(assistantRuns.tenantId, input.tenantId), eq(assistantRuns.id, input.runId)))
+          .for("update");
+        if (!run) throw new NotFoundException("common.toast.notFound");
+        if (
+          run.status !== ASSISTANT_RUN_STATUSES.PENDING &&
+          run.status !== ASSISTANT_RUN_STATUSES.RUNNING
+        )
+          return { run, message: undefined };
+        const now = new Date(Math.max(Date.now(), Date.parse(run.updatedAt) + 1)).toISOString();
+        const sources = update.sources
+          ? [
+              ...new Map(
+                [...run.sources, ...update.sources].map((source) => [source.url, source]),
+              ).values(),
+            ].slice(0, 100)
+          : undefined;
+        const [updated] = await this.db
+          .update(assistantRuns)
+          .set({
+            status: update.status,
+            activity:
+              update.status &&
+              (update.status === ASSISTANT_RUN_STATUSES.COMPLETED ||
+                update.status === ASSISTANT_RUN_STATUSES.FAILED ||
+                update.status === ASSISTANT_RUN_STATUSES.CANCELLED)
+                ? null
+                : update.activity,
+            sources,
+            errorCode: update.errorCode,
+            successfulToolCalls: update.recordTool ? run.successfulToolCalls + 1 : undefined,
+            readableToolCalls: update.recordTool?.readable ? run.readableToolCalls + 1 : undefined,
+            updatedAt: now,
+          })
+          .where(and(eq(assistantRuns.tenantId, input.tenantId), eq(assistantRuns.id, input.runId)))
+          .returning();
+        const messageStatus =
+          update.status === ASSISTANT_RUN_STATUSES.COMPLETED
+            ? ASSISTANT_MESSAGE_STATUSES.COMPLETE
+            : update.status;
+        const [message] = await this.db
+          .update(assistantMessages)
+          .set({
+            status: messageStatus,
+            text: update.text,
+            sources: update.messageSources,
+            updatedAt: now,
+          })
+          .where(
+            and(
+              eq(assistantMessages.tenantId, input.tenantId),
+              eq(assistantMessages.threadId, run.threadId),
+              eq(assistantMessages.id, run.assistantMessageId),
+            ),
+          )
+          .returning();
+        await this.db
+          .update(assistantThreads)
+          .set({ updatedAt: now })
+          .where(
+            and(
+              eq(assistantThreads.tenantId, input.tenantId),
+              eq(assistantThreads.userId, run.userId),
+              eq(assistantThreads.id, run.threadId),
+            ),
+          );
+        return { run: updated, message };
+      },
+    );
+    if (result.message) this.assistantRealtimeService.publish(result.run, result.message);
+    return result.run;
   }
 
   async boundActiveRuns(tenantId: string, after?: AssistantRunCursor) {

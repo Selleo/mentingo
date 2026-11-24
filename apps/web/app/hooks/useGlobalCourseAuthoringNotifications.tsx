@@ -1,9 +1,7 @@
 import { useNavigate } from "@remix-run/react";
-import { isAxiosError } from "axios";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import { refreshAuthoringSession } from "~/api/queries/useCourseAuthoringSessionQuery";
 import { queryClient } from "~/api/queryClient";
 import { ToastAction } from "~/components/ui/toast";
 import { useToast } from "~/components/ui/use-toast";
@@ -11,7 +9,7 @@ import { EDIT_COURSE_TABS } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { useAuthStore } from "~/modules/Auth/authStore";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 import { observeAuthoringWork } from "~/modules/CourseAuthoring/authoringNotifications";
-import { isUnavailableAuthoringSession } from "~/modules/CourseAuthoring/authoringSessionRecovery";
+import { createAuthoringNotificationStream } from "~/modules/CourseAuthoring/authoringNotificationStream";
 import {
   authoringSessionVisibility,
   authoringSessionVisibilityKey,
@@ -45,14 +43,14 @@ export const useGlobalCourseAuthoringNotifications = () => {
         notices.delete(key);
       });
     });
+    const watchHiddenSession = createAuthoringNotificationStream();
     const dispose = observeAuthoringWork({
       client: queryClient,
       seedCachedSessions,
-      refresh: (courseId, sessionId) =>
-        refreshAuthoringSession(courseId, sessionId, isCurrentActor),
-      isUnavailable: (error) =>
-        isUnavailableAuthoringSession(error) ||
-        (isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0)),
+      watch: (session, publish) =>
+        watchHiddenSession(session, (snapshot) => {
+          if (isCurrentActor()) publish(snapshot);
+        }),
       notify: (outcome, session) => {
         if (!isCurrentActor()) return;
         const noticeKey = authoringSessionVisibilityKey(session.courseId, session.sessionId);

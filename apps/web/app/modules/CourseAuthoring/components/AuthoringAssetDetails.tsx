@@ -9,6 +9,13 @@ import type { AssetRequestView } from "../courseAuthoring.types";
 export function AuthoringAssetTitle({ asset }: { asset: AssetRequestView }) {
   const { t } = useTranslation();
   const title = asset.altText.trim();
+  if (asset.source.type === AUTHORING_ASSET_SOURCE_TYPE.PODCAST) {
+    return (
+      <p className="line-clamp-2 min-w-0 break-words text-sm font-medium">
+        {title || t("richText.audio.label")}
+      </p>
+    );
+  }
   const fallbackTitleKey =
     asset.source.type === AUTHORING_ASSET_SOURCE_TYPE.SOURCE_IMAGE
       ? "courseAuthoring.activityRail.sourceImageTitle"
@@ -42,6 +49,7 @@ export function AuthoringAssetDetails({
             {t("courseAuthoring.activityRail.generatedVisual", { content: asset.source.content })}
           </p>
         )}
+        {asset.source.type === AUTHORING_ASSET_SOURCE_TYPE.PODCAST && <p>{asset.source.content}</p>}
         {asset.source.type === AUTHORING_ASSET_SOURCE_TYPE.SOURCE_IMAGE && asset.placement && (
           <>
             {asset.placement.caption && <p>{asset.placement.caption}</p>}

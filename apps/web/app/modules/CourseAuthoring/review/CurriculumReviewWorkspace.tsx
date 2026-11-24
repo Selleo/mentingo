@@ -20,6 +20,7 @@ import { useToast } from "~/components/ui/use-toast";
 import { renderReviewNativeForm } from "~/modules/Admin/EditCourse/CourseLessons/components/ReviewNativeForm";
 
 import { CURRICULUM_HANDLES } from "../../../../e2e/data/curriculum/handles";
+import { AUTHORING_TASK_STATUS } from "../courseAuthoring.constants";
 
 import { AuthoringMediaPolicyProvider } from "./authoringMediaPolicy";
 import { buildCurriculumReview, reviewNodeKey } from "./buildCurriculumReview";
@@ -177,6 +178,7 @@ export const CurriculumReviewWorkspace = ({
   const [changesOnly, setChangesOnly] = useState(false);
   const [assessmentConfirmationOpen, setAssessmentConfirmationOpen] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [retryingPodcastIds, setRetryingPodcastIds] = useState<string[]>([]);
   const [submittingRefinements, setSubmittingRefinements] = useState(false);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
@@ -295,6 +297,23 @@ export const CurriculumReviewWorkspace = ({
   const acceptedOperationIds = new Set(
     summary.accepted.flatMap((proposal) => proposal.operationIds),
   );
+  const readyAssets = new Set(preview.readyAssetIds);
+  const pendingPodcasts = (preview.podcastAssets ?? []).filter(
+    (asset) => acceptedOperationIds.has(asset.operationId) && !readyAssets.has(asset.assetId),
+  );
+  const podcastTasks = new Map(preview.podcastTasks?.map((task) => [task.request.assetId, task]));
+  const waitingForPodcasts = pendingPodcasts.length > 0;
+  const retryPodcast = async (assetId: string) => {
+    if (!actions?.retryPodcast || retryingPodcastIds.includes(assetId)) return;
+    setRetryingPodcastIds((current) => [...current, assetId]);
+    try {
+      await actions.retryPodcast(assetId);
+    } catch {
+      // The session reports the failure. Keep retry available.
+    } finally {
+      setRetryingPodcastIds((current) => current.filter((id) => id !== assetId));
+    }
+  };
   const requiresAssessmentAcknowledgement = (preview.operations ?? []).some(
     (operation) =>
       acceptedOperationIds.has(operation.operationId) &&
@@ -303,7 +322,7 @@ export const CurriculumReviewWorkspace = ({
   );
 
   const apply = async (acknowledgeAssessmentChanges: boolean) => {
-    if (readOnly || !actions?.applyReview || applying) return false;
+    if (readOnly || !actions?.applyReview || applying || waitingForPodcasts) return false;
     setApplying(true);
     try {
       await actions.applyReview({
@@ -449,6 +468,7 @@ export const CurriculumReviewWorkspace = ({
             readOnly={readOnly}
             streaming={streaming}
             applying={applying}
+            applyDisabled={waitingForPodcasts}
             requiresAssessmentAcknowledgement={requiresAssessmentAcknowledgement}
             assessmentConfirmationOpen={assessmentConfirmationOpen}
             onAssessmentConfirmationOpenChange={setAssessmentConfirmationOpen}
@@ -460,6 +480,41 @@ export const CurriculumReviewWorkspace = ({
             onDiscard={() => void discard()}
             onExit={onExit}
           />
+          {!readOnly && waitingForPodcasts && (
+            <Alert>
+              <AlertDescription className="space-y-2">
+                <p>{t("courseAuthoring.review.podcastNotReady")}</p>
+                <ul className="space-y-1">
+                  {pendingPodcasts.map((asset) => {
+                    const task = podcastTasks.get(asset.assetId);
+                    const needsRetry =
+                      task?.status === AUTHORING_TASK_STATUS.FAILED ||
+                      (task?.status === AUTHORING_TASK_STATUS.WAITING_AUTHOR &&
+                        task.action !== null);
+                    return (
+                      <li key={asset.assetId} className="flex flex-wrap items-center gap-2">
+                        {asset.altText || t("richText.audio.label")}
+                        {task?.action && (
+                          <span>{t("courseAuthoring.activityRail.retryPodcastApproval")}</span>
+                        )}
+                        {needsRetry && actions?.retryPodcast && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={retryingPodcastIds.includes(asset.assetId)}
+                            onClick={() => void retryPodcast(asset.assetId)}
+                          >
+                            {t("courseAuthoring.activityRail.retryPodcast")}
+                          </Button>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
           {failedAssetIds.length > 0 && (
             <Alert>
               <AlertDescription className="flex items-center justify-between gap-3">

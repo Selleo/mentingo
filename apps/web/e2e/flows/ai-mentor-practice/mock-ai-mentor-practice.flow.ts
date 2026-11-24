@@ -116,3 +116,37 @@ export const mockAiMentorPracticeSessionFlow = async (page: Page) => {
 
   return { releaseReplay: () => releaseReplay() };
 };
+
+export const mockAiMentorPracticeVoiceEntryFlow = async (page: Page) => {
+  // Simulate a destination reached after the dashboard click's activation has expired.
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "userActivation", { value: { isActive: false } });
+  });
+  await mockDashboardFlow(page, {
+    widgets: [
+      {
+        type: DASHBOARD_WIDGET_TYPES.AI_MENTOR_PRACTICE,
+        size: DASHBOARD_WIDGET_SIZES.TWO_BY_TWO,
+        visible: true,
+      },
+    ],
+    responses: [
+      { path: "/api/ai/practice/today", body: { data: READY_AI_MENTOR_PRACTICE } },
+      {
+        path: `/api/ai/practice/${AI_MENTOR_PRACTICE_ID}`,
+        body: { data: READY_AI_MENTOR_PRACTICE },
+      },
+      {
+        path: "/api/env/luma",
+        body: {
+          data: {
+            enabled: true,
+            courseGenerationEnabled: false,
+            voiceMentorEnabled: true,
+            voiceTtsProvider: "cartesia",
+          },
+        },
+      },
+    ],
+  });
+};

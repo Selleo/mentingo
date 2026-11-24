@@ -8,7 +8,7 @@ import {
   getUiMessageText,
   toUiMessageRole,
 } from "@repo/shared";
-import { Plus, SquareArrowRightEnter } from "lucide-react";
+import { AudioLines, Plus, SquareArrowRightEnter } from "lucide-react";
 import { useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,6 +20,7 @@ import {
   getCurrentThreadMessagesQueryKey,
   useCurrentThreadMessages,
 } from "~/api/queries/useCurrentThreadMessages";
+import { useLumaConfigured } from "~/api/queries/useLumaConfigured";
 import { queryClient } from "~/api/queryClient";
 import { AiMentorReplayLoader } from "~/components/AiMentorReplayLoader";
 import { Icon } from "~/components/Icon";
@@ -35,6 +36,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
+import { PRACTICE_VOICE_ENTRY_STATE } from "~/modules/AiMentorPractice/aiMentorPractice.constants";
 import { AiMentorPracticeMessages } from "~/modules/AiMentorPractice/components/AiMentorPracticeMessages";
 import { createAiMentorChatTransport } from "~/modules/Courses/Lesson/AiMentorLesson/aiMentorChatTransport";
 import { LessonComposerCenterContent } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonComposerCenterContent";
@@ -227,6 +229,7 @@ export function WidgetStudentAiMentorPractice({
   const shouldReduceMotion = useReducedMotion();
   const language = useLanguageStore((state) => state.language);
   const { data, isLoading, isError, refetch } = useAiMentorPracticeToday();
+  const { data: lumaConfigured } = useLumaConfigured();
   const { mutateAsync: createPractice, isPending: isCreating } = useCreateAiMentorPractice();
   const { mutateAsync: retryPractice, isPending: isRetrying } = useRetryAiMentorPractice();
   const [scenario, setScenario] = useState("");
@@ -326,6 +329,8 @@ export function WidgetStudentAiMentorPractice({
   };
 
   const isActive = data?.threadStatus === "active";
+  const canOpenVoice = isActive && Boolean(threadId && lumaConfigured?.voiceMentorEnabled);
+  const startVoiceLabel = t("studentCourseView.lesson.aiMentorLesson.startVoiceMentor");
   const scenarioMaxRows = Math.min(2, Math.max(1, dashboardSizeToSpan(widgetSize).rows));
   const lastMessage = messages[messages.length - 1];
   const showChatLoader =
@@ -359,15 +364,29 @@ export function WidgetStudentAiMentorPractice({
         iconContainerClassName={metadata.iconContainerClassName}
         headerAction={
           data ? (
-            <Link
-              to={`/ai-mentor/practice/${data.id}`}
-              data-testid={AI_MENTOR_PRACTICE_HANDLES.CONTINUE_LINK}
-              className="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 transition-[color,transform] duration-75 hover:text-neutral-700 active:scale-95 active:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-1 motion-reduce:transition-none"
-              aria-label={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
-              title={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
-            >
-              <SquareArrowRightEnter className="size-4" aria-hidden="true" />
-            </Link>
+            <div className="flex items-center gap-1">
+              {canOpenVoice && (
+                <Link
+                  to={`/ai-mentor/practice/${data.id}`}
+                  state={PRACTICE_VOICE_ENTRY_STATE}
+                  data-testid={AI_MENTOR_PRACTICE_HANDLES.WIDGET_VOICE_LINK}
+                  className="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 hover:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-1"
+                  aria-label={startVoiceLabel}
+                  title={startVoiceLabel}
+                >
+                  <AudioLines className="size-4" aria-hidden="true" />
+                </Link>
+              )}
+              <Link
+                to={`/ai-mentor/practice/${data.id}`}
+                data-testid={AI_MENTOR_PRACTICE_HANDLES.CONTINUE_LINK}
+                className="inline-flex size-8 items-center justify-center rounded-md text-neutral-500 transition-[color,transform] duration-75 hover:text-neutral-700 active:scale-95 active:text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-1 motion-reduce:transition-none"
+                aria-label={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
+                title={t("dashboardHome.widgets.studentTiles.aiMentorPractice.continueCta")}
+              >
+                <SquareArrowRightEnter className="size-4" aria-hidden="true" />
+              </Link>
+            </div>
           ) : undefined
         }
       />

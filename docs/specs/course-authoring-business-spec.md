@@ -38,11 +38,17 @@ Course authors describe the course material or changes they need in AI course ge
 - Edits require at least one valid course operation before they can become a reviewable proposal. Ambiguous target scope must be resolved before writing; an empty edit is invalid rather than a course change.
 - Stop active generation from the composer while keeping Send available for a new request. When a step fails, see whether it needs a fresh draft, a provider retry, an author answer, or a service fix. Retry failed parts while preserving completed chapter plans, research and author approvals.
 - Generate visuals with OpenAI GPT Image Sunburst. The authoring agent selects standard quality for ordinary visuals and premium quality when additional detail improves learning. Explicitly approve uncertain generation retries and omit optional visuals from an application when appropriate. Public-web image import is outside this authoring scope.
+- Add a short conversation to a content lesson when a case, differing perspectives, or a trade-off benefits from two speakers. Review the podcast in the lesson and let learners play it inline.
 - Provider usage is recorded for operational accounting; it is not displayed in the authoring interaction.
 
 The conversation treats internal execution records as background state, not missing chat
 messages. If a saved display record arrives incomplete, the workspace fetches a fresh
 session snapshot automatically instead of asking the author to reload the page.
+
+Opening the workspace loads the saved session. Socket.IO then carries session updates
+in sequence, including draft attachment and podcast readiness. Background notifications
+also follow the stream after the drawer closes. A sequence gap is recovered over the
+socket, with a bounded HTTP read available when transport recovery needs it.
 
 The source policy supports explicit web/general authority and persisted section constraints for
 backend processing. Uploading a file adds its returned source version to the current session
@@ -135,6 +141,13 @@ After outline approval, lesson-writing progress appears below the outline in a s
 Live work distinguishes creating an outline, planning the approved lessons, generating lesson content, checking the result and revising a plan. Authors can follow chapter names and completion during detailed planning. Lesson generation groups related work under its chapter, with completion counts and up to three currently running lesson titles; additional running lessons are summarized. Failed work and author actions remain visible, and completed research is retained as a chapter summary. Queued lessons retain their chapter context before writing begins, and saved progress survives a reconnect. This uses the existing work section without adding another approval step or progress toggle.
 
 Verification for chapter progress (2026-10-05): all 332 CourseAuthoring unit tests across 35 files pass, including streamed progress, snapshot recovery, chapter grouping and retained research results. Web typecheck and lint pass with one existing unrelated test warning. Live provider generation and authenticated browser verification were not run for this change.
+
+Lesson podcasts generate alongside visuals when they add a useful teaching perspective. The
+author can preview the rest of the lesson while its audio is being prepared. Apply becomes
+available once the planned assets are ready, and includes the podcast at its saved placement.
+If generation fails, the author can retry the audio independently. Mentingo AI
+uses the organization's selected speech provider and its language-specific voice pool or
+built-in presets. The saved cast stays consistent through retries.
 
 Generated lessons distinguish material for participants from production instructions in an uploaded syllabus. Presenter briefs, image-generation prompts and publication checklists stay out of learner-facing teaching; supported visuals use the asset preparation flow and unavailable media requirements remain author-facing notes. Source preservation still covers the complete learner material and supplied assessments. Assistant lifecycle notices use the conversation's resolved language separately from the course and interface language. When a course coherence check starts a targeted rewrite, the conversation retains a notice naming the affected lessons and explaining the reason before the repair jobs are dispatched.
 

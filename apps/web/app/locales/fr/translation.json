@@ -636,6 +636,7 @@
     "invalidOrder": "L’ordre des tâches n’est plus à jour. Actualisez la page et réessayez."
   },
   "aiMentorPractice": {
+    "voiceEntryPrompt": "Lancez le mode vocal et autorisez l’accès au microphone si votre navigateur le demande.",
     "form": {
       "title": "Pratiquez une vraie conversation.",
       "promptEyebrow": "Plantez le décor",
@@ -7016,6 +7017,8 @@
       "unknown": "Inconnue",
       "generatedVisual": "Visuel généré : {{content}}",
       "approveRetry": "Réessayer l’image",
+      "retryPodcast": "Relancer la génération du podcast",
+      "retryPodcastApproval": "Le fournisseur a peut-être accepté la demande précédente. Une nouvelle tentative peut entraîner des frais supplémentaires.",
       "requiredScopeChange": "Obligatoire : modifier le périmètre",
       "skipOptionalAsset": "Ignorer l’image",
       "requiredCannotSkip": "Cette image est obligatoire et ne peut pas être ignorée. Si elle ne peut pas être créée, demandez à l’IA de modifier la proposition pour s’en passer.",
@@ -7174,7 +7177,7 @@
         "blockReplace": "Remplacer le contenu de la leçon"
       },
       "unknownChange": "Modification du cours",
-      "visualAssets": "Images",
+      "visualAssets": "Médias de la leçon",
       "visualAssetsDescription": "Vérifiez chaque image avant d’appliquer. Vous pouvez omettre les images facultatives. Les images obligatoires doivent être approuvées, sinon demandez à l’IA de modifier la proposition.",
       "selected": "{{count}} sélectionnés",
       "ready": "Prêt",
@@ -7183,6 +7186,7 @@
       "purpose": "Objectif : {{value}}",
       "unknownPurpose": "Non précisé",
       "purposes": {
+        "podcast": "Podcast",
         "thumbnail": "Miniature",
         "lesson": "Leçon",
         "diagram": "Diagramme",
@@ -7194,6 +7198,7 @@
         "identified": "Identifiée",
         "unknown": "Inconnue"
       },
+      "podcastNotReady": "Le podcast doit être prêt avant que vous puissiez appliquer la leçon.",
       "omitOptionalAsset": "Ignorer la ressource facultative {{title}}",
       "omit": "Ignorer",
       "requiredAssetNotReady": "Une image obligatoire n’est pas prête. Approuvez-la ou relancez-la dans le panneau d’activité, ou demandez à l’IA de modifier la proposition.",

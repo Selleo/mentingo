@@ -366,6 +366,42 @@ describe("AuthoringActivityRail asset decisions", () => {
     expect(onSkipAsset).toHaveBeenCalledWith("asset-1");
   });
 
+  it("offers audio-only retry and ignores a stale omission for a failed podcast", async () => {
+    const onRetry = vi.fn();
+    const podcast: AssetTaskView = {
+      ...assetTask,
+      status: "failed",
+      action: null,
+      revision: null,
+      question: null,
+      request: {
+        ...assetTask.request,
+        purpose: "podcast",
+        altText: "Lesson discussion",
+        source: { type: "podcast", content: "Explore the trade-off" },
+      },
+    };
+    renderWith().render(
+      <AuthoringActivityRail
+        tasks={[]}
+        questions={[]}
+        assetTasks={[podcast]}
+        applications={[]}
+        connection="live"
+        omittedOptionalAssetIds={[podcast.request.assetId]}
+        onRetry={onRetry}
+        onStopRequest={vi.fn()}
+        onAnswer={vi.fn()}
+        onAssetAction={vi.fn()}
+        onSkipAsset={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Skip image" })).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Retry podcast" }));
+    expect(onRetry).toHaveBeenCalledWith(podcast.taskId);
+  });
+
   it("keeps the running task stop action compact and request-scoped", async () => {
     const user = userEvent.setup();
     const onStopRequest = vi.fn();

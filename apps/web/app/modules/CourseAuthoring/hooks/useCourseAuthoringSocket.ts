@@ -17,8 +17,6 @@ const RECOVERY_DELAYS_MS = [0, 500, 1_000, 2_000] as const;
 const OFFLINE_RETRY_DELAY_MS = 30_000;
 const JOIN_TIMEOUT_MS = 10_000;
 const SNAPSHOT_TIMEOUT_MS = 10_000;
-export const ACTIVE_TURN_RECONCILE_DELAYS_MS = [5_000, 10_000, 20_000, 30_000] as const;
-export const ACTIVE_TURN_RECONCILE_DELAY_MS = ACTIVE_TURN_RECONCILE_DELAYS_MS[0];
 
 type Options = {
   courseId: string;
@@ -28,6 +26,7 @@ type Options = {
   onRefresh: (signal?: AbortSignal) => Promise<AuthoringSession | void>;
   onSessionUnavailable?: (sessionId: string) => void;
   reconnectAttempt?: number;
+  allowCourseAttachment?: boolean;
 };
 
 /** Keeps authoritative work state available across transport failures and missed terminal events. */
@@ -39,17 +38,13 @@ export const useCourseAuthoringSocket = ({
   onRefresh,
   onSessionUnavailable,
   reconnectAttempt = 0,
+  allowCourseAttachment = false,
 }: Options) => {
   const [connectionState, setConnectionState] = useState<AuthoringConnectionState>("connecting");
   const cursorRef = useRef(session?.snapshotSequence ?? 0);
   const sessionRef = useRef(session);
   const sessionIdRef = useRef(session?.sessionId);
   const callbacksRef = useRef({ onSnapshot, onEvent, onRefresh, onSessionUnavailable });
-  const rearmWatchdogRef = useRef<(() => void) | null>(null);
-  const hasActiveWork = Boolean(
-    session?.turns?.some((turn) => turn.status === "queued" || turn.status === "running") ||
-      session?.tasks.some((task) => task.status === "queued" || task.status === "running"),
-  );
   useEffect(() => {
     callbacksRef.current = { onSnapshot, onEvent, onRefresh, onSessionUnavailable };
   }, [onSnapshot, onEvent, onRefresh, onSessionUnavailable]);
@@ -84,10 +79,7 @@ export const useCourseAuthoringSocket = ({
     let resolveRecoveryTimer: (() => void) | null = null;
     let offlineRetryTimer: ReturnType<typeof setTimeout> | null = null;
     let joinTimer: ReturnType<typeof setTimeout> | null = null;
-    let activeTurnReconcileTimer: ReturnType<typeof setTimeout> | null = null;
-    let activeTurnReconcileDelayIndex = 0;
     let streamRevision = 0;
-    let preserveNextSocketSnapshotWatchdog = false;
 
     const canRecover = () => active && !terminal;
     const clearJoinTimeout = () => {
@@ -98,15 +90,10 @@ export const useCourseAuthoringSocket = ({
       if (offlineRetryTimer) clearTimeout(offlineRetryTimer);
       offlineRetryTimer = null;
     };
-    const clearActiveTurnTimer = () => {
-      if (activeTurnReconcileTimer) clearTimeout(activeTurnReconcileTimer);
-      activeTurnReconcileTimer = null;
-    };
     /** Releases every retry, including a suspended fast retry, on cleanup or terminal rejection. */
     const clearTimers = () => {
       clearJoinTimeout();
       clearOfflineRetry();
-      clearActiveTurnTimer();
       if (recoveryTimer) clearTimeout(recoveryTimer);
       recoveryTimer = null;
       resolveRecoveryTimer?.();
@@ -131,7 +118,7 @@ export const useCourseAuthoringSocket = ({
         if (canRecover()) recover();
       }, JOIN_TIMEOUT_MS);
     };
-    const join = () => {
+    const join = (hasSnapshot = true) => {
       if (!canRecover()) return;
       streamHealthy = false;
       setConnectionState("connecting");
@@ -140,51 +127,36 @@ export const useCourseAuthoringSocket = ({
         courseId,
         sessionId,
         afterSequence: cursorRef.current,
+        hasSnapshot,
       });
     };
-    /** Refreshes only active work; healthy streams keep their subscription and cursor. */
-    const scheduleActiveTurnReconciliation = (resetDelay = true) => {
-      clearActiveTurnTimer();
-      if (resetDelay) activeTurnReconcileDelayIndex = 0;
-      const current = sessionRef.current;
-      const hasActiveWork =
-        current?.turns?.some((turn) => turn.status === "queued" || turn.status === "running") ||
-        current?.tasks.some((task) => task.status === "queued" || task.status === "running");
-      if (!canRecover() || !hasActiveWork || offlineRetryTimer) return;
-      const delay = ACTIVE_TURN_RECONCILE_DELAYS_MS[activeTurnReconcileDelayIndex];
-      activeTurnReconcileTimer = setTimeout(() => {
-        activeTurnReconcileTimer = null;
-        activeTurnReconcileDelayIndex = Math.min(
-          activeTurnReconcileDelayIndex + 1,
-          ACTIVE_TURN_RECONCILE_DELAYS_MS.length - 1,
-        );
-        recover(true);
-      }, delay);
-    };
     /** Applies snapshots monotonically; REST success alone does not prove stream liveness. */
-    const acceptSnapshot = (snapshot: AuthoringSession, resetWatchdog: boolean) => {
+    const acceptSnapshot = (snapshot: AuthoringSession) => {
       if (
         !canRecover() ||
         snapshot.sessionId !== sessionId ||
-        snapshot.courseId !== courseId ||
+        (snapshot.courseId !== courseId && !allowCourseAttachment) ||
         snapshot.snapshotSequence < cursorRef.current
       )
         return false;
       cursorRef.current = snapshot.snapshotSequence;
       sessionRef.current = snapshot;
       callbacksRef.current.onSnapshot(snapshot);
-      scheduleActiveTurnReconciliation(resetWatchdog);
       return true;
     };
-    const handleSnapshot = (snapshot: AuthoringSession) => {
-      if (!acceptSnapshot(snapshot, !preserveNextSocketSnapshotWatchdog)) return;
-      preserveNextSocketSnapshotWatchdog = false;
+    const markLive = () => {
       streamRevision += 1;
       streamHealthy = true;
       clearJoinTimeout();
       clearOfflineRetry();
       setConnectionState("live");
-      scheduleActiveTurnReconciliation(false);
+    };
+    const handleSnapshot = (snapshot: AuthoringSession) => {
+      if (acceptSnapshot(snapshot)) markLive();
+    };
+    const handleReady = (ready: { courseId: string; sessionId: string; afterSequence: number }) => {
+      if (!canRecover() || ready.courseId !== courseId || ready.sessionId !== sessionId) return;
+      if (ready.afterSequence === cursorRef.current) markLive();
     };
     const waitForRetry = (delayMs: number) =>
       new Promise<void>((resolve) => {
@@ -198,7 +170,6 @@ export const useCourseAuthoringSocket = ({
     /** Retains slow retries after a temporary outage even when no task is currently active. */
     const scheduleOfflineRetry = () => {
       if (!canRecover() || offlineRetryTimer) return;
-      clearActiveTurnTimer();
       offlineRetryTimer = setTimeout(() => {
         offlineRetryTimer = null;
         recover();
@@ -225,20 +196,16 @@ export const useCourseAuthoringSocket = ({
         if (snapshotController === controller) snapshotController = null;
       }
     };
-    const recover = (fromWatchdog = false) => {
+    const recover = () => {
       if (!canRecover()) return;
       if (recoveryPromise) {
-        if (!fromWatchdog) {
-          recoveryRequested = true;
-          setConnectionState("recovering");
-        }
+        recoveryRequested = true;
+        setConnectionState("recovering");
         return;
       }
       clearJoinTimeout();
       clearOfflineRetry();
-      clearActiveTurnTimer();
-      if (!fromWatchdog) activeTurnReconcileDelayIndex = 0;
-      if (!fromWatchdog || !streamHealthy) setConnectionState("recovering");
+      setConnectionState("recovering");
       const startingRevision = streamRevision;
       const operation = (async () => {
         for (const delayMs of RECOVERY_DELAYS_MS) {
@@ -248,9 +215,7 @@ export const useCourseAuthoringSocket = ({
           try {
             const snapshot = await refreshSnapshot();
             if (!canRecover() || streamRevision !== startingRevision) return;
-            if (snapshot) acceptSnapshot(snapshot, !fromWatchdog);
-            if (fromWatchdog) preserveNextSocketSnapshotWatchdog = true;
-            if (fromWatchdog && streamHealthy) return;
+            if (snapshot) acceptSnapshot(snapshot);
             if (socket.connected) join();
             else {
               reconnectSnapshotReady = true;
@@ -285,8 +250,6 @@ export const useCourseAuthoringSocket = ({
           recover();
           return;
         }
-        if (!activeTurnReconcileTimer && !offlineRetryTimer)
-          scheduleActiveTurnReconciliation(false);
       });
     };
     const handleEvent = (event: AuthoringEvent) => {
@@ -299,15 +262,10 @@ export const useCourseAuthoringSocket = ({
       );
       if (decision.type === "ignore") return;
       if (decision.type === "gap") {
-        recover();
+        if (!joinTimer) join(false);
         return;
       }
-      preserveNextSocketSnapshotWatchdog = false;
-      streamRevision += 1;
-      streamHealthy = true;
-      clearJoinTimeout();
-      clearOfflineRetry();
-      setConnectionState("live");
+      markLive();
       cursorRef.current = decision.cursor;
       const nextSession = applyAuthoringEvent(
         { ...current, snapshotSequence: cursorRef.current - 1 },
@@ -315,7 +273,6 @@ export const useCourseAuthoringSocket = ({
       );
       sessionRef.current = nextSession;
       callbacksRef.current.onEvent?.(nextSession, event);
-      scheduleActiveTurnReconciliation();
     };
     const handleError = (payload: { sessionId?: string; code?: string }) => {
       if (payload.sessionId && payload.sessionId !== sessionId) return;
@@ -349,18 +306,19 @@ export const useCourseAuthoringSocket = ({
       recover();
     };
     const handleResync = (payload: { sessionId?: string }) => {
-      if (payload?.sessionId && payload.sessionId !== sessionId) return;
+      if (!canRecover() || (payload?.sessionId && payload.sessionId !== sessionId)) return;
       streamHealthy = false;
-      recover();
+      setConnectionState("recovering");
+      if (!joinTimer) watchJoin();
     };
 
-    rearmWatchdogRef.current = () => scheduleActiveTurnReconciliation(false);
     setConnectionState("connecting");
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("connect_error", handleConnectError);
     socket.on("exception", handleConnectError);
     socket.on("authoring.snapshot", handleSnapshot);
+    socket.on("authoring.ready", handleReady);
     socket.on("authoring.event", handleEvent);
     socket.on("authoring.resync", handleResync);
     socket.on("authoring.error", handleError);
@@ -369,28 +327,23 @@ export const useCourseAuthoringSocket = ({
       watchJoin();
       socket.connect();
     }
-    scheduleActiveTurnReconciliation();
 
     return () => {
       active = false;
-      rearmWatchdogRef.current = null;
       clearTimers();
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
       socket.off("connect_error", handleConnectError);
       socket.off("exception", handleConnectError);
       socket.off("authoring.snapshot", handleSnapshot);
+      socket.off("authoring.ready", handleReady);
       socket.off("authoring.event", handleEvent);
       socket.off("authoring.resync", handleResync);
       socket.off("authoring.error", handleError);
       if (socket.connected) socket.emit("leave:course-authoring", { sessionId });
       releaseSocket();
     };
-  }, [courseId, reconnectAttempt, session?.sessionId]);
-
-  useEffect(() => {
-    if (hasActiveWork) rearmWatchdogRef.current?.();
-  }, [hasActiveWork]);
+  }, [allowCourseAttachment, courseId, reconnectAttempt, session?.sessionId]);
 
   return connectionState;
 };

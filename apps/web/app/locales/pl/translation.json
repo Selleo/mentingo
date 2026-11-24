@@ -638,6 +638,7 @@
     "invalidOrder": "Kolejność zadań jest nieaktualna. Odśwież stronę i spróbuj ponownie."
   },
   "aiMentorPractice": {
+    "voiceEntryPrompt": "Uruchom tryb głosowy i zezwól na dostęp do mikrofonu, jeśli poprosi o to przeglądarka.",
     "form": {
       "title": "Przećwicz prawdziwą rozmowę.",
       "promptEyebrow": "Ustaw scenę",
@@ -7341,6 +7342,8 @@
       "unknown": "Nieznane",
       "generatedVisual": "Wygenerowany obraz: {{content}}",
       "approveRetry": "Ponów obraz",
+      "retryPodcast": "Ponów generowanie podcastu",
+      "retryPodcastApproval": "Dostawca mógł przyjąć poprzednie żądanie. Ponowienie może wiązać się z dodatkową opłatą.",
       "requiredScopeChange": "Wymagana zmiana zakresu",
       "skipOptionalAsset": "Pomiń obraz",
       "requiredCannotSkip": "Ta grafika jest wymagana i nie można jej pominąć. Jeśli nie da się jej utworzyć, poproś AI o zmianę propozycji tak, by nie była potrzebna.",
@@ -7499,7 +7502,7 @@
         "blockReplace": "Zastąp treść lekcji"
       },
       "unknownChange": "Zmiana w kursie",
-      "visualAssets": "Grafiki",
+      "visualAssets": "Materiały w lekcji",
       "visualAssetsDescription": "Sprawdź każdą grafikę przed zastosowaniem. Opcjonalne grafiki możesz pominąć. Wymagane grafiki trzeba zatwierdzić albo poprosić AI o zmianę propozycji.",
       "selected": "Wybrano: {{count}}",
       "ready": "Gotowe",
@@ -7508,6 +7511,7 @@
       "purpose": "Cel: {{value}}",
       "unknownPurpose": "Nieokreślony",
       "purposes": {
+        "podcast": "Podcast",
         "thumbnail": "Miniatura",
         "lesson": "Lekcja",
         "diagram": "Diagram",
@@ -7519,6 +7523,7 @@
         "identified": "Zidentyfikowano",
         "unknown": "Nieznana"
       },
+      "podcastNotReady": "Podcast musi być gotowy, aby można było zastosować lekcję.",
       "omitOptionalAsset": "Pomiń opcjonalny materiał {{title}}",
       "omit": "Pomiń",
       "requiredAssetNotReady": "Wymagana grafika nie jest gotowa. Zatwierdź ją lub ponów w panelu aktywności albo poproś AI o zmianę propozycji.",

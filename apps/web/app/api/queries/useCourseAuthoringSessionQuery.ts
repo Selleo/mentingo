@@ -2,8 +2,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { queryClient } from "~/api/queryClient";
-import { isUnavailableAuthoringSession } from "~/modules/CourseAuthoring/authoringSessionRecovery";
-import { AUTHORING_SESSION_STATUS } from "~/modules/CourseAuthoring/courseAuthoring.constants";
 
 import { getAuthoringSession } from "../../modules/CourseAuthoring/courseAuthoring.api";
 
@@ -19,7 +17,7 @@ export const authoringSessionQueryOptions = (courseId: string, sessionId: string
     queryKey: authoringSessionKey(courseId, sessionId),
     queryFn: () => getAuthoringSession(courseId, sessionId),
     enabled: Boolean(courseId && sessionId),
-    staleTime: 15_000,
+    staleTime: Infinity,
     retry: 1,
   });
 
@@ -41,20 +39,5 @@ export const refreshAuthoringSession = async (
 };
 
 /** React Query hook for opening and caching the authoring session. */
-export const useCourseAuthoringSessionQuery = (
-  courseId: string,
-  sessionId: string,
-  refetchInterval?: number,
-) =>
-  useQuery({
-    ...authoringSessionQueryOptions(courseId, sessionId),
-    refetchInterval: ({ state }) => {
-      if (
-        (state.data && state.data.courseId !== courseId) ||
-        state.data?.status === AUTHORING_SESSION_STATUS.DISCARDED ||
-        isUnavailableAuthoringSession(state.error)
-      )
-        return false;
-      return refetchInterval ?? false;
-    },
-  });
+export const useCourseAuthoringSessionQuery = (courseId: string, sessionId: string) =>
+  useQuery(authoringSessionQueryOptions(courseId, sessionId));

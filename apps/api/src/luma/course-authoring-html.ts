@@ -49,7 +49,9 @@ export const validateAuthoringHtml = (content: string) => {
         throw new BadRequestException("courseAuthoring.errors.invalidOperations");
       if (!URL_ATTRIBUTES.has(name)) continue;
       if (
-        (tag === "img" || node.attr("data-node-type") === "image") &&
+        (tag === "img" ||
+          node.attr("data-node-type") === "image" ||
+          (tag === "audio" && node.attr("data-node-type") === "audio")) &&
         (name === "src" || name === "data-src") &&
         ASSET_REFERENCE.test(value)
       )
@@ -105,12 +107,14 @@ export const validateAuthoringMedia = (
     const node = $(element);
     for (const [name, value] of Object.entries(node.attr() ?? {})) {
       if (!FETCH_ATTRIBUTES.has(name)) continue;
-      const image =
+      const stagedMedia =
         element.type === "tag" &&
-        (element.name === "img" || node.attr("data-node-type") === "image");
+        (element.name === "img" ||
+          node.attr("data-node-type") === "image" ||
+          (element.name === "audio" && node.attr("data-node-type") === "audio"));
       const assetId = node.attr("data-authoring-asset-id");
       if (
-        image &&
+        stagedMedia &&
         (name === "src" || name === "data-src") &&
         assetId &&
         stagedAssetIds.has(assetId) &&

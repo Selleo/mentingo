@@ -1,14 +1,16 @@
 import { getUiMessageText, LEARNER_TRANSCRIPT_STATUSES, MESSAGE_ROLE } from "@repo/shared";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useLumaConfigured } from "~/api/queries/useLumaConfigured";
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import { LessonComposerCenterContent } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonComposerCenterContent";
 import { LessonComposerLeftControl } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonComposerLeftControl";
 import { LessonComposerRightControls } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonComposerRightControls";
 import { LessonEmojiPicker } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonEmojiPicker";
 import { VoiceMentorModeOverlay } from "~/modules/Courses/Lesson/AiMentorLesson/components/VoiceMentorModeOverlay";
+import { VOICE_CONNECTION_STATE } from "~/modules/Voice/audio-stream.types";
 import { useTranscription } from "~/modules/Voice/hooks/useTranscription";
 import { useVoiceMentor } from "~/modules/Voice/hooks/useVoiceMentor";
 import { useVoiceModeUIState } from "~/modules/Voice/hooks/useVoiceModeUIState";
@@ -45,6 +47,7 @@ interface LessonFormProps {
   allowJudge?: boolean;
   textReadOnly?: boolean;
   onVoiceActiveChange?: (active: boolean) => void;
+  startInVoice?: boolean;
   compact?: boolean;
 }
 
@@ -70,10 +73,14 @@ export const LessonForm = ({
   allowJudge = true,
   textReadOnly = false,
   onVoiceActiveChange,
+  startInVoice = false,
   compact = false,
 }: LessonFormProps) => {
   const { t } = useTranslation();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showVoiceEntry, setShowVoiceEntry] = useState(startInVoice);
+  const attemptedVoiceEntry = useRef(false);
+  const dismissedVoiceEntry = useRef(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isVoiceMentorAudioStarted, setIsVoiceMentorAudioStarted] = useState(false);
   const [isVoiceTurnPending, setIsVoiceTurnPending] = useState(false);
@@ -231,15 +238,15 @@ export const LessonForm = ({
     voiceModeUI.onMicCaptureStopped();
   };
 
-  const cancelVoiceMode = async () => {
+  const cancelVoiceMode = useCallback(async () => {
     await cancelTranscription();
     setIsVoiceMode(false);
     setVoiceLevel(0);
     setMentorVoiceLevel(0);
     voiceModeUI.onMicCaptureStopped();
-  };
+  }, [cancelTranscription, voiceModeUI]);
 
-  const startVoiceMentorMode = async () => {
+  const startVoiceMentorMode = useCallback(async () => {
     if (!canUseVoiceMentor) {
       return;
     }
@@ -259,8 +266,31 @@ export const LessonForm = ({
       return;
     }
 
+    if (dismissedVoiceEntry.current) {
+      await cancelVoiceMentor();
+      return;
+    }
+
+    setShowVoiceEntry(false);
     voiceModeUI.onMicCaptureStarted();
-  };
+  }, [
+    canUseVoiceMentor,
+    cancelVoiceMentor,
+    cancelVoiceMode,
+    isVoiceMode,
+    lastMentorResponse,
+    startVoiceMentor,
+    voiceModeUI,
+  ]);
+
+  useEffect(() => {
+    if (!showVoiceEntry || !canUseVoiceMentor || attemptedVoiceEntry.current) return;
+    attemptedVoiceEntry.current = true;
+
+    // A delayed navigation can outlive the dashboard click's browser activation.
+    if (navigator.userActivation?.isActive === false) return;
+    void startVoiceMentorMode();
+  }, [canUseVoiceMentor, showVoiceEntry, startVoiceMentorMode]);
 
   const stopVoiceMentorMode = async () => {
     const canceled = await cancelVoiceMentor();
@@ -290,6 +320,10 @@ export const LessonForm = ({
   };
 
   const closeVoiceOverlay = async () => {
+    if (showVoiceEntry) {
+      dismissedVoiceEntry.current = true;
+      setShowVoiceEntry(false);
+    }
     if (isVoiceMentorMode) {
       await stopVoiceMentorMode();
       return;
@@ -374,7 +408,10 @@ export const LessonForm = ({
               dictationDisabled={textReadOnly}
               onStartVoiceMode={() => void startVoiceMode()}
               onStopVoiceMode={() => void stopVoiceMode()}
-              onStartVoiceMentor={() => void startVoiceMentorMode()}
+              onStartVoiceMentor={() => {
+                dismissedVoiceEntry.current = false;
+                void startVoiceMentorMode();
+              }}
               onStopVoiceMentor={() => void stopVoiceMentorMode()}
               onSubmit={submitTextMessage}
               sendLabel={t("studentCourseView.lesson.aiMentorLesson.send")}
@@ -401,7 +438,7 @@ export const LessonForm = ({
 
       <VoiceMentorModeOverlay
         messages={messages}
-        open={isVoiceMentorMode}
+        open={isVoiceMentorMode || (showVoiceEntry && canUseVoiceMentor)}
         state={voiceModeUI.voiceModeState}
         voiceLevel={voiceLevel}
         mentorVoiceLevel={mentorVoiceLevel}
@@ -420,7 +457,26 @@ export const LessonForm = ({
             (!isVoiceTurnPending && messages.some((message) => message.role === MESSAGE_ROLE.USER)))
         }
         isMicMuted={isVoiceMentorMuted}
-        connectionState={voiceMentorConnectionState}
+        connectionState={
+          showVoiceEntry && !isVoiceMentorMode
+            ? VOICE_CONNECTION_STATE.RECOVERING
+            : voiceMentorConnectionState
+        }
+        notice={
+          showVoiceEntry && !isVoiceMentorMode && !isVoiceMentorStarting ? (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span>{t("aiMentorPractice.voiceEntryPrompt")}</span>
+              <Button
+                type="button"
+                size="sm"
+                data-testid={LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY_START_BUTTON}
+                onClick={() => void startVoiceMentorMode()}
+              >
+                {t("studentCourseView.lesson.aiMentorLesson.startVoiceMentor")}
+              </Button>
+            </div>
+          ) : undefined
+        }
         isRestarting={isVoiceMentorStarting}
         onMicMutedChange={(muted) => void setVoiceMentorMuted(muted)}
         onRestart={() => void restartVoiceMentorMode()}

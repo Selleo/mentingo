@@ -28,3 +28,16 @@ it("replaces the in-place loading node with the inline diagram when its preview 
   expect(content).not.toContain("blob:");
   view.unmount();
 });
+
+it("plays only the authorized preview for an inline staged podcast", async () => {
+  const id = "11111111-1111-4111-8111-111111111111";
+  const content = `<audio data-node-type="audio" data-authoring-asset-id="${id}" src="blob:untrusted" data-name="Making the decision"></audio>`;
+  const view = renderWith({}).render(<AuthoringContentPreview content={content} />);
+  expect(view.container.querySelector("audio")).not.toBeInTheDocument();
+  view.rerender(
+    <AuthoringContentPreview content={content} assetPreviewUrls={{ [id]: "blob:podcast" }} />,
+  );
+  await waitFor(() =>
+    expect(view.container.querySelector("audio")).toHaveAttribute("src", "blob:podcast"),
+  );
+});

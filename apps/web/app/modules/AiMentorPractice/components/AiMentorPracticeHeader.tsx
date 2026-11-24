@@ -17,18 +17,23 @@ import { AI_MENTOR_PRACTICE_HANDLES } from "../../../../e2e/data/ai-mentor-pract
 type AiMentorPracticeHeaderProps = {
   title: string | null;
   taskGoal: string | null;
+  openTaskOnMount?: boolean;
 };
 
-export function AiMentorPracticeHeader({ title, taskGoal }: AiMentorPracticeHeaderProps) {
+export function AiMentorPracticeHeader({
+  title,
+  taskGoal,
+  openTaskOnMount = true,
+}: AiMentorPracticeHeaderProps) {
   const { t } = useTranslation();
 
   return (
-    <header className="w-full shrink-0 pb-5">
-      <div className="flex flex-col gap-3 border-b border-neutral-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="h3 max-w-3xl text-balance text-neutral-950">
+    <header className="w-full shrink-0 pb-3 sm:pb-5">
+      <div className="flex items-center justify-between gap-3 border-b border-neutral-200 pb-3 sm:pb-4">
+        <h1 className="h3 min-w-0 max-w-3xl break-words text-neutral-950">
           {title || t("aiMentorPractice.conversationTitle")}
         </h1>
-        <Dialog defaultOpen>
+        <Dialog defaultOpen={openTaskOnMount}>
           <DialogTrigger asChild>
             <Button
               type="button"

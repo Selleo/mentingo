@@ -12,6 +12,7 @@ import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 
 type AiMentorPracticeComposerProps = {
   practiceSessionId: string;
+  startInVoice?: boolean;
   threadId: string;
   mentorName: string;
   handleSubmit: () => void;
@@ -35,6 +36,7 @@ type AiMentorPracticeComposerProps = {
 
 export function AiMentorPracticeComposer({
   practiceSessionId,
+  startInVoice,
   threadId,
   mentorName,
   handleSubmit,
@@ -60,6 +62,7 @@ export function AiMentorPracticeComposer({
     <>
       <LessonForm
         voiceTarget={{ practiceSessionId, threadId }}
+        startInVoice={startInVoice}
         mentorName={mentorName}
         handleSubmit={handleSubmit}
         onLearnerTranscription={onLearnerTranscription}
@@ -78,7 +81,7 @@ export function AiMentorPracticeComposer({
         onVoiceActiveChange={setIsVoiceActive}
         compact
       />
-      <div className="mt-2 flex items-center justify-between gap-4">
+      <div className="mt-2 flex items-center justify-between gap-2 sm:gap-4">
         <p className="details text-neutral-500">
           {hasLearnerMessage ? t("aiMentorPractice.checkHint") : t("aiMentorPractice.startHint")}
         </p>

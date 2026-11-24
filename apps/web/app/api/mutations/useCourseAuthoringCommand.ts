@@ -1,8 +1,9 @@
-/** Sends one workspace command and refreshes its durable session projection. */
+/** Sends workspace commands and lets the socket project live session updates. */
 import { useMutation } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 
 import { sendAuthoringCommand } from "../../modules/CourseAuthoring/courseAuthoring.api";
+import { AUTHORING_TASK_STATUS } from "../../modules/CourseAuthoring/courseAuthoring.constants";
 import {
   authoringSessionKey,
   refreshAuthoringSession,
@@ -11,7 +12,10 @@ import { authoringSessionsKey } from "../queries/useCourseAuthoringSessionsQuery
 import { INFINITE_COURSE_AUTHORING_SESSIONS_QUERY_KEY } from "../queries/useInfiniteCourseAuthoringSessionsQuery";
 import { queryClient } from "../queryClient";
 
-import type { AuthoringCommand } from "../../modules/CourseAuthoring/courseAuthoring.types";
+import type {
+  AuthoringCommand,
+  AuthoringSession,
+} from "../../modules/CourseAuthoring/courseAuthoring.types";
 import type { SupportedLanguages } from "@repo/shared";
 
 type CommandInput = Omit<AuthoringCommand, "schemaVersion" | "commandId"> & {
@@ -34,13 +38,40 @@ export const useCourseAuthoringCommand = ({ courseId, sessionId }: Options) =>
 
       return sendAuthoringCommand(courseId, sessionId, command);
     },
-    onSuccess: async () => {
+    onSuccess: async (receipt, command) => {
       if (!sessionId) {
         return;
       }
 
+      const { requestId, taskIds } = receipt;
+      if (command.action === "request.create" && requestId && taskIds?.length) {
+        queryClient.setQueryData<AuthoringSession>(
+          authoringSessionKey(courseId, sessionId),
+          (current) => {
+            if (!current || current.snapshotSequence >= receipt.acceptedSequence) return current;
+            const knownTasks = new Set(current.tasks.map((task) => task.taskId));
+            return {
+              ...current,
+              tasks: [
+                ...current.tasks,
+                ...taskIds
+                  .filter((taskId) => !knownTasks.has(taskId))
+                  .map((taskId) => ({
+                    taskId,
+                    requestId,
+                    status: AUTHORING_TASK_STATUS.QUEUED,
+                    errorCode: null,
+                    outputId: null,
+                  })),
+              ],
+            };
+          },
+        );
+      }
       try {
-        await refreshAuthoringSession(courseId, sessionId);
+        if (command.action === "sources.select" || command.action === "source.refresh") {
+          await refreshAuthoringSession(courseId, sessionId);
+        }
         await queryClient.invalidateQueries({ queryKey: authoringSessionsKey(courseId) });
         await queryClient.invalidateQueries({
           queryKey: [INFINITE_COURSE_AUTHORING_SESSIONS_QUERY_KEY, courseId],

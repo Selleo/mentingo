@@ -86,6 +86,7 @@ function setup() {
   const prepareUnassignedMentorContextDocument = jest.fn();
   const getContext = jest.fn();
   const getMentorContextLessons = jest.fn().mockResolvedValue([]);
+  const getSession = jest.fn().mockResolvedValue({ courseId, sessionId, records: [] });
   const command = jest.fn().mockResolvedValue({
     commandId: assetId,
     hash: "command-hash",
@@ -97,7 +98,7 @@ function setup() {
   });
   const service = new CourseAuthoringApplicationService(
     {
-      get: jest.fn().mockResolvedValue({ courseId, sessionId }),
+      get: getSession,
       authorizeAccess: jest.fn().mockResolvedValue({ draft: null, actor }),
       command,
     } as unknown as CourseAuthoringSessionService,
@@ -140,11 +141,114 @@ function setup() {
     prepareUnassignedMentorContextDocument,
     getContext,
     getMentorContextLessons,
+    getSession,
     uploadFile,
     command,
     service,
   };
 }
+
+beforeAll(() => FormatRegistry.Set("uuid", validate));
+
+describe("Podcast apply readiness", () => {
+  const operationId = "00000000-0000-4000-8000-000000000010";
+  const chapterId = "00000000-0000-4000-8000-000000000011";
+  const pending = {
+    assetId,
+    operationId,
+    title: "Two voices",
+  };
+  const lesson = (description: string): FrozenAuthoringExport["operations"][number] => ({
+    type: "lesson.create",
+    operationId,
+    targetId: operationId,
+    chapterId,
+    language: "en",
+    baselineHash: null,
+    dependencies: [],
+    payload: { lessonType: "content", title: "Two voices", description },
+  });
+  const planned = {
+    courseId,
+    sessionId,
+    records: [
+      {
+        id: operationId,
+        kind: "proposal",
+        payload: {
+          id: assetId,
+          assetRequests: [{ ...pending, purpose: "podcast", required: false }],
+        },
+      },
+    ],
+  };
+
+  it("refuses to omit a planned podcast before freezing the export", async () => {
+    const test = setup();
+    test.getSession.mockResolvedValue(planned);
+
+    await expect(
+      test.service.enqueue(
+        courseId,
+        sessionId,
+        { commandId: exportId, proposalIds: [assetId], omitOptionalAssetIds: [assetId] },
+        actor,
+      ),
+    ).rejects.toThrow("courseAuthoring.errors.invalidOperations");
+    expect(test.client.authoring.prepareExport).not.toHaveBeenCalled();
+    expect(test.enqueue).not.toHaveBeenCalled();
+  });
+
+  it("rejects a pending audio placement without a ready manifest before queueing", async () => {
+    const test = setup();
+    test.exported.operations = [
+      lesson(
+        `<audio data-node-type="audio" data-authoring-asset-id="${assetId}" src="authoring-asset:${assetId}"></audio>`,
+      ),
+    ];
+
+    await expect(
+      test.service.enqueue(
+        courseId,
+        sessionId,
+        { commandId: exportId, proposalIds: [assetId] },
+        actor,
+      ),
+    ).rejects.toThrow("courseAuthoring.errors.assetNotReady");
+    expect(test.enqueue).not.toHaveBeenCalled();
+  });
+
+  it("rejects a frozen export that stripped the planned podcast placement and its asset", async () => {
+    const test = setup();
+    test.getSession.mockResolvedValue(planned);
+    test.exported.operations = [lesson("<p>Lesson text.</p>")];
+    test.exported.exportHash = courseAuthoringExportHash(test.exported);
+
+    await expect(test.service.process({ courseId, sessionId, exportId, actor })).rejects.toThrow(
+      "courseAuthoring.errors.assetNotReady",
+    );
+    expect(test.applyPreparedExport).not.toHaveBeenCalled();
+    expect(test.client.authoring.downloadAsset).not.toHaveBeenCalled();
+  });
+
+  it("rejects an early-apply exporter carrying a deferred podcast", async () => {
+    const test = setup();
+    test.client.authoring.prepareExport.mockResolvedValue({
+      ...test.exported,
+      deferredPodcasts: [pending],
+    });
+
+    await expect(
+      test.service.enqueue(
+        courseId,
+        sessionId,
+        { commandId: exportId, proposalIds: [assetId] },
+        actor,
+      ),
+    ).rejects.toThrow("courseAuthoring.errors.assetNotReady");
+    expect(test.enqueue).not.toHaveBeenCalled();
+  });
+});
 
 describe("CourseAuthoringApplicationService immutable preparation", () => {
   it("forwards the autonomous request fence to export preparation", async () => {
@@ -233,7 +337,6 @@ describe("CourseAuthoringApplicationService immutable preparation", () => {
     expect(test.recordFailureOnce).not.toHaveBeenCalled();
     expect(test.applyPreparedExport).not.toHaveBeenCalled();
   });
-  beforeAll(() => FormatRegistry.Set("uuid", validate));
   it.each([
     ["AUTHORING_CHAPTER_DEPENDENCY_UNREADY", "missingDependency"],
     ["AUTHORING_DEPENDENCY_UNREADY", "missingDependency"],
