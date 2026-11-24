@@ -88,7 +88,7 @@ export function getSubjectRequirements(
       confirmed: (requirement ? requirement.met : currentIndex >= 0) && !standing.expiring,
     };
   });
-  const hasNoProfile = !assessment?.profileId;
+  const hasNoTrack = !assessment?.tracks.length;
   const requirementRows = rows
     .filter((row) => row.requiredIndex >= 0)
     .sort(
@@ -97,7 +97,7 @@ export function getSubjectRequirements(
         REQUIREMENT_ORDER.indexOf(getRequirementState(right)),
     );
 
-  return { activeDefinitions, canInspectCompetencies, hasNoProfile, requirementRows };
+  return { activeDefinitions, canInspectCompetencies, hasNoTrack, requirementRows };
 }
 
 export function getCompetencySubjectDetails(
@@ -152,7 +152,7 @@ export function getCompetencySubjectDetails(
 
 export function getSubjectMessageKeys(assessment: CompetencySubjectWorkspace["assessment"]) {
   if (!assessment || assessment.coverage === null)
-    return { summaryKey: "competencies.noProfile", statusKey: "competencies.noProfile" } as const;
+    return { summaryKey: "competencies.noTrack", statusKey: "competencies.noTrack" } as const;
   if (assessment.metCount === assessment.requirementCount)
     return {
       summaryKey: "competencies.allRequirementsMet",

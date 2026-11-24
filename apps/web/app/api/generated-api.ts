@@ -38367,6 +38367,7 @@ export interface GetCompetenciesConfigurationResponse {
     enabled: boolean;
     canManage: boolean;
     canPlan: boolean;
+    maxTracksPerPerson: number;
   };
 }
 
@@ -38377,8 +38378,8 @@ export interface GetCompetenciesSummaryResponse {
     pendingReviewCount: number;
     setup: {
       competencies: number;
-      profiles: number;
-      assignments: number;
+      tracks: number;
+      assignedPeople: number;
     };
   };
 }
@@ -38439,7 +38440,7 @@ export interface GetCompetencyCatalogResponse {
         }[];
       }[];
       categoryName: string | null;
-      profileCount: number;
+      trackCount: number;
     }[];
     pagination: {
       totalItems: number;
@@ -38449,7 +38450,7 @@ export interface GetCompetencyCatalogResponse {
   };
 }
 
-export interface GetCompetencyProfilesResponse {
+export interface GetCompetencyTracksResponse {
   data: {
     data: {
       /** @format uuid */
@@ -38482,12 +38483,15 @@ export interface GetCompetencyPeopleResponse {
       /** @format uuid */
       id: string;
       name: string;
-      profileId: string | null;
-      profileName: string | null;
+      tracks: {
+        /** @format uuid */
+        id: string;
+        name: string;
+      }[];
       profilePictureUrl: string | null;
       metCount: number;
       requirementCount: number;
-      readiness: "no_profile" | "missing" | "expiring" | "met";
+      readiness: "no_track" | "missing" | "expiring" | "met";
     }[];
     pagination: {
       totalItems: number;
@@ -38496,7 +38500,7 @@ export interface GetCompetencyPeopleResponse {
     };
     counts: {
       all: number;
-      no_profile: number;
+      no_track: number;
       missing: number;
       expiring: number;
       met: number;
@@ -38527,7 +38531,7 @@ export interface GetCompetencyMatrixResponse {
       page: number;
       perPage: number;
     };
-    profile: {
+    track: {
       /** @format uuid */
       id: string;
       revision: number;
@@ -38667,7 +38671,7 @@ export interface GetCompetencySubjectResponse {
       name: string;
       profilePictureUrl: string | null;
     } | null;
-    profile: {
+    tracks: {
       /** @format uuid */
       id: string;
       revision: number;
@@ -38682,17 +38686,20 @@ export interface GetCompetencySubjectResponse {
          */
         levelId: string;
       }[];
-    } | null;
+    }[];
     assessment: {
       /** @format uuid */
       subjectId: string;
-      profileId: string | null;
-      profileRevision: number | null;
+      tracks: {
+        /** @format uuid */
+        id: string;
+        revision: number;
+      }[];
       asOf: string;
       coverage: number | null;
       metCount: number;
       requirementCount: number;
-      readiness: "no_profile" | "missing" | "expiring" | "met";
+      readiness: "no_track" | "missing" | "expiring" | "met";
       requirements: {
         requirement: {
           /** @format uuid */
@@ -38703,6 +38710,7 @@ export interface GetCompetencySubjectResponse {
            */
           levelId: string;
         };
+        trackIds: string[];
         met: boolean;
         expiring: boolean;
         standing: {
@@ -38976,7 +38984,7 @@ export type ExecuteCompetenciesCommandBody =
       revision: number;
     }
   | {
-      operation: "save_profile";
+      operation: "save_track";
       /** @format uuid */
       id?: string;
       /** @min 1 */
@@ -39001,17 +39009,21 @@ export type ExecuteCompetenciesCommandBody =
       };
     }
   | {
-      operation: "delete_profile";
+      operation: "delete_track";
       /** @format uuid */
       id: string;
       /** @min 1 */
       revision: number;
     }
   | {
-      operation: "assign_profile";
+      operation: "assign_tracks";
       /** @format uuid */
       subjectId: string;
-      profileId: string | null;
+      /**
+       * @maxItems 5
+       * @uniqueItems true
+       */
+      trackIds: string[];
     }
   | {
       operation: "submit_evidence";
@@ -51308,10 +51320,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CompetenciesControllerGetCompetencyProfiles
-     * @request GET:/api/competencies/profiles
+     * @name CompetenciesControllerGetCompetencyTracks
+     * @request GET:/api/competencies/tracks
      */
-    competenciesControllerGetCompetencyProfiles: (
+    competenciesControllerGetCompetencyTracks: (
       query?: {
         /**
          * @min 1
@@ -51335,8 +51347,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<GetCompetencyProfilesResponse, any>({
-        path: `/api/competencies/profiles`,
+      this.request<GetCompetencyTracksResponse, any>({
+        path: `/api/competencies/tracks`,
         method: "GET",
         query: query,
         format: "json",
@@ -51364,8 +51376,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @maxLength 200 */
         search?: string;
         /** @format uuid */
-        profileId?: string;
-        readiness?: "no_profile" | "missing" | "expiring" | "met";
+        trackId?: string;
+        readiness?: "no_track" | "missing" | "expiring" | "met";
         teamOnly?: "true" | "false";
       },
       params: RequestParams = {},
@@ -51387,7 +51399,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     competenciesControllerGetCompetencyMatrix: (
       query?: {
         /** @format uuid */
-        profileId?: string;
+        trackId?: string;
         /**
          * @min 1
          * @max 1000000
@@ -51476,7 +51488,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       subjectId: string,
       query?: {
         /** @format uuid */
-        profileId?: string;
+        trackId?: string;
       },
       params: RequestParams = {},
     ) =>

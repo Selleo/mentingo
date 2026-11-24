@@ -16,7 +16,7 @@ export const getCommandSubjectIds = (command: CompetenciesCommand) =>
       value.subjectId,
     ])
     .with(
-      { operation: COMPETENCIES_COMMAND_OPERATIONS.ASSIGN_PROFILE },
+      { operation: COMPETENCIES_COMMAND_OPERATIONS.ASSIGN_TRACKS },
       { operation: COMPETENCIES_COMMAND_OPERATIONS.REVIEW_EVIDENCE },
       { operation: COMPETENCIES_COMMAND_OPERATIONS.REVOKE_CONFIRMATION },
       { operation: COMPETENCIES_COMMAND_OPERATIONS.SET_CONDITION_OVERRIDE },
@@ -26,8 +26,8 @@ export const getCommandSubjectIds = (command: CompetenciesCommand) =>
       { operation: COMPETENCIES_COMMAND_OPERATIONS.SAVE_CATEGORY },
       { operation: COMPETENCIES_COMMAND_OPERATIONS.DELETE_CATEGORY },
       { operation: COMPETENCIES_COMMAND_OPERATIONS.DELETE_COMPETENCY },
-      { operation: COMPETENCIES_COMMAND_OPERATIONS.SAVE_PROFILE },
-      { operation: COMPETENCIES_COMMAND_OPERATIONS.DELETE_PROFILE },
+      { operation: COMPETENCIES_COMMAND_OPERATIONS.SAVE_TRACK },
+      { operation: COMPETENCIES_COMMAND_OPERATIONS.DELETE_TRACK },
       { operation: COMPETENCIES_COMMAND_OPERATIONS.SETTINGS },
       () => [],
     )

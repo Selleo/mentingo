@@ -3,7 +3,7 @@ import { match } from "ts-pattern";
 export const SETUP_SECTIONS = {
   CATEGORIES: "categories",
   COMPETENCIES: "competencies",
-  PROFILES: "profiles",
+  TRACKS: "tracks",
   EXPIRY: "expiry",
 } as const;
 
@@ -14,7 +14,7 @@ export function parseSetupSection(value: string | null): SetupSection {
     .with(
       SETUP_SECTIONS.CATEGORIES,
       SETUP_SECTIONS.COMPETENCIES,
-      SETUP_SECTIONS.PROFILES,
+      SETUP_SECTIONS.TRACKS,
       SETUP_SECTIONS.EXPIRY,
       (section) => section,
     )

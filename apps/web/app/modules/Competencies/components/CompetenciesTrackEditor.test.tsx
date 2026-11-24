@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
-import { CompetenciesProfileEditor } from "./CompetenciesProfileEditor";
+import { CompetenciesTrackEditor } from "./CompetenciesTrackEditor";
 
 const { execute } = vi.hoisted(() => ({ execute: vi.fn() }));
 vi.mock("~/api/api-client", () => ({
@@ -37,7 +37,7 @@ async function fillCompetency(user: ReturnType<typeof userEvent.setup>) {
   return editor;
 }
 
-describe("inline competency creation in job profiles", () => {
+describe("inline competency creation in job tracks", () => {
   beforeEach(() => {
     execute.mockReset();
     execute.mockResolvedValue({ data: { data: { id: "created-competency" } } });
@@ -49,9 +49,9 @@ describe("inline competency creation in job profiles", () => {
       const user = userEvent.setup();
       const close = vi.fn();
       const requirements = [{ competencyId: "existing", levelId: "existing-level" }];
-      const profile = editing
+      const track = editing
         ? {
-            id: "profile",
+            id: "track",
             revision: 3,
             assignedPeopleCount: 0,
             name: "",
@@ -60,7 +60,7 @@ describe("inline competency creation in job profiles", () => {
           }
         : undefined;
       renderWith({ withQuery: true }).render(
-        <CompetenciesProfileEditor profile={profile} close={close} />,
+        <CompetenciesTrackEditor track={track} close={close} />,
       );
       await user.type(screen.getByLabelText("Name"), "Paramedic");
       await user.type(screen.getByLabelText("Description"), "Draft description");
@@ -84,7 +84,7 @@ describe("inline competency creation in job profiles", () => {
       await waitFor(() => expect(close).toHaveBeenCalledOnce());
       const savedCompetency = execute.mock.calls[0][0].value;
       expect(execute.mock.calls[1][0]).toMatchObject({
-        operation: "save_profile",
+        operation: "save_track",
         value: {
           name: "Paramedic",
           description: "Draft description",
@@ -97,20 +97,18 @@ describe("inline competency creation in job profiles", () => {
     },
   );
 
-  it("cancels competency creation without changing an edited profile or saving anything", async () => {
+  it("cancels competency creation without changing an edited track or saving anything", async () => {
     const user = userEvent.setup();
     const close = vi.fn();
-    const profile = {
-      id: "profile",
+    const track = {
+      id: "track",
       revision: 3,
       assignedPeopleCount: 0,
       name: "Paramedic",
       description: "Existing description",
       requirements: [{ competencyId: "existing", levelId: "existing-level" }],
     };
-    renderWith({ withQuery: true }).render(
-      <CompetenciesProfileEditor profile={profile} close={close} />,
-    );
+    renderWith({ withQuery: true }).render(<CompetenciesTrackEditor track={track} close={close} />);
     await user.type(screen.getByLabelText("Name"), " updated");
     const editor = await fillCompetency(user);
     await user.click(editor.getByRole("button", { name: "Cancel" }));
@@ -121,13 +119,13 @@ describe("inline competency creation in job profiles", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(close).toHaveBeenCalledOnce());
     expect(execute).toHaveBeenCalledWith({
-      operation: "save_profile",
-      id: "profile",
+      operation: "save_track",
+      id: "track",
       revision: 3,
       value: {
         name: "Paramedic updated",
-        description: profile.description,
-        requirements: profile.requirements,
+        description: track.description,
+        requirements: track.requirements,
       },
     });
   });
@@ -135,7 +133,7 @@ describe("inline competency creation in job profiles", () => {
   it("retains both drafts on error and assigns exactly once after retry", async () => {
     const user = userEvent.setup();
     execute.mockRejectedValueOnce(new Error("Unavailable"));
-    renderWith({ withQuery: true }).render(<CompetenciesProfileEditor close={vi.fn()} />);
+    renderWith({ withQuery: true }).render(<CompetenciesTrackEditor close={vi.fn()} />);
     await user.type(screen.getByLabelText("Name"), "Paramedic");
     const editor = await fillCompetency(user);
     await user.click(editor.getByRole("button", { name: "Save" }));
@@ -154,7 +152,7 @@ describe("inline competency creation in job profiles", () => {
     ]);
   });
 
-  it("blocks profile submission while the competency dialog is open and pending", async () => {
+  it("blocks track submission while the competency dialog is open and pending", async () => {
     const user = userEvent.setup();
     let finish: (value: unknown) => void = () => {};
     execute.mockImplementationOnce(
@@ -164,13 +162,13 @@ describe("inline competency creation in job profiles", () => {
         }),
     );
     const close = vi.fn();
-    renderWith({ withQuery: true }).render(<CompetenciesProfileEditor close={close} />);
-    const profileForm = screen.getByLabelText("Name").closest("form");
-    if (!profileForm) throw new Error("Missing profile form");
+    renderWith({ withQuery: true }).render(<CompetenciesTrackEditor close={close} />);
+    const trackForm = screen.getByLabelText("Name").closest("form");
+    if (!trackForm) throw new Error("Missing track form");
     await user.type(screen.getByLabelText("Name"), "Paramedic");
     const editor = await fillCompetency(user);
     await act(async () => {
-      fireEvent.submit(profileForm);
+      fireEvent.submit(trackForm);
     });
     expect(execute).not.toHaveBeenCalled();
     await user.click(editor.getByRole("button", { name: "Save" }));
@@ -180,7 +178,7 @@ describe("inline competency creation in job profiles", () => {
     await user.click(editor.getByRole("button", { name: "Close" }));
     expect(screen.getByRole("dialog", { name: "Add competency" })).toBeInTheDocument();
     await act(async () => {
-      fireEvent.submit(profileForm);
+      fireEvent.submit(trackForm);
     });
     expect(execute).toHaveBeenCalledTimes(1);
     expect(close).not.toHaveBeenCalled();
@@ -190,9 +188,9 @@ describe("inline competency creation in job profiles", () => {
     );
   });
 
-  it("requires a level before saving a competency for a profile", async () => {
+  it("requires a level before saving a competency for a track", async () => {
     const user = userEvent.setup();
-    renderWith({ withQuery: true }).render(<CompetenciesProfileEditor close={vi.fn()} />);
+    renderWith({ withQuery: true }).render(<CompetenciesTrackEditor close={vi.fn()} />);
     const editor = await openCompetencyEditor(user);
     await user.type(editor.getByLabelText("Name"), "First aid");
     expect(editor.getByRole("button", { name: "Save" })).toBeDisabled();
@@ -203,9 +201,9 @@ describe("inline competency creation in job profiles", () => {
     expect(editor.getByRole("button", { name: "Save" })).toBeEnabled();
   });
 
-  it("keeps category and competency portal form submissions separate from the profile", async () => {
+  it("keeps category and competency portal form submissions separate from the track", async () => {
     const user = userEvent.setup();
-    renderWith({ withQuery: true }).render(<CompetenciesProfileEditor close={vi.fn()} />);
+    renderWith({ withQuery: true }).render(<CompetenciesTrackEditor close={vi.fn()} />);
     await user.type(screen.getByLabelText("Name"), "Paramedic");
     const editor = await fillCompetency(user);
     await user.click(editor.getByRole("combobox", { name: "Category" }));

@@ -26085,9 +26085,9 @@
         }
       }
     },
-    "/api/competencies/profiles": {
+    "/api/competencies/tracks": {
       "get": {
-        "operationId": "CompetenciesController_getCompetencyProfiles",
+        "operationId": "CompetenciesController_getCompetencyTracks",
         "parameters": [
           {
             "name": "page",
@@ -26147,7 +26147,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetCompetencyProfilesResponse"
+                  "$ref": "#/components/schemas/GetCompetencyTracksResponse"
                 }
               }
             }
@@ -26189,7 +26189,7 @@
             }
           },
           {
-            "name": "profileId",
+            "name": "trackId",
             "required": false,
             "in": "query",
             "schema": {
@@ -26204,7 +26204,7 @@
             "schema": {
               "anyOf": [
                 {
-                  "const": "no_profile",
+                  "const": "no_track",
                   "type": "string"
                 },
                 {
@@ -26258,7 +26258,7 @@
         "operationId": "CompetenciesController_getCompetencyMatrix",
         "parameters": [
           {
-            "name": "profileId",
+            "name": "trackId",
             "required": false,
             "in": "query",
             "schema": {
@@ -26476,7 +26476,7 @@
             }
           },
           {
-            "name": "profileId",
+            "name": "trackId",
             "required": false,
             "in": "query",
             "schema": {
@@ -197627,12 +197627,16 @@
               },
               "canPlan": {
                 "type": "boolean"
+              },
+              "maxTracksPerPerson": {
+                "type": "integer"
               }
             },
             "required": [
               "enabled",
               "canManage",
-              "canPlan"
+              "canPlan",
+              "maxTracksPerPerson"
             ]
           }
         },
@@ -197668,17 +197672,17 @@
                   "competencies": {
                     "type": "integer"
                   },
-                  "profiles": {
+                  "tracks": {
                     "type": "integer"
                   },
-                  "assignments": {
+                  "assignedPeople": {
                     "type": "integer"
                   }
                 },
                 "required": [
                   "competencies",
-                  "profiles",
-                  "assignments"
+                  "tracks",
+                  "assignedPeople"
                 ]
               }
             },
@@ -197880,7 +197884,7 @@
                         }
                       ]
                     },
-                    "profileCount": {
+                    "trackCount": {
                       "type": "integer"
                     }
                   },
@@ -197893,7 +197897,7 @@
                     "categoryId",
                     "levels",
                     "categoryName",
-                    "profileCount"
+                    "trackCount"
                   ]
                 }
               },
@@ -197927,7 +197931,7 @@
           "data"
         ]
       },
-      "GetCompetencyProfilesResponse": {
+      "GetCompetencyTracksResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -198035,26 +198039,24 @@
                     "name": {
                       "type": "string"
                     },
-                    "profileId": {
-                      "anyOf": [
-                        {
-                          "format": "uuid",
-                          "type": "string"
+                    "tracks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "profileName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                        "required": [
+                          "id",
+                          "name"
+                        ]
+                      }
                     },
                     "profilePictureUrl": {
                       "anyOf": [
@@ -198075,7 +198077,7 @@
                     "readiness": {
                       "anyOf": [
                         {
-                          "const": "no_profile",
+                          "const": "no_track",
                           "type": "string"
                         },
                         {
@@ -198096,8 +198098,7 @@
                   "required": [
                     "id",
                     "name",
-                    "profileId",
-                    "profileName",
+                    "tracks",
                     "profilePictureUrl",
                     "metCount",
                     "requirementCount",
@@ -198130,7 +198131,7 @@
                   "all": {
                     "type": "integer"
                   },
-                  "no_profile": {
+                  "no_track": {
                     "type": "integer"
                   },
                   "missing": {
@@ -198145,7 +198146,7 @@
                 },
                 "required": [
                   "all",
-                  "no_profile",
+                  "no_track",
                   "missing",
                   "expiring",
                   "met"
@@ -198265,7 +198266,7 @@
                   "perPage"
                 ]
               },
-              "profile": {
+              "track": {
                 "type": "object",
                 "properties": {
                   "id": {
@@ -198446,7 +198447,7 @@
             "required": [
               "data",
               "pagination",
-              "profile",
+              "track",
               "competencies"
             ]
           }
@@ -198852,59 +198853,55 @@
                   }
                 ]
               },
-              "profile": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "revision": {
-                        "type": "integer"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "description": {
-                        "type": "string"
-                      },
-                      "requirements": {
-                        "type": "array",
-                        "items": {
-                          "additionalProperties": false,
-                          "type": "object",
-                          "properties": {
-                            "competencyId": {
-                              "format": "uuid",
-                              "type": "string"
-                            },
-                            "levelId": {
-                              "minLength": 1,
-                              "maxLength": 100,
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "competencyId",
-                            "levelId"
-                          ]
-                        }
-                      }
+              "tracks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
                     },
-                    "required": [
-                      "id",
-                      "revision",
-                      "name",
-                      "description",
-                      "requirements"
-                    ]
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "requirements": {
+                      "type": "array",
+                      "items": {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "competencyId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "levelId": {
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "competencyId",
+                          "levelId"
+                        ]
+                      }
+                    }
                   },
-                  {
-                    "type": "null"
-                  }
-                ]
+                  "required": [
+                    "id",
+                    "revision",
+                    "name",
+                    "description",
+                    "requirements"
+                  ]
+                }
               },
               "assessment": {
                 "anyOf": [
@@ -198915,26 +198912,24 @@
                         "format": "uuid",
                         "type": "string"
                       },
-                      "profileId": {
-                        "anyOf": [
-                          {
-                            "format": "uuid",
-                            "type": "string"
+                      "tracks": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "revision": {
+                              "type": "integer"
+                            }
                           },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "profileRevision": {
-                        "anyOf": [
-                          {
-                            "type": "number"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
+                          "required": [
+                            "id",
+                            "revision"
+                          ]
+                        }
                       },
                       "asOf": {
                         "type": "string"
@@ -198958,7 +198953,7 @@
                       "readiness": {
                         "anyOf": [
                           {
-                            "const": "no_profile",
+                            "const": "no_track",
                             "type": "string"
                           },
                           {
@@ -198998,6 +198993,13 @@
                                 "competencyId",
                                 "levelId"
                               ]
+                            },
+                            "trackIds": {
+                              "type": "array",
+                              "items": {
+                                "format": "uuid",
+                                "type": "string"
+                              }
                             },
                             "met": {
                               "type": "boolean"
@@ -199189,6 +199191,7 @@
                           },
                           "required": [
                             "requirement",
+                            "trackIds",
                             "met",
                             "expiring",
                             "standing"
@@ -199198,8 +199201,7 @@
                     },
                     "required": [
                       "subjectId",
-                      "profileId",
-                      "profileRevision",
+                      "tracks",
                       "asOf",
                       "coverage",
                       "metCount",
@@ -199821,7 +199823,7 @@
               "asOf",
               "warningDays",
               "person",
-              "profile",
+              "tracks",
               "assessment",
               "competencies",
               "standings",
@@ -200238,7 +200240,7 @@
             "type": "object",
             "properties": {
               "operation": {
-                "const": "save_profile",
+                "const": "save_track",
                 "type": "string"
               },
               "id": {
@@ -200302,7 +200304,7 @@
             "type": "object",
             "properties": {
               "operation": {
-                "const": "delete_profile",
+                "const": "delete_track",
                 "type": "string"
               },
               "id": {
@@ -200325,29 +200327,27 @@
             "type": "object",
             "properties": {
               "operation": {
-                "const": "assign_profile",
+                "const": "assign_tracks",
                 "type": "string"
               },
               "subjectId": {
                 "format": "uuid",
                 "type": "string"
               },
-              "profileId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+              "trackIds": {
+                "maxItems": 5,
+                "uniqueItems": true,
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
               }
             },
             "required": [
               "operation",
               "subjectId",
-              "profileId"
+              "trackIds"
             ]
           },
           {
