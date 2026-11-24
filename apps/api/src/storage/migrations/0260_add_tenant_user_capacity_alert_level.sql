@@ -1,1 +1,0 @@
-ALTER TABLE "tenants" ADD COLUMN "user_capacity_alert_level" text DEFAULT 'within_limit' NOT NULL;

@@ -20783,6 +20783,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
+        },
+        "user_capacity_alert_level": {
+          "name": "user_capacity_alert_level",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'within_limit'"
         }
       },
       "indexes": {
