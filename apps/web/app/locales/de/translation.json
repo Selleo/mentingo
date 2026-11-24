@@ -1193,6 +1193,69 @@
       "authorization_failed": "Die Autorisierung des Microsoft-Kalenders ist fehlgeschlagen. Versuchen Sie es erneut."
     }
   },
+  "googleCalendar": {
+    "title": "Google Kalender",
+    "description": "Übernehmen Sie Ihren primären Google Kalender in Mentingo. Google Kalender bleibt die maßgebliche Quelle.",
+    "account": "Verbundenes Konto",
+    "lastSync": "Letzte erfolgreiche Synchronisierung",
+    "status": {
+      "disconnected": "Getrennt",
+      "syncing": "Wird synchronisiert",
+      "connected": "Verbunden",
+      "error": "Aktion erforderlich",
+      "reconnect_required": "Erneute Verbindung erforderlich"
+    },
+    "action": {
+      "connect": "Google Kalender verbinden",
+      "sync": "Jetzt synchronisieren",
+      "syncCalendar": "Google Kalender synchronisieren",
+      "reconnect": "Erneut verbinden",
+      "replace": "Anderes Konto verwenden",
+      "disconnect": "Trennen",
+      "continue": "Weiter zu Google"
+    },
+    "errors": {
+      "unavailable": "Die Google Kalender-Integration ist nicht konfiguriert.",
+      "invalidState": "Der Google Kalender-Autorisierungslink ist ungültig oder abgelaufen. Bitte versuchen Sie es erneut.",
+      "refreshTokenMissing": "Google hat keinen Offline-Zugriff gewährt. Bitte verbinden Sie Google Kalender erneut.",
+      "connectionNotFound": "Google Kalender ist nicht verbunden.",
+      "reconnectRequired": "Verbinden Sie Ihr Google-Konto erneut, um fortzufahren.",
+      "syncInProgress": "Google Kalender wird bereits synchronisiert.",
+      "syncCooldown": "Bitte warten Sie, bevor Sie eine weitere Synchronisierung starten."
+    },
+    "stale": {
+      "title": "Kalenderdaten sind möglicherweise veraltet",
+      "description": "Ihre importierten Termine bleiben sichtbar. Synchronisieren Sie erneut oder verbinden Sie Ihr Google-Konto neu."
+    },
+    "disconnect": {
+      "title": "Google Kalender trennen?",
+      "description": "Dadurch werden importierte Google Kalender-Termine aus Mentingo entfernt. Ihr Google Kalender wird nicht geändert."
+    },
+    "replace": {
+      "title": "Ein anderes Google-Konto verbinden?",
+      "description": "Die Verbindung für {{email}} und ihre importierten Termine werden entfernt, bevor das neue Konto synchronisiert wird."
+    },
+    "outbound": {
+      "title": "Mentingo-Termine synchronisieren",
+      "description": "Live-Trainings und Kursfälligkeiten in einen separaten Mentingo-Kalender in Google Kalender exportieren.",
+      "calendarDeleted": "Der Mentingo-Kalender wurde in Google Kalender gelöscht. Aktivieren Sie den Export erneut, um ihn neu zu erstellen."
+    },
+    "toast": {
+      "syncQueued": "Die Google Kalender-Synchronisierung wurde gestartet.",
+      "syncFailed": "Google Kalender konnte nicht synchronisiert werden.",
+      "disconnected": "Google Kalender wurde getrennt.",
+      "disconnectFailed": "Google Kalender konnte nicht getrennt werden.",
+      "outboundEnabled": "Mentingo-Termine werden in Google Kalender exportiert.",
+      "outboundDisabled": "Der Export von Mentingo-Terminen wurde deaktiviert.",
+      "outboundFailed": "Mentingo-Termine konnten nicht exportiert werden."
+    },
+    "oauth": {
+      "connected": "Google Kalender wird verbunden und die erste Synchronisierung wurde gestartet.",
+      "replacement_required": "Bestätigen Sie den Kontowechsel, bevor Sie ein anderes Google-Konto verbinden.",
+      "permissions_missing": "Erlauben Sie alle angeforderten Google Kalender-Berechtigungen, um Ihren Kalender zu verbinden.",
+      "authorization_failed": "Die Autorisierung für Google Kalender ist fehlgeschlagen. Bitte versuchen Sie es erneut."
+    }
+  },
   "calendarView": {
     "title": "Kalender",
     "description": "Geplante Lernereignisse anzeigen.",
@@ -1205,6 +1268,13 @@
     "microsoft": {
       "staleWarning": "Microsoft-Termine sind möglicherweise veraltet. Verbinden Sie das Konto neu oder versuchen Sie es in den Kontoeinstellungen erneut.",
       "horizonNotice": "Microsoft-Termine werden von 30 Tagen in der Vergangenheit bis 6 Monate im Voraus importiert; dieser Zeitraum kann unvollständig sein."
+    },
+    "google": {
+      "staleWarning": "Google Kalender-Termine sind möglicherweise veraltet. Verbinden Sie sich erneut oder versuchen Sie es in den Kontoeinstellungen noch einmal.",
+      "horizonNotice": "Google Kalender-Termine werden von vor 30 Tagen bis 6 Monate im Voraus importiert, daher kann dieser Zeitraum unvollständig sein."
+    },
+    "externalCalendars": {
+      "horizonNotice": "Outlook- und Google Kalender-Termine werden von vor 30 Tagen bis 6 Monate im Voraus importiert, daher kann dieser Zeitraum unvollständig sein."
     },
     "view": {
       "month": "Monat",
@@ -1290,12 +1360,14 @@
         "edit": "Edit event",
         "goToLiveTraining": "Go to Live-Schulung",
         "goToCourse": "Zum Kurs",
-        "openOutlook": "In Outlook öffnen"
+        "openOutlook": "In Outlook öffnen",
+        "openGoogleCalendar": "In Google Kalender öffnen"
       },
       "sourceType": {
         "liveTraining": "Live-Schulung",
         "courseDueDate": "Kursfrist",
-        "microsoftOutlook": "Microsoft Outlook"
+        "microsoftOutlook": "Microsoft Outlook",
+        "googleCalendar": "Google Kalender"
       },
       "field": {
         "time": "Time",
@@ -2656,6 +2728,10 @@
         "title": "Microsoft-Kalender",
         "description": "Live-Trainings mit Microsoft-Outlook-Kalendern synchronisieren."
       },
+      "googleCalendar": {
+        "title": "Google Kalender",
+        "description": "Google Kalender synchronisieren und Live-Trainings sowie Kursfälligkeiten in Google Kalender exportieren."
+      },
       "payments": {
         "title": "Zahlungen",
         "description": "Stripe-Schlüssel für den Kursverkauf und die Prüfung von Zahlungs-Webhooks."
@@ -2703,6 +2779,12 @@
       },
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Microsoft-Kalender-Client-Geheimnis"
+      },
+      "GOOGLE_CALENDAR_CLIENT_ID": {
+        "label": "Google Kalender Client-ID"
+      },
+      "GOOGLE_CALENDAR_CLIENT_SECRET": {
+        "label": "Google Kalender Client-Secret"
       },
       "OPENAI_API_KEY": {
         "label": "OpenAI-API-Schlüssel"

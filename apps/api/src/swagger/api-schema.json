@@ -27140,6 +27140,132 @@
         }
       }
     },
+    "/api/calendar/google/connection": {
+      "get": {
+        "operationId": "GoogleCalendarController_getGoogleCalendarConnection",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGoogleCalendarConnectionResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "GoogleCalendarController_disconnectGoogleCalendar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisconnectGoogleCalendarResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/google/connection/sync": {
+      "post": {
+        "operationId": "GoogleCalendarController_syncGoogleCalendar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncGoogleCalendarResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/google/connection/outbound": {
+      "post": {
+        "operationId": "GoogleCalendarController_updateGoogleCalendarOutboundSync",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGoogleCalendarOutboundSyncBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateGoogleCalendarOutboundSyncResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/google/notifications": {
+      "post": {
+        "operationId": "GoogleCalendarController_receiveGoogleCalendarNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/google-calendar": {
+      "get": {
+        "operationId": "GoogleCalendarOAuthController_connectGoogleCalendar",
+        "parameters": [
+          {
+            "name": "replace",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outbound",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/google-calendar/callback": {
+      "get": {
+        "operationId": "GoogleCalendarOAuthController_completeGoogleCalendarAuthorization",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/todo-tasks": {
       "get": {
         "operationId": "TodoTasksController_list",
@@ -180579,6 +180705,14 @@
                 "type": "string"
               },
               {
+                "const": "GOOGLE_CALENDAR_CLIENT_ID",
+                "type": "string"
+              },
+              {
+                "const": "GOOGLE_CALENDAR_CLIENT_SECRET",
+                "type": "string"
+              },
+              {
                 "const": "OPENAI_API_KEY",
                 "type": "string"
               },
@@ -180720,6 +180854,14 @@
                     },
                     {
                       "const": "MICROSOFT_CALENDAR_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "GOOGLE_CALENDAR_CLIENT_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "GOOGLE_CALENDAR_CLIENT_SECRET",
                       "type": "string"
                     },
                     {
@@ -202920,6 +203062,10 @@
                         {
                           "const": "microsoft_outlook",
                           "type": "string"
+                        },
+                        {
+                          "const": "google_calendar",
+                          "type": "string"
                         }
                       ]
                     },
@@ -203182,6 +203328,61 @@
                           "required": [
                             "outlookCalendar"
                           ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "googleCalendar": {
+                              "type": "object",
+                              "properties": {
+                                "webLink": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "isSensitive": {
+                                  "type": "boolean"
+                                },
+                                "availability": {
+                                  "anyOf": [
+                                    {
+                                      "const": "free",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "tentative",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "busy",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "out_of_office",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "working_elsewhere",
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "webLink",
+                                "isSensitive",
+                                "availability"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "googleCalendar"
+                          ]
                         }
                       ]
                     }
@@ -203237,6 +203438,10 @@
                     },
                     {
                       "const": "microsoft_outlook",
+                      "type": "string"
+                    },
+                    {
+                      "const": "google_calendar",
                       "type": "string"
                     }
                   ]
@@ -203295,6 +203500,10 @@
                   },
                   {
                     "const": "microsoft_outlook",
+                    "type": "string"
+                  },
+                  {
+                    "const": "google_calendar",
                     "type": "string"
                   }
                 ]
@@ -203822,6 +204031,61 @@
                     "required": [
                       "outlookCalendar"
                     ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "googleCalendar": {
+                        "type": "object",
+                        "properties": {
+                          "webLink": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isSensitive": {
+                            "type": "boolean"
+                          },
+                          "availability": {
+                            "anyOf": [
+                              {
+                                "const": "free",
+                                "type": "string"
+                              },
+                              {
+                                "const": "tentative",
+                                "type": "string"
+                              },
+                              {
+                                "const": "busy",
+                                "type": "string"
+                              },
+                              {
+                                "const": "out_of_office",
+                                "type": "string"
+                              },
+                              {
+                                "const": "working_elsewhere",
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "webLink",
+                          "isSensitive",
+                          "availability"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "googleCalendar"
+                    ]
                   }
                 ]
               }
@@ -204070,6 +204334,182 @@
             }
           }
         }
+      },
+      "GetGoogleCalendarConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "available": {
+                "type": "boolean"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "disconnected",
+                    "type": "string"
+                  },
+                  {
+                    "const": "syncing",
+                    "type": "string"
+                  },
+                  {
+                    "const": "connected",
+                    "type": "string"
+                  },
+                  {
+                    "const": "error",
+                    "type": "string"
+                  },
+                  {
+                    "const": "reconnect_required",
+                    "type": "string"
+                  }
+                ]
+              },
+              "accountEmail": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lastSuccessfulSyncAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "subscriptionExpiresAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "errorCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "stale": {
+                "type": "boolean"
+              },
+              "outboundSyncEnabled": {
+                "type": "boolean"
+              },
+              "outboundStatus": {
+                "type": "string"
+              },
+              "outboundCalendarId": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "outboundErrorCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lastOutboundSyncAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "available",
+              "status",
+              "accountEmail",
+              "lastSuccessfulSyncAt",
+              "subscriptionExpiresAt",
+              "errorCode",
+              "stale",
+              "outboundSyncEnabled",
+              "outboundStatus",
+              "outboundCalendarId",
+              "outboundErrorCode",
+              "lastOutboundSyncAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SyncGoogleCalendarResponse": {
+        "type": "null"
+      },
+      "UpdateGoogleCalendarOutboundSyncBody": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "UpdateGoogleCalendarOutboundSyncResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "authorizationUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "authorizationUrl"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DisconnectGoogleCalendarResponse": {
+        "type": "null"
       },
       "ListResponse": {
         "type": "object",

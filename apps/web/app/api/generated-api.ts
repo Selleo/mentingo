@@ -34876,6 +34876,8 @@ export interface UpdateTenantApiKeysBody {
     | "MICROSOFT_CLIENT_SECRET"
     | "MICROSOFT_CALENDAR_CLIENT_ID"
     | "MICROSOFT_CALENDAR_CLIENT_SECRET"
+    | "GOOGLE_CALENDAR_CLIENT_ID"
+    | "GOOGLE_CALENDAR_CLIENT_SECRET"
     | "OPENAI_API_KEY"
     | "BUNNY_STREAM_API_KEY"
     | "BUNNY_STREAM_READ_ONLY_API_KEY"
@@ -34917,6 +34919,8 @@ export interface UpdateTenantApiKeysResponse {
       | "MICROSOFT_CLIENT_SECRET"
       | "MICROSOFT_CALENDAR_CLIENT_ID"
       | "MICROSOFT_CALENDAR_CLIENT_SECRET"
+      | "GOOGLE_CALENDAR_CLIENT_ID"
+      | "GOOGLE_CALENDAR_CLIENT_SECRET"
       | "OPENAI_API_KEY"
       | "BUNNY_STREAM_API_KEY"
       | "BUNNY_STREAM_READ_ONLY_API_KEY"
@@ -39593,7 +39597,7 @@ export interface GetEventsResponse {
       /** @format uuid */
       id: string;
       uid: string;
-      sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
+      sourceType: "live_training" | "course_due_date" | "microsoft_outlook" | "google_calendar";
       /** @format uuid */
       sourceId: string;
       title: string;
@@ -39635,6 +39639,13 @@ export interface GetEventsResponse {
               isSensitive: boolean;
               availability: "free" | "tentative" | "busy" | "out_of_office" | "working_elsewhere";
             };
+          }
+        | {
+            googleCalendar: {
+              webLink: string | null;
+              isSensitive: boolean;
+              availability: "free" | "tentative" | "busy" | "out_of_office" | "working_elsewhere";
+            };
           };
     }[];
   };
@@ -39644,7 +39655,7 @@ export interface GetDashboardEventsResponse {
   data: {
     /** @format uuid */
     id: string;
-    sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
+    sourceType: "live_training" | "course_due_date" | "microsoft_outlook" | "google_calendar";
     /** @format uuid */
     targetId: string;
     title: string;
@@ -39658,7 +39669,7 @@ export interface GetEventDetailsResponse {
     /** @format uuid */
     id: string;
     uid: string;
-    sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
+    sourceType: "live_training" | "course_due_date" | "microsoft_outlook" | "google_calendar";
     /** @format uuid */
     sourceId: string;
     title: string;
@@ -39741,6 +39752,13 @@ export interface GetEventDetailsResponse {
             isSensitive: boolean;
             availability: "free" | "tentative" | "busy" | "out_of_office" | "working_elsewhere";
           };
+        }
+      | {
+          googleCalendar: {
+            webLink: string | null;
+            isSensitive: boolean;
+            availability: "free" | "tentative" | "busy" | "out_of_office" | "working_elsewhere";
+          };
         };
   };
 }
@@ -39795,6 +39813,37 @@ export interface LifecycleNotificationsBody {
   }[];
   [key: string]: any;
 }
+
+export interface GetGoogleCalendarConnectionResponse {
+  data: {
+    available: boolean;
+    status: "disconnected" | "syncing" | "connected" | "error" | "reconnect_required";
+    accountEmail: string | null;
+    lastSuccessfulSyncAt: string | null;
+    subscriptionExpiresAt: string | null;
+    errorCode: string | null;
+    stale: boolean;
+    outboundSyncEnabled: boolean;
+    outboundStatus: string;
+    outboundCalendarId: string | null;
+    outboundErrorCode: string | null;
+    lastOutboundSyncAt: string | null;
+  };
+}
+
+export type SyncGoogleCalendarResponse = null;
+
+export interface UpdateGoogleCalendarOutboundSyncBody {
+  enabled: boolean;
+}
+
+export interface UpdateGoogleCalendarOutboundSyncResponse {
+  data: {
+    authorizationUrl: string | null;
+  };
+}
+
+export type DisconnectGoogleCalendarResponse = null;
 
 export interface ListResponse {
   data: {
@@ -52297,6 +52346,115 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     microsoftCalendarOAuthControllerCallback: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/auth/microsoft-calendar/callback`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GoogleCalendarControllerGetGoogleCalendarConnection
+     * @request GET:/api/calendar/google/connection
+     */
+    googleCalendarControllerGetGoogleCalendarConnection: (params: RequestParams = {}) =>
+      this.request<GetGoogleCalendarConnectionResponse, any>({
+        path: `/api/calendar/google/connection`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GoogleCalendarControllerDisconnectGoogleCalendar
+     * @request DELETE:/api/calendar/google/connection
+     */
+    googleCalendarControllerDisconnectGoogleCalendar: (params: RequestParams = {}) =>
+      this.request<DisconnectGoogleCalendarResponse, any>({
+        path: `/api/calendar/google/connection`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GoogleCalendarControllerSyncGoogleCalendar
+     * @request POST:/api/calendar/google/connection/sync
+     */
+    googleCalendarControllerSyncGoogleCalendar: (params: RequestParams = {}) =>
+      this.request<SyncGoogleCalendarResponse, any>({
+        path: `/api/calendar/google/connection/sync`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GoogleCalendarControllerUpdateGoogleCalendarOutboundSync
+     * @request POST:/api/calendar/google/connection/outbound
+     */
+    googleCalendarControllerUpdateGoogleCalendarOutboundSync: (
+      data: UpdateGoogleCalendarOutboundSyncBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateGoogleCalendarOutboundSyncResponse, any>({
+        path: `/api/calendar/google/connection/outbound`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GoogleCalendarControllerReceiveGoogleCalendarNotification
+     * @request POST:/api/calendar/google/notifications
+     */
+    googleCalendarControllerReceiveGoogleCalendarNotification: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/calendar/google/notifications`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GoogleCalendarOAuthControllerConnectGoogleCalendar
+     * @request GET:/api/auth/google-calendar
+     */
+    googleCalendarOAuthControllerConnectGoogleCalendar: (
+      query?: {
+        replace?: string;
+        outbound?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/auth/google-calendar`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GoogleCalendarOAuthControllerCompleteGoogleCalendarAuthorization
+     * @request GET:/api/auth/google-calendar/callback
+     */
+    googleCalendarOAuthControllerCompleteGoogleCalendarAuthorization: (
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/auth/google-calendar/callback`,
         method: "GET",
         ...params,
       }),

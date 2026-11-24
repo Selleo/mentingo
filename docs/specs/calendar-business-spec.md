@@ -2,7 +2,7 @@
 
 ## Business Overview
 
-Calendar gives learners, trainers, and administrators one place to see time-based learning commitments. It combines scheduled live training, mandatory course due dates, and a user's Microsoft Outlook events so users do not need to inspect separate systems to understand what is coming up. Users can also optionally publish Mentingo commitments into a dedicated `Mentingo` calendar in Outlook.
+Calendar gives learners, trainers, and administrators one place to see time-based learning commitments. It combines scheduled live training, mandatory course due dates, and a user's Microsoft Outlook and Google Calendar events so users do not need to inspect separate systems to understand what is coming up. Users can also optionally publish Mentingo commitments into a dedicated `Mentingo` calendar in Outlook or Google Calendar.
 
 For HR and L&D operations, the calendar is a planning and coordination view. It helps administrators schedule instructor-led sessions in context, gives learners a clear reminder surface for required learning, and reduces conflicts with personal or work commitments already held in Outlook.
 
@@ -13,6 +13,7 @@ For HR and L&D operations, the calendar is a planning and coordination view. It 
 - Trainers and authors who need visibility into training sessions connected to them.
 - L&D managers reviewing time-sensitive learning obligations across the tenant.
 - Microsoft 365 users who want a read-only view of their own Outlook calendar alongside Mentingo commitments, or want those commitments copied into Outlook.
+- Google Workspace and Gmail users who want the same for their primary Google Calendar.
 
 ## Feature Functions
 
@@ -25,7 +26,9 @@ For HR and L&D operations, the calendar is a planning and coordination view. It 
 - Import the connected user's primary Outlook calendar as a read-only calendar source.
 - Optionally export live trainings and mandatory course due dates to a separate, Mentingo-managed Outlook calendar.
 - Reconcile exported events when Mentingo events change, recipients gain or lose eligibility, or a user manually synchronizes.
-- Mask private and confidential Outlook events and never expose their location or Outlook link.
+- Connect, replace, reconnect, manually synchronize, or disconnect one Google account, independently of the Outlook connection.
+- Import the connected user's primary Google Calendar as a read-only calendar source and optionally export the same Mentingo commitments to a dedicated `Mentingo` Google calendar.
+- Mask private and confidential Outlook and Google events and never expose their location or external link.
 - Show synchronization, reconnect, admin-approval, stale-data, and six-month import-horizon guidance.
 - Localize event titles and details according to the selected language.
 - Apply permission, enrollment, authorship, host, and feature-flag rules before showing events or creation controls.
@@ -50,19 +53,22 @@ When outbound synchronization is enabled, Mentingo creates or locates one non-de
 
 Outlook events are stored as normalized calendar records and remain read-only. Deleted and cancelled Microsoft events are removed from the active calendar view. Private and confidential events are imported with a generic title and without their location or external link. If authorization expires, the last successfully imported data remains visible with a stale warning until the user reconnects. Disconnecting or archiving the user removes the connection and imported Outlook events.
 
+Google Calendar works the same way and can be connected alongside Outlook. Mentingo requests read access to the user's calendars and permission to manage only calendars it creates; if the user declines either permission on Google's consent screen, the connection is not created and the user is told permissions are missing. Mentingo imports the primary calendar over the same 30-day/six-month window using Google incremental synchronization, push notifications, and scheduled reconciliation. Push notifications only speed synchronization up: if Google rejects the notification channel, synchronization continues through reconciliation. Private and confidential Google events are masked, free (transparent) events show as free, and tentative events show as tentative. Because every Google connection already holds export permission, enabling export does not require reauthorization unless the connection needs to be reconnected. Exported copies carry a private Mentingo marker and are excluded from the import.
+
 ## Key Technical Context
 
 - Frontend route: `/calendar`.
 - Frontend implementation: `apps/web/app/modules/Calendar` and the Settings Integrations tab.
 - API implementation: `apps/api/src/calendar`.
-- API endpoints: calendar event list/details plus Microsoft connection, sync, disconnect, OAuth callback, and notification endpoints under `/api/calendar/microsoft` and `/api/auth/microsoft-calendar`.
+- API endpoints: calendar event list/details plus Microsoft connection, sync, disconnect, OAuth callback, and notification endpoints under `/api/calendar/microsoft` and `/api/auth/microsoft-calendar`, and the equivalent Google endpoints under `/api/calendar/google` and `/api/auth/google-calendar`.
 - Access requires `PERMISSIONS.CALENDAR_READ`.
 - Creating live training from the calendar also depends on the Live Training feature and `PERMISSIONS.LIVE_TRAINING_CREATE`.
-- Managing the personal Microsoft connection uses the existing self-account permission.
-- Supported event source types include Live Training, Course Due Date, and Microsoft Outlook.
-- Microsoft refresh tokens use envelope encryption at rest. OAuth state is signed and bound to the tenant, user, intended action, origin, expiry, and nonce.
+- Managing the personal Microsoft or Google connection uses the existing self-account permission.
+- Supported event source types include Live Training, Course Due Date, Microsoft Outlook, and Google Calendar.
+- Calendar connections, imported events, and outbound mappings share provider-neutral tables keyed by a `provider` column; each user has at most one connection per provider.
+- Microsoft and Google refresh tokens use envelope encryption at rest. OAuth state is signed and bound to the tenant, user, intended action, origin, expiry, and nonce.
 - Tenant row-level security and owner filtering prevent users, including tenant administrators, from reading another user's imported Outlook events.
-- BullMQ handles initial, incremental, webhook-triggered, lifecycle, and reconciliation sync work. Microsoft subscriptions are renewed before expiry and recreated if Microsoft no longer recognizes them.
+- BullMQ handles initial, incremental, webhook-triggered, lifecycle, and reconciliation sync work. Microsoft subscriptions are renewed before expiry and recreated if Microsoft no longer recognizes them. Google push channels cannot be renewed, so a new channel is opened before expiry and the previous one is stopped.
 - Outbound mappings are isolated from imported Outlook mappings and are keyed per tenant, connection, Mentingo event, and recipient; BullMQ retries Graph work without blocking local calendar changes.
 - The managed-event marker used to distinguish Mentingo-owned Outlook copies is configurable per deployment so installations can choose their own Microsoft Graph extended-property identifier.
 
@@ -73,4 +79,7 @@ Outlook events are stored as normalized calendar records and remain read-only. D
 - API E2E coverage verifies Outlook events remain owner-only even for tenant administrators, cancelled imports stay hidden, and cross-user detail access returns not found.
 - API unit coverage verifies Outlook event mapping, private-event masking, unsafe-link removal, tombstones, refresh-token envelope encryption, OAuth-state tamper protection, multi-page delta synchronization, deletion handling, token rotation, reconnect behavior, and subscription renewal/recreation.
 - Web unit coverage verifies read-only Outlook details, safe Outlook navigation, metadata presentation, and link suppression for private events.
+- API E2E coverage verifies Google events appear alongside Outlook events only for their owner, carry the Google Calendar source type and details payload, and that provider-scoped connection lookups never return another provider's connection.
+- API unit coverage verifies Google event mapping, private-event masking, unsafe-link removal, cancellations and Mentingo-copy exclusion; tenant-managed credentials and consent URL; OAuth-state binding and Microsoft-state rejection; required-scope, refresh-token and account-replacement checks; incremental pagination, out-of-window removal and expired sync-token recovery; reconnect behavior; push-channel rotation, non-fatal channel rejection and notification token validation; and outbound payloads, all-day dates, in-place updates, recreation, stale-event removal, managed-calendar reuse/creation and deleted-calendar handling.
+- Google Calendar web unit and web E2E coverage is not yet added; they should verify the settings card states and the read-only Google event details.
 - Outbound API coverage should verify Graph payloads, mapping idempotency, recipient deduplication, authorization failures, and dedicated-calendar deletion handling.

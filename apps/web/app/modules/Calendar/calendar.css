@@ -243,6 +243,31 @@
   box-shadow: 0 0 0 1px rgb(0 120 212 / 0.16);
 }
 
+.calendar-shell .fc .calendar-event--google_calendar {
+  border-color: color-mix(in srgb, #188038 30%, white);
+  border-left-color: #188038;
+  background: #e6f4ea;
+  color: #0d652d;
+}
+
+.calendar-shell .fc .calendar-event--google_calendar:hover {
+  border-color: color-mix(in srgb, #188038 46%, white);
+  background: #ceead6;
+  color: #0b5227;
+}
+
+.calendar-event__google-badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.1875rem;
+  background: white;
+  box-shadow: 0 0 0 1px rgb(24 128 56 / 0.16);
+}
+
 .calendar-shell .fc .fc-event-main {
   color: inherit;
 }

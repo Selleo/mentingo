@@ -149,8 +149,7 @@ describe("MicrosoftCalendarService synchronization", () => {
     expect(graph.getDeltaPage).toHaveBeenNthCalledWith(1, "delta-1", "access-token");
     expect(graph.getDeltaPage).toHaveBeenNthCalledWith(2, "delta-2", "access-token");
     expect(repository.upsertEvent).toHaveBeenCalledWith(
-      connection().id,
-      connection().userId,
+      expect.objectContaining({ id: connection().id, userId: connection().userId }),
       expect.objectContaining({ externalEventId: "event-1" }),
     );
     expect(repository.removeEvents).toHaveBeenCalledWith(connection().id, ["event-removed"]);

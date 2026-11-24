@@ -1,3 +1,4 @@
+import { GoogleCalendarCard } from "./GoogleCalendarCard";
 import { IntegrationApiKeysCard } from "./IntegrationApiKeysCard";
 import { MicrosoftCalendarCard } from "./MicrosoftCalendarCard";
 
@@ -9,6 +10,7 @@ export function IntegrationsTabContent({ canAccessIntegrationApi }: Integrations
   return (
     <>
       <MicrosoftCalendarCard />
+      <GoogleCalendarCard />
       {canAccessIntegrationApi && <IntegrationApiKeysCard />}
     </>
   );

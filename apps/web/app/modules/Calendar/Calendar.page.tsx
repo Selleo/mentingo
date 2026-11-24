@@ -3,13 +3,21 @@ import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { Navigate } from "@remix-run/react";
-import { CALENDAR_EVENT_SOURCE_TYPES, PERMISSIONS } from "@repo/shared";
+import {
+  CALENDAR_CONNECTION_PUBLIC_STATUSES,
+  CALENDAR_CONNECTION_STATUSES,
+  CALENDAR_EVENT_SOURCE_TYPES,
+  PERMISSIONS,
+} from "@repo/shared";
 import { RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useReducer, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
+import { useSyncGoogleCalendar } from "~/api/mutations/calendar/useSyncGoogleCalendar";
 import { useSyncMicrosoftCalendar } from "~/api/mutations/calendar/useSyncMicrosoftCalendar";
 import { useCalendarEvents } from "~/api/queries/calendar/useCalendarEvents";
+import { useGoogleCalendarConnection } from "~/api/queries/calendar/useGoogleCalendarConnection";
 import { useMicrosoftCalendarConnection } from "~/api/queries/calendar/useMicrosoftCalendarConnection";
 import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
@@ -53,6 +61,13 @@ import type { LinksFunction, MetaFunction } from "@remix-run/node";
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: calendarStyles }];
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.calendar");
+
+const isCalendarConnectionActive = (status: string | undefined) =>
+  status !== undefined && status !== CALENDAR_CONNECTION_PUBLIC_STATUSES.DISCONNECTED;
+
+const isCalendarConnectionSyncable = (status: string | undefined) =>
+  status === CALENDAR_CONNECTION_STATUSES.CONNECTED ||
+  status === CALENDAR_CONNECTION_STATUSES.SYNCING;
 
 const getBrowserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -112,17 +127,32 @@ function CalendarContent() {
   const { data: globalSettings } = useGlobalSettings();
   const { data: microsoftConnection } = useMicrosoftCalendarConnection();
   const { mutateAsync: syncCalendar, isPending: isSyncPending } = useSyncMicrosoftCalendar();
+  const { data: googleConnection } = useGoogleCalendarConnection();
+  const { mutateAsync: syncGoogleCalendar, isPending: isGoogleSyncPending } =
+    useSyncGoogleCalendar();
   const { hasAccess: hasLiveTrainingCreateAccess } = usePermissions({
     required: PERMISSIONS.LIVE_TRAINING_CREATE,
   });
   const timezone = useMemo(() => getBrowserTimezone(), []);
   const canCreateLiveTraining =
     Boolean(globalSettings?.liveTrainingEnabled) && hasLiveTrainingCreateAccess;
-  const canSyncMicrosoftCalendar =
-    microsoftConnection?.status === "connected" || microsoftConnection?.status === "syncing";
+  const canSyncMicrosoftCalendar = isCalendarConnectionSyncable(microsoftConnection?.status);
+  const canSyncGoogleCalendar = isCalendarConnectionSyncable(googleConnection?.status);
+  const isGoogleSyncing =
+    googleConnection?.status === CALENDAR_CONNECTION_STATUSES.SYNCING || isGoogleSyncPending;
+  const hasMicrosoftConnection = isCalendarConnectionActive(microsoftConnection?.status);
+  const hasGoogleConnection = isCalendarConnectionActive(googleConnection?.status);
+  const horizonNoticeKey = match({ hasMicrosoftConnection, hasGoogleConnection })
+    .with(
+      { hasMicrosoftConnection: true, hasGoogleConnection: true },
+      () => "calendarView.externalCalendars.horizonNotice",
+    )
+    .with({ hasGoogleConnection: true }, () => "calendarView.google.horizonNotice")
+    .otherwise(() => "calendarView.microsoft.horizonNotice");
   const visibleRange = calendarState.visibleRange;
   const showHorizonNotice = useMemo(() => {
-    if (!visibleRange || microsoftConnection?.status === "disconnected") return false;
+    if (!visibleRange) return false;
+    if (!hasMicrosoftConnection && !hasGoogleConnection) return false;
     const historyStart = new Date();
     historyStart.setDate(historyStart.getDate() - 30);
     const horizonEnd = new Date();
@@ -131,7 +161,7 @@ function CalendarContent() {
       Date.parse(visibleRange.start) < historyStart.getTime() ||
       Date.parse(visibleRange.end) > horizonEnd.getTime()
     );
-  }, [microsoftConnection?.status, visibleRange]);
+  }, [hasGoogleConnection, hasMicrosoftConnection, visibleRange]);
 
   const { data: events = [] } = useCalendarEvents(
     {
@@ -205,13 +235,21 @@ function CalendarContent() {
   const renderEventContent = (eventInfo: EventContentArg) => {
     const sourceType = eventInfo.event.extendedProps.sourceType as string;
     const isOutlook = sourceType === CALENDAR_EVENT_SOURCE_TYPES.MICROSOFT_OUTLOOK;
-    let sourceLabelKey = "calendarView.details.sourceType.courseDueDate";
-    if (sourceType === CALENDAR_EVENT_SOURCE_TYPES.LIVE_TRAINING) {
-      sourceLabelKey = "calendarView.details.sourceType.liveTraining";
-    }
-    if (isOutlook) {
-      sourceLabelKey = "calendarView.details.sourceType.microsoftOutlook";
-    }
+    const isGoogleCalendar = sourceType === CALENDAR_EVENT_SOURCE_TYPES.GOOGLE_CALENDAR;
+    const sourceLabelKey = match(sourceType)
+      .with(
+        CALENDAR_EVENT_SOURCE_TYPES.LIVE_TRAINING,
+        () => "calendarView.details.sourceType.liveTraining",
+      )
+      .with(
+        CALENDAR_EVENT_SOURCE_TYPES.MICROSOFT_OUTLOOK,
+        () => "calendarView.details.sourceType.microsoftOutlook",
+      )
+      .with(
+        CALENDAR_EVENT_SOURCE_TYPES.GOOGLE_CALENDAR,
+        () => "calendarView.details.sourceType.googleCalendar",
+      )
+      .otherwise(() => "calendarView.details.sourceType.courseDueDate");
     const sourceLabel = t(sourceLabelKey);
 
     return (
@@ -219,6 +257,11 @@ function CalendarContent() {
         {isOutlook && (
           <span className="calendar-event__microsoft-badge" aria-hidden="true">
             <Icon name="Microsoft" className="size-2.5" />
+          </span>
+        )}
+        {isGoogleCalendar && (
+          <span className="calendar-event__google-badge" aria-hidden="true">
+            <Icon name="Google" className="size-2.5" />
           </span>
         )}
         <span className="sr-only">{sourceLabel}: </span>
@@ -253,24 +296,44 @@ function CalendarContent() {
               <span className="size-2.5 rounded-sm bg-[#0078d4]" />
               {t("calendarView.details.sourceType.microsoftOutlook")}
             </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-sm bg-[#188038]" />
+              {t("calendarView.details.sourceType.googleCalendar")}
+            </span>
           </div>
-          {canSyncMicrosoftCalendar && (
-            <Button
-              variant="outline"
-              disabled={microsoftConnection?.status === "syncing" || isSyncPending}
-              onClick={() => syncCalendar()}
-              data-testid={CALENDAR_HANDLES.MICROSOFT_CALENDAR_SYNC}
-            >
-              <RefreshCw
-                className={cn(
-                  "mr-2 size-4",
-                  (microsoftConnection?.status === "syncing" || isSyncPending) && "animate-spin",
-                )}
-                aria-hidden="true"
-              />
-              {t("microsoftCalendar.action.sync")}
-            </Button>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {canSyncMicrosoftCalendar && (
+              <Button
+                variant="outline"
+                disabled={microsoftConnection?.status === "syncing" || isSyncPending}
+                onClick={() => syncCalendar()}
+                data-testid={CALENDAR_HANDLES.MICROSOFT_CALENDAR_SYNC}
+              >
+                <RefreshCw
+                  className={cn(
+                    "mr-2 size-4",
+                    (microsoftConnection?.status === "syncing" || isSyncPending) && "animate-spin",
+                  )}
+                  aria-hidden="true"
+                />
+                {t("microsoftCalendar.action.sync")}
+              </Button>
+            )}
+            {canSyncGoogleCalendar && (
+              <Button
+                variant="outline"
+                disabled={isGoogleSyncing}
+                onClick={() => syncGoogleCalendar()}
+                data-testid={CALENDAR_HANDLES.GOOGLE_CALENDAR_SYNC}
+              >
+                <RefreshCw
+                  className={cn("mr-2 size-4", isGoogleSyncing && "animate-spin")}
+                  aria-hidden="true"
+                />
+                {t("googleCalendar.action.syncCalendar")}
+              </Button>
+            )}
+          </div>
         </div>
 
         {microsoftConnection?.stale && (
@@ -283,13 +346,23 @@ function CalendarContent() {
           </div>
         )}
 
+        {googleConnection?.stale && (
+          <div
+            role="status"
+            className="rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-950"
+            data-testid={CALENDAR_HANDLES.GOOGLE_STALE_WARNING}
+          >
+            {t("calendarView.google.staleWarning")}
+          </div>
+        )}
+
         {showHorizonNotice && (
           <div
             role="status"
             className="rounded-md border border-[#0078d4]/20 bg-[#f5faff] px-3 py-2 text-sm text-[#004578]"
             data-testid={CALENDAR_HANDLES.HORIZON_NOTICE}
           >
-            {t("calendarView.microsoft.horizonNotice")}
+            {t(horizonNoticeKey)}
           </div>
         )}
 

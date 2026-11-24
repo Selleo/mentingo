@@ -1,22 +1,20 @@
 import type {
+  CalendarConnection,
+  CalendarConnectionCreateInput,
+  CalendarConnectionUpdate,
+  CalendarOutboundCandidate,
+  EncryptedCalendarRefreshToken,
+  MappedExternalCalendarEvent,
+} from "./calendar-connection.types";
+import type {
   MICROSOFT_CALENDAR_GRAPH_SENSITIVITIES,
   MICROSOFT_CALENDAR_GRAPH_SHOW_AS,
   MICROSOFT_CALENDAR_LIFECYCLE_EVENTS,
   MICROSOFT_CALENDAR_OAUTH_PURPOSE,
-  MicrosoftCalendarOutboundErrorCode,
-  MicrosoftCalendarOutboundSourceType,
 } from "../calendar.constants";
-import type {
-  CALENDAR_PROVIDERS,
-  MicrosoftCalendarConnectionStatus,
-  MicrosoftCalendarOutboundStatus,
-  OutlookEventAvailability,
-  OutlookEventSensitivity,
-} from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { calendarConnections } from "src/storage/schema";
 
-export type MicrosoftCalendarConnection = typeof calendarConnections.$inferSelect;
+export type MicrosoftCalendarConnection = CalendarConnection;
 
 export const MICROSOFT_CALENDAR_SYNC_REASONS = {
   INITIAL: "initial",
@@ -30,22 +28,9 @@ export const MICROSOFT_CALENDAR_SYNC_REASONS = {
 export type MicrosoftCalendarSyncReason =
   (typeof MICROSOFT_CALENDAR_SYNC_REASONS)[keyof typeof MICROSOFT_CALENDAR_SYNC_REASONS];
 
-export type EncryptedMicrosoftRefreshToken = {
-  refreshTokenCiphertext: string;
-  refreshTokenIv: string;
-  refreshTokenTag: string;
-  refreshTokenEncryptedDek: string;
-  refreshTokenEncryptedDekIv: string;
-  refreshTokenEncryptedDekTag: string;
-};
+export type EncryptedMicrosoftRefreshToken = EncryptedCalendarRefreshToken;
 
-export type MicrosoftCalendarConnectionCreateInput = {
-  userId: UUIDType;
-  provider: typeof CALENDAR_PROVIDERS.MICROSOFT;
-  accountId: string;
-  accountEmail: string;
-  encryptedRefreshToken: EncryptedMicrosoftRefreshToken;
-};
+export type MicrosoftCalendarConnectionCreateInput = CalendarConnectionCreateInput;
 
 export type MicrosoftCalendarSyncJobData = {
   tenantId: UUIDType;
@@ -60,20 +45,7 @@ export type MicrosoftCalendarOutboundJobData = {
   reason: MicrosoftCalendarSyncReason;
 };
 
-export type OutboundCandidate = {
-  calendarEventId: string;
-  title: string;
-  description: string;
-  startsAt: string;
-  endsAt: string;
-  allDay: boolean;
-  timezone: string;
-  location: string | null;
-  sourceType: MicrosoftCalendarOutboundSourceType;
-  groupName: string | null;
-  courseTitle: string | null;
-  recipientId: string;
-};
+export type OutboundCandidate = CalendarOutboundCandidate;
 
 export type MicrosoftCalendarOAuthState = {
   tenantId: UUIDType;
@@ -158,38 +130,6 @@ export type MicrosoftGraphNotificationBody = {
   value?: MicrosoftGraphNotification[];
 };
 
-export type MappedMicrosoftCalendarEvent = {
-  externalEventId: string;
-  title: string;
-  startsAt: string;
-  endsAt: string;
-  allDay: boolean;
-  timezone: string;
-  location: string | null;
-  isCancelled: boolean;
-  availability: OutlookEventAvailability;
-  sensitivity: OutlookEventSensitivity;
-  webLink: string | null;
-};
+export type MappedMicrosoftCalendarEvent = MappedExternalCalendarEvent;
 
-export type MicrosoftCalendarConnectionUpdate = Partial<{
-  accountId: string;
-  accountEmail: string;
-  status: MicrosoftCalendarConnectionStatus;
-  errorCode: string | null;
-  syncCursor: string | null;
-  syncWindowStart: string | null;
-  syncWindowEnd: string | null;
-  windowBuiltAt: string | null;
-  lastSuccessfulSyncAt: string | null;
-  lastSyncCompletedAt: string | null;
-  subscriptionId: string | null;
-  subscriptionClientState: string | null;
-  subscriptionExpiresAt: string | null;
-  outboundSyncEnabled: boolean;
-  outboundStatus: MicrosoftCalendarOutboundStatus;
-  outboundCalendarId: string | null;
-  outboundErrorCode: MicrosoftCalendarOutboundErrorCode | null;
-  lastOutboundSyncAt: string | null;
-}> &
-  Partial<EncryptedMicrosoftRefreshToken>;
+export type MicrosoftCalendarConnectionUpdate = CalendarConnectionUpdate;

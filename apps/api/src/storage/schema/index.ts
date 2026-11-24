@@ -18,7 +18,9 @@ import {
   LEARNING_PATH_CERTIFICATE_STATUSES,
   LEARNING_PATH_PROGRESS_STATUSES,
   LEARNING_PATH_STATUSES,
+  CALENDAR_CONNECTION_STATUSES,
   CALENDAR_EVENT_STATUSES,
+  CALENDAR_OUTBOUND_STATUSES,
   LIVE_TRAINING_DELIVERY_TYPES,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
   LIVE_TRAINING_MEMBER_ROLES,
@@ -37,8 +39,6 @@ import {
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
   COURSE_GENERATION_SYNC_STATUS,
-  MICROSOFT_CALENDAR_CONNECTION_STATUSES,
-  MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
   ANNOUNCEMENT_AUDIENCES,
   AI_MENTOR_ROLEPLAY_DIFFICULTY,
   AI_MENTOR_TEACHING_STYLE,
@@ -75,7 +75,9 @@ import {
   type LearningPathStatus,
   type CertificateArchiveReason,
   type CertificateStatus,
+  type CalendarConnectionStatus,
   type CalendarEventStatus,
+  type CalendarOutboundStatus,
   type CalendarProvider,
   type AnnouncementEmailTemplate,
   type AnnouncementSourceType,
@@ -90,8 +92,6 @@ import {
   type LiveTrainingSessionStatus,
   type LiveTrainingStatus,
   type LiveTrainingVisibilityScope,
-  type MicrosoftCalendarConnectionStatus,
-  type MicrosoftCalendarOutboundStatus,
   type OutlookEventAvailability,
   type OutlookEventSensitivity,
   type AnnouncementAudience,
@@ -156,7 +156,7 @@ import type {
   EncryptedAccountActionToken,
   NotificationAccountActionKind,
 } from "src/automation-execution/automation-execution.types";
-import type { MicrosoftCalendarOutboundErrorCode } from "src/calendar/calendar.constants";
+import type { CalendarOutboundErrorCode } from "src/calendar/calendar.constants";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type {
   CourseTransferKind,
@@ -576,9 +576,9 @@ export const calendarConnections = pgTable(
     refreshTokenEncryptedDekIv: text("refresh_token_encrypted_dek_iv").notNull(),
     refreshTokenEncryptedDekTag: text("refresh_token_encrypted_dek_tag").notNull(),
     status: text("status")
-      .$type<MicrosoftCalendarConnectionStatus>()
+      .$type<CalendarConnectionStatus>()
       .notNull()
-      .default(MICROSOFT_CALENDAR_CONNECTION_STATUSES.SYNCING),
+      .default(CALENDAR_CONNECTION_STATUSES.SYNCING),
     errorCode: text("error_code"),
     syncCursor: text("sync_cursor"),
     syncWindowStart: timestampWithTimezone({ name: "sync_window_start" }),
@@ -587,17 +587,16 @@ export const calendarConnections = pgTable(
     lastSuccessfulSyncAt: timestampWithTimezone({ name: "last_successful_sync_at" }),
     lastSyncCompletedAt: timestampWithTimezone({ name: "last_sync_completed_at" }),
     subscriptionId: text("subscription_id"),
+    subscriptionResourceId: text("subscription_resource_id"),
     subscriptionClientState: text("subscription_client_state"),
     subscriptionExpiresAt: timestampWithTimezone({ name: "subscription_expires_at" }),
     outboundSyncEnabled: boolean("outbound_sync_enabled").notNull().default(false),
     outboundStatus: text("outbound_status")
-      .$type<MicrosoftCalendarOutboundStatus>()
+      .$type<CalendarOutboundStatus>()
       .notNull()
-      .default(MICROSOFT_CALENDAR_OUTBOUND_STATUSES.DISABLED),
+      .default(CALENDAR_OUTBOUND_STATUSES.DISABLED),
     outboundCalendarId: text("outbound_calendar_id"),
-    outboundErrorCode: text(
-      "outbound_error_code",
-    ).$type<MicrosoftCalendarOutboundErrorCode | null>(),
+    outboundErrorCode: text("outbound_error_code").$type<CalendarOutboundErrorCode | null>(),
     lastOutboundSyncAt: timestampWithTimezone({ name: "last_outbound_sync_at" }),
     tenantId,
   },

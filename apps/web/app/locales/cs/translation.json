@@ -1199,6 +1199,69 @@
       "authorization_failed": "Autorizace Kalendáře Microsoft selhala. Zkuste to znovu."
     }
   },
+  "googleCalendar": {
+    "title": "Kalendář Google",
+    "description": "Přeneste svůj hlavní kalendář Google do Mentinga. Kalendář Google zůstává zdrojem pravdy.",
+    "account": "Připojený účet",
+    "lastSync": "Poslední úspěšná synchronizace",
+    "status": {
+      "disconnected": "Odpojeno",
+      "syncing": "Synchronizace",
+      "connected": "Připojeno",
+      "error": "Vyžaduje pozornost",
+      "reconnect_required": "Vyžadováno opětovné připojení"
+    },
+    "action": {
+      "connect": "Připojit Kalendář Google",
+      "sync": "Synchronizovat nyní",
+      "syncCalendar": "Synchronizovat Kalendář Google",
+      "reconnect": "Znovu připojit",
+      "replace": "Použít jiný účet",
+      "disconnect": "Odpojit",
+      "continue": "Pokračovat na Google"
+    },
+    "errors": {
+      "unavailable": "Integrace Kalendáře Google není nakonfigurována.",
+      "invalidState": "Autorizační odkaz Kalendáře Google je neplatný nebo vypršel. Zkuste to prosím znovu.",
+      "refreshTokenMissing": "Google neudělil offline přístup. Připojte prosím Kalendář Google znovu.",
+      "connectionNotFound": "Kalendář Google není připojen.",
+      "reconnectRequired": "Před pokračováním znovu připojte svůj účet Google.",
+      "syncInProgress": "Kalendář Google se již synchronizuje.",
+      "syncCooldown": "Před spuštěním další synchronizace prosím počkejte."
+    },
+    "stale": {
+      "title": "Data kalendáře mohou být zastaralá",
+      "description": "Importované události zůstávají viditelné. Zkuste synchronizaci zopakovat nebo znovu připojte účet Google."
+    },
+    "disconnect": {
+      "title": "Odpojit Kalendář Google?",
+      "description": "Tím se z Mentinga odstraní importované události z Kalendáře Google. Váš Kalendář Google se nezmění."
+    },
+    "replace": {
+      "title": "Připojit jiný účet Google?",
+      "description": "Připojení pro {{email}} a jeho importované události budou odstraněny před synchronizací nového účtu."
+    },
+    "outbound": {
+      "title": "Synchronizovat události Mentinga",
+      "description": "Exportovat živá školení a termíny kurzů do samostatného kalendáře Mentingo v Kalendáři Google.",
+      "calendarDeleted": "Kalendář Mentingo byl v Kalendáři Google smazán. Znovu zapněte export a vytvořte jej znovu."
+    },
+    "toast": {
+      "syncQueued": "Synchronizace Kalendáře Google byla spuštěna.",
+      "syncFailed": "Kalendář Google se nepodařilo synchronizovat.",
+      "disconnected": "Kalendář Google byl odpojen.",
+      "disconnectFailed": "Kalendář Google se nepodařilo odpojit.",
+      "outboundEnabled": "Události Mentinga budou exportovány do Kalendáře Google.",
+      "outboundDisabled": "Export událostí Mentinga byl vypnut.",
+      "outboundFailed": "Události Mentinga se nepodařilo exportovat."
+    },
+    "oauth": {
+      "connected": "Kalendář Google se připojuje a první synchronizace byla spuštěna.",
+      "replacement_required": "Před připojením jiného účtu Google potvrďte výměnu účtu.",
+      "permissions_missing": "Pro připojení kalendáře povolte všechna požadovaná oprávnění Kalendáře Google.",
+      "authorization_failed": "Autorizace Kalendáře Google se nezdařila. Zkuste to prosím znovu."
+    }
+  },
   "calendarView": {
     "title": "Kalendář",
     "description": "Zobrazit naplánované vzdělávací události.",
@@ -1211,6 +1274,13 @@
     "microsoft": {
       "staleWarning": "Události Microsoft mohou být zastaralé. Připojte účet znovu nebo opakujte akci v nastavení účtu.",
       "horizonNotice": "Události Microsoft se importují od 30 dnů zpětně do 6 měsíců dopředu, takže tento rozsah může být neúplný."
+    },
+    "google": {
+      "staleWarning": "Události z Kalendáře Google mohou být zastaralé. Připojte se znovu nebo to zkuste znovu v nastavení účtu.",
+      "horizonNotice": "Události z Kalendáře Google se importují od 30 dnů zpět do 6 měsíců dopředu, takže tento rozsah může být neúplný."
+    },
+    "externalCalendars": {
+      "horizonNotice": "Události z Outlooku a Kalendáře Google se importují od 30 dnů zpět do 6 měsíců dopředu, takže tento rozsah může být neúplný."
     },
     "view": {
       "month": "Měsíc",
@@ -1296,12 +1366,14 @@
         "edit": "Edit event",
         "goToLiveTraining": "Go to Živé školení",
         "goToCourse": "Přejít na kurz",
-        "openOutlook": "Otevřít v Outlooku"
+        "openOutlook": "Otevřít v Outlooku",
+        "openGoogleCalendar": "Otevřít v Kalendáři Google"
       },
       "sourceType": {
         "liveTraining": "Živé školení",
         "courseDueDate": "Termín kurzu",
-        "microsoftOutlook": "Microsoft Outlook"
+        "microsoftOutlook": "Microsoft Outlook",
+        "googleCalendar": "Kalendář Google"
       },
       "field": {
         "time": "Time",
@@ -2662,6 +2734,10 @@
         "title": "Kalendář Microsoft",
         "description": "Synchronizujte živá školení s kalendáři Microsoft Outlook."
       },
+      "googleCalendar": {
+        "title": "Kalendář Google",
+        "description": "Synchronizujte kalendáře Google a exportujte živá školení a termíny kurzů do Kalendáře Google."
+      },
       "payments": {
         "title": "Platby",
         "description": "Klíče Stripe pro prodej kurzů a ověřování platebních webhooků."
@@ -2709,6 +2785,12 @@
       },
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Tajný klíč klienta kalendáře Microsoft"
+      },
+      "GOOGLE_CALENDAR_CLIENT_ID": {
+        "label": "Client ID Kalendáře Google"
+      },
+      "GOOGLE_CALENDAR_CLIENT_SECRET": {
+        "label": "Client Secret Kalendáře Google"
       },
       "OPENAI_API_KEY": {
         "label": "Klíč OpenAI API"

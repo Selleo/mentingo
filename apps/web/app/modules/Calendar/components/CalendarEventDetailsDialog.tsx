@@ -16,12 +16,14 @@ import { CALENDAR_HANDLES } from "../../../../e2e/data/live-training/handles";
 
 import { CalendarCourseDueDateEventDetailsDialog } from "./CalendarCourseDueDateEventDetailsDialog";
 import { CalendarEventDetailsSkeleton } from "./CalendarEventDetailsSkeleton";
+import { CalendarGoogleEventDetailsDialog } from "./CalendarGoogleEventDetailsDialog";
 import { CalendarLiveTrainingEventDetailsDialog } from "./CalendarLiveTrainingEventDetailsDialog";
 import { CalendarOutlookEventDetailsDialog } from "./CalendarOutlookEventDetailsDialog";
 
 import type {
   CalendarEventDetails,
   CourseDueDateCalendarEventDetails,
+  GoogleCalendarEventDetails,
   LiveTrainingCalendarEventDetails,
   OutlookCalendarEventDetails,
 } from "../calendarEventDetails.types";
@@ -52,6 +54,12 @@ const isOutlookEventDetails = (
 ): eventDetails is OutlookCalendarEventDetails =>
   eventDetails.sourceType === CALENDAR_EVENT_SOURCE_TYPES.MICROSOFT_OUTLOOK &&
   "outlookCalendar" in eventDetails.payload;
+
+const isGoogleEventDetails = (
+  eventDetails: CalendarEventDetails,
+): eventDetails is GoogleCalendarEventDetails =>
+  eventDetails.sourceType === CALENDAR_EVENT_SOURCE_TYPES.GOOGLE_CALENDAR &&
+  "googleCalendar" in eventDetails.payload;
 
 function CalendarEventDetailsLoadingContent() {
   return (
@@ -129,6 +137,14 @@ export function CalendarEventDetailsDialog({
       .when(isOutlookEventDetails, (outlookEventDetails) => (
         <CalendarOutlookEventDetailsDialog
           eventDetails={outlookEventDetails}
+          insideDialog
+          open={open}
+          onOpenChange={onOpenChange}
+        />
+      ))
+      .when(isGoogleEventDetails, (googleEventDetails) => (
+        <CalendarGoogleEventDetailsDialog
+          eventDetails={googleEventDetails}
           insideDialog
           open={open}
           onOpenChange={onOpenChange}

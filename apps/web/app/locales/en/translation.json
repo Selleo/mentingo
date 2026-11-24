@@ -1194,6 +1194,69 @@
       "authorization_failed": "Microsoft Calendar authorization failed. Please try again."
     }
   },
+  "googleCalendar": {
+    "title": "Google Calendar",
+    "description": "Bring your primary Google calendar into Mentingo. Google Calendar remains the source of truth.",
+    "account": "Connected account",
+    "lastSync": "Last successful sync",
+    "status": {
+      "disconnected": "Disconnected",
+      "syncing": "Syncing",
+      "connected": "Connected",
+      "error": "Needs attention",
+      "reconnect_required": "Reconnect required"
+    },
+    "action": {
+      "connect": "Connect Google Calendar",
+      "sync": "Sync now",
+      "syncCalendar": "Sync Google Calendar",
+      "reconnect": "Reconnect",
+      "replace": "Use another account",
+      "disconnect": "Disconnect",
+      "continue": "Continue to Google"
+    },
+    "errors": {
+      "unavailable": "Google Calendar integration is not configured.",
+      "invalidState": "The Google Calendar authorization link is invalid or has expired. Please try again.",
+      "refreshTokenMissing": "Google did not grant offline access. Please connect Google Calendar again.",
+      "connectionNotFound": "Google Calendar is not connected.",
+      "reconnectRequired": "Reconnect your Google account before continuing.",
+      "syncInProgress": "Google Calendar is already synchronizing.",
+      "syncCooldown": "Please wait before starting another sync."
+    },
+    "stale": {
+      "title": "Calendar data may be out of date",
+      "description": "Your imported events remain visible. Try syncing again or reconnect your Google account."
+    },
+    "disconnect": {
+      "title": "Disconnect Google Calendar?",
+      "description": "This removes imported Google Calendar events from Mentingo. Your Google Calendar is not changed."
+    },
+    "replace": {
+      "title": "Connect a different Google account?",
+      "description": "The connection for {{email}} and its imported events will be removed before the new account is synchronized."
+    },
+    "outbound": {
+      "title": "Sync Mentingo events",
+      "description": "Export live trainings and course due dates to a separate Mentingo calendar in Google Calendar.",
+      "calendarDeleted": "The Mentingo calendar was deleted in Google Calendar. Turn export on again to recreate it."
+    },
+    "toast": {
+      "syncQueued": "Google Calendar sync has started.",
+      "syncFailed": "Google Calendar could not be synchronized.",
+      "disconnected": "Google Calendar has been disconnected.",
+      "disconnectFailed": "Google Calendar could not be disconnected.",
+      "outboundEnabled": "Mentingo events will be exported to Google Calendar.",
+      "outboundDisabled": "Mentingo event export has been disabled.",
+      "outboundFailed": "Mentingo events could not be exported."
+    },
+    "oauth": {
+      "connected": "Google Calendar is connecting and the first sync has started.",
+      "replacement_required": "Confirm account replacement before connecting a different Google account.",
+      "permissions_missing": "Allow all requested Google Calendar permissions to connect your calendar.",
+      "authorization_failed": "Google Calendar authorization failed. Please try again."
+    }
+  },
   "calendarView": {
     "title": "Calendar",
     "description": "View scheduled learning events.",
@@ -1206,6 +1269,13 @@
     "microsoft": {
       "staleWarning": "Microsoft events may be out of date. Reconnect or retry from Account settings.",
       "horizonNotice": "Microsoft events are imported from 30 days ago through 6 months ahead, so this range may be incomplete."
+    },
+    "google": {
+      "staleWarning": "Google Calendar events may be out of date. Reconnect or retry from Account settings.",
+      "horizonNotice": "Google Calendar events are imported from 30 days ago through 6 months ahead, so this range may be incomplete."
+    },
+    "externalCalendars": {
+      "horizonNotice": "Outlook and Google Calendar events are imported from 30 days ago through 6 months ahead, so this range may be incomplete."
     },
     "view": {
       "month": "Month",
@@ -1291,12 +1361,14 @@
         "edit": "Edit event",
         "goToLiveTraining": "Go to Live Training",
         "goToCourse": "Go to course",
-        "openOutlook": "Open in Outlook"
+        "openOutlook": "Open in Outlook",
+        "openGoogleCalendar": "Open in Google Calendar"
       },
       "sourceType": {
         "liveTraining": "Live Training",
         "courseDueDate": "Course due date",
-        "microsoftOutlook": "Microsoft Outlook"
+        "microsoftOutlook": "Microsoft Outlook",
+        "googleCalendar": "Google Calendar"
       },
       "field": {
         "time": "Time",
@@ -2657,6 +2729,10 @@
         "title": "Microsoft Calendar",
         "description": "Sync live training sessions to Microsoft Outlook calendars."
       },
+      "googleCalendar": {
+        "title": "Google Calendar",
+        "description": "Sync Google calendars and export live trainings and course due dates to Google Calendar."
+      },
       "payments": {
         "title": "Payments",
         "description": "Stripe keys for selling courses and verifying payment webhooks."
@@ -2704,6 +2780,12 @@
       },
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Microsoft Calendar Client Secret"
+      },
+      "GOOGLE_CALENDAR_CLIENT_ID": {
+        "label": "Google Calendar Client ID"
+      },
+      "GOOGLE_CALENDAR_CLIENT_SECRET": {
+        "label": "Google Calendar Client Secret"
       },
       "OPENAI_API_KEY": {
         "label": "OpenAI API Key"

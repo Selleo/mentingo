@@ -1193,6 +1193,69 @@
       "authorization_failed": "Microsoft kalendoriaus autorizacija nepavyko. Bandykite dar kartą."
     }
   },
+  "googleCalendar": {
+    "title": "Google kalendorius",
+    "description": "Perkelkite savo pagrindinį Google kalendorių į Mentingo. Google kalendorius išlieka tiesos šaltiniu.",
+    "account": "Prijungta paskyra",
+    "lastSync": "Paskutinis sėkmingas sinchronizavimas",
+    "status": {
+      "disconnected": "Atjungta",
+      "syncing": "Sinchronizuojama",
+      "connected": "Prijungta",
+      "error": "Reikia dėmesio",
+      "reconnect_required": "Reikia prisijungti iš naujo"
+    },
+    "action": {
+      "connect": "Prijungti Google kalendorių",
+      "sync": "Sinchronizuoti dabar",
+      "syncCalendar": "Sinchronizuoti Google kalendorių",
+      "reconnect": "Prijungti iš naujo",
+      "replace": "Naudoti kitą paskyrą",
+      "disconnect": "Atjungti",
+      "continue": "Tęsti Google"
+    },
+    "errors": {
+      "unavailable": "Google kalendoriaus integracija nesukonfigūruota.",
+      "invalidState": "Google kalendoriaus autorizacijos nuoroda neteisinga arba nebegalioja. Bandykite dar kartą.",
+      "refreshTokenMissing": "Google nesuteikė prieigos neprisijungus. Prijunkite Google kalendorių iš naujo.",
+      "connectionNotFound": "Google kalendorius neprijungtas.",
+      "reconnectRequired": "Prieš tęsdami iš naujo prijunkite savo Google paskyrą.",
+      "syncInProgress": "Google kalendorius jau sinchronizuojamas.",
+      "syncCooldown": "Palaukite prieš pradėdami kitą sinchronizavimą."
+    },
+    "stale": {
+      "title": "Kalendoriaus duomenys gali būti pasenę",
+      "description": "Importuoti įvykiai lieka matomi. Pabandykite sinchronizuoti dar kartą arba iš naujo prijunkite Google paskyrą."
+    },
+    "disconnect": {
+      "title": "Atjungti Google kalendorių?",
+      "description": "Bus pašalinti iš Google kalendoriaus importuoti įvykiai iš Mentingo. Jūsų Google kalendorius nebus pakeistas."
+    },
+    "replace": {
+      "title": "Prijungti kitą Google paskyrą?",
+      "description": "Ryšys su {{email}} ir jo importuoti įvykiai bus pašalinti prieš sinchronizuojant naują paskyrą."
+    },
+    "outbound": {
+      "title": "Sinchronizuoti Mentingo įvykius",
+      "description": "Eksportuokite tiesioginius mokymus ir kursų terminus į atskirą Mentingo kalendorių Google kalendoriuje.",
+      "calendarDeleted": "Mentingo kalendorius buvo ištrintas Google kalendoriuje. Vėl įjunkite eksportą, kad jis būtų sukurtas iš naujo."
+    },
+    "toast": {
+      "syncQueued": "Google kalendoriaus sinchronizavimas pradėtas.",
+      "syncFailed": "Nepavyko sinchronizuoti Google kalendoriaus.",
+      "disconnected": "Google kalendorius atjungtas.",
+      "disconnectFailed": "Nepavyko atjungti Google kalendoriaus.",
+      "outboundEnabled": "Mentingo įvykiai bus eksportuojami į Google kalendorių.",
+      "outboundDisabled": "Mentingo įvykių eksportas išjungtas.",
+      "outboundFailed": "Nepavyko eksportuoti Mentingo įvykių."
+    },
+    "oauth": {
+      "connected": "Google kalendorius jungiamas, pradėtas pirmasis sinchronizavimas.",
+      "replacement_required": "Prieš prijungdami kitą Google paskyrą, patvirtinkite paskyros pakeitimą.",
+      "permissions_missing": "Norėdami prijungti kalendorių, suteikite visus prašomus Google kalendoriaus leidimus.",
+      "authorization_failed": "Google kalendoriaus autorizacija nepavyko. Bandykite dar kartą."
+    }
+  },
   "calendarView": {
     "title": "Kalendorius",
     "description": "Peržiūrėkite suplanuotus mokymosi įvykius.",
@@ -1205,6 +1268,13 @@
     "microsoft": {
       "staleWarning": "Microsoft įvykiai gali būti pasenę. Prijunkite iš naujo arba kartokite paskyros nustatymuose.",
       "horizonNotice": "Microsoft įvykiai importuojami nuo 30 dienų praeityje iki 6 mėnesių į priekį, todėl šis laikotarpis gali būti nepilnas."
+    },
+    "google": {
+      "staleWarning": "Google kalendoriaus įvykiai gali būti pasenę. Prisijunkite iš naujo arba bandykite dar kartą paskyros nustatymuose.",
+      "horizonNotice": "Google kalendoriaus įvykiai importuojami nuo 30 dienų atgal iki 6 mėnesių į priekį, todėl šis laikotarpis gali būti neišsamus."
+    },
+    "externalCalendars": {
+      "horizonNotice": "Outlook ir Google kalendoriaus įvykiai importuojami nuo 30 dienų atgal iki 6 mėnesių į priekį, todėl šis laikotarpis gali būti neišsamus."
     },
     "view": {
       "month": "Mėnuo",
@@ -1290,12 +1360,14 @@
         "edit": "Edit event",
         "goToLiveTraining": "Go to Tiesioginiai mokymai",
         "goToCourse": "Eiti į kursą",
-        "openOutlook": "Atidaryti Outlook"
+        "openOutlook": "Atidaryti Outlook",
+        "openGoogleCalendar": "Atidaryti Google kalendoriuje"
       },
       "sourceType": {
         "liveTraining": "Tiesioginiai mokymai",
         "courseDueDate": "Kurso terminas",
-        "microsoftOutlook": "Microsoft Outlook"
+        "microsoftOutlook": "Microsoft Outlook",
+        "googleCalendar": "Google kalendorius"
       },
       "field": {
         "time": "Time",
@@ -2656,6 +2728,10 @@
         "title": "Microsoft kalendorius",
         "description": "Sinchronizuokite tiesioginius mokymus su Microsoft Outlook kalendoriais."
       },
+      "googleCalendar": {
+        "title": "Google kalendorius",
+        "description": "Sinchronizuokite Google kalendorius ir eksportuokite tiesioginius mokymus bei kursų terminus į Google kalendorių."
+      },
       "payments": {
         "title": "Mokėjimai",
         "description": "Stripe raktai kursams parduoti ir mokėjimų webhookams tikrinti."
@@ -2703,6 +2779,12 @@
       },
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "„Microsoft“ kalendoriaus kliento paslaptis"
+      },
+      "GOOGLE_CALENDAR_CLIENT_ID": {
+        "label": "Google kalendoriaus Client ID"
+      },
+      "GOOGLE_CALENDAR_CLIENT_SECRET": {
+        "label": "Google kalendoriaus Client Secret"
       },
       "OPENAI_API_KEY": {
         "label": "OpenAI API raktas"
