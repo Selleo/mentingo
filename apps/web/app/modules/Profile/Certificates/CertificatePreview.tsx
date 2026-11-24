@@ -147,6 +147,7 @@ const CertificatePreview = ({
             lang={selectedLanguage}
             colorTheme={colorTheme}
             certificateKind={certificateKind}
+            certificateId={certificateId}
           />
         </div>
       </div>

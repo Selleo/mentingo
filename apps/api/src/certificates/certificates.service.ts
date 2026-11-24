@@ -735,6 +735,7 @@ export class CertificatesService implements OnModuleDestroy {
       backgroundImageUrl,
       lang: shareLanguage,
       isDownload: true,
+      certificateId,
       colorTheme: {
         titleColor: accentColor,
         certifyTextColor: accentColor,
@@ -992,6 +993,7 @@ export class CertificatesService implements OnModuleDestroy {
       signatureImageUrl: context.certificateSignatureUrl,
       backgroundImageUrl: context.certificateBackgroundUrl,
       lang: context.language,
+      certificateId: context.certificate.id,
       colorTheme: {
         titleColor: accentColor,
         certifyTextColor: accentColor,
@@ -1059,7 +1061,7 @@ export class CertificatesService implements OnModuleDestroy {
     certificateId: UUIDType,
     language: SupportedLanguages,
   ): string {
-    return `${tenantId}/certificate-share/v4/${certificateId}/${language}.png`;
+    return `${tenantId}/certificate-share/v5/${certificateId}/${language}.png`;
   }
 
   private normalizeLanguage(language?: string): SupportedLanguages {
