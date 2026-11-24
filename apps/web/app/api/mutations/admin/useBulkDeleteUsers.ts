@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
 import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
+import { invalidateTenantUserCountQueries } from "~/api/utils/invalidateTenantUserCountQueries";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -29,6 +30,7 @@ export function useBulkDeleteUsers() {
       await queryClient.invalidateQueries({ queryKey: ["users"] });
       await queryClient.invalidateQueries(globalSettingsQueryOptions);
       await invalidateLearningPathEnrollmentData();
+      await invalidateTenantUserCountQueries();
       await invalidateCourseStatisticsQueries();
 
       return response.data;

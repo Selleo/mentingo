@@ -68,6 +68,7 @@ import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
+import { UserLimitService } from "src/user/services/user-limit.service";
 import {
   USER_CREATION_FLOW_TYPE,
   type CreateUserContext,
@@ -155,6 +156,7 @@ export class UserService {
     private readonly wsGateway: WsGateway,
     @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
     private readonly notificationAccountActionService: NotificationAccountActionService,
+    private readonly userLimitService: UserLimitService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -439,6 +441,14 @@ export class UserService {
         ? await trx.update(users).set(userData).where(eq(users.id, id)).returning()
         : [existingUser.users];
 
+      if (existingUser.users.archived && !updatedUser.archived) {
+        await this.userLimitService.enforceTenantUserLimit(updatedUser.tenantId, trx);
+      }
+
+      if (!existingUser.users.archived && updatedUser.archived) {
+        await this.userLimitService.syncTenantUserCapacityAlert(updatedUser.tenantId, trx);
+      }
+
       const { avatarReference, ...userWithoutAvatar } = updatedUser;
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
 
@@ -686,6 +696,8 @@ export class UserService {
         .where(eq(users.id, id))
         .returning();
 
+      await this.userLimitService.syncTenantUserCapacityAlert(actor.tenantId, trx);
+
       if (userSnapshot) {
         await this.outboxPublisher.publish(
           new DeleteUserEvent({
@@ -752,6 +764,8 @@ export class UserService {
             .where(eq(users.id, id)),
         ),
       );
+
+      await this.userLimitService.syncTenantUserCapacityAlert(actor.tenantId, trx);
 
       await Promise.all(
         usersSnapshots.map((snapshot, index) => {
@@ -870,6 +884,8 @@ export class UserService {
     const [createdUser] = await trx.insert(users).values(userData).returning();
 
     if (!createdUser) throw new InternalServerErrorException("common.toast.somethingWentWrong");
+
+    await this.userLimitService.enforceTenantUserLimit(createdUser.tenantId, trx);
 
     await this.insertUserRoleAssignmentsForNewUser(
       [{ userId: createdUser.id, tenantId: createdUser.tenantId, roleSlugs }],
@@ -1063,11 +1079,17 @@ export class UserService {
 
     const usersToArchiveIds = usersToArchive.map(({ id }) => id);
 
-    const archivedUsers = await this.db
-      .update(users)
-      .set({ archived: true })
-      .where(inArray(users.id, usersToArchiveIds))
-      .returning();
+    const archivedUsers = await this.db.transaction(async (trx) => {
+      const archivedUserRows = await trx
+        .update(users)
+        .set({ archived: true })
+        .where(inArray(users.id, usersToArchiveIds))
+        .returning();
+
+      await this.userLimitService.syncTenantUserCapacityAlert(archivedUserRows[0].tenantId, trx);
+
+      return archivedUserRows;
+    });
 
     await this.outboxPublisher.publish(new ArchiveUsersEvent(usersToArchiveIds));
 

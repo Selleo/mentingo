@@ -349,7 +349,8 @@
       "quiz_attempt_graded": "Quiz évalué par un évaluateur",
       "quiz_grading_digest": "Nouvelles réponses en attente d’évaluation (quotidien)",
       "forum_mention": "Utilisateur mentionné dans un sujet du forum",
-      "discussion_reply": "Nouvelles réponses dans une discussion (regroupées)"
+      "discussion_reply": "Nouvelles réponses dans une discussion (regroupées)",
+      "tenant_user_capacity": "Alerte de capacité d'utilisateurs"
     },
     "errors": {
       "incompleteButton": "Saisissez le libellé du bouton et son URL.",
@@ -4049,7 +4050,8 @@
   },
   "user": {
     "error": {
-      "archived": "Votre compte a été archivé."
+      "archived": "Votre compte a été archivé.",
+      "userLimitReached": "Votre organisation a atteint sa limite d'utilisateurs. Archivez ou supprimez des utilisateurs, ou contactez le support pour augmenter la limite."
     }
   },
   "studentCoursesView": {
@@ -5886,8 +5888,6 @@
       "placeholder": "Rechercher des organisations..."
     },
     "table": {
-      "name": "Nom",
-      "host": "Hôte",
       "status": "Statut",
       "managing": "Gérer",
       "lastActivity": "Dernière activité",
@@ -5905,7 +5905,14 @@
         "title": "Actions",
         "enterSupportMode": "Passer en mode assistance",
         "impersonateUser": "Agir en tant qu'utilisateur"
-      }
+      },
+      "organization": "Organisation",
+      "accessEndsAt": "Fin de l'accès",
+      "unlimitedAccess": "Illimité",
+      "userCapacity": "Capacité d'utilisateurs",
+      "userCapacityValue": "{{used}} / {{allowed}}",
+      "userCapacityUnlimitedValue": "{{used}} / ∞",
+      "accessEndedAgo": "terminé {{relativeTime}}"
     },
     "activityTrend": {
       "noActivity": "Aucune activité",
@@ -5962,14 +5969,22 @@
         "firstAdmin": "Premier administrateur"
       },
       "accessEndsAtPlaceholder": "Accès illimité",
-      "accessEndsAtClear": "Supprimer la date de fin"
+      "accessEndsAtClear": "Supprimer la date de fin",
+      "maxUsers": "Nombre maximal d'utilisateurs",
+      "maxUsersHint": "Les utilisateurs archivés et supprimés ne comptent pas. Laissez vide pour aucune limite.",
+      "maxUsersPlaceholder": "Sans limite",
+      "maxUsersOverflowPercentage": "Dépassement autorisé (%)",
+      "maxUsersOverflowPercentageHint": "Utilisateurs supplémentaires au-delà du maximum, par ex. 200 utilisateurs + 10 % autorise 220.",
+      "userLimitBelowUsage": "Cette organisation compte {{activeUsersCount}} utilisateurs actifs, mais cette limite en autorise {{allowedUsersCount}}. Personne ne perd l'accès, mais il sera impossible d'ajouter ou de désarchiver des utilisateurs tant que {{excessUsersCount}} n'auront pas été archivés. Les administrateurs seront informés."
     },
     "validation": {
       "nameRequired": "Le nom est requis",
       "hostInvalid": "L'hôte doit être une URL valide",
       "adminEmailRequired": "L'adresse e-mail de l'administrateur est requise",
       "adminFirstNameRequired": "Le prénom de l'administrateur est requis",
-      "adminLastNameRequired": "Le nom de famille de l'administrateur est requis"
+      "adminLastNameRequired": "Le nom de famille de l'administrateur est requis",
+      "maxUsersInvalid": "Le nombre maximal d'utilisateurs doit être un entier d'au moins 1",
+      "maxUsersOverflowPercentageInvalid": "Le dépassement doit être un entier de 0 à 100"
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organisation créée avec succès",
@@ -7925,7 +7940,8 @@
       "quizAttemptGraded": "Quiz évalué",
       "quizGradingDigest": "Récapitulatif de la file d’évaluation",
       "forumUserMentioned": "Mention sur le forum",
-      "discussionReply": "Nouvelles réponses dans une discussion"
+      "discussionReply": "Nouvelles réponses dans une discussion",
+      "tenantUserCapacity": "Alerte de capacité d'utilisateurs"
     },
     "recipients": {
       "title": "Destinataires",
@@ -7976,7 +7992,8 @@
         "quiz_attempt_graded": "L’apprenant dont les réponses au quiz ont été évaluées.",
         "quiz_grading_digest": "Les utilisateurs pouvant évaluer les réponses aux quiz.",
         "forum_mention": "Les utilisateurs mentionnés dans le message du forum.",
-        "discussion_reply": "Les participants du fil ou du sujet qui n'ont pas lu les réponses dans l'application."
+        "discussion_reply": "Les participants du fil ou du sujet qui n'ont pas lu les réponses dans l'application.",
+        "tenant_user_capacity": "Administrateurs actifs de l'organisation."
       }
     },
     "mapping": {
@@ -8135,7 +8152,13 @@
       "latestReply": "Dernière réponse",
       "discussionUrl": "Lien vers la discussion",
       "unsubscribeUrl": "Lien de désabonnement",
-      "unfollowUrl": "Lien pour ne plus suivre"
+      "unfollowUrl": "Lien pour ne plus suivre",
+      "capacityTitle": "Titre de l'alerte de capacité",
+      "capacityMessage": "Message de l'alerte de capacité",
+      "activeUsersCount": "Utilisateurs actifs",
+      "maxUsers": "Utilisateurs de l'offre",
+      "allowedUsersCount": "Utilisateurs autorisés (avec dépassement)",
+      "usersUrl": "Lien vers la page des utilisateurs"
     },
     "simulation": {
       "title": "Résultat de la simulation",

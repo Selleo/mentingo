@@ -16,6 +16,7 @@ import { GamificationSetupService } from "src/gamification/gamification-setup.se
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { settings } from "src/storage/schema";
+import { UserLimitService } from "src/user/services/user-limit.service";
 import { UserService } from "src/user/user.service";
 import { USER_CREATION_FLOW_TYPE } from "src/user/user.types";
 import { invalidateCorsCache } from "src/utils/cors";
@@ -28,6 +29,7 @@ import type {
   CreateTenantOptions,
   CreateTenantBody,
   ListTenantsQuery,
+  TenantDetailsResponse,
   TenantsListItemResponse,
   UpdateTenantBody,
 } from "./types";
@@ -45,6 +47,7 @@ export class TenantsService {
     private readonly defaultAutomationSetupService: DefaultAutomationSetupService,
     private readonly configService: ConfigService,
     private readonly gamificationSetupService: GamificationSetupService,
+    private readonly userLimitService: UserLimitService,
   ) {}
 
   async findAllTenants(
@@ -91,6 +94,8 @@ export class TenantsService {
       host,
       status: input.status ?? TENANT_STATUSES.ACTIVE,
       accessEndsAt: input.accessEndsAt ?? null,
+      maxUsers: input.maxUsers ?? null,
+      maxUsersOverflowPercentage: input.maxUsersOverflowPercentage ?? 0,
     });
 
     const { adminFirstName, adminLastName } = input;
@@ -137,12 +142,14 @@ export class TenantsService {
     return createdTenant;
   }
 
-  async findTenantById(id: string) {
+  async findTenantById(id: string): Promise<TenantDetailsResponse> {
     const tenant = await this.tenantsRepository.findById(id);
 
     if (!tenant) throw new NotFoundException("superAdminTenants.error.notFound");
 
-    return tenant;
+    const activeUsersCount = await this.tenantsRepository.countActiveUsers(id);
+
+    return { ...tenant, activeUsersCount };
   }
 
   async updateTenantById(id: string, input: UpdateTenantBody) {
@@ -158,9 +165,18 @@ export class TenantsService {
       }
     }
 
+    const previousTenant = await this.tenantsRepository.findById(id);
     const updatedTenant = await this.tenantsRepository.update(id, updates);
 
     if (!updatedTenant) throw new NotFoundException("superAdminTenants.error.notFound");
+
+    if (previousTenant && this.changesUserLimit(input)) {
+      await this.tenantRunner.runWithTenant(id, () =>
+        this.tenantRunner.transactionWithHandle((transaction) =>
+          this.userLimitService.refreshTenantUserCapacityAlert(id, previousTenant, transaction),
+        ),
+      );
+    }
 
     await invalidateCorsCache();
 
@@ -187,6 +203,10 @@ export class TenantsService {
     if (!deletedTenant) throw new NotFoundException("superAdminTenants.error.notFound");
 
     await invalidateCorsCache();
+  }
+
+  private changesUserLimit(input: UpdateTenantBody) {
+    return input.maxUsers !== undefined || input.maxUsersOverflowPercentage !== undefined;
   }
 
   private normalizeHost(host: string) {

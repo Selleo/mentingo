@@ -160,6 +160,7 @@ export class AutomationRecipientResolverService {
         AUTOMATION_EVENT_KINDS.LIVE_TRAINING_ENDED,
         AUTOMATION_EVENT_KINDS.QUIZ_GRADING_DIGEST,
         AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY,
+        AUTOMATION_EVENT_KINDS.TENANT_USER_CAPACITY,
       ] as string[]
     ).includes(event.kind);
   }

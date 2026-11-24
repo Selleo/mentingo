@@ -349,7 +349,8 @@
       "quiz_attempt_graded": "Kvíz ohodnocen hodnotitelem",
       "quiz_grading_digest": "Nové odpovědi čekají na hodnocení (denně)",
       "forum_mention": "Uživatel zmíněn v tématu fóra",
-      "discussion_reply": "Nové odpovědi v diskusi (souhrnně)"
+      "discussion_reply": "Nové odpovědi v diskusi (souhrnně)",
+      "tenant_user_capacity": "Upozornění na kapacitu uživatelů"
     },
     "errors": {
       "incompleteButton": "Zadejte popisek tlačítka a URL.",
@@ -4294,7 +4295,8 @@
   },
   "user": {
     "error": {
-      "archived": "Váš účet byl archivován."
+      "archived": "Váš účet byl archivován.",
+      "userLimitReached": "Vaše organizace dosáhla limitu uživatelů. Archivujte nebo smažte uživatele, nebo kontaktujte podporu pro navýšení limitu."
     }
   },
   "studentCoursesView": {
@@ -6347,8 +6349,6 @@
       "placeholder": "Hledat organizace..."
     },
     "table": {
-      "name": "Jméno",
-      "host": "Hostitel",
       "status": "Postavení",
       "managing": "Správa",
       "lastActivity": "Poslední aktivita",
@@ -6366,7 +6366,14 @@
         "title": "Akce",
         "enterSupportMode": "Vstupte do režimu podpory",
         "impersonateUser": "Jednat jako uživatel"
-      }
+      },
+      "organization": "Organizace",
+      "accessEndsAt": "Konec přístupu",
+      "unlimitedAccess": "Neomezeno",
+      "userCapacity": "Kapacita uživatelů",
+      "userCapacityValue": "{{used}} / {{allowed}}",
+      "userCapacityUnlimitedValue": "{{used}} / ∞",
+      "accessEndedAgo": "skončil {{relativeTime}}"
     },
     "activityTrend": {
       "noActivity": "Žádná aktivita",
@@ -6423,14 +6430,22 @@
         "firstAdmin": "První administrátor"
       },
       "accessEndsAtPlaceholder": "Neomezený přístup",
-      "accessEndsAtClear": "Odebrat datum ukončení"
+      "accessEndsAtClear": "Odebrat datum ukončení",
+      "maxUsers": "Maximální počet uživatelů",
+      "maxUsersHint": "Archivovaní a smazaní uživatelé se nepočítají. Ponechte prázdné pro žádný limit.",
+      "maxUsersPlaceholder": "Bez limitu",
+      "maxUsersOverflowPercentage": "Povolené překročení (%)",
+      "maxUsersOverflowPercentageHint": "Další uživatelé nad maximum, např. 200 uživatelů + 10 % umožní 220.",
+      "userLimitBelowUsage": "Tato organizace má {{activeUsersCount}} aktivních uživatelů, ale tento limit povoluje {{allowedUsersCount}}. Nikdo nepřijde o přístup, ale uživatele nebude možné přidávat ani obnovovat z archivu, dokud jich nebude {{excessUsersCount}} archivováno. Správci budou upozorněni."
     },
     "validation": {
       "nameRequired": "Jméno je povinné",
       "hostInvalid": "Hostitel musí být platná adresa URL",
       "adminEmailRequired": "Je vyžadován e-mail správce",
       "adminFirstNameRequired": "Je vyžadováno křestní jméno správce",
-      "adminLastNameRequired": "Je vyžadováno příjmení správce"
+      "adminLastNameRequired": "Je vyžadováno příjmení správce",
+      "maxUsersInvalid": "Maximální počet uživatelů musí být celé číslo alespoň 1",
+      "maxUsersOverflowPercentageInvalid": "Překročení musí být celé číslo od 0 do 100"
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organizace byla úspěšně vytvořena",
@@ -8292,7 +8307,8 @@
         "quiz_attempt_graded": "Účastník, jehož odpovědi v kvízu byly ohodnoceny.",
         "quiz_grading_digest": "Uživatelé, kteří mohou hodnotit odpovědi v kvízech.",
         "forum_mention": "Uživatelé zmínění v příspěvku na fóru.",
-        "discussion_reply": "Účastníci vlákna nebo tématu, kteří si odpovědi v aplikaci nepřečetli."
+        "discussion_reply": "Účastníci vlákna nebo tématu, kteří si odpovědi v aplikaci nepřečetli.",
+        "tenant_user_capacity": "Aktivní správci organizace."
       }
     },
     "mapping": {
@@ -8394,7 +8410,8 @@
       "quizAttemptGraded": "Kvíz ohodnocen",
       "quizGradingDigest": "Přehled fronty hodnocení",
       "forumUserMentioned": "Zmínka ve fóru",
-      "discussionReply": "Nové odpovědi v diskusi"
+      "discussionReply": "Nové odpovědi v diskusi",
+      "tenantUserCapacity": "Upozornění na kapacitu uživatelů"
     },
     "canvas": {
       "emptyTitle": "Vaše plátno automatizace je prázdné",
@@ -8561,7 +8578,13 @@
       "latestReply": "Poslední odpověď",
       "discussionUrl": "Odkaz na diskusi",
       "unsubscribeUrl": "Odkaz pro odhlášení",
-      "unfollowUrl": "Odkaz pro ukončení sledování"
+      "unfollowUrl": "Odkaz pro ukončení sledování",
+      "capacityTitle": "Název upozornění na kapacitu",
+      "capacityMessage": "Text upozornění na kapacitu",
+      "activeUsersCount": "Aktivní uživatelé",
+      "maxUsers": "Uživatelé v plánu",
+      "allowedUsersCount": "Povolení uživatelé (s překročením)",
+      "usersUrl": "Odkaz na stránku uživatelů"
     },
     "simulation": {
       "title": "Výsledek simulace",
