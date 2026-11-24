@@ -1,10 +1,13 @@
 import { loadEsm } from "load-esm";
 
+type DetectedFileType = { ext: string; mime: string };
+
+type FileTypeModule = {
+  fileTypeFromBuffer: (buffer: Uint8Array) => Promise<DetectedFileType | undefined>;
+};
+
 export const detectFileType = async (buffer: Buffer) => {
-  // Resolve the API dependency through an explicit export supported by Node and Jest.
-  const { fileTypeFromBuffer } = await loadEsm<typeof import("file-type")>(
-    require.resolve("file-type/node"),
-  );
+  const { fileTypeFromBuffer } = await loadEsm<FileTypeModule>(require.resolve("file-type"));
 
   return fileTypeFromBuffer(buffer);
 };
