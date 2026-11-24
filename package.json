@@ -20,6 +20,7 @@
     "test:web": "pnpm run --filter=web test",
     "test:api": "pnpm run --filter=api test",
     "test:web:e2e": "pnpm run --filter=web test:e2e",
+    "test:web:a11y": "pnpm run --filter=web test:a11y-audit",
     "test:api:e2e": "pnpm run --filter=api test:e2e",
     "perf:load": "pnpm --filter @mentingo/performance-tests test:load",
     "perf:stress": "pnpm --filter @mentingo/performance-tests test:stress",
