@@ -25,6 +25,7 @@ export type EnrollmentState = (typeof ENROLLMENT_STATES)[keyof typeof ENROLLMENT
 
 export type CatalogCourseFixture = {
   title: string;
+  description: string;
   categoryTitle: string;
   author: { firstName: string; lastName: string };
   createdAt: string;
@@ -35,6 +36,7 @@ export type CatalogCourseFixture = {
 export const CATALOG_COURSE_FIXTURES: Record<CatalogCourse, CatalogCourseFixture> = {
   [CATALOG_COURSES.ALPHA]: {
     title: "Alpha catalog course",
+    description: "Start with spreadsheets",
     categoryTitle: "Zulu category",
     author: { firstName: "Carol", lastName: "Cole" },
     createdAt: "2025-01-03T00:00:00.000Z",
@@ -43,6 +45,7 @@ export const CATALOG_COURSE_FIXTURES: Record<CatalogCourse, CatalogCourseFixture
   },
   [CATALOG_COURSES.BRAVO]: {
     title: "Bravo catalog course",
+    description: "Practise public speaking",
     categoryTitle: "Alpha category",
     author: { firstName: "Alice", lastName: "Abbot" },
     createdAt: "2025-01-01T00:00:00.000Z",
@@ -51,6 +54,7 @@ export const CATALOG_COURSE_FIXTURES: Record<CatalogCourse, CatalogCourseFixture
   },
   [CATALOG_COURSES.CHARLIE]: {
     title: "Charlie catalog course",
+    description: "Plan a garden",
     categoryTitle: "Mike category",
     author: { firstName: "Bob", lastName: "Baker" },
     createdAt: "2025-01-02T00:00:00.000Z",
@@ -59,6 +63,7 @@ export const CATALOG_COURSE_FIXTURES: Record<CatalogCourse, CatalogCourseFixture
   },
   [CATALOG_COURSES.DRAFT]: {
     title: "Delta draft course",
+    description: "Draft notes",
     categoryTitle: "Draft category",
     author: { firstName: "Dana", lastName: "Doe" },
     createdAt: "2025-01-04T00:00:00.000Z",
@@ -67,6 +72,7 @@ export const CATALOG_COURSE_FIXTURES: Record<CatalogCourse, CatalogCourseFixture
   },
   [CATALOG_COURSES.ARCHIVED]: {
     title: "Echo archived course",
+    description: "Retired material",
     categoryTitle: "Archived category",
     author: { firstName: "Eve", lastName: "Evans" },
     createdAt: "2025-01-05T00:00:00.000Z",
@@ -236,3 +242,54 @@ export const LESSON_SEQUENCE_CASES: { lessonSequenceEnabled: boolean }[] = [
   { lessonSequenceEnabled: true },
   { lessonSequenceEnabled: false },
 ];
+
+export const AVAILABLE_COURSE_ENROLLMENT_CASES: {
+  enrollmentState: EnrollmentState;
+  expectedCourses: CatalogCourse[];
+}[] = [
+  { enrollmentState: ENROLLMENT_STATES.ENROLLED, expectedCourses: [BRAVO, CHARLIE] },
+  { enrollmentState: ENROLLMENT_STATES.NOT_ENROLLED, expectedCourses: [ALPHA, BRAVO, CHARLIE] },
+];
+
+export const AVAILABLE_COURSE_FILTER_CASES: {
+  description: string;
+  query: { title?: string; description?: string; sort?: string; page?: number; perPage?: number };
+  excludedCourse?: CatalogCourse;
+  expectedCourses: CatalogCourse[];
+  expectedPagination: { totalItems: number; page: number; perPage: number };
+}[] = [
+  {
+    description: "matches a title fragment",
+    query: { title: "Alpha" },
+    expectedCourses: [ALPHA],
+    expectedPagination: { totalItems: 1, page: 1, perPage: 20 },
+  },
+  {
+    description: "matches a description fragment",
+    query: { description: "speaking" },
+    expectedCourses: [BRAVO],
+    expectedPagination: { totalItems: 1, page: 1, perPage: 20 },
+  },
+  {
+    description: "skips the excluded course",
+    query: { sort: "title" },
+    excludedCourse: ALPHA,
+    expectedCourses: [BRAVO, CHARLIE],
+    expectedPagination: { totalItems: 2, page: 1, perPage: 20 },
+  },
+  {
+    description: "returns the requested page",
+    query: { sort: "title", page: 2, perPage: 2 },
+    expectedCourses: [CHARLIE],
+    expectedPagination: { totalItems: 3, page: 2, perPage: 2 },
+  },
+];
+
+export const LISTED_COURSE_DETAILS = {
+  chapterCount: 5,
+  priceInCents: 2999,
+  currency: "usd",
+  freePurchasedCount: 1,
+  paidPurchasedCount: 1,
+  expectedParticipantCount: 2,
+};

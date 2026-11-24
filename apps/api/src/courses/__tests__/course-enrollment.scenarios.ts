@@ -39,9 +39,13 @@ export const SELF_ENROLLMENT_REJECTION_CASES = [
 ];
 
 export const BULK_ENROLLMENT_REJECTIONS = {
+  ANONYMOUS_REQUESTER: "the requester is anonymous",
+  STUDENT_REQUESTER: "the requester is a student",
+  MISSING_COURSE: "the course does not exist",
   NO_STUDENTS: "no students are given",
   UNKNOWN_STUDENT: "a student does not exist",
   DELETED_STUDENT: "a student is deleted",
+  ALREADY_ENROLLED: "the students are already enrolled",
 } as const;
 
 export type BulkEnrollmentRejection =
@@ -49,16 +53,35 @@ export type BulkEnrollmentRejection =
 
 export const BULK_ENROLLMENT_REJECTION_CASES = [
   {
+    rejection: BULK_ENROLLMENT_REJECTIONS.ANONYMOUS_REQUESTER,
+    expectedStatus: 401,
+    expectedBody: {},
+  },
+  {
+    rejection: BULK_ENROLLMENT_REJECTIONS.STUDENT_REQUESTER,
+    expectedStatus: 403,
+    expectedBody: { message: "auth.error.missingPermission" },
+  },
+  { rejection: BULK_ENROLLMENT_REJECTIONS.MISSING_COURSE, expectedStatus: 404, expectedBody: {} },
+  {
     rejection: BULK_ENROLLMENT_REJECTIONS.NO_STUDENTS,
-    expectedMessage: "adminCourseView.errors.enrollment.studentsRequired",
+    expectedStatus: 400,
+    expectedBody: { message: "adminCourseView.errors.enrollment.studentsRequired" },
   },
   {
     rejection: BULK_ENROLLMENT_REJECTIONS.UNKNOWN_STUDENT,
-    expectedMessage: "adminCourseView.errors.enrollment.onlyExistingUsers",
+    expectedStatus: 400,
+    expectedBody: { message: "adminCourseView.errors.enrollment.onlyExistingUsers" },
   },
   {
     rejection: BULK_ENROLLMENT_REJECTIONS.DELETED_STUDENT,
-    expectedMessage: "adminCourseView.errors.enrollment.onlyExistingUsers",
+    expectedStatus: 400,
+    expectedBody: { message: "adminCourseView.errors.enrollment.onlyExistingUsers" },
+  },
+  {
+    rejection: BULK_ENROLLMENT_REJECTIONS.ALREADY_ENROLLED,
+    expectedStatus: 409,
+    expectedBody: { message: "adminCourseView.errors.enrollment.studentsAlreadyEnrolled" },
   },
 ];
 
@@ -66,6 +89,7 @@ export const UNENROLLMENT_REJECTIONS = {
   NEVER_ENROLLED: "the student was never enrolled",
   ALREADY_UNENROLLED: "the student is already unenrolled",
   ENROLLED_BY_GROUP: "the student is enrolled by a group",
+  ENROLLED_DIRECTLY_THEN_BY_GROUP: "the student was enrolled directly and then by a group",
 } as const;
 
 export type UnenrollmentRejection =
@@ -82,6 +106,10 @@ export const UNENROLLMENT_REJECTION_CASES = [
   },
   {
     rejection: UNENROLLMENT_REJECTIONS.ENROLLED_BY_GROUP,
+    expectedBody: { message: "adminCourseView.enrolled.toast.studentsEnrolledByGroup", count: 1 },
+  },
+  {
+    rejection: UNENROLLMENT_REJECTIONS.ENROLLED_DIRECTLY_THEN_BY_GROUP,
     expectedBody: { message: "adminCourseView.enrolled.toast.studentsEnrolledByGroup", count: 1 },
   },
 ];

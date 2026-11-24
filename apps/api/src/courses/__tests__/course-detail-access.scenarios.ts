@@ -1,3 +1,7 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
+
+import type { SupportedLanguages } from "@repo/shared";
+
 export const COURSE_VIEWERS = {
   ADMIN: "admin",
   COURSE_AUTHOR: "course author",
@@ -345,6 +349,16 @@ export const COURSE_LOOKUP_CASES: Array<{
     courseState: COURSE_STATES.ARCHIVED,
     outcome: COURSE_LOOKUP_OUTCOMES.FOUND,
   },
+  {
+    viewer: COURSE_VIEWERS.ADMIN,
+    courseState: COURSE_STATES.DRAFT,
+    outcome: COURSE_LOOKUP_OUTCOMES.FOUND,
+  },
+  {
+    viewer: COURSE_VIEWERS.ADMIN,
+    courseState: COURSE_STATES.PRIVATE,
+    outcome: COURSE_LOOKUP_OUTCOMES.FOUND,
+  },
 ];
 
 export const BETA_COURSE_ACCESS_CASES: Array<{
@@ -423,3 +437,90 @@ export const VIDEO_EMBED_CASES: Array<{
     result: VIDEO_EMBED_RESULTS.ERROR_CLEARED,
   },
 ];
+
+export const CATEGORY_TRANSLATIONS = {
+  REQUESTED_LANGUAGE: "requested language",
+  BASE_LANGUAGE_FALLBACK: "base language fallback",
+} as const;
+
+export type CategoryTranslation =
+  (typeof CATEGORY_TRANSLATIONS)[keyof typeof CATEGORY_TRANSLATIONS];
+
+export const LOCALIZED_CATEGORY_TITLES = {
+  [SUPPORTED_LANGUAGES.EN]: "Details category",
+  [SUPPORTED_LANGUAGES.LT]: "Detali kategorija",
+};
+
+export const CATEGORY_LANGUAGE_CASES: Array<{
+  viewer: CourseViewer;
+  language: SupportedLanguages;
+  categoryTranslation: CategoryTranslation;
+}> = [
+  {
+    viewer: COURSE_VIEWERS.ADMIN,
+    language: SUPPORTED_LANGUAGES.LT,
+    categoryTranslation: CATEGORY_TRANSLATIONS.REQUESTED_LANGUAGE,
+  },
+  {
+    viewer: COURSE_VIEWERS.ADMIN,
+    language: SUPPORTED_LANGUAGES.DE,
+    categoryTranslation: CATEGORY_TRANSLATIONS.BASE_LANGUAGE_FALLBACK,
+  },
+  {
+    viewer: COURSE_VIEWERS.STUDENT,
+    language: SUPPORTED_LANGUAGES.DE,
+    categoryTranslation: CATEGORY_TRANSLATIONS.BASE_LANGUAGE_FALLBACK,
+  },
+];
+
+export const COURSE_OVERVIEW = {
+  thumbnailPositionY: 72,
+  learningOutcomes: ["Clean data", "Build reports"],
+  embedLessonEstimateSeconds: 180,
+  groupDueDate: "2026-08-12T00:00:00.000Z",
+  listedDueDate: "2026-08-12T00:00:00Z",
+};
+
+export const LOCALIZED_LEARNING_OUTCOMES = {
+  [SUPPORTED_LANGUAGES.EN]: ["English outcome"],
+  [SUPPORTED_LANGUAGES.PL]: ["Polski efekt"],
+};
+
+export const SLUG_TITLE_CASES: Array<{ titleKind: string; title: string; slugText: string }> = [
+  { titleKind: "plain words", title: "Data Analysis Basics", slugText: "data-analysis-basics" },
+  { titleKind: "emoji", title: "Course 😀 title", slugText: "course-title" },
+  {
+    titleKind: "accented Latin letters",
+    title: "Zażółć gęślą jaźń",
+    slugText: "zazolc-gesla-jazn",
+  },
+  { titleKind: "no URL-safe characters", title: "😀!!!", slugText: "course" },
+];
+
+export const SLUG_LOOKUPS = {
+  CANONICAL_SLUG: "the canonical slug",
+  OUTDATED_SLUG_TEXT: "a known short id with outdated slug text",
+  UNKNOWN_SHORT_ID: "an unknown short id",
+  MALFORMED_SLUG: "a malformed slug",
+} as const;
+
+export const SLUG_LOOKUP_OUTCOMES = {
+  FOUND: "finds the course",
+  REDIRECT: "redirects to the canonical slug",
+  NOT_FOUND: "gets not found",
+} as const;
+
+export type SlugLookup = (typeof SLUG_LOOKUPS)[keyof typeof SLUG_LOOKUPS];
+export type SlugLookupOutcome = (typeof SLUG_LOOKUP_OUTCOMES)[keyof typeof SLUG_LOOKUP_OUTCOMES];
+
+export const SLUG_LOOKUP_CASES: Array<{ lookup: SlugLookup; outcome: SlugLookupOutcome }> = [
+  { lookup: SLUG_LOOKUPS.CANONICAL_SLUG, outcome: SLUG_LOOKUP_OUTCOMES.FOUND },
+  { lookup: SLUG_LOOKUPS.OUTDATED_SLUG_TEXT, outcome: SLUG_LOOKUP_OUTCOMES.REDIRECT },
+  { lookup: SLUG_LOOKUPS.UNKNOWN_SHORT_ID, outcome: SLUG_LOOKUP_OUTCOMES.NOT_FOUND },
+  { lookup: SLUG_LOOKUPS.MALFORMED_SLUG, outcome: SLUG_LOOKUP_OUTCOMES.NOT_FOUND },
+];
+
+export const SLUG_COURSE_TITLE = "Data Analysis Basics";
+export const SLUG_COURSE_SLUG_TEXT = "data-analysis-basics";
+export const POLISH_SLUG_COURSE_TITLE = "Polski tytuł kursu";
+export const POLISH_SLUG_COURSE_SLUG_TEXT = "polski-tytul-kursu";

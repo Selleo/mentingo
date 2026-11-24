@@ -247,15 +247,46 @@ describe("Course enrollment (e2e)", () => {
   });
 
   describe("POST /api/course/:courseId/enroll-courses", () => {
-    const arrangeBulkEnrollmentStudentIds = async (
+    const arrangeAdminCourse = async () => {
+      const admin = await helpers.arrangeSignedInUser(SYSTEM_ROLE_SLUGS.ADMIN);
+      const { course } = await arrangeCourse(admin.user.id);
+
+      return { requester: admin, courseId: course.id };
+    };
+
+    const arrangeBulkEnrollmentRejection = async (
       rejection: BulkEnrollmentRejection,
-    ): Promise<UUIDType[]> =>
+    ): Promise<{ requester: SignedInUser | null; courseId: UUIDType; studentIds: UUIDType[] }> =>
       match(rejection)
-        .with(BULK_ENROLLMENT_REJECTIONS.NO_STUDENTS, async () => [])
+        .with(BULK_ENROLLMENT_REJECTIONS.ANONYMOUS_REQUESTER, async () => {
+          const student = await helpers.arrangeUser(SYSTEM_ROLE_SLUGS.STUDENT);
+          const { courseId } = await arrangeAdminCourse();
+
+          return { requester: null, courseId, studentIds: [student.id] };
+        })
+        .with(BULK_ENROLLMENT_REJECTIONS.STUDENT_REQUESTER, async () => {
+          const student = await helpers.arrangeSignedInUser(SYSTEM_ROLE_SLUGS.STUDENT);
+          const { courseId } = await arrangeAdminCourse();
+
+          return { requester: student, courseId, studentIds: [student.user.id] };
+        })
+        .with(BULK_ENROLLMENT_REJECTIONS.MISSING_COURSE, async () => {
+          const admin = await helpers.arrangeSignedInUser(SYSTEM_ROLE_SLUGS.ADMIN);
+          const student = await helpers.arrangeUser(SYSTEM_ROLE_SLUGS.STUDENT);
+
+          return { requester: admin, courseId: faker.string.uuid(), studentIds: [student.id] };
+        })
+        .with(BULK_ENROLLMENT_REJECTIONS.NO_STUDENTS, async () => ({
+          ...(await arrangeAdminCourse()),
+          studentIds: [],
+        }))
         .with(BULK_ENROLLMENT_REJECTIONS.UNKNOWN_STUDENT, async () => {
           const student = await helpers.arrangeUser(SYSTEM_ROLE_SLUGS.STUDENT);
 
-          return [student.id, faker.string.uuid()];
+          return {
+            ...(await arrangeAdminCourse()),
+            studentIds: [student.id, faker.string.uuid()],
+          };
         })
         .with(BULK_ENROLLMENT_REJECTIONS.DELETED_STUDENT, async () => {
           const student = await helpers.arrangeUser(SYSTEM_ROLE_SLUGS.STUDENT);
@@ -266,25 +297,74 @@ describe("Course enrollment (e2e)", () => {
               .where(eq(users.id, student.id)),
           );
 
-          return [student.id];
+          return { ...(await arrangeAdminCourse()), studentIds: [student.id] };
+        })
+        .with(BULK_ENROLLMENT_REJECTIONS.ALREADY_ENROLLED, async () => {
+          const adminCourse = await arrangeAdminCourse();
+          const studentIds = [
+            (await helpers.arrangeUser(SYSTEM_ROLE_SLUGS.STUDENT)).id,
+            (await helpers.arrangeUser(SYSTEM_ROLE_SLUGS.STUDENT)).id,
+          ];
+          await enrollStudents(adminCourse.requester, adminCourse.courseId, studentIds);
+
+          return { ...adminCourse, studentIds };
         })
         .exhaustive();
 
+    const findEnrollments = (studentIds: UUIDType[], courseId: UUIDType) =>
+      Promise.all(
+        studentIds.map((studentId) => helpers.findStudentEnrollment(studentId, courseId)),
+      );
+
     it.each(BULK_ENROLLMENT_REJECTION_CASES)(
-      "rejects the enrollment when $rejection",
-      async ({ rejection, expectedMessage }) => {
-        const admin = await helpers.arrangeSignedInUser(SYSTEM_ROLE_SLUGS.ADMIN);
-        const { course } = await arrangeCourse(admin.user.id);
-        const studentIds = await arrangeBulkEnrollmentStudentIds(rejection);
+      "rejects the enrollment with $expectedStatus when $rejection",
+      async ({ rejection, expectedStatus, expectedBody }) => {
+        const { requester, courseId, studentIds } = await arrangeBulkEnrollmentRejection(rejection);
+        const enrollmentsBefore = await findEnrollments(studentIds, courseId);
+        const enrollRequest = request(app.getHttpServer())
+          .post(`/api/course/${courseId}/enroll-courses`)
+          .send({ studentIds });
 
-        const response = await enrollStudents(admin, course.id, studentIds, 400);
+        const response = await (
+          requester ? enrollRequest.set("Cookie", requester.cookies) : enrollRequest
+        ).expect(expectedStatus);
 
-        expect(response.body).toMatchObject({ message: expectedMessage });
-        for (const studentId of studentIds) {
-          expect(await helpers.findStudentEnrollment(studentId, course.id)).toBeUndefined();
-        }
+        expect(response.body).toMatchObject(expectedBody);
+        expect(await findEnrollments(studentIds, courseId)).toEqual(enrollmentsBefore);
       },
     );
+
+    it("enrolls every student and prepares their course progress", async () => {
+      const admin = await helpers.arrangeSignedInUser(SYSTEM_ROLE_SLUGS.ADMIN);
+      const { course, chapters } = await arrangeCourse(admin.user.id);
+      const studentIds = [
+        (await helpers.arrangeUser(SYSTEM_ROLE_SLUGS.STUDENT)).id,
+        (await helpers.arrangeUser(SYSTEM_ROLE_SLUGS.STUDENT)).id,
+      ];
+      const lessonCount = chapters.flatMap(({ lessons }) => lessons).length;
+
+      await enrollStudents(admin, course.id, studentIds);
+
+      const enrolledStudents = await Promise.all(
+        studentIds.map(async (studentId) => {
+          const progress = await helpers.findStudentCourseProgress(studentId, course.id);
+
+          return {
+            enrollment: await helpers.findStudentEnrollment(studentId, course.id),
+            chapterProgressCount: progress.chapterProgress.length,
+            lessonProgressCount: progress.lessonProgress.length,
+          };
+        }),
+      );
+
+      expect(enrolledStudents).toEqual(
+        studentIds.map(() => ({
+          enrollment: expect.objectContaining({ status: COURSE_ENROLLMENT.ENROLLED }),
+          chapterProgressCount: chapters.length,
+          lessonProgressCount: lessonCount,
+        })),
+      );
+    });
 
     it("re-enrolls students who were previously unenrolled", async () => {
       const admin = await helpers.arrangeSignedInUser(SYSTEM_ROLE_SLUGS.ADMIN);
@@ -376,6 +456,11 @@ describe("Course enrollment (e2e)", () => {
         })
         .with(UNENROLLMENT_REJECTIONS.ENROLLED_BY_GROUP, async () => {
           const group = await helpers.arrangeGroupWithMembers([student.id]);
+          await enrollGroup(admin, courseId, group.id);
+        })
+        .with(UNENROLLMENT_REJECTIONS.ENROLLED_DIRECTLY_THEN_BY_GROUP, async () => {
+          const group = await helpers.arrangeGroupWithMembers([student.id]);
+          await enrollStudents(admin, courseId, [student.id]);
           await enrollGroup(admin, courseId, group.id);
         })
         .exhaustive();
