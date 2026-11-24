@@ -2,6 +2,7 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { queryClient } from "~/api/queryClient";
+import { isCompletedAuthoringDraft } from "~/modules/CourseAuthoring/authoringSessionRecovery";
 
 import { getAuthoringSession } from "../../modules/CourseAuthoring/courseAuthoring.api";
 
@@ -18,7 +19,7 @@ export const authoringSessionQueryOptions = (courseId: string, sessionId: string
     queryFn: () => getAuthoringSession(courseId, sessionId),
     enabled: Boolean(courseId && sessionId),
     staleTime: Infinity,
-    retry: 1,
+    retry: (failureCount, error) => failureCount < 1 && !isCompletedAuthoringDraft(error),
   });
 
 /** Refreshes monotonically; canceled or superseded owners cannot commit a late response. */

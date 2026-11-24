@@ -6746,6 +6746,7 @@
     "draft": {
       "starting": "Atidaromas juodraštis…",
       "startFailed": "Nepavyko atidaryti kurso juodraščio.",
+      "expired": "Šio juodraščio galiojimas baigėsi",
       "expiredTitle": "Šio juodraščio galiojimas baigėsi",
       "expiredBody": "Norėdami tęsti, sukurkite naują juodraštį.",
       "startAgain": "Kurti naują juodraštį",
@@ -7359,6 +7360,7 @@
       "proposalNotReady": "Kai kurie pakeitimai dar ruošiami. Palaukite ir bandykite dar kartą.",
       "revisionChanged": "Peržiūros metu šis juodraštis pasikeitė. Atkurta naujausia versija.",
       "selectionAlreadyApplied": "Šie pakeitimai jau pritaikyti.",
+      "invalidSession": "Ši kurso kūrimo sesija netinkama.",
       "sessionNotFound": "Šis pokalbis nebepasiekiamas.",
       "targetAlreadyExists": "Dalis šio pakeitimo jau yra kurse.",
       "targetOutsideCourse": "Pasirinktas elementas nepriklauso šiam kursui.",

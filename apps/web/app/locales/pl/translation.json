@@ -6809,6 +6809,7 @@
     "draft": {
       "starting": "Otwieramy szkic…",
       "startFailed": "Nie udało się otworzyć szkicu kursu.",
+      "expired": "Ten szkic wygasł",
       "expiredTitle": "Ten szkic wygasł",
       "expiredBody": "Utwórz nowy szkic, aby kontynuować.",
       "startAgain": "Utwórz nowy szkic",
@@ -7424,6 +7425,7 @@
       "proposalNotReady": "Niektóre zmiany są jeszcze przygotowywane. Poczekaj chwilę i spróbuj ponownie.",
       "revisionChanged": "Wersja robocza zmieniła się podczas przeglądania. Przywrócono najnowszą wersję.",
       "selectionAlreadyApplied": "Te zmiany zostały już zastosowane.",
+      "invalidSession": "Ta sesja tworzenia kursu jest nieprawidłowa.",
       "sessionNotFound": "Ten czat nie jest już dostępny.",
       "targetAlreadyExists": "Część tej zmiany jest już w kursie.",
       "targetOutsideCourse": "Wybrany element nie należy do tego kursu.",

@@ -9,6 +9,11 @@ export type CourseAuthoringDraftIdentity = {
   ownerId: UUIDType;
 };
 
+export type CourseAuthoringSessionAccessOptions = {
+  refreshDraftActivity?: boolean;
+  reportDraftCompletion?: boolean;
+};
+
 export type CourseAuthoringApplicationClaim = {
   /** Placeholder identity for a pre-course export or failure receipt. */
   draftCourseId?: UUIDType;

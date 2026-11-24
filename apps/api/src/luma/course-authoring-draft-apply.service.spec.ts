@@ -3,6 +3,7 @@ import { FormatRegistry } from "@sinclair/typebox";
 import { validate } from "uuid";
 
 import { CourseAuthoringDraftApplyService } from "./course-authoring-draft-apply.service";
+import { CourseAuthoringDraftContextService } from "./course-authoring-draft-context.service";
 
 import type {
   CourseAuthoringApplicationClaim,
@@ -84,7 +85,11 @@ describe(CourseAuthoringDraftApplyService.name, () => {
       mocks as unknown as ConstructorParameters<typeof CourseAuthoringDraftApplyService>[1],
       mocks as unknown as ConstructorParameters<typeof CourseAuthoringDraftApplyService>[2],
       mocks as unknown as ConstructorParameters<typeof CourseAuthoringDraftApplyService>[3],
-      mocks as unknown as ConstructorParameters<typeof CourseAuthoringDraftApplyService>[4],
+      new CourseAuthoringDraftContextService(
+        {} as DatabasePg,
+        mocks as unknown as ConstructorParameters<typeof CourseAuthoringDraftContextService>[1],
+        {} as ConstructorParameters<typeof CourseAuthoringDraftContextService>[2],
+      ),
     );
     return { service, mocks, transaction };
   }

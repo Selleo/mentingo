@@ -1,26 +1,16 @@
 /** Materializes an approved pre-course export and its durable placeholder mapping. */
 import { randomUUID } from "node:crypto";
 
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  ServiceUnavailableException,
-} from "@nestjs/common";
-import {
-  ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  COURSE_STATUSES,
-  PERMISSIONS,
-  hasPermission,
-} from "@repo/shared";
+import { BadRequestException, Injectable, ServiceUnavailableException } from "@nestjs/common";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, COURSE_STATUSES } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
 import { CategoryService } from "src/category/category.service";
 import { CourseService } from "src/courses/course.service";
 import { isOutboxProcessingEnabled } from "src/outbox/outbox.constants";
-import { PermissionsService } from "src/permissions/permissions.service";
 
 import { CourseAuthoringApplicationRepository } from "./course-authoring-application.repository";
+import { CourseAuthoringDraftContextService } from "./course-authoring-draft-context.service";
 import { CourseAuthoringDraftRepository } from "./course-authoring-draft.repository";
 import {
   stripAuthoringHtmlStyles,
@@ -39,19 +29,12 @@ export class CourseAuthoringDraftApplyService {
     private readonly courseAuthoringDraftRepository: CourseAuthoringDraftRepository,
     private readonly categoryService: CategoryService,
     private readonly courseService: CourseService,
-    private readonly permissionsService: PermissionsService,
+    private readonly courseAuthoringDraftContextService: CourseAuthoringDraftContextService,
   ) {}
 
   /** Creates a single draft course, commits native events, and binds the approved session once. */
   async applyPreparedExport(input: PreparedCourseAuthoringApplication, actor: CurrentUserType) {
-    const access = await this.permissionsService.getUserAccess(actor.userId);
-    const currentActor = { ...actor, ...access };
-    if (
-      !hasPermission(currentActor.permissions, PERMISSIONS.COURSE_AI_GENERATION) ||
-      !hasPermission(currentActor.permissions, PERMISSIONS.COURSE_CREATE)
-    ) {
-      throw new ForbiddenException("common.toast.noAccess");
-    }
+    const currentActor = await this.courseAuthoringDraftContextService.authorize(actor);
     if (!isOutboxProcessingEnabled())
       throw new ServiceUnavailableException("courseAuthoring.errors.outboxUnavailable");
 

@@ -102,7 +102,7 @@ export class CourseAuthoringDraftLifecycleService {
     );
   }
 
-  /** Expires inactive owner-only drafts and retries cleanup until the producer acknowledges. */
+  /** Expires inactive owner-only drafts and retries recoverable cleanup failures. */
   @Cron(CronExpression.EVERY_HOUR)
   async discardInactiveDrafts() {
     if (this.sweeping) return;
@@ -126,7 +126,7 @@ export class CourseAuthoringDraftLifecycleService {
   /** Checks producer work before fencing the draft and deleting its unapplied Core objects. */
   private async discardDraft(draft: Draft, before: Date) {
     const { tenantId, id, lumaSessionId, ownerId } = draft;
-    let producerExists = false;
+    let producerState: "missing" | "owned" | "unverified" = "missing";
     const client = lumaSessionId ? await this.lumaService.getLumaClient() : null;
     if (client && lumaSessionId) {
       try {
@@ -136,17 +136,17 @@ export class CourseAuthoringDraftLifecycleService {
           snapshot.sessionId !== lumaSessionId ||
           snapshot.courseId !== id
         ) {
-          throw new Error("AI course draft ownership mismatch");
-        }
-        producerExists = snapshot.status !== "discarded";
-        if (
-          producerExists &&
-          !draft.expiredAt &&
-          (snapshot.pendingWork ||
-            snapshot.tasks.some((task) => ACTIVE_TASK_STATUSES.has(task.status)))
-        ) {
-          await this.courseAuthoringDraftRepository.touch(tenantId, id, lumaSessionId);
-          return;
+          producerState = "unverified";
+        } else if (snapshot.status !== "discarded") {
+          producerState = "owned";
+          if (
+            !draft.expiredAt &&
+            (snapshot.pendingWork ||
+              snapshot.tasks.some((task) => ACTIVE_TASK_STATUSES.has(task.status)))
+          ) {
+            await this.courseAuthoringDraftRepository.touch(tenantId, id, lumaSessionId);
+            return;
+          }
         }
       } catch (error) {
         if (!isAxiosError(error) || error.response?.status !== 404) throw error;
@@ -154,7 +154,7 @@ export class CourseAuthoringDraftLifecycleService {
     }
 
     if (!(await this.courseAuthoringDraftRepository.expire(tenantId, id, before))) return;
-    if (producerExists && client && lumaSessionId) {
+    if (producerState === "owned" && client && lumaSessionId) {
       try {
         await client.authoring.sendCommand({
           sessionId: lumaSessionId,
@@ -178,7 +178,10 @@ export class CourseAuthoringDraftLifecycleService {
         }
       }
     }
-    if (lumaSessionId) {
+    if (producerState === "unverified") {
+      // The orphan-staging sweep can reclaim aged assets without trusting the session binding.
+      this.logger.warn("Retiring an inactive AI course draft with an invalid producer snapshot");
+    } else if (lumaSessionId) {
       const assets = await this.courseAuthoringApplicationRepository.draftStagedAssets(
         tenantId,
         lumaSessionId,

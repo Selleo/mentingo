@@ -157,6 +157,7 @@ describe("useCourseAuthoringSocket", () => {
     const { listeners, socket } = createSocket();
     mocks.acquireSocket.mockReturnValue(socket);
     const onRefresh = vi.fn().mockResolvedValue(undefined);
+    const onPermissionRevoked = vi.fn();
     const onSnapshot = vi.fn();
     const { result } = renderHook(() =>
       useCourseAuthoringSocket({
@@ -164,6 +165,7 @@ describe("useCourseAuthoringSocket", () => {
         session: session(),
         onSnapshot,
         onRefresh,
+        onPermissionRevoked,
       }),
     );
 
@@ -174,6 +176,7 @@ describe("useCourseAuthoringSocket", () => {
 
     await waitFor(() => expect(result.current).toBe("permission_revoked"));
     expect(onRefresh).not.toHaveBeenCalled();
+    expect(onPermissionRevoked).toHaveBeenCalledOnce();
   });
 
   it("leaves once and never rejoins a session the gateway says is missing", async () => {

@@ -107,8 +107,13 @@ export class CourseAuthoringContextService {
     if (!hasPermission(currentActor.permissions, PERMISSIONS.COURSE_AI_GENERATION)) {
       throw new ForbiddenException("common.toast.noAccess");
     }
-    await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentActor, courseId);
+    await this.assertCourseAccess(courseId, currentActor);
     return currentActor;
+  }
+
+  /** Applies native course edit rights to a caller that has already refreshed their permissions. */
+  async assertCourseAccess(courseId: UUIDType, currentActor: CurrentUserType) {
+    await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentActor, courseId);
   }
 
   /** Reads only localized content lesson bodies within the actor-authorized course and tenant. */

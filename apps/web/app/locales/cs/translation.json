@@ -6750,6 +6750,7 @@
     "draft": {
       "starting": "Otevíráme koncept…",
       "startFailed": "Koncept kurzu se nepodařilo otevřít.",
+      "expired": "Platnost tohoto konceptu vypršela",
       "expiredTitle": "Platnost tohoto konceptu vypršela",
       "expiredBody": "Chcete-li pokračovat, vytvořte nový koncept.",
       "startAgain": "Vytvořit nový koncept",
@@ -7364,6 +7365,7 @@
       "proposalNotReady": "Některé změny se ještě připravují. Chvíli počkejte a zkuste to znovu.",
       "revisionChanged": "Tento návrh se při kontrole změnil. Nejnovější verze byla obnovena.",
       "selectionAlreadyApplied": "Tyto změny už byly použity.",
+      "invalidSession": "Tato relace tvorby kurzu je neplatná.",
       "sessionNotFound": "Tento chat už není k dispozici.",
       "targetAlreadyExists": "Část této změny už v kurzu je.",
       "targetOutsideCourse": "Vybraná položka do tohoto kurzu nepatří.",

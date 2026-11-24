@@ -6692,6 +6692,7 @@
     "draft": {
       "starting": "Abriendo el borrador…",
       "startFailed": "No se pudo abrir el borrador del curso.",
+      "expired": "Este borrador ha caducado",
       "expiredTitle": "Este borrador ha caducado",
       "expiredBody": "Crea un nuevo borrador para continuar.",
       "startAgain": "Crear un nuevo borrador",
@@ -7307,6 +7308,7 @@
       "proposalNotReady": "Algunos cambios aún se están preparando. Espera un momento e inténtalo de nuevo.",
       "revisionChanged": "Este borrador cambió mientras lo revisabas. Se restauró la versión más reciente.",
       "selectionAlreadyApplied": "Estos cambios ya se aplicaron.",
+      "invalidSession": "Esta sesión de creación del curso no es válida.",
       "sessionNotFound": "Este chat ya no está disponible.",
       "targetAlreadyExists": "Parte de este cambio ya está en el curso.",
       "targetOutsideCourse": "Algo que seleccionaste no forma parte de este curso.",

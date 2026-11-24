@@ -161,7 +161,7 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
       void this.tenants
         .runWithTenant(subscription.tenantId, async () => {
           for (const socket of [...subscription.members.values()])
-            await this.authorizeMember(subscription, socket);
+            await this.authorizeMember(subscription, socket, true);
         })
         .catch(() => this.emitResync(subscription));
     }, 60_000);
@@ -242,8 +242,7 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
             this.logStreamIssue("disconnected", subscription, undefined, Date.now() - connectedAt);
         } catch (error) {
           if (!subscription.abort.signal.aborted && !streamAbort.signal.aborted) {
-            const status = this.errorStatus(error);
-            if (status === 404)
+            if (this.isMissingSession(error))
               this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND);
             else if (this.isAccessError(error))
               this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.PERMISSION_REVOKED);
@@ -288,10 +287,11 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
           subscription.courseId,
           subscription.sessionId,
           socket.data.user,
+          { refreshDraftActivity: false },
         );
         break;
       } catch (error) {
-        if (this.errorStatus(error) === 404) {
+        if (this.isMissingSession(error)) {
           this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND);
           return false;
         }
@@ -342,6 +342,7 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
   private async authorizeMember(
     subscription: CourseAuthoringSubscription,
     socket: AuthenticatedSocket,
+    refreshDraftActivity = false,
   ): Promise<boolean> {
     if (subscription.abort.signal.aborted || !subscription.members.has(socket.id)) return false;
     try {
@@ -352,10 +353,11 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
         subscription.courseId,
         subscription.sessionId,
         socket.data.user,
+        { refreshDraftActivity },
       );
       return true;
     } catch (error) {
-      if (this.errorStatus(error) === 404) {
+      if (this.isMissingSession(error)) {
         this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND);
         return false;
       }
@@ -400,7 +402,7 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
 
   /** Maps expected authorization and stale-session failures without forwarding provider details. */
   private joinErrorCode(error: unknown) {
-    if (this.errorStatus(error) === 404) return AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND;
+    if (this.isMissingSession(error)) return AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND;
     if (this.isAccessError(error)) return AUTHORING_SOCKET_ERROR.PERMISSION_REVOKED;
     return AUTHORING_SOCKET_ERROR.JOIN_FAILED;
   }
@@ -440,6 +442,12 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
       error instanceof WsAuthenticationException ||
       [401, 403].includes(this.errorStatus(error) ?? 0)
     );
+  }
+
+  /** Missing and expired sessions are terminal for every member. */
+  private isMissingSession(error: unknown) {
+    const status = this.errorStatus(error);
+    return status === 404 || status === 410;
   }
 
   /** Extracts only numeric HTTP status, never a provider response body. */
