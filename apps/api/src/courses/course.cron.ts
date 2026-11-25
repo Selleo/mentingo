@@ -12,10 +12,17 @@ export class CourseCron {
     private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_9AM)
   async notifyAdminsAboutOverdueCoursesPerDay() {
     await this.tenantRunner.runForEachTenant(async () => {
       await this.courseService.sendOverdueCoursesEmails();
+    });
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_9AM)
+  async notifyAdminsAboutCourseDueDatesAtRiskPerDay() {
+    await this.tenantRunner.runForEachTenant(async () => {
+      await this.courseService.sendCourseDueDatesAtRiskEmails();
     });
   }
 

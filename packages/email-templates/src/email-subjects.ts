@@ -147,6 +147,15 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     es: "Notificación de cursos vencidos",
     fr: "Notification de cours en retard",
   },
+  adminCourseDueDatesAtRiskEmail: {
+    en: "Course due dates are approaching",
+    pl: "Zbliżają się terminy kursów",
+    de: "Kursfristen rücken näher",
+    lt: "Artėja kursų terminai",
+    cs: "Blíží se termíny kurzů",
+    es: "Se acercan las fechas límite de los cursos",
+    fr: "Les dates limites des cours approchent",
+  },
   courseDueDateReminderEmail: {
     en: "Course deadline approaching - {{courseName}}",
     pl: "Zbliża się termin kursu - {{courseName}}",

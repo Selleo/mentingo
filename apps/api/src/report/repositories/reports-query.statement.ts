@@ -63,7 +63,7 @@ function buildLearnerPopulationCte(context: ReportStatementContext): SQL {
               NULL::numeric AS progress, NULL::numeric AS score, 0::int AS attempts,
               NULL::text AS certificate_status, NULL::timestamptz AS certificate_issued_at,
               NULL::timestamptz AS enrolled_at, NULL::timestamptz AS completed_at,
-              NULL::timestamptz AS last_activity_at,
+              NULL::timestamptz AS last_activity_at, NULL::timestamptz AS due_date,
               COALESCE(group_data.group_ids, ARRAY[]::uuid[]) AS group_ids,
               '[]'::jsonb AS path_courses
             FROM users u
@@ -194,6 +194,7 @@ function buildCourseFactsCte(context: ReportStatementContext): SQL {
               cert.issued_at AS certificate_issued_at,
               GREATEST(sc.last_opened_at, sc.completed_at, progress.last_completed_at,
                 quiz.last_submitted_at) AS last_activity_at,
+              course_due_date.due_date,
               COALESCE(group_data.group_ids, ARRAY[]::uuid[]) AS group_ids,
               NULL::uuid AS path_id,
               NULL::text AS path_title,
@@ -209,6 +210,19 @@ function buildCourseFactsCte(context: ReportStatementContext): SQL {
             LEFT JOIN latest_course_certificates cert ON cert.tenant_id = sc.tenant_id
               AND cert.user_id = sc.student_id AND cert.course_id = sc.course_id
             LEFT JOIN learner_groups group_data ON group_data.tenant_id = sc.tenant_id AND group_data.user_id = sc.student_id
+            LEFT JOIN LATERAL (
+              SELECT MIN(gc.due_date) AS due_date
+              FROM group_courses gc
+              WHERE gc.tenant_id = sc.tenant_id AND gc.course_id = sc.course_id
+                AND gc.due_date IS NOT NULL
+                AND (
+                  gc.group_id = sc.enrolled_by_group_id
+                  OR (gc.is_mandatory AND sc.enrolled_by_group_id IS NULL AND EXISTS (
+                    SELECT 1 FROM group_users gu_due WHERE gu_due.tenant_id = sc.tenant_id
+                      AND gu_due.group_id = gc.group_id AND gu_due.user_id = sc.student_id
+                  ))
+                )
+            ) course_due_date ON TRUE
           )
   `;
 }
@@ -247,6 +261,7 @@ function buildPathFactsCtes(context: ReportStatementContext): SQL {
               END AS certificate_status,
               path_cert.issued_at AS certificate_issued_at,
               MAX(pcf.last_activity_at) AS last_activity_at,
+              NULL::timestamptz AS due_date,
               COALESCE(group_data.group_ids, ARRAY[]::uuid[]) AS group_ids,
               COALESCE(JSONB_AGG(JSONB_BUILD_OBJECT(
                 'courseId', pcf.course_id, 'courseTitle', pcf.course_title, 'status', pcf.status,

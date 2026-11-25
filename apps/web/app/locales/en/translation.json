@@ -355,7 +355,8 @@
       "forum_mention": "User mentioned in a forum topic",
       "discussion_reply": "New replies in a discussion (grouped)",
       "tenant_user_capacity": "User capacity alert",
-      "content_marketplace_course_update": "Marketplace course update"
+      "content_marketplace_course_update": "Marketplace course update",
+      "admin_course_due_dates_at_risk": "Course due dates at risk"
     },
     "errors": {
       "incompleteButton": "Enter a button label and URL.",
@@ -7941,7 +7942,8 @@
       "score": "Average quiz score",
       "attempts": "Total quiz attempts",
       "certificate": "Certificate",
-      "lastActivity": "Last activity"
+      "lastActivity": "Last activity",
+      "dueDate": "Due date"
     },
     "operators": {
       "eq": "Is",
@@ -8309,7 +8311,8 @@
         "forum_mention": "The users mentioned in the forum post.",
         "discussion_reply": "Participants of the thread or topic who have not read the replies in the application.",
         "tenant_user_capacity": "Active administrators of the organization.",
-        "content_marketplace_course_update": "Active administrators of the organization."
+        "content_marketplace_course_update": "Active administrators of the organization.",
+        "admin_course_due_dates_at_risk": "Users who can manage course enrollment and have overdue course notifications enabled."
       }
     },
     "mapping": {
@@ -8413,7 +8416,8 @@
       "forumUserMentioned": "Forum mention",
       "discussionReply": "New replies in a discussion",
       "tenantUserCapacity": "User capacity alert",
-      "contentMarketplaceCourseUpdate": "Marketplace course update"
+      "contentMarketplaceCourseUpdate": "Marketplace course update",
+      "courseDueDatesAtRisk": "Course due dates at risk"
     },
     "canvas": {
       "emptyTitle": "Your automation canvas is empty",
@@ -8594,7 +8598,13 @@
       "marketplaceUrl": "Content marketplace link",
       "coursesWithNewVersion": "Courses with a new version",
       "allCoursesWithNewVersion": "All courses with a new version",
-      "coursesWithNewVersionCount": "Number of courses with a new version"
+      "coursesWithNewVersionCount": "Number of courses with a new version",
+      "overdueLearnersCount": "Number of learners with overdue courses",
+      "overdueCoursesCount": "Number of overdue courses",
+      "reportUrl": "Report link",
+      "atRiskCoursesSummary": "Courses with an approaching due date",
+      "atRiskLearnersCount": "Number of learners who have not completed the courses",
+      "atRiskCoursesCount": "Number of courses with an approaching due date"
     },
     "simulation": {
       "title": "Simulation Result",

@@ -14,6 +14,7 @@ export const REPORT_DATE_FIELDS = new Set<string>([
   FIELD.ENROLLED_AT,
   FIELD.COMPLETED_AT,
   FIELD.LAST_ACTIVITY,
+  FIELD.DUE_DATE,
 ]);
 
 export const REPORT_IDENTIFIER_FIELDS = new Set<string>([
@@ -60,5 +61,6 @@ export const REPORT_ROW_COLUMNS: Record<ReportFilterCondition["field"], SQL> = {
   attempts: sql`r.attempts`,
   certificate: sql`r.certificate_status`,
   lastActivity: sql`r.last_activity_at`,
+  dueDate: sql`r.due_date`,
   groupId: sql`r.learner_id`,
 };

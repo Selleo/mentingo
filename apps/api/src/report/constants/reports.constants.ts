@@ -1,5 +1,10 @@
 import { REPORT_ERRORS } from "./reports.errors";
 
+export const REPORTS_PAGE_PATH = "/reports";
+
+/** The reports page reads a shared configuration from this search parameter. */
+export const REPORT_CONFIGURATION_SEARCH_PARAM = "reportConfig";
+
 export const REPORT_VIEWS = {
   ORGANISATION: "organisation",
   DEVELOPMENT_PATHS: "developmentPaths",
@@ -20,6 +25,7 @@ export const REPORT_FILTER_FIELDS = {
   ATTEMPTS: "attempts",
   CERTIFICATE: "certificate",
   LAST_ACTIVITY: "lastActivity",
+  DUE_DATE: "dueDate",
 } as const;
 
 export const REPORT_FILTER_OPERATORS = {

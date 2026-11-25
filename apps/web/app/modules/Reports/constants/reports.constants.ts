@@ -49,6 +49,7 @@ export const REPORT_FIELD_KEYS: ReportFilterField[] = [
   "attempts",
   "certificate",
   "lastActivity",
+  "dueDate",
 ];
 
 export const REPORT_OPERATOR_KEYS: ReportFilterOperator[] = [
@@ -88,11 +89,12 @@ export const REPORT_DATE_FIELDS: ReportFilterField[] = [
   "enrolledAt",
   "completedAt",
   "lastActivity",
+  "dueDate",
 ];
 
 export const REPORT_VIEW_FIELDS: Record<ReportView, ReportFilterField[]> = {
   organisation: REPORT_FIELD_KEYS,
-  developmentPaths: REPORT_FIELD_KEYS,
+  developmentPaths: REPORT_FIELD_KEYS.filter((field) => field !== "dueDate"),
   course: REPORT_FIELD_KEYS,
   learner: REPORT_FIELD_KEYS.filter((field) => field !== "learner"),
 };
@@ -111,6 +113,7 @@ export const REPORT_FILTER_FIELDS: Record<ReportFilterField, ReportFilterOperato
   attempts: ["eq", "neq", "gte", "lte", "between", "notBetween"],
   certificate: ["eq", "neq", "isEmpty", "isNotEmpty"],
   lastActivity: ["eq", "neq", "gte", "lte", "between", "notBetween", "isEmpty", "isNotEmpty"],
+  dueDate: ["eq", "neq", "gte", "lte", "between", "notBetween", "isEmpty", "isNotEmpty"],
 };
 
 export const REPORT_FIELD_VALUES: Partial<Record<ReportFilterField, string[]>> = {

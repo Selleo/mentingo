@@ -355,7 +355,8 @@
       "forum_mention": "Utilisateur mentionné dans un sujet du forum",
       "discussion_reply": "Nouvelles réponses dans une discussion (regroupées)",
       "tenant_user_capacity": "Alerte de capacité d'utilisateurs",
-      "content_marketplace_course_update": "Mise à jour de cours du marketplace"
+      "content_marketplace_course_update": "Mise à jour de cours du marketplace",
+      "admin_course_due_dates_at_risk": "Dates limites de cours menacées"
     },
     "errors": {
       "incompleteButton": "Saisissez le libellé du bouton et son URL.",
@@ -7673,7 +7674,8 @@
       "score": "Score moyen aux quiz",
       "attempts": "Nombre total de tentatives",
       "certificate": "Certificat",
-      "lastActivity": "Dernière activité"
+      "lastActivity": "Dernière activité",
+      "dueDate": "Date limite"
     },
     "operators": {
       "eq": "Est",
@@ -7947,7 +7949,8 @@
       "forumUserMentioned": "Mention sur le forum",
       "discussionReply": "Nouvelles réponses dans une discussion",
       "tenantUserCapacity": "Alerte de capacité d'utilisateurs",
-      "contentMarketplaceCourseUpdate": "Mise à jour de cours du marketplace"
+      "contentMarketplaceCourseUpdate": "Mise à jour de cours du marketplace",
+      "courseDueDatesAtRisk": "Dates limites de cours menacées"
     },
     "recipients": {
       "title": "Destinataires",
@@ -8000,7 +8003,8 @@
         "forum_mention": "Les utilisateurs mentionnés dans le message du forum.",
         "discussion_reply": "Les participants du fil ou du sujet qui n'ont pas lu les réponses dans l'application.",
         "tenant_user_capacity": "Administrateurs actifs de l'organisation.",
-        "content_marketplace_course_update": "Administrateurs actifs de l’organisation."
+        "content_marketplace_course_update": "Administrateurs actifs de l’organisation.",
+        "admin_course_due_dates_at_risk": "Utilisateurs qui peuvent gérer les inscriptions aux cours et ont activé les notifications de cours en retard."
       }
     },
     "mapping": {
@@ -8169,7 +8173,13 @@
       "marketplaceUrl": "Lien vers le marketplace",
       "coursesWithNewVersion": "Cours avec une nouvelle version",
       "allCoursesWithNewVersion": "Tous les cours avec une nouvelle version",
-      "coursesWithNewVersionCount": "Nombre de cours avec une nouvelle version"
+      "coursesWithNewVersionCount": "Nombre de cours avec une nouvelle version",
+      "overdueLearnersCount": "Nombre d'apprenants ayant des cours en retard",
+      "overdueCoursesCount": "Nombre de cours en retard",
+      "reportUrl": "Lien vers le rapport",
+      "atRiskCoursesSummary": "Cours dont la date limite approche",
+      "atRiskLearnersCount": "Nombre d'apprenants n'ayant pas terminé les cours",
+      "atRiskCoursesCount": "Nombre de cours dont la date limite approche"
     },
     "simulation": {
       "title": "Résultat de la simulation",

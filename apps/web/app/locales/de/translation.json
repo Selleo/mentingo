@@ -355,7 +355,8 @@
       "forum_mention": "Benutzer in einem Forenthema erwähnt",
       "discussion_reply": "Neue Antworten in einer Diskussion (gesammelt)",
       "tenant_user_capacity": "Warnung zur Benutzerkapazität",
-      "content_marketplace_course_update": "Kursaktualisierung im Marketplace"
+      "content_marketplace_course_update": "Kursaktualisierung im Marketplace",
+      "admin_course_due_dates_at_risk": "Gefährdete Kursfristen"
     },
     "errors": {
       "incompleteButton": "Geben Sie eine Schaltflächenbeschriftung und URL ein.",
@@ -7973,7 +7974,8 @@
         "forum_mention": "Die im Forenbeitrag erwähnten Benutzer.",
         "discussion_reply": "Teilnehmer des Threads oder Themas, die die Antworten in der Anwendung noch nicht gelesen haben.",
         "tenant_user_capacity": "Aktive Administratoren der Organisation.",
-        "content_marketplace_course_update": "Aktive Administratoren der Organisation."
+        "content_marketplace_course_update": "Aktive Administratoren der Organisation.",
+        "admin_course_due_dates_at_risk": "Benutzer, die Kurseinschreibungen verwalten können und Benachrichtigungen über überfällige Kurse aktiviert haben."
       }
     },
     "mapping": {
@@ -8078,7 +8080,8 @@
       "forumUserMentioned": "Erwähnung im Forum",
       "discussionReply": "Neue Antworten in einer Diskussion",
       "tenantUserCapacity": "Warnung zur Benutzerkapazität",
-      "contentMarketplaceCourseUpdate": "Kursaktualisierung im Marketplace"
+      "contentMarketplaceCourseUpdate": "Kursaktualisierung im Marketplace",
+      "courseDueDatesAtRisk": "Gefährdete Kursfristen"
     },
     "canvas": {
       "emptyTitle": "Ihre Automatisierungsleinwand ist leer",
@@ -8256,7 +8259,13 @@
       "marketplaceUrl": "Link zum Marketplace",
       "coursesWithNewVersion": "Kurse mit neuer Version",
       "allCoursesWithNewVersion": "Alle Kurse mit neuer Version",
-      "coursesWithNewVersionCount": "Anzahl der Kurse mit neuer Version"
+      "coursesWithNewVersionCount": "Anzahl der Kurse mit neuer Version",
+      "overdueLearnersCount": "Anzahl der Teilnehmenden mit überfälligen Kursen",
+      "overdueCoursesCount": "Anzahl der überfälligen Kurse",
+      "reportUrl": "Link zum Bericht",
+      "atRiskCoursesSummary": "Kurse mit bald ablaufender Frist",
+      "atRiskLearnersCount": "Anzahl der Teilnehmenden, die die Kurse nicht abgeschlossen haben",
+      "atRiskCoursesCount": "Anzahl der Kurse mit bald ablaufender Frist"
     },
     "simulation": {
       "title": "Simulationsergebnis",
@@ -8626,7 +8635,8 @@
       "score": "Durchschnittliche Quizpunktzahl",
       "attempts": "Quizversuche insgesamt",
       "certificate": "Zertifikat",
-      "lastActivity": "Letzte Aktivität"
+      "lastActivity": "Letzte Aktivität",
+      "dueDate": "Fälligkeitsdatum"
     },
     "operators": {
       "eq": "Ist",

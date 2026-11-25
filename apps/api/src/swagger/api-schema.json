@@ -13435,6 +13435,10 @@
                   "type": "string"
                 },
                 {
+                  "const": "admin_course_due_dates_at_risk",
+                  "type": "string"
+                },
+                {
                   "const": "magic_link",
                   "type": "string"
                 },
@@ -13599,6 +13603,10 @@
                 },
                 {
                   "const": "admin_overdue_courses",
+                  "type": "string"
+                },
+                {
+                  "const": "admin_course_due_dates_at_risk",
                   "type": "string"
                 },
                 {
@@ -14555,6 +14563,10 @@
                 },
                 {
                   "const": "admin_overdue_courses",
+                  "type": "string"
+                },
+                {
+                  "const": "admin_course_due_dates_at_risk",
                   "type": "string"
                 },
                 {
@@ -75004,6 +75016,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "admin_course_due_dates_at_risk",
+                      "type": "string"
+                    },
+                    {
                       "const": "course_due_date_reminder",
                       "type": "string"
                     },
@@ -79394,6 +79410,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -79546,6 +79566,10 @@
                       },
                       {
                         "const": "admin_overdue_courses",
+                        "type": "string"
+                      },
+                      {
+                        "const": "admin_course_due_dates_at_risk",
                         "type": "string"
                       },
                       {
@@ -83751,6 +83775,10 @@
                           "type": "string"
                         },
                         {
+                          "const": "admin_course_due_dates_at_risk",
+                          "type": "string"
+                        },
+                        {
                           "const": "course_due_date_reminder",
                           "type": "string"
                         },
@@ -83903,6 +83931,10 @@
                         },
                         {
                           "const": "admin_overdue_courses",
+                          "type": "string"
+                        },
+                        {
+                          "const": "admin_course_due_dates_at_risk",
                           "type": "string"
                         },
                         {
@@ -88133,6 +88165,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -88285,6 +88321,10 @@
                       },
                       {
                         "const": "admin_overdue_courses",
+                        "type": "string"
+                      },
+                      {
+                        "const": "admin_course_due_dates_at_risk",
                         "type": "string"
                       },
                       {
@@ -92488,6 +92528,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -92640,6 +92684,10 @@
                       },
                       {
                         "const": "admin_overdue_courses",
+                        "type": "string"
+                      },
+                      {
+                        "const": "admin_course_due_dates_at_risk",
                         "type": "string"
                       },
                       {
@@ -96843,6 +96891,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -96995,6 +97047,10 @@
                       },
                       {
                         "const": "admin_overdue_courses",
+                        "type": "string"
+                      },
+                      {
+                        "const": "admin_course_due_dates_at_risk",
                         "type": "string"
                       },
                       {
@@ -101089,6 +101145,10 @@
                 "type": "string"
               },
               {
+                "const": "admin_course_due_dates_at_risk",
+                "type": "string"
+              },
+              {
                 "const": "course_due_date_reminder",
                 "type": "string"
               },
@@ -105137,6 +105197,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -105289,6 +105353,10 @@
                       },
                       {
                         "const": "admin_overdue_courses",
+                        "type": "string"
+                      },
+                      {
+                        "const": "admin_course_due_dates_at_risk",
                         "type": "string"
                       },
                       {
@@ -109385,6 +109453,10 @@
                     "type": "string"
                   },
                   {
+                    "const": "admin_course_due_dates_at_risk",
+                    "type": "string"
+                  },
+                  {
                     "const": "course_due_date_reminder",
                     "type": "string"
                   },
@@ -113398,6 +113470,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -113550,6 +113626,10 @@
                       },
                       {
                         "const": "admin_overdue_courses",
+                        "type": "string"
+                      },
+                      {
+                        "const": "admin_course_due_dates_at_risk",
                         "type": "string"
                       },
                       {
@@ -117795,6 +117875,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -117947,6 +118031,10 @@
                       },
                       {
                         "const": "admin_overdue_courses",
+                        "type": "string"
+                      },
+                      {
+                        "const": "admin_course_due_dates_at_risk",
                         "type": "string"
                       },
                       {
@@ -122196,6 +122284,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -122348,6 +122440,10 @@
                       },
                       {
                         "const": "admin_overdue_courses",
+                        "type": "string"
+                      },
+                      {
+                        "const": "admin_course_due_dates_at_risk",
                         "type": "string"
                       },
                       {
@@ -126551,6 +126647,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -126703,6 +126803,10 @@
                       },
                       {
                         "const": "admin_overdue_courses",
+                        "type": "string"
+                      },
+                      {
+                        "const": "admin_course_due_dates_at_risk",
                         "type": "string"
                       },
                       {
@@ -130917,6 +131021,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -131069,6 +131177,10 @@
                       },
                       {
                         "const": "admin_overdue_courses",
+                        "type": "string"
+                      },
+                      {
+                        "const": "admin_course_due_dates_at_risk",
                         "type": "string"
                       },
                       {
@@ -135272,6 +135384,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -135424,6 +135540,10 @@
                       },
                       {
                         "const": "admin_overdue_courses",
+                        "type": "string"
+                      },
+                      {
+                        "const": "admin_course_due_dates_at_risk",
                         "type": "string"
                       },
                       {
@@ -143342,6 +143462,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -143660,6 +143784,10 @@
                                             "type": "string"
                                           },
                                           {
+                                            "const": "admin_course_due_dates_at_risk",
+                                            "type": "string"
+                                          },
+                                          {
                                             "const": "course_due_date_reminder",
                                             "type": "string"
                                           },
@@ -143868,6 +143996,10 @@
                                                   },
                                                   {
                                                     "const": "admin_overdue_courses",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "admin_course_due_dates_at_risk",
                                                     "type": "string"
                                                   },
                                                   {
@@ -144359,6 +144491,10 @@
                                                     "type": "string"
                                                   },
                                                   {
+                                                    "const": "admin_course_due_dates_at_risk",
+                                                    "type": "string"
+                                                  },
+                                                  {
                                                     "const": "course_due_date_reminder",
                                                     "type": "string"
                                                   },
@@ -144567,6 +144703,10 @@
                                                           },
                                                           {
                                                             "const": "admin_overdue_courses",
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "const": "admin_course_due_dates_at_risk",
                                                             "type": "string"
                                                           },
                                                           {
@@ -145030,6 +145170,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "admin_course_due_dates_at_risk",
+                      "type": "string"
+                    },
+                    {
                       "const": "course_due_date_reminder",
                       "type": "string"
                     },
@@ -145453,6 +145597,10 @@
                               "type": "string"
                             },
                             {
+                              "const": "admin_course_due_dates_at_risk",
+                              "type": "string"
+                            },
+                            {
                               "const": "magic_link",
                               "type": "string"
                             },
@@ -145764,6 +145912,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "admin_course_due_dates_at_risk",
+                      "type": "string"
+                    },
+                    {
                       "const": "magic_link",
                       "type": "string"
                     },
@@ -146006,6 +146158,10 @@
                                                 "type": "string"
                                               },
                                               {
+                                                "const": "admin_course_due_dates_at_risk",
+                                                "type": "string"
+                                              },
+                                              {
                                                 "const": "course_due_date_reminder",
                                                 "type": "string"
                                               },
@@ -146214,6 +146370,10 @@
                                                       },
                                                       {
                                                         "const": "admin_overdue_courses",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "admin_course_due_dates_at_risk",
                                                         "type": "string"
                                                       },
                                                       {
@@ -146687,6 +146847,10 @@
                                       "type": "string"
                                     },
                                     {
+                                      "const": "admin_course_due_dates_at_risk",
+                                      "type": "string"
+                                    },
+                                    {
                                       "const": "course_due_date_reminder",
                                       "type": "string"
                                     },
@@ -146895,6 +147059,10 @@
                                             },
                                             {
                                               "const": "admin_overdue_courses",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "admin_course_due_dates_at_risk",
                                               "type": "string"
                                             },
                                             {
@@ -147633,6 +147801,10 @@
                                   "type": "string"
                                 },
                                 {
+                                  "const": "admin_course_due_dates_at_risk",
+                                  "type": "string"
+                                },
+                                {
                                   "const": "magic_link",
                                   "type": "string"
                                 },
@@ -147964,6 +148136,10 @@
                                       "type": "string"
                                     },
                                     {
+                                      "const": "admin_course_due_dates_at_risk",
+                                      "type": "string"
+                                    },
+                                    {
                                       "const": "course_due_date_reminder",
                                       "type": "string"
                                     },
@@ -148172,6 +148348,10 @@
                                             },
                                             {
                                               "const": "admin_overdue_courses",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "admin_course_due_dates_at_risk",
                                               "type": "string"
                                             },
                                             {
@@ -148641,6 +148821,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "admin_course_due_dates_at_risk",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "course_due_date_reminder",
                                           "type": "string"
                                         },
@@ -148849,6 +149033,10 @@
                                                 },
                                                 {
                                                   "const": "admin_overdue_courses",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_course_due_dates_at_risk",
                                                   "type": "string"
                                                 },
                                                 {
@@ -149340,6 +149528,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "admin_course_due_dates_at_risk",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "course_due_date_reminder",
                                                   "type": "string"
                                                 },
@@ -149548,6 +149740,10 @@
                                                         },
                                                         {
                                                           "const": "admin_overdue_courses",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "admin_course_due_dates_at_risk",
                                                           "type": "string"
                                                         },
                                                         {
@@ -150047,6 +150243,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "admin_course_due_dates_at_risk",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "course_due_date_reminder",
                                           "type": "string"
                                         },
@@ -150255,6 +150455,10 @@
                                                 },
                                                 {
                                                   "const": "admin_overdue_courses",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_course_due_dates_at_risk",
                                                   "type": "string"
                                                 },
                                                 {
@@ -150746,6 +150950,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "admin_course_due_dates_at_risk",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "course_due_date_reminder",
                                                   "type": "string"
                                                 },
@@ -150954,6 +151162,10 @@
                                                         },
                                                         {
                                                           "const": "admin_overdue_courses",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "admin_course_due_dates_at_risk",
                                                           "type": "string"
                                                         },
                                                         {
@@ -151453,6 +151665,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "admin_course_due_dates_at_risk",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "course_due_date_reminder",
                                           "type": "string"
                                         },
@@ -151661,6 +151877,10 @@
                                                 },
                                                 {
                                                   "const": "admin_overdue_courses",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_course_due_dates_at_risk",
                                                   "type": "string"
                                                 },
                                                 {
@@ -152152,6 +152372,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "admin_course_due_dates_at_risk",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "course_due_date_reminder",
                                                   "type": "string"
                                                 },
@@ -152360,6 +152584,10 @@
                                                         },
                                                         {
                                                           "const": "admin_overdue_courses",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "admin_course_due_dates_at_risk",
                                                           "type": "string"
                                                         },
                                                         {
@@ -152856,6 +153084,10 @@
                                       "type": "string"
                                     },
                                     {
+                                      "const": "admin_course_due_dates_at_risk",
+                                      "type": "string"
+                                    },
+                                    {
                                       "const": "course_due_date_reminder",
                                       "type": "string"
                                     },
@@ -153064,6 +153296,10 @@
                                             },
                                             {
                                               "const": "admin_overdue_courses",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "admin_course_due_dates_at_risk",
                                               "type": "string"
                                             },
                                             {
@@ -153529,6 +153765,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "admin_course_due_dates_at_risk",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "course_due_date_reminder",
                                           "type": "string"
                                         },
@@ -153737,6 +153977,10 @@
                                                 },
                                                 {
                                                   "const": "admin_overdue_courses",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_course_due_dates_at_risk",
                                                   "type": "string"
                                                 },
                                                 {
@@ -154228,6 +154472,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "admin_course_due_dates_at_risk",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "course_due_date_reminder",
                                                   "type": "string"
                                                 },
@@ -154436,6 +154684,10 @@
                                                         },
                                                         {
                                                           "const": "admin_overdue_courses",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "admin_course_due_dates_at_risk",
                                                           "type": "string"
                                                         },
                                                         {
@@ -154956,6 +155208,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "admin_course_due_dates_at_risk",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "course_due_date_reminder",
                                           "type": "string"
                                         },
@@ -155164,6 +155420,10 @@
                                                 },
                                                 {
                                                   "const": "admin_overdue_courses",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_course_due_dates_at_risk",
                                                   "type": "string"
                                                 },
                                                 {
@@ -155655,6 +155915,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "admin_course_due_dates_at_risk",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "course_due_date_reminder",
                                                   "type": "string"
                                                 },
@@ -155863,6 +156127,10 @@
                                                         },
                                                         {
                                                           "const": "admin_overdue_courses",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "admin_course_due_dates_at_risk",
                                                           "type": "string"
                                                         },
                                                         {
@@ -156363,6 +156631,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "admin_course_due_dates_at_risk",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "course_due_date_reminder",
                                           "type": "string"
                                         },
@@ -156571,6 +156843,10 @@
                                                 },
                                                 {
                                                   "const": "admin_overdue_courses",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_course_due_dates_at_risk",
                                                   "type": "string"
                                                 },
                                                 {
@@ -157042,6 +157318,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "admin_course_due_dates_at_risk",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "course_due_date_reminder",
                                           "type": "string"
                                         },
@@ -157250,6 +157530,10 @@
                                                 },
                                                 {
                                                   "const": "admin_overdue_courses",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_course_due_dates_at_risk",
                                                   "type": "string"
                                                 },
                                                 {
@@ -157741,6 +158025,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "admin_course_due_dates_at_risk",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "course_due_date_reminder",
                                                   "type": "string"
                                                 },
@@ -157949,6 +158237,10 @@
                                                         },
                                                         {
                                                           "const": "admin_overdue_courses",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "admin_course_due_dates_at_risk",
                                                           "type": "string"
                                                         },
                                                         {
@@ -158448,6 +158740,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "admin_course_due_dates_at_risk",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "course_due_date_reminder",
                                           "type": "string"
                                         },
@@ -158656,6 +158952,10 @@
                                                 },
                                                 {
                                                   "const": "admin_overdue_courses",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_course_due_dates_at_risk",
                                                   "type": "string"
                                                 },
                                                 {
@@ -159147,6 +159447,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "admin_course_due_dates_at_risk",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "course_due_date_reminder",
                                                   "type": "string"
                                                 },
@@ -159355,6 +159659,10 @@
                                                         },
                                                         {
                                                           "const": "admin_overdue_courses",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "admin_course_due_dates_at_risk",
                                                           "type": "string"
                                                         },
                                                         {
@@ -159854,6 +160162,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "admin_course_due_dates_at_risk",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "course_due_date_reminder",
                                           "type": "string"
                                         },
@@ -160062,6 +160374,10 @@
                                                 },
                                                 {
                                                   "const": "admin_overdue_courses",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_course_due_dates_at_risk",
                                                   "type": "string"
                                                 },
                                                 {
@@ -160553,6 +160869,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "admin_course_due_dates_at_risk",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "course_due_date_reminder",
                                                   "type": "string"
                                                 },
@@ -160761,6 +161081,10 @@
                                                         },
                                                         {
                                                           "const": "admin_overdue_courses",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "admin_course_due_dates_at_risk",
                                                           "type": "string"
                                                         },
                                                         {
@@ -161260,6 +161584,10 @@
                                           "type": "string"
                                         },
                                         {
+                                          "const": "admin_course_due_dates_at_risk",
+                                          "type": "string"
+                                        },
+                                        {
                                           "const": "course_due_date_reminder",
                                           "type": "string"
                                         },
@@ -161468,6 +161796,10 @@
                                                 },
                                                 {
                                                   "const": "admin_overdue_courses",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "admin_course_due_dates_at_risk",
                                                   "type": "string"
                                                 },
                                                 {
@@ -161959,6 +162291,10 @@
                                                   "type": "string"
                                                 },
                                                 {
+                                                  "const": "admin_course_due_dates_at_risk",
+                                                  "type": "string"
+                                                },
+                                                {
                                                   "const": "course_due_date_reminder",
                                                   "type": "string"
                                                 },
@@ -162167,6 +162503,10 @@
                                                         },
                                                         {
                                                           "const": "admin_overdue_courses",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "admin_course_due_dates_at_risk",
                                                           "type": "string"
                                                         },
                                                         {
@@ -162636,6 +162976,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "admin_course_due_dates_at_risk",
+                      "type": "string"
+                    },
+                    {
                       "const": "course_due_date_reminder",
                       "type": "string"
                     },
@@ -162957,6 +163301,10 @@
                         "type": "string"
                       },
                       {
+                        "const": "admin_course_due_dates_at_risk",
+                        "type": "string"
+                      },
+                      {
                         "const": "course_due_date_reminder",
                         "type": "string"
                       },
@@ -163207,6 +163555,10 @@
                                 },
                                 {
                                   "const": "admin_overdue_courses",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "admin_course_due_dates_at_risk",
                                   "type": "string"
                                 },
                                 {
@@ -169089,6 +169441,10 @@
                             {
                               "const": "lastActivity",
                               "type": "string"
+                            },
+                            {
+                              "const": "dueDate",
+                              "type": "string"
                             }
                           ]
                         },
@@ -169253,6 +169609,10 @@
                                   },
                                   {
                                     "const": "lastActivity",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "dueDate",
                                     "type": "string"
                                   }
                                 ]
@@ -170666,6 +171026,10 @@
                                       {
                                         "const": "lastActivity",
                                         "type": "string"
+                                      },
+                                      {
+                                        "const": "dueDate",
+                                        "type": "string"
                                       }
                                     ]
                                   },
@@ -170830,6 +171194,10 @@
                                             },
                                             {
                                               "const": "lastActivity",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "dueDate",
                                               "type": "string"
                                             }
                                           ]
@@ -171129,6 +171497,10 @@
                                 {
                                   "const": "lastActivity",
                                   "type": "string"
+                                },
+                                {
+                                  "const": "dueDate",
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -171293,6 +171665,10 @@
                                       },
                                       {
                                         "const": "lastActivity",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "dueDate",
                                         "type": "string"
                                       }
                                     ]
@@ -171558,6 +171934,10 @@
                                     {
                                       "const": "lastActivity",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "dueDate",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -171722,6 +172102,10 @@
                                           },
                                           {
                                             "const": "lastActivity",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "dueDate",
                                             "type": "string"
                                           }
                                         ]
@@ -172021,6 +172405,10 @@
                                 {
                                   "const": "lastActivity",
                                   "type": "string"
+                                },
+                                {
+                                  "const": "dueDate",
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -172185,6 +172573,10 @@
                                       },
                                       {
                                         "const": "lastActivity",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "dueDate",
                                         "type": "string"
                                       }
                                     ]
@@ -172445,6 +172837,10 @@
                                     {
                                       "const": "lastActivity",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "dueDate",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -172609,6 +173005,10 @@
                                           },
                                           {
                                             "const": "lastActivity",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "dueDate",
                                             "type": "string"
                                           }
                                         ]
@@ -172934,6 +173334,10 @@
                                 {
                                   "const": "lastActivity",
                                   "type": "string"
+                                },
+                                {
+                                  "const": "dueDate",
+                                  "type": "string"
                                 }
                               ]
                             },
@@ -173098,6 +173502,10 @@
                                       },
                                       {
                                         "const": "lastActivity",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "dueDate",
                                         "type": "string"
                                       }
                                     ]

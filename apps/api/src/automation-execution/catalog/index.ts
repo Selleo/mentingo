@@ -1,3 +1,4 @@
+import { adminCourseDueDatesAtRiskAutomation } from "./admin-course-due-dates-at-risk.automation";
 import { adminFinishedCourseAutomation } from "./admin-finished-course.automation";
 import { adminNewUserAutomation } from "./admin-new-user.automation";
 import { adminOverdueCoursesAutomation } from "./admin-overdue-courses.automation";
@@ -56,4 +57,5 @@ export const BUILT_IN_AUTOMATIONS = [
   discussionReplyAutomation,
   tenantUserCapacityAutomation,
   contentMarketplaceCourseUpdateAutomation,
+  adminCourseDueDatesAtRiskAutomation,
 ];

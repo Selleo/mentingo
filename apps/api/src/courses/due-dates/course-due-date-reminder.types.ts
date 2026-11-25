@@ -1,4 +1,5 @@
 import type { COURSE_DUE_DATE_REMINDER_DAYS } from "./course-due-date-reminders.constants";
+import type { DueDateCourse } from "@repo/email-templates";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { DefaultEmailSettings } from "src/events/types";
@@ -26,19 +27,19 @@ export type CourseDueDateReminderWindow = {
   endsAt: string;
 };
 
-export type OverdueCoursesEmailCourse = {
-  courseTitle: string;
-  groups: {
-    groupName: string;
-    dueDate: string;
-    students: {
-      name: string;
-      email: string;
-    }[];
-  }[];
+export type DueDateCoursesByLanguageRow = {
+  language: SupportedLanguages;
+  courses: DueDateCourse[];
 };
 
-export type OverdueCoursesByLanguageRow = {
-  language: SupportedLanguages;
-  courses: OverdueCoursesEmailCourse[];
+/** Due dates on or after `dueFrom` (when given) and strictly before `dueBefore`. */
+export type CourseDueDateWindow = {
+  dueFrom: Date | null;
+  dueBefore: Date;
+};
+
+/** Inclusive calendar days, in the report's `YYYY-MM-DD` form. */
+export type CourseDueDateReportRange = {
+  firstDay: string | null;
+  lastDay: string;
 };

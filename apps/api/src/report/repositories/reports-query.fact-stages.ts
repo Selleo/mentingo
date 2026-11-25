@@ -69,6 +69,7 @@ function buildScopedEnrollments({ db, query, access, managedGroupIds }: ReportQu
       course_id: studentCourses.courseId,
       enrolled_at: studentCourses.enrolledAt,
       completed_at: studentCourses.completedAt,
+      enrolled_by_group_id: studentCourses.enrolledByGroupId,
       last_opened_at: studentCourses.lastOpenedAt,
       progress: studentCourses.progress,
     })

@@ -355,7 +355,8 @@
       "forum_mention": "Naudotojas paminėtas forumo temoje",
       "discussion_reply": "Nauji atsakymai diskusijoje (sugrupuoti)",
       "tenant_user_capacity": "Įspėjimas apie naudotojų talpą",
-      "content_marketplace_course_update": "Kurso atnaujinimas marketplace"
+      "content_marketplace_course_update": "Kurso atnaujinimas marketplace",
+      "admin_course_due_dates_at_risk": "Kursų terminams kyla grėsmė"
     },
     "errors": {
       "incompleteButton": "Įveskite mygtuko tekstą ir URL.",
@@ -7990,7 +7991,8 @@
         "forum_mention": "Forumo įraše paminėti naudotojai.",
         "discussion_reply": "Gijos arba temos dalyviai, kurie neperskaitė atsakymų programoje.",
         "tenant_user_capacity": "Aktyvūs organizacijos administratoriai.",
-        "content_marketplace_course_update": "Aktyvūs organizacijos administratoriai."
+        "content_marketplace_course_update": "Aktyvūs organizacijos administratoriai.",
+        "admin_course_due_dates_at_risk": "Naudotojai, galintys valdyti registraciją į kursus ir įjungę pranešimus apie vėluojančius kursus."
       }
     },
     "mapping": {
@@ -8095,7 +8097,8 @@
       "forumUserMentioned": "Paminėjimas forume",
       "discussionReply": "Nauji atsakymai diskusijoje",
       "tenantUserCapacity": "Įspėjimas apie naudotojų talpą",
-      "contentMarketplaceCourseUpdate": "Kurso atnaujinimas marketplace"
+      "contentMarketplaceCourseUpdate": "Kurso atnaujinimas marketplace",
+      "courseDueDatesAtRisk": "Kursų terminams kyla grėsmė"
     },
     "canvas": {
       "emptyTitle": "Jūsų automatizavimo drobė tuščia",
@@ -8273,7 +8276,13 @@
       "marketplaceUrl": "Nuoroda į marketplace",
       "coursesWithNewVersion": "Kursai su nauja versija",
       "allCoursesWithNewVersion": "Visi kursai su nauja versija",
-      "coursesWithNewVersionCount": "Kursų su nauja versija skaičius"
+      "coursesWithNewVersionCount": "Kursų su nauja versija skaičius",
+      "overdueLearnersCount": "Studentų su vėluojančiais kursais skaičius",
+      "overdueCoursesCount": "Vėluojančių kursų skaičius",
+      "reportUrl": "Ataskaitos nuoroda",
+      "atRiskCoursesSummary": "Kursai, kurių terminas artėja",
+      "atRiskLearnersCount": "Kursų nebaigusių studentų skaičius",
+      "atRiskCoursesCount": "Kursų, kurių terminas artėja, skaičius"
     },
     "simulation": {
       "title": "Simuliacijos rezultatas",
@@ -8649,7 +8658,8 @@
       "score": "Vidutinis testų rezultatas",
       "attempts": "Visi testų bandymai",
       "certificate": "Pažymėjimas",
-      "lastActivity": "Paskutinė veikla"
+      "lastActivity": "Paskutinė veikla",
+      "dueDate": "Terminas"
     },
     "operators": {
       "eq": "Yra",

@@ -56,6 +56,7 @@ export const LT_REPORT_EXPORT_LABELS: ReportExportLabels = {
   fieldProgress: "Pažanga",
   fieldEnrolledAt: "Registracijos data",
   fieldCompletedAt: "Užbaigimo data",
+  fieldDueDate: "Terminas",
   opEq: "yra",
   opNeq: "nėra",
   opIn: "yra vienas iš",

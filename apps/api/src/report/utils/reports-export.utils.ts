@@ -212,7 +212,7 @@ function describeConditionValue(
       getCertificateLabel(text as ReportResultRow["certificate"]["status"], labels),
     )
     .with(P.union(FIELD.PROGRESS, FIELD.SCORE), () => formatPercent(Number(value)))
-    .with(P.union(FIELD.ENROLLED_AT, FIELD.COMPLETED_AT, FIELD.LAST_ACTIVITY), () =>
+    .with(P.union(FIELD.ENROLLED_AT, FIELD.COMPLETED_AT, FIELD.LAST_ACTIVITY, FIELD.DUE_DATE), () =>
       formatter.conditionDate(text),
     )
     .with(
@@ -236,6 +236,7 @@ function getFieldLabel(field: ReportFilterCondition["field"], labels: ReportExpo
     .with(FIELD.ATTEMPTS, () => labels.attempts)
     .with(FIELD.CERTIFICATE, () => labels.certificate)
     .with(FIELD.LAST_ACTIVITY, () => labels.lastActivity)
+    .with(FIELD.DUE_DATE, () => labels.fieldDueDate)
     .exhaustive();
 }
 

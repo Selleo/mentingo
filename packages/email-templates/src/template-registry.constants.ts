@@ -139,6 +139,15 @@ export const EMAIL_TEMPLATE_NAMES: Record<
     es: "Notificación de cursos vencidos",
     fr: "Notification de cours en retard",
   },
+  ADMIN_COURSE_DUE_DATES_AT_RISK: {
+    en: "Course due dates at risk",
+    pl: "Zagrożone terminy kursów",
+    de: "Gefährdete Kursfristen",
+    lt: "Kursų terminams kyla grėsmė",
+    cs: "Ohrožené termíny kurzů",
+    es: "Fechas límite de cursos en riesgo",
+    fr: "Dates limites de cours menacées",
+  },
   COURSE_DUE_DATE_REMINDER: {
     en: "Course due-date reminder",
     pl: "Przypomnienie o terminie kursu",
