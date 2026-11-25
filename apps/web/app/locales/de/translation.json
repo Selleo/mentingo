@@ -9848,7 +9848,7 @@
     }
   },
   "quizGrading": {
-    "title": "Zu bewerten",
+    "title": "Quiz-Bewertung",
     "answerTitle": "Antwort bewerten",
     "empty": "Keine Antworten entsprechen den ausgewählten Filtern.",
     "filters": {

@@ -9921,7 +9921,7 @@
     }
   },
   "quizGrading": {
-    "title": "K hodnocení",
+    "title": "Hodnocení kvízů",
     "answerTitle": "Hodnocení odpovědi",
     "empty": "Vybraným filtrům neodpovídají žádné odpovědi.",
     "filters": {

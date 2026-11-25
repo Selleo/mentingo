@@ -9987,7 +9987,7 @@
             "The reviewer has quiz_grading.read; published demo courses have current-run submitted open answers from other people."
           ],
           "actions": [
-            "Open To grade and inspect the pending counter and oldest-first queue.",
+            "Open Quiz grading and inspect the oldest-first queue.",
             "Filter by course, lesson, learner and pending or graded status; paginate the results.",
             "Open an accessible answer belonging to another synthetic learner."
           ],

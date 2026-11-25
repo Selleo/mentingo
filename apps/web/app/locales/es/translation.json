@@ -9803,7 +9803,7 @@
     }
   },
   "quizGrading": {
-    "title": "Por calificar",
+    "title": "Calificación de cuestionarios",
     "answerTitle": "Calificar respuesta",
     "pendingCount": "Pendientes: {{count}}",
     "empty": "Ninguna respuesta coincide con los filtros seleccionados.",

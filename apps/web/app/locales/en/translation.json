@@ -9890,7 +9890,7 @@
     }
   },
   "quizGrading": {
-    "title": "To grade",
+    "title": "Quiz grading",
     "answerTitle": "Grade answer",
     "empty": "No answers match the selected filters.",
     "filters": {
