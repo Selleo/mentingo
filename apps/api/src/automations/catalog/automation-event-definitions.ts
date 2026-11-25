@@ -370,17 +370,68 @@ export const AUTOMATION_EVENT_DEFINITIONS: Omit<AutomationEventDefinition, "prov
       fields: [
         {
           key: "overdue_courses_summary",
-          label: "Overdue courses",
+          label: "Overdue courses (up to two named, then a count)",
           type: AUTOMATION_PLACEHOLDER_TYPES.LOCALIZED_STRING,
-          sampleValue:
-            "Some students did not finish their courses on time:\n\nCourse: Leadership essentials\n    Group: New managers\n    Due date: 2026-09-30\n    Students:\n    - Alex Morgan (alex@example.com)\n",
+          sampleValue: "Leadership essentials, Phishing basics and 2 more",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "overdue_learners_count",
+          label: "Number of learners with overdue courses",
+          type: AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+          sampleValue: 23,
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "overdue_courses_count",
+          label: "Number of overdue courses",
+          type: AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+          sampleValue: 4,
           sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
         },
         {
           key: "courses_link",
-          label: "Courses link",
+          label: "Report link",
           type: AUTOMATION_PLACEHOLDER_TYPES.URL,
-          sampleValue: "https://example.com/courses",
+          sampleValue: "https://example.com/reports",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+      ],
+    },
+    {
+      kind: AUTOMATION_EVENT_KINDS.ADMIN_COURSE_DUE_DATES_AT_RISK,
+      label: "Course due dates at risk",
+      description:
+        "Sent to administrators once per due date, five days before it, about learners who have not finished those courses yet.",
+      recipientPolicy:
+        "Eligible administrators selected by the event producer, respecting personal notification preferences.",
+      fields: [
+        {
+          key: "at_risk_courses_summary",
+          label: "Courses with an approaching due date (up to two named, then a count)",
+          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
+          sampleValue: "Leadership essentials, Phishing basics and 2 more",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "at_risk_learners_count",
+          label: "Number of learners who have not completed the courses",
+          type: AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+          sampleValue: 50,
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "at_risk_courses_count",
+          label: "Number of courses with an approaching due date",
+          type: AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+          sampleValue: 4,
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "report_link",
+          label: "Report link",
+          type: AUTOMATION_PLACEHOLDER_TYPES.URL,
+          sampleValue: "https://example.com/reports",
           sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
         },
       ],

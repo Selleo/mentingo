@@ -355,7 +355,8 @@
       "forum_mention": "Usuario mencionado en un tema del foro",
       "discussion_reply": "Nuevas respuestas en una discusión (agrupadas)",
       "tenant_user_capacity": "Alerta de capacidad de usuarios",
-      "content_marketplace_course_update": "Actualización de curso del marketplace"
+      "content_marketplace_course_update": "Actualización de curso del marketplace",
+      "admin_course_due_dates_at_risk": "Fechas límite de cursos en riesgo"
     },
     "errors": {
       "incompleteButton": "Introduce el texto del botón y la URL.",
@@ -7904,7 +7905,8 @@
       "score": "Puntuación media de cuestionarios",
       "attempts": "Intentos totales en cuestionarios",
       "certificate": "Certificado",
-      "lastActivity": "Última actividad"
+      "lastActivity": "Última actividad",
+      "dueDate": "Fecha límite"
     },
     "operators": {
       "eq": "Es",
@@ -8263,7 +8265,8 @@
         "forum_mention": "Los usuarios mencionados en la publicación del foro.",
         "discussion_reply": "Participantes del hilo o tema que no han leído las respuestas en la aplicación.",
         "tenant_user_capacity": "Administradores activos de la organización.",
-        "content_marketplace_course_update": "Administradores activos de la organización."
+        "content_marketplace_course_update": "Administradores activos de la organización.",
+        "admin_course_due_dates_at_risk": "Usuarios que pueden gestionar las inscripciones a cursos y tienen activadas las notificaciones de cursos vencidos."
       }
     },
     "mapping": {
@@ -8367,7 +8370,8 @@
       "forumUserMentioned": "Mención en el foro",
       "discussionReply": "Nuevas respuestas en una discusión",
       "tenantUserCapacity": "Alerta de capacidad de usuarios",
-      "contentMarketplaceCourseUpdate": "Actualización de curso del marketplace"
+      "contentMarketplaceCourseUpdate": "Actualización de curso del marketplace",
+      "courseDueDatesAtRisk": "Fechas límite de cursos en riesgo"
     },
     "canvas": {
       "emptyTitle": "El lienzo de automatización está vacío",
@@ -8548,7 +8552,13 @@
       "marketplaceUrl": "Enlace al marketplace",
       "coursesWithNewVersion": "Cursos con una nueva versión",
       "allCoursesWithNewVersion": "Todos los cursos con una nueva versión",
-      "coursesWithNewVersionCount": "Número de cursos con una nueva versión"
+      "coursesWithNewVersionCount": "Número de cursos con una nueva versión",
+      "overdueLearnersCount": "Número de estudiantes con cursos vencidos",
+      "overdueCoursesCount": "Número de cursos vencidos",
+      "reportUrl": "Enlace al informe",
+      "atRiskCoursesSummary": "Cursos con fecha límite próxima",
+      "atRiskLearnersCount": "Número de estudiantes que no han completado los cursos",
+      "atRiskCoursesCount": "Número de cursos con fecha límite próxima"
     },
     "simulation": {
       "title": "Resultado de la simulación",

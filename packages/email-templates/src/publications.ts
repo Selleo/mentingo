@@ -10,7 +10,7 @@ import {
   EMAIL_TEMPLATE_SYSTEM_VARIABLES,
   EMAIL_TEMPLATE_DEFINITIONS_BY_EVENT,
 } from "./template-registry";
-import { getOverdueCoursesEmailTranslations } from "./translations/overdueCourses";
+import { summarizeDueDateCourseTitles } from "./translations/dueDateCourses";
 import type { OverdueCoursesEmailCourse } from "./templates/OverdueCoursesEmail";
 import { deriveEmailTemplatePublicationUsage } from "./template-usage";
 import type { PublishedEmailTemplate } from "./publication.types";
@@ -68,10 +68,10 @@ export function getBuiltInTemplatePublication(
             ...placeholder,
             name: "overdue_courses_summary",
             type: "localized_string" as const,
-            sampleValue: getOverdueCoursesEmailTranslations(
-              SUPPORTED_LANGUAGES.EN,
+            sampleValue: summarizeDueDateCourseTitles(
               samples.courses as OverdueCoursesEmailCourse[],
-            ).paragraphs.join("\n"),
+              SUPPORTED_LANGUAGES.EN,
+            ),
           }
         : placeholder,
     );
@@ -79,7 +79,7 @@ export function getBuiltInTemplatePublication(
   return deriveEmailTemplatePublicationUsage(publication);
 }
 
-/** Each locale receives its producer-resolved collection and language-specific labels. */
+/** Each locale names the overdue courses in its own words, so automations pick the recipient's language. */
 export function buildOverdueCoursesEventFields(
   courses: Partial<Record<SupportedLanguages, OverdueCoursesEmailCourse[]>>,
 ) {
@@ -87,14 +87,13 @@ export function buildOverdueCoursesEventFields(
     overdue_courses_summary: Object.fromEntries(
       Object.values(SUPPORTED_LANGUAGES).map((language) => [
         language,
-        getOverdueCoursesEmailTranslations(
-          language,
-          courses[language] ?? courses.en ?? [],
-        ).paragraphs.join("\n"),
+        summarizeDueDateCourseTitles(courses[language] ?? courses.en ?? [], language),
       ]),
     ),
   };
 }
+
+export { summarizeDueDateCourseTitles, type DueDateCourse } from "./translations/dueDateCourses";
 
 export const VISIBLE_BUILT_IN_EMAIL_TEMPLATE_KEYS = Object.values(BUILT_IN_EMAIL_TEMPLATE_KEYS);
 export function getBuiltInTemplateEvent(key: BuiltInEmailTemplateKey): AutomationEventKind {

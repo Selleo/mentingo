@@ -1,5 +1,8 @@
 export const MAX_COURSE_LEARNING_OUTCOMES = 5;
 
+/** Admins hear once about unfinished courses, exactly this many days before their due date. */
+export const COURSE_DUE_DATE_AT_RISK_DAYS = 5;
+
 export const COURSE_STATUSES = {
   DRAFT: "draft",
   PUBLISHED: "published",

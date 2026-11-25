@@ -479,6 +479,10 @@ export class CourseService {
     return this.courseDueDateNotificationService.sendOverdueCoursesEmails();
   }
 
+  async sendCourseDueDatesAtRiskEmails() {
+    return this.courseDueDateNotificationService.sendCourseDueDatesAtRiskEmails();
+  }
+
   async sendCourseDueDateReminders() {
     return this.courseDueDateNotificationService.sendCourseDueDateReminders();
   }
