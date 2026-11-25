@@ -10,7 +10,7 @@ import {
   getGroupManagerLearnerScopeCondition,
   shouldApplyGroupManagerScope,
 } from "src/common/permissions/group-manager-scope.utils";
-import { hasPermission } from "src/common/permissions/permission.utils";
+import { canTrackLessonProgress } from "src/common/utils/lessonLearningAccess";
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { LearningTimeRepository } from "src/learning-time/learning-time.repository";
@@ -103,9 +103,15 @@ export class LearningTimeService implements OnModuleInit {
   private async trackSocketSession(socketId: string, sessionKey: string): Promise<void> {
     const key = this.getSocketSessionsKey(socketId);
     const sessions = (await this.cacheManager.get<string[]>(key)) || [];
-    sessions.push(sessionKey);
+    const trackedSessions = sessions.includes(sessionKey) ? sessions : [...sessions, sessionKey];
 
-    await this.cacheManager.set(key, sessions, SESSION_TTL);
+    await this.cacheManager.set(key, trackedSessions, SESSION_TTL);
+  }
+
+  /** Saves the session and keeps it listed for its socket, so both expire together and a disconnect can flush it. */
+  private async saveSocketSession(sessionKey: string, session: LessonSession): Promise<void> {
+    await this.saveSession(sessionKey, session);
+    await this.trackSocketSession(session.socketId, sessionKey);
   }
 
   private async untrackSocketSession(socketId: string, sessionKey: string): Promise<void> {
@@ -120,25 +126,32 @@ export class LearningTimeService implements OnModuleInit {
     }
   }
 
-  private async getEnrolledLessonCourseId(
+  private async getTrackableLessonCourseId(
     socket: AuthenticatedSocket,
     payload: JoinLessonPayload,
   ): Promise<UUIDType | null> {
-    const { tenantId, userId } = socket.data.user;
-    return this.tenantDbRunnerService.runWithTenant(tenantId, () =>
-      this.learningTimeRepository.getEnrolledCourseIdByLessonId(payload.lessonId, userId),
+    const { tenantId, userId, permissions } = socket.data.user;
+
+    const access = await this.tenantDbRunnerService.runWithTenant(tenantId, () =>
+      this.learningTimeRepository.getEnrolledLessonLearningAccess(payload.lessonId, userId),
     );
+
+    if (!access) return null;
+
+    const canTrack = canTrackLessonProgress(permissions, {
+      hasEnrollment: true,
+      isCourseAuthor: access.authorId === userId,
+      isLearningModeActive: access.isLearningModeActive,
+    });
+
+    return canTrack ? access.courseId : null;
   }
 
   private async handleJoinLesson(
     socket: AuthenticatedSocket,
     payload: JoinLessonPayload,
   ): Promise<void> {
-    if (!this.canTrackLearningTime(socket)) {
-      return;
-    }
-
-    const courseId = await this.getEnrolledLessonCourseId(socket, payload);
+    const courseId = await this.getTrackableLessonCourseId(socket, payload);
     if (!courseId) return;
 
     const userId = socket.data.user.userId;
@@ -154,8 +167,7 @@ export class LearningTimeService implements OnModuleInit {
       accumulatedSeconds: 0,
     };
 
-    await this.saveSession(sessionKey, session);
-    await this.trackSocketSession(socket.id, sessionKey);
+    await this.saveSocketSession(sessionKey, session);
 
     this.logger.debug(`Started learning session for user ${userId} on lesson ${lessonId}`);
   }
@@ -164,10 +176,6 @@ export class LearningTimeService implements OnModuleInit {
     socket: AuthenticatedSocket,
     payload: LeaveLessonPayload,
   ): Promise<void> {
-    if (!this.canTrackLearningTime(socket)) {
-      return;
-    }
-
     const userId = socket.data.user.userId;
     const tenantId = socket.data.user.tenantId;
 
@@ -197,11 +205,7 @@ export class LearningTimeService implements OnModuleInit {
     socket: AuthenticatedSocket,
     payload: HeartbeatPayload,
   ): Promise<void> {
-    if (!this.canTrackLearningTime(socket)) {
-      return;
-    }
-
-    const courseId = await this.getEnrolledLessonCourseId(socket, payload);
+    const courseId = await this.getTrackableLessonCourseId(socket, payload);
     if (!courseId) return;
 
     const userId = socket.data.user.userId;
@@ -220,7 +224,7 @@ export class LearningTimeService implements OnModuleInit {
         accumulatedSeconds: 0,
       };
 
-      await this.saveSession(sessionKey, newSession);
+      await this.saveSocketSession(sessionKey, newSession);
 
       return;
     }
@@ -242,11 +246,11 @@ export class LearningTimeService implements OnModuleInit {
         this.logger.debug(`Flushed ${FLUSH_THRESHOLD}s for user ${userId} on lesson ${lessonId}`);
       }
 
-      await this.saveSession(sessionKey, session);
+      await this.saveSocketSession(sessionKey, session);
     } else {
       session.lastHeartbeat = Date.now();
 
-      await this.saveSession(sessionKey, session);
+      await this.saveSocketSession(sessionKey, session);
     }
   }
 
@@ -457,13 +461,5 @@ export class LearningTimeService implements OnModuleInit {
       default:
         return sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
     }
-  }
-
-  private canTrackLearningTime(socket: AuthenticatedSocket) {
-    return (
-      hasPermission(socket.data.user.permissions, PERMISSIONS.LEARNING_PROGRESS_UPDATE) &&
-      !hasPermission(socket.data.user.permissions, PERMISSIONS.COURSE_UPDATE) &&
-      !hasPermission(socket.data.user.permissions, PERMISSIONS.COURSE_UPDATE_OWN)
-    );
   }
 }

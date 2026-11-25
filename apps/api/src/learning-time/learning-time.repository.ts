@@ -9,6 +9,7 @@ import { LocalizationService } from "src/localization/localization.service";
 import {
   chapters,
   courses,
+  courseStudentMode,
   groupCourses,
   groups,
   groupManagerGroups,
@@ -21,6 +22,7 @@ import {
 
 import type { SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
+import type { EnrolledLessonLearningAccess } from "src/learning-time/learning-time.types";
 
 @Injectable()
 export class LearningTimeRepository {
@@ -56,14 +58,26 @@ export class LearningTimeRepository {
     return result?.courseId ?? null;
   }
 
-  async getEnrolledCourseIdByLessonId(
+  async getEnrolledLessonLearningAccess(
     lessonId: UUIDType,
     userId: UUIDType,
-  ): Promise<UUIDType | null> {
+  ): Promise<EnrolledLessonLearningAccess | null> {
     const [result] = await this.db
-      .select({ courseId: chapters.courseId })
+      .select({
+        courseId: chapters.courseId,
+        authorId: courses.authorId,
+        isLearningModeActive: sql<boolean>`${courseStudentMode.id} IS NOT NULL`,
+      })
       .from(lessons)
       .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(
+        courseStudentMode,
+        and(
+          eq(courseStudentMode.courseId, chapters.courseId),
+          eq(courseStudentMode.userId, userId),
+        ),
+      )
       .innerJoin(
         studentCourses,
         and(
@@ -74,7 +88,7 @@ export class LearningTimeRepository {
       )
       .where(eq(lessons.id, lessonId));
 
-    return result?.courseId ?? null;
+    return result ?? null;
   }
 
   async getLearningTimeForUser(userId: UUIDType, lessonId: UUIDType) {
