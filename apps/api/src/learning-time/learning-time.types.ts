@@ -9,3 +9,9 @@ export type LearningTimeQuery = {
   searchQuery?: string;
   sort?: LearningTimeStatisticsSortOptions;
 };
+
+export type EnrolledLessonLearningAccess = {
+  courseId: UUIDType;
+  authorId: UUIDType;
+  isLearningModeActive: boolean;
+};
