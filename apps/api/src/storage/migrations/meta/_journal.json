@@ -1835,6 +1835,20 @@
       "when": 1795776635592,
       "tag": "0261_course_authoring_draft_tenant_isolation",
       "breakpoints": true
+    },
+    {
+      "idx": 262,
+      "version": "7",
+      "when": 1795787117541,
+      "tag": "0262_add_marketplace_update_notices_and_authorless_announcements",
+      "breakpoints": true
+    },
+    {
+      "idx": 263,
+      "version": "7",
+      "when": 1795787120023,
+      "tag": "0263_clear_author_of_user_capacity_alerts",
+      "breakpoints": true
     }
   ]
 }

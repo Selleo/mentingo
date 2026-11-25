@@ -27,6 +27,7 @@ export const QUEUE_NAMES = {
   VIDEO_METADATA: "video-metadata",
   REPORT_EXPORT: "report-export",
   CONTENT_MARKETPLACE_EVENTS: "content-marketplace-events",
+  CONTENT_MARKETPLACE_UPDATE_CHECKS: "content-marketplace-update-checks",
   GAMIFICATION: "gamification",
   QUIZ_ATTEMPT_EXPIRATION: "quiz-attempt-expiration",
 } as const;

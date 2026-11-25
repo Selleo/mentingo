@@ -816,4 +816,43 @@ export const AUTOMATION_EVENT_DEFINITIONS: Omit<AutomationEventDefinition, "prov
         },
       ],
     },
+    {
+      kind: AUTOMATION_EVENT_KINDS.CONTENT_MARKETPLACE_COURSE_UPDATE,
+      label: "Marketplace course update",
+      description:
+        "Sent once per daily check that finds courses added from the content marketplace with a newer version, listing those courses. Each version is announced once.",
+      recipientPolicy:
+        "Active administrators of the organization. The in-app notification remains independent.",
+      fields: [
+        {
+          key: "courses_with_new_version",
+          label: "Courses with a new version (up to two named, then a count)",
+          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
+          sampleValue: "Leadership essentials, Phishing basics and 3 more",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "all_courses_with_new_version",
+          label: "All courses with a new version",
+          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
+          sampleValue:
+            "Cyber hygiene, Data privacy, Leadership essentials, Phishing basics and Remote work",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "courses_with_new_version_count",
+          label: "Number of courses with a new version",
+          type: AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+          sampleValue: 5,
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "marketplace_link",
+          label: "Content marketplace link",
+          type: AUTOMATION_PLACEHOLDER_TYPES.URL,
+          sampleValue: "https://example.com/content-marketplace",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+      ],
+    },
   ];

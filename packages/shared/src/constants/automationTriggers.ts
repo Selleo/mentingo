@@ -1036,6 +1036,37 @@ export const AUTOMATION_TRIGGER_DEFINITIONS: AutomationTriggerDefinition[] = [
       ),
     ],
   },
+  {
+    type: AUTOMATION_EVENT_KINDS.CONTENT_MARKETPLACE_COURSE_UPDATE,
+    kind: AUTOMATION_NODE_KINDS.TRIGGER,
+    labelKey: "automationBuilder.blocks.contentMarketplaceCourseUpdate",
+    providedVariables: [
+      variable(
+        "coursesWithNewVersion",
+        "automationBuilder.variables.coursesWithNewVersion",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "courses_with_new_version",
+      ),
+      variable(
+        "allCoursesWithNewVersion",
+        "automationBuilder.variables.allCoursesWithNewVersion",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "all_courses_with_new_version",
+      ),
+      variable(
+        "coursesWithNewVersionCount",
+        "automationBuilder.variables.coursesWithNewVersionCount",
+        AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+        "courses_with_new_version_count",
+      ),
+      variable(
+        "marketplaceUrl",
+        "automationBuilder.variables.marketplaceUrl",
+        AUTOMATION_PLACEHOLDER_TYPES.URL,
+        "marketplace_link",
+      ),
+    ],
+  },
 ];
 
 export const getAutomationTriggerDefinition = (type: AutomationEventKind) =>

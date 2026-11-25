@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, ne, or } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
@@ -8,6 +8,7 @@ import { contentMarketplaceCourseLineages, courses } from "src/storage/schema";
 import type {
   ContentMarketplaceCourseLineage,
   ContentMarketplaceImportedCourse,
+  ContentMarketplaceTrackedCourse,
 } from "../content-marketplace.types";
 import type { UUIDType } from "src/common";
 
@@ -64,5 +65,55 @@ export class ContentMarketplaceLineageRepository {
           isNotNull(courses.originalId),
         ),
       );
+  }
+
+  /** Imported marketplace courses that are still in use, with the update version admins were last told about. */
+  async findTrackedCourses(): Promise<ContentMarketplaceTrackedCourse[]> {
+    return this.db
+      .select({
+        courseId: contentMarketplaceCourseLineages.courseId,
+        listingId: contentMarketplaceCourseLineages.listingId,
+        versionId: contentMarketplaceCourseLineages.versionId,
+        notifiedUpdateVersionId: contentMarketplaceCourseLineages.notifiedUpdateVersionId,
+      })
+      .from(contentMarketplaceCourseLineages)
+      .innerJoin(courses, eq(courses.id, contentMarketplaceCourseLineages.courseId))
+      .where(and(isNotNull(courses.originalId), eq(courses.isArchived, false)));
+  }
+
+  async hasTrackedCourses(): Promise<boolean> {
+    const [trackedCourse] = await this.db
+      .select({ id: contentMarketplaceCourseLineages.id })
+      .from(contentMarketplaceCourseLineages)
+      .innerJoin(courses, eq(courses.id, contentMarketplaceCourseLineages.courseId))
+      .where(and(isNotNull(courses.originalId), eq(courses.isArchived, false)))
+      .limit(1);
+
+    return Boolean(trackedCourse);
+  }
+
+  /**
+   * Records that admins were told about this version, only if they were not told already, so
+   * concurrent checks notify once. Returns no rows when another check claimed it first.
+   */
+  async claimCourseUpdateNotification(
+    courseId: UUIDType,
+    versionId: string,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance
+      .update(contentMarketplaceCourseLineages)
+      .set({ notifiedUpdateVersionId: versionId })
+      .where(
+        and(
+          eq(contentMarketplaceCourseLineages.courseId, courseId),
+          ne(contentMarketplaceCourseLineages.versionId, versionId),
+          or(
+            isNull(contentMarketplaceCourseLineages.notifiedUpdateVersionId),
+            ne(contentMarketplaceCourseLineages.notifiedUpdateVersionId, versionId),
+          ),
+        ),
+      )
+      .returning({ courseId: contentMarketplaceCourseLineages.courseId });
   }
 }

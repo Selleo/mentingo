@@ -161,6 +161,7 @@ export class AutomationRecipientResolverService {
         AUTOMATION_EVENT_KINDS.QUIZ_GRADING_DIGEST,
         AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY,
         AUTOMATION_EVENT_KINDS.TENANT_USER_CAPACITY,
+        AUTOMATION_EVENT_KINDS.CONTENT_MARKETPLACE_COURSE_UPDATE,
       ] as string[]
     ).includes(event.kind);
   }

@@ -9080,7 +9080,7 @@ export interface GetAllAnnouncementsResponse {
     id: string;
     createdAt: string;
     updatedAt: string;
-    authorId: string;
+    authorId: string | null;
     audience: string;
     status: string;
     scheduledAt: string | null;
@@ -9116,7 +9116,7 @@ export interface GetAnnouncementsForUserResponse {
     id: string;
     createdAt: string;
     updatedAt: string;
-    authorId: string;
+    authorId: string | null;
     audience: string;
     status: string;
     scheduledAt: string | null;
@@ -9166,7 +9166,7 @@ export interface CreateAnnouncementResponse {
     id: string;
     createdAt: string;
     updatedAt: string;
-    authorId: string;
+    authorId: string | null;
     audience: string;
     status: string;
     scheduledAt: string | null;
@@ -9768,7 +9768,8 @@ export interface ListEmailTemplateEventsResponse {
       | "quiz_grading_digest"
       | "forum_mention"
       | "discussion_reply"
-      | "tenant_user_capacity";
+      | "tenant_user_capacity"
+      | "content_marketplace_course_update";
     label: string;
     description: string;
     recipientPolicy: string;
@@ -10822,6 +10823,7 @@ export interface DuplicateEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -10860,6 +10862,7 @@ export interface DuplicateEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -11873,6 +11876,7 @@ export interface ListEmailTemplatesResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -11911,6 +11915,7 @@ export interface ListEmailTemplatesResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -12930,6 +12935,7 @@ export interface GetBuiltInEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -12968,6 +12974,7 @@ export interface GetBuiltInEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -13981,6 +13988,7 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -14019,6 +14027,7 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -15032,6 +15041,7 @@ export interface GetEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -15070,6 +15080,7 @@ export interface GetEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -16067,7 +16078,8 @@ export interface CreateEmailTemplateBody {
     | "quiz_grading_digest"
     | "forum_mention"
     | "discussion_reply"
-    | "tenant_user_capacity";
+    | "tenant_user_capacity"
+    | "content_marketplace_course_update";
   populateEventTags?: boolean;
   /** @maxItems 100 */
   placeholders?: {
@@ -17072,6 +17084,7 @@ export interface CreateEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -17110,6 +17123,7 @@ export interface CreateEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -18109,6 +18123,7 @@ export interface UpdateEmailTemplateBody {
         | "forum_mention"
         | "discussion_reply"
         | "tenant_user_capacity"
+        | "content_marketplace_course_update"
       )
     | null;
   name?: {
@@ -19112,6 +19127,7 @@ export interface UpdateEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -19150,6 +19166,7 @@ export interface UpdateEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -20168,6 +20185,7 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -20206,6 +20224,7 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -21226,6 +21245,7 @@ export interface PublishEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -21264,6 +21284,7 @@ export interface PublishEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -22277,6 +22298,7 @@ export interface ArchiveEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -22315,6 +22337,7 @@ export interface ArchiveEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -23332,6 +23355,7 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -23370,6 +23394,7 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -24383,6 +24408,7 @@ export interface RestoreEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     event?:
@@ -24421,6 +24447,7 @@ export interface RestoreEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @maxItems 100 */
@@ -26372,6 +26399,7 @@ export interface PreviewEmailTemplateResponse {
           | "forum_mention"
           | "discussion_reply"
           | "tenant_user_capacity"
+          | "content_marketplace_course_update"
         )
       | null;
     /** @default "en" */
@@ -26458,6 +26486,7 @@ export interface ListAutomationsResponse {
                     | "forum_mention"
                     | "discussion_reply"
                     | "tenant_user_capacity"
+                    | "content_marketplace_course_update"
                   )
                 | null;
             };
@@ -26510,7 +26539,8 @@ export interface ListAutomationsResponse {
                           | "quiz_grading_digest"
                           | "forum_mention"
                           | "discussion_reply"
-                          | "tenant_user_capacity";
+                          | "tenant_user_capacity"
+                          | "content_marketplace_course_update";
                       }
                     | {
                         type: "custom";
@@ -26626,6 +26656,7 @@ export interface ListAutomationsResponse {
                       | "forum_mention"
                       | "discussion_reply"
                       | "tenant_user_capacity"
+                      | "content_marketplace_course_update"
                     )
                   | null;
               };
@@ -26678,7 +26709,8 @@ export interface ListAutomationsResponse {
                             | "quiz_grading_digest"
                             | "forum_mention"
                             | "discussion_reply"
-                            | "tenant_user_capacity";
+                            | "tenant_user_capacity"
+                            | "content_marketplace_course_update";
                         }
                       | {
                           type: "custom";
@@ -26772,7 +26804,8 @@ export interface ListAutomationEventsResponse {
       | "quiz_grading_digest"
       | "forum_mention"
       | "discussion_reply"
-      | "tenant_user_capacity";
+      | "tenant_user_capacity"
+      | "content_marketplace_course_update";
     label: string;
     description: string;
     recipientPolicy: string;
@@ -26844,7 +26877,8 @@ export interface ListAvailableEmailTemplatesResponse {
             | "quiz_grading_digest"
             | "forum_mention"
             | "discussion_reply"
-            | "tenant_user_capacity";
+            | "tenant_user_capacity"
+            | "content_marketplace_course_update";
         }
       | {
           type: "custom";
@@ -26901,7 +26935,8 @@ export interface ListBuiltInAutomationTemplatesResponse {
       | "quiz_grading_digest"
       | "forum_mention"
       | "discussion_reply"
-      | "tenant_user_capacity";
+      | "tenant_user_capacity"
+      | "content_marketplace_course_update";
     definition: {
       /**
        * @minLength 1
@@ -26976,6 +27011,7 @@ export interface ListBuiltInAutomationTemplatesResponse {
                       | "forum_mention"
                       | "discussion_reply"
                       | "tenant_user_capacity"
+                      | "content_marketplace_course_update"
                     )
                   | null;
               };
@@ -27028,7 +27064,8 @@ export interface ListBuiltInAutomationTemplatesResponse {
                             | "quiz_grading_digest"
                             | "forum_mention"
                             | "discussion_reply"
-                            | "tenant_user_capacity";
+                            | "tenant_user_capacity"
+                            | "content_marketplace_course_update";
                         }
                       | {
                           type: "custom";
@@ -27138,6 +27175,7 @@ export interface SimulateAutomationBody {
                   | "forum_mention"
                   | "discussion_reply"
                   | "tenant_user_capacity"
+                  | "content_marketplace_course_update"
                 )
               | null;
           };
@@ -27190,7 +27228,8 @@ export interface SimulateAutomationBody {
                         | "quiz_grading_digest"
                         | "forum_mention"
                         | "discussion_reply"
-                        | "tenant_user_capacity";
+                        | "tenant_user_capacity"
+                        | "content_marketplace_course_update";
                     }
                   | {
                       type: "custom";
@@ -27338,7 +27377,8 @@ export interface SimulateAutomationResponse {
               | "quiz_grading_digest"
               | "forum_mention"
               | "discussion_reply"
-              | "tenant_user_capacity";
+              | "tenant_user_capacity"
+              | "content_marketplace_course_update";
           }
         | {
             type: "custom";
@@ -27427,6 +27467,7 @@ export interface CreateAutomationBody {
                   | "forum_mention"
                   | "discussion_reply"
                   | "tenant_user_capacity"
+                  | "content_marketplace_course_update"
                 )
               | null;
           };
@@ -27479,7 +27520,8 @@ export interface CreateAutomationBody {
                         | "quiz_grading_digest"
                         | "forum_mention"
                         | "discussion_reply"
-                        | "tenant_user_capacity";
+                        | "tenant_user_capacity"
+                        | "content_marketplace_course_update";
                     }
                   | {
                       type: "custom";
@@ -27593,6 +27635,7 @@ export interface CreateAutomationResponse {
                     | "forum_mention"
                     | "discussion_reply"
                     | "tenant_user_capacity"
+                    | "content_marketplace_course_update"
                   )
                 | null;
             };
@@ -27645,7 +27688,8 @@ export interface CreateAutomationResponse {
                           | "quiz_grading_digest"
                           | "forum_mention"
                           | "discussion_reply"
-                          | "tenant_user_capacity";
+                          | "tenant_user_capacity"
+                          | "content_marketplace_course_update";
                       }
                     | {
                         type: "custom";
@@ -27761,6 +27805,7 @@ export interface CreateAutomationResponse {
                       | "forum_mention"
                       | "discussion_reply"
                       | "tenant_user_capacity"
+                      | "content_marketplace_course_update"
                     )
                   | null;
               };
@@ -27813,7 +27858,8 @@ export interface CreateAutomationResponse {
                             | "quiz_grading_digest"
                             | "forum_mention"
                             | "discussion_reply"
-                            | "tenant_user_capacity";
+                            | "tenant_user_capacity"
+                            | "content_marketplace_course_update";
                         }
                       | {
                           type: "custom";
@@ -27931,6 +27977,7 @@ export interface CreateAutomationFromTemplateResponse {
                     | "forum_mention"
                     | "discussion_reply"
                     | "tenant_user_capacity"
+                    | "content_marketplace_course_update"
                   )
                 | null;
             };
@@ -27983,7 +28030,8 @@ export interface CreateAutomationFromTemplateResponse {
                           | "quiz_grading_digest"
                           | "forum_mention"
                           | "discussion_reply"
-                          | "tenant_user_capacity";
+                          | "tenant_user_capacity"
+                          | "content_marketplace_course_update";
                       }
                     | {
                         type: "custom";
@@ -28099,6 +28147,7 @@ export interface CreateAutomationFromTemplateResponse {
                       | "forum_mention"
                       | "discussion_reply"
                       | "tenant_user_capacity"
+                      | "content_marketplace_course_update"
                     )
                   | null;
               };
@@ -28151,7 +28200,8 @@ export interface CreateAutomationFromTemplateResponse {
                             | "quiz_grading_digest"
                             | "forum_mention"
                             | "discussion_reply"
-                            | "tenant_user_capacity";
+                            | "tenant_user_capacity"
+                            | "content_marketplace_course_update";
                         }
                       | {
                           type: "custom";
@@ -28269,6 +28319,7 @@ export interface GetAutomationResponse {
                     | "forum_mention"
                     | "discussion_reply"
                     | "tenant_user_capacity"
+                    | "content_marketplace_course_update"
                   )
                 | null;
             };
@@ -28321,7 +28372,8 @@ export interface GetAutomationResponse {
                           | "quiz_grading_digest"
                           | "forum_mention"
                           | "discussion_reply"
-                          | "tenant_user_capacity";
+                          | "tenant_user_capacity"
+                          | "content_marketplace_course_update";
                       }
                     | {
                         type: "custom";
@@ -28437,6 +28489,7 @@ export interface GetAutomationResponse {
                       | "forum_mention"
                       | "discussion_reply"
                       | "tenant_user_capacity"
+                      | "content_marketplace_course_update"
                     )
                   | null;
               };
@@ -28489,7 +28542,8 @@ export interface GetAutomationResponse {
                             | "quiz_grading_digest"
                             | "forum_mention"
                             | "discussion_reply"
-                            | "tenant_user_capacity";
+                            | "tenant_user_capacity"
+                            | "content_marketplace_course_update";
                         }
                       | {
                           type: "custom";
@@ -28606,6 +28660,7 @@ export interface UpdateAutomationBody {
                   | "forum_mention"
                   | "discussion_reply"
                   | "tenant_user_capacity"
+                  | "content_marketplace_course_update"
                 )
               | null;
           };
@@ -28658,7 +28713,8 @@ export interface UpdateAutomationBody {
                         | "quiz_grading_digest"
                         | "forum_mention"
                         | "discussion_reply"
-                        | "tenant_user_capacity";
+                        | "tenant_user_capacity"
+                        | "content_marketplace_course_update";
                     }
                   | {
                       type: "custom";
@@ -28772,6 +28828,7 @@ export interface UpdateAutomationResponse {
                     | "forum_mention"
                     | "discussion_reply"
                     | "tenant_user_capacity"
+                    | "content_marketplace_course_update"
                   )
                 | null;
             };
@@ -28824,7 +28881,8 @@ export interface UpdateAutomationResponse {
                           | "quiz_grading_digest"
                           | "forum_mention"
                           | "discussion_reply"
-                          | "tenant_user_capacity";
+                          | "tenant_user_capacity"
+                          | "content_marketplace_course_update";
                       }
                     | {
                         type: "custom";
@@ -28940,6 +28998,7 @@ export interface UpdateAutomationResponse {
                       | "forum_mention"
                       | "discussion_reply"
                       | "tenant_user_capacity"
+                      | "content_marketplace_course_update"
                     )
                   | null;
               };
@@ -28992,7 +29051,8 @@ export interface UpdateAutomationResponse {
                             | "quiz_grading_digest"
                             | "forum_mention"
                             | "discussion_reply"
-                            | "tenant_user_capacity";
+                            | "tenant_user_capacity"
+                            | "content_marketplace_course_update";
                         }
                       | {
                           type: "custom";
@@ -29117,6 +29177,7 @@ export interface DuplicateAutomationResponse {
                     | "forum_mention"
                     | "discussion_reply"
                     | "tenant_user_capacity"
+                    | "content_marketplace_course_update"
                   )
                 | null;
             };
@@ -29169,7 +29230,8 @@ export interface DuplicateAutomationResponse {
                           | "quiz_grading_digest"
                           | "forum_mention"
                           | "discussion_reply"
-                          | "tenant_user_capacity";
+                          | "tenant_user_capacity"
+                          | "content_marketplace_course_update";
                       }
                     | {
                         type: "custom";
@@ -29285,6 +29347,7 @@ export interface DuplicateAutomationResponse {
                       | "forum_mention"
                       | "discussion_reply"
                       | "tenant_user_capacity"
+                      | "content_marketplace_course_update"
                     )
                   | null;
               };
@@ -29337,7 +29400,8 @@ export interface DuplicateAutomationResponse {
                             | "quiz_grading_digest"
                             | "forum_mention"
                             | "discussion_reply"
-                            | "tenant_user_capacity";
+                            | "tenant_user_capacity"
+                            | "content_marketplace_course_update";
                         }
                       | {
                           type: "custom";
@@ -29455,6 +29519,7 @@ export interface ApplyAutomationBody {
                     | "forum_mention"
                     | "discussion_reply"
                     | "tenant_user_capacity"
+                    | "content_marketplace_course_update"
                   )
                 | null;
             };
@@ -29507,7 +29572,8 @@ export interface ApplyAutomationBody {
                           | "quiz_grading_digest"
                           | "forum_mention"
                           | "discussion_reply"
-                          | "tenant_user_capacity";
+                          | "tenant_user_capacity"
+                          | "content_marketplace_course_update";
                       }
                     | {
                         type: "custom";
@@ -29622,6 +29688,7 @@ export interface ApplyAutomationResponse {
                     | "forum_mention"
                     | "discussion_reply"
                     | "tenant_user_capacity"
+                    | "content_marketplace_course_update"
                   )
                 | null;
             };
@@ -29674,7 +29741,8 @@ export interface ApplyAutomationResponse {
                           | "quiz_grading_digest"
                           | "forum_mention"
                           | "discussion_reply"
-                          | "tenant_user_capacity";
+                          | "tenant_user_capacity"
+                          | "content_marketplace_course_update";
                       }
                     | {
                         type: "custom";
@@ -29790,6 +29858,7 @@ export interface ApplyAutomationResponse {
                       | "forum_mention"
                       | "discussion_reply"
                       | "tenant_user_capacity"
+                      | "content_marketplace_course_update"
                     )
                   | null;
               };
@@ -29842,7 +29911,8 @@ export interface ApplyAutomationResponse {
                             | "quiz_grading_digest"
                             | "forum_mention"
                             | "discussion_reply"
-                            | "tenant_user_capacity";
+                            | "tenant_user_capacity"
+                            | "content_marketplace_course_update";
                         }
                       | {
                           type: "custom";
@@ -29960,6 +30030,7 @@ export interface EnableAutomationResponse {
                     | "forum_mention"
                     | "discussion_reply"
                     | "tenant_user_capacity"
+                    | "content_marketplace_course_update"
                   )
                 | null;
             };
@@ -30012,7 +30083,8 @@ export interface EnableAutomationResponse {
                           | "quiz_grading_digest"
                           | "forum_mention"
                           | "discussion_reply"
-                          | "tenant_user_capacity";
+                          | "tenant_user_capacity"
+                          | "content_marketplace_course_update";
                       }
                     | {
                         type: "custom";
@@ -30128,6 +30200,7 @@ export interface EnableAutomationResponse {
                       | "forum_mention"
                       | "discussion_reply"
                       | "tenant_user_capacity"
+                      | "content_marketplace_course_update"
                     )
                   | null;
               };
@@ -30180,7 +30253,8 @@ export interface EnableAutomationResponse {
                             | "quiz_grading_digest"
                             | "forum_mention"
                             | "discussion_reply"
-                            | "tenant_user_capacity";
+                            | "tenant_user_capacity"
+                            | "content_marketplace_course_update";
                         }
                       | {
                           type: "custom";
@@ -30298,6 +30372,7 @@ export interface DisableAutomationResponse {
                     | "forum_mention"
                     | "discussion_reply"
                     | "tenant_user_capacity"
+                    | "content_marketplace_course_update"
                   )
                 | null;
             };
@@ -30350,7 +30425,8 @@ export interface DisableAutomationResponse {
                           | "quiz_grading_digest"
                           | "forum_mention"
                           | "discussion_reply"
-                          | "tenant_user_capacity";
+                          | "tenant_user_capacity"
+                          | "content_marketplace_course_update";
                       }
                     | {
                         type: "custom";
@@ -30466,6 +30542,7 @@ export interface DisableAutomationResponse {
                       | "forum_mention"
                       | "discussion_reply"
                       | "tenant_user_capacity"
+                      | "content_marketplace_course_update"
                     )
                   | null;
               };
@@ -30518,7 +30595,8 @@ export interface DisableAutomationResponse {
                             | "quiz_grading_digest"
                             | "forum_mention"
                             | "discussion_reply"
-                            | "tenant_user_capacity";
+                            | "tenant_user_capacity"
+                            | "content_marketplace_course_update";
                         }
                       | {
                           type: "custom";
@@ -30636,6 +30714,7 @@ export interface ArchiveAutomationResponse {
                     | "forum_mention"
                     | "discussion_reply"
                     | "tenant_user_capacity"
+                    | "content_marketplace_course_update"
                   )
                 | null;
             };
@@ -30688,7 +30767,8 @@ export interface ArchiveAutomationResponse {
                           | "quiz_grading_digest"
                           | "forum_mention"
                           | "discussion_reply"
-                          | "tenant_user_capacity";
+                          | "tenant_user_capacity"
+                          | "content_marketplace_course_update";
                       }
                     | {
                         type: "custom";
@@ -30804,6 +30884,7 @@ export interface ArchiveAutomationResponse {
                       | "forum_mention"
                       | "discussion_reply"
                       | "tenant_user_capacity"
+                      | "content_marketplace_course_update"
                     )
                   | null;
               };
@@ -30856,7 +30937,8 @@ export interface ArchiveAutomationResponse {
                             | "quiz_grading_digest"
                             | "forum_mention"
                             | "discussion_reply"
-                            | "tenant_user_capacity";
+                            | "tenant_user_capacity"
+                            | "content_marketplace_course_update";
                         }
                       | {
                           type: "custom";
@@ -30952,7 +31034,8 @@ export interface ListAutomationRunsResponse {
       | "quiz_grading_digest"
       | "forum_mention"
       | "discussion_reply"
-      | "tenant_user_capacity";
+      | "tenant_user_capacity"
+      | "content_marketplace_course_update";
     status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
     createdAt: string;
     completedAt: string | null;
@@ -31022,7 +31105,8 @@ export interface GetAutomationRunResponse {
         | "quiz_grading_digest"
         | "forum_mention"
         | "discussion_reply"
-        | "tenant_user_capacity";
+        | "tenant_user_capacity"
+        | "content_marketplace_course_update";
       status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
       createdAt: string;
       completedAt: string | null;
@@ -31077,7 +31161,8 @@ export interface GetAutomationRunResponse {
               | "quiz_grading_digest"
               | "forum_mention"
               | "discussion_reply"
-              | "tenant_user_capacity";
+              | "tenant_user_capacity"
+              | "content_marketplace_course_update";
           }
         | {
             type: "custom";
@@ -46282,7 +46367,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "quiz_grading_digest"
         | "forum_mention"
         | "discussion_reply"
-        | "tenant_user_capacity",
+        | "tenant_user_capacity"
+        | "content_marketplace_course_update",
       params: RequestParams = {},
     ) =>
       this.request<GetBuiltInEmailTemplateResponse, any>({
@@ -46333,7 +46419,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "quiz_grading_digest"
         | "forum_mention"
         | "discussion_reply"
-        | "tenant_user_capacity",
+        | "tenant_user_capacity"
+        | "content_marketplace_course_update",
       params: RequestParams = {},
     ) =>
       this.request<CreateDraftFromBuiltInEmailTemplateResponse, any>({
@@ -46716,7 +46803,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "quiz_grading_digest"
         | "forum_mention"
         | "discussion_reply"
-        | "tenant_user_capacity",
+        | "tenant_user_capacity"
+        | "content_marketplace_course_update",
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";

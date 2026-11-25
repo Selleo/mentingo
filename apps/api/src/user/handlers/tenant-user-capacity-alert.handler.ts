@@ -79,12 +79,10 @@ export class TenantUserCapacityAlertHandler
     await this.captureUserCapacityEmails(tenantId, alertTexts, tenantUserCapacity, admins);
   }
 
-  /** The alert has no human author, so the tenant's oldest admin is recorded as one. */
   private async createUserCapacityAnnouncement(
     alertTexts: Record<SupportedLanguages, TenantUserCapacityAlertTexts>,
     admins: TenantUserCapacityAlertRecipient[],
   ) {
-    const [oldestAdmin] = admins;
     const adminIds = admins.map(({ id }) => id);
 
     await this.announcementsRepository.createAnnouncement({
@@ -93,7 +91,7 @@ export class TenantUserCapacityAlertHandler
       content: mapValues(alertTexts, ({ message }) => message),
       baseLanguage: SUPPORTED_LANGUAGES.EN,
       availableLocales: Object.values(SUPPORTED_LANGUAGES),
-      authorId: oldestAdmin.id,
+      authorId: null,
       status: ANNOUNCEMENT_STATUSES.PUBLISHED,
       scheduledAt: null,
       publishedAt: new Date().toISOString(),

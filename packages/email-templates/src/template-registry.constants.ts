@@ -247,4 +247,13 @@ export const EMAIL_TEMPLATE_NAMES: Record<
     es: "Alerta de capacidad de usuarios",
     fr: "Alerte de capacité d'utilisateurs",
   },
+  CONTENT_MARKETPLACE_COURSE_UPDATE: {
+    en: "Marketplace course update",
+    pl: "Aktualizacja kursu z marketplace",
+    de: "Kursaktualisierung im Marketplace",
+    lt: "Kurso atnaujinimas marketplace",
+    cs: "Aktualizace kurzu z marketplace",
+    es: "Actualización de curso del marketplace",
+    fr: "Mise à jour de cours du marketplace",
+  },
 };

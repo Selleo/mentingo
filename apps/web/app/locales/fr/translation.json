@@ -354,7 +354,8 @@
       "quiz_grading_digest": "Nouvelles réponses en attente d’évaluation (quotidien)",
       "forum_mention": "Utilisateur mentionné dans un sujet du forum",
       "discussion_reply": "Nouvelles réponses dans une discussion (regroupées)",
-      "tenant_user_capacity": "Alerte de capacité d'utilisateurs"
+      "tenant_user_capacity": "Alerte de capacité d'utilisateurs",
+      "content_marketplace_course_update": "Mise à jour de cours du marketplace"
     },
     "errors": {
       "incompleteButton": "Saisissez le libellé du bouton et son URL.",
@@ -7970,7 +7971,8 @@
       "quizGradingDigest": "Récapitulatif de la file d’évaluation",
       "forumUserMentioned": "Mention sur le forum",
       "discussionReply": "Nouvelles réponses dans une discussion",
-      "tenantUserCapacity": "Alerte de capacité d'utilisateurs"
+      "tenantUserCapacity": "Alerte de capacité d'utilisateurs",
+      "contentMarketplaceCourseUpdate": "Mise à jour de cours du marketplace"
     },
     "recipients": {
       "title": "Destinataires",
@@ -8022,7 +8024,8 @@
         "quiz_grading_digest": "Les utilisateurs pouvant évaluer les réponses aux quiz.",
         "forum_mention": "Les utilisateurs mentionnés dans le message du forum.",
         "discussion_reply": "Les participants du fil ou du sujet qui n'ont pas lu les réponses dans l'application.",
-        "tenant_user_capacity": "Administrateurs actifs de l'organisation."
+        "tenant_user_capacity": "Administrateurs actifs de l'organisation.",
+        "content_marketplace_course_update": "Administrateurs actifs de l’organisation."
       }
     },
     "mapping": {
@@ -8187,7 +8190,11 @@
       "activeUsersCount": "Utilisateurs actifs",
       "maxUsers": "Utilisateurs de l'offre",
       "allowedUsersCount": "Utilisateurs autorisés (avec dépassement)",
-      "usersUrl": "Lien vers la page des utilisateurs"
+      "usersUrl": "Lien vers la page des utilisateurs",
+      "marketplaceUrl": "Lien vers le marketplace",
+      "coursesWithNewVersion": "Cours avec une nouvelle version",
+      "allCoursesWithNewVersion": "Tous les cours avec une nouvelle version",
+      "coursesWithNewVersionCount": "Nombre de cours avec une nouvelle version"
     },
     "simulation": {
       "title": "Résultat de la simulation",

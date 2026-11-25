@@ -30,6 +30,7 @@ import { getUserFirstLoginEmailTranslations } from "./translations/userFirstLogi
 import { getUserInviteEmailTranslations } from "./translations/userInvite";
 import { getUserLongInactivityEmailTranslations } from "./translations/userLongInactivity";
 import { getTenantUserCapacityEmailTranslations } from "./translations/tenantUserCapacity";
+import { getContentMarketplaceCourseUpdateEmailTranslations } from "./translations/contentMarketplaceCourseUpdate";
 import { getUserShortInactivityEmailTranslations } from "./translations/userShortInactivity";
 import { getWelcomeEmailTranslations } from "./translations/welcome";
 
@@ -820,6 +821,48 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
         "{{ capacity_message }}",
       ),
     buttonUrl: "{{ users_link }}",
+  }),
+  createEmailTemplateDefinition({
+    event: EMAIL_TEMPLATE_EVENTS.CONTENT_MARKETPLACE_COURSE_UPDATE,
+    name: EMAIL_TEMPLATE_NAMES.CONTENT_MARKETPLACE_COURSE_UPDATE,
+    description:
+      "Sent to administrators once per daily check, listing the courses added from the content marketplace that have a newer version.",
+    sourceTemplate: "ContentMarketplaceCourseUpdateEmail",
+    subject: buildNormalizedLocalizedSubjectTemplates("contentMarketplaceCourseUpdateEmail"),
+    variables: [
+      defineEmailTemplateVariable(
+        "courses_with_new_version",
+        "Courses with a new version (up to two named, then a count)",
+        "text",
+        "Leadership essentials, Phishing basics and 3 more",
+        { required: true },
+      ),
+      defineEmailTemplateVariable(
+        "all_courses_with_new_version",
+        "All courses with a new version",
+        "text",
+        "Cyber hygiene, Data privacy, Leadership essentials, Phishing basics and Remote work",
+      ),
+      defineEmailTemplateVariable(
+        "courses_with_new_version_count",
+        "Number of courses with a new version",
+        "number",
+        5,
+      ),
+      defineEmailTemplateVariable(
+        "marketplace_link",
+        "Content marketplace link",
+        "url",
+        "https://example.com/content-marketplace",
+        { required: true },
+      ),
+    ],
+    getContent: (language) =>
+      getContentMarketplaceCourseUpdateEmailTranslations(
+        language,
+        "{{ courses_with_new_version }}",
+      ),
+    buttonUrl: "{{ marketplace_link }}",
   }),
 ] as const;
 
