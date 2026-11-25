@@ -38,12 +38,16 @@ const PUBLIC_ARCHIVE_ERROR_CODES = new Set([
   "nativeArchive.error.uploadComplete",
   "nativeArchive.error.uploadIncomplete",
   "nativeArchive.error.uploadNotFound",
+  "nativeArchive.error.videoEncodingFailed",
+  "nativeArchive.error.videoMp4Unavailable",
+  "nativeArchive.error.videoStillProcessing",
 ]);
+
+/** Failures that are not the archive's fault, such as provider or network errors, are reported generically. */
+const UNKNOWN_ARCHIVE_FAILURE_CODE = "nativeArchive.error.jobFailed";
 
 export function toPublicArchiveFailureCode(failedReason?: string | null): string | null {
   if (!failedReason) return null;
 
-  return PUBLIC_ARCHIVE_ERROR_CODES.has(failedReason)
-    ? failedReason
-    : "nativeArchive.error.invalidArchive";
+  return PUBLIC_ARCHIVE_ERROR_CODES.has(failedReason) ? failedReason : UNKNOWN_ARCHIVE_FAILURE_CODE;
 }

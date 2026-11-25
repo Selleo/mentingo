@@ -36,8 +36,8 @@ describe("NativeArchiveJobService", () => {
   it.each([
     ["nativeArchive.error.invalidArchive", "nativeArchive.error.invalidArchive"],
     ["nativeArchive.error.storageUnavailable", "nativeArchive.error.storageUnavailable"],
-    ["Error: database connection details", "nativeArchive.error.invalidArchive"],
-    ["nativeArchive.error.notAnArchiveError", "nativeArchive.error.invalidArchive"],
+    ["Error: database connection details", "nativeArchive.error.jobFailed"],
+    ["nativeArchive.error.notAnArchiveError", "nativeArchive.error.jobFailed"],
     [null, null],
   ])("returns a safe failed reason for %s", async (failedReason, expected) => {
     const job = {

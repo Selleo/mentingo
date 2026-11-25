@@ -1,3 +1,4 @@
+import type { VIDEO_MP4_UNAVAILABLE_REASONS } from "./bunnyStream.constants";
 import type { Readable } from "node:stream";
 
 export type BunnyMp4FallbackResolution = 720 | 480 | 360 | 240;
@@ -24,3 +25,6 @@ export type BunnyMp4DownloadResult = {
   filename: string;
   resolution: BunnyMp4FallbackResolution;
 };
+
+export type VideoMp4UnavailableReason =
+  (typeof VIDEO_MP4_UNAVAILABLE_REASONS)[keyof typeof VIDEO_MP4_UNAVAILABLE_REASONS];
