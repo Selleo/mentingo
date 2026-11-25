@@ -15,12 +15,12 @@ export const getContentMarketplaceCourseUpdateEmailTranslations = (
       buttonText: "OPEN MARKETPLACE",
     },
     pl: {
-      heading: "Aktualizacje kursów w marketplace",
+      heading: "Aktualizacje kursów w katalogu kursów",
       paragraphs: [
         `Nowe wersje są dostępne dla: ${coursesWithNewVersion}.`,
-        "Otwórz marketplace i zsynchronizuj, aby korzystać z najnowszej wersji.",
+        "Otwórz katalog kursów i zsynchronizuj, aby korzystać z najnowszej wersji.",
       ],
-      buttonText: "OTWÓRZ MARKETPLACE",
+      buttonText: "OTWÓRZ KATALOG KURSÓW",
     },
     de: {
       heading: "Kursaktualisierungen im Marketplace",

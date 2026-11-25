@@ -11,7 +11,7 @@ export const contentMarketplaceCourseUpdateAutomation: BuiltInAutomationDefiniti
   eventKind: AUTOMATION_EVENT_KINDS.CONTENT_MARKETPLACE_COURSE_UPDATE,
   name: {
     [SUPPORTED_LANGUAGES.EN]: "Marketplace course update",
-    [SUPPORTED_LANGUAGES.PL]: "Aktualizacja kursu z marketplace",
+    [SUPPORTED_LANGUAGES.PL]: "Aktualizacja kursu z katalogu kursów",
     [SUPPORTED_LANGUAGES.DE]: "Kursaktualisierung im Marketplace",
     [SUPPORTED_LANGUAGES.FR]: "Mise à jour de cours du marketplace",
     [SUPPORTED_LANGUAGES.ES]: "Actualización de curso del marketplace",
@@ -22,7 +22,7 @@ export const contentMarketplaceCourseUpdateAutomation: BuiltInAutomationDefiniti
     [SUPPORTED_LANGUAGES.EN]:
       "Sent to administrators once per daily check, listing the courses added from the content marketplace that have a new version.",
     [SUPPORTED_LANGUAGES.PL]:
-      "Wysyłane jednorazowo do administratorów, gdy marketplace opublikuje nową wersję kursu dodanego przez organizację.",
+      "Wysyłane jednorazowo do administratorów, gdy w katalogu kursów pojawi się nowa wersja kursu dodanego przez organizację.",
     [SUPPORTED_LANGUAGES.DE]:
       "Wird einmalig an Administratoren gesendet, wenn der Marketplace eine neue Version eines Kurses veröffentlicht, den die Organisation von dort hinzugefügt hat.",
     [SUPPORTED_LANGUAGES.FR]:

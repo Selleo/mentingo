@@ -221,7 +221,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
   },
   contentMarketplaceCourseUpdateEmail: {
     en: "Course updates in the content marketplace",
-    pl: "Aktualizacje kursów w marketplace",
+    pl: "Aktualizacje kursów w katalogu kursów",
     de: "Kursaktualisierungen im Marketplace",
     lt: "Kursų atnaujinimai marketplace",
     cs: "Aktualizace kurzů v marketplace",

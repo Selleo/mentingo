@@ -249,7 +249,7 @@ export const EMAIL_TEMPLATE_NAMES: Record<
   },
   CONTENT_MARKETPLACE_COURSE_UPDATE: {
     en: "Marketplace course update",
-    pl: "Aktualizacja kursu z marketplace",
+    pl: "Aktualizacja kursu z katalogu kursów",
     de: "Kursaktualisierung im Marketplace",
     lt: "Kurso atnaujinimas marketplace",
     cs: "Aktualizace kurzu z marketplace",

@@ -30,12 +30,12 @@ const COURSE_UPDATE_COPY: Record<SupportedLanguages, CourseUpdateCopy> = {
   },
   pl: {
     singleCourse: (courseTitle) => ({
-      title: "Kurs z marketplace ma nową wersję",
-      message: `W marketplace opublikowano nową wersję kursu ${courseTitle}. Otwórz marketplace i zsynchronizuj kurs, aby go zaktualizować.`,
+      title: "Kurs z katalogu kursów ma nową wersję",
+      message: `W katalogu kursów opublikowano nową wersję kursu ${courseTitle}. Otwórz katalog kursów i zsynchronizuj kurs, aby go zaktualizować.`,
     }),
     severalCourses: (updatedCourses) => ({
-      title: "Kursy z marketplace mają nowe wersje",
-      message: `W marketplace opublikowano nowe wersje kursów: ${updatedCourses}. Otwórz marketplace i zsynchronizuj te kursy, aby je zaktualizować.`,
+      title: "Kursy z katalogu kursów mają nowe wersje",
+      message: `W katalogu kursów opublikowano nowe wersje kursów: ${updatedCourses}. Otwórz katalog kursów i zsynchronizuj te kursy, aby je zaktualizować.`,
     }),
     remainingCourses: (remainingCount) => `jeszcze ${remainingCount}`,
   },
