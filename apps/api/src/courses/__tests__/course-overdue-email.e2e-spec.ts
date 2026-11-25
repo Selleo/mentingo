@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { CourseService } from "src/courses/course.service";
+import { REPORTS_PAGE_PATH } from "src/report/constants/reports.constants";
 import { DEFAULT_ADMIN_SETTINGS } from "src/settings/constants/settings.constants";
 import { groupCourses, settings, studentCourses } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -111,8 +112,9 @@ describe("Course overdue emails (e2e)", () => {
       to: admin.email,
       subject: "Overdue courses notification",
     });
-    expect(emails[0].text?.replace(/\s+/g, " ")).toContain("Overdue Regression Course");
-    expect(emails[0].text?.replace(/\s+/g, " ")).toContain("Overdue Regression Group");
-    expect(emails[0].text?.replace(/\s+/g, " ")).toContain(student.email);
+    const emailText = emails[0].text?.replace(/\s+/g, " ");
+    expect(emailText).toContain("Overdue Regression Course");
+    expect(emailText).toContain(`${REPORTS_PAGE_PATH}?`);
+    expect(emailText).not.toContain(student.email);
   });
 });
