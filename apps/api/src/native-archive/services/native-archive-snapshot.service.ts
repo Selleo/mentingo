@@ -1,7 +1,14 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { LESSON_TYPES, PERMISSIONS } from "@repo/shared";
 import { match } from "ts-pattern";
 
+import { VIDEO_MP4_UNAVAILABLE_REASONS } from "src/bunny/bunnyStream.constants";
+import { VideoMp4UnavailableError } from "src/bunny/bunnyStream.errors";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { CourseTransferGraphRepository } from "src/course-transfer/repositories/course-transfer-graph.repository";
@@ -365,11 +372,11 @@ export class NativeArchiveSnapshotService {
           const tenantHost = await this.courseTransferGraphRepository.getTenantHost(tenantId);
           if (!tenantHost) throw new NotFoundException("masterCourse.error.sourceTenantMissing");
 
-          const video = await this.bunnyStreamService.downloadMp4Fallback(
-            sourceReference.slice("bunny-".length),
-            720,
-            tenantHost,
-          );
+          const video = await this.bunnyStreamService
+            .downloadMp4Fallback(sourceReference.slice("bunny-".length), 720, tenantHost)
+            .catch((error: unknown) => {
+              throw this.toPublicVideoDownloadError(error);
+            });
 
           return video.stream;
         },
@@ -388,5 +395,27 @@ export class NativeArchiveSnapshotService {
       contentType,
       open: async () => (await this.s3Service.getFileStream(sourceReference)).stream,
     };
+  }
+
+  /** Tells the exporting admin why a video could not be packaged instead of failing generically. */
+  private toPublicVideoDownloadError(error: unknown): unknown {
+    if (!(error instanceof VideoMp4UnavailableError)) return error;
+
+    const errorKey = match(error.reason)
+      .with(
+        VIDEO_MP4_UNAVAILABLE_REASONS.STILL_PROCESSING,
+        () => "nativeArchive.error.videoStillProcessing",
+      )
+      .with(
+        VIDEO_MP4_UNAVAILABLE_REASONS.ENCODING_FAILED,
+        () => "nativeArchive.error.videoEncodingFailed",
+      )
+      .with(
+        VIDEO_MP4_UNAVAILABLE_REASONS.NOT_GENERATED,
+        () => "nativeArchive.error.videoMp4Unavailable",
+      )
+      .exhaustive();
+
+    return new BadRequestException(errorKey);
   }
 }
