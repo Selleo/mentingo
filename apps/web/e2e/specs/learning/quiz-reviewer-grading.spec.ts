@@ -106,7 +106,7 @@ test("grading the last answer completes the lesson", async ({
 
     await page.goto("/");
     await expect(page).toHaveURL(/\/quiz-grading$/);
-    await expect(page.getByTestId(QUIZ_GRADING_HANDLES.PENDING_COUNT)).toBeVisible();
+    await expect(page.getByTestId(QUIZ_GRADING_HANDLES.QUEUE_PAGE)).toBeVisible();
 
     // The queue is tenant-wide, so scope it to this course instead of following "next answer".
     const courseQueueUrl = `/quiz-grading?courseId=${courseId}`;

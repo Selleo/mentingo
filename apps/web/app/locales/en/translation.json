@@ -9892,7 +9892,6 @@
   "quizGrading": {
     "title": "To grade",
     "answerTitle": "Grade answer",
-    "pendingCount": "Pending: {{count}}",
     "empty": "No answers match the selected filters.",
     "filters": {
       "status": "Status",

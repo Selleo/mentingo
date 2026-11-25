@@ -9921,7 +9921,6 @@
   "quizGrading": {
     "title": "Vertinti",
     "answerTitle": "Atsakymo vertinimas",
-    "pendingCount": "Laukia: {{count}}",
     "empty": "Pasirinktus filtrus atitinkančių atsakymų nėra.",
     "filters": {
       "status": "Būsena",

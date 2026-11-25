@@ -9923,7 +9923,6 @@
   "quizGrading": {
     "title": "K hodnocení",
     "answerTitle": "Hodnocení odpovědi",
-    "pendingCount": "Čekající: {{count}}",
     "empty": "Vybraným filtrům neodpovídají žádné odpovědi.",
     "filters": {
       "status": "Stav",

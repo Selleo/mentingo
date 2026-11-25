@@ -55,12 +55,12 @@ export class QuizGradingController {
     @Query("courseId") courseId: UUIDType | undefined,
     @Query("lessonId") lessonId: UUIDType | undefined,
     @Query("studentId") studentId: UUIDType | undefined,
-    @CurrentUser("userId") reviewerId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<PaginatedResponse<QuizGradingAnswerListResponse>> {
     return new PaginatedResponse(
       await this.quizGradingService.getAnswers(
         { status, courseId, lessonId, studentId },
-        reviewerId,
+        currentUser,
         page,
         perPage,
       ),
@@ -71,9 +71,9 @@ export class QuizGradingController {
   @RequirePermission(PERMISSIONS.QUIZ_GRADING_READ)
   @Validate({ response: baseResponse(quizGradingFiltersSchema) })
   async getFilterOptions(
-    @CurrentUser("userId") reviewerId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<QuizGradingFiltersResponse>> {
-    return new BaseResponse(await this.quizGradingService.getFilterOptions(reviewerId));
+    return new BaseResponse(await this.quizGradingService.getFilterOptions(currentUser));
   }
 
   @Get("answers/:id")
@@ -84,9 +84,9 @@ export class QuizGradingController {
   })
   async getAnswerDetails(
     @Param("id") id: UUIDType,
-    @CurrentUser("userId") reviewerId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<QuizGradingAnswerDetailsResponse>> {
-    return new BaseResponse(await this.quizGradingService.getAnswerDetails(id, reviewerId));
+    return new BaseResponse(await this.quizGradingService.getAnswerDetails(id, currentUser));
   }
 
   @Post("answers/:id/grade")

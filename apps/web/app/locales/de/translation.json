@@ -9850,7 +9850,6 @@
   "quizGrading": {
     "title": "Zu bewerten",
     "answerTitle": "Antwort bewerten",
-    "pendingCount": "Ausstehend: {{count}}",
     "empty": "Keine Antworten entsprechen den ausgewählten Filtern.",
     "filters": {
       "status": "Status",

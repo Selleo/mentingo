@@ -10007,7 +10007,6 @@
   "quizGrading": {
     "title": "Do oceny",
     "answerTitle": "Ocena odpowiedzi",
-    "pendingCount": "Oczekujące: {{count}}",
     "empty": "Brak odpowiedzi pasujących do wybranych filtrów.",
     "filters": {
       "status": "Status",
