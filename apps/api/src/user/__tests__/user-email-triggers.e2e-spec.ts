@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { eq } from "drizzle-orm";
 
+import { BUILT_IN_AUTOMATIONS } from "src/automation-execution/catalog";
 import { DefaultAutomationSetupService } from "src/automation-execution/services/default-automation-setup.service";
 import { AutomationEmailWorker } from "src/automation-execution/workers/automation-email.worker";
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
@@ -54,7 +55,7 @@ describe("legacy organization email switches migrate to automation state (e2e)",
       await db.insert(settings).values({ settings: settingsToJSONBuildObject(legacySettings) });
       await provisioning.ensureTenantDefaultAutomations();
       const defaults = await db.select().from(automations);
-      expect(defaults).toHaveLength(27);
+      expect(defaults).toHaveLength(BUILT_IN_AUTOMATIONS.length);
       expect(defaults.find((item) => item.builtInKey === "user_first_login")?.status).toBe(
         "enabled",
       );
@@ -74,7 +75,7 @@ describe("legacy organization email switches migrate to automation state (e2e)",
         .where(eq(automations.id, firstLogin.id));
       await provisioning.ensureTenantDefaultAutomations();
       const retained = await db.select().from(automations);
-      expect(retained).toHaveLength(27);
+      expect(retained).toHaveLength(BUILT_IN_AUTOMATIONS.length);
       expect(retained.find((item) => item.id === firstLogin.id)?.status).toBe("archived");
     });
   });
