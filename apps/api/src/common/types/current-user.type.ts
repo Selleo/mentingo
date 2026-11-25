@@ -5,6 +5,7 @@ export type CurrentUserType = {
   tokenVersion?: number;
   sessionId?: string;
   sessionVersion?: string;
+  accessVersion?: string;
   tokenPurpose?: AuthTokenPurpose;
   mfaVerified?: boolean;
   jti?: string;

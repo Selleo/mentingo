@@ -13,6 +13,7 @@ import { AUTH_ERROR_KEYS, AUTH_TOKEN_PURPOSE, SUPPORT_SESSION_ERROR_KEYS } from 
 import { Value } from "@sinclair/typebox/value";
 import { nanoid } from "nanoid";
 import { authenticator } from "otplib";
+import { match } from "ts-pattern";
 
 import { UserSessionRevokedEvent } from "src/events/user/user-session-revoked.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -94,7 +95,11 @@ export class SessionService {
 
     if (isPendingMfa) return this.validatePendingMfaClaims(claims, allowMfa);
 
-    await this.sessionRevocationService.assertSessionActive(claims);
+    await match(purpose)
+      .with(AUTH_TOKEN_PURPOSE.ACCESS, () =>
+        this.sessionRevocationService.assertAccessTokenActive(claims),
+      )
+      .otherwise(() => this.sessionRevocationService.assertSessionActive(claims));
 
     if (claims.isSupportMode) return this.validateSupportModeClaims(claims);
 
@@ -107,10 +112,11 @@ export class SessionService {
 
   /**
    * Re-checks a credential derived from a browser session (e.g. a SCORM content grant): the session
-   * must still be active and the MFA assurance it was issued with must satisfy the current policy.
+   * must still be active, the permissions it was issued with must still be current, and its MFA
+   * assurance must satisfy the current policy.
    */
   async assertDerivedSessionAssurance(actor: CurrentUserType): Promise<void> {
-    await this.sessionRevocationService.assertSessionActive(actor);
+    await this.sessionRevocationService.assertAccessTokenActive(actor);
 
     if (actor.isSupportMode) {
       await this.validateSupportModeClaims(actor);

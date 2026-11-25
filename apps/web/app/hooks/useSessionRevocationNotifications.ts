@@ -1,5 +1,5 @@
 import { SESSION_REVOCATION_SOCKET } from "@repo/shared";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { currentUserQueryOptions } from "~/api/queries";
@@ -17,7 +17,7 @@ export function useSessionRevocationNotifications() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const [isRefreshingPermissions, setIsRefreshingPermissions] = useState(false);
+  const isRefreshingPermissionsRef = useRef(false);
 
   useEffect(() => {
     const socket = acquireSocket();
@@ -31,9 +31,9 @@ export function useSessionRevocationNotifications() {
     if (socket.connected) handleConnect();
 
     const handlePermissionsUpdated = async (notification: SessionRevocationNotification) => {
-      if (isRefreshingPermissions) return;
+      if (isRefreshingPermissionsRef.current) return;
 
-      setIsRefreshingPermissions(true);
+      isRefreshingPermissionsRef.current = true;
 
       toast({
         description: t(
@@ -51,7 +51,8 @@ export function useSessionRevocationNotifications() {
           variant: "destructive",
         });
       } finally {
-        setIsRefreshingPermissions(false);
+        isRefreshingPermissionsRef.current = false;
+        socket.disconnect().connect();
       }
     };
 
@@ -62,5 +63,5 @@ export function useSessionRevocationNotifications() {
       socket.off(SESSION_REVOCATION_SOCKET.EVENTS.PERMISSIONS_UPDATED, handlePermissionsUpdated);
       releaseSocket();
     };
-  }, [toast, t, isRefreshingPermissions]);
+  }, [toast, t]);
 }

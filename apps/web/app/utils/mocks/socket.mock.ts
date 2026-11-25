@@ -16,6 +16,9 @@ export const fakeSocket = {
     fakeSocket.emitted.push([event, payload]);
   },
   connect() {},
+  disconnect() {
+    return fakeSocket;
+  },
   receive(event: string, payload?: unknown) {
     handlersByEvent.get(event)?.forEach((handler) => handler(payload));
   },

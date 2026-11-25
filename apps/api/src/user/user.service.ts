@@ -427,7 +427,7 @@ export class UserService {
     );
 
     const managedGroupsChanged = !this.haveSameIds(currentManagedGroupIds, nextManagedGroupIds);
-    const shouldRevokeSession = rolesChanged || managedGroupsChanged;
+    const accessChanged = rolesChanged || managedGroupsChanged;
     const shouldRefreshCourseAuthorMetadata =
       data.firstName !== undefined || data.lastName !== undefined;
 
@@ -499,7 +499,7 @@ export class UserService {
       };
     });
 
-    if (shouldRevokeSession) await this.revokeSessionsAndNotifyUsers([id]);
+    if (accessChanged) await this.expireAccessTokensAndNotifyUsers([id]);
     if (shouldRefreshCourseAuthorMetadata) await this.courseService.refreshAuthorMetadata(id);
 
     return updatedUser;
@@ -1441,17 +1441,22 @@ export class UserService {
       );
     });
 
-    const usersToRevoke = usersWithChangedRoles.filter((userId): userId is UUIDType =>
+    const usersWithChangedAccess = usersWithChangedRoles.filter((userId): userId is UUIDType =>
       Boolean(userId),
     );
 
-    if (usersToRevoke.length) await this.revokeSessionsAndNotifyUsers(usersToRevoke);
+    if (usersWithChangedAccess.length)
+      await this.expireAccessTokensAndNotifyUsers(usersWithChangedAccess);
   }
 
-  private async revokeSessionsAndNotifyUsers(userIds: UUIDType[]): Promise<void> {
+  /**
+   * Old permissions stop working at once, but the users stay signed in: their next refresh mints
+   * tokens with the new permissions. Sockets are dropped because they were authorized with the old ones.
+   */
+  private async expireAccessTokensAndNotifyUsers(userIds: UUIDType[]): Promise<void> {
     await Promise.all(
       userIds.map(async (userId) => {
-        await this.sessionRevocationService.revokeUserSessions(userId);
+        await this.sessionRevocationService.rotateUserAccessVersion(userId);
         this.wsGateway.emitToUser(userId, SESSION_REVOCATION_SOCKET.EVENTS.PERMISSIONS_UPDATED, {
           reason: SESSION_REVOCATION_SOCKET.REASONS.ROLES_CHANGED,
           messageKey: SESSION_REVOCATION_SOCKET.MESSAGE_KEYS.PERMISSIONS_UPDATED,

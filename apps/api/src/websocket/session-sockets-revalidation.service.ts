@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { AUTH_SOCKET_EVENTS } from "@repo/shared";
 import { chunk } from "lodash";
 
 import { SessionRevocationService } from "src/redis";
@@ -13,8 +14,10 @@ export class SessionSocketsRevalidationService {
   ) {}
 
   /**
-   * Disconnects this instance's sockets whose session is no longer active. It backs up the
-   * immediate disconnect on logout, which is a best-effort broadcast and can be lost.
+   * Disconnects this instance's sockets whose session is no longer active or whose permissions have
+   * changed. It backs up the immediate disconnects on logout and on access changes, which are
+   * best-effort broadcasts and can be lost. Sockets with outdated permissions are told to refresh
+   * first, so the client can reconnect with its current permissions.
    */
   async disconnectRevokedSessionSockets(): Promise<void> {
     const sockets = await this.wsGateway.server.local.fetchSockets();
@@ -23,8 +26,11 @@ export class SessionSocketsRevalidationService {
     );
 
     for (const batch of chunk(socketSessions, WS_SESSION_REVALIDATION.BATCH_SIZE)) {
-      const revokedSessions = await this.sessionRevocationService.findInactiveSessions(batch);
-      revokedSessions.forEach(({ socket }) => socket.disconnect(true));
+      const { revoked, expired } =
+        await this.sessionRevocationService.findInactiveAccessTokens(batch);
+
+      expired.forEach(({ socket }) => socket.emit(AUTH_SOCKET_EVENTS.SESSION_EXPIRED));
+      [...revoked, ...expired].forEach(({ socket }) => socket.disconnect(true));
     }
   }
 }
