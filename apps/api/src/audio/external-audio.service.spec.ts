@@ -43,6 +43,7 @@ const currentUser: WsUser = {
   userId: "user-1",
   sessionId: "s".repeat(32),
   sessionVersion: "v".repeat(32),
+  accessVersion: "a".repeat(32),
   email: "learner@example.com",
   roleSlugs: [],
   permissions: [PERMISSIONS.COURSE_UPDATE],

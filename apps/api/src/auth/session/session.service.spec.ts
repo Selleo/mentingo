@@ -44,6 +44,7 @@ describe("Session authentication boundaries", () => {
       {
         assertUserSessionVersion: assertActive,
         assertSessionActive: assertActive,
+        assertAccessTokenActive: assertActive,
         getOrCreateUserSessionVersion: async () => "v".repeat(32),
       } as unknown as SessionRevocationService,
       { get, set } as unknown as RedisClient,
