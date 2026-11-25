@@ -43,7 +43,8 @@ export type CreateAnnouncementRecordInput = {
   content: LocalizedText;
   baseLanguage: SupportedLanguages;
   availableLocales: SupportedLanguages[];
-  authorId: UUIDType;
+  /** Null for system notifications, which no person wrote. */
+  authorId: UUIDType | null;
   status: AnnouncementStatus;
   scheduledAt: string | null;
   publishedAt: string | null;

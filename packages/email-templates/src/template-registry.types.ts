@@ -51,6 +51,7 @@ export const EMAIL_TEMPLATE_EVENTS = {
   FORUM_MENTION: "forum_mention",
   DISCUSSION_REPLY: "discussion_reply",
   TENANT_USER_CAPACITY: "tenant_user_capacity",
+  CONTENT_MARKETPLACE_COURSE_UPDATE: "content_marketplace_course_update",
 } as const;
 
 export type EmailTemplateEvent = (typeof EMAIL_TEMPLATE_EVENTS)[keyof typeof EMAIL_TEMPLATE_EVENTS];

@@ -22,6 +22,7 @@ import {
   Mail,
   Megaphone,
   MessagesSquare,
+  PackageCheck,
   UserCheck,
   UserPlus,
   UsersRound,
@@ -62,6 +63,7 @@ const TRIGGER_ICONS: Record<AutomationEventKind, LucideIcon> = {
   [AUTOMATION_EVENT_KINDS.FORUM_MENTION]: AtSign,
   [AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY]: MessagesSquare,
   [AUTOMATION_EVENT_KINDS.TENANT_USER_CAPACITY]: UsersRound,
+  [AUTOMATION_EVENT_KINDS.CONTENT_MARKETPLACE_COURSE_UPDATE]: PackageCheck,
 };
 
 export function AutomationNodeIcon({ eventKind }: { eventKind?: AutomationEventKind | null }) {

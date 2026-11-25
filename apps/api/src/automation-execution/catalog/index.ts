@@ -4,6 +4,7 @@ import { adminOverdueCoursesAutomation } from "./admin-overdue-courses.automatio
 import { announcementAutomation } from "./announcement.automation";
 import { certificateExpirationWarningAutomation } from "./certificate-expiration-warning.automation";
 import { certificateExpiredAutomation } from "./certificate-expired.automation";
+import { contentMarketplaceCourseUpdateAutomation } from "./content-marketplace-course-update.automation";
 import { courseChatMentionAutomation } from "./course-chat-mention.automation";
 import { courseDueDateReminderAutomation } from "./course-due-date-reminder.automation";
 import { discussionReplyAutomation } from "./discussion-reply.automation";
@@ -54,4 +55,5 @@ export const BUILT_IN_AUTOMATIONS = [
   forumMentionAutomation,
   discussionReplyAutomation,
   tenantUserCapacityAutomation,
+  contentMarketplaceCourseUpdateAutomation,
 ];

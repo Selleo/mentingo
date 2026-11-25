@@ -434,7 +434,12 @@ export class AnnouncementsRepository {
     const allUserIds = await this.db
       .select({ id: users.id })
       .from(users)
-      .where(and(not(eq(users.id, announcement.authorId)), isNull(users.deletedAt)));
+      .where(
+        and(
+          announcement.authorId ? not(eq(users.id, announcement.authorId)) : undefined,
+          isNull(users.deletedAt),
+        ),
+      );
 
     await this.createUserAnnouncementRecords(
       allUserIds.map((user) => user.id),

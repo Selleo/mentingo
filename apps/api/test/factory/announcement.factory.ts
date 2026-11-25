@@ -158,7 +158,7 @@ async function createUserAnnouncementsForGroup(
 async function createUserAnnouncementsForAll(
   db: DatabasePg,
   announcementId: string,
-  authorId: string,
+  authorId: string | null,
   tenantId: UUIDType,
 ) {
   const allUserIds = await db
@@ -166,7 +166,7 @@ async function createUserAnnouncementsForAll(
       id: users.id,
     })
     .from(users)
-    .where(and(ne(users.id, authorId), isNull(users.deletedAt)));
+    .where(and(authorId ? ne(users.id, authorId) : undefined, isNull(users.deletedAt)));
 
   const userAnnouncementsToInsert = allUserIds.map((u) => ({
     userId: u.id,

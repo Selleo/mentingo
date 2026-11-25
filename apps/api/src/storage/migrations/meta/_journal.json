@@ -1821,6 +1821,20 @@
       "when": 1795097975680,
       "tag": "0259_add_tenant_user_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 260,
+      "version": "7",
+      "when": 1795606281842,
+      "tag": "0260_add_marketplace_update_notices_and_authorless_announcements",
+      "breakpoints": true
+    },
+    {
+      "idx": 261,
+      "version": "7",
+      "when": 1795606284278,
+      "tag": "0261_clear_author_of_user_capacity_alerts",
+      "breakpoints": true
     }
   ]
 }
