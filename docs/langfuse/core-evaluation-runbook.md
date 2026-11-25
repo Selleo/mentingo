@@ -29,7 +29,7 @@ mkdir -p /tmp/core-evals
 pnpm --filter=api exec node --import tsx test/evaluations/run.ts --mode offline --out /tmp/core-evals/grading.json
 ```
 
-`validate` checks the 54 underlying regression definitions and semantic registry. `offline` executes the 12 production grading cases, not all application cases or the 103 feature items.
+`validate` checks the 54 underlying regression definitions and semantic registry. `offline` executes the 12 production grading cases, not all application cases or the 106 feature items.
 
 Voice code is also tested normally. For example:
 

@@ -705,6 +705,22 @@ export const AuthoringActivityRail = ({
   omittedOptionalAssetIds = [],
 }: Props) => {
   const { t } = useTranslation();
+  const assetDecisions = {
+    "courseAuthoring.activityRail.assetDecisions": [] as AssetTaskView[],
+    "courseAuthoring.activityRail.podcastDecisions": [] as AssetTaskView[],
+  };
+  for (const asset of assetTasks) {
+    if (
+      asset.status === AUTHORING_TASK_STATUS.WAITING_AUTHOR ||
+      asset.status === AUTHORING_TASK_STATUS.FAILED
+    ) {
+      const heading =
+        asset.request.purpose === "podcast"
+          ? "courseAuthoring.activityRail.podcastDecisions"
+          : "courseAuthoring.activityRail.assetDecisions";
+      assetDecisions[heading].push(asset);
+    }
+  }
   const tools = compactSourceReadActivity(rawTools, (item) => item);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const succeeded = tasks.filter((task) => task.status === AUTHORING_TASK_STATUS.SUCCEEDED).length;
@@ -1347,46 +1363,43 @@ export const AuthoringActivityRail = ({
         </section>
       )}
 
-      {assetTasks.some((asset) =>
-        [AUTHORING_TASK_STATUS.WAITING_AUTHOR, AUTHORING_TASK_STATUS.FAILED].some(
-          (value) => value === asset.status,
-        ),
-      ) && (
-        <section className="rounded-xl border border-neutral-200 bg-white px-4">
-          <h2 className="border-b border-neutral-100 py-3 text-xs font-medium text-neutral-800">
-            {t("courseAuthoring.activityRail.assetDecisions")}
-          </h2>
-          <div className="divide-y divide-neutral-100">
-            {assetTasks
-              .filter((asset) =>
-                [AUTHORING_TASK_STATUS.WAITING_AUTHOR, AUTHORING_TASK_STATUS.FAILED].some(
-                  (value) => value === asset.status,
-                ),
-              )
-              .map((asset) => (
-                <AuthoringAssetDecision
-                  key={asset.taskId}
-                  asset={asset}
-                  omitted={
-                    !asset.request.required &&
-                    asset.request.purpose !== "podcast" &&
-                    omittedOptionalAssetIds.includes(asset.request.assetId)
-                  }
-                  busy={busy}
-                  onRetry={() => {
-                    if (asset.action) onAssetAction(asset, asset.action);
-                    else if (
-                      asset.request.purpose === "podcast" &&
-                      asset.status === AUTHORING_TASK_STATUS.FAILED
-                    )
-                      onRetry(asset.taskId);
-                  }}
-                  onSkip={() => onSkipAsset(asset.request.assetId)}
-                  onRestore={() => onRestoreAsset?.(asset.request.assetId)}
-                />
-              ))}
-          </div>
-        </section>
+      {Object.entries(assetDecisions).map(
+        ([heading, assets]) =>
+          assets.length > 0 && (
+            <section
+              key={heading}
+              aria-label={t(heading)}
+              className="rounded-xl border border-neutral-200 bg-white px-4"
+            >
+              <h2 className="border-b border-neutral-100 py-3 text-xs font-medium text-neutral-800">
+                {t(heading)}
+              </h2>
+              <div className="divide-y divide-neutral-100">
+                {assets.map((asset) => (
+                  <AuthoringAssetDecision
+                    key={asset.taskId}
+                    asset={asset}
+                    omitted={
+                      !asset.request.required &&
+                      asset.request.purpose !== "podcast" &&
+                      omittedOptionalAssetIds.includes(asset.request.assetId)
+                    }
+                    busy={busy}
+                    onRetry={() => {
+                      if (asset.action) onAssetAction(asset, asset.action);
+                      else if (
+                        asset.request.purpose === "podcast" &&
+                        asset.status === AUTHORING_TASK_STATUS.FAILED
+                      )
+                        onRetry(asset.taskId);
+                    }}
+                    onSkip={() => onSkipAsset(asset.request.assetId)}
+                    onRestore={() => onRestoreAsset?.(asset.request.assetId)}
+                  />
+                ))}
+              </div>
+            </section>
+          ),
       )}
 
       {applications.length > 0 && (

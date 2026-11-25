@@ -161,12 +161,13 @@ export class CourseAuthoringContextBridgeWorker implements OnModuleDestroy {
 
     // Existing conversations may predate block preparation or contain legacy plain copy.
     // Prepare selected anchors before reading either structural hashes or lesson details.
-    await this.context.prepareBlockIdentities(
-      binding.courseId,
-      binding.language,
-      actor,
-      request.lessonIds,
-    );
+    if (request.readOnly !== true)
+      await this.context.prepareBlockIdentities(
+        binding.courseId,
+        binding.language,
+        actor,
+        request.lessonIds,
+      );
     // The skeleton provides structural baselines; detail is loaded separately for selected lessons only.
     const skeleton = await this.context.getContext(
       binding.courseId,

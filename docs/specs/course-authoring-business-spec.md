@@ -163,6 +163,9 @@ Generated lessons distinguish material for participants from production instruct
 - Luma is Mentingo's connected AI service; new authoring integration is still under construction.
 - Luma owns the assistant's planning, research, writing and conversation history. Core authorizes course access, provides selected native content, and applies approved changes to the course. Older turns are fetched in pages while current work remains visible.
 - Core verifies context requests after removing the event-only record envelope, in both connected and replay delivery. Luma publishes a selected-content request only after its task has durably entered the waiting state, so Core's prompt callback cannot arrive before the task can accept it. The browser inserts new `task.updated` rows into the live task view, including tasks created after the initial snapshot.
+- Exact lesson reads in the chat use the same signed context bridge. Core rechecks the author and
+  reads the selected lesson without preparing block anchors. The assistant can answer from that
+  lesson before proposing an edit.
 - A single-item Apply reviews and submits the change; group Apply selected sends one atomic selection. A confirmed Core receipt remains available across a reload until the assistant's session projection records the applied state.
 - Opening the workspace selects the latest accessible conversation. If none exists, or a saved selection is no longer available and the refreshed history is empty, the drawer creates and selects one new conversation only once. The conversation browser keeps prior chats available; **New chat** starts another durable conversation without replacing that history.
 - Existing current course-edit access and `COURSE_AI_GENERATION` permission are both required.

@@ -101,7 +101,7 @@ export type AiJudgeCriterionJudgementWrite = {
 
 export type AiJudgeBlockingErrorJudgementWrite = {
   judgementId: string;
-  blockingErrorId: string;
+  blockingErrorId: string | null;
   blockingErrorDescription: string;
   learnerSafeFeedback: string;
 };

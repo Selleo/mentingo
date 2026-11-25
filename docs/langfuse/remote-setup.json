@@ -31,8 +31,8 @@
       "id": "cmw0lmb6e0043ad0ma7yln4w0",
       "name": "core/mentor-roleplay-chat/v1",
       "featureId": "mentor-roleplay-chat",
-      "items": 2,
-      "manifestSha256": "28101702285e4d17ae4f47545ae705d3bcd73f26efa89f7fc5b9aa49795d4760"
+      "items": 3,
+      "manifestSha256": "9d2dd56d0a5df6456e3a311aeaca9403de559141112d062b3065f15aa65ae6bc"
     },
     {
       "id": "cmw0lmbpv0047ad0mvqa06aej",
@@ -227,8 +227,15 @@
       "id": "cmw0lnn7f007lad0d3gv7pjfn",
       "name": "core/mentor-blocker-verification/v1",
       "featureId": "mentor-blocker-verification",
-      "items": 20,
-      "manifestSha256": "80e5e9fccc3760830b1fb63e3748daa17a8a2ca7b072ed403c09648b4eeff8f3"
+      "items": 22,
+      "manifestSha256": "fd72b07adde2f4b11fa5598877ff804226bbf3e53e0d34d77b7777a85b544aa6"
+    },
+    {
+      "id": "cmwv03ru5006yad0dv3pkk9xv",
+      "name": "core/course-authoring-media-review-ui/v1",
+      "featureId": "course-authoring-media-review-ui",
+      "items": 1,
+      "manifestSha256": "3808289fa63224ba03e7274eb8e0cb1b76337468d1995c99c1811fd0cc1165d7"
     }
   ],
   "evaluators": [

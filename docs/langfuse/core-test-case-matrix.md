@@ -412,3 +412,15 @@ These separate legacy calibration fixtures test the judge itself and are not add
 ## Historical evidence
 
 Earlier failures, fixture/oracle revisions and saved-output reassessments remain in Langfuse and private local artifacts. Run-specific results are excluded from version control; keep datasets, evaluator definitions and reusable execution guidance here.
+
+## Course generator and Mentor conduct
+
+The Mentor conduct cases use synthetic Polish turns to check disengagement after a repeated
+insult, verification of the learner's own profanity and acceptance of a neutrally reported
+quotation. The prompt experiment uses the bundled scenario instructions. The Judge service
+tests exercise the verification and result persistence paths separately.
+
+The podcast review fixture is in [course-generator-media-v1.json](../evaluation-datasets/course-generator-media-v1.json).
+The Vitest component test renders a failed required podcast, checks the media heading and retry
+action and verifies the original task ID. The recording imports that test result. Playback and
+actual synthesis recovery remain separate application checks.

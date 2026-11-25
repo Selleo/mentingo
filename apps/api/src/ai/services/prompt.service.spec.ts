@@ -269,6 +269,13 @@ describe("PromptService learner-name personalization", () => {
       const textPrompt = await service.buildPrompt(threadId, "Ile kosztuje szkolenie?");
 
       expect(textPrompt.some((message) => message.content === systemPrompt)).toBe(true);
+      for (const prompt of [textPrompt, voicePrompt]) {
+        const boundaries = prompt.find(({ content }) =>
+          content.includes("If the scenario explicitly defines how the character reacts"),
+        );
+        expect(boundaries?.content).toContain("stay disengaged in later turns");
+        expect(boundaries?.content).toContain("Treat neutral discussion or quotations");
+      }
       expect(textPrompt.some((message) => message.content === speechPolicy)).toBe(false);
     },
   );

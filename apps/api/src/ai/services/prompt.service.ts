@@ -14,6 +14,7 @@ import { MessageService } from "src/ai/services/message.service";
 import { RagService } from "src/ai/services/rag.service";
 import { TokenService } from "src/ai/services/token.service";
 import { MESSAGE_ROLE, OPENAI_MODELS } from "src/ai/utils/ai.type";
+import { MENTOR_CONDUCT_INSTRUCTIONS } from "src/ai/utils/mentor-conduct";
 import { EnvService } from "src/env/services/env.service";
 import { aiMentorThreads } from "src/storage/schema";
 
@@ -96,6 +97,13 @@ export class PromptService implements OnModuleInit {
         content: systemPrompt.content,
       });
     }
+
+    metaMessages.push({
+      id: "",
+      role: MESSAGE_ROLE.SYSTEM,
+      userName: null,
+      content: MENTOR_CONDUCT_INSTRUCTIONS,
+    });
 
     if (isVoiceMentor) {
       const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);

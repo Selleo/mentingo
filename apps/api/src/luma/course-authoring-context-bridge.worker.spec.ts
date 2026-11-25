@@ -23,7 +23,7 @@ describe("CourseAuthoringContextBridgeWorker", () => {
   const lessonId = "00000000-0000-4000-8000-000000000008";
   const chapterId = "00000000-0000-4000-8000-000000000009";
 
-  function setup() {
+  function setup(readOnly = false) {
     const request = {
       schemaVersion: 1,
       contextRequestId,
@@ -35,6 +35,7 @@ describe("CourseAuthoringContextBridgeWorker", () => {
       language: "en",
       lessonIds: [lessonId],
       targetKinds: ["lesson"],
+      ...(readOnly ? { readOnly: true } : {}),
       requestHash: "request-hash",
     };
     const binding = {
@@ -120,6 +121,21 @@ describe("CourseAuthoringContextBridgeWorker", () => {
     jest.spyOn(tenantRunner, "runWithTenant");
     return { worker, tenantRunner, repository, context, fulfillContext, failContext, request, db };
   }
+
+  it("reads selected lessons without preparing or mutating their block anchors", async () => {
+    const test = setup(true);
+
+    await test.worker.handleJob({ tenantId, contextRequestId }, test.tenantRunner as never);
+
+    expect(test.context.prepareBlockIdentities).not.toHaveBeenCalled();
+    expect(test.context.getSelectedLessonDetails).toHaveBeenCalledWith(
+      courseId,
+      "en",
+      [lessonId],
+      expect.objectContaining({ userId: actorId, tenantId }),
+    );
+    expect(test.fulfillContext).toHaveBeenCalledTimes(1);
+  });
 
   it("rechecks the bound actor and sends only selected lesson details with fresh baselines", async () => {
     const test = setup();
