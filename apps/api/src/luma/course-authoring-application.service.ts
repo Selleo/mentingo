@@ -98,6 +98,20 @@ function plannedPodcasts(session: AuthoringSession, proposalIds: readonly string
   });
 }
 
+function readFrozenExport(
+  response: unknown,
+  { courseId, sessionId, exportId }: { courseId: string; sessionId: string; exportId?: string },
+): FrozenAuthoringExport {
+  if (
+    !Value.Check(frozenAuthoringExportSchema, response) ||
+    response.courseId !== courseId ||
+    response.sessionId !== sessionId ||
+    (exportId !== undefined && response.exportId !== exportId)
+  )
+    throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
+  return response;
+}
+
 /** Checks both planned placements and their frozen, downloadable podcast manifests. */
 function validateFrozenPodcasts(exported: FrozenAuthoringExport, session: AuthoringSession) {
   if ("deferredPodcasts" in exported && exported.deferredPodcasts !== undefined) {
@@ -244,7 +258,7 @@ export class CourseAuthoringApplicationService {
           }
         : {}),
     };
-    const exported: unknown = await client.authoring
+    const response = await client.authoring
       .prepareExport({
         sessionId,
         request: exportRequest,
@@ -277,12 +291,7 @@ export class CourseAuthoringApplicationService {
         }
         throw new BadGatewayException("adminCourseView.toast.lumaServiceUnavailable");
       });
-    if (
-      !Value.Check(frozenAuthoringExportSchema, exported) ||
-      exported.courseId !== courseId ||
-      exported.sessionId !== sessionId
-    )
-      throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
+    const exported = readFrozenExport(response, { courseId, sessionId });
     validateFrozenPodcasts(exported, session);
     const queue = this.queue.getQueue(QUEUE_NAMES.COURSE_AUTHORING_APPLY);
     const jobId = `${actor.tenantId}-${exported.exportId}`;
@@ -403,17 +412,11 @@ export class CourseAuthoringApplicationService {
     );
     if (existing) return existing;
     const client = await this.luma.getLumaClient();
-    const exported = await client.authoring.getExport({
+    const response = await client.authoring.getExport({
       sessionId: data.sessionId,
       exportId: data.exportId,
     });
-    if (
-      !Value.Check(frozenAuthoringExportSchema, exported) ||
-      exported.courseId !== data.courseId ||
-      exported.sessionId !== data.sessionId ||
-      exported.exportId !== data.exportId
-    )
-      throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
+    const exported = readFrozenExport(response, data);
     if (courseAuthoringExportHash(exported) !== exported.exportHash)
       throw new BadGatewayException("courseAuthoring.errors.exportHashMismatch");
     const safeReason =
@@ -477,17 +480,11 @@ export class CourseAuthoringApplicationService {
     if ((draft?.id ?? undefined) !== data.draftCourseId)
       throw new ForbiddenException("common.toast.noAccess");
     const client = await this.luma.getLumaClient();
-    const exported: unknown = await client.authoring.getExport({
+    const response = await client.authoring.getExport({
       sessionId: data.sessionId,
       exportId: data.exportId,
     });
-    if (
-      !Value.Check(frozenAuthoringExportSchema, exported) ||
-      exported.courseId !== data.courseId ||
-      exported.sessionId !== data.sessionId ||
-      exported.exportId !== data.exportId
-    )
-      throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
+    const exported = readFrozenExport(response, data);
     if (courseAuthoringExportHash(exported) !== exported.exportHash)
       throw new BadGatewayException("courseAuthoring.errors.exportHashMismatch");
     const courseCreate = exported.operations.some(
