@@ -108,7 +108,7 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 | **AI**               | Vercel AI SDK + OpenAI · LangChain · pgvector retrieval · LiveKit real-time voice · Langfuse tracing                                                                                                                                  |
 | **Authentication**   | Microsoft 365, Google Workspace and Slack OAuth 2.0 SSO · email/password · TOTP two-factor                                                                                                                                            |
 | **Multi-tenancy**    | PostgreSQL Row-Level Security with a least-privilege runtime role, per-tenant domains                                                                                                                                                 |
-| **Interoperability** | SCORM 1.2 export · OpenAPI/Swagger with a generated typed client · CSV and XLSX bulk import/export                                                                                                                                    |
+| **Interoperability** | SCORM 1.2 import and export · OpenAPI/Swagger with a generated typed client · CSV and XLSX bulk import/export · native cross-tenant course export/import                                                                              |
 | **Storage & media**  | Any S3-compatible object storage (MinIO, AWS S3, Hetzner) · Bunny Stream video with signed URLs                                                                                                                                       |
 | **Payments**         | Stripe (optional - for selling courses)                                                                                                                                                                                               |
 | **UI languages**     | English, Polish, German, Spanish, French, Czech                                                                                                                                                                                       |
@@ -122,9 +122,11 @@ Do not want to build anything? Mentingo is listed on the [AWS Marketplace](https
 ### AI-powered training
 
 - **Practise conversations instead of watching slides.** A voice and chat AI mentor runs real-time role-play for sales, compliance and customer-support scenarios, and scores the attempt automatically.
-- **Turn the documents you already have into a course.** The AI course architect converts knowledge bases, policies and internal documentation into structured, interactive courses in minutes.
-- **Grade open-ended answers without an L&D queue.** Behavioural and problem-solving tasks are analysed automatically and returned with actionable feedback.
-- **Keep the AI accountable.** Every model call is traced with Langfuse, so you can inspect cost, latency and what the mentor actually said.
+- **Turn the documents you already have into a course.** AI Course Autopilot converts knowledge bases, policies and internal documentation into structured, interactive courses in minutes, with a reviewable draft before anything goes live.
+- **Grade open-ended answers without an L&D queue - but keep a human in the loop.** Behavioural and problem-solving tasks are scored automatically; a dedicated reviewer role can check or override any AI-graded open answer before it counts.
+- **An AI assistant built into the platform.** A permission-aware assistant with persistent conversations and hybrid search finds answers across courses, articles and uploaded documents - scoped to what the asking user is actually allowed to see.
+- **Not locked into one AI vendor.** Bring your own OpenAI-compatible key, or point Mentingo at a self-hosted/local LLM provider - keep prompts and learner data off third-party AI infrastructure entirely if your policy requires it.
+- **Keep the AI accountable.** Every model call - mentor, course generation and MCP tool calls alike - is traced with Langfuse, so you can inspect cost, latency and what the mentor actually said.
 
 ### Use Mentingo tools from your AI assistant
 
@@ -159,13 +161,28 @@ Existing `authoring` and `search` grants retain their current access until recon
 - **Mirror the org chart you actually have.** Departments, branches and teams as groups, with course access inherited automatically.
 - **Mandatory training that renews itself.** Set expiry intervals for compliance, safety or cyber-security courses; re-enrolment and reminder schedules run on their own.
 - **An interface people open voluntarily.** A clean, consumer-grade UI built for completion rates, not for admin convenience.
-- **Assess more than recall.** Behavioural scenarios, short and long-form text analysis, dynamic quizzes and daily streaks.
-- **See what training is doing.** Engagement, consistency and outcome analytics per learner, group and course.
+- **Assess more than recall.** Behavioural scenarios, short and long-form text analysis, dynamic quizzes, matching and fill-in-the-blank questions, timed assessments and daily streaks.
+- **Make completion a game, not a chore.** Points, levels, achievements and leaderboards are built in and configurable by admins - not a bolted-on plugin.
+- **Train people to spot a real attack.** Built-in phishing and social-engineering simulation scenarios, scored like any other course.
+- **See what training is doing.** Engagement, consistency and outcome analytics per learner, group and course, with dedicated reports, charts and Excel export.
+
+### Structured learning programs
+
+- **Blend self-paced and instructor-led training.** Schedule live/virtual training sessions with calendar booking alongside your e-learning, in the same platform.
+- **Group courses into real programs.** Learning paths turn separate courses into a structured onboarding track, role curriculum or certification programme.
+- **Track skills, not just course completions.** A competency and job-profile module maps what each role requires against what each person has actually demonstrated.
 
 ### Knowledge management and internal comms
 
 - **One place for the material that is not a course.** Central repository for documentation, playbooks and assets.
 - **Keep hybrid teams aligned.** Built-in company blog, announcements and an internal FAQ.
+- **A real community, not just comments.** Course and platform-wide discussion forums with threads, reactions, @mentions and email digests - so questions get answered instead of lost in a chat window.
+
+### Running it as a platform, not just an instance
+
+- **Discover training across the organisation.** A content marketplace lets teams browse and preview courses - chapters, lessons and learning outcomes - before enrolling or reusing them.
+- **Share one course across many tenants.** Native course export/import and cross-tenant sync, so a group company or training vendor can author once and distribute everywhere.
+- **Manage many client organisations from one seat.** A super-admin support mode lets your platform team administer and - with the access it implies, used for support only - impersonate users across tenants without juggling separate logins.
 
 ---
 
@@ -251,17 +268,20 @@ Mentingo is built for training that has to be evidenced to an auditor, not only 
 - Self-hosted: learner data stays in your database, your object storage and your region. You choose the cloud and the jurisdiction - an EU-only deployment is a configuration choice, not a paid tier.
 - Files are served through pre-signed, expiring URLs; video through Bunny Stream signed tokens.
 - An application master key is required to run the platform and is used to protect sensitive stored values.
-- **AI: bring your own key.** You configure the AI provider and its API key. No prompt or learner content is routed through Selleo infrastructure in a self-hosted deployment.
+- **AI: bring your own key, or your own model.** You configure the AI provider and its API key - including a self-hosted/local LLM provider. No prompt or learner content is routed through Selleo infrastructure in a self-hosted deployment.
 
 **Evidence and observability**
 
 - Recurring recertification with expiry dates, automated re-enrolment and notification schedules.
-- Per-learner completion and engagement records, exportable to CSV/XLSX.
-- Application monitoring with Sentry and OpenTelemetry; every AI call traced in Langfuse.
+- Per-learner completion and engagement records, exportable to CSV/XLSX, with dedicated reports and charts on course activity and popularity.
+- A reviewer role can check or override AI-graded open answers, so sensitive assessments keep a documented human sign-off.
+- Signed, downloadable certificates with an ID for verification and optional LinkedIn export - evidence the learner can show, and you can audit.
+- Application monitoring with Sentry and OpenTelemetry; every AI call and MCP tool call traced in Langfuse.
 
 **Interoperability**
 
-- SCORM 1.2 export, so content authored in Mentingo can be handed to another LMS - and so your organisation is not locked in.
+- SCORM 1.2 import and export, so content can move both into and out of Mentingo without re-authoring - and your organisation is never locked in.
+- Native course export/import and cross-tenant sync, for groups running more than one Mentingo-backed brand or instance.
 
 <!-- ETAP 3 - do potwierdzenia przez zespół, NIE publikować bez weryfikacji:
      ISO 27001 (certyfikat Selleo czy tylko zgodność procesów?), WCAG 2.1 AA (audyt dostępności),
@@ -276,7 +296,8 @@ Found a vulnerability? Please read [SECURITY.md](SECURITY.md) - do not open a pu
 - **Typed API client.** The API is documented with OpenAPI/Swagger at `/api`; `pnpm generate:client` regenerates the typed client used by the web app - and by anything else you build.
 - **Bulk operations.** Import and export users and results as CSV or XLSX.
 - **Integration origins.** A dedicated CORS allow-list (`INTEGRATION_CORS_ORIGINS`) for embedding Mentingo endpoints in your own products.
-- **Your own AI provider.** Model and key are configuration, not a fork.
+- **Your own AI provider.** Model and key are configuration, not a fork - a self-hosted/local LLM included.
+- **Content portability across instances.** Native course export/import and cross-tenant sync, so a course built in one tenant can be rolled out to others without rebuilding it.
 - **White-label.** Domains, logo, colours and styles per tenant.
 - **Localisation.** Six UI languages shipped; translations live in `apps/web/app/locales/<lang>/translation.json` - adding one is a pull request, not a licence upgrade.
 
@@ -312,23 +333,35 @@ It covers the same job - corporate training, compliance and analytics with AI su
 
 ### Does Mentingo support SCORM?
 
-Mentingo can export courses as SCORM 1.2 packages, so content you build here can be handed to another LMS. <!-- TODO(weryfikacja): czy jest import SCORM? jeśli tak, dopisać zdanie. jeśli nie - zostaw jak jest -->
+Yes, both ways. Mentingo can import existing SCORM 1.2 packages as courses, and export courses it built as SCORM 1.2 packages for another LMS - so migrating in or out is never a rewrite.
 
 ### Which AI provider does Mentingo use, and where does my data go?
 
-You configure the provider and supply your own API key - OpenAI is supported out of the box through the Vercel AI SDK. In a self-hosted deployment, prompts and learner content go from your server to the provider you chose and nowhere else; nothing is routed through Selleo. Every model call is traced locally with Langfuse, so you can audit what the mentor said, what it cost and how long it took.
+You configure the provider and supply your own API key - OpenAI is supported out of the box through the Vercel AI SDK, and a self-hosted/local LLM provider is also supported if you need to keep inference entirely off third-party infrastructure. In a self-hosted deployment, prompts and learner content go from your server to the provider you chose and nowhere else; nothing is routed through Selleo. Every model call is traced locally with Langfuse, so you can audit what the mentor said, what it cost and how long it took.
 
 ### Can I use Mentingo for compliance and mandatory training?
 
-Yes. Courses can be given expiry intervals with automated re-enrolment and reminder schedules, completion records are kept per learner and exportable, and each tenant's data is isolated at the database level with PostgreSQL Row-Level Security. Whether that satisfies a specific regulation is a question for your compliance team and your deployment, not for the software alone.
+Yes. Courses can be given expiry intervals with automated re-enrolment and reminder schedules, completion records are kept per learner and exportable, and each tenant's data is isolated at the database level with PostgreSQL Row-Level Security. Built-in phishing and social-engineering simulation scenarios cover the security-awareness side specifically. Whether this satisfies a specific regulation is a question for your compliance team and your deployment, not for the software alone.
 
 ### Does Mentingo support single sign-on?
 
-Yes - OAuth 2.0 with Microsoft 365, Google Workspace and Slack, plus email and password with TOTP two-factor authentication.
+Yes - OAuth 2.0 with Microsoft 365 (including Microsoft Entra), Google Workspace and Slack, plus email and password with TOTP two-factor authentication.
 
 ### Can one installation serve several companies or brands?
 
-Yes. Multi-tenancy is built in and enforced in PostgreSQL with Row-Level Security, with per-tenant domains and branding. This is what makes Mentingo usable by holding structures, group companies and B2B training vendors.
+Yes. Multi-tenancy is built in and enforced in PostgreSQL with Row-Level Security, with per-tenant domains and branding. Native course export/import and cross-tenant sync let a holding company, group of brands or B2B training vendor author a course once and roll it out to every tenant instead of rebuilding it per instance.
+
+### Can I run instructor-led or blended training, not just e-learning?
+
+Yes. Live training sessions can be scheduled with calendar booking alongside self-paced courses, and learning paths group related courses into a structured onboarding track or role curriculum - so a programme isn't limited to one course at a time.
+
+### Does Mentingo track skills and competencies, not just course completions?
+
+Yes, through an optional competencies module that maps the skills a job profile requires against what each person has actually demonstrated - useful for skills-gap analysis and role-based development plans, beyond a simple list of finished courses.
+
+### Does Mentingo have gamification?
+
+Yes. Points, levels, achievements and leaderboards are built into the core and configurable by admins - not a third-party plugin - alongside daily streaks and course badges.
 
 ### How much does it cost to run?
 
