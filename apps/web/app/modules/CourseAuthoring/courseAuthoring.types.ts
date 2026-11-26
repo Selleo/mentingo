@@ -14,6 +14,7 @@ import type {
   AUTHORING_SESSION_STATUS,
   AUTHORING_SOURCE_REFRESH_STATUS,
   AUTHORING_SOURCE_STATUS,
+  AUTHORING_STREAM_LOSS,
   AUTHORING_TASK_STATUS,
   AUTHORING_TOOL_STATUS,
   AUTHORING_TURN_STATUS,
@@ -30,6 +31,8 @@ export type AuthoringSessionStatus =
   (typeof AUTHORING_SESSION_STATUS)[keyof typeof AUTHORING_SESSION_STATUS];
 export type AuthoringTaskStatus =
   (typeof AUTHORING_TASK_STATUS)[keyof typeof AUTHORING_TASK_STATUS];
+export type AuthoringStreamLoss =
+  (typeof AUTHORING_STREAM_LOSS)[keyof typeof AUTHORING_STREAM_LOSS];
 
 export type AuthoringWorkProgressStage =
   (typeof AUTHORING_WORK_PROGRESS_STAGE)[keyof typeof AUTHORING_WORK_PROGRESS_STAGE];

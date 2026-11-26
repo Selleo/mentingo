@@ -47,10 +47,16 @@ export const useGlobalCourseAuthoringNotifications = () => {
     const dispose = observeAuthoringWork({
       client: queryClient,
       seedCachedSessions,
-      watch: (session, publish) =>
-        watchHiddenSession(session, (snapshot) => {
-          if (isCurrentActor()) publish(snapshot);
-        }),
+      watch: (session, publish, onLoss) =>
+        watchHiddenSession(
+          session,
+          (snapshot) => {
+            if (isCurrentActor()) publish(snapshot);
+          },
+          (reason) => {
+            if (isCurrentActor()) onLoss(reason);
+          },
+        ),
       notify: (outcome, session) => {
         if (!isCurrentActor()) return;
         const noticeKey = authoringSessionVisibilityKey(session.courseId, session.sessionId);
