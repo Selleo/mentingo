@@ -98,6 +98,53 @@ describe(CourseAuthoringDraftLifecycleService.name, () => {
     expect(repo.markPolled).toHaveBeenCalledWith(tenantId, draftId, 1, 1);
   });
 
+  it("skips a permanently invalid event so later events are not pinned", async () => {
+    const { service, repo, queue, luma } = setup();
+    const page = await luma.getEvents();
+    luma.getEvents.mockResolvedValueOnce({
+      ...page,
+      events: [{ ...page.events[0], payload: { ...page.events[0].payload, actorId: draftId } }],
+    });
+    await service.pollDraftEvents();
+    expect(queue.enqueue).not.toHaveBeenCalled();
+    expect(repo.markPolled).toHaveBeenCalledWith(tenantId, draftId, 1, 2);
+  });
+
+  it("skips an event only after repeated handoff failures", async () => {
+    const { service, repo, queue } = setup();
+    queue.enqueue.mockRejectedValue(new Error("Job rejected"));
+    for (let attempt = 1; attempt < 30; attempt++) await service.pollDraftEvents();
+    expect(repo.markPolled).not.toHaveBeenCalledWith(tenantId, draftId, 1, 2);
+
+    await service.pollDraftEvents();
+    expect(repo.markPolled).toHaveBeenLastCalledWith(tenantId, draftId, 1, 2);
+  });
+
+  it("pages past drafts whose cleanup keeps failing", async () => {
+    const { service, repo } = setup();
+    const lastActivityAt = "2026-11-20 10:00:00+00";
+    const failing = Array.from({ length: 100 }, (_unused, index) => ({
+      ...draft,
+      id: `00000000-0000-4000-9000-${String(index).padStart(12, "0")}`,
+      lastActivityAt,
+    }));
+    repo.inactive.mockResolvedValueOnce(failing).mockResolvedValueOnce([draft]);
+    repo.expire.mockImplementation(async (_tenant: string, id: string) => {
+      if (id !== draftId) throw new Error("Cleanup keeps failing");
+      return draft;
+    });
+
+    await service.discardInactiveDrafts();
+
+    expect(repo.inactive).toHaveBeenLastCalledWith(
+      tenantId,
+      expect.any(Date),
+      { lastActivityAt, id: failing.at(-1)?.id },
+      100,
+    );
+    expect(repo.markDiscarded).toHaveBeenCalledWith(tenantId, draftId);
+  });
+
   it("keeps a draft with pending producer work", async () => {
     const { service, repo, luma } = setup();
     luma.getSession.mockResolvedValueOnce({ ...snapshot, pendingWork: true });
