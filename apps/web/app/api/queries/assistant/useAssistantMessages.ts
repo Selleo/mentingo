@@ -9,7 +9,10 @@ import {
   type AssistantScope,
 } from "~/api/assistantIdentity";
 
-import { keepNewerAssistantTranscript } from "./assistantTranscriptCache";
+import {
+  assistantTranscriptRefetchInterval,
+  keepNewerAssistantTranscript,
+} from "./assistantTranscriptCache";
 import { useAssistantMessagesRealtime } from "./useAssistantMessagesRealtime";
 
 export const assistantMessagesKey = (
@@ -45,6 +48,7 @@ export function useAssistantMessages(threadId: string) {
     getNextPageParam: (last) =>
       last.page * last.perPage < last.totalItems ? last.page + 1 : undefined,
     structuralSharing: keepNewerAssistantTranscript,
+    refetchInterval: (query) => assistantTranscriptRefetchInterval(query.state.data),
     retry: false,
   });
   useAssistantMessagesRealtime({ threadId, scope, queryKey });

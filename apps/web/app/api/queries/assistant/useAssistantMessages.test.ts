@@ -7,7 +7,9 @@ import {
 import { describe, expect, it } from "vitest";
 
 import {
+  ACTIVE_RUN_REFRESH_MS,
   applyAssistantTranscriptUpdate,
+  assistantTranscriptRefetchInterval,
   keepNewerAssistantTranscript,
   settledAssistantMessages,
   type AssistantTranscriptCache,
@@ -107,6 +109,39 @@ describe("Assistant realtime transcript", () => {
   it("waits for an HTTP snapshot if a new run arrives without the persisted user turn", () => {
     const start = transcript(checkpoint("run-1", 3, "completed"));
     expect(applyAssistantTranscriptUpdate(start, checkpoint("run-2", 11))).toBe(start);
+  });
+
+  it("keeps an older page loaded while a realtime checkpoint advanced the run", () => {
+    const olderReply = checkpoint("run-1", 3, "completed");
+    const partial = checkpoint("run-2", 12);
+    const fetchStart = transcript(partial);
+    fetchStart.pages[0].totalItems = 2;
+    const current = applyAssistantTranscriptUpdate(fetchStart, checkpoint("run-2", 13));
+    const fetched: AssistantTranscriptCache = {
+      pageParams: [1, 2],
+      pages: [
+        fetchStart.pages[0],
+        { ...fetchStart.pages[0], page: 2, items: [olderReply.assistantMessage] },
+      ],
+    };
+
+    const merged = keepNewerAssistantTranscript(current, fetched) as AssistantTranscriptCache;
+
+    expect(merged.pageParams).toEqual([1, 2]);
+    expect(merged.pages[0]).toBe(current.pages[0]);
+    expect(merged.pages[1].items).toEqual([olderReply.assistantMessage]);
+    expect(merged.pages[1].latestRun).toEqual(current.pages[0].latestRun);
+    expect(keepNewerAssistantTranscript(current, fetchStart)).toBe(current);
+  });
+
+  it("reconciles over HTTP only while the latest run is active", () => {
+    expect(assistantTranscriptRefetchInterval(undefined)).toBe(false);
+    expect(assistantTranscriptRefetchInterval(transcript(checkpoint("run-1", 2)))).toBe(
+      ACTIVE_RUN_REFRESH_MS,
+    );
+    expect(
+      assistantTranscriptRefetchInterval(transcript(checkpoint("run-1", 3, "completed"))),
+    ).toBe(false);
   });
 
   it("clears stale pending UI when a legacy snapshot reports a terminal run", () => {
