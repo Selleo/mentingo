@@ -1,8 +1,4 @@
 import {
-  CERTIFICATE_VALIDITY_TYPES,
-  CERTIFICATE_VALIDITY_UNITS,
-  COURSE_FEATURE,
-  COURSE_FEATURE_ERROR_TRANSLATION_KEY,
   COURSE_STATUSES,
   COURSE_TYPE,
   DEFAULT_CERTIFICATE_FONT_COLOR,
@@ -127,37 +123,10 @@ export const COURSE_KIND_DEFAULTS = [
   },
 ];
 
-export const SCORM_UNAVAILABLE_SETTINGS = [
-  {
-    setting: "lessonSequenceEnabled",
-    body: { lessonSequenceEnabled: true },
-    expectedMessage: COURSE_FEATURE_ERROR_TRANSLATION_KEY[COURSE_FEATURE.LESSON_SEQUENCE_SETTING],
-  },
-  {
-    setting: "quizFeedbackEnabled",
-    body: { quizFeedbackEnabled: true },
-    expectedMessage: COURSE_FEATURE_ERROR_TRANSLATION_KEY[COURSE_FEATURE.QUIZ_FEEDBACK_SETTING],
-  },
+export const THUMBNAIL_PNG_BYTES = [
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+  0xde, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54, 0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00,
+  0x00, 0x03, 0x01, 0x01, 0x00, 0x18, 0xdd, 0x8d, 0xb1, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
+  0x44, 0xae, 0x42, 0x60, 0x82,
 ];
-
-export const EXPORTED_COURSE_SETTINGS_UPDATES = [
-  {
-    change: "certificate font color",
-    body: { certificateFontColor: "#123456" },
-    expectedStatus: 200,
-  },
-  { change: "certificate validity", body: { certificateValidity: null }, expectedStatus: 200 },
-  {
-    change: "certificate signature removal",
-    body: { removeCertificateSignature: true },
-    expectedStatus: 200,
-  },
-  { change: "lesson sequence", body: { lessonSequenceEnabled: false }, expectedStatus: 403 },
-  { change: "quiz feedback", body: { quizFeedbackEnabled: false }, expectedStatus: 403 },
-];
-
-export const CERTIFICATE_VALIDITY_PERIOD = {
-  type: CERTIFICATE_VALIDITY_TYPES.PERIOD,
-  value: 2,
-  unit: CERTIFICATE_VALIDITY_UNITS.YEARS,
-};

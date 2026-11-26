@@ -11,10 +11,11 @@ import request from "supertest";
 import { match } from "ts-pattern";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
+import { CourseDurationService } from "src/courses/duration/course-duration.service";
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { courses, lessons, settings } from "src/storage/schema";
+import { categories, courses, lessons, settings } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createAiMentorLessonFactory } from "../../../test/factory/ai-mentor-lesson.factory";
@@ -41,6 +42,9 @@ import {
   BETA_COURSE_ACCESS_CASES,
   BETA_COURSE_OUTCOMES,
   BUNNY_PLAYBACK_URL_PREFIX,
+  CATEGORY_LANGUAGE_CASES,
+  CATEGORY_TRANSLATIONS,
+  COURSE_OVERVIEW,
   COURSE_DETAIL_ACCESS_CASES,
   COURSE_DETAIL_OUTCOMES,
   COURSE_LOOKUP_CASES,
@@ -50,9 +54,19 @@ import {
   COURSE_VIEWERS,
   LESSON_FILE_CASES,
   LESSON_FILE_URLS,
+  LOCALIZED_CATEGORY_TITLES,
+  LOCALIZED_LEARNING_OUTCOMES,
   MANAGER_PREVIEW_CASES,
   MANAGER_SCOPES,
+  POLISH_SLUG_COURSE_SLUG_TEXT,
+  POLISH_SLUG_COURSE_TITLE,
   SIGNED_STORAGE_URL_PREFIX,
+  SLUG_COURSE_SLUG_TEXT,
+  SLUG_COURSE_TITLE,
+  SLUG_LOOKUP_CASES,
+  SLUG_LOOKUP_OUTCOMES,
+  SLUG_LOOKUPS,
+  SLUG_TITLE_CASES,
   TITLE_TRANSLATIONS,
   VIDEO_EMBED_CASES,
   VIDEO_EMBED_RESULTS,
@@ -63,12 +77,15 @@ import type {
   CourseState,
   CourseViewer,
   ManagerScope,
+  SlugLookup,
 } from "./course-detail-access.scenarios";
+import type { CourseTest } from "../../../test/factory/course.factory";
 import type { UserWithCredentials } from "../../../test/factory/user.factory";
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
 
 const COURSE_DETAIL_TABLES: Parameters<typeof truncateTables>[1] = [
+  "course_slugs",
   "ai_mentor_lessons",
   "resource_entity",
   "resources",
@@ -217,7 +234,11 @@ describe("Course detail access (e2e)", () => {
       userFactory.withCredentials({ password: PASSWORD }).withTrainerSettings(db).create(),
     );
 
-  const arrangeCourse = (courseState: CourseState, authorId: UUIDType) =>
+  const arrangeCourse = (
+    courseState: CourseState,
+    authorId: UUIDType,
+    course: Partial<CourseTest> = {},
+  ) =>
     seedInTenant(async () => {
       const category = await categoryFactory.create();
       const courseAttributes = match(courseState)
@@ -239,6 +260,7 @@ describe("Course detail access (e2e)", () => {
         categoryId: category.id,
         thumbnailS3Key: null,
         chapterCount: 0,
+        ...course,
       });
     });
 
@@ -441,6 +463,126 @@ describe("Course detail access (e2e)", () => {
       expect(response.status).toBe(200);
       expect(response.body.data.thumbnailUrl).toBe("course/thumbnail.png");
     });
+
+    it("describes the overview with outcomes, duration estimates and the group deadline", async () => {
+      const admin = await createAdmin();
+      const student = await createStudent();
+      const course = await arrangeCourse(COURSE_STATES.PUBLISHED, admin.id, {
+        thumbnailPositionY: COURSE_OVERVIEW.thumbnailPositionY,
+        showAuthorSection: false,
+        chapterCount: 1,
+        learningOutcomes: { [SUPPORTED_LANGUAGES.EN]: COURSE_OVERVIEW.learningOutcomes },
+      });
+      const { chapter, lesson } = await seedInTenant(async () => {
+        const group = await groupFactory.withMembers([student.id]).create();
+        await groupCourseFactory.create({
+          groupId: group.id,
+          courseId: course.id,
+          isMandatory: true,
+          dueDate: new Date(COURSE_OVERVIEW.groupDueDate),
+        });
+        await studentCourseFactory.create({
+          studentId: student.id,
+          courseId: course.id,
+          enrolledByGroupId: group.id,
+        });
+        const overviewChapter = await chapterFactory.create({
+          authorId: admin.id,
+          courseId: course.id,
+          displayOrder: 1,
+          lessonCount: 1,
+        });
+        const embedLesson = await lessonFactory.create({
+          chapterId: overviewChapter.id,
+          type: LESSON_TYPES.EMBED,
+          description: { [SUPPORTED_LANGUAGES.EN]: "" },
+        });
+        await app.get(CourseDurationService).refreshCourseDurationEstimates(course.id);
+
+        return { chapter: overviewChapter, lesson: embedLesson };
+      });
+
+      const response = await getCourseAs(student, course.id);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toMatchObject({
+        id: course.id,
+        thumbnailPositionY: COURSE_OVERVIEW.thumbnailPositionY,
+        showAuthorSection: false,
+        learningOutcomes: COURSE_OVERVIEW.learningOutcomes,
+        estimatedDurationSeconds: COURSE_OVERVIEW.embedLessonEstimateSeconds,
+        dueDate: COURSE_OVERVIEW.listedDueDate,
+        enrolled: true,
+        completedChapterCount: 0,
+        chapters: [
+          {
+            id: chapter.id,
+            estimatedDurationSeconds: COURSE_OVERVIEW.embedLessonEstimateSeconds,
+            lessons: [
+              {
+                id: lesson.id,
+                estimatedDurationSeconds: COURSE_OVERVIEW.embedLessonEstimateSeconds,
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it("returns learning outcomes in the requested language", async () => {
+      const author = await createContentCreator();
+      const course = await arrangeCourse(COURSE_STATES.PUBLISHED, author.id, {
+        availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+      });
+      await seedInTenant(() =>
+        db
+          .update(courses)
+          .set({
+            learningOutcomes: buildJsonbFieldWithMultipleEntries(LOCALIZED_LEARNING_OUTCOMES),
+          })
+          .where(eq(courses.id, course.id)),
+      );
+
+      const response = await getCourseAs(author, course.id, SUPPORTED_LANGUAGES.PL);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.learningOutcomes).toEqual(
+        LOCALIZED_LEARNING_OUTCOMES[SUPPORTED_LANGUAGES.PL],
+      );
+    });
+
+    it.each(CATEGORY_LANGUAGE_CASES)(
+      "$viewer reads the category in $language as $categoryTranslation",
+      async ({ viewer, language, categoryTranslation }) => {
+        const admin = await createAdmin();
+        const course = await arrangeCourse(COURSE_STATES.PUBLISHED, admin.id);
+        await seedInTenant(() =>
+          db
+            .update(categories)
+            .set({
+              title: buildJsonbFieldWithMultipleEntries(LOCALIZED_CATEGORY_TITLES),
+              availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.LT],
+            })
+            .where(eq(categories.id, course.categoryId)),
+        );
+        const viewingUser = await arrangeViewer(viewer, course.id, admin);
+
+        const response = await getCourseAs(viewingUser, course.id, language);
+
+        const expectedCategory = match(categoryTranslation)
+          .with(
+            CATEGORY_TRANSLATIONS.REQUESTED_LANGUAGE,
+            () => LOCALIZED_CATEGORY_TITLES[SUPPORTED_LANGUAGES.LT],
+          )
+          .with(
+            CATEGORY_TRANSLATIONS.BASE_LANGUAGE_FALLBACK,
+            () => LOCALIZED_CATEGORY_TITLES[SUPPORTED_LANGUAGES.EN],
+          )
+          .exhaustive();
+        expect(response.status).toBe(200);
+        expect(response.body.data.category).toBe(expectedCategory);
+      },
+    );
   });
 
   describe("GET /api/course/lookup", () => {
@@ -477,6 +619,136 @@ describe("Course detail access (e2e)", () => {
       );
 
       expect(response.status).toBe(404);
+    });
+
+    describe("slugs", () => {
+      const lookupCourseAs = (
+        user: UserWithCredentials,
+        idOrSlug: string,
+        language: string = SUPPORTED_LANGUAGES.EN,
+      ) =>
+        sendAs(user, `/api/course/lookup?id=${encodeURIComponent(idOrSlug)}&language=${language}`);
+
+      const findCourseShortId = (courseId: UUIDType) =>
+        seedInTenant(async () => {
+          const [course] = await db
+            .select({ shortId: courses.shortId })
+            .from(courses)
+            .where(eq(courses.id, courseId));
+
+          return course.shortId;
+        });
+
+      const arrangeSlugCourse = async (course: Partial<CourseTest> = {}) => {
+        const admin = await createAdmin();
+        const slugCourse = await arrangeCourse(COURSE_STATES.PUBLISHED, admin.id, {
+          title: SLUG_COURSE_TITLE,
+          ...course,
+        });
+
+        return { admin, course: slugCourse };
+      };
+
+      it("assigns a short id on the first lookup by course id", async () => {
+        const { admin, course } = await arrangeSlugCourse();
+        const shortIdBeforeLookup = await findCourseShortId(course.id);
+
+        const response = await lookupCourseAs(admin, course.id);
+
+        const shortId = await findCourseShortId(course.id);
+        expect(shortIdBeforeLookup).toBeNull();
+        expect(shortId).toMatch(/^[a-z0-9]{5}$/);
+        expect(response.status).toBe(200);
+        expect(response.body.data).toMatchObject({
+          status: "found",
+          slug: `${shortId}-${SLUG_COURSE_SLUG_TEXT}`,
+        });
+      });
+
+      it.each(SLUG_TITLE_CASES)(
+        "builds an ASCII slug from a title with $titleKind",
+        async ({ title, slugText }) => {
+          const { admin, course } = await arrangeSlugCourse({ title });
+
+          const response = await lookupCourseAs(admin, course.id);
+
+          const shortId = await findCourseShortId(course.id);
+          expect(response.body.data).toMatchObject({
+            status: "found",
+            slug: `${shortId}-${slugText}`,
+          });
+        },
+      );
+
+      const slugToLookUp = (lookup: SlugLookup, canonicalSlug: string, shortId: string) =>
+        match(lookup)
+          .with(SLUG_LOOKUPS.CANONICAL_SLUG, () => canonicalSlug)
+          .with(SLUG_LOOKUPS.OUTDATED_SLUG_TEXT, () => `${shortId}-some-outdated-slug-text`)
+          .with(SLUG_LOOKUPS.UNKNOWN_SHORT_ID, () => "zzzzz-non-existent-slug")
+          .with(SLUG_LOOKUPS.MALFORMED_SLUG, () => "malformed-slug")
+          .exhaustive();
+
+      it.each(SLUG_LOOKUP_CASES)("$lookup $outcome", async ({ lookup, outcome }) => {
+        const { admin, course } = await arrangeSlugCourse();
+        await lookupCourseAs(admin, course.id);
+        const shortId = await findCourseShortId(course.id);
+        const canonicalSlug = `${shortId}-${SLUG_COURSE_SLUG_TEXT}`;
+
+        const response = await lookupCourseAs(
+          admin,
+          slugToLookUp(lookup, canonicalSlug, String(shortId)),
+        );
+
+        match(outcome)
+          .with(SLUG_LOOKUP_OUTCOMES.FOUND, () =>
+            expect(response.body.data).toMatchObject({ status: "found", slug: canonicalSlug }),
+          )
+          .with(SLUG_LOOKUP_OUTCOMES.REDIRECT, () =>
+            expect(response.body.data).toMatchObject({ status: "redirect", slug: canonicalSlug }),
+          )
+          .with(SLUG_LOOKUP_OUTCOMES.NOT_FOUND, () => expect(response.status).toBe(404))
+          .exhaustive();
+      });
+
+      it("falls back to the base-language slug when the title lacks a translation", async () => {
+        const { admin, course } = await arrangeSlugCourse({
+          availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+        });
+
+        const response = await lookupCourseAs(admin, course.id, SUPPORTED_LANGUAGES.PL);
+
+        const shortId = await findCourseShortId(course.id);
+        expect(response.body.data).toMatchObject({
+          status: "found",
+          slug: `${shortId}-${SLUG_COURSE_SLUG_TEXT}`,
+        });
+      });
+
+      it("switches to the translated slug once the title is translated", async () => {
+        const { admin, course } = await arrangeSlugCourse({
+          availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+        });
+        await lookupCourseAs(admin, course.id, SUPPORTED_LANGUAGES.PL);
+        await seedInTenant(() =>
+          db
+            .update(courses)
+            .set({
+              title: buildJsonbFieldWithMultipleEntries({
+                [SUPPORTED_LANGUAGES.EN]: SLUG_COURSE_TITLE,
+                [SUPPORTED_LANGUAGES.PL]: POLISH_SLUG_COURSE_TITLE,
+              }),
+            })
+            .where(eq(courses.id, course.id)),
+        );
+
+        const response = await lookupCourseAs(admin, course.id, SUPPORTED_LANGUAGES.PL);
+
+        const shortId = await findCourseShortId(course.id);
+        expect(response.body.data).toMatchObject({
+          status: "found",
+          slug: `${shortId}-${POLISH_SLUG_COURSE_SLUG_TEXT}`,
+        });
+      });
     });
   });
 

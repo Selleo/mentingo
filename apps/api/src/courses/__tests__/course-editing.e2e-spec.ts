@@ -1,4 +1,9 @@
-import { COURSE_ORIGIN_TYPES, COURSE_TYPE, ENTITY_TYPES, SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  COURSE_ORIGIN_TYPES,
+  COURSE_STATUSES,
+  ENTITY_TYPES,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { eq, inArray, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 import { match } from "ts-pattern";
@@ -20,20 +25,19 @@ import { createResourceFactory } from "../../../test/factory/resource.factory";
 import { createSecretFactory } from "../../../test/factory/secret.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { createCourseAuthoringHelpers } from "../../../test/helpers/course-authoring";
 import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../../../test/helpers/e2e-settings";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
 import {
-  CERTIFICATE_VALIDITY_PERIOD,
   COURSE_AUTHORS,
   COURSE_EDIT_ACCESS_CASES,
   COURSE_EDIT_ENDPOINTS,
   COURSE_EDITORS,
   COURSE_FIELD_UPDATES,
   COURSE_KIND_DEFAULTS,
-  EXPORTED_COURSE_SETTINGS_UPDATES,
   EXPORTED_COURSE_UPDATES,
-  SCORM_UNAVAILABLE_SETTINGS,
+  THUMBNAIL_PNG_BYTES,
 } from "./course-editing.scenarios";
 
 import type { CourseAuthor, CourseEditEndpoint, CourseEditor } from "./course-editing.scenarios";
@@ -75,6 +79,13 @@ const s3ServiceMock = {
 
 const cacheManagerMock = { get: jest.fn(), set: jest.fn(), del: jest.fn() };
 
+// The ESM file-type detector cannot be imported inside the Jest VM without --experimental-vm-modules.
+jest.mock("load-esm", () => ({
+  loadEsm: async () => ({
+    fileTypeFromBuffer: async () => ({ ext: "png", mime: "image/png" }),
+  }),
+}));
+
 describe("Course editing (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
@@ -87,6 +98,7 @@ describe("Course editing (e2e)", () => {
   let resourceFactory: ReturnType<typeof createResourceFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let secretFactory: ReturnType<typeof createSecretFactory>;
+  let authoringHelpers: ReturnType<typeof createCourseAuthoringHelpers>;
 
   beforeAll(async () => {
     const e2e = await createE2ETest({
@@ -110,6 +122,7 @@ describe("Course editing (e2e)", () => {
     resourceFactory = createResourceFactory(db);
     settingsFactory = createSettingsFactory(db);
     secretFactory = createSecretFactory(app.get(EnvService));
+    authoringHelpers = createCourseAuthoringHelpers({ db, runInTenant: inTenant });
   });
 
   afterAll(async () => {
@@ -474,6 +487,81 @@ describe("Course editing (e2e)", () => {
         .expect(200);
 
       expect(publishedCourseUpdates(course.id)).toEqual([]);
+    });
+
+    it("publishes an update when only overview fields change", async () => {
+      const { admin, cookie } = await arrangeSignedInAdmin();
+      const course = await arrangeCourse({
+        authorId: admin.id,
+        thumbnailPositionY: 50,
+        showAuthorSection: true,
+      });
+
+      await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}`)
+        .set("x-playwright-test", "true")
+        .set("Cookie", cookie)
+        .send({
+          language: SUPPORTED_LANGUAGES.EN,
+          learningOutcomes: ["Build reliable reports"],
+          showAuthorSection: false,
+          thumbnailPositionY: 75,
+        })
+        .expect(200);
+
+      expect(publishedCourseUpdates(course.id)).toEqual([
+        expect.objectContaining({
+          courseUpdateData: expect.objectContaining({
+            previousCourseData: expect.objectContaining({
+              learningOutcomes: [],
+              showAuthorSection: true,
+              thumbnailPositionY: 50,
+            }),
+            updatedCourseData: expect.objectContaining({
+              learningOutcomes: ["Build reliable reports"],
+              showAuthorSection: false,
+              thumbnailPositionY: 75,
+            }),
+          }),
+        }),
+      ]);
+    });
+
+    it("clears the featured course when it is unpublished", async () => {
+      const { admin, cookie } = await arrangeSignedInAdmin();
+      const course = await arrangeCourse({ authorId: admin.id, status: COURSE_STATUSES.PUBLISHED });
+      await authoringHelpers.featureCourse(course.id);
+
+      await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}`)
+        .set("x-playwright-test", "true")
+        .set("Cookie", cookie)
+        .send({ language: SUPPORTED_LANGUAGES.EN, status: COURSE_STATUSES.DRAFT })
+        .expect(200);
+
+      expect(await authoringHelpers.findFeaturedCourseId()).toBeUndefined();
+    });
+
+    it("keeps the featured course when another course is unpublished", async () => {
+      const { admin, cookie } = await arrangeSignedInAdmin();
+      const featuredCourse = await arrangeCourse({
+        authorId: admin.id,
+        status: COURSE_STATUSES.PUBLISHED,
+      });
+      const otherCourse = await arrangeCourse({
+        authorId: admin.id,
+        status: COURSE_STATUSES.PUBLISHED,
+      });
+      await authoringHelpers.featureCourse(featuredCourse.id);
+
+      await request(app.getHttpServer())
+        .patch(`/api/course/${otherCourse.id}`)
+        .set("x-playwright-test", "true")
+        .set("Cookie", cookie)
+        .send({ language: SUPPORTED_LANGUAGES.EN, status: COURSE_STATUSES.DRAFT })
+        .expect(200);
+
+      expect(await authoringHelpers.findFeaturedCourseId()).toBe(featuredCourse.id);
     });
 
     describe("Stripe synchronization", () => {
@@ -990,104 +1078,58 @@ describe("Course editing (e2e)", () => {
     });
   });
 
-  describe("PATCH /api/course/settings/:courseId", () => {
-    const updateSettings = (courseId: UUIDType, cookie: string) =>
-      request(app.getHttpServer()).patch(`/api/course/settings/${courseId}`).set("Cookie", cookie);
+  describe("PATCH /api/course/:id/media", () => {
+    const updateMedia = (courseId: UUIDType, cookie: string) =>
+      request(app.getHttpServer())
+        .patch(`/api/course/${courseId}/media`)
+        .set("Cookie", cookie)
+        .field("language", SUPPORTED_LANGUAGES.EN)
+        .field("thumbnailPositionY", "35");
 
-    it.each(SCORM_UNAVAILABLE_SETTINGS)(
-      "rejects $setting for SCORM courses",
-      async ({ body, expectedMessage }) => {
-        const { admin, cookie } = await arrangeSignedInAdmin();
-        const course = await arrangeCourse({ authorId: admin.id, courseType: COURSE_TYPE.SCORM });
+    const attachThumbnail = (mediaRequest: ReturnType<typeof updateMedia>) =>
+      mediaRequest.attach("image", Buffer.from(THUMBNAIL_PNG_BYTES), {
+        filename: "thumbnail.png",
+        contentType: "image/png",
+      });
 
-        const response = await updateSettings(course.id, cookie).send(body).expect(400);
-
-        expect(response.body.message).toBe(expectedMessage);
-      },
-    );
-
-    it.each(EXPORTED_COURSE_SETTINGS_UPDATES)(
-      "responds $expectedStatus when changing the $change of a course exported from a master course",
-      async ({ body, expectedStatus }) => {
-        const { admin, cookie } = await arrangeSignedInAdmin();
-        const course = await arrangeCourse({
-          authorId: admin.id,
-          originType: COURSE_ORIGIN_TYPES.EXPORTED,
-        });
-
-        await updateSettings(course.id, cookie).send(body).expect(expectedStatus);
-      },
-    );
-
-    it("removes the stored certificate signature", async () => {
+    it("uploads a new thumbnail and stores its position", async () => {
       const { admin, cookie } = await arrangeSignedInAdmin();
       const course = await arrangeCourse({ authorId: admin.id });
-      await inTenant(() =>
-        db
-          .update(courses)
-          .set({
-            settings: sql`${courses.settings} || jsonb_build_object('certificateSignature', 'certificate/signature.png')`,
-          })
-          .where(eq(courses.id, course.id)),
+
+      const response = await attachThumbnail(updateMedia(course.id, cookie)).expect(200);
+
+      expect(response.body).toEqual({ data: { message: "Course updated successfully" } });
+      expect(await findCourse(course.id)).toMatchObject({
+        thumbnailPositionY: 35,
+        thumbnailS3Key: expect.stringMatching(new RegExp(`^${admin.tenantId}/course/`)),
+      });
+    });
+
+    it("forbids a content creator to change the media of another author's course", async () => {
+      const contentCreator = await arrangeEditor(COURSE_EDITORS.CONTENT_CREATOR);
+      const course = await arrangeCourse({
+        authorId: await arrangeAuthorId(COURSE_AUTHORS.ANOTHER_USER, contentCreator),
+      });
+
+      const response = await updateMedia(course.id, await cookieFor(contentCreator, app)).expect(
+        403,
       );
 
-      await updateSettings(course.id, cookie)
-        .send({ removeCertificateSignature: true })
-        .expect(200);
-
-      expect(await findCourse(course.id)).toMatchObject({
-        settings: { certificateSignature: null },
-      });
+      expect(response.body.message).toBe("adminCourseView.errors.forbidden.updateCourse");
     });
 
-    it("stores a certificate validity and applies it to existing certificates", async () => {
+    it("keeps the previous thumbnail when the upload fails", async () => {
+      s3ServiceMock.uploadFile.mockRejectedValue(new Error("Upload failed"));
       const { admin, cookie } = await arrangeSignedInAdmin();
       const course = await arrangeCourse({ authorId: admin.id });
 
-      await updateSettings(course.id, cookie)
-        .send({
-          certificateValidity: CERTIFICATE_VALIDITY_PERIOD,
-          applyValidityToExistingCertificates: true,
-        })
-        .expect(200);
+      const response = await attachThumbnail(updateMedia(course.id, cookie)).expect(409);
 
+      expect(response.body.message).toBe("adminCourseView.errors.media.imageUploadFailed");
       expect(await findCourse(course.id)).toMatchObject({
-        settings: { certificateValidity: CERTIFICATE_VALIDITY_PERIOD },
+        thumbnailPositionY: course.thumbnailPositionY,
+        thumbnailS3Key: null,
       });
-    });
-
-    it("clears the certificate validity", async () => {
-      const { admin, cookie } = await arrangeSignedInAdmin();
-      const course = await arrangeCourse({ authorId: admin.id });
-      await inTenant(() =>
-        db
-          .update(courses)
-          .set({
-            settings: sql`${
-              courses.settings
-            } || jsonb_build_object('certificateValidity', ${JSON.stringify(
-              CERTIFICATE_VALIDITY_PERIOD,
-            )}::text::jsonb)`,
-          })
-          .where(eq(courses.id, course.id)),
-      );
-
-      await updateSettings(course.id, cookie).send({ certificateValidity: null }).expect(200);
-
-      expect(await findCourse(course.id)).toMatchObject({
-        settings: { certificateValidity: null },
-      });
-    });
-
-    it("does not publish an update when the settings did not change", async () => {
-      const { admin, cookie } = await arrangeSignedInAdmin();
-      const course = await arrangeCourse({ authorId: admin.id });
-
-      await updateSettings(course.id, cookie)
-        .send({ certificateFontColor: course.settings.certificateFontColor })
-        .expect(200);
-
-      expect(publishedCourseUpdates(course.id)).toEqual([]);
     });
   });
 });

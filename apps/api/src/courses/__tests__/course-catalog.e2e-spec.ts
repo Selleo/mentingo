@@ -6,10 +6,12 @@ import { match } from "ts-pattern";
 
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { studentCourses } from "src/storage/schema";
+import { courses, studentCourses } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
+import { createChapterFactory } from "../../../test/factory/chapter.factory";
+import { createCourseSummaryStatsFactory } from "../../../test/factory/course-summary-stats.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createStudentCourseFactory } from "../../../test/factory/student-course.factory";
@@ -18,11 +20,14 @@ import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
 import {
   AVAILABLE_CATEGORY_CASES,
+  AVAILABLE_COURSE_ENROLLMENT_CASES,
+  AVAILABLE_COURSE_FILTER_CASES,
   AVAILABLE_COURSE_SORT_CASES,
   CATALOG_COURSE_FIXTURES,
   CATALOG_COURSES,
   ENROLLMENT_STATES,
   LESSON_SEQUENCE_CASES,
+  LISTED_COURSE_DETAILS,
   MARK_COURSE_OPENED_CASES,
   PUBLISHED_LOOKUP_CASES,
   SORT_EXPECTATIONS,
@@ -36,6 +41,7 @@ import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
 
 const COURSE_CATALOG_TABLES = [
+  "courses_summary_stats",
   "student_courses",
   "lessons",
   "chapters",
@@ -132,6 +138,7 @@ describe("Course catalog (e2e)", () => {
       const category = await categoryFactory.create({ title: courseFixture.categoryTitle });
       const course = await courseFactory.create({
         title: courseFixture.title,
+        description: courseFixture.description,
         categoryId: category.id,
         authorId: author.id,
         createdAt: courseFixture.createdAt,
@@ -162,6 +169,23 @@ describe("Course catalog (e2e)", () => {
     return rows.map(({ id }) => courseKeyById[id]);
   };
 
+  const arrangeViewerEnrollment = (enrollmentState: EnrollmentState) =>
+    match(enrollmentState)
+      .with(ENROLLMENT_STATES.ENROLLED, () =>
+        enrollLearner(fixture.viewer.id, CATALOG_COURSES.ALPHA),
+      )
+      .with(ENROLLMENT_STATES.NOT_ENROLLED, () =>
+        runAsDefaultTenant(() =>
+          studentCourseFactory.create({
+            studentId: fixture.viewer.id,
+            courseId: fixture.courseIdsByKey[CATALOG_COURSES.ALPHA],
+            status: COURSE_ENROLLMENT.NOT_ENROLLED,
+          }),
+        ),
+      )
+      .with(ENROLLMENT_STATES.NONE, async () => null)
+      .exhaustive();
+
   const getAsViewer = (path: string, query: Record<string, unknown> = {}) =>
     request(app.getHttpServer())
       .get(path)
@@ -169,6 +193,82 @@ describe("Course catalog (e2e)", () => {
       .set("Cookie", fixture.viewerCookies);
 
   describe("GET /api/course/available-courses", () => {
+    it("lists published, unarchived courses to anonymous visitors without a language", async () => {
+      const response = await request(app.getHttpServer())
+        .get("/api/course/available-courses")
+        .expect(200);
+
+      expect(courseKeysOf(response.body.data).sort()).toEqual([
+        CATALOG_COURSES.ALPHA,
+        CATALOG_COURSES.BRAVO,
+        CATALOG_COURSES.CHARLIE,
+      ]);
+    });
+
+    it.each(AVAILABLE_COURSE_ENROLLMENT_CASES)(
+      "lists $expectedCourses when the viewer is $enrollmentState in alpha",
+      async ({ enrollmentState, expectedCourses }) => {
+        await arrangeViewerEnrollment(enrollmentState);
+
+        const response = await getAsViewer("/api/course/available-courses").expect(200);
+
+        expect(courseKeysOf(response.body.data).sort()).toEqual(expectedCourses);
+      },
+    );
+
+    it.each(AVAILABLE_COURSE_FILTER_CASES)(
+      "$description",
+      async ({ query, excludedCourse, expectedCourses, expectedPagination }) => {
+        const response = await getAsViewer("/api/course/available-courses", {
+          ...query,
+          ...(excludedCourse && { excludeCourseId: fixture.courseIdsByKey[excludedCourse] }),
+        }).expect(200);
+
+        expect(courseKeysOf(response.body.data)).toEqual(expectedCourses);
+        expect(response.body.pagination).toEqual(expectedPagination);
+      },
+    );
+
+    it("describes each course with its chapters, free chapters, participants and price", async () => {
+      const courseId = fixture.courseIdsByKey[CATALOG_COURSES.ALPHA];
+      const { chapterCount, priceInCents, currency, freePurchasedCount, paidPurchasedCount } =
+        LISTED_COURSE_DETAILS;
+      await runAsDefaultTenant(async () => {
+        const [course] = await db
+          .update(courses)
+          .set({ chapterCount, priceInCents, currency })
+          .where(eq(courses.id, courseId))
+          .returning({ authorId: courses.authorId });
+        await createChapterFactory(db).create({
+          courseId,
+          authorId: course.authorId,
+          isFreemium: true,
+          displayOrder: 1,
+        });
+        await createCourseSummaryStatsFactory(db).create({
+          courseId,
+          authorId: course.authorId,
+          freePurchasedCount,
+          paidPurchasedCount,
+        });
+      });
+
+      const response = await getAsViewer("/api/course/available-courses", {
+        title: "Alpha",
+      }).expect(200);
+
+      expect(response.body.data).toEqual([
+        expect.objectContaining({
+          id: courseId,
+          courseChapterCount: chapterCount,
+          hasFreeChapters: true,
+          enrolledParticipantCount: LISTED_COURSE_DETAILS.expectedParticipantCount,
+          priceInCents,
+          currency,
+        }),
+      ]);
+    });
+
     it.each(AVAILABLE_COURSE_SORT_CASES)(
       "returns published, unarchived courses sorted by $sort $expectation",
       async ({ sort, expectation, expectedCourses }) => {
@@ -305,23 +405,6 @@ describe("Course catalog (e2e)", () => {
   });
 
   describe("POST /api/course/:courseId/open", () => {
-    const arrangeViewerEnrollment = (enrollmentState: EnrollmentState) =>
-      match(enrollmentState)
-        .with(ENROLLMENT_STATES.ENROLLED, () =>
-          enrollLearner(fixture.viewer.id, CATALOG_COURSES.ALPHA),
-        )
-        .with(ENROLLMENT_STATES.NOT_ENROLLED, () =>
-          runAsDefaultTenant(() =>
-            studentCourseFactory.create({
-              studentId: fixture.viewer.id,
-              courseId: fixture.courseIdsByKey[CATALOG_COURSES.ALPHA],
-              status: COURSE_ENROLLMENT.NOT_ENROLLED,
-            }),
-          ),
-        )
-        .with(ENROLLMENT_STATES.NONE, async () => null)
-        .exhaustive();
-
     const findViewerEnrollment = () =>
       runAsDefaultTenant(async () => {
         const [enrollment] = await db

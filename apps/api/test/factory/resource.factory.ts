@@ -73,3 +73,25 @@ export const createResourceFactory = (db: DatabasePg) => {
     };
   });
 };
+
+export type ResourceEntityTest = Omit<InferInsertModel<typeof resourceEntity>, "tenantId">;
+
+/** Links an existing resource to another entity, the way a reused upload is attached again. */
+export const createResourceEntityFactory = (db: DatabasePg) =>
+  Factory.define<ResourceEntityTest, never, InferSelectModel<typeof resourceEntity>>(
+    ({ onCreate }) => {
+      onCreate(async (link) => {
+        const [inserted] = await db.insert(resourceEntity).values(link).returning();
+
+        return inserted;
+      });
+
+      return {
+        id: faker.string.uuid(),
+        resourceId: "",
+        entityId: "",
+        entityType: "",
+        relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      };
+    },
+  );
