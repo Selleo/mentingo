@@ -12,6 +12,7 @@ import { Value } from "@sinclair/typebox/value";
 import { AssistantExecutionService } from "./assistant-execution.service";
 import { assistantProductTutorialSearchSchema } from "./schemas/assistant-product-tutorial.schema";
 
+import type { AssistantRealtimeService } from "./assistant-realtime.service";
 import type { AssistantRepository } from "./assistant.repository";
 import type { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import type { PromptService } from "src/ai/services/prompt.service";
@@ -46,6 +47,7 @@ describe("AssistantExecutionService", () => {
   let mcpHttpService: { executeNativeReadTool: jest.Mock; listNativeReadTools: jest.Mock };
   let service: AssistantExecutionService;
   let tenantDbRunnerService: { runWithTenant: jest.Mock };
+  let assistantRealtimeService: { publish: jest.Mock };
 
   const capabilities = {
     articles: { enabled: false, canList: false, canRead: false },
@@ -57,7 +59,7 @@ describe("AssistantExecutionService", () => {
   beforeEach(() => {
     assistantRepository = {
       getRun: jest.fn().mockResolvedValue({ ...run }),
-      updateRun: jest.fn().mockResolvedValue(run),
+      updateRun: jest.fn().mockResolvedValue({ run }),
       getHistory: jest.fn().mockResolvedValue([]),
       findTenantState: jest.fn(async () => currentTenant),
       isAccountActive: jest.fn(async () => activeAccount()),
@@ -76,12 +78,14 @@ describe("AssistantExecutionService", () => {
     };
     promptService = { loadPrompt: jest.fn(async (id) => `Managed ${id}`) };
     tenantDbRunnerService = { runWithTenant: jest.fn((_tenantId, callback) => callback()) };
+    assistantRealtimeService = { publish: jest.fn() };
     service = new AssistantExecutionService(
       assistantRepository as unknown as AssistantRepository,
       mcpHttpService as unknown as McpHttpService,
       tenantDbRunnerService as unknown as TenantDbRunnerService,
       { getAssistantLanguageModel: modelProvider } as unknown as AiRuntimeService,
       promptService as unknown as PromptService,
+      assistantRealtimeService as unknown as AssistantRealtimeService,
     );
   });
 
@@ -506,6 +510,23 @@ describe("AssistantExecutionService", () => {
     });
     finishRead({ structuredContent: { items: [] } });
     await pending;
+  });
+
+  it("broadcasts only checkpoints that the repository committed", async () => {
+    const message = { id: "message-1", text: "Saved reply" };
+    assistantRepository.updateRun.mockResolvedValueOnce({ run, message });
+    await service.setActivity(identity, ASSISTANT_RUN_ACTIVITIES.WRITING);
+    expect(assistantRealtimeService.publish).toHaveBeenCalledWith(run, message);
+
+    assistantRealtimeService.publish.mockClear();
+    await service.setActivity(identity, ASSISTANT_RUN_ACTIVITIES.WRITING);
+    expect(assistantRealtimeService.publish).not.toHaveBeenCalled();
+
+    assistantRepository.updateRun.mockRejectedValueOnce(new Error("rollback"));
+    await expect(service.setActivity(identity, ASSISTANT_RUN_ACTIVITIES.WRITING)).rejects.toThrow(
+      "rollback",
+    );
+    expect(assistantRealtimeService.publish).not.toHaveBeenCalled();
   });
 
   it.each([

@@ -41,6 +41,7 @@ describe("Assistant bound run reconciliation", () => {
     findTenantState: jest.Mock;
   };
   let runtime: { isAvailable: jest.Mock; getRunState: jest.Mock; start: jest.Mock };
+  let realtime: { publish: jest.Mock };
 
   beforeEach(() => {
     run = { ...baseRun };
@@ -65,13 +66,14 @@ describe("Assistant bound run reconciliation", () => {
           if (patch.status) message.status = patch.status;
           if (patch.text !== undefined) message.text = patch.text;
           if (patch.messageSources !== undefined) message.sources = patch.messageSources;
+          return { run, message };
         }
-        return run;
+        return { run };
       }),
       createSend: jest.fn(async () => {
         if (["pending", "running"].includes(run.status)) throw new ConflictException("Run active");
         const nextRun = { ...baseRun, id: "run-2", status: "pending", workflowRunId: null };
-        return { run: nextRun, userMessage: {}, assistantMessage: {} };
+        return { run: nextRun, userMessage: {}, assistantMessage: {}, created: true };
       }),
       getRun: jest.fn(async ({ runId }) =>
         runId === run.id
@@ -87,6 +89,7 @@ describe("Assistant bound run reconciliation", () => {
       getRunState: jest.fn(async () => "failed"),
       start: jest.fn(async () => ({ workflowRunId: "world-run-2" })),
     };
+    realtime = { publish: jest.fn() };
     service = new AssistantService(
       repository as never,
       runtime as never,
@@ -94,6 +97,7 @@ describe("Assistant bound run reconciliation", () => {
         runForEachTenant: async (callback: (tenantId: string) => Promise<void>) =>
           callback(actor.tenantId),
       } as never,
+      realtime as never,
     );
     jest
       .spyOn((service as unknown as { logger: { warn: () => void } }).logger, "warn")
@@ -122,6 +126,36 @@ describe("Assistant bound run reconciliation", () => {
       }),
     ).resolves.toEqual(expect.objectContaining({ run: expect.objectContaining({ id: "run-2" }) }));
     expect(runtime.start).toHaveBeenCalledTimes(1);
+  });
+
+  it("broadcasts a new send once and stays silent for an idempotent replay", async () => {
+    run.status = "failed";
+    const input = { clientMessageId: "retry-id", text: "Try again", language: "en" } as const;
+    await service.sendMessage(actor as never, run.threadId, input);
+    expect(realtime.publish).toHaveBeenCalledTimes(1);
+    expect(realtime.publish).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "run-2" }),
+      expect.anything(),
+      expect.anything(),
+    );
+
+    realtime.publish.mockClear();
+    repository.createSend.mockResolvedValueOnce({
+      run: { ...baseRun, id: "run-2", status: "pending", workflowRunId: "world-run-2" },
+      userMessage: {},
+      assistantMessage: {},
+      created: false,
+    });
+    await service.sendMessage(actor as never, run.threadId, input);
+    expect(realtime.publish).not.toHaveBeenCalled();
+  });
+
+  it("broadcasts reconciled terminal checkpoints", async () => {
+    await service.recoverPendingRuns();
+    expect(realtime.publish).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "failed" }),
+      expect.objectContaining({ status: "failed" }),
+    );
   });
 
   it.each([

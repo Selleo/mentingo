@@ -15,11 +15,17 @@ import { match } from "ts-pattern";
 
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { AssistantRealtimeService } from "./assistant-realtime.service";
 import { AssistantRepository } from "./assistant.repository";
 import { DEFAULT_ASSISTANT_LANGUAGE } from "./schemas/assistant.schema";
 import { AssistantRuntimeService } from "./workflow/assistant-runtime.service";
 
-import type { AssistantRun, AssistantRunCursor } from "./assistant.types";
+import type {
+  AssistantRun,
+  AssistantRunCursor,
+  AssistantRunIdentity,
+  AssistantRunUpdate,
+} from "./assistant.types";
 import type {
   AssistantPageQuery,
   AssistantThreadListQuery,
@@ -38,7 +44,15 @@ export class AssistantService {
     private readonly assistantRepository: AssistantRepository,
     private readonly assistantRuntimeService: AssistantRuntimeService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
+    private readonly assistantRealtimeService: AssistantRealtimeService,
   ) {}
+
+  /** Broadcasts only checkpoints that the committed update actually wrote. */
+  private async updateRun(input: AssistantRunIdentity, update: AssistantRunUpdate) {
+    const { run, message } = await this.assistantRepository.updateRun(input, update);
+    if (message) this.assistantRealtimeService.publish(run, message);
+    return run;
+  }
 
   private async requireActor(user: CurrentUserType) {
     const account = await this.assistantRepository.isAccountActive(user);
@@ -86,7 +100,15 @@ export class AssistantService {
     const tenant = await this.assistantRepository.findTenantState(user.tenantId);
     if (!tenant?.host) throw new ServiceUnavailableException("assistant.errors.unavailable");
     const origin = new URL(tenant.host).origin;
-    const sent = await this.assistantRepository.createSend(user, threadId, body, origin);
+    const { created, ...sent } = await this.assistantRepository.createSend(
+      user,
+      threadId,
+      body,
+      origin,
+    );
+    // An idempotent replay was already broadcast when it was first created.
+    if (created)
+      this.assistantRealtimeService.publish(sent.run, sent.assistantMessage, sent.userMessage);
     if (sent.run.status === ASSISTANT_RUN_STATUSES.PENDING && !sent.run.workflowRunId) {
       try {
         await this.start(sent.run);
@@ -123,7 +145,7 @@ export class AssistantService {
     const run = await this.assistantRepository.getRun({ tenantId: user.tenantId, runId });
     if (run.threadId !== threadId || run.userId !== user.userId)
       throw new NotFoundException("common.toast.notFound");
-    const cancelled = await this.assistantRepository.updateRun(
+    const cancelled = await this.updateRun(
       { tenantId: user.tenantId, runId },
       { status: ASSISTANT_RUN_STATUSES.CANCELLED },
     );
@@ -171,7 +193,7 @@ export class AssistantService {
         if (update) {
           // updateRun locks the Core row and ignores terminal rows, protecting
           // cancellation/completion races while retaining saved text/sources.
-          await this.assistantRepository.updateRun({ tenantId, runId: run.id }, update);
+          await this.updateRun({ tenantId, runId: run.id }, update);
         }
       } catch {
         this.logger.warn(`Assistant workflow state reconciliation deferred for ${run.id}`);
