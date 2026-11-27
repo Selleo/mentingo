@@ -1,25 +1,35 @@
 import {
+  authoringSessionKey,
+  authoringSessionQueryOptions,
+} from "~/api/queries/useCourseAuthoringSessionQuery";
+
+import {
+  authoringSessionVisibility,
+  authoringSessionVisibilityKey,
+} from "./authoringSessionVisibility";
+import {
   AUTHORING_TASK_KIND,
   AUTHORING_TASK_STATUS,
   AUTHORING_TURN_STATUS,
+  AUTHORING_STREAM_LOSS,
   AUTHORING_WORK_STATUS,
 } from "./courseAuthoring.constants";
 import { projectWorkspaceRecords } from "./courseAuthoring.records";
 import { PROPOSAL_DECISION } from "./review/curriculumReview.constants";
 
 import type { AUTHORING_WORK_OUTCOME } from "./courseAuthoring.constants";
-import type { AuthoringSession } from "./courseAuthoring.types";
+import type { AuthoringSession, AuthoringStreamLoss } from "./courseAuthoring.types";
 import type { QueryClient } from "@tanstack/react-query";
 
 export type AuthoringWorkOutcome =
   (typeof AUTHORING_WORK_OUTCOME)[keyof typeof AUTHORING_WORK_OUTCOME];
 type WorkStatus = (typeof AUTHORING_WORK_STATUS)[keyof typeof AUTHORING_WORK_STATUS];
 type WatchedSession = {
-  courseId: string;
-  sessionId: string;
-  sequence: number;
+  session: AuthoringSession;
+  cacheCourseId: string;
   requests: Map<string, WorkStatus>;
   startedAt: Map<string, number>;
+  stopWatching?: () => void;
 };
 
 const requestStatuses = (session: AuthoringSession) => {
@@ -145,29 +155,85 @@ const requestStatuses = (session: AuthoringSession) => {
 /** Watches work seen running in this login. Opening old finished sessions stays quiet. */
 export const observeAuthoringWork = ({
   client,
-  refresh,
+  watch,
   notify,
-  isUnavailable,
-  intervalMs = 10_000,
   seedCachedSessions = true,
   longRunningMs = 10_000,
 }: {
   client: QueryClient;
-  refresh: (courseId: string, sessionId: string) => Promise<AuthoringSession>;
+  watch: (
+    session: AuthoringSession,
+    publish: (next: AuthoringSession) => void,
+    onLoss: (reason: AuthoringStreamLoss) => void,
+  ) => () => void;
   notify: (outcome: AuthoringWorkOutcome, session: AuthoringSession) => void;
-  isUnavailable: (error: unknown) => boolean;
-  intervalMs?: number;
   seedCachedSessions?: boolean;
   longRunningMs?: number;
 }) => {
   const watched = new Map<string, WatchedSession>();
-  const inFlight = new Set<string>();
   let disposed = false;
-  const accept = (session: AuthoringSession) => {
+
+  const hasActiveWork = (entry: WatchedSession | undefined) =>
+    entry && [...entry.requests.values()].includes(AUTHORING_WORK_STATUS.ACTIVE);
+
+  /** Hand off hidden active sessions to the background stream until a workspace resumes. */
+  const reconcileWatch = (entry: WatchedSession) => {
+    const { session, cacheCourseId } = entry;
+    const visible = authoringSessionVisibility.getState();
+    const isVisible =
+      visible[authoringSessionVisibilityKey(cacheCourseId, session.sessionId)] ||
+      visible[authoringSessionVisibilityKey(session.courseId, session.sessionId)];
+    if (isVisible || !hasActiveWork(entry)) {
+      entry.stopWatching?.();
+      entry.stopWatching = undefined;
+      return;
+    }
+    if (entry.stopWatching) return;
+
+    const key = authoringSessionVisibilityKey(cacheCourseId, session.sessionId);
+    const subscription: { stop?: () => void } = {};
+    const publish = (snapshot: AuthoringSession) => {
+      if (
+        disposed ||
+        snapshot.sessionId !== session.sessionId ||
+        snapshot.snapshotSequence < (watched.get(key)?.session.snapshotSequence ?? 0)
+      )
+        return;
+      client.setQueryData<AuthoringSession>(
+        authoringSessionKey(cacheCourseId, session.sessionId),
+        (current) =>
+          !current || snapshot.snapshotSequence >= current.snapshotSequence ? snapshot : current,
+      );
+    };
+    const handleLoss = (reason: AuthoringStreamLoss) => {
+      const current = watched.get(key);
+      if (disposed || !current || current.stopWatching !== subscription.stop) return;
+      current.stopWatching = undefined;
+      if (reason === AUTHORING_STREAM_LOSS.REVOKED) {
+        watched.delete(key);
+        return;
+      }
+      // One HTTP snapshot replaces the lost stream; still-active work then rejoins the socket.
+      void client
+        .fetchQuery({
+          ...authoringSessionQueryOptions(cacheCourseId, session.sessionId),
+          staleTime: 0,
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          const latest = watched.get(key);
+          if (!disposed && latest) reconcileWatch(latest);
+        });
+    };
+    subscription.stop = watch(session, publish, handleLoss);
+    entry.stopWatching = subscription.stop;
+  };
+
+  const accept = (session: AuthoringSession, cacheCourseId: string) => {
     if (disposed) return;
-    const key = `${session.courseId}:${session.sessionId}`;
+    const key = authoringSessionVisibilityKey(cacheCourseId, session.sessionId);
     const previous = watched.get(key);
-    if (previous && session.snapshotSequence < previous.sequence) return;
+    if (previous && session.snapshotSequence < previous.session.snapshotSequence) return;
     const requests = requestStatuses(session);
     const startedAt = previous?.startedAt ?? new Map<string, number>();
     requests.forEach((status, requestId) => {
@@ -205,56 +271,53 @@ export const observeAuthoringWork = ({
         notify(status, session);
       }
     });
-    watched.set(key, {
-      courseId: session.courseId,
-      sessionId: session.sessionId,
-      sequence: session.snapshotSequence,
+    const entry = {
+      session,
+      cacheCourseId,
       requests,
       startedAt,
-    });
+      stopWatching: previous?.stopWatching,
+    };
+    watched.set(key, entry);
+    reconcileWatch(entry);
   };
   const cache = client.getQueryCache();
   const unsubscribe = cache.subscribe((event) => {
     const key = event.query.queryKey;
-    if (key[0] !== "course-authoring" || key[2] !== "session") return;
+    if (
+      key[0] !== "course-authoring" ||
+      typeof key[1] !== "string" ||
+      key[2] !== "session" ||
+      typeof key[3] !== "string"
+    )
+      return;
     if (event.type === "removed") {
-      const watchedKey = `${key[1]}:${key[3]}`;
+      const watchedKey = authoringSessionVisibilityKey(key[1], key[3]);
       // Query garbage collection must not abandon long-running background work.
-      if (
-        ![...(watched.get(watchedKey)?.requests.values() ?? [])].includes(
-          AUTHORING_WORK_STATUS.ACTIVE,
-        )
-      ) {
+      if (!hasActiveWork(watched.get(watchedKey))) {
+        watched.get(watchedKey)?.stopWatching?.();
         watched.delete(watchedKey);
       }
       return;
     }
     if (event.type !== "updated" || event.action.type !== "success") return;
     const session = event.query.state.data as AuthoringSession | undefined;
-    if (session) accept(session);
+    if (session) accept(session, key[1]);
   });
   if (seedCachedSessions)
     cache.findAll({ queryKey: ["course-authoring"] }).forEach((query) => {
-      if (query.queryKey[2] !== "session" || !query.state.data) return;
-      accept(query.state.data as AuthoringSession);
+      const key = query.queryKey;
+      if (typeof key[1] !== "string" || key[2] !== "session" || !query.state.data) return;
+      accept(query.state.data as AuthoringSession, key[1]);
     });
-  const timer = setInterval(() => {
-    watched.forEach((entry, key) => {
-      if (inFlight.has(key) || ![...entry.requests.values()].includes(AUTHORING_WORK_STATUS.ACTIVE))
-        return;
-      inFlight.add(key);
-      void refresh(entry.courseId, entry.sessionId)
-        .then(accept)
-        .catch((error: unknown) => {
-          if (isUnavailable(error)) watched.delete(key);
-        })
-        .finally(() => inFlight.delete(key));
-    });
-  }, intervalMs);
+  const unsubscribeVisibility = authoringSessionVisibility.subscribe(() => {
+    watched.forEach(reconcileWatch);
+  });
   return () => {
     disposed = true;
-    clearInterval(timer);
     unsubscribe();
+    unsubscribeVisibility();
+    watched.forEach((entry) => entry.stopWatching?.());
     watched.clear();
   };
 };

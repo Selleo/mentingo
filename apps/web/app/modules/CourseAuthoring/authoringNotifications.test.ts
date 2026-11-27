@@ -2,8 +2,16 @@ import { QueryClient } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { observeAuthoringWork } from "./authoringNotifications";
+import {
+  authoringSessionVisibility,
+  authoringSessionVisibilityKey,
+} from "./authoringSessionVisibility";
 
-import type { AuthoringSession, AuthoringTurnStatus } from "./courseAuthoring.types";
+import type {
+  AuthoringSession,
+  AuthoringStreamLoss,
+  AuthoringTurnStatus,
+} from "./courseAuthoring.types";
 
 const session = (
   status: AuthoringTurnStatus,
@@ -76,14 +84,19 @@ describe("global authoring work observer", () => {
   let client: QueryClient;
   let dispose: () => void;
   const notify = vi.fn();
-  const refresh = vi.fn();
+  const stopWatching = vi.fn();
+  const watch = vi.fn(
+    (
+      _session: AuthoringSession,
+      _publish: (next: AuthoringSession) => void,
+      _onLoss: (reason: AuthoringStreamLoss) => void,
+    ) => stopWatching,
+  );
   const start = (longRunningMs = 0) => {
     dispose = observeAuthoringWork({
       client,
       notify,
-      refresh,
-      isUnavailable: (error) => error === "denied",
-      intervalMs: 100,
+      watch,
       longRunningMs,
     });
   };
@@ -263,20 +276,20 @@ describe("global authoring work observer", () => {
     ]);
   });
 
-  it("polls work after another session opens and after query garbage collection", async () => {
+  it("keeps streaming after another session opens and after query garbage collection", () => {
     client.setQueryData(key(), session("running"));
     start();
     client.setQueryData(key("other"), session("completed", 1, "other"));
     client.removeQueries({ queryKey: key(), exact: true });
-    refresh.mockResolvedValue(session("completed", 2));
-    await vi.advanceTimersByTimeAsync(100);
-    expect(refresh).toHaveBeenCalledWith("course-1", "session-1");
+    expect(watch).toHaveBeenCalledOnce();
+    const [initial, publish] = watch.mock.calls[0];
+    expect(initial.sessionId).toBe("session-1");
+    publish(session("completed", 2));
     expect(notify).toHaveBeenCalledWith(
       "completed",
       expect.objectContaining({ sessionId: "session-1" }),
     );
-    await vi.advanceTimersByTimeAsync(500);
-    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(stopWatching).toHaveBeenCalledOnce();
   });
 
   it("does not report failure while sibling tasks are still running", () => {
@@ -323,7 +336,6 @@ describe("global authoring work observer", () => {
     client.setQueryData(key(), session("completed", 2));
     expect(notify).not.toHaveBeenCalled();
     client.setQueryData(key(), session("running", 3));
-    refresh.mockResolvedValue(session("running", 3));
     await vi.advanceTimersByTimeAsync(10_000);
     client.setQueryData(key(), session("completed", 4));
     expect(notify).toHaveBeenCalledTimes(1);
@@ -363,35 +375,33 @@ describe("global authoring work observer", () => {
         tasks: [{ ...snapshot.tasks[0], status: "succeeded" }],
       });
       await vi.advanceTimersByTimeAsync(500);
-      expect(refresh).not.toHaveBeenCalled();
+      expect(watch).not.toHaveBeenCalled();
       expect(notify).not.toHaveBeenCalled();
     },
   );
-  it("stops polling denied sessions without reporting a task failure", async () => {
+  it("forgets a session whose background stream was revoked", () => {
+    authoringSessionVisibility.setState({}, true);
     start();
     client.setQueryData(key(), session("running"));
-    refresh.mockRejectedValue("denied");
-    await vi.advanceTimersByTimeAsync(500);
-    expect(refresh).toHaveBeenCalledTimes(1);
+    const [, , onLoss] = watch.mock.calls[0];
+    onLoss("revoked");
+    authoringSessionVisibility.setState({
+      [authoringSessionVisibilityKey("course-1", "other")]: 1,
+    });
+    client.removeQueries({ queryKey: key(), exact: true });
+    authoringSessionVisibility.setState({}, true);
+    expect(watch).toHaveBeenCalledOnce();
     expect(notify).not.toHaveBeenCalled();
   });
-
-  it("ignores stale snapshots and suppresses in-flight outcomes after logout", async () => {
+  it("ignores stale snapshots and suppresses a late event after logout", () => {
     start();
     client.setQueryData(key(), session("running", 5));
-    client.setQueryData(key(), session("completed", 4));
+    const [, publish] = watch.mock.calls[0];
+    publish(session("completed", 4));
     expect(notify).not.toHaveBeenCalled();
-    let finish: (snapshot: AuthoringSession) => void = () => {};
-    refresh.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          finish = resolve;
-        }),
-    );
-    await vi.advanceTimersByTimeAsync(100);
     dispose();
-    finish(session("completed", 6));
-    await Promise.resolve();
+    publish(session("completed", 6));
+    expect(client.getQueryData<AuthoringSession>(key())?.snapshotSequence).toBe(5);
     expect(notify).not.toHaveBeenCalled();
   });
 });

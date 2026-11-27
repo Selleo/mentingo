@@ -14,6 +14,7 @@ import type {
   AUTHORING_SESSION_STATUS,
   AUTHORING_SOURCE_REFRESH_STATUS,
   AUTHORING_SOURCE_STATUS,
+  AUTHORING_STREAM_LOSS,
   AUTHORING_TASK_STATUS,
   AUTHORING_TOOL_STATUS,
   AUTHORING_TURN_STATUS,
@@ -30,6 +31,8 @@ export type AuthoringSessionStatus =
   (typeof AUTHORING_SESSION_STATUS)[keyof typeof AUTHORING_SESSION_STATUS];
 export type AuthoringTaskStatus =
   (typeof AUTHORING_TASK_STATUS)[keyof typeof AUTHORING_TASK_STATUS];
+export type AuthoringStreamLoss =
+  (typeof AUTHORING_STREAM_LOSS)[keyof typeof AUTHORING_STREAM_LOSS];
 
 export type AuthoringWorkProgressStage =
   (typeof AUTHORING_WORK_PROGRESS_STAGE)[keyof typeof AUTHORING_WORK_PROGRESS_STAGE];
@@ -347,6 +350,9 @@ export type CurriculumPreview = {
   authoringSessionId?: string;
   /** Asset IDs already uploaded and ready for the review preview. */
   readyAssetIds?: string[];
+  /** Podcasts bound to the editable lesson operations in this review. */
+  podcastAssets?: Array<Pick<AssetRequestView, "assetId" | "operationId" | "altText">>;
+  podcastTasks?: AssetTaskView[];
   outline: Array<{
     id: string;
     title: string;
@@ -372,6 +378,7 @@ export type CurriculumReviewSubmission = {
 export type CurriculumPreviewActions = {
   /** Records every staged verdict and applies the accepted changes as one course update. */
   applyReview?: (submission: CurriculumReviewSubmission) => Promise<void>;
+  retryPodcast?: (assetId: string) => Promise<void>;
   /** Starts one revised conversation turn for the reviewed draft. */
   refineBatch?: (feedbacks: Array<{ proposalId: string; feedback: string }>) => Promise<void>;
 };
@@ -379,7 +386,7 @@ export type CurriculumPreviewActions = {
 export type AssetRequestView = {
   assetId: string;
   operationId: string;
-  purpose: "thumbnail" | "lesson" | "diagram" | "avatar" | "signature";
+  purpose: "thumbnail" | "lesson" | "diagram" | "avatar" | "signature" | "podcast";
   required: boolean;
   altText: string;
   source:
@@ -388,6 +395,7 @@ export type AssetRequestView = {
         content: string;
         visualQuery: string;
       }
+    | { type: typeof AUTHORING_ASSET_SOURCE_TYPE.PODCAST; content: string }
     | {
         type: typeof AUTHORING_ASSET_SOURCE_TYPE.SOURCE_IMAGE;
         sourceVersionId: string;
@@ -411,6 +419,7 @@ export type AssetTaskView = {
   question: string | null;
   action: "asset.retry_submission" | null;
   ready: boolean;
+  terminalFailure: boolean;
 };
 
 export type PreviewView = {

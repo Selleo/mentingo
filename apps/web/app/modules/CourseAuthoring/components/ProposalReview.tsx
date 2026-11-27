@@ -43,6 +43,7 @@ import { AuthoringOperationPreview } from "./AuthoringOperationPreview";
 import { AuthoringRequestHistory } from "./AuthoringRequestHistory";
 
 import type {
+  AssetRequestView,
   AuthoringOperation,
   AuthoringRequestView,
   AuthoringTask,
@@ -162,6 +163,7 @@ type Props = {
   attemptedTargetIds?: string[];
   readyAssetIds?: string[];
   failedOptionalAssetIds?: string[];
+  omittablePodcastAssetIds?: string[];
   omittedOptionalAssetIds?: string[];
   onOmittedOptionalAssetIdsChange?: (assetIds: string[]) => void;
   selectedProposalIds?: string[];
@@ -218,6 +220,7 @@ export const ProposalCard = ({
   proposal,
   selected,
   disabled,
+  applyDisabled,
   onSelectedChange,
   onAccept,
   onReject,
@@ -240,6 +243,7 @@ export const ProposalCard = ({
   proposal: ProposalView;
   selected: boolean;
   disabled?: boolean;
+  applyDisabled?: boolean;
   onSelectedChange: (selected: boolean) => void;
   onAccept: () => void | Promise<void>;
   onReject: () => void;
@@ -570,7 +574,7 @@ export const ProposalCard = ({
                       type="button"
                       size="sm"
                       className="min-w-32 px-4"
-                      disabled={disabled}
+                      disabled={disabled || applyDisabled}
                       onClick={() => decide(onAccept)}
                     >
                       {t(
@@ -821,7 +825,7 @@ export const ProposalCard = ({
                 type="button"
                 size="sm"
                 className="gap-1.5"
-                disabled={disabled}
+                disabled={disabled || applyDisabled}
                 onClick={() => decide(onAccept)}
               >
                 <Check className="size-4" />{" "}
@@ -868,6 +872,7 @@ export const ProposalReview = ({
   attemptedTargetIds = [],
   readyAssetIds = [],
   failedOptionalAssetIds = [],
+  omittablePodcastAssetIds = [],
   omittedOptionalAssetIds,
   onOmittedOptionalAssetIdsChange,
   selectedProposalIds,
@@ -892,6 +897,12 @@ export const ProposalReview = ({
   ];
   const updateOmittedOptionalAssetIds =
     onOmittedOptionalAssetIdsChange ?? setLocalOmittedOptionalAssetIds;
+  const canOmitAsset = (asset: AssetRequestView) =>
+    asset.purpose === "podcast"
+      ? omittablePodcastAssetIds.includes(asset.assetId)
+      : !asset.required;
+  const isAssetOmitted = (asset: AssetRequestView) =>
+    canOmitAsset(asset) && effectiveOmittedOptionalAssetIds.includes(asset.assetId);
   useEffect(() => {
     const acceptedIds = new Set(
       proposals
@@ -927,27 +938,30 @@ export const ProposalReview = ({
   const selectedAssets = useMemo(
     () =>
       proposals
-        .filter((proposal) => selectedForApply.includes(proposal.id))
+        .filter((proposal) => closure.ids.includes(proposal.id))
         .flatMap((proposal) => proposal.assetRequests ?? [])
         .filter(
           (asset, index, assets) =>
             assets.findIndex((candidate) => candidate.assetId === asset.assetId) === index,
         ),
-    [proposals, selectedForApply],
+    [proposals, closure.ids],
   );
   const readyAssets = useMemo(() => new Set(readyAssetIds), [readyAssetIds]);
   const pendingRequiredAssets = selectedAssets.filter(
-    (asset) => asset.required && !readyAssets.has(asset.assetId),
+    (asset) =>
+      (asset.required || asset.purpose === "podcast") &&
+      !readyAssets.has(asset.assetId) &&
+      !isAssetOmitted(asset),
   );
   const pendingOptionalAssets = selectedAssets.filter(
     (asset) =>
       !asset.required &&
+      asset.purpose !== "podcast" &&
       !readyAssets.has(asset.assetId) &&
       !effectiveOmittedOptionalAssetIds.includes(asset.assetId),
   );
-  const selectedAssetIds = useMemo(
-    () => new Set(selectedAssets.map((asset) => asset.assetId)),
-    [selectedAssets],
+  const selectedAssetIds = new Set(
+    selectedAssets.filter(canOmitAsset).map((asset) => asset.assetId),
   );
   const hasAssessmentImpact = useMemo(
     () =>
@@ -1000,6 +1014,9 @@ export const ProposalReview = ({
         selected={selected.includes(proposal.id)}
         showSelection={!autoApplyReadyContent}
         disabled={busy || applyState !== "idle"}
+        applyDisabled={proposal.assetRequests?.some(
+          (asset) => !readyAssets.has(asset.assetId) && !isAssetOmitted(asset),
+        )}
         onSelectedChange={(checked) =>
           updateSelected((current) =>
             checked ? [...current, proposal.id] : current.filter((id) => id !== proposal.id),
@@ -1055,7 +1072,15 @@ export const ProposalReview = ({
           <div className="mt-3 space-y-2">
             {selectedAssets.map((asset) => {
               const ready = readyAssets.has(asset.assetId);
-              const omitted = effectiveOmittedOptionalAssetIds.includes(asset.assetId);
+              const podcast = asset.purpose === "podcast";
+              const required = asset.required || podcast;
+              const omittable = canOmitAsset(asset);
+              const omitted = isAssetOmitted(asset);
+              let assetNotReadyKey = "courseAuthoring.review.optionalAssetOmitHint";
+              if (required) assetNotReadyKey = "courseAuthoring.review.requiredAssetNotReady";
+              if (podcast) assetNotReadyKey = "courseAuthoring.review.podcastNotReady";
+              if (podcast && omittable)
+                assetNotReadyKey = "courseAuthoring.activityRail.podcastFailedTerminal";
               return (
                 <div
                   key={asset.assetId}
@@ -1066,10 +1091,10 @@ export const ProposalReview = ({
                       <AuthoringAssetTitle asset={asset} />
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         <Badge
-                          variant={asset.required ? "blocked" : "secondaryWithOutline"}
+                          variant={required ? "blocked" : "secondaryWithOutline"}
                           className="text-[10px]"
                         >
-                          {asset.required
+                          {required
                             ? t("courseAuthoring.activityRail.required")
                             : t("courseAuthoring.activityRail.optional")}
                         </Badge>
@@ -1093,7 +1118,7 @@ export const ProposalReview = ({
                       </p>
                       <AuthoringAssetDetails asset={asset} />
                     </div>
-                    {!asset.required && (
+                    {omittable && (
                       <div className="flex shrink-0 items-start gap-2 text-xs text-neutral-700">
                         <Checkbox
                           aria-label={t("courseAuthoring.review.omitOptionalAsset", {
@@ -1118,12 +1143,10 @@ export const ProposalReview = ({
                     <p
                       className={cn(
                         "mt-2 text-xs",
-                        asset.required ? "text-destructive" : "text-warning-800",
+                        required ? "text-destructive" : "text-warning-800",
                       )}
                     >
-                      {asset.required
-                        ? t("courseAuthoring.review.requiredAssetNotReady")
-                        : t("courseAuthoring.review.optionalAssetOmitHint")}
+                      {t(assetNotReadyKey)}
                     </p>
                   )}
                 </div>

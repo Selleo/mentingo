@@ -20,6 +20,7 @@ type Props = {
   readOnly: boolean;
   streaming: boolean;
   applying: boolean;
+  applyDisabled: boolean;
   requiresAssessmentAcknowledgement: boolean;
   assessmentConfirmationOpen: boolean;
   onAssessmentConfirmationOpenChange: (open: boolean) => void;
@@ -39,6 +40,7 @@ export const CurriculumReviewBar = ({
   readOnly,
   streaming,
   applying,
+  applyDisabled,
   requiresAssessmentAcknowledgement,
   assessmentConfirmationOpen,
   onAssessmentConfirmationOpenChange,
@@ -51,7 +53,7 @@ export const CurriculumReviewBar = ({
   onExit,
 }: Props) => {
   const { t } = useTranslation();
-  const applyBlocked = applying;
+  const applyBlocked = applying || applyDisabled;
   const titleKey = outlineOnly
     ? "courseAuthoring.reviewMode.outlineTitle"
     : "courseAuthoring.reviewMode.title";
@@ -176,7 +178,7 @@ export const CurriculumReviewBar = ({
                     </Button>
                     <Button
                       type="button"
-                      disabled={applying}
+                      disabled={applyBlocked}
                       onClick={() => {
                         void onApply(true).then((applied) => {
                           if (applied) onAssessmentConfirmationOpenChange(false);

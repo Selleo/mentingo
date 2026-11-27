@@ -637,6 +637,7 @@
     "invalidOrder": "Užduočių tvarka pasikeitė. Atnaujinkite puslapį ir bandykite dar kartą."
   },
   "aiMentorPractice": {
+    "voiceEntryPrompt": "Įjunkite balso režimą ir leiskite naudoti mikrofoną, jei to prašo naršyklė.",
     "form": {
       "title": "Praktikuokite tikrą pokalbį.",
       "promptEyebrow": "Nustatykite sceną",
@@ -7292,9 +7293,13 @@
       "unknown": "Nežinoma",
       "generatedVisual": "Sugeneruotas vaizdas: {{content}}",
       "approveRetry": "Kartoti vaizdą",
+      "retryPodcast": "Bandyti kurti tinklalaidę dar kartą",
+      "retryPodcastApproval": "Teikėjas galėjo priimti ankstesnę užklausą. Pakartotinis bandymas gali kainuoti papildomai.",
       "requiredScopeChange": "Privaloma: keisti apimtį",
       "skipOptionalAsset": "Praleisti vaizdą",
-      "requiredCannotSkip": "Šis vaizdas privalomas ir jo praleisti negalima. Jei jo sukurti nepavyksta, paprašykite DI pakeisti pasiūlymą, kad jo nereikėtų.",
+      "omitFailedPodcast": "Praleisti tinklalaidę",
+      "podcastFailedTerminal": "Šios tinklalaidės sukurti nepavyko. Praleiskite ją, kad pamoką pritaikytumėte be jos, arba paprašykite DI pakeisti pasiūlymą.",
+      "requiredCannotSkip": "Ši medija privaloma ir jos praleisti negalima. Jei jos sukurti nepavyksta, paprašykite DI pakeisti pasiūlymą, kad jos nereikėtų.",
       "applicationHistory": "Pritaikyti pakeitimai",
       "apply": "Taikyti {{id}}",
       "applicationStatus": {
@@ -7451,8 +7456,8 @@
         "blockReplace": "Pakeisti pamokos turinį"
       },
       "unknownChange": "Kurso pakeitimas",
-      "visualAssets": "Vaizdai",
-      "visualAssetsDescription": "Prieš taikydami peržiūrėkite kiekvieną vaizdą. Neprivalomus vaizdus galite praleisti. Privalomus vaizdus reikia patvirtinti arba paprašyti DI pakeisti pasiūlymą.",
+      "visualAssets": "Pamokos medija",
+      "visualAssetsDescription": "Prieš taikydami peržiūrėkite kiekvieną vaizdą ir tinklalaidę. Neprivalomą mediją galite praleisti. Privalomą mediją reikia patvirtinti arba paprašyti DI pakeisti pasiūlymą.",
       "selected": "Pasirinkta: {{count}}",
       "ready": "Paruošta",
       "omitted": "Praleista",
@@ -7460,6 +7465,7 @@
       "purpose": "Paskirtis: {{value}}",
       "unknownPurpose": "Nenurodyta",
       "purposes": {
+        "podcast": "Tinklalaidė",
         "thumbnail": "Miniatiūra",
         "lesson": "Pamoka",
         "diagram": "Diagrama",
@@ -7471,9 +7477,10 @@
         "identified": "Nustatyta",
         "unknown": "Nežinoma"
       },
+      "podcastNotReady": "Kad galėtumėte pritaikyti pamoką, tinklalaidė turi būti paruošta.",
       "omitOptionalAsset": "Praleisti neprivalomą išteklių {{title}}",
       "omit": "Praleisti",
-      "requiredAssetNotReady": "Privalomas vaizdas neparuoštas. Patvirtinkite jį arba bandykite dar kartą veiklos skydelyje, arba paprašykite DI pakeisti pasiūlymą.",
+      "requiredAssetNotReady": "Privalomas vaizdas arba tinklalaidė neparuošti. Patvirtinkite arba bandykite dar kartą veiklos skydelyje, arba paprašykite DI pakeisti pasiūlymą.",
       "incompletePreview": "Trūksta kai kurių pakeitimų, nuo kurių priklauso ši peržiūra. Turinį galite peržiūrėti, bet pritaikyti galėsite tik juos pridėję. Trūkstami pakeitimai:",
       "optionalAssetOmitHint": "Pasirinkite „Praleisti“, kad pritaikytumėte tekstą be šio neprivalomo vaizdinio ištekliaus.",
       "savingPreviousChanges": "Įrašomi ankstesni pakeitimai į DI darbo sritį",

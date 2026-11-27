@@ -2,6 +2,7 @@
 
 const ASSET_MARKER_PATTERN = /data-authoring-asset-id\s*=\s*(["'])([0-9a-f-]{36})\1/gi;
 const IMAGE_TAG_PATTERN = /<img\b([^>]*)>/gi;
+const AUDIO_TAG_PATTERN = /<audio\b([^>]*)>\s*<\/audio>/gi;
 const ATTRIBUTE_PATTERN = /(?:^|\s)([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g;
 
 /** Return the unique asset UUIDs referenced by canonical HTML placeholders. */
@@ -18,11 +19,13 @@ export const getAuthoringAssetIds = (html: string): string[] => {
 export const getAuthoringAssetLabels = (html: string): Readonly<Record<string, string>> => {
   const ids = new Set(getAuthoringAssetIds(html));
   const labels: Record<string, string> = {};
-  for (const match of html.matchAll(/<(?:img|div)\b([^>]*)>/gi)) {
+  for (const match of html.matchAll(/<(?:img|div|audio)\b([^>]*)>/gi)) {
     const attributes = readAttributes(match[1] ?? "");
     const id = attributes.get("data-authoring-asset-id");
     if (!id || !ids.has(id)) continue;
-    labels[id] = decodeAttribute(attributes.get("alt") ?? attributes.get("data-alt") ?? "");
+    labels[id] = decodeAttribute(
+      attributes.get("alt") ?? attributes.get("data-alt") ?? attributes.get("data-name") ?? "",
+    );
   }
   return labels;
 };
@@ -32,25 +35,36 @@ export const withAuthoringAssetPreviewUrls = (
   html: string,
   previewUrls: Readonly<Record<string, string>>,
 ): string =>
-  html.replace(IMAGE_TAG_PATTERN, (tag, rawAttributes: string) => {
-    const attributes = readAttributes(rawAttributes);
-    const assetId = attributes.get("data-authoring-asset-id");
-    const previewUrl = (assetId ? previewUrls[assetId] : undefined) ?? attributes.get("src");
-    if (!assetId && !previewUrl) return tag;
+  html
+    .replace(AUDIO_TAG_PATTERN, (tag, rawAttributes: string) => {
+      const attributes = readAttributes(rawAttributes);
+      const assetId = attributes.get("data-authoring-asset-id");
+      if (!assetId || !/^[0-9a-f-]{36}$/i.test(assetId)) return tag;
+      const label = escapeAttribute(decodeAttribute(attributes.get("data-name") ?? ""));
+      const blockId = escapeAttribute(
+        decodeAttribute(attributes.get("data-authoring-block-id") ?? assetId),
+      );
+      return `<audio data-node-type="audio" data-authoring-asset-id="${assetId}" data-authoring-block-id="${blockId}" data-name="${label}"></audio>`;
+    })
+    .replace(IMAGE_TAG_PATTERN, (tag, rawAttributes: string) => {
+      const attributes = readAttributes(rawAttributes);
+      const assetId = attributes.get("data-authoring-asset-id");
+      const previewUrl = (assetId ? previewUrls[assetId] : undefined) ?? attributes.get("src");
+      if (!assetId && !previewUrl) return tag;
 
-    const alt = attributes.get("alt") ?? attributes.get("data-alt");
-    const blockId = attributes.get("data-authoring-block-id");
-    const wrapperAttributes = [
-      `data-node-type="image"`,
-      `data-src="${escapeAttribute(decodeAttribute(previewUrl ?? ""))}"`,
-      ...(alt === undefined ? [] : [`data-alt="${escapeAttribute(decodeAttribute(alt))}"`]),
-      ...(assetId ? [`data-authoring-asset-id="${escapeAttribute(assetId)}"`] : []),
-      ...(blockId === undefined
-        ? []
-        : [`data-authoring-block-id="${escapeAttribute(decodeAttribute(blockId))}"`]),
-    ];
-    return `<div ${wrapperAttributes.join(" ")}></div>`;
-  });
+      const alt = attributes.get("alt") ?? attributes.get("data-alt");
+      const blockId = attributes.get("data-authoring-block-id");
+      const wrapperAttributes = [
+        `data-node-type="image"`,
+        `data-src="${escapeAttribute(decodeAttribute(previewUrl ?? ""))}"`,
+        ...(alt === undefined ? [] : [`data-alt="${escapeAttribute(decodeAttribute(alt))}"`]),
+        ...(assetId ? [`data-authoring-asset-id="${escapeAttribute(assetId)}"`] : []),
+        ...(blockId === undefined
+          ? []
+          : [`data-authoring-block-id="${escapeAttribute(decodeAttribute(blockId))}"`]),
+      ];
+      return `<div ${wrapperAttributes.join(" ")}></div>`;
+    });
 
 /** Read quoted or unquoted HTML attributes while preserving their encoded values for re-emission. */
 const readAttributes = (rawAttributes: string): Map<string, string> => {

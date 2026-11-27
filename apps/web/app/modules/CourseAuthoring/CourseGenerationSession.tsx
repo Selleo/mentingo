@@ -27,6 +27,7 @@ import { cn } from "~/lib/utils";
 
 import { COURSE_AUTHORING_HANDLES } from "../../../e2e/data/curriculum/handles";
 
+import { omittablePodcastAssetIds, omittedPodcastAssetIds } from "./authoringAssetOmission";
 import {
   assetSelectionKey,
   readOmittedAssets,
@@ -102,6 +103,19 @@ import type {
   SourcePolicy,
 } from "./courseAuthoring.types";
 import type { SupportedLanguages } from "@repo/shared";
+
+/** Podcasts that still gate apply; an omitted terminally failed podcast no longer does. */
+const reviewPodcastAssets = (proposals: ProposalView[], omittedAssetIds: string[] = []) => [
+  ...new Map(
+    proposals
+      .flatMap((proposal) => proposal.assetRequests ?? [])
+      .filter((asset) => asset.purpose === "podcast" && !omittedAssetIds.includes(asset.assetId))
+      .map(
+        ({ assetId, operationId, altText }) =>
+          [assetId, { assetId, operationId, altText }] as const,
+      ),
+  ).values(),
+];
 
 /** Displays a recoverable session error without losing the route context. */
 const ErrorState = ({ onRetry }: { onRetry: () => void }) => {
@@ -300,13 +314,12 @@ export const CourseGenerationSession = ({
       try {
         await invalidateCourseCurriculumData();
         if (!isDraft) await refetchAuthoringContext({ throwOnError: true });
-        await refetchSnapshot();
       } catch (error) {
         refreshedAppliedExportsRef.current.delete(applicationExportId);
         throw error;
       }
     },
-    [isDraft, refetchAuthoringContext, refetchSnapshot],
+    [isDraft, refetchAuthoringContext],
   );
   const session = sessionQuery.data;
   const historyQuery = useCourseAuthoringTurnHistoryQuery(
@@ -432,6 +445,7 @@ export const CourseGenerationSession = ({
     onSessionUnavailable,
     onPermissionRevoked,
     reconnectAttempt,
+    allowCourseAttachment: isDraft,
   });
   let displayedConnection = connection;
   if (sessionQuery.isError) {
@@ -460,11 +474,10 @@ export const CourseGenerationSession = ({
       lastProjectionRecoveryRef.current = null;
       return;
     }
-    const fingerprint = visibleRecords.map((record) => record.id).join(":");
-    if (lastProjectionRecoveryRef.current === fingerprint) return;
-    lastProjectionRecoveryRef.current = fingerprint;
-    void refetchSnapshot();
-  }, [projection.unsupportedRecordCount, refetchSnapshot, visibleRecords]);
+    if (lastProjectionRecoveryRef.current === sessionId) return;
+    lastProjectionRecoveryRef.current = sessionId;
+    void refetchSnapshot().catch(() => undefined);
+  }, [projection.unsupportedRecordCount, refetchSnapshot, sessionId]);
   useEffect(() => {
     const application = readTrackedApplication(id, sessionId);
     if (!application?.confirmed) return;
@@ -512,6 +525,13 @@ export const CourseGenerationSession = ({
           targetedMentorOperationIds: targetedMentorOperationIds(session?.records ?? []),
           authoringSessionId: session?.sessionId,
           readyAssetIds: projection.readyAssetIds,
+          podcastAssets: reviewPodcastAssets(
+            projection.proposals,
+            omittedPodcastAssetIds(projection.assetTasks, omittedOptionalAssetIds),
+          ),
+          podcastTasks: projection.assetTasks.filter(
+            (asset) => asset.request.purpose === "podcast",
+          ),
         }
       : null;
   }, [
@@ -520,6 +540,8 @@ export const CourseGenerationSession = ({
     projection.proposals,
     projection.sources,
     projection.readyAssetIds,
+    projection.assetTasks,
+    omittedOptionalAssetIds,
     session?.sessionId,
     session?.records,
     session?.status,
@@ -879,14 +901,31 @@ export const CourseGenerationSession = ({
     ) => {
       lastSubmittedApplyProposalIdsRef.current = proposalIds;
       const latestSession = authoringSessionRef.current;
-      const latestProposals = latestSession
-        ? projectWorkspaceRecords(latestSession.records, latestSession.tasks).proposals
-        : projection.proposals;
+      const latestProjection = latestSession
+        ? projectWorkspaceRecords(latestSession.records, latestSession.tasks)
+        : projection;
+      const selectedProposals = latestProjection.proposals.filter((proposal) =>
+        proposalIds.includes(proposal.id),
+      );
+      const omittablePodcasts = omittablePodcastAssetIds(latestProjection.assetTasks);
+      if (
+        reviewPodcastAssets(
+          selectedProposals,
+          omittedPodcastAssetIds(latestProjection.assetTasks, [
+            ...omitOptionalAssetIds,
+            ...omittedOptionalAssetIdsRef.current,
+          ]),
+        ).some((asset) => !latestProjection.readyAssetIds.includes(asset.assetId))
+      )
+        throw new Error(t("courseAuthoring.review.podcastNotReady"));
       const optionalAssetIds = new Set(
-        latestProposals
-          .filter((proposal) => proposalIds.includes(proposal.id))
+        selectedProposals
           .flatMap((proposal) => proposal.assetRequests ?? [])
-          .filter((asset) => !asset.required)
+          .filter((asset) =>
+            asset.purpose === "podcast"
+              ? omittablePodcasts.includes(asset.assetId)
+              : !asset.required,
+          )
           .map((asset) => asset.assetId),
       );
       const request = {
@@ -900,7 +939,7 @@ export const CourseGenerationSession = ({
       setPendingApplyRequest(request);
       await applyMutation.mutateAsync(request);
     },
-    [applyMutation, projection.proposals],
+    [applyMutation, projection, t],
   );
   /** Commits one request-level decision set, then submits exactly one atomic native apply selection. */
   const reviewGroupAndApply = useCallback(
@@ -1012,6 +1051,13 @@ export const CourseGenerationSession = ({
           );
         }),
       );
+      if (
+        reviewPodcastAssets(
+          availableProposals.filter((proposal) => selectedIds.has(proposal.id)),
+          omittedPodcastAssetIds(latestProjection.assetTasks, omittedOptionalAssetIdsRef.current),
+        ).some((asset) => !latestProjection.readyAssetIds.includes(asset.assetId))
+      )
+        throw new Error(t("courseAuthoring.review.podcastNotReady"));
       const reviews = currentProposals
         .filter(
           (proposal) =>
@@ -1123,6 +1169,44 @@ export const CourseGenerationSession = ({
     },
     [projection.proposals, refetchSnapshot, sessionId, t, toast],
   );
+  const retryPodcast = useCallback(
+    async (assetId: string) => {
+      const latest = authoringSessionRef.current;
+      if (!latest || latest.status !== AUTHORING_SESSION_STATUS.ACTIVE) return;
+      const current = projectWorkspaceRecords(latest.records, latest.tasks).assetTasks.find(
+        (asset) =>
+          asset.request.assetId === assetId && asset.request.purpose === "podcast" && !asset.ready,
+      );
+      if (
+        !current ||
+        (current.status !== AUTHORING_TASK_STATUS.WAITING_AUTHOR &&
+          current.status !== AUTHORING_TASK_STATUS.FAILED)
+      )
+        return;
+      try {
+        if (current.action && current.revision !== null) {
+          await commandMutation.mutateAsync({
+            action: current.action,
+            targetId: current.taskId,
+            expectedRevision: current.revision,
+          });
+        } else if (current.status === AUTHORING_TASK_STATUS.FAILED) {
+          await commandMutation.mutateAsync({ action: "task.retry", targetId: current.taskId });
+        }
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          description: getTranslatedApiErrorMessage(
+            error,
+            t,
+            t("courseAuthoring.errors.invalidCommand"),
+          ),
+        });
+        throw error;
+      }
+    },
+    [commandMutation, t, toast],
+  );
   /** Opens a request's proposals in curriculum review mode, bound to one batch apply. */
   const previewProposalGroupInCurriculum = useCallback(
     async (requestId: string, proposals: ProposalView[], focusProposalId?: string) => {
@@ -1133,6 +1217,7 @@ export const CourseGenerationSession = ({
           projection.proposals,
           projection.assetTasks,
           omittedOptionalAssetIdsRef.current,
+          true,
         )
       )
         return;
@@ -1179,6 +1264,13 @@ export const CourseGenerationSession = ({
           authoringSessionId: session?.sessionId,
           readyAssetIds: projection.readyAssetIds,
           proposals: toReviewProposals(reviewable),
+          podcastAssets: reviewPodcastAssets(
+            reviewable,
+            omittedPodcastAssetIds(projection.assetTasks, omittedOptionalAssetIdsRef.current),
+          ),
+          podcastTasks: projection.assetTasks.filter(
+            (asset) => asset.request.purpose === "podcast",
+          ),
           focusProposalId,
           courseTitle: context?.title,
           assessedLessonIds: [...attemptedTargetIds],
@@ -1193,6 +1285,7 @@ export const CourseGenerationSession = ({
               acknowledgeAssessmentChanges,
               rejectedProposalIds,
             }),
+          retryPodcast,
           refineBatch: (feedbacks) => sendProposalFeedbackBatch(currentProposals, feedbacks),
         },
       );
@@ -1213,6 +1306,7 @@ export const CourseGenerationSession = ({
       projection.readyAssetIds,
       session?.sessionId,
       reviewGroupAndApply,
+      retryPodcast,
       sendProposalFeedbackBatch,
     ],
   );
@@ -1253,6 +1347,13 @@ export const CourseGenerationSession = ({
           authoringSessionId: session?.sessionId,
           readyAssetIds: projection.readyAssetIds,
           proposals: toReviewProposals([proposal]),
+          podcastAssets: reviewPodcastAssets(
+            [proposal],
+            omittedPodcastAssetIds(projection.assetTasks, omittedOptionalAssetIdsRef.current),
+          ),
+          podcastTasks: projection.assetTasks.filter(
+            (asset) => asset.request.purpose === "podcast",
+          ),
           focusProposalId: proposal.id,
           courseTitle: context?.title,
           assessedLessonIds: [...attemptedTargetIds],
@@ -1265,6 +1366,7 @@ export const CourseGenerationSession = ({
             }
             await decideProposal(proposal, false);
           },
+          retryPodcast,
           refineBatch: (feedbacks) => sendProposalFeedbackBatch([proposal], feedbacks),
         },
       );
@@ -1279,7 +1381,9 @@ export const CourseGenerationSession = ({
       preparePreview,
       session?.applicationDelta,
       projection.proposals,
+      projection.assetTasks,
       projection.sources,
+      retryPodcast,
       session?.records,
       projection.readyAssetIds,
       session?.sessionId,
@@ -1598,13 +1702,14 @@ export const CourseGenerationSession = ({
     {},
   );
   const visibleTasks = (session?.tasks ?? []).filter((task) => !sourceTaskIds.has(task.taskId));
-  const generationPending = (requestId: string) =>
+  const generationPending = (requestId: string, inspectPendingPodcasts = false) =>
     requestGenerationPending(
       session?.tasks ?? [],
       requestId,
       projection.proposals,
       projection.assetTasks,
       omittedOptionalAssetIds,
+      inspectPendingPodcasts,
     );
   const requestIdByTaskId = new Map(visibleTasks.map((task) => [task.taskId, task.requestId]));
   const proposalsByRequest = projection.proposals.reduce<Map<string, ProposalView[]>>(
@@ -1715,7 +1820,7 @@ export const CourseGenerationSession = ({
               requestId={requestId}
               proposals={changeProposals}
               busy={reviewBusy}
-              generationPending={waiting}
+              generationPending={generationPending(requestId, true)}
               onReview={(focusProposalId) =>
                 previewProposalGroupInCurriculum(requestId, changeProposals, focusProposalId)
               }
@@ -1864,9 +1969,11 @@ export const CourseGenerationSession = ({
                   (asset) =>
                     asset.status === AUTHORING_TASK_STATUS.FAILED &&
                     !asset.request.required &&
+                    asset.request.purpose !== "podcast" &&
                     !asset.ready,
                 )
                 .map((asset) => asset.request.assetId)}
+              omittablePodcastAssetIds={omittablePodcastAssetIds(projection.assetTasks)}
               omittedOptionalAssetIds={omittedOptionalAssetIds}
               onOmittedOptionalAssetIdsChange={setOmittedOptionalAssetIds}
             />

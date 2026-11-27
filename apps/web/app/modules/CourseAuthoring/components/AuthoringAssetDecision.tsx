@@ -1,8 +1,11 @@
-import { Check, Image, RotateCcw } from "lucide-react";
+import { AudioLines, Check, Image, RotateCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
+
+import { canOmitAuthoringAsset } from "../authoringAssetOmission";
+import { AUTHORING_TASK_STATUS } from "../courseAuthoring.constants";
 
 import { AuthoringAssetDetails, AuthoringAssetTitle } from "./AuthoringAssetDetails";
 
@@ -25,13 +28,29 @@ export function AuthoringAssetDecision({
   onRestore?: () => void;
 }) {
   const { t } = useTranslation();
+  const podcast = asset.request.purpose === "podcast";
+  const required = asset.request.required || podcast;
+  const canOmit = canOmitAuthoringAsset(asset);
+  let AssetStatusIcon = podcast ? AudioLines : Image;
+  if (omitted) AssetStatusIcon = Check;
+  const canRetry = asset.action
+    ? asset.revision !== null
+    : podcast && asset.status === AUTHORING_TASK_STATUS.FAILED && !asset.terminalFailure;
+  let explanationKey = "courseAuthoring.activityRail.assetDecisionFallback";
+  if (asset.action) explanationKey = "courseAuthoring.activityRail.retryApprovalExplanation";
+  if (podcast) {
+    explanationKey = asset.action
+      ? "courseAuthoring.activityRail.retryPodcastApproval"
+      : "courseAuthoring.review.podcastNotReady";
+    if (canOmit) explanationKey = "courseAuthoring.activityRail.podcastFailedTerminal";
+  }
   let statusKey = "courseAuthoring.activityRail.optional";
-  if (asset.request.required) statusKey = "courseAuthoring.activityRail.required";
+  if (required) statusKey = "courseAuthoring.activityRail.required";
   if (omitted) statusKey = "courseAuthoring.review.omitted";
   return (
     <div className="flex items-start gap-3 py-3">
       <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-500">
-        {omitted ? <Check className="size-4" /> : <Image className="size-4" />}
+        <AssetStatusIcon className="size-4" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
@@ -41,13 +60,7 @@ export function AuthoringAssetDecision({
           </span>
         </div>
         {!omitted && (
-          <p className="mt-1 max-w-lg text-xs leading-5 text-neutral-800">
-            {t(
-              asset.action === "asset.retry_submission"
-                ? "courseAuthoring.activityRail.retryApprovalExplanation"
-                : "courseAuthoring.activityRail.assetDecisionFallback",
-            )}
-          </p>
+          <p className="mt-1 max-w-lg text-xs leading-5 text-neutral-800">{t(explanationKey)}</p>
         )}
         <div className="mt-2 flex flex-wrap items-center gap-2">
           {omitted ? (
@@ -61,13 +74,17 @@ export function AuthoringAssetDecision({
                 variant="outline"
                 size="sm"
                 className="h-8 gap-1.5 px-2.5 text-xs"
-                disabled={busy || asset.revision === null || asset.action === null}
+                disabled={busy || !canRetry}
                 onClick={onRetry}
               >
                 <RotateCcw className="size-3.5" />
-                {t("courseAuthoring.activityRail.approveRetry")}
+                {t(
+                  podcast
+                    ? "courseAuthoring.activityRail.retryPodcast"
+                    : "courseAuthoring.activityRail.approveRetry",
+                )}
               </Button>
-              {!asset.request.required && (
+              {canOmit && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -75,14 +92,18 @@ export function AuthoringAssetDecision({
                   className="h-8 px-2.5 text-xs text-neutral-800"
                   onClick={onSkip}
                 >
-                  {t("courseAuthoring.activityRail.skipOptionalAsset")}
+                  {t(
+                    podcast
+                      ? "courseAuthoring.activityRail.omitFailedPodcast"
+                      : "courseAuthoring.activityRail.skipOptionalAsset",
+                  )}
                 </Button>
               )}
             </>
           )}
           <AuthoringAssetDetails asset={asset.request} diagnostic={asset.question} />
         </div>
-        {!omitted && asset.request.required && (
+        {!omitted && required && !podcast && (
           <p className="mt-1 text-xs text-neutral-800">
             {t("courseAuthoring.activityRail.requiredCannotSkip")}
           </p>

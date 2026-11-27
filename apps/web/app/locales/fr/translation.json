@@ -637,6 +637,7 @@
     "invalidOrder": "L’ordre des tâches n’est plus à jour. Actualisez la page et réessayez."
   },
   "aiMentorPractice": {
+    "voiceEntryPrompt": "Lancez le mode vocal et autorisez l’accès au microphone si votre navigateur le demande.",
     "form": {
       "title": "Pratiquez une vraie conversation.",
       "promptEyebrow": "Plantez le décor",
@@ -7032,9 +7033,13 @@
       "unknown": "Inconnue",
       "generatedVisual": "Visuel généré : {{content}}",
       "approveRetry": "Réessayer l’image",
+      "retryPodcast": "Relancer la génération du podcast",
+      "retryPodcastApproval": "Le fournisseur a peut-être accepté la demande précédente. Une nouvelle tentative peut entraîner des frais supplémentaires.",
       "requiredScopeChange": "Obligatoire : modifier le périmètre",
       "skipOptionalAsset": "Ignorer l’image",
-      "requiredCannotSkip": "Cette image est obligatoire et ne peut pas être ignorée. Si elle ne peut pas être créée, demandez à l’IA de modifier la proposition pour s’en passer.",
+      "omitFailedPodcast": "Omettre le podcast",
+      "podcastFailedTerminal": "Ce podcast n’a pas pu être créé. Omettez-le pour appliquer la leçon sans lui, ou demandez à l’IA de modifier la proposition.",
+      "requiredCannotSkip": "Ce média est obligatoire et ne peut pas être ignoré. S’il ne peut pas être créé, demandez à l’IA de modifier la proposition pour s’en passer.",
       "applicationHistory": "Modifications appliquées",
       "apply": "Appliquer {{id}}",
       "applicationStatus": {
@@ -7191,8 +7196,8 @@
         "blockReplace": "Remplacer le contenu de la leçon"
       },
       "unknownChange": "Modification du cours",
-      "visualAssets": "Images",
-      "visualAssetsDescription": "Vérifiez chaque image avant d’appliquer. Vous pouvez omettre les images facultatives. Les images obligatoires doivent être approuvées, sinon demandez à l’IA de modifier la proposition.",
+      "visualAssets": "Médias de la leçon",
+      "visualAssetsDescription": "Vérifiez chaque image et chaque podcast avant d’appliquer. Vous pouvez omettre les médias facultatifs. Les médias obligatoires doivent être approuvés, sinon demandez à l’IA de modifier la proposition.",
       "selected": "{{count}} sélectionnés",
       "ready": "Prêt",
       "omitted": "Ignoré",
@@ -7200,6 +7205,7 @@
       "purpose": "Objectif : {{value}}",
       "unknownPurpose": "Non précisé",
       "purposes": {
+        "podcast": "Podcast",
         "thumbnail": "Miniature",
         "lesson": "Leçon",
         "diagram": "Diagramme",
@@ -7211,9 +7217,10 @@
         "identified": "Identifiée",
         "unknown": "Inconnue"
       },
+      "podcastNotReady": "Le podcast doit être prêt avant que vous puissiez appliquer la leçon.",
       "omitOptionalAsset": "Ignorer la ressource facultative {{title}}",
       "omit": "Ignorer",
-      "requiredAssetNotReady": "Une image obligatoire n’est pas prête. Approuvez-la ou relancez-la dans le panneau d’activité, ou demandez à l’IA de modifier la proposition.",
+      "requiredAssetNotReady": "Une image ou un podcast obligatoire n’est pas prêt. Approuvez-le ou relancez-le dans le panneau d’activité, ou demandez à l’IA de modifier la proposition.",
       "incompletePreview": "Certaines modifications dont dépend cet aperçu sont manquantes. Vous pouvez consulter le contenu, mais pas l’appliquer tant qu’elles ne sont pas ajoutées. Modifications manquantes :",
       "optionalAssetOmitHint": "Choisissez « Ignorer » pour appliquer le texte sans cette ressource visuelle facultative.",
       "savingPreviousChanges": "Enregistrement des modifications précédentes dans l’espace de travail IA",

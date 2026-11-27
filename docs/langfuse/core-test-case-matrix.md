@@ -50,6 +50,12 @@ Catalogue: **31 feature datasets / 103 entries / 98 distinct complete input obje
 
 Additional existing normal voice checks: [capture mode](../../apps/web/app/modules/Voice/audio-capture-mode.test.ts), [audio recovery](../../apps/web/app/modules/Voice/audio-stream.recovery.test.ts), [VAD deferral](../../apps/web/app/modules/Voice/audio-stream.vad-deferral.test.ts), [practice voice](../../apps/api/src/audio/external-audio-practice.spec.ts). These are deterministic code checks, not provider listening evidence.
 
+Lesson podcast coverage lives in the authoring integration and deterministic product tests. Core tests exercise
+staged preview, the required audio readiness gate, audio-only retry, and same-lesson native MP3 application. The connected
+Mentingo AI runtime owns the script, source review, cast and synthesis checks. Hosted provider timing,
+actual learner playback, and independent listening are separate acceptance checks. [Core apply tests](../../apps/api/src/luma/course-authoring-apply.service.spec.ts)
+· [Review readiness tests](../../apps/web/app/modules/CourseAuthoring/review/CurriculumReviewWorkspace.test.tsx)
+
 ## Every feature case
 
 Each row gives the actual scenario and acceptance rubric from the versioned manifest. Full prompt variables, source facts, forbidden facts, schema references and native evidence requirements remain authoritative in the JSON. All 103 rows have a **current verified result: pass** in the linked report. Grounded/adversarial names alone do not establish distinct coverage; identical inputs are flagged below.

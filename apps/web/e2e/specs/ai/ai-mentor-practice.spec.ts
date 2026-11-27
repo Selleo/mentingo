@@ -12,6 +12,7 @@ import { expect, test } from "../../fixtures/test.fixture";
 import {
   mockAiMentorPracticeDashboardFlow,
   mockAiMentorPracticeSessionFlow,
+  mockAiMentorPracticeVoiceEntryFlow,
 } from "../../flows/ai-mentor-practice/mock-ai-mentor-practice.flow";
 
 // Practice scenarios, transcripts and feedback come from the LLM, so those endpoints are mocked
@@ -86,5 +87,24 @@ test("student can review practice feedback and start the practice again", async 
     await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT)).toBeVisible();
     // The replayed practice starts without the previous feedback.
     await expect(page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.VIEW_FEEDBACK_BUTTON)).toBeHidden();
+  });
+});
+
+test("student opens the active dashboard practice in full-screen voice mode", async ({
+  withWorkerPage,
+}) => {
+  await withWorkerPage(USER_ROLE.student, async ({ page }) => {
+    await mockAiMentorPracticeVoiceEntryFlow(page);
+
+    await page.goto("/dashboard");
+    const widget = page.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET);
+    await widget.getByTestId(AI_MENTOR_PRACTICE_HANDLES.WIDGET_VOICE_LINK).click();
+
+    await expect(page).toHaveURL(new RegExp(`/ai-mentor/practice/${AI_MENTOR_PRACTICE_ID}$`));
+    const voice = page.getByTestId(LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY);
+    await expect(voice).toBeVisible();
+    await expect(
+      voice.getByTestId(LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY_START_BUTTON),
+    ).toBeEnabled();
   });
 });

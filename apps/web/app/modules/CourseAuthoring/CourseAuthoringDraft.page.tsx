@@ -36,8 +36,6 @@ import { CourseGenerationSession } from "./CourseGenerationSession";
 
 import type { MetaFunction } from "@remix-run/react";
 
-const DRAFT_POLL_INTERVAL_MS = 5_000;
-
 export const meta: MetaFunction = ({ matches }) =>
   setPageTitle(matches, "adminCourseTypeSelector.ai.title");
 
@@ -50,11 +48,7 @@ const DraftWorkspace = ({ draftId, sessionId }: { draftId: string; sessionId: st
   const { hasAccess: canEditCourse } = usePermissions({
     required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
   });
-  const { data, error, refetch } = useCourseAuthoringSessionQuery(
-    draftId,
-    sessionId,
-    DRAFT_POLL_INTERVAL_MS,
-  );
+  const { data, error, refetch } = useCourseAuthoringSessionQuery(draftId, sessionId);
   useVisibleAuthoringSession(draftId, sessionId);
 
   const refetchDraft = useCallback(() => void refetch(), [refetch]);

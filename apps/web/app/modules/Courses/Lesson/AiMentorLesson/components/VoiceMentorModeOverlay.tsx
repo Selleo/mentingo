@@ -17,6 +17,7 @@ import { useCurrentUserSuspense } from "~/api/queries";
 import Viewer from "~/components/RichText/Viever";
 
 import type { UIMessage } from "@ai-sdk/react";
+import type { ReactNode } from "react";
 import type { VoiceConnectionState } from "~/modules/Voice/audio-stream.types";
 import type {
   LearnerTranscriptRevision,
@@ -45,6 +46,7 @@ type VoiceMentorModeOverlayProps = {
   onMicMutedChange: (muted: boolean) => void;
   onRestart: () => void;
   onExit: () => void;
+  notice?: ReactNode;
 };
 
 const TRANSCRIPT_ROLES: Partial<Record<UIMessage["role"], VoiceTranscriptMessage["role"]>> = {

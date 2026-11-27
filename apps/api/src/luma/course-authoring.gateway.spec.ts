@@ -91,6 +91,75 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
     test.gateway.onModuleDestroy();
   });
 
+  it("acknowledges a matching browser snapshot and starts the shared stream from its cursor", async () => {
+    const test = setup();
+    await test.gateway.join(test.socket, {
+      courseId,
+      sessionId,
+      afterSequence: 4,
+      hasSnapshot: true,
+    });
+
+    expect(test.socket.emit).toHaveBeenCalledWith("authoring.ready", {
+      courseId,
+      sessionId,
+      afterSequence: 4,
+    });
+    expect(test.socket.emit).not.toHaveBeenCalledWith("authoring.snapshot", expect.anything());
+    expect(test.getOptions()?.afterSequence).toBe(4);
+    test.gateway.onModuleDestroy();
+  });
+
+  it.each([3, 5])(
+    "returns the authoritative snapshot for an unmatched cursor of %i",
+    async (cursor) => {
+      const test = setup();
+      await test.gateway.join(test.socket, {
+        courseId,
+        sessionId,
+        afterSequence: cursor,
+        hasSnapshot: true,
+      });
+
+      expect(test.socket.emit).toHaveBeenCalledWith("authoring.snapshot", {
+        courseId,
+        sessionId,
+        snapshotSequence: 4,
+      });
+      expect(test.socket.emit).not.toHaveBeenCalledWith("authoring.ready", expect.anything());
+      expect(test.getOptions()?.afterSequence).toBe(4);
+      test.gateway.onModuleDestroy();
+    },
+  );
+
+  it("delivers course attachment as a delta to clients that support a cached snapshot", async () => {
+    const test = setup();
+    const legacySocket = test.createSocket("legacy-socket");
+    await test.gateway.join(test.socket, {
+      courseId,
+      sessionId,
+      afterSequence: 4,
+      hasSnapshot: true,
+    });
+    await test.gateway.join(legacySocket, { courseId, sessionId, afterSequence: 4 });
+    const event = {
+      schemaVersion: 1 as const,
+      eventId: courseId,
+      sessionId,
+      sequence: 5,
+      occurredAt: new Date().toISOString(),
+      type: "session.course_attached",
+      payload: { courseId: "00000000-0000-4000-8000-000000000004", language: "en" },
+    };
+
+    await test.getOptions()?.onEvent(event);
+
+    expect(test.socket.emit).toHaveBeenCalledWith("authoring.event", event);
+    expect(test.socket.emit).not.toHaveBeenCalledWith("authoring.resync", expect.anything());
+    expect(legacySocket.emit).toHaveBeenCalledWith("authoring.resync", { sessionId });
+    test.gateway.onModuleDestroy();
+  });
+
   it("forwards each durable event before consuming the next event", async () => {
     const test = setup();
     await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });

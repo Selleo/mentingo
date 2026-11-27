@@ -637,6 +637,7 @@
     "invalidOrder": "El orden de las tareas ya no está actualizado. Actualiza la página e inténtalo de nuevo."
   },
   "aiMentorPractice": {
+    "voiceEntryPrompt": "Inicia el modo de voz y permite el acceso al micrófono si tu navegador lo solicita.",
     "form": {
       "title": "Practica una conversación real.",
       "promptEyebrow": "Prepara la escena",
@@ -7238,9 +7239,13 @@
       "unknown": "Desconocido",
       "generatedVisual": "Recurso visual generado: {{content}}",
       "approveRetry": "Reintentar imagen",
+      "retryPodcast": "Volver a generar el pódcast",
+      "retryPodcastApproval": "Es posible que el proveedor haya aceptado la solicitud anterior. Reintentar puede generar otro cargo.",
       "requiredScopeChange": "Obligatorio: cambiar el alcance",
       "skipOptionalAsset": "Omitir imagen",
-      "requiredCannotSkip": "Esta imagen es obligatoria y no se puede omitir. Si no se puede crear, pide a la IA que cambie la propuesta para que no sea necesaria.",
+      "omitFailedPodcast": "Omitir pódcast",
+      "podcastFailedTerminal": "No se pudo crear este pódcast. Omítelo para aplicar la lección sin él o pide a la IA que cambie la propuesta.",
+      "requiredCannotSkip": "Este elemento multimedia es obligatorio y no se puede omitir. Si no se puede crear, pide a la IA que cambie la propuesta para que no sea necesario.",
       "applicationHistory": "Cambios aplicados",
       "apply": "Aplicar {{id}}",
       "applicationStatus": {
@@ -7397,8 +7402,8 @@
         "blockReplace": "Reemplazar contenido de la lección"
       },
       "unknownChange": "Cambio del curso",
-      "visualAssets": "Imágenes",
-      "visualAssetsDescription": "Revisa cada imagen antes de aplicar. Puedes omitir las imágenes opcionales. Las obligatorias deben aprobarse, o pide a la IA que cambie la propuesta.",
+      "visualAssets": "Material multimedia de la lección",
+      "visualAssetsDescription": "Revisa cada imagen y pódcast antes de aplicar. Puedes omitir el material multimedia opcional. El obligatorio debe aprobarse, o pide a la IA que cambie la propuesta.",
       "selected": "{{count}} seleccionados",
       "ready": "Listo",
       "omitted": "Omitido",
@@ -7406,6 +7411,7 @@
       "purpose": "Propósito: {{value}}",
       "unknownPurpose": "Sin especificar",
       "purposes": {
+        "podcast": "Pódcast",
         "thumbnail": "Miniatura",
         "lesson": "Lección",
         "diagram": "Diagrama",
@@ -7417,9 +7423,10 @@
         "identified": "Identificada",
         "unknown": "Desconocida"
       },
+      "podcastNotReady": "El pódcast debe estar listo para poder aplicar la lección.",
       "omitOptionalAsset": "Omitir recurso opcional {{title}}",
       "omit": "Omitir",
-      "requiredAssetNotReady": "Una imagen obligatoria no está lista. Apruébala o reinténtala en el panel de actividad, o pide a la IA que cambie la propuesta.",
+      "requiredAssetNotReady": "Una imagen o un pódcast obligatorio no está listo. Apruébalo o reinténtalo en el panel de actividad, o pide a la IA que cambie la propuesta.",
       "incompletePreview": "Faltan algunos cambios de los que depende esta vista previa. Puedes revisar el contenido, pero no aplicarlo hasta que se añadan. Cambios que faltan:",
       "optionalAssetOmitHint": "Elige «Omitir» para aplicar el texto sin este recurso visual opcional.",
       "savingPreviousChanges": "Guardando cambios anteriores en el espacio de trabajo de IA",

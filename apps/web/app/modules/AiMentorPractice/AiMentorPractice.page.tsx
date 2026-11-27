@@ -1,4 +1,4 @@
-import { Link, useParams } from "@remix-run/react";
+import { Link, useLocation, useNavigationType, useParams } from "@remix-run/react";
 import { AI_MENTOR_PRACTICE_STATUSES } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
@@ -13,12 +13,18 @@ import Loader from "~/modules/common/Loader/Loader";
 
 import { AI_MENTOR_PRACTICE_HANDLES } from "../../../e2e/data/ai-mentor-practice/handles";
 
+import { PRACTICE_VOICE_ENTRY_STATE } from "./aiMentorPractice.constants";
 import { AiMentorPracticeConversation } from "./AiMentorPracticeConversation";
 import { AiMentorPracticeForm } from "./AiMentorPracticeForm";
 
 export default function AiMentorPracticePage() {
   const { t } = useTranslation();
   const { id = "new" } = useParams();
+  const { state } = useLocation();
+  const navigationType = useNavigationType();
+  const startInVoice =
+    navigationType === "PUSH" &&
+    state?.startPracticeInVoice === PRACTICE_VOICE_ENTRY_STATE.startPracticeInVoice;
   const isNew = id === "new";
   const { data: practice, isLoading, isError, refetch } = useAiMentorPractice(isNew ? "" : id);
   const { mutateAsync: retryPractice, isPending: isRetrying } = useRetryAiMentorPractice();
@@ -111,7 +117,9 @@ export default function AiMentorPracticePage() {
 
   return (
     <AiMentorPracticeConversation
+      key={practice.id}
       id={practice.id}
+      startInVoice={startInVoice}
       threadId={practice.threadId}
       threadStatus={practice.threadStatus}
       title={practice.title}

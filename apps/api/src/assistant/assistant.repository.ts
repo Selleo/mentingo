@@ -28,8 +28,9 @@ import type {
   AssistantPageInput,
   AssistantRunIdentity,
   AssistantRunCursor,
+  AssistantRunCheckpoint,
   AssistantRunUpdate,
-  AssistantSendResult,
+  AssistantSendOutcome,
 } from "./assistant.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -70,13 +71,22 @@ export class AssistantRepository {
     });
   }
 
-  private owner(user: CurrentUserType, threadId?: string) {
+  private owner(user: AssistantActorIdentity, threadId?: string) {
     return and(
       eq(assistantThreads.tenantId, user.tenantId),
       eq(assistantThreads.userId, user.userId),
       eq(assistantThreads.source, "mentingo"),
       threadId ? eq(assistantThreads.id, threadId) : undefined,
     );
+  }
+
+  async ownsThread(actor: AssistantActorIdentity, threadId: string): Promise<boolean> {
+    const [thread] = await this.db
+      .select({ id: assistantThreads.id })
+      .from(assistantThreads)
+      .where(this.owner(actor, threadId))
+      .limit(1);
+    return Boolean(thread);
   }
 
   async listThreads(
@@ -190,7 +200,7 @@ export class AssistantRepository {
     threadId: string,
     input: { clientMessageId: string; text: string; language: SupportedLanguages },
     origin: string,
-  ): Promise<AssistantSendResult> {
+  ): Promise<AssistantSendOutcome> {
     return this.tenantDbRunnerService.transaction(async () => {
       const [thread] = await this.db
         .select()
@@ -233,7 +243,7 @@ export class AssistantRepository {
             ),
           )
           .limit(1);
-        return { userMessage: existing, assistantMessage, run };
+        return { userMessage: existing, assistantMessage, run, created: false };
       }
       if (thread.archived) throw new ConflictException("assistant.archivedNotice");
       const [active] = await this.db
@@ -296,7 +306,7 @@ export class AssistantRepository {
           updatedAt: new Date(now).toISOString(),
         })
         .where(this.owner(user, threadId));
-      return { userMessage, assistantMessage, run };
+      return { userMessage, assistantMessage, run, created: true };
     });
   }
 
@@ -346,7 +356,10 @@ export class AssistantRepository {
     );
   }
 
-  async updateRun(input: AssistantRunIdentity, update: AssistantRunUpdate) {
+  async updateRun(
+    input: AssistantRunIdentity,
+    update: AssistantRunUpdate,
+  ): Promise<AssistantRunCheckpoint> {
     return this.tenantDbRunnerService.runWithTenantTransaction(input.tenantId, async () => {
       const [run] = await this.db
         .select()
@@ -358,8 +371,8 @@ export class AssistantRepository {
         run.status !== ASSISTANT_RUN_STATUSES.PENDING &&
         run.status !== ASSISTANT_RUN_STATUSES.RUNNING
       )
-        return run;
-      const now = new Date().toISOString();
+        return { run, message: undefined };
+      const now = new Date(Math.max(Date.now(), Date.parse(run.updatedAt) + 1)).toISOString();
       const sources = update.sources
         ? [
             ...new Map(
@@ -390,7 +403,7 @@ export class AssistantRepository {
         update.status === ASSISTANT_RUN_STATUSES.COMPLETED
           ? ASSISTANT_MESSAGE_STATUSES.COMPLETE
           : update.status;
-      await this.db
+      const [message] = await this.db
         .update(assistantMessages)
         .set({
           status: messageStatus,
@@ -404,7 +417,8 @@ export class AssistantRepository {
             eq(assistantMessages.threadId, run.threadId),
             eq(assistantMessages.id, run.assistantMessageId),
           ),
-        );
+        )
+        .returning();
       await this.db
         .update(assistantThreads)
         .set({ updatedAt: now })
@@ -415,7 +429,7 @@ export class AssistantRepository {
             eq(assistantThreads.id, run.threadId),
           ),
         );
-      return updated;
+      return { run: updated, message };
     });
   }
 

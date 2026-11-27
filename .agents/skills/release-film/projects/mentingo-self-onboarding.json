@@ -1798,7 +1798,8 @@
           "actions": [
             "Open an empty base-language curriculum and its AI generation action.",
             "Enter a realistic learning brief and optionally attach a synthetic source document.",
-            "Follow progress, then review the generated chapters and lessons."
+            "Follow progress, then review the generated chapters and lessons.",
+            "When the generated lesson includes a podcast, play it inline during review."
           ],
           "outcomes": [
             "The generated curriculum is available for normal creator editing."
@@ -4967,10 +4968,12 @@
             "ai-mentor"
           ],
           "specPaths": [
-            "docs/specs/ai-mentor-lessons-business-spec.md"
+            "docs/specs/ai-mentor-lessons-business-spec.md",
+            "docs/specs/personal-dashboard-business-spec.md"
           ],
           "watchPaths": [
             "apps/web/app/modules/AiMentorPractice/**",
+            "apps/web/app/modules/Dashboard/Home/widgets/student-ai-mentor-practice.tsx",
             "apps/api/src/ai/**"
           ],
           "goal": "Use voice in mentor practice.",
@@ -4979,7 +4982,7 @@
             "A synthetic microphone/media fixture and isolated voice provider are available; no real microphone recording."
           ],
           "actions": [
-            "Open voice mode in a prepared practice.",
+            "Select the voice action on the dashboard’s prepared practice card and open the same attempt in full-screen voice mode.",
             "Grant only the test browser's microphone fixture and speak the staged response.",
             "Inspect the transcript and mentor reply, then return to text mode."
           ],

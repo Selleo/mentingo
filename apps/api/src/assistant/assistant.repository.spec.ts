@@ -44,7 +44,7 @@ describe("Assistant durable progress", () => {
     set = jest.fn((patch) => ({
       where: () => ({ returning: async () => [{ ...current, ...patch }] }),
     }));
-    runWithTenantTransaction = jest.fn((_tenantId, callback) => callback());
+    runWithTenantTransaction = jest.fn(async (_tenantId, callback) => callback());
     repository = new AssistantRepository(
       { select: () => query, update: () => ({ set }) } as never,
       { runWithTenantTransaction } as never,
@@ -60,7 +60,7 @@ describe("Assistant durable progress", () => {
       status,
       activity: ASSISTANT_RUN_ACTIVITIES.WRITING,
     });
-    expect(result.activity).toBeNull();
+    expect(result.run.activity).toBeNull();
     expect(set.mock.calls[0][0]).toEqual(expect.objectContaining({ status, activity: null }));
     expect(runWithTenantTransaction).toHaveBeenCalledWith(identity.tenantId, expect.any(Function));
   });
@@ -73,7 +73,7 @@ describe("Assistant durable progress", () => {
     current = { ...current, status, activity: null };
     await expect(
       repository.updateRun(identity, { activity: ASSISTANT_RUN_ACTIVITIES.WRITING }),
-    ).resolves.toEqual(current);
+    ).resolves.toEqual({ run: current, message: undefined });
     expect(set).not.toHaveBeenCalled();
   });
 
@@ -85,6 +85,16 @@ describe("Assistant durable progress", () => {
     set.mockClear();
     await repository.updateRun(identity, { text: "Final reply", messageSources: [] });
     expect(set.mock.calls[1][0].sources).toEqual([]);
+  });
+
+  it("returns the persisted checkpoint message for the service to broadcast", async () => {
+    const result = await repository.updateRun(identity, {
+      text: "Saved reply",
+      status: ASSISTANT_RUN_STATUSES.RUNNING,
+    });
+
+    expect(result.message).toEqual(expect.objectContaining({ text: "Saved reply" }));
+    expect(result.run.status).toBe(ASSISTANT_RUN_STATUSES.RUNNING);
   });
 
   it("persists real activity for an active run without changing its status", async () => {
@@ -124,7 +134,7 @@ describe("Assistant durable progress", () => {
           status: ASSISTANT_RUN_STATUSES.FAILED,
           errorCode: ASSISTANT_RUN_ERROR_CODES.WORKFLOW_FAILED,
         }),
-      ).resolves.toEqual(current);
+      ).resolves.toEqual({ run: current, message: undefined });
       expect(set).not.toHaveBeenCalled();
     },
   );

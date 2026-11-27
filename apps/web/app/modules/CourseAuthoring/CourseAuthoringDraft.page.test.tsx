@@ -75,7 +75,7 @@ describe("AI course draft route", () => {
 
     expect(await screen.findByText("session-a")).toBeInTheDocument();
     expect(mockOpen).toHaveBeenCalledTimes(1);
-    expect(mockSnapshot).toHaveBeenCalledWith("draft-a", "session-a", 5000);
+    expect(mockSnapshot).toHaveBeenCalledWith("draft-a", "session-a");
   });
 
   it("offers a retry and reuses the same creation command after an interrupted request", async () => {

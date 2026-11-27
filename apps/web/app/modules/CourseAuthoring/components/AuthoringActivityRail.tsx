@@ -20,6 +20,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 
+import { canOmitAuthoringAsset } from "../authoringAssetOmission";
 import { parseFetchedResearchSources } from "../authoringSources";
 import {
   authoringTaskFailureLabel,
@@ -1368,12 +1369,17 @@ export const AuthoringActivityRail = ({
                   key={asset.taskId}
                   asset={asset}
                   omitted={
-                    !asset.request.required &&
+                    canOmitAuthoringAsset(asset) &&
                     omittedOptionalAssetIds.includes(asset.request.assetId)
                   }
                   busy={busy}
                   onRetry={() => {
                     if (asset.action) onAssetAction(asset, asset.action);
+                    else if (
+                      asset.request.purpose === "podcast" &&
+                      asset.status === AUTHORING_TASK_STATUS.FAILED
+                    )
+                      onRetry(asset.taskId);
                   }}
                   onSkip={() => onSkipAsset(asset.request.assetId)}
                   onRestore={() => onRestoreAsset?.(asset.request.assetId)}

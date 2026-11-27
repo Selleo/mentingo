@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
+  RichTextAuthoringAssetUrlsContext,
   RichTextContentPolicyContext,
   RichTextMediaUrlsContext,
 } from "~/components/RichText/contentPolicyContext";
@@ -111,9 +112,11 @@ export const AuthoringMediaPolicyProvider = ({
   );
   return (
     <RichTextMediaUrlsContext.Provider value={policy.urls}>
-      <RichTextContentPolicyContext.Provider value={filter}>
-        {children}
-      </RichTextContentPolicyContext.Provider>
+      <RichTextAuthoringAssetUrlsContext.Provider value={assetPreviewUrls ?? null}>
+        <RichTextContentPolicyContext.Provider value={filter}>
+          {children}
+        </RichTextContentPolicyContext.Provider>
+      </RichTextAuthoringAssetUrlsContext.Provider>
     </RichTextMediaUrlsContext.Provider>
   );
 };

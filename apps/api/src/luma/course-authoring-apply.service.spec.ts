@@ -669,6 +669,53 @@ describe("CourseAuthoringApplyService reviewed assessment guard", () => {
     expect(patch.description).toContain("<figcaption>Data flow</figcaption>");
     expect(patch.description).not.toContain("&lt;h2");
   });
+  it.each([true, false])(
+    "applies generated lesson audio only with a ready podcast (ready=%s)",
+    async (ready) => {
+      const test = setup();
+      const assetId = "00000000-0000-4000-8000-000000000093";
+      test.input.operations = [
+        {
+          type: "lesson.create",
+          operationId,
+          targetId: operationId,
+          chapterId,
+          baselineHash: null,
+          language: "en",
+          dependencies: [],
+          payload: {
+            lessonType: "content",
+            title: "Two views",
+            description: `<p>Compare these perspectives.</p><audio data-node-type="audio" data-authoring-asset-id="${assetId}" src="authoring-asset:${assetId}" data-name="Two views"></audio>`,
+          },
+        },
+      ];
+      if (!ready) {
+        await expect(test.service.applyPreparedExport(test.input, actor)).rejects.toThrow(
+          "courseAuthoring.errors.mediaOutsideCourse",
+        );
+        expect(test.createLessonResources).not.toHaveBeenCalled();
+        expect(test.updateLesson).not.toHaveBeenCalled();
+        return;
+      }
+
+      test.input.assetMappings = { [assetId]: "podcasts/episode.mp3" };
+      test.input.assetMimeTypes = { [assetId]: "audio/mpeg" };
+      test.input.audioDurations = { [assetId]: 240 };
+      await test.service.applyPreparedExport(test.input, actor);
+
+      const description = test.updateLesson.mock.calls[0][1].description;
+      const html = loadHtml(description);
+      expect(html("p").first().text()).toBe("Compare these perspectives.");
+      expect(html("audio").attr("src")).toBe(`/api/lesson/lesson-resource/${lessonId}`);
+      expect(test.createLessonResources).toHaveBeenCalledWith(operationId, [
+        expect.objectContaining({
+          contentType: "audio/mpeg",
+          metadata: expect.objectContaining({ durationSeconds: 240 }),
+        }),
+      ]);
+    },
+  );
   it("clears a quiz introduction without replacing its questions", async () => {
     const test = setup();
     test.input.operations = [

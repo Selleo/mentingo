@@ -867,6 +867,103 @@ describe("CourseGenerationSession proposal decisions", () => {
     expect(state.toastCalls).toHaveLength(0);
   });
 
+  it.each(["running", "failed", "succeeded"])(
+    "opens podcast review with a %s asset and applies only when audio is ready",
+    async (status) => {
+      state.groupedReview = true;
+      const podcast: AssetRequestView = {
+        assetId: "podcast",
+        operationId: "lesson-operation",
+        purpose: "podcast",
+        required: true,
+        altText: "Lesson discussion",
+        source: { type: "podcast", content: "Explore the trade-off" },
+      };
+      state.assetRequests = [podcast];
+      state.siblingTasks = [
+        {
+          taskId: "podcast-task",
+          requestId: "request-1",
+          kind: "asset",
+          status,
+          errorCode: null,
+          outputId: null,
+        },
+      ];
+      state.progressRecords = [
+        {
+          id: "podcast-record",
+          kind: "asset_task",
+          payload: { taskId: "podcast-task", parentTaskId: "task-1", request: podcast },
+        },
+        ...(status === "succeeded"
+          ? [
+              {
+                id: "podcast:1",
+                kind: "asset",
+                payload: { status: "ready", manifest: { assetId: "podcast" } },
+              },
+            ]
+          : []),
+      ];
+      const onPreviewProposalInCurriculum = vi.fn();
+      renderWith().render(
+        <CourseGenerationSession
+          courseId="course"
+          language="en"
+          sessionId="session"
+          embedded
+          onPreviewProposalInCurriculum={onPreviewProposalInCurriculum}
+        />,
+      );
+
+      const review = screen.getByRole("button", { name: "Review grouped changes" });
+      expect(review).toBeEnabled();
+      await userEvent.setup().click(review);
+      expect(onPreviewProposalInCurriculum).toHaveBeenCalledWith(
+        expect.objectContaining({
+          podcastAssets: [
+            {
+              assetId: "podcast",
+              operationId: "lesson-operation",
+              altText: "Lesson discussion",
+            },
+          ],
+        }),
+        expect.any(Object),
+      );
+      const actions = onPreviewProposalInCurriculum.mock.calls[0][1] as CurriculumPreviewActions;
+      const selection = {
+        acceptedProposalIds: ["content-proposal"],
+        rejectedProposalIds: [],
+        acknowledgeAssessmentChanges: false,
+      };
+      if (status === "succeeded") {
+        await act(async () => {
+          await actions.applyReview?.(selection);
+        });
+        expect(state.applyCalls[0]).toMatchObject({
+          proposalIds: ["content-proposal"],
+          omitOptionalAssetIds: [],
+        });
+      } else {
+        await expect(actions.applyReview?.(selection)).rejects.toThrow();
+        expect(state.applyCalls).toHaveLength(0);
+        if (status === "failed") {
+          await act(async () => {
+            await actions.retryPodcast?.("podcast");
+          });
+          expect(state.commandCalls).toContainEqual(
+            expect.objectContaining({
+              action: "task.retry",
+              targetId: "podcast-task",
+            }),
+          );
+        }
+      }
+    },
+  );
+
   it("opens later grouped review after an earlier application reaches applied", async () => {
     state.groupedReview = true;
     state.applicationResult = { exportId: "earlier-export", status: "applied" };
@@ -1336,7 +1433,7 @@ describe("CourseGenerationSession proposal decisions", () => {
     );
   });
 
-  it("refreshes authoring context and the session after an application is confirmed", async () => {
+  it("refreshes native authoring context without rereading the session after Apply", async () => {
     state.applicationResult = { exportId: "export-context-refresh", status: "applied" };
 
     renderWith().render(
@@ -1344,7 +1441,7 @@ describe("CourseGenerationSession proposal decisions", () => {
     );
 
     await waitFor(() => expect(state.contextRefetchCalls).toBe(1));
-    expect(state.refetchCalls).toBe(1);
+    expect(state.refetchCalls).toBe(0);
   });
 
   it("refreshes the curriculum after an unattended application appears in a restored session", async () => {
@@ -1361,7 +1458,7 @@ describe("CourseGenerationSession proposal decisions", () => {
     );
 
     await waitFor(() => expect(state.contextRefetchCalls).toBe(1));
-    expect(state.refetchCalls).toBe(1);
+    expect(state.refetchCalls).toBe(0);
   });
 
   it("keeps a confirmed application complete when authoring-context refresh fails", async () => {

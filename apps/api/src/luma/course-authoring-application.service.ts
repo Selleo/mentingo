@@ -14,10 +14,13 @@ import {
 import { ALLOWED_LESSON_IMAGE_FILE_TYPES, MAX_FILE_SIZE_BYTES } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { isAxiosError } from "axios";
+import { load } from "cheerio";
 import { v5 as uuidv5 } from "uuid";
 
+import { isRecord } from "src/common/utils/object.utils";
 import { FileGuard } from "src/file/guards/file.guard";
 import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
+import { validateAudioUpload } from "src/file/utils/validate-audio";
 import { IngestionProcessingService } from "src/ingestion/services/ingestion-processing.service";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { S3Service } from "src/s3/s3.service";
@@ -43,10 +46,14 @@ import type {
   CourseAuthoringAutonomousFence,
   CourseAuthoringReceiptJob,
 } from "./course-authoring.types";
-import type { AuthoringApplyStatus } from "./schema/course-authoring-application.schema";
+import type {
+  AuthoringApplyStatus,
+  FrozenAuthoringExport,
+} from "./schema/course-authoring-application.schema";
 import type {
   AuthoringCommandBody,
   AuthoringCommandReceiptResponse,
+  AuthoringSession,
   PrepareAuthoringExportBody,
 } from "./schema/course-authoring-session.schema";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -71,6 +78,90 @@ const selectionCommandId = (
     }),
     AUTHORING_SELECTION_NAMESPACE,
   );
+
+function plannedPodcasts(session: AuthoringSession, proposalIds: readonly string[]) {
+  const selection = new Set(proposalIds);
+  return session.records.flatMap(({ id, kind, payload }) => {
+    if (
+      kind !== "proposal" ||
+      !selection.has(typeof payload.id === "string" ? payload.id : id) ||
+      !Array.isArray(payload.assetRequests)
+    )
+      return [];
+    return payload.assetRequests.filter(
+      (request): request is { assetId: string; operationId: string } =>
+        isRecord(request) &&
+        request.purpose === "podcast" &&
+        typeof request.assetId === "string" &&
+        typeof request.operationId === "string",
+    );
+  });
+}
+
+/**
+ * Checks both planned placements and their frozen, downloadable podcast manifests. The producer
+ * only accepts omitting a podcast whose generation failed terminally; such a podcast must leave
+ * neither a manifest nor a placement behind.
+ */
+function validateFrozenPodcasts(
+  exported: FrozenAuthoringExport,
+  session: AuthoringSession,
+  omittedAssetIds: readonly string[] = [],
+) {
+  if ("deferredPodcasts" in exported && exported.deferredPodcasts !== undefined) {
+    const legacy = exported.deferredPodcasts;
+    if (!Array.isArray(legacy) || legacy.length)
+      throw new ConflictException("courseAuthoring.errors.assetNotReady");
+  }
+
+  const operationIds = new Set(exported.operations.map(({ operationId }) => operationId));
+  const podcastAssets = exported.assets.filter(({ role }) => role === "podcast");
+  const assetsById = new Map(podcastAssets.map((asset) => [asset.assetId, asset]));
+  if (assetsById.size !== podcastAssets.length)
+    throw new BadRequestException("courseAuthoring.errors.invalidOperations");
+
+  const omitted = new Set(omittedAssetIds);
+  for (const request of plannedPodcasts(session, exported.proposalIds)) {
+    if (omitted.has(request.assetId)) {
+      if (assetsById.has(request.assetId))
+        throw new BadRequestException("courseAuthoring.errors.invalidOperations");
+      continue;
+    }
+    if (
+      operationIds.has(request.operationId) &&
+      assetsById.get(request.assetId)?.operationId !== request.operationId
+    )
+      throw new ConflictException("courseAuthoring.errors.assetNotReady");
+  }
+
+  const placed = new Set<string>();
+  for (const operation of exported.operations) {
+    if (operation.type !== "lesson.create" && operation.type !== "lesson.update") continue;
+    const html = load(operation.payload.description);
+    for (const element of html("[data-authoring-asset-id]").toArray()) {
+      const node = html(element);
+      const assetId = node.attr("data-authoring-asset-id");
+      if (!assetId) continue;
+      const asset = assetsById.get(assetId);
+      const isAudio = node.is('audio[data-node-type="audio"]');
+      if (isAudio && !asset) throw new ConflictException("courseAuthoring.errors.assetNotReady");
+      if (!asset) continue;
+      if (
+        !isAudio ||
+        placed.has(assetId) ||
+        asset.operationId !== operation.operationId ||
+        asset.mimeType !== "audio/mpeg" ||
+        asset.byteSize === 0 ||
+        operation.payload.lessonType !== "content" ||
+        operation.language !== exported.language
+      )
+        throw new BadRequestException("courseAuthoring.errors.invalidOperations");
+      placed.add(assetId);
+    }
+  }
+  if (placed.size !== podcastAssets.length)
+    throw new BadRequestException("courseAuthoring.errors.invalidOperations");
+}
 
 @Injectable()
 /** Coordinates export preparation, asset staging, queued application, and receipt handoff. */
@@ -110,6 +201,7 @@ export class CourseAuthoringApplicationService {
     autonomousFence?: CourseAuthoringAutonomousFence,
   ): Promise<AuthoringApplyStatus> {
     const access = await this.sessions.getWithAccess(courseId, sessionId, actor);
+    const { snapshot: session } = access;
     if (access.draft?.courseId)
       throw new ConflictException("courseAuthoring.errors.selectionAlreadyApplied");
     const pendingReceipts = await this.receipts.pendingSessionReceipts(
@@ -161,7 +253,7 @@ export class CourseAuthoringApplicationService {
           }
         : {}),
     };
-    const exported = await client.authoring
+    const exported: unknown = await client.authoring
       .prepareExport({
         sessionId,
         request: exportRequest,
@@ -194,8 +286,13 @@ export class CourseAuthoringApplicationService {
         }
         throw new BadGatewayException("adminCourseView.toast.lumaServiceUnavailable");
       });
-    if (exported.courseId !== courseId || exported.sessionId !== sessionId)
+    if (
+      !Value.Check(frozenAuthoringExportSchema, exported) ||
+      exported.courseId !== courseId ||
+      exported.sessionId !== sessionId
+    )
       throw new BadGatewayException("courseAuthoring.errors.invalidServiceResponse");
+    validateFrozenPodcasts(exported, session, omitOptionalAssetIds);
     const queue = this.queue.getQueue(QUEUE_NAMES.COURSE_AUTHORING_APPLY);
     const jobId = `${actor.tenantId}-${exported.exportId}`;
     const existingJob = await queue.getJob(jobId);
@@ -220,6 +317,7 @@ export class CourseAuthoringApplicationService {
         exportId: exported.exportId,
         actor,
         acknowledgeAssessmentChanges: input.acknowledgeAssessmentChanges,
+        ...(omitOptionalAssetIds.length ? { omittedAssetIds: omitOptionalAssetIds } : {}),
         ...(access.draft ? { draftCourseId: access.draft.id } : {}),
       },
       {
@@ -381,15 +479,15 @@ export class CourseAuthoringApplicationService {
 
   /** Downloads and verifies a frozen export before applying it and recording its receipt. */
   async process(data: CourseAuthoringApplyJob) {
-    const { actor, draft } = await this.sessions.getWithAccess(
-      data.courseId,
-      data.sessionId,
-      data.actor,
-    );
+    const {
+      actor,
+      draft,
+      snapshot: session,
+    } = await this.sessions.getWithAccess(data.courseId, data.sessionId, data.actor);
     if ((draft?.id ?? undefined) !== data.draftCourseId)
       throw new ForbiddenException("common.toast.noAccess");
     const client = await this.luma.getLumaClient();
-    const exported = await client.authoring.getExport({
+    const exported: unknown = await client.authoring.getExport({
       sessionId: data.sessionId,
       exportId: data.exportId,
     });
@@ -407,6 +505,7 @@ export class CourseAuthoringApplicationService {
     );
     if (courseCreate !== Boolean(draft) || (courseCreate && exported.operations.length !== 1))
       throw new BadRequestException("courseAuthoring.errors.invalidOperations");
+    validateFrozenPodcasts(exported, session, data.omittedAssetIds);
     const existing = await this.receipts.findReceipt(data.courseId, data.exportId, actor.tenantId);
     if (existing && existing.status !== "applied")
       throw new ConflictException(existing.reason ?? "courseAuthoring.errors.applicationFailed");
@@ -414,6 +513,7 @@ export class CourseAuthoringApplicationService {
       throw new ConflictException("courseAuthoring.errors.exportChanged");
     const assets: Record<string, string> = {};
     const assetMimeTypes: Record<string, string> = {};
+    const audioDurations: Record<string, number> = {};
     const preparedDocumentIds: Record<string, string[]> = {};
     if (!existing)
       for (const asset of exported.assets) {
@@ -476,10 +576,18 @@ export class CourseAuthoringApplicationService {
           ];
           continue;
         }
-        await FileGuard.validateFile(file, {
-          allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
-          maxSize: MAX_FILE_SIZE_BYTES,
-        });
+        if (asset.role === "podcast") {
+          file.originalname = `${asset.assetId}.mp3`;
+          const audio = await validateAudioUpload(file);
+          if (audio.contentType !== "audio/mpeg")
+            throw new BadRequestException("courseAuthoring.errors.invalidOperations");
+          audioDurations[asset.assetId] = audio.durationSeconds;
+        } else {
+          await FileGuard.validateFile(file, {
+            allowedTypes: ALLOWED_LESSON_IMAGE_FILE_TYPES,
+            maxSize: MAX_FILE_SIZE_BYTES,
+          });
+        }
         const key = prefixTenantStorageKey(
           `course-authoring/${data.sessionId}/${asset.assetId}/${asset.revision}/${asset.sha256}`,
           actor.tenantId,
@@ -548,6 +656,7 @@ export class CourseAuthoringApplicationService {
       assetMappings: assets,
       preparedDocumentIds,
       assetMimeTypes,
+      audioDurations,
       acknowledgeAssessmentChanges: data.acknowledgeAssessmentChanges,
     };
     const receipt =

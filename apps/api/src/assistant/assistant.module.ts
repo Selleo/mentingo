@@ -5,7 +5,9 @@ import { McpModule } from "src/mcp/mcp.module";
 import { PermissionsModule } from "src/permissions/permissions.module";
 
 import { AssistantExecutionService } from "./assistant-execution.service";
+import { AssistantRealtimeService } from "./assistant-realtime.service";
 import { AssistantController } from "./assistant.controller";
+import { AssistantGateway } from "./assistant.gateway";
 import { AssistantRepository } from "./assistant.repository";
 import { AssistantService } from "./assistant.service";
 import { AssistantRuntimeService } from "./workflow/assistant-runtime.service";
@@ -15,6 +17,8 @@ import { AssistantRuntimeService } from "./workflow/assistant-runtime.service";
   controllers: [AssistantController],
   providers: [
     AssistantRepository,
+    AssistantRealtimeService,
+    AssistantGateway,
     AssistantExecutionService,
     AssistantRuntimeService,
     AssistantService,

@@ -4,6 +4,7 @@ import { isEqual } from "lodash-es";
 
 import { toPlainTextPreview } from "~/components/RichText/viewer.utils";
 
+import { isTerminalAuthoringTaskFailure } from "./authoringTaskFailure";
 import {
   AUTHORING_APPLICATION_STATUS,
   AUTHORING_ASSET_SOURCE_TYPE,
@@ -82,6 +83,7 @@ const assetPurposes = new Set<AssetRequestView["purpose"]>([
   "diagram",
   "avatar",
   "signature",
+  "podcast",
 ]);
 
 /** Projects one generated or source-image visual request from a durable record. */
@@ -102,6 +104,19 @@ const parseAssetRequest = (value: unknown): AssetRequestView | null => {
     !isObject(source)
   ) {
     return null;
+  }
+  if (source.type === AUTHORING_ASSET_SOURCE_TYPE.PODCAST && purpose === "podcast") {
+    const content = stringValue(source.content);
+    return content
+      ? {
+          assetId,
+          operationId,
+          purpose,
+          required: value.required,
+          altText,
+          source: { type: source.type, content },
+        }
+      : null;
   }
   if (source.type === AUTHORING_ASSET_SOURCE_TYPE.GENERATED) {
     const content = stringValue(source.content);
@@ -802,6 +817,7 @@ const parseAssetTask = (
     question: question ? stringValue(question.payload.question) : null,
     action: action === "asset.retry_submission" ? action : null,
     ready: readyAssetIds.has(request.assetId),
+    terminalFailure: task ? isTerminalAuthoringTaskFailure(task) : false,
   };
 };
 

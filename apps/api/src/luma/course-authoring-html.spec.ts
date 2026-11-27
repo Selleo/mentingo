@@ -90,3 +90,18 @@ it("removes automatic CSS requests while preserving ordinary content", () => {
   expect(stripAuthoringHtmlStyles(html)).toBe("<p>Introduction</p>");
   expect(stripAuthoringHtmlStyles("<p>Introduction</p>")).toBe("<p>Introduction</p>");
 });
+
+it("requires a staged podcast reference for authoring audio and rejects blob URLs", () => {
+  const assetId = "11111111-1111-4111-8111-111111111111";
+  const marker = `<audio data-node-type="audio" data-authoring-asset-id="${assetId}" src="authoring-asset:${assetId}"></audio>`;
+  expect(() => validateAuthoringHtml(marker)).not.toThrow();
+  expect(() =>
+    validateAuthoringMedia(marker, new Set(), new Set(), new Set([assetId])),
+  ).not.toThrow();
+  expect(() => validateAuthoringMedia(marker, new Set(), new Set(), new Set())).toThrow(
+    "courseAuthoring.errors.mediaOutsideCourse",
+  );
+  expect(() =>
+    validateAuthoringHtml(marker.replace(`authoring-asset:${assetId}`, "blob:malicious")),
+  ).toThrow("courseAuthoring.errors.invalidOperations");
+});

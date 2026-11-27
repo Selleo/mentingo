@@ -1069,20 +1069,39 @@ export class CourseAuthoringApplyService {
       const node = $(element);
       const assetId = node.attr("data-authoring-asset-id");
       if (!assetId) throw new BadRequestException("courseAuthoring.errors.assetNotReady");
+      const durationSeconds = input.audioDurations?.[assetId];
+      const isAudio = node.is('audio[data-node-type="audio"]');
+      if (
+        isAudio !== (durationSeconds !== undefined) ||
+        (isAudio && input.assetMimeTypes[assetId] !== "audio/mpeg") ||
+        (!isAudio && !ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(input.assetMimeTypes[assetId]))
+      )
+        throw new BadRequestException("courseAuthoring.errors.invalidOperations");
       const [resource] = await this.lessonRepository.createLessonResources(lessonId, [
         {
           reference: this.assetKey(assetId, input),
           contentType: input.assetMimeTypes[assetId],
           uploadedById: actor.userId,
-          metadata: { authoringAssetId: assetId, exportId: input.exportId },
+          metadata: {
+            authoringAssetId: assetId,
+            exportId: input.exportId,
+            ...(durationSeconds === undefined ? {} : { durationSeconds }),
+          },
         },
       ]);
-      const replacement = $("<div></div>");
-      replacement
-        .attr("data-node-type", "image")
-        .attr("data-src", `/api/lesson/lesson-resource/${resource.id}`)
-        .attr("data-resource-id", resource.id)
-        .attr("data-alt", node.attr("alt") ?? "");
+      const resourceUrl = `/api/lesson/lesson-resource/${resource.id}`;
+      const replacement = isAudio
+        ? $("<audio></audio>")
+            .attr("data-node-type", "audio")
+            .attr("src", resourceUrl)
+            .attr("data-name", node.attr("data-name") ?? "")
+            .attr("controls", "")
+            .attr("preload", "metadata")
+        : $("<div></div>")
+            .attr("data-node-type", "image")
+            .attr("data-src", resourceUrl)
+            .attr("data-alt", node.attr("alt") ?? "");
+      replacement.attr("data-resource-id", resource.id);
       const blockId = node.attr("data-authoring-block-id");
       if (blockId) replacement.attr("data-authoring-block-id", blockId);
       node.replaceWith(replacement);

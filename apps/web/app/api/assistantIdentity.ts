@@ -36,14 +36,18 @@ const subscribe = (listener: () => void) => {
   };
 };
 
-/** A validated cookie session is authoritative even if the persisted UI login flag is false. */
-export function useAssistantScope() {
-  const { data: actor } = useCurrentUser();
-  useSyncExternalStore(
+export function useAssistantSessionGeneration() {
+  return useSyncExternalStore(
     subscribe,
     () => generation,
     () => 0,
   );
+}
+
+/** A validated cookie session is authoritative even if the persisted UI login flag is false. */
+export function useAssistantScope() {
+  const { data: actor } = useCurrentUser();
+  useAssistantSessionGeneration();
   return actor ? currentAssistantScope() : undefined;
 }
 

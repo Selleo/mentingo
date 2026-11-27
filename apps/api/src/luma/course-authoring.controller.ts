@@ -192,7 +192,7 @@ export class CourseAuthoringController {
 
   @Get("sessions/:sessionId/assets/:assetId")
   @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
-  @ApiProduces("image/png", "image/jpeg", "image/webp", "image/gif")
+  @ApiProduces("image/png", "image/jpeg", "image/webp", "image/gif", "audio/mpeg")
   @ApiOkResponse({ schema: { type: "string", format: "binary" } })
   @Validate({
     request: [

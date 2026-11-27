@@ -29,7 +29,12 @@ import type { OnGatewayDisconnect } from "@nestjs/websockets";
 import type { Socket } from "socket.io";
 
 const joinSchema = Type.Object(
-  { courseId: UUIDSchema, sessionId: UUIDSchema, afterSequence: Type.Integer({ minimum: 0 }) },
+  {
+    courseId: UUIDSchema,
+    sessionId: UUIDSchema,
+    afterSequence: Type.Integer({ minimum: 0 }),
+    hasSnapshot: Type.Optional(Type.Boolean()),
+  },
   { additionalProperties: false },
 );
 const leaveSchema = Type.Object({ sessionId: UUIDSchema }, { additionalProperties: false });
@@ -78,13 +83,30 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
             tenantId: actor.tenantId,
             cursor: snapshot.snapshotSequence,
             members: new Map(),
+            deltaMembers: new Set(),
             abort: new AbortController(),
           };
           this.subscriptions.set(key, subscription);
         }
         await socket.join(`course-authoring:${key}`);
         subscription.members.set(socket.id, socket);
-        this.emit(socket, "authoring.snapshot", snapshot);
+        if (payload.hasSnapshot) subscription.deltaMembers.add(socket.id);
+        else subscription.deltaMembers.delete(socket.id);
+
+        if (
+          payload.hasSnapshot &&
+          snapshot.courseId === payload.courseId &&
+          payload.afterSequence === snapshot.snapshotSequence &&
+          subscription.cursor <= payload.afterSequence
+        ) {
+          this.emit(socket, "authoring.ready", {
+            courseId: payload.courseId,
+            sessionId: payload.sessionId,
+            afterSequence: payload.afterSequence,
+          });
+        } else {
+          this.emit(socket, "authoring.snapshot", snapshot);
+        }
         if (startStream) void this.consume(key, subscription);
         return {
           success: true,
@@ -124,6 +146,7 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
       const member = subscription.members.get(socketId);
       if (member) void member.leave(`course-authoring:${key}`);
       subscription.members.delete(socketId);
+      subscription.deltaMembers.delete(socketId);
       if (!subscription.members.size) {
         subscription.abort.abort();
         this.subscriptions.delete(key);
@@ -211,14 +234,14 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
                   return;
                 }
                 needsReconcile = true;
-                this.emitResync(subscription);
+                streamAbort.abort();
               },
             });
           });
           if (!subscription.abort.signal.aborted && !needsReconcile)
             this.logStreamIssue("disconnected", subscription, undefined, Date.now() - connectedAt);
         } catch (error) {
-          if (!subscription.abort.signal.aborted) {
+          if (!subscription.abort.signal.aborted && !streamAbort.signal.aborted) {
             if (this.isMissingSession(error))
               this.endSubscription(subscription, AUTHORING_SOCKET_ERROR.SESSION_NOT_FOUND);
             else if (this.isAccessError(error))
@@ -256,8 +279,6 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
   /** Rebuilds the shared cursor from a durable snapshot after a replay gap. */
   private async reconcile(subscription: CourseAuthoringSubscription): Promise<boolean> {
     if (subscription.abort.signal.aborted || !subscription.members.size) return false;
-    this.emitResync(subscription);
-
     let snapshot: Awaited<ReturnType<CourseAuthoringSessionService["get"]>> | undefined;
     for (const socket of [...subscription.members.values()]) {
       if (!(await this.authorizeMember(subscription, socket))) continue;
@@ -309,7 +330,8 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
           event &&
           typeof event === "object" &&
           "type" in event &&
-          event.type === "session.course_attached"
+          event.type === "session.course_attached" &&
+          !subscription.deltaMembers.has(socket.id)
         )
           this.emit(socket, "authoring.resync", { sessionId: subscription.sessionId });
       }
@@ -385,7 +407,7 @@ export class CourseAuthoringGateway implements OnGatewayDisconnect, OnModuleDest
     return AUTHORING_SOCKET_ERROR.JOIN_FAILED;
   }
 
-  /** Requests client-side snapshot refresh while the server repairs its cursor. */
+  /** Marks the stream as recovering while the gateway reloads the session snapshot. */
   private emitResync(subscription: CourseAuthoringSubscription) {
     for (const socket of subscription.members.values())
       this.emit(socket, "authoring.resync", { sessionId: subscription.sessionId });

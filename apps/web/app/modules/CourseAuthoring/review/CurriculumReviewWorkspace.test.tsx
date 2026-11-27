@@ -24,7 +24,7 @@ vi.mock("~/context/LeaveModalContext", () => ({
 }));
 
 import type { ReviewProposal } from "./curriculumReview.types";
-import type { CurriculumPreview } from "../courseAuthoring.types";
+import type { CurriculumPreview, CurriculumPreviewActions } from "../courseAuthoring.types";
 import type { Chapter } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 const chapters = [
@@ -98,6 +98,7 @@ const renderWorkspace = (
   applyReview = vi.fn().mockResolvedValue(undefined),
   reviewPreview = preview,
   refineBatch?: (feedbacks: Array<{ proposalId: string; feedback: string }>) => Promise<void>,
+  retryPodcast?: CurriculumPreviewActions["retryPodcast"],
 ) => {
   const onApplied = vi.fn();
   const onExit = vi.fn();
@@ -105,7 +106,7 @@ const renderWorkspace = (
     <CurriculumReviewWorkspace
       chapters={chapters}
       preview={reviewPreview}
-      actions={{ applyReview, ...(refineBatch ? { refineBatch } : {}) }}
+      actions={{ applyReview, ...(refineBatch ? { refineBatch } : {}), retryPodcast }}
       language="en"
       baseLanguage="en"
       onExit={onExit}
@@ -300,6 +301,81 @@ describe("CurriculumReviewWorkspace", () => {
       acknowledgeAssessmentChanges: false,
     });
     expect(onApplied).toHaveBeenCalled();
+  });
+
+  it.each(["running", "failed"] as const)(
+    "waits for a %s lesson podcast and offers retry for failure",
+    async (status) => {
+      const user = userEvent.setup();
+      const retryPodcast = vi.fn().mockResolvedValue(undefined);
+      const { applyReview } = renderWorkspace(
+        vi.fn().mockResolvedValue(undefined),
+        {
+          ...preview,
+          podcastAssets: [
+            { assetId: "pending-audio", operationId: "op-edit", altText: "Episode" },
+            { assetId: "ready-audio", operationId: "op-edit", altText: "Finished episode" },
+            { assetId: "unselected-audio", operationId: "elsewhere", altText: "Another episode" },
+          ],
+          podcastTasks: [
+            {
+              taskId: "podcast-task",
+              parentTaskId: "lesson-task",
+              request: {
+                assetId: "pending-audio",
+                operationId: "op-edit",
+                purpose: "podcast",
+                required: true,
+                altText: "Episode",
+                source: { type: "podcast", content: "Explore an instructional trade-off" },
+              },
+              status,
+              action: null,
+              revision: null,
+              question: null,
+              ready: false,
+              terminalFailure: false,
+            },
+          ],
+          readyAssetIds: ["ready-audio"],
+        },
+        undefined,
+        retryPodcast,
+      );
+      const apply = screen.getByTestId("course-authoring-review-apply");
+      expect(apply).toBeDisabled();
+      expect(screen.getByRole("button", { name: "Discard" })).toBeEnabled();
+      expect(screen.getByText("Episode")).toBeVisible();
+      expect(screen.queryByText("Finished episode")).not.toBeInTheDocument();
+      expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+      if (status === "failed") {
+        await user.click(screen.getByRole("button", { name: "Retry podcast" }));
+        expect(retryPodcast).toHaveBeenCalledWith("pending-audio");
+      } else {
+        expect(screen.queryByRole("button", { name: "Retry podcast" })).not.toBeInTheDocument();
+      }
+      await user.click(apply);
+      expect(applyReview).not.toHaveBeenCalled();
+    },
+  );
+
+  it("applies when the selected podcasts are ready", async () => {
+    const { applyReview } = renderWorkspace(vi.fn().mockResolvedValue(undefined), {
+      ...preview,
+      podcastAssets: [{ assetId: "ready-audio", operationId: "op-edit", altText: "Episode" }],
+      readyAssetIds: ["ready-audio"],
+    });
+
+    expect(
+      screen.queryByText("The podcast must be ready before you can apply the lesson."),
+    ).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByTestId("course-authoring-review-apply"));
+
+    expect(applyReview).toHaveBeenCalledWith({
+      acceptedProposalIds: ["p-edit", "p-delete"],
+      rejectedProposalIds: [],
+      acknowledgeAssessmentChanges: false,
+    });
   });
 
   it("describes outline approval as starting lesson drafting", async () => {

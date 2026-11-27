@@ -20,6 +20,7 @@ export const AI_MENTOR_PRACTICE_HANDLES = {
   WIDGET_GENERATING: "ai-mentor-practice-dashboard-generating",
   WIDGET_FAILED: "ai-mentor-practice-dashboard-failed",
   WIDGET_RETRY: "ai-mentor-practice-dashboard-retry",
+  WIDGET_VOICE_LINK: "ai-mentor-practice-dashboard-voice-link",
   WIDGET_MESSAGE_INPUT: "ai-mentor-practice-dashboard-message-input",
   CONTINUE_LINK: "ai-mentor-practice-continue-link",
 } as const;

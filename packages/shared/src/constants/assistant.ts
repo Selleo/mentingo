@@ -90,3 +90,42 @@ export const ASSISTANT_RUN_ERROR_CODES = {
   WORKFLOW_COMPLETION_NOT_SAVED: "WORKFLOW_COMPLETION_NOT_SAVED",
   WORKFLOW_UNAVAILABLE: "WORKFLOW_UNAVAILABLE",
 } as const;
+
+export const ASSISTANT_SOCKET_EVENTS = {
+  JOIN: "assistant:join",
+  LEAVE: "assistant:leave",
+  TRANSCRIPT_UPDATED: "assistant:transcript-updated",
+} as const;
+
+export type AssistantTranscriptUpdate = {
+  threadId: string;
+  run: {
+    id: string;
+    threadId: string;
+    status: AssistantRunStatus;
+    activity: AssistantRunActivity | null;
+    errorCode: string | null;
+    workflowRunId: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+  assistantMessage: AssistantTranscriptMessage;
+  userMessage?: AssistantTranscriptMessage;
+};
+
+type AssistantTranscriptMessage = {
+  id: string;
+  threadId: string;
+  role: AssistantMessageRole;
+  clientMessageId: string | null;
+  text: string;
+  status: AssistantMessageStatus;
+  sources: {
+    title: string;
+    url: string;
+    entityType?: AssistantSourceType;
+    description?: string;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+};

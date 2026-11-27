@@ -643,6 +643,7 @@
     "invalidOrder": "Pořadí úkolů již není aktuální. Obnovte stránku a zkuste to znovu."
   },
   "aiMentorPractice": {
+    "voiceEntryPrompt": "Spusťte hlasový režim a povolte přístup k mikrofonu, pokud vás o to prohlížeč požádá.",
     "form": {
       "title": "Procvičte si skutečný rozhovor.",
       "promptEyebrow": "Nastavte scénu",
@@ -7297,9 +7298,13 @@
       "unknown": "Neznámé",
       "generatedVisual": "Generovaný vizuál: {{content}}",
       "approveRetry": "Zkusit obrázek znovu",
+      "retryPodcast": "Zkusit podcast znovu",
+      "retryPodcastApproval": "Poskytovatel mohl předchozí požadavek přijmout. Další pokus může být zpoplatněn.",
       "requiredScopeChange": "Povinné: změna rozsahu",
       "skipOptionalAsset": "Přeskočit obrázek",
-      "requiredCannotSkip": "Tento obrázek je povinný a nelze ho přeskočit. Pokud ho nelze vytvořit, požádejte AI o úpravu návrhu, aby nebyl potřeba.",
+      "omitFailedPodcast": "Vynechat podcast",
+      "podcastFailedTerminal": "Tento podcast se nepodařilo vytvořit. Vynechte ho a použijte lekci bez něj, nebo požádejte AI o úpravu návrhu.",
+      "requiredCannotSkip": "Toto médium je povinné a nelze ho přeskočit. Pokud ho nelze vytvořit, požádejte AI o úpravu návrhu, aby nebylo potřeba.",
       "applicationHistory": "Použité změny",
       "apply": "Použít {{id}}",
       "applicationStatus": {
@@ -7456,8 +7461,8 @@
         "blockReplace": "Nahradit obsah lekce"
       },
       "unknownChange": "Změna kurzu",
-      "visualAssets": "Obrázky",
-      "visualAssetsDescription": "Před použitím zkontrolujte každý obrázek. Volitelné obrázky můžete vynechat. Povinné obrázky je třeba schválit, případně požádejte AI o úpravu návrhu.",
+      "visualAssets": "Média lekce",
+      "visualAssetsDescription": "Před použitím zkontrolujte každý obrázek a podcast. Volitelná média můžete vynechat. Povinná média je třeba schválit, případně požádejte AI o úpravu návrhu.",
       "selected": "Vybráno: {{count}}",
       "ready": "Připraveno",
       "omitted": "Vynecháno",
@@ -7465,6 +7470,7 @@
       "purpose": "Účel: {{value}}",
       "unknownPurpose": "Neuvedeno",
       "purposes": {
+        "podcast": "Podcast",
         "thumbnail": "Náhled",
         "lesson": "Lekce",
         "diagram": "Schéma",
@@ -7476,9 +7482,10 @@
         "identified": "Identifikováno",
         "unknown": "Neznámé"
       },
+      "podcastNotReady": "Před použitím lekce musí být podcast připraven.",
       "omitOptionalAsset": "Vynechat volitelný prvek {{title}}",
       "omit": "Vynechat",
-      "requiredAssetNotReady": "Povinný obrázek není připravený. Schvalte ho nebo zopakujte v panelu aktivity, případně požádejte AI o úpravu návrhu.",
+      "requiredAssetNotReady": "Povinný obrázek nebo podcast není připravený. Schvalte ho nebo zopakujte v panelu aktivity, případně požádejte AI o úpravu návrhu.",
       "incompletePreview": "Chybí některé změny, na kterých tento náhled závisí. Obsah si můžete prohlédnout, ale použít ho půjde až po jejich doplnění. Chybějící změny:",
       "optionalAssetOmitHint": "Zvolte „Vynechat“ a použijte text bez tohoto volitelného vizuálního prvku.",
       "savingPreviousChanges": "Ukládání předchozích změn do pracovního prostoru AI",
