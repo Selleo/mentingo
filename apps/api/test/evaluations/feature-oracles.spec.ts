@@ -351,7 +351,12 @@ describe("task-specific Core oracle regression contracts", () => {
     const { request } = prepareFeaturePrompt(disengagement);
     expect(request.messages[0].content).toContain("<conduct_boundaries>");
     expect(request.messages[0].content).toContain("stay disengaged in later turns");
-    expect(disengagement.input.task.messages?.some(({ role }) => role === "system")).toBe(false);
+    expect(
+      request.messages.filter(
+        ({ role, content }) =>
+          role === "system" && content.includes("stay disengaged in later turns"),
+      ),
+    ).toEqual([request.messages[0]]);
     expect(disengagement.input.task.variables).not.toHaveProperty("blockingError");
     expect(disengagement.input.task.variables).not.toHaveProperty("assessmentConfiguration");
   });
