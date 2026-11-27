@@ -53,6 +53,8 @@ export const allUsersSchema = Type.Array(
           name: Type.String(),
         }),
       ),
+      isDirectoryManaged: Type.Boolean(),
+      isRoleOverridden: Type.Boolean(),
     }),
   ]),
 );
@@ -71,6 +73,8 @@ export const userSchema = Type.Composite([
   Type.Object({
     profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
     roleSlugs: Type.Array(Type.String()),
+    isDirectoryManaged: Type.Boolean(),
+    isRoleOverridden: Type.Boolean(),
     groups: Type.Array(
       Type.Object({
         id: UUIDSchema,

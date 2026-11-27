@@ -1856,6 +1856,20 @@
       "when": 1795790862028,
       "tag": "0264_add_calendar_subscription_resource_id",
       "breakpoints": true
+    },
+    {
+      "idx": 265,
+      "version": "7",
+      "when": 1795794338302,
+      "tag": "0265_add_directory_sync",
+      "breakpoints": true
+    },
+    {
+      "idx": 266,
+      "version": "7",
+      "when": 1795794348173,
+      "tag": "0266_enable_directory_sync_rls",
+      "breakpoints": true
     }
   ]
 }

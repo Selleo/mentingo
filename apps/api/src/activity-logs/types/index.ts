@@ -189,6 +189,7 @@ export type UserActivityLogSnapshot = {
   lastName?: string | null;
   email?: string | null;
   role?: string | null;
+  roleSlugs?: string[];
   archived?: boolean | null;
   groups?: Array<{ id: UUIDType; name?: string | null }>;
   managedGroups?: Array<{ id: UUIDType; name?: string | null }>;

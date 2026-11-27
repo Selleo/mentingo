@@ -11,6 +11,8 @@ import {
 } from "@nestjs/common";
 import {
   AUTOMATION_EVENT_KINDS,
+  DIRECTORY_SYNC_CHANGE_SOURCE,
+  DIRECTORY_SYNC_ERROR_KEYS,
   OnboardingPages,
   PERMISSIONS,
   SESSION_REVOCATION_SOCKET,
@@ -68,11 +70,13 @@ import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
+import { UserDirectoryManagementRepository } from "src/user/repositories/user-directory-management.repository";
 import { UserLimitService } from "src/user/services/user-limit.service";
 import {
   USER_CREATION_FLOW_TYPE,
   type CreateUserContext,
   type CreateUserCoreResult,
+  type UpdateUserOptions,
 } from "src/user/user.types";
 import { WsGateway } from "src/websocket/websocket.gateway";
 
@@ -87,6 +91,7 @@ import {
   permissionRuleSets,
   permissionUserRoles,
   userDetails,
+  userExternalIdentities,
   users,
   settings,
   tenants,
@@ -157,6 +162,7 @@ export class UserService {
     @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
     private readonly notificationAccountActionService: NotificationAccountActionService,
     private readonly userLimitService: UserLimitService,
+    private readonly userDirectoryManagementRepository: UserDirectoryManagementRepository,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -186,8 +192,16 @@ export class UserService {
           undefined,
           groups,
         )})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as("groups"),
+        isDirectoryManaged: sql<boolean>`bool_or(${userExternalIdentities.id} IS NOT NULL)`.as(
+          "isDirectoryManaged",
+        ),
+        isRoleOverridden:
+          sql<boolean>`COALESCE(bool_or(${userExternalIdentities.rolesOverridden}), false)`.as(
+            "isRoleOverridden",
+          ),
       })
       .from(users)
+      .leftJoin(userExternalIdentities, eq(users.id, userExternalIdentities.userId))
       .leftJoin(
         permissionUserRoles,
         and(
@@ -296,9 +310,17 @@ export class UserService {
           sql<boolean>`COALESCE(bool_or(${credentials.requiresPasswordChange}), false)`.as(
             "requiresPasswordChange",
           ),
+        isDirectoryManaged: sql<boolean>`bool_or(${userExternalIdentities.id} IS NOT NULL)`.as(
+          "isDirectoryManaged",
+        ),
+        isRoleOverridden:
+          sql<boolean>`COALESCE(bool_or(${userExternalIdentities.rolesOverridden}), false)`.as(
+            "isRoleOverridden",
+          ),
       })
       .from(users)
       .leftJoin(credentials, eq(users.id, credentials.userId))
+      .leftJoin(userExternalIdentities, eq(users.id, userExternalIdentities.userId))
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .leftJoin(groupManagerGroups, eq(users.id, groupManagerGroups.managerUserId))
@@ -400,7 +422,14 @@ export class UserService {
     };
   }
 
-  public async updateUser(id: UUIDType, data: UpdateUserBody, actor?: CurrentUserType) {
+  public async updateUser(
+    id: UUIDType,
+    data: UpdateUserBody,
+    actor?: CurrentUserType,
+    options: UpdateUserOptions = {},
+  ) {
+    const isDirectorySyncChange = options.source === DIRECTORY_SYNC_CHANGE_SOURCE;
+
     const [existingUser] = await this.db
       .select()
       .from(users)
@@ -449,6 +478,10 @@ export class UserService {
         await this.userLimitService.syncTenantUserCapacityAlert(updatedUser.tenantId, trx);
       }
 
+      if (existingUser.users.archived !== updatedUser.archived && !isDirectorySyncChange) {
+        await this.userDirectoryManagementRepository.clearArchivedByDirectorySync([id], trx);
+      }
+
       const { avatarReference, ...userWithoutAvatar } = updatedUser;
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
 
@@ -463,6 +496,10 @@ export class UserService {
         await this.replaceUserRoleAssignments(id, existingUser.users.tenantId, roleSlugs, trx);
       }
 
+      if (actor && rolesChanged && !isDirectorySyncChange) {
+        await this.userDirectoryManagementRepository.markRolesOverridden([id], trx);
+      }
+
       if (data.managedGroupIds !== undefined || managedGroupsChanged) {
         await this.replaceManagedGroupAssignments(
           id,
@@ -470,6 +507,10 @@ export class UserService {
           nextManagedGroupIds,
           trx,
         );
+      }
+
+      if (rolesChanged || existingUser.users.archived !== updatedUser.archived) {
+        await this.assertActiveAdminRemains(trx);
       }
 
       const updatedSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
@@ -484,6 +525,7 @@ export class UserService {
             actor,
             previousUserData: previousSnapshot,
             updatedUserData: updatedSnapshot,
+            source: options.source,
           }),
           trx,
         );
@@ -655,6 +697,8 @@ export class UserService {
       throw new BadRequestException("You cannot delete your own account");
     }
 
+    await this.assertUsersNotSyncedFromDirectory([id]);
+
     const [userToDelete] = await this.db
       .select({ id: users.id })
       .from(users)
@@ -717,6 +761,8 @@ export class UserService {
     if (ids.includes(actor.userId)) {
       throw new BadRequestException("You cannot delete yourself");
     }
+
+    await this.assertUsersNotSyncedFromDirectory(ids);
 
     const usersToDelete = await this.db
       .select({ id: users.id })
@@ -795,6 +841,19 @@ export class UserService {
 
       const { createdUser, newUsersLanguage } = await this.createUserCore(trx, data, context);
       if (context.flowType === USER_CREATION_FLOW_TYPE.REGISTRATION) return createdUser;
+      if (context.flowType === USER_CREATION_FLOW_TYPE.DIRECTORY_SYNC) {
+        await this.outboxPublisher.publish(
+          new CreateUserEvent({
+            userId: createdUser.id,
+            actor: context.creator,
+            createdUserData: await this.buildUserActivitySnapshot(createdUser.id, trx),
+            source: DIRECTORY_SYNC_CHANGE_SOURCE,
+          }),
+          trx,
+        );
+
+        if (!context.sendWelcomeEmail) return createdUser;
+      }
       if (context.flowType === USER_CREATION_FLOW_TYPE.ADMIN) {
         const snapshot = await this.buildUserActivitySnapshot(createdUser.id, trx);
         await this.outboxPublisher.publish(
@@ -1086,6 +1145,12 @@ export class UserService {
         .where(inArray(users.id, usersToArchiveIds))
         .returning();
 
+      await this.userDirectoryManagementRepository.clearArchivedByDirectorySync(
+        usersToArchiveIds,
+        trx,
+      );
+      await this.assertActiveAdminRemains(trx);
+
       await this.userLimitService.syncTenantUserCapacityAlert(archivedUserRows[0].tenantId, trx);
 
       return archivedUserRows;
@@ -1114,9 +1179,11 @@ export class UserService {
 
     const userGroups = await this.getUserGroupsForSnapshot(userId, dbInstance);
     const managedGroups = await this.getManagedGroupsForSnapshot(userId, dbInstance);
+    const { roleSlugs } = await this.getUserAccess(userId, dbInstance);
 
     return {
       ...user,
+      roleSlugs: [...roleSlugs].sort(),
       groups: userGroups,
       managedGroups,
     };
@@ -1417,6 +1484,9 @@ export class UserService {
         return hasChanged ? user.id : null;
       }),
     );
+    const changedUserIds = usersWithChangedRoles.filter((userId): userId is UUIDType =>
+      Boolean(userId),
+    );
 
     await this.db.transaction(async (trx) => {
       const permissions = await this.getPermissionsForRoleSlugs(
@@ -1430,6 +1500,10 @@ export class UserService {
         PERMISSIONS.MANAGED_GROUP_RESULTS_READ,
       );
 
+      await this.userDirectoryManagementRepository.markRolesOverridden(changedUserIds, trx);
+
+      const previousSnapshots = await this.buildUserActivitySnapshotsById(changedUserIds, trx);
+
       await Promise.all(
         usersToUpdate.map(async (user) => {
           await this.replaceUserRoleAssignments(user.id, user.tenantId, data.roleSlugs, trx);
@@ -1439,14 +1513,52 @@ export class UserService {
           }
         }),
       );
+
+      await this.assertActiveAdminRemains(trx);
+
+      for (const userId of changedUserIds) {
+        await this.outboxPublisher.publish(
+          new UpdateUserEvent({
+            userId,
+            actor: currentUser,
+            previousUserData: previousSnapshots.get(userId) ?? null,
+            updatedUserData: await this.buildUserActivitySnapshot(userId, trx),
+          }),
+          trx,
+        );
+      }
     });
 
-    const usersWithChangedAccess = usersWithChangedRoles.filter((userId): userId is UUIDType =>
-      Boolean(userId),
-    );
+    if (changedUserIds.length) await this.expireAccessTokensAndNotifyUsers(changedUserIds);
+  }
 
-    if (usersWithChangedAccess.length)
-      await this.expireAccessTokensAndNotifyUsers(usersWithChangedAccess);
+  private async buildUserActivitySnapshotsById(userIds: UUIDType[], trx: DatabasePg) {
+    const snapshots = new Map<UUIDType, UserActivityLogSnapshot | null>();
+
+    for (const userId of userIds) {
+      snapshots.set(userId, await this.buildUserActivitySnapshot(userId, trx));
+    }
+
+    return snapshots;
+  }
+
+  /** The tenant must always keep at least one active (not archived) admin. */
+  private async assertActiveAdminRemains(trx: DatabasePg) {
+    const activeAdminCount = await this.userDirectoryManagementRepository.countActiveAdmins(trx);
+
+    if (activeAdminCount === 0) {
+      throw new BadRequestException("adminUsersView.toast.lastActiveAdminRequired");
+    }
+  }
+
+  /** Synced users leave Mentingo through the directory, which archives them instead. */
+  private async assertUsersNotSyncedFromDirectory(userIds: UUIDType[]) {
+    const directoryManagedUsers =
+      await this.userDirectoryManagementRepository.findDirectoryManagedUserIds(userIds);
+
+    if (directoryManagedUsers.length) {
+      throw new BadRequestException(DIRECTORY_SYNC_ERROR_KEYS.DIRECTORY_USER_NOT_DELETABLE);
+    }
   }
 
   /**

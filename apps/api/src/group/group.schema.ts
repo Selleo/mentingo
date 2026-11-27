@@ -13,6 +13,7 @@ export const groupSchema = Type.Object({
   availableLocales: Type.Array(groupLanguageSchema),
   baseLanguage: groupLanguageSchema,
   users: Type.Optional(Type.Array(baseUserResponseSchema)),
+  isDirectoryManaged: Type.Optional(Type.Boolean()),
   createdAt: Type.Optional(Type.String()),
   updatedAt: Type.Optional(Type.String()),
 });

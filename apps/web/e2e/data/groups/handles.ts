@@ -1,4 +1,5 @@
 export const GROUPS_PAGE_HANDLES = {
+  DIRECTORY_SYNCED_BADGE: "groups-directory-synced-badge",
   PAGE: "groups-page",
   HEADING: "groups-page-heading",
   CREATE_BUTTON: "groups-page-create-button",
@@ -48,6 +49,7 @@ export const CREATE_GROUP_PAGE_HANDLES = {
 } as const;
 
 export const GROUP_PAGE_HANDLES = {
+  DIRECTORY_SYNCED_NOTICE: "group-directory-synced-notice",
   PAGE: "group-page",
   HEADING: "group-page-heading",
 } as const;

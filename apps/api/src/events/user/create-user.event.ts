@@ -6,6 +6,7 @@ type CreateUserData = {
   userId: UUIDType;
   actor: ActorUserType;
   createdUserData: UserActivityLogSnapshot | null;
+  source?: string;
 };
 
 export class CreateUserEvent {

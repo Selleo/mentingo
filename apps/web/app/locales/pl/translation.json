@@ -2596,7 +2596,8 @@
       "noUserSelected": "Nie wybrano żadnego użytkownika",
       "noGroupSelected": "Wybierz co najmniej jedną grupę.",
       "userMustHaveAtLeastOneRole": "Użytkownik musi mieć co najmniej jedną rolę.",
-      "trainerRoleRequiresLiveTraining": "Rola Trener jest dostępna tylko wtedy, gdy szkolenia na żywo są włączone."
+      "trainerRoleRequiresLiveTraining": "Rola Trener jest dostępna tylko wtedy, gdy szkolenia na żywo są włączone.",
+      "lastActiveAdminRequired": "Musi pozostać co najmniej jeden aktywny administrator. Najpierw nadaj rolę administratora innemu aktywnemu użytkownikowi."
     },
     "other": {
       "selected": "Wybrany"
@@ -2788,7 +2789,8 @@
         "forum_topic_create": "Może tworzyć tematy na forum.",
         "forum_post_create": "Może odpowiadać w tematach na forum.",
         "forum_post_delete": "Może usuwać dowolne posty na forum.",
-        "forum_post_react": "Może reagować na posty na forum."
+        "forum_post_react": "Może reagować na posty na forum.",
+        "directory_sync_manage": "Konfiguracja synchronizacji katalogu Google Workspace."
       }
     },
     "dropdown": {
@@ -3008,6 +3010,10 @@
       "phishingSimulations": {
         "title": "Symulacje phishingu",
         "description": "Połączenie z usługą symulacji phishingu."
+      },
+      "googleWorkspaceDirectorySync": {
+        "title": "Synchronizacja katalogu Google Workspace",
+        "description": "Konto usługi używane do odczytu użytkowników i grup z Google Workspace."
       }
     },
     "name": "Zmienne środowiskowe",
@@ -3098,7 +3104,11 @@
       "LIVEKIT_API_SECRET": {
         "label": "LiveKit API Secret"
       },
-      "save": "Zapisz"
+      "save": "Zapisz",
+      "DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY": {
+        "label": "Klucz konta usługi Google (JSON)",
+        "description": "Wklej pełny klucz JSON konta usługi Google Cloud używanego do synchronizacji katalogu. Nadaj mu przekazywanie uprawnień w całej domenie w konsoli administracyjnej Google."
+      }
     },
     "breadcrumbs": {
       "envs": "Zmienne środowiskowe"
@@ -10393,6 +10403,217 @@
     },
     "errors": {
       "invalidUnsubscribeLink": "Ten link jest nieprawidłowy lub wygasł."
+    }
+  },
+  "directorySync": {
+    "title": "Synchronizacja katalogu Google Workspace",
+    "description": "Automatycznie twórz, aktualizuj i archiwizuj użytkowników na podstawie katalogu Google Workspace.",
+    "lastSuccessfulSync": "Ostatnia udana synchronizacja: {{date}}",
+    "statuses": {
+      "pending_verification": "Oczekuje na weryfikację",
+      "active": "Aktywna",
+      "failing": "Błąd"
+    },
+    "setup": {
+      "title": "Nadaj dostęp w Google Workspace",
+      "stepOpenAdminConsole": "W konsoli administracyjnej Google otwórz Bezpieczeństwo → Kontrola dostępu i danych → Ustawienia interfejsów API → Zarządzaj przekazywaniem uprawnień w całej domenie.",
+      "stepAddClient": "Dodaj nowego klienta z poniższym identyfikatorem klienta i zakresami.",
+      "stepSaveAndVerify": "Zapisz poniższe ustawienia i kliknij Zweryfikuj połączenie.",
+      "clientId": "Identyfikator klienta",
+      "scopes": "Zakresy OAuth",
+      "copy": "Kopiuj",
+      "keyMissingTitle": "Brak klucza konta usługi",
+      "keyMissingDescription": "Przed połączeniem katalogu dodaj klucz konta usługi Google w ustawieniach środowiska.",
+      "openEnvs": "Otwórz ustawienia środowiska",
+      "accessGranted": "Dostęp przyznany w Google Workspace · pokaż szczegóły konfiguracji"
+    },
+    "form": {
+      "administratorEmail": "E-mail administratora Google Workspace",
+      "administratorEmailDescription": "Mentingo odczytuje katalog w imieniu tego administratora. Zmiana wymaga ponownej weryfikacji połączenia.",
+      "scope": "Użytkownicy do synchronizacji",
+      "scopeTypes": {
+        "all_users": "Wszyscy użytkownicy",
+        "organizational_units": "Wybrane jednostki organizacyjne",
+        "groups": "Członkowie wybranych grup"
+      },
+      "organizationalUnitsPlaceholder": "Wybierz jednostki organizacyjne",
+      "groupsPlaceholder": "Szukaj grup po adresie e-mail",
+      "noResults": "Brak wyników",
+      "verifyToPickScope": "Zweryfikuj połączenie, aby przeglądać katalog.",
+      "defaultRole": "Domyślna rola",
+      "defaultRolePlaceholder": "Wybierz rolę",
+      "defaultRoleDescription": "Nadawana synchronizowanym użytkownikom, którzy nie należą do żadnej zmapowanej grupy.",
+      "archiveUsersOutsideScope": "Archiwizuj użytkowników spoza zakresu synchronizacji",
+      "archiveUsersOutsideScopeDescription": "Synchronizowani użytkownicy, którzy nie należą już do wybranych użytkowników, zostaną zarchiwizowani. Użytkownicy zawieszeni w Google są zawsze archiwizowani.",
+      "sendWelcomeEmail": "Wysyłaj e-mail powitalny do nowych użytkowników",
+      "sendWelcomeEmailDescription": "Nowi synchronizowani użytkownicy otrzymają zaproszenie e-mailem. Pozostaw wyłączone, jeśli logują się przez Google.",
+      "archiveLimit": "Ogranicz archiwizację na synchronizację",
+      "archiveLimitDescription": "Zatrzymaj synchronizację, która zarchiwizowałaby więcej niż podany procent synchronizowanych użytkowników. Do 5 użytkowników można zawsze zarchiwizować.",
+      "administratorEmailHelp": "Administrator Google Workspace w Twojej domenie (np. superadministrator). Mentingo tylko odczytuje katalog w jego imieniu."
+    },
+    "actions": {
+      "verify": "Zweryfikuj połączenie",
+      "syncNow": "Synchronizuj teraz",
+      "disconnect": "Rozłącz",
+      "more": "Więcej akcji"
+    },
+    "disconnect": {
+      "title": "Rozłączyć synchronizację katalogu?",
+      "description": "Synchronizowani użytkownicy pozostaną w Mentingo i będą zarządzani ręcznie. Możesz połączyć się ponownie później."
+    },
+    "roleMappings": {
+      "title": "Mapowanie grup na role",
+      "description": "Członkowie grupy otrzymują jej rolę. Wygrywa pierwsza pasująca grupa na liście; pozostali otrzymują rolę domyślną.",
+      "addGroup": "Dodaj grupę",
+      "save": "Zapisz mapowanie",
+      "moveUp": "Przenieś w górę",
+      "moveDown": "Przenieś w dół",
+      "remove": "Usuń"
+    },
+    "runs": {
+      "title": "Historia synchronizacji",
+      "empty": "Brak synchronizacji.",
+      "startedAt": "Rozpoczęto",
+      "trigger": "Wyzwalacz",
+      "status": "Status",
+      "changes": "Zmiany",
+      "noChanges": "Brak zmian",
+      "previous": "Poprzednia",
+      "next": "Następna",
+      "triggers": {
+        "schedule": "Zaplanowana",
+        "manual": "Ręczna"
+      },
+      "statuses": {
+        "queued": "W kolejce",
+        "running": "W toku",
+        "succeeded": "Zakończona",
+        "failed": "Nieudana",
+        "aborted_by_safeguard": "Zatrzymana przez zabezpieczenie"
+      },
+      "counts": {
+        "created": "utworzono: {{count}}",
+        "linked": "powiązano: {{count}}",
+        "roleChanged": "zmieniono role: {{count}}",
+        "archived": "zarchiwizowano: {{count}}",
+        "restored": "przywrócono: {{count}}",
+        "skipped": "pominięto: {{count}}",
+        "groupMembershipChanged": "zmieniono członkostwo w grupach: {{count}}"
+      },
+      "emptyDescription": "Uruchomienia pojawią się tutaj po pierwszej synchronizacji."
+    },
+    "toast": {
+      "saveSuccess": "Zapisano ustawienia synchronizacji katalogu.",
+      "saveError": "Nie udało się zapisać ustawień synchronizacji katalogu.",
+      "verifySuccess": "Połączenie zweryfikowane.",
+      "verifyError": "Nie udało się zweryfikować połączenia.",
+      "roleMappingsSuccess": "Zapisano mapowanie ról.",
+      "roleMappingsError": "Nie udało się zapisać mapowania ról.",
+      "syncRequested": "Synchronizacja rozpoczęta. Wyniki pojawią się w historii synchronizacji.",
+      "syncError": "Nie udało się rozpocząć synchronizacji.",
+      "disconnectSuccess": "Rozłączono synchronizację katalogu.",
+      "disconnectError": "Nie udało się rozłączyć synchronizacji katalogu.",
+      "copySuccess": "Skopiowano do schowka.",
+      "copyError": "Nie udało się skopiować do schowka.",
+      "groupMappingsSuccess": "Zapisano synchronizację grup.",
+      "groupMappingsError": "Nie udało się zapisać synchronizacji grup.",
+      "restoreRolesSuccess": "Od następnej synchronizacji role znów będą zgodne z Google Workspace.",
+      "restoreRolesError": "Nie udało się przywrócić ról z katalogu.",
+      "groupsSaved": "Zapisano grupy Google.",
+      "groupsError": "Nie udało się zapisać grup Google."
+    },
+    "user": {
+      "groupsManagedByDirectory": "Członkostwo w grupach synchronizowanych z Google Workspace jest zarządzane przez synchronizację katalogu.",
+      "rolesOverrideNotice": "Role tego użytkownika pochodzą z Google Workspace. Zmiana ich tutaj zastępuje synchronizację katalogu dla tego użytkownika.",
+      "rolesOverridden": "Role zostały zmienione ręcznie i nie są już aktualizowane z Google Workspace.",
+      "restoreDirectoryRoles": "Przywróć role z katalogu"
+    },
+    "errors": {
+      "invalidServiceAccountKey": "To nie jest prawidłowy klucz JSON konta usługi Google.",
+      "syncAlreadyInProgress": "Synchronizacja jest już w toku.",
+      "connectionNotActive": "Najpierw zweryfikuj połączenie z katalogiem.",
+      "connectionNotFound": "Synchronizacja katalogu nie jest skonfigurowana.",
+      "serviceAccountKeyMissing": "Najpierw dodaj klucz konta usługi Google w ustawieniach środowiska.",
+      "directoryAccessDenied": "Google Workspace odmówił dostępu. Sprawdź przekazywanie uprawnień w całej domenie, zakresy i e-mail administratora.",
+      "scopeNotFound": "Niektóre wybrane grupy lub jednostki organizacyjne nie istnieją już w Google Workspace.",
+      "invalidScope": "Wybierz co najmniej jedną jednostkę organizacyjną lub grupę.",
+      "invalidRole": "Jedna z wybranych ról nie istnieje.",
+      "duplicateRoleMapping": "Każdą grupę można zmapować tylko raz.",
+      "duplicateGroupMapping": "Każdą grupę Google i każdą grupę Mentingo można zmapować tylko raz.",
+      "invalidGroup": "Jedna z wybranych grup Mentingo nie istnieje.",
+      "groupMembershipManagedByDirectory": "Członkostwa użytkowników synchronizowanych z Google Workspace w synchronizowanych grupach nie można zmieniać ręcznie.",
+      "mappedGroupNotDeletable": "Ta grupa jest synchronizowana z Google Workspace i nie można jej usunąć. Najpierw usuń ją z synchronizacji grup.",
+      "directoryUserNotDeletable": "Użytkowników synchronizowanych z Google Workspace nie można usunąć. Są archiwizowani, gdy opuszczą katalog.",
+      "userNotSynced": "Ten użytkownik nie jest synchronizowany z katalogu.",
+      "disconnectWhileSyncing": "Trwa synchronizacja. Poczekaj na jej zakończenie przed rozłączeniem."
+    },
+    "groupMappings": {
+      "title": "Synchronizacja grup",
+      "description": "Synchronizowani użytkownicy są dodawani do zmapowanych grup Mentingo i z nich usuwani na podstawie członkostwa w grupach Google. Nadal możesz ręcznie dodawać do tych grup inne osoby.",
+      "addGroup": "Dodaj grupę Google",
+      "save": "Zapisz synchronizację grup",
+      "pickGroup": "Istniejąca grupa Mentingo",
+      "createsNewGroup": "Pozostaw puste, aby utworzyć nową grupę o nazwie „{{name}}”.",
+      "remove": "Usuń",
+      "removeTitle": "Zatrzymać synchronizację „{{name}}”?",
+      "removeDescription": "Członkowie pozostaną w grupie, ale nie będzie ona już aktualizowana z Google Workspace, a grupę będzie można ręcznie edytować i usunąć. Zmiany zostaną zastosowane po zapisaniu synchronizacji grup."
+    },
+    "group": {
+      "syncedBadge": "Synchronizowana z Google Workspace",
+      "syncedTooltip": "Członkostwo synchronizowanych użytkowników jest zgodne z Google Workspace. Aby usunąć tę grupę, najpierw usuń ją z synchronizacji grup w Ustawienia → Integracje → Synchronizacja katalogu.",
+      "syncedNoticeDescription": "Członkostwo synchronizowanych użytkowników jest zgodne z Google Workspace. Aby usunąć tę grupę, najpierw usuń ją z synchronizacji grup.",
+      "openSettings": "Otwórz synchronizację katalogu"
+    },
+    "firstSyncHint": "Automatyczna synchronizacja co 4 godziny rozpocznie się po pierwszej synchronizacji. Sprawdź wszystkie ustawienia i mapowania, a następnie kliknij Synchronizuj teraz.",
+    "missingObjects": {
+      "title": "Niektóre grupy lub jednostki organizacyjne nie istnieją już w Google Workspace",
+      "description": "Każda synchronizacja kończy się błędem, dopóki nie zaktualizujesz zakresu lub nie usuniesz oznaczonych poniżej mapowań. Brakujące identyfikatory:",
+      "mappingMissing": "Nie istnieje już w Google Workspace"
+    },
+    "sections": {
+      "account": "Konto Google Workspace",
+      "usersAndRoles": "Użytkownicy i role",
+      "usersAndRolesDescription": "Wybierz, kto jest synchronizowany i jaką rolę otrzymuje, gdy nie pasuje żadne mapowanie grup.",
+      "behaviour": "Zachowanie synchronizacji"
+    },
+    "firstSyncTitle": "Gotowe do pierwszej synchronizacji",
+    "overview": {
+      "administrator": "Administrator",
+      "lastSuccessfulSync": "Ostatnia udana synchronizacja",
+      "latestRun": "Ostatnie uruchomienie",
+      "never": "Jeszcze nie"
+    },
+    "connect": {
+      "grantAccessTitle": "Nadaj dostęp w Google Workspace",
+      "connectTitle": "Połącz Google Workspace",
+      "connectButton": "Połącz"
+    },
+    "tabs": {
+      "settings": "Ustawienia",
+      "groups": "Grupy Google",
+      "history": "Historia"
+    },
+    "groups": {
+      "description": "Nadaj członkom grupy Google rolę, synchronizuj ich z grupą Mentingo lub jedno i drugie. Gdy ktoś należy do kilku grup, o jego roli decyduje grupa wyżej na liście.",
+      "addPlaceholder": "Wyszukaj grupy Google do dodania…",
+      "empty": "Nie dodano jeszcze grup Google.",
+      "noRole": "Brak roli",
+      "columns": {
+        "googleGroup": "Grupa Google",
+        "role": "Rola",
+        "mentingoGroup": "Grupa Mentingo",
+        "actions": "Akcje"
+      },
+      "notSynced": "Bez synchronizacji",
+      "createGroupOption": "Utwórz grupę „{{name}}”",
+      "dragToReorder": "Przeciągnij, aby zmienić kolejność"
+    },
+    "status": {
+      "lastSync": "Ostatnia synchronizacja {{date}}"
+    },
+    "connectionDetails": {
+      "connectedVia": "Połączono przez {{email}}",
+      "saveAndVerify": "Zapisz i zweryfikuj"
     }
   }
 }

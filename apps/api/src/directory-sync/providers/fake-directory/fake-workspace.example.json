@@ -1,0 +1,74 @@
+{
+  "customerId": "C0fakeworkspace",
+  "users": [
+    {
+      "id": "fake-user-admin",
+      "email": "it-admin@fake-workspace.test",
+      "firstName": "Iris",
+      "lastName": "Admin",
+      "orgUnitPath": "/",
+      "isAdmin": true
+    },
+    {
+      "id": "fake-user-anna",
+      "email": "anna.sales@fake-workspace.test",
+      "firstName": "Anna",
+      "lastName": "Sales",
+      "orgUnitPath": "/Sales"
+    },
+    {
+      "id": "fake-user-bob",
+      "email": "bob.sales@fake-workspace.test",
+      "firstName": "Bob",
+      "lastName": "Sales",
+      "orgUnitPath": "/Sales/Enterprise"
+    },
+    {
+      "id": "fake-user-cara",
+      "email": "cara.engineering@fake-workspace.test",
+      "firstName": "Cara",
+      "lastName": "Engineering",
+      "orgUnitPath": "/Engineering"
+    },
+    {
+      "id": "fake-user-dan",
+      "email": "dan.left@fake-workspace.test",
+      "firstName": "Dan",
+      "lastName": "Leaver",
+      "orgUnitPath": "/Engineering",
+      "suspended": true
+    }
+  ],
+  "orgUnits": [
+    { "id": "fake-ou-sales", "path": "/Sales", "name": "Sales" },
+    { "id": "fake-ou-sales-enterprise", "path": "/Sales/Enterprise", "name": "Enterprise" },
+    { "id": "fake-ou-engineering", "path": "/Engineering", "name": "Engineering" }
+  ],
+  "groups": [
+    {
+      "id": "fake-group-lms-admins",
+      "email": "lms-admins@fake-workspace.test",
+      "name": "LMS admins",
+      "memberUserIds": ["fake-user-admin"]
+    },
+    {
+      "id": "fake-group-sales-team",
+      "email": "sales-team@fake-workspace.test",
+      "name": "Sales team",
+      "memberUserIds": ["fake-user-anna"],
+      "memberGroupIds": ["fake-group-enterprise-sales"]
+    },
+    {
+      "id": "fake-group-enterprise-sales",
+      "email": "enterprise-sales@fake-workspace.test",
+      "name": "Enterprise sales",
+      "memberUserIds": ["fake-user-bob"]
+    },
+    {
+      "id": "fake-group-engineers",
+      "email": "engineers@fake-workspace.test",
+      "name": "Engineers",
+      "memberUserIds": ["fake-user-cara", "fake-user-dan"]
+    }
+  ]
+}

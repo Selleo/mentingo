@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "@remix-run/react";
+import { DIRECTORY_SYNC_ERROR_KEYS } from "@repo/shared";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Plus, Trash } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
@@ -30,6 +31,7 @@ import {
   DialogPortal,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { useToast } from "~/components/ui/use-toast";
 import { useUrlTableState } from "~/hooks/useUrlTableState";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -85,6 +87,7 @@ const Groups = (): ReactElement => {
   });
 
   const { mutateAsync: deleteGroups } = useBulkDeleteGroups();
+  const { toast } = useToast();
 
   const columns = useMemo(() => getGroupsColumns({ rowRangeSelection, t }), [rowRangeSelection, t]);
 
@@ -104,6 +107,22 @@ const Groups = (): ReactElement => {
   });
 
   const selectedGroupIds = table.getSelectedRowModel().rows.map((row) => row.original.id);
+
+  const hasDirectorySyncedGroupSelected = table
+    .getSelectedRowModel()
+    .rows.some((row) => row.original.isDirectoryManaged);
+
+  const openDeleteDialogUnlessDirectorySynced = () => {
+    if (hasDirectorySyncedGroupSelected) {
+      toast({
+        variant: "destructive",
+        description: t(DIRECTORY_SYNC_ERROR_KEYS.MAPPED_GROUP_NOT_DELETABLE),
+      });
+      return;
+    }
+
+    setIsDialogOpen(true);
+  };
 
   const deleteSelectedGroups = async (event: FormEvent) => {
     event.preventDefault();
@@ -162,7 +181,7 @@ const Groups = (): ReactElement => {
                 {
                   icon: <Trash className="size-4 shrink-0" />,
                   translationKey: "adminGroupsView.buttons.deleteSelected",
-                  action: () => setIsDialogOpen(true),
+                  action: openDeleteDialogUnlessDirectorySynced,
                   destructive: true,
                   testId: GROUPS_PAGE_HANDLES.DELETE_SELECTED_BUTTON,
                 },

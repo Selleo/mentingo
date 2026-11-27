@@ -147,6 +147,8 @@ describe("UsersController (e2e)", () => {
         roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
         groups: [],
         managedGroups: [],
+        isDirectoryManaged: false,
+        isRoleOverridden: false,
       });
     });
 

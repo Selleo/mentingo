@@ -15,6 +15,7 @@ import { SettingsModule } from "src/settings/settings.module";
 import { StatisticsModule } from "src/statistics/statistics.module";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import { UserDirectoryManagementRepository } from "src/user/repositories/user-directory-management.repository";
 import { UserImportRepository } from "src/user/repositories/user-import.repository";
 import { UserLimitRepository } from "src/user/repositories/user-limit.repository";
 import { UserPasswordEmailRepository } from "src/user/repositories/user-password-email.repository";
@@ -45,6 +46,7 @@ import { UserService } from "./user.service";
     UserImportService,
     UserPasswordEmailService,
     UserImportRepository,
+    UserDirectoryManagementRepository,
     UserLimitRepository,
     UserLimitService,
     UserPasswordEmailRepository,

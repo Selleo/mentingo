@@ -1,4 +1,4 @@
-import type { SupportedLanguages } from "@repo/shared";
+import type { DIRECTORY_SYNC_CHANGE_SOURCE, SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -15,6 +15,7 @@ export const USER_CREATION_FLOW_TYPE = {
   REGISTRATION: "registration",
   INVITE: "invite",
   PASSWORD_REMINDER: "password_reminder",
+  DIRECTORY_SYNC: "directory_sync",
 } as const;
 
 export type CreateUserContext =
@@ -33,6 +34,11 @@ export type CreateUserContext =
     }
   | {
       flowType: typeof USER_CREATION_FLOW_TYPE.PASSWORD_REMINDER;
+    }
+  | {
+      flowType: typeof USER_CREATION_FLOW_TYPE.DIRECTORY_SYNC;
+      sendWelcomeEmail: boolean;
+      creator: CurrentUserType;
     };
 
 export type CreateUserCoreResult = {
@@ -162,4 +168,8 @@ export type UserPasswordEmailTokenInsert = {
 
 export type UserCreatePasswordTokenInsert = UserPasswordEmailTokenInsert & {
   reminderCount: number;
+};
+
+export type UpdateUserOptions = {
+  source?: typeof DIRECTORY_SYNC_CHANGE_SOURCE;
 };

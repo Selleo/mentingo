@@ -4,6 +4,7 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 export const BULK_ASSIGN_USERS_TO_GROUPS_SOURCES = {
   IMPORT: "import",
   BULK_EDIT: "bulk-edit",
+  DIRECTORY_SYNC: "directory-sync",
 } as const;
 
 export type BulkAssignUsersToGroupsSource =

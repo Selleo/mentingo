@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useGroupById } from "~/api/queries/admin/useGroupById";
 import { getLocalizedResourceLanguage } from "~/components/LanguageSelector/utils";
 import { PageWrapper } from "~/components/PageWrapper";
+import { DirectorySyncedGroupNotice } from "~/modules/Admin/Groups/components/DirectorySyncedGroupNotice";
 import { EditGroupForm } from "~/modules/Admin/Groups/components/EditGroupForm";
 import { GroupLanguageSelector } from "~/modules/Admin/Groups/components/GroupLanguageSelector";
 import Loader from "~/modules/common/Loader/Loader";
@@ -60,6 +61,11 @@ const EditGroup = (): ReactElement => {
       ]}
     >
       <div data-testid={GROUP_PAGE_HANDLES.PAGE} className="flex h-full flex-col">
+        {data.isDirectoryManaged && (
+          <div className="mb-6">
+            <DirectorySyncedGroupNotice />
+          </div>
+        )}
         <EditGroupForm
           key={formKey}
           formKey={formKey}

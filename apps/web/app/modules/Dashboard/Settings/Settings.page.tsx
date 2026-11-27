@@ -37,6 +37,7 @@ export default function SettingsPage() {
     canManageEnvs,
     canManageCourses,
     canManageIntegrationApi,
+    canManageDirectorySync,
     canUpdateLearningProgress,
     canManageUsers,
     canManageSettings,
@@ -52,6 +53,7 @@ export default function SettingsPage() {
         PERMISSIONS.COURSE_UPDATE_OWN,
       ]),
       canManageIntegrationApi: hasPermission(permissions, PERMISSIONS.INTEGRATION_KEY_MANAGE),
+      canManageDirectorySync: hasPermission(permissions, PERMISSIONS.DIRECTORY_SYNC_MANAGE),
       canUpdateLearningProgress: hasPermission(permissions, PERMISSIONS.LEARNING_PROGRESS_UPDATE),
       canManageUsers: hasPermission(permissions, PERMISSIONS.USER_MANAGE),
       canManageSettings: hasPermission(permissions, PERMISSIONS.SETTINGS_MANAGE),
@@ -93,6 +95,7 @@ export default function SettingsPage() {
     canManageEnvs && configurationState?.hasIssues && !configurationState?.isWarningDismissed;
   const hasIntegrationsAvailable =
     canManageIntegrationApi ||
+    canManageDirectorySync ||
     Boolean(microsoftCalendarConnection?.available) ||
     Boolean(googleCalendarConnection?.available);
 
@@ -130,7 +133,10 @@ export default function SettingsPage() {
           }
           integrationsContent={
             !isSupportMode && (
-              <IntegrationsTabContent canAccessIntegrationApi={canManageIntegrationApi} />
+              <IntegrationsTabContent
+                canAccessIntegrationApi={canManageIntegrationApi}
+                canManageDirectorySync={canManageDirectorySync}
+              />
             )
           }
           organizationContent={

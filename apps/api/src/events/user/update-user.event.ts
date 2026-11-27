@@ -7,6 +7,7 @@ type UpdateUserData = {
   actor: ActorUserType;
   previousUserData: UserActivityLogSnapshot | null;
   updatedUserData: UserActivityLogSnapshot | null;
+  source?: string;
 };
 
 export class UpdateUserEvent {

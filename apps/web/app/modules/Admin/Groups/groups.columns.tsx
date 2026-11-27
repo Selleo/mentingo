@@ -3,6 +3,8 @@ import SortButton from "~/components/TableSortButton/TableSortButton";
 
 import { GROUPS_PAGE_HANDLES } from "../../../../e2e/data/groups/handles";
 
+import { DirectorySyncedGroupBadge } from "./components/DirectorySyncedGroupBadge";
+
 import type { ColumnDef } from "@tanstack/react-table";
 import type { TFunction } from "i18next";
 import type { GetAllGroupsResponse } from "~/api/generated-api";
@@ -39,7 +41,12 @@ export const getGroupsColumns = ({
           {t("adminGroupsView.name")}
         </SortButton>
       ),
-      cell: ({ row }) => <span className="font-medium text-neutral-950">{row.original.name}</span>,
+      cell: ({ row }) => (
+        <span className="flex items-center gap-2">
+          <span className="font-medium text-neutral-950">{row.original.name}</span>
+          {row.original.isDirectoryManaged && <DirectorySyncedGroupBadge />}
+        </span>
+      ),
     },
     {
       accessorKey: "characteristic",

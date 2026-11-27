@@ -57,6 +57,8 @@ export const CREATE_USER_PAGE_HANDLES = {
 } as const;
 
 export const USER_PAGE_HANDLES = {
+  ROLES_OVERRIDDEN_NOTICE: "user-page-roles-overridden-notice",
+  RESTORE_DIRECTORY_ROLES_BUTTON: "user-page-restore-directory-roles-button",
   PAGE: "user-page",
   INFORMATION_TAB: "user-page-information-tab",
   PERMISSIONS_TAB: "user-page-permissions-tab",

@@ -150,7 +150,7 @@ export async function addSystemRoleToUserInTests(
     });
 }
 
-async function findPermissionRoleIdInTests(
+export async function findPermissionRoleIdInTests(
   db: DatabasePg,
   tenantId: UUIDType,
   roleSlug: SystemRoleSlug,

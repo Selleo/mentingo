@@ -2344,7 +2344,8 @@
       "noUserSelected": "Nepasirinktas joks vartotojas",
       "noGroupSelected": "Pasirinkite bent vieną grupę.",
       "userMustHaveAtLeastOneRole": "Vartotojas turi turėti bent vieną vaidmenį.",
-      "trainerRoleRequiresLiveTraining": "Trenerio vaidmuo pasiekiamas tik tada, kai įjungtas Tiesioginiai mokymai."
+      "trainerRoleRequiresLiveTraining": "Trenerio vaidmuo pasiekiamas tik tada, kai įjungtas Tiesioginiai mokymai.",
+      "lastActiveAdminRequired": "Turi likti bent vienas aktyvus administratorius. Pirmiausia suteikite administratoriaus vaidmenį kitam aktyviam naudotojui."
     },
     "import": {
       "toast": {
@@ -2539,7 +2540,8 @@
         "forum_topic_create": "Gali kurti forumo temas.",
         "forum_post_create": "Gali atsakyti forumo temose.",
         "forum_post_delete": "Gali trinti bet kuriuos forumo įrašus.",
-        "forum_post_react": "Gali reaguoti į forumo įrašus."
+        "forum_post_react": "Gali reaguoti į forumo įrašus.",
+        "directory_sync_manage": "Konfigūruoti Google Workspace katalogo sinchronizavimą."
       }
     },
     "dropdown": {
@@ -2755,6 +2757,10 @@
       "phishingSimulations": {
         "title": "Phishing simuliacijos",
         "description": "Ryšys su phishing simuliacijų paslauga."
+      },
+      "googleWorkspaceDirectorySync": {
+        "title": "Google Workspace katalogo sinchronizavimas",
+        "description": "Paslaugos paskyra, naudojama naudotojams ir grupėms nuskaityti iš Google Workspace."
       }
     },
     "name": "Aplinkos kintamieji",
@@ -2848,7 +2854,11 @@
       "LIVEKIT_API_SECRET": {
         "label": "LiveKit API Secret"
       },
-      "save": "Išsaugoti"
+      "save": "Išsaugoti",
+      "DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY": {
+        "label": "Google paslaugos paskyros raktas (JSON)",
+        "description": "Įklijuokite visą Google Cloud paslaugos paskyros, naudojamos katalogo sinchronizavimui, JSON raktą. Google administratoriaus konsolėje suteikite jai viso domeno įgaliojimą."
+      }
     },
     "breadcrumbs": {
       "envs": "Aplinkos kintamieji"
@@ -10307,6 +10317,217 @@
     },
     "errors": {
       "invalidUnsubscribeLink": "Ši nuoroda neteisinga arba nebegalioja."
+    }
+  },
+  "directorySync": {
+    "title": "Google Workspace katalogo sinchronizavimas",
+    "description": "Automatiškai kurkite, atnaujinkite ir archyvuokite naudotojus pagal Google Workspace katalogą.",
+    "lastSuccessfulSync": "Paskutinis sėkmingas sinchronizavimas: {{date}}",
+    "statuses": {
+      "pending_verification": "Laukiama patvirtinimo",
+      "active": "Aktyvus",
+      "failing": "Klaida"
+    },
+    "setup": {
+      "title": "Suteikite prieigą Google Workspace",
+      "stepOpenAdminConsole": "Google administratoriaus konsolėje atidarykite Sauga → Prieigos ir duomenų valdymas → API valdikliai → Tvarkyti viso domeno įgaliojimą.",
+      "stepAddClient": "Pridėkite naują klientą su toliau nurodytu kliento ID ir apimtimis.",
+      "stepSaveAndVerify": "Išsaugokite toliau pateiktus nustatymus ir spustelėkite Patikrinti ryšį.",
+      "clientId": "Kliento ID",
+      "scopes": "OAuth apimtys",
+      "copy": "Kopijuoti",
+      "keyMissingTitle": "Trūksta paslaugos paskyros rakto",
+      "keyMissingDescription": "Prieš prijungdami katalogą, aplinkos nustatymuose pridėkite Google paslaugos paskyros raktą.",
+      "openEnvs": "Atidaryti aplinkos nustatymus",
+      "accessGranted": "Prieiga Google Workspace suteikta · rodyti sąrankos informaciją"
+    },
+    "form": {
+      "administratorEmail": "Google Workspace administratoriaus el. paštas",
+      "administratorEmailDescription": "Mentingo skaito katalogą šio administratoriaus vardu. Pakeitus reikia iš naujo patikrinti ryšį.",
+      "scope": "Sinchronizuojami naudotojai",
+      "scopeTypes": {
+        "all_users": "Visi naudotojai",
+        "organizational_units": "Pasirinkti organizaciniai vienetai",
+        "groups": "Pasirinktų grupių nariai"
+      },
+      "organizationalUnitsPlaceholder": "Pasirinkite organizacinius vienetus",
+      "groupsPlaceholder": "Ieškoti grupių pagal el. paštą",
+      "noResults": "Rezultatų nėra",
+      "verifyToPickScope": "Patikrinkite ryšį, kad galėtumėte naršyti katalogą.",
+      "defaultRole": "Numatytasis vaidmuo",
+      "defaultRolePlaceholder": "Pasirinkite vaidmenį",
+      "defaultRoleDescription": "Suteikiamas sinchronizuotiems naudotojams, kurie nepriklauso jokiai susietai grupei.",
+      "archiveUsersOutsideScope": "Archyvuoti naudotojus, išėjusius iš sinchronizavimo apimties",
+      "archiveUsersOutsideScopeDescription": "Sinchronizuoti naudotojai, kurie nebepriklauso pasirinktiems naudotojams, bus archyvuoti. Google sustabdyti naudotojai archyvuojami visada.",
+      "sendWelcomeEmail": "Siųsti pasveikinimo el. laišką naujiems naudotojams",
+      "sendWelcomeEmailDescription": "Nauji sinchronizuoti naudotojai gaus kvietimą el. paštu. Palikite išjungtą, jei jie jungiasi per Google.",
+      "archiveLimit": "Riboti archyvavimą per sinchronizavimą",
+      "archiveLimitDescription": "Sustabdyti sinchronizavimą, kuris archyvuotų daugiau nei šis sinchronizuotų naudotojų procentas. Iki 5 naudotojų galima archyvuoti visada.",
+      "administratorEmailHelp": "Jūsų domeno Google Workspace administratorius (pvz., superadministratorius). Mentingo jo vardu katalogą tik skaito."
+    },
+    "actions": {
+      "verify": "Patikrinti ryšį",
+      "syncNow": "Sinchronizuoti dabar",
+      "disconnect": "Atjungti",
+      "more": "Daugiau veiksmų"
+    },
+    "disconnect": {
+      "title": "Atjungti katalogo sinchronizavimą?",
+      "description": "Sinchronizuoti naudotojai liks Mentingo ir bus valdomi rankiniu būdu. Vėliau galėsite prisijungti iš naujo."
+    },
+    "roleMappings": {
+      "title": "Grupių susiejimas su vaidmenimis",
+      "description": "Grupės nariai gauna jos vaidmenį. Galioja pirmoji tinkama grupė sąraše; kiti gauna numatytąjį vaidmenį.",
+      "addGroup": "Pridėti grupę",
+      "save": "Išsaugoti susiejimą",
+      "moveUp": "Perkelti aukštyn",
+      "moveDown": "Perkelti žemyn",
+      "remove": "Pašalinti"
+    },
+    "runs": {
+      "title": "Sinchronizavimo istorija",
+      "empty": "Sinchronizavimų dar nėra.",
+      "startedAt": "Pradėta",
+      "trigger": "Paleidimas",
+      "status": "Būsena",
+      "changes": "Pakeitimai",
+      "noChanges": "Pakeitimų nėra",
+      "previous": "Ankstesnis",
+      "next": "Kitas",
+      "triggers": {
+        "schedule": "Suplanuotas",
+        "manual": "Rankinis"
+      },
+      "statuses": {
+        "queued": "Eilėje",
+        "running": "Vykdomas",
+        "succeeded": "Sėkmingas",
+        "failed": "Nepavyko",
+        "aborted_by_safeguard": "Sustabdytas apsaugos"
+      },
+      "counts": {
+        "created": "sukurta: {{count}}",
+        "linked": "susieta: {{count}}",
+        "roleChanged": "pakeisti vaidmenys: {{count}}",
+        "archived": "archyvuota: {{count}}",
+        "restored": "atkurta: {{count}}",
+        "skipped": "praleista: {{count}}",
+        "groupMembershipChanged": "pakeistos narystės grupėse: {{count}}"
+      },
+      "emptyDescription": "Vykdymai čia atsiras po pirmojo sinchronizavimo."
+    },
+    "toast": {
+      "saveSuccess": "Katalogo sinchronizavimo nustatymai išsaugoti.",
+      "saveError": "Nepavyko išsaugoti katalogo sinchronizavimo nustatymų.",
+      "verifySuccess": "Ryšys patikrintas.",
+      "verifyError": "Nepavyko patikrinti ryšio.",
+      "roleMappingsSuccess": "Vaidmenų susiejimas išsaugotas.",
+      "roleMappingsError": "Nepavyko išsaugoti vaidmenų susiejimo.",
+      "syncRequested": "Sinchronizavimas pradėtas. Rezultatai bus rodomi sinchronizavimo istorijoje.",
+      "syncError": "Nepavyko pradėti sinchronizavimo.",
+      "disconnectSuccess": "Katalogo sinchronizavimas atjungtas.",
+      "disconnectError": "Nepavyko atjungti katalogo sinchronizavimo.",
+      "copySuccess": "Nukopijuota į iškarpinę.",
+      "copyError": "Nepavyko nukopijuoti į iškarpinę.",
+      "groupMappingsSuccess": "Grupių sinchronizavimas išsaugotas.",
+      "groupMappingsError": "Nepavyko išsaugoti grupių sinchronizavimo.",
+      "restoreRolesSuccess": "Nuo kito sinchronizavimo vaidmenys vėl atitiks Google Workspace.",
+      "restoreRolesError": "Nepavyko atkurti vaidmenų iš katalogo.",
+      "groupsSaved": "Google grupės išsaugotos.",
+      "groupsError": "Nepavyko išsaugoti Google grupių."
+    },
+    "user": {
+      "groupsManagedByDirectory": "Narystę iš Google Workspace sinchronizuojamose grupėse valdo katalogo sinchronizavimas.",
+      "rolesOverrideNotice": "Šio naudotojo vaidmenys gaunami iš Google Workspace. Juos pakeitus čia, šiam naudotojui nepaisoma katalogo sinchronizavimo.",
+      "rolesOverridden": "Vaidmenys pakeisti rankiniu būdu ir nebeatnaujinami iš Google Workspace.",
+      "restoreDirectoryRoles": "Atkurti vaidmenis iš katalogo"
+    },
+    "errors": {
+      "invalidServiceAccountKey": "Tai nėra galiojantis Google paslaugos paskyros JSON raktas.",
+      "syncAlreadyInProgress": "Sinchronizavimas jau vyksta.",
+      "connectionNotActive": "Pirmiausia patikrinkite ryšį su katalogu.",
+      "connectionNotFound": "Katalogo sinchronizavimas nesukonfigūruotas.",
+      "serviceAccountKeyMissing": "Pirmiausia aplinkos nustatymuose pridėkite Google paslaugos paskyros raktą.",
+      "directoryAccessDenied": "Google Workspace atmetė prieigą. Patikrinkite viso domeno įgaliojimą, apimtis ir administratoriaus el. paštą.",
+      "scopeNotFound": "Kai kurių pasirinktų grupių arba organizacinių vienetų Google Workspace nebėra.",
+      "invalidScope": "Pasirinkite bent vieną organizacinį vienetą arba grupę.",
+      "invalidRole": "Vienas iš pasirinktų vaidmenų neegzistuoja.",
+      "duplicateRoleMapping": "Kiekvieną grupę galima susieti tik kartą.",
+      "duplicateGroupMapping": "Kiekvieną Google grupę ir kiekvieną Mentingo grupę galima susieti tik kartą.",
+      "invalidGroup": "Viena iš pasirinktų Mentingo grupių neegzistuoja.",
+      "groupMembershipManagedByDirectory": "Iš Google Workspace sinchronizuotų naudotojų narystės sinchronizuojamose grupėse negalima keisti rankiniu būdu.",
+      "mappedGroupNotDeletable": "Ši grupė sinchronizuojama iš Google Workspace ir jos negalima ištrinti. Pirmiausia pašalinkite ją iš grupių sinchronizavimo.",
+      "directoryUserNotDeletable": "Iš Google Workspace sinchronizuotų naudotojų negalima ištrinti. Jie archyvuojami, kai palieka katalogą.",
+      "userNotSynced": "Šis naudotojas nesinchronizuojamas iš katalogo.",
+      "disconnectWhileSyncing": "Vyksta sinchronizavimas. Prieš atsijungdami palaukite, kol jis baigsis."
+    },
+    "groupMappings": {
+      "title": "Grupių sinchronizavimas",
+      "description": "Sinchronizuoti naudotojai įtraukiami į susietas Mentingo grupes ir iš jų pašalinami pagal narystę Google grupėse. Į šias grupes vis tiek galite rankiniu būdu įtraukti kitus asmenis.",
+      "addGroup": "Pridėti Google grupę",
+      "save": "Išsaugoti grupių sinchronizavimą",
+      "pickGroup": "Esama Mentingo grupė",
+      "createsNewGroup": "Palikite tuščią, kad būtų sukurta nauja grupė „{{name}}“.",
+      "remove": "Pašalinti",
+      "removeTitle": "Nustoti sinchronizuoti „{{name}}“?",
+      "removeDescription": "Nariai liks grupėje, bet ji nebebus atnaujinama iš Google Workspace, o grupę bus galima redaguoti ir ištrinti rankiniu būdu. Pakeitimai įsigalios išsaugojus grupių sinchronizavimą."
+    },
+    "group": {
+      "syncedBadge": "Sinchronizuojama iš Google Workspace",
+      "syncedTooltip": "Sinchronizuotų naudotojų narystė atitinka Google Workspace. Norėdami ištrinti šią grupę, pirmiausia pašalinkite ją iš grupių sinchronizavimo skiltyje Nustatymai → Integracijos → Katalogo sinchronizavimas.",
+      "syncedNoticeDescription": "Sinchronizuotų naudotojų narystė atitinka Google Workspace. Norėdami ištrinti šią grupę, pirmiausia pašalinkite ją iš grupių sinchronizavimo.",
+      "openSettings": "Atidaryti katalogo sinchronizavimą"
+    },
+    "firstSyncHint": "Automatinis sinchronizavimas kas 4 valandas prasidės po pirmojo sinchronizavimo. Peržiūrėkite visus nustatymus ir susiejimus, tada spustelėkite Sinchronizuoti dabar.",
+    "missingObjects": {
+      "title": "Kai kurių grupių arba organizacinių vienetų Google Workspace nebėra",
+      "description": "Kiekvienas sinchronizavimas nepavyks, kol atnaujinsite apimtį arba pašalinsite toliau pažymėtus susiejimus. Trūkstami ID:",
+      "mappingMissing": "Google Workspace nebeegzistuoja"
+    },
+    "sections": {
+      "account": "Google Workspace paskyra",
+      "usersAndRoles": "Naudotojai ir vaidmenys",
+      "usersAndRolesDescription": "Pasirinkite, kas sinchronizuojamas ir kokį vaidmenį gauna, kai netinka joks grupių susiejimas.",
+      "behaviour": "Sinchronizavimo elgsena"
+    },
+    "firstSyncTitle": "Paruošta pirmajam sinchronizavimui",
+    "overview": {
+      "administrator": "Administratorius",
+      "lastSuccessfulSync": "Paskutinis sėkmingas sinchronizavimas",
+      "latestRun": "Paskutinis vykdymas",
+      "never": "Dar ne"
+    },
+    "connect": {
+      "grantAccessTitle": "Suteikite prieigą Google Workspace",
+      "connectTitle": "Prijunkite Google Workspace",
+      "connectButton": "Prijungti"
+    },
+    "tabs": {
+      "settings": "Nustatymai",
+      "groups": "Google grupės",
+      "history": "Istorija"
+    },
+    "groups": {
+      "description": "Suteikite Google grupės nariams vaidmenį, sinchronizuokite juos į Mentingo grupę arba abu. Kai asmuo yra keliose grupėse, vaidmenį lemia aukščiau esanti.",
+      "addPlaceholder": "Ieškoti Google grupių pridėjimui…",
+      "empty": "Google grupių dar nepridėta.",
+      "noRole": "Be vaidmens",
+      "columns": {
+        "googleGroup": "Google grupė",
+        "role": "Vaidmuo",
+        "mentingoGroup": "Mentingo grupė",
+        "actions": "Veiksmai"
+      },
+      "notSynced": "Nesinchronizuojama",
+      "createGroupOption": "Sukurti grupę „{{name}}“",
+      "dragToReorder": "Vilkite, kad pakeistumėte tvarką"
+    },
+    "status": {
+      "lastSync": "Paskutinis sinchronizavimas {{date}}"
+    },
+    "connectionDetails": {
+      "connectedVia": "Prijungta per {{email}}",
+      "saveAndVerify": "Išsaugoti ir patikrinti"
     }
   }
 }

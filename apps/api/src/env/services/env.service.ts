@@ -8,11 +8,13 @@ import {
 import { createPhishingClient } from "@mentingo/phishing-simulation-sdk";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { LOGIN_METHOD_ERROR_KEYS } from "@repo/shared";
+import { DIRECTORY_SYNC_ERROR_KEYS, LOGIN_METHOD_ERROR_KEYS } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
+import { parseGoogleServiceAccountKey } from "src/directory-sync/utils/parse-google-service-account-key";
 import {
   ALLOWED_SECRETS,
+  DIRECTORY_SYNC_SECRETS,
   ENCRYPTION_ALG,
   ENTRA_ID_SECRETS,
   INTERNAL_SECRETS,
@@ -62,6 +64,12 @@ export class EnvService {
         !Value.Check(entraDirectoryIdSchema, env.value.trim())
       ) {
         throw new BadRequestException(LOGIN_METHOD_ERROR_KEYS.INVALID_DIRECTORY_ID);
+      }
+      if (
+        env.name === DIRECTORY_SYNC_SECRETS.GOOGLE_SERVICE_ACCOUNT_KEY &&
+        !parseGoogleServiceAccountKey(env.value)
+      ) {
+        throw new BadRequestException(DIRECTORY_SYNC_ERROR_KEYS.INVALID_SERVICE_ACCOUNT_KEY);
       }
       const value =
         env.name === "COMPETENCIES_BASE_URL" && env.value
