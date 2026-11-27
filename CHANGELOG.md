@@ -1,3 +1,49 @@
+<a name="v4.37.0"></a>
+
+## [v4.37.0] - 26.11.2026
+
+### Features:
+
+- automatically import users and groups from Google Workspace ([#2354](https://github.com/Selleo/mentingo/issues/2354))
+
+- connect Google Calendar to keep your schedule and events in sync ([#2340](https://github.com/Selleo/mentingo/issues/2340))
+
+- alert admins to courses at risk of missing their due dates and summarize overdue ones ([#2348](https://github.com/Selleo/mentingo/issues/2348))
+
+- improve course authoring review and Mentor conduct ([#2351](https://github.com/Selleo/mentingo/issues/2351))
+
+- add lesson podcasts and realtime authoring updates ([#2337](https://github.com/Selleo/mentingo/issues/2337))
+
+- create standard courses with AI ([#2330](https://github.com/Selleo/mentingo/issues/2330))
+
+- add tenant user limits with overflow and capacity alerts ([#2317](https://github.com/Selleo/mentingo/issues/2317))
+
+- let admins assign up to five competency tracks per person ([#2326](https://github.com/Selleo/mentingo/issues/2326))
+
+### Bug Fixes:
+
+- track learning time for all learners and keep it saved when a long session disconnects ([#2349](https://github.com/Selleo/mentingo/issues/2349))
+
+- keep users signed in after their roles are updated ([#2347](https://github.com/Selleo/mentingo/issues/2347))
+
+- explain why video exports fail and retry video uploads that get interrupted ([#2345](https://github.com/Selleo/mentingo/issues/2345))
+
+- show learner's own words when reviewing drag-and-drop blanks ([#2352](https://github.com/Selleo/mentingo/issues/2352))
+
+- stop asking about unwatched videos when leaving a lesson where you've watched them all ([#2344](https://github.com/Selleo/mentingo/issues/2344))
+
+### Chores:
+
+- make the grading view clearer and easier to use ([#2343](https://github.com/Selleo/mentingo/issues/2343))
+
+- let admins know when a marketplace course has a new version available ([#2346](https://github.com/Selleo/mentingo/issues/2346))
+
+- automatically check the platform against accessibility standards ([#2327](https://github.com/Selleo/mentingo/issues/2327))
+
+### Documentation:
+
+- highlight live training, competencies, gamification and more in README
+
 <a name="v4.36.0"></a>
 
 ## [v4.36.0] - 24.11.2026
@@ -23,6 +69,10 @@
 - patch the last critical security issues ([#2331](https://github.com/Selleo/mentingo/issues/2331))
 
 - close known security holes in third-party packages ([#2329](https://github.com/Selleo/mentingo/issues/2329))
+
+### Documentation:
+
+- update changelog for version v4.36.0
 
 ### Styles:
 
@@ -4012,7 +4062,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.36.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.37.0...HEAD
+[v4.37.0]: https://github.com/Selleo/mentingo/compare/v4.36.0...v4.37.0
 [v4.36.0]: https://github.com/Selleo/mentingo/compare/v4.35.0...v4.36.0
 [v4.35.0]: https://github.com/Selleo/mentingo/compare/v4.34.0...v4.35.0
 [v4.34.0]: https://github.com/Selleo/mentingo/compare/v4.33.0...v4.34.0
