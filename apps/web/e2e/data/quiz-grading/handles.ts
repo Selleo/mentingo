@@ -1,10 +1,10 @@
 export const QUIZ_GRADING_HANDLES = {
   QUEUE_PAGE: "quiz-grading-queue-page",
-  PENDING_COUNT: "quiz-grading-pending-count",
   STATUS_FILTER: "quiz-grading-status-filter",
   COURSE_FILTER: "quiz-grading-course-filter",
   LESSON_FILTER: "quiz-grading-lesson-filter",
   STUDENT_FILTER: "quiz-grading-student-filter",
+  TABLE: "quiz-grading-table",
   ROW: "quiz-grading-row",
   EMPTY_STATE: "quiz-grading-empty-state",
   ANSWER_PAGE: "quiz-grading-answer-page",

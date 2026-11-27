@@ -510,6 +510,38 @@ describe("QuizGradingController (e2e)", () => {
     expect(response.body.message).toBe("quizGrading.errors.ownAnswer");
   });
 
+  it("lets admins see and grade their own answers", async () => {
+    const t = await setup();
+
+    await runAsTenant(defaultTenantId, () =>
+      addSystemRoleToUserInTests(db, t.student.id, defaultTenantId, SYSTEM_ROLE_SLUGS.ADMIN),
+    );
+    const ownCookie = await cookieFor(t.student, app);
+
+    await submitQuiz(ownCookie, t.lesson.id, t.briefId, t.detailedId);
+
+    const ownList = await listAnswers(ownCookie).expect(200);
+
+    expect(ownList.body.pagination.totalItems).toBe(2);
+    const filters = await request(app.getHttpServer())
+      .get("/api/quiz-grading/filters")
+      .set("Cookie", ownCookie)
+      .expect(200);
+
+    expect(filters.body.data.students).toEqual([expect.objectContaining({ id: t.student.id })]);
+
+    const [first, second] = ownList.body.data;
+    const details = await request(app.getHttpServer())
+      .get(`/api/quiz-grading/answers/${first.id}`)
+      .set("Cookie", ownCookie)
+      .expect(200);
+
+    expect(details.body.data.nextAnswerId).toBe(second.id);
+    const response = await grade(ownCookie, first.id, true).expect(201);
+
+    expect(response.body.data.nextAnswerId).toBe(second.id);
+  });
+
   it("refuses to grade an attempt from a course run the learner has since repeated", async () => {
     const t = await setup();
 

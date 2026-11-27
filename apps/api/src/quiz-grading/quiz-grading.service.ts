@@ -13,6 +13,7 @@ import {
   COURSE_STATUSES,
   PERMISSIONS,
   QUIZ_REVIEW_GRADING_METHODS,
+  SYSTEM_ROLE_SLUGS,
   type QuizReviewGradingMethod,
 } from "@repo/shared";
 import { match } from "ts-pattern";
@@ -56,14 +57,14 @@ export class QuizGradingService {
 
   async getAnswers(
     filters: QuizGradingAnswerFilters,
-    reviewerId: UUIDType,
+    currentUser: CurrentUserType,
     pageInput?: number,
     perPageInput?: number,
   ): Promise<{ data: QuizGradingAnswerListResponse; pagination: Pagination }> {
     const { page, perPage } = parsePagination(pageInput, perPageInput);
     const { data, totalItems } = await this.quizGradingRepository.findAnswers(
       filters,
-      reviewerId,
+      this.excludedStudentId(currentUser),
       page,
       perPage,
     );
@@ -71,21 +72,22 @@ export class QuizGradingService {
     return { data, pagination: { totalItems, page, perPage } };
   }
 
-  getFilterOptions(reviewerId: UUIDType) {
-    return this.quizGradingRepository.findFilterOptions(reviewerId);
+  getFilterOptions(currentUser: CurrentUserType) {
+    return this.quizGradingRepository.findFilterOptions(this.excludedStudentId(currentUser));
   }
 
   async getAnswerDetails(
     answerId: UUIDType,
-    reviewerId: UUIDType,
+    currentUser: CurrentUserType,
   ): Promise<QuizGradingAnswerDetailsResponse> {
-    const answer = await this.quizGradingRepository.findAnswerDetails(answerId, reviewerId);
+    const excludedStudentId = this.excludedStudentId(currentUser);
+    const answer = await this.quizGradingRepository.findAnswerDetails(answerId, excludedStudentId);
 
     if (!answer) throw new NotFoundException("quizGrading.errors.answerNotFound");
 
     const [reviews, nextAnswerId] = await Promise.all([
       this.quizGradingRepository.findReviews(answerId),
-      this.quizGradingRepository.findNextPendingAnswerId(answerId, reviewerId),
+      this.quizGradingRepository.findNextPendingAnswerId(answerId, excludedStudentId),
     ]);
 
     return { ...answer, reviews, nextAnswerId };
@@ -109,7 +111,7 @@ export class QuizGradingService {
       if (!answer || answer.gradingMode !== ASSESSMENT_GRADING_MODES.MANUAL)
         throw new NotFoundException("quizGrading.errors.answerNotFound");
 
-      if (answer.studentId === currentUser.userId)
+      if (answer.studentId === this.excludedStudentId(currentUser))
         throw new ForbiddenException("quizGrading.errors.ownAnswer");
 
       // Grading may complete the lesson, which needs a published course. Unenrolled (e.g. freemium)
@@ -138,7 +140,7 @@ export class QuizGradingService {
       // Read inside the transaction so a failed lookup can't report a saved grade as failed.
       const nextAnswerId = await this.quizGradingRepository.findNextPendingAnswerId(
         answerId,
-        currentUser.userId,
+        this.excludedStudentId(currentUser),
         this.db,
       );
 
@@ -299,5 +301,10 @@ export class QuizGradingService {
       isQuizPassed,
       language: answer.language,
     });
+  }
+
+  // Admins may grade their own answers (e.g. when trying out a course); other reviewers may not.
+  private excludedStudentId(currentUser: CurrentUserType) {
+    return currentUser.roleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN) ? undefined : currentUser.userId;
   }
 }

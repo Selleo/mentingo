@@ -9433,7 +9433,7 @@
     }
   },
   "quizGrading": {
-    "title": "À noter",
+    "title": "Correction des quiz",
     "answerTitle": "Noter la réponse",
     "pendingCount": "En attente : {{count}}",
     "empty": "Aucune réponse ne correspond aux filtres sélectionnés.",

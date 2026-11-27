@@ -1,220 +1,239 @@
-import { useNavigate, useSearchParams } from "@remix-run/react";
-import { ASSESSMENT_ANSWER_GRADING_STATUSES, sanitizeQuizQuestionTitle } from "@repo/shared";
+import { useNavigate } from "@remix-run/react";
+import { ASSESSMENT_ANSWER_GRADING_STATUSES } from "@repo/shared";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useQuizGradingAnswers } from "~/api/queries/quiz-grading/useQuizGradingAnswers";
 import { useQuizGradingFilterOptions } from "~/api/queries/quiz-grading/useQuizGradingFilterOptions";
+import {
+  type ActiveTableFilter,
+  DataTable,
+  DataTableCard,
+  DataTableEmptyState,
+  DataTablePagination,
+  DataTableToolbar,
+  useClampedPage,
+} from "~/components/DataTable";
+import { OptionPicker, type PickerOption } from "~/components/OptionPicker/OptionPicker";
+import { PageHeader } from "~/components/PageHeader/PageHeader";
 import { PageWrapper } from "~/components/PageWrapper";
-import { Pagination } from "~/components/Pagination/Pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
-import { formatLocalizedDate } from "~/utils/formatLocalizedDate";
+import { useUrlTableState } from "~/hooks/useUrlTableState";
 
 import { QUIZ_GRADING_HANDLES } from "../../../e2e/data/quiz-grading/handles";
 
 import {
-  parseQueueSearchParams,
+  isQuizGradingStatus,
+  isUuid,
+  QUIZ_GRADING_DEFAULT_PER_PAGE,
+  QUIZ_GRADING_FILTER_KEYS,
   QUIZ_GRADING_STATUSES,
-  updateQueueSearchParams,
 } from "./quizGrading.utils";
-import { QuizGradingStatusBadge } from "./QuizGradingStatusBadge";
+import { getQuizGradingQueueColumns } from "./quizGradingQueue.columns";
 
 import type { QuizGradingFilterKey } from "./quizGrading.utils";
 
-const ALL = "all";
-const COLUMN_COUNT = 7;
-
-type FilterSelectProps = {
-  label: string;
-  value: string | undefined;
-  allLabel?: string;
-  options: { id: string; name: string }[];
-  testId: string;
-  onChange: (value: string | undefined) => void;
-};
-
-function FilterSelect({ label, value, allLabel, options, testId, onChange }: FilterSelectProps) {
-  return (
-    <Select
-      value={value ?? ALL}
-      onValueChange={(next) => onChange(next === ALL ? undefined : next)}
-    >
-      <SelectTrigger className="w-full sm:w-56" aria-label={label} data-testid={testId}>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {allLabel && <SelectItem value={ALL}>{allLabel}</SelectItem>}
-        {options.map((option) => (
-          <SelectItem key={option.id} value={option.id}>
-            {option.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
+const ALL = "__all__";
 
 export default function QuizGradingQueuePage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const query = parseQueueSearchParams(searchParams);
-  const { data, isPending, isError } = useQuizGradingAnswers(query);
-  const { data: pendingData, isError: isPendingCountError } = useQuizGradingAnswers({
-    status: ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING,
-    page: 1,
-    perPage: 1,
+
+  const tableState = useUrlTableState({
+    filterKeys: QUIZ_GRADING_FILTER_KEYS,
+    filterValidators: {
+      status: isQuizGradingStatus,
+      courseId: isUuid,
+      lessonId: isUuid,
+      studentId: isUuid,
+    },
+    defaultPerPage: QUIZ_GRADING_DEFAULT_PER_PAGE,
+  });
+  const { courseId, lessonId, studentId } = tableState.filters;
+  const status = isQuizGradingStatus(tableState.filters.status)
+    ? tableState.filters.status
+    : ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING;
+
+  const { data, isPending, isFetching, isError } = useQuizGradingAnswers({
+    status,
+    courseId,
+    lessonId,
+    studentId,
+    page: tableState.page,
+    perPage: tableState.perPage,
   });
   const { data: filterOptions, isError: isFilterOptionsError } = useQuizGradingFilterOptions();
-  const hasLoadError = isError || isPendingCountError || isFilterOptionsError;
+  const hasLoadError = isError || isFilterOptionsError;
 
-  const answers = data?.data ?? [];
-  const lessons = (filterOptions?.lessons ?? []).filter(
-    (lesson) => !query.courseId || lesson.courseId === query.courseId,
+  useClampedPage({
+    page: tableState.page,
+    perPage: tableState.perPage,
+    totalItems: data?.pagination.totalItems,
+    setPage: tableState.setPage,
+  });
+
+  const toPickerOptions = (options: { id: string; name: string }[] = []) =>
+    options.map(({ id, name }) => ({ id, label: name }));
+
+  const statusOptions = QUIZ_GRADING_STATUSES.map((gradingStatus) => ({
+    id: gradingStatus,
+    label: t(`quizGrading.status.${gradingStatus}`),
+  }));
+  const courseOptions = toPickerOptions(filterOptions?.courses);
+  const lessonOptions = toPickerOptions(
+    filterOptions?.lessons.filter((lesson) => !courseId || lesson.courseId === courseId),
+  );
+  const studentOptions = toPickerOptions(filterOptions?.students);
+
+  const setStatus = (nextStatus: string) =>
+    tableState.setFilter(
+      "status",
+      nextStatus === ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING ? undefined : nextStatus,
+    );
+  const setCourse = (nextCourseId?: string) =>
+    tableState.setFilters({ courseId: nextCourseId, lessonId: undefined });
+
+  const filterLabel = (options: PickerOption[], id: string) =>
+    options.find((option) => option.id === id)?.label ?? id;
+
+  const activeFilterDefinitions: {
+    key: QuizGradingFilterKey;
+    value: string | undefined;
+    label: string;
+    options: PickerOption[];
+    onRemove: () => void;
+  }[] = [
+    {
+      key: "status",
+      value: tableState.filters.status,
+      label: t("quizGrading.filters.status"),
+      options: statusOptions,
+      onRemove: () => setStatus(ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING),
+    },
+    {
+      key: "courseId",
+      value: courseId,
+      label: t("quizGrading.filters.course"),
+      options: courseOptions,
+      onRemove: () => setCourse(undefined),
+    },
+    {
+      key: "lessonId",
+      value: lessonId,
+      label: t("quizGrading.filters.lesson"),
+      options: lessonOptions,
+      onRemove: () => tableState.setFilter("lessonId", undefined),
+    },
+    {
+      key: "studentId",
+      value: studentId,
+      label: t("quizGrading.filters.student"),
+      options: studentOptions,
+      onRemove: () => tableState.setFilter("studentId", undefined),
+    },
+  ];
+  const activeFilters: ActiveTableFilter[] = activeFilterDefinitions.flatMap(
+    ({ key, value, label, options, onRemove }) =>
+      value ? [{ id: key, label, value: filterLabel(options, value), onRemove }] : [],
   );
 
-  const setFilter = (key: QuizGradingFilterKey | "page" | "perPage", value?: string) =>
-    setSearchParams(updateQueueSearchParams(searchParams, { [key]: value }), { replace: true });
+  const columns = useMemo(
+    () => getQuizGradingQueueColumns({ t, language: i18n.language }),
+    [t, i18n.language],
+  );
 
-  const openAnswer = (answerId: string) => navigate(`/quiz-grading/${answerId}`);
+  const table = useReactTable({
+    getRowId: (answer) => answer.id,
+    data: data?.data ?? [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   return (
     <PageWrapper breadcrumbs={[{ title: t("quizGrading.title"), href: "/quiz-grading" }]}>
-      <div className="flex flex-col gap-4" data-testid={QUIZ_GRADING_HANDLES.QUEUE_PAGE}>
-        <div className="flex flex-wrap items-center gap-3">
-          <h4 className="h4">{t("quizGrading.title")}</h4>
-          {pendingData && (
-            <span
-              className="rounded-full bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700"
-              data-testid={QUIZ_GRADING_HANDLES.PENDING_COUNT}
-            >
-              {t("quizGrading.pendingCount", { count: pendingData.pagination.totalItems })}
-            </span>
-          )}
-        </div>
+      <div className="flex flex-col gap-6" data-testid={QUIZ_GRADING_HANDLES.QUEUE_PAGE}>
+        <PageHeader title={t("quizGrading.title")} />
+
         {hasLoadError && (
           <p role="alert" className="text-sm text-error-700">
             {t("quizGrading.loadError")}
           </p>
         )}
-        <div className="flex flex-wrap gap-3">
-          <FilterSelect
-            label={t("quizGrading.filters.status")}
-            value={query.status}
-            options={QUIZ_GRADING_STATUSES.map((status) => ({
-              id: status,
-              name: t(`quizGrading.status.${status}`),
-            }))}
-            testId={QUIZ_GRADING_HANDLES.STATUS_FILTER}
-            onChange={(value) => setFilter("status", value)}
+
+        <DataTableCard>
+          <DataTableToolbar
+            activeFilters={activeFilters}
+            canResetFilters={tableState.activeFilterCount > 0}
+            onResetFilters={tableState.resetFilters}
+          >
+            <OptionPicker
+              label={t("quizGrading.filters.status")}
+              placeholder={t("quizGrading.filters.status")}
+              className="w-full sm:w-44"
+              options={statusOptions}
+              selectedIds={[status]}
+              testId={QUIZ_GRADING_HANDLES.STATUS_FILTER}
+              onToggle={({ id }) => setStatus(id)}
+            />
+            <OptionPicker
+              label={t("quizGrading.filters.course")}
+              placeholder={t("quizGrading.filters.allCourses")}
+              className="w-full sm:w-56"
+              options={[{ id: ALL, label: t("quizGrading.filters.allCourses") }, ...courseOptions]}
+              selectedIds={[courseId ?? ALL]}
+              testId={QUIZ_GRADING_HANDLES.COURSE_FILTER}
+              onToggle={({ id }) => setCourse(id === ALL ? undefined : id)}
+            />
+            <OptionPicker
+              label={t("quizGrading.filters.lesson")}
+              placeholder={t("quizGrading.filters.allLessons")}
+              className="w-full sm:w-56"
+              options={[{ id: ALL, label: t("quizGrading.filters.allLessons") }, ...lessonOptions]}
+              selectedIds={[lessonId ?? ALL]}
+              testId={QUIZ_GRADING_HANDLES.LESSON_FILTER}
+              onToggle={({ id }) => tableState.setFilter("lessonId", id === ALL ? undefined : id)}
+            />
+            <OptionPicker
+              label={t("quizGrading.filters.student")}
+              placeholder={t("quizGrading.filters.allStudents")}
+              className="w-full sm:w-56"
+              options={[
+                { id: ALL, label: t("quizGrading.filters.allStudents") },
+                ...studentOptions,
+              ]}
+              selectedIds={[studentId ?? ALL]}
+              testId={QUIZ_GRADING_HANDLES.STUDENT_FILTER}
+              onToggle={({ id }) => tableState.setFilter("studentId", id === ALL ? undefined : id)}
+            />
+          </DataTableToolbar>
+
+          <DataTable
+            table={table}
+            isRefreshing={isFetching && !isPending}
+            onRowClick={(row) => navigate(`/quiz-grading/${row.original.id}`)}
+            testId={QUIZ_GRADING_HANDLES.TABLE}
+            getRowTestId={() => QUIZ_GRADING_HANDLES.ROW}
+            emptyState={
+              !isPending && (
+                <DataTableEmptyState
+                  testId={QUIZ_GRADING_HANDLES.EMPTY_STATE}
+                  title={t("quizGrading.empty")}
+                  onResetFilters={
+                    tableState.activeFilterCount > 0 ? tableState.resetFilters : undefined
+                  }
+                />
+              )
+            }
           />
-          <FilterSelect
-            label={t("quizGrading.filters.course")}
-            value={query.courseId}
-            allLabel={t("quizGrading.filters.allCourses")}
-            options={filterOptions?.courses ?? []}
-            testId={QUIZ_GRADING_HANDLES.COURSE_FILTER}
-            onChange={(value) => setFilter("courseId", value)}
-          />
-          <FilterSelect
-            label={t("quizGrading.filters.lesson")}
-            value={query.lessonId}
-            allLabel={t("quizGrading.filters.allLessons")}
-            options={lessons}
-            testId={QUIZ_GRADING_HANDLES.LESSON_FILTER}
-            onChange={(value) => setFilter("lessonId", value)}
-          />
-          <FilterSelect
-            label={t("quizGrading.filters.student")}
-            value={query.studentId}
-            allLabel={t("quizGrading.filters.allStudents")}
-            options={filterOptions?.students ?? []}
-            testId={QUIZ_GRADING_HANDLES.STUDENT_FILTER}
-            onChange={(value) => setFilter("studentId", value)}
-          />
-        </div>
-        <div className="overflow-x-auto">
-          <Table className="border bg-neutral-50" aria-label={t("quizGrading.title")}>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("quizGrading.columns.question")}</TableHead>
-                <TableHead>{t("quizGrading.columns.course")}</TableHead>
-                <TableHead>{t("quizGrading.columns.lesson")}</TableHead>
-                <TableHead>{t("quizGrading.columns.student")}</TableHead>
-                <TableHead>{t("quizGrading.columns.submittedAt")}</TableHead>
-                <TableHead>{t("quizGrading.columns.status")}</TableHead>
-                <TableHead>{t("quizGrading.columns.points")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody aria-busy={isPending}>
-              {!isPending && !isError && !answers.length && (
-                <TableRow data-testid={QUIZ_GRADING_HANDLES.EMPTY_STATE}>
-                  <TableCell
-                    colSpan={COLUMN_COUNT}
-                    className="py-12 text-center text-muted-foreground"
-                  >
-                    {t("quizGrading.empty")}
-                  </TableCell>
-                </TableRow>
-              )}
-              {answers.map((answer) => (
-                <TableRow
-                  key={answer.id}
-                  tabIndex={0}
-                  data-testid={QUIZ_GRADING_HANDLES.ROW}
-                  onClick={() => openAnswer(answer.id)}
-                  onKeyDown={(event) => {
-                    if (event.target === event.currentTarget && event.key === "Enter") {
-                      openAnswer(answer.id);
-                    }
-                  }}
-                  className="cursor-pointer hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-                >
-                  <TableCell
-                    className="text-sm"
-                    dangerouslySetInnerHTML={{
-                      __html: sanitizeQuizQuestionTitle(answer.questionTitle),
-                    }}
-                  />
-                  <TableCell className="text-sm">{answer.course.name}</TableCell>
-                  <TableCell className="text-sm">{answer.lesson.name}</TableCell>
-                  <TableCell className="text-sm">{answer.student.name}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {formatLocalizedDate(i18n.language, answer.submittedAt)}
-                  </TableCell>
-                  <TableCell>
-                    <QuizGradingStatusBadge status={answer.gradingStatus} />
-                  </TableCell>
-                  <TableCell className="text-sm tabular-nums">
-                    {answer.awardedPoints ?? "—"} / {answer.maximumPoints}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Pagination
-            className="rounded-b-lg border-x border-b bg-neutral-50"
-            emptyDataClassName="rounded-b-lg border-x border-b bg-neutral-50"
+
+          <DataTablePagination
             totalItems={data?.pagination.totalItems}
-            currentPage={query.page}
-            itemsPerPage={query.perPage}
-            onPageChange={(page) => setFilter("page", String(page))}
-            onItemsPerPageChange={(perPage) => setFilter("perPage", perPage)}
+            itemsPerPage={tableState.perPage}
+            currentPage={tableState.page}
+            onPageChange={tableState.setPage}
+            onItemsPerPageChange={tableState.setPerPage}
           />
-        </div>
+        </DataTableCard>
       </div>
     </PageWrapper>
   );

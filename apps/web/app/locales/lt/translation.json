@@ -9965,9 +9965,8 @@
     }
   },
   "quizGrading": {
-    "title": "Vertinti",
+    "title": "Testų vertinimas",
     "answerTitle": "Atsakymo vertinimas",
-    "pendingCount": "Laukia: {{count}}",
     "empty": "Pasirinktus filtrus atitinkančių atsakymų nėra.",
     "filters": {
       "status": "Būsena",

@@ -52,11 +52,11 @@ export class QuizGradingRepository {
 
   async findAnswers(
     filters: QuizGradingAnswerFilters,
-    reviewerId: UUIDType,
+    excludedStudentId: UUIDType | undefined,
     page: number,
     perPage: number,
   ) {
-    const queue = this.queueSubquery(filters, reviewerId);
+    const queue = this.queueSubquery(filters, excludedStudentId);
 
     const [data, [{ totalItems }]] = await Promise.all([
       this.db
@@ -71,8 +71,8 @@ export class QuizGradingRepository {
     return { data, totalItems };
   }
 
-  async findFilterOptions(reviewerId: UUIDType) {
-    const queue = this.queueSubquery({}, reviewerId);
+  async findFilterOptions(excludedStudentId: UUIDType | undefined) {
+    const queue = this.queueSubquery({}, excludedStudentId);
 
     const [courseRows, lessonRows, studentRows] = await Promise.all([
       this.db
@@ -92,8 +92,8 @@ export class QuizGradingRepository {
     return { courses: courseRows, lessons: lessonRows, students: studentRows };
   }
 
-  async findAnswerDetails(answerId: UUIDType, reviewerId: UUIDType) {
-    const queue = this.queueSubquery({}, reviewerId);
+  async findAnswerDetails(answerId: UUIDType, excludedStudentId: UUIDType | undefined) {
+    const queue = this.queueSubquery({}, excludedStudentId);
 
     const [answer] = await this.db
       .select({
@@ -136,12 +136,12 @@ export class QuizGradingRepository {
 
   async findNextPendingAnswerId(
     excludedAnswerId: UUIDType,
-    reviewerId: UUIDType,
+    excludedStudentId: UUIDType | undefined,
     db: DatabasePg = this.db,
   ) {
     const queue = this.queueSubquery(
       { status: ASSESSMENT_ANSWER_GRADING_STATUSES.PENDING },
-      reviewerId,
+      excludedStudentId,
       db,
     );
 
@@ -339,10 +339,10 @@ export class QuizGradingRepository {
   }
 
   // Reviewer-graded answers from the learner's current learning state that can still complete
-  // the lesson; a given reviewer never sees their own.
+  // the lesson, without the excluded student's own answers.
   private queueSubquery(
     filters: QuizGradingAnswerFilters,
-    reviewerId?: UUIDType,
+    excludedStudentId?: UUIDType,
     db: DatabasePg = this.db,
   ) {
     return db
@@ -390,7 +390,7 @@ export class QuizGradingRepository {
           eq(assessmentQuestions.gradingMode, ASSESSMENT_GRADING_MODES.MANUAL),
           eq(assessmentAttempts.submissionStatus, ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.SUBMITTED),
           activeLearningState(assessmentAttempts.learningStateId),
-          reviewerId ? ne(users.id, reviewerId) : undefined,
+          excludedStudentId ? ne(users.id, excludedStudentId) : undefined,
           ne(courses.status, COURSE_STATUSES.DRAFT),
           filters.status
             ? eq(assessmentAttemptQuestionAnswers.gradingStatus, filters.status)

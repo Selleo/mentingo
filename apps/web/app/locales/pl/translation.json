@@ -10051,9 +10051,8 @@
     }
   },
   "quizGrading": {
-    "title": "Do oceny",
+    "title": "Ocenianie quizów",
     "answerTitle": "Ocena odpowiedzi",
-    "pendingCount": "Oczekujące: {{count}}",
     "empty": "Brak odpowiedzi pasujących do wybranych filtrów.",
     "filters": {
       "status": "Status",

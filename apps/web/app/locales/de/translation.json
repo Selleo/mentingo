@@ -9894,9 +9894,8 @@
     }
   },
   "quizGrading": {
-    "title": "Zu bewerten",
+    "title": "Quiz-Bewertung",
     "answerTitle": "Antwort bewerten",
-    "pendingCount": "Ausstehend: {{count}}",
     "empty": "Keine Antworten entsprechen den ausgewählten Filtern.",
     "filters": {
       "status": "Status",
