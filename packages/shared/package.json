@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@types/sanitize-html": "2.16.2",
-    "glob": "11.0.3",
+    "glob": "11.1.0",
     "tsup": "8.3.5",
     "typescript": "5.9.3"
   },

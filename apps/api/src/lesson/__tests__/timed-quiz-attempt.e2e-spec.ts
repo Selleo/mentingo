@@ -23,7 +23,6 @@ import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { QuizAttemptService } from "src/quiz/services/quiz-attempt.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
-import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   assessmentAttemptQuestionAnswers,
   assessmentAttempts,
@@ -53,6 +52,7 @@ describe("Timed quiz attempts (e2e)", () => {
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let enqueueSpy: jest.SpyInstance;
+  let runAsTenant: Awaited<ReturnType<typeof createE2ETest>>["runAsTenant"];
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
@@ -61,13 +61,13 @@ describe("Timed quiz attempts (e2e)", () => {
   const password = "password123";
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest([
-      { provide: QuizAttemptExpirationWorker, useValue: {} },
-    ]);
+    const test = await createE2ETest({
+      customProviders: [{ provide: QuizAttemptExpirationWorker, useValue: {} }],
+      // Lazy finalization must reuse the lesson view transaction and its course lock.
+      useDbProxy: true,
+    });
 
-    app = testApp;
-    db = app.get(DB);
-    baseDb = app.get(DB_ADMIN);
+    ({ app, db, dbAdmin: baseDb, runAsTenant } = test);
     enqueueSpy = jest.spyOn(app.get(QueueService), "enqueue").mockResolvedValue({} as never);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
@@ -260,6 +260,11 @@ describe("Timed quiz attempts (e2e)", () => {
       permissions: SYSTEM_ROLE_PERMISSIONS[SYSTEM_ROLE_SLUGS.STUDENT],
       tenantId: student.tenantId,
     }) as CurrentUserType;
+
+  const finalizeExpiredAttempt = (attemptId: UUIDType, actor: CurrentUserType) =>
+    runAsTenant(actor.tenantId, () =>
+      app.get(LessonService).finalizeExpiredQuizAttempt(attemptId, actor),
+    );
 
   const GRACE_MS = ASSESSMENT_TIMED_ATTEMPT_SUBMIT_GRACE_SECONDS * 1000;
   const pastGrace = ASSESSMENT_TIMED_ATTEMPT_SUBMIT_GRACE_SECONDS + 10;
@@ -547,18 +552,18 @@ describe("Timed quiz attempts (e2e)", () => {
     const { attemptId } = await startAttemptState(cookies, lesson.id);
     await saveDraft(cookies, lesson.id, attemptId, draftWithFirstCorrect(questions)).expect(200);
 
-    const lessonService = app.get(LessonService);
-    await expect(
-      lessonService.finalizeExpiredQuizAttempt(attemptId, actorFor(student)),
-    ).resolves.toEqual({ status: "not_expired", msUntilGraceEnds: expect.any(Number) });
+    await expect(finalizeExpiredAttempt(attemptId, actorFor(student))).resolves.toEqual({
+      status: "not_expired",
+      msUntilGraceEnds: expect.any(Number),
+    });
 
     await expireAttempt(attemptId, pastGrace);
-    await expect(
-      lessonService.finalizeExpiredQuizAttempt(attemptId, actorFor(student)),
-    ).resolves.toEqual({ status: "closed" });
-    await expect(
-      lessonService.finalizeExpiredQuizAttempt(attemptId, actorFor(student)),
-    ).resolves.toEqual({ status: "closed" });
+    await expect(finalizeExpiredAttempt(attemptId, actorFor(student))).resolves.toEqual({
+      status: "closed",
+    });
+    await expect(finalizeExpiredAttempt(attemptId, actorFor(student))).resolves.toEqual({
+      status: "closed",
+    });
 
     const [attempt] = await getAttempts(assessment.id);
     expect(attempt).toMatchObject({
@@ -592,7 +597,7 @@ describe("Timed quiz attempts (e2e)", () => {
       .where(eq(lessons.id, lesson.id));
     const { attemptId } = await startAttemptState(cookies, lesson.id);
     await expireAttempt(attemptId, pastGrace);
-    await app.get(LessonService).finalizeExpiredQuizAttempt(attemptId, actorFor(student));
+    await finalizeExpiredAttempt(attemptId, actorFor(student));
 
     const retake = await request(app.getHttpServer())
       .delete("/api/lesson/delete-student-quiz-answers")
@@ -608,9 +613,9 @@ describe("Timed quiz attempts (e2e)", () => {
     await expireAttempt(attemptId, pastGrace);
     await db.delete(studentCourses).where(eq(studentCourses.studentId, student.id));
 
-    await expect(
-      app.get(LessonService).finalizeExpiredQuizAttempt(attemptId, actorFor(student)),
-    ).resolves.toEqual({ status: "closed" });
+    await expect(finalizeExpiredAttempt(attemptId, actorFor(student))).resolves.toEqual({
+      status: "closed",
+    });
 
     const [attempt] = await getAttempts(assessment.id);
     expect(attempt.submissionStatus).toBe(ASSESSMENT_ATTEMPT_SUBMISSION_STATUSES.CANCELLED);
@@ -632,9 +637,9 @@ describe("Timed quiz attempts (e2e)", () => {
     await db.delete(assessmentQuestions).where(eq(assessmentQuestions.id, questions[1].questionId));
     await expireAttempt(attemptId, pastGrace);
 
-    await expect(
-      app.get(LessonService).finalizeExpiredQuizAttempt(attemptId, actorFor(student)),
-    ).resolves.toEqual({ status: "closed" });
+    await expect(finalizeExpiredAttempt(attemptId, actorFor(student))).resolves.toEqual({
+      status: "closed",
+    });
 
     const [attempt] = await getAttempts(assessment.id);
     expect(attempt).toMatchObject({
@@ -666,7 +671,7 @@ describe("Timed quiz attempts (e2e)", () => {
     await expireAttempt(attemptId, pastGrace);
 
     const [, lessonView] = await Promise.all([
-      app.get(LessonService).finalizeExpiredQuizAttempt(attemptId, actorFor(student)),
+      finalizeExpiredAttempt(attemptId, actorFor(student)),
       getLessonView(cookies, lesson.id),
     ]);
 
@@ -681,10 +686,14 @@ describe("Timed quiz attempts (e2e)", () => {
     const { student, cookies, lesson, assessment } = await setupQuiz(10);
     await startAttemptState(cookies, lesson.id);
 
-    const stats = await app.get(StatisticsRepository).getQuizStats(student.id);
+    const stats = await runAsTenant(student.tenantId, () =>
+      app.get(StatisticsRepository).getQuizStats(student.id),
+    );
     expect(stats.totalAttempts).toBe(0);
     await expect(
-      app.get(QuizAttemptService).findLatestAttemptFeedback(assessment.id, student.id),
+      runAsTenant(student.tenantId, () =>
+        app.get(QuizAttemptService).findLatestAttemptFeedback(assessment.id, student.id),
+      ),
     ).resolves.toBeNull();
   });
 });

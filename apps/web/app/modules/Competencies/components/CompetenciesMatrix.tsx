@@ -34,7 +34,7 @@ export function CompetenciesMatrix({
 }) {
   const { t, i18n } = useTranslation();
   const definitions = new Map(matrix.competencies.map((item) => [item.id, item]));
-  const columns = matrix.profile.requirements.flatMap(
+  const columns = matrix.track.requirements.flatMap(
     (requirement) => definitions.get(requirement.competencyId) ?? [],
   );
   const levelLabel = (index: number, name?: string) =>

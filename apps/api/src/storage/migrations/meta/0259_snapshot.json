@@ -1,5 +1,5 @@
 {
-  "id": "8f2d4e76-3e5e-4e0c-b671-9da91322b98c",
+  "id": "cc73c2e9-da35-4f20-9527-0ec3a910f0be",
   "prevId": "2d4d917b-8ed8-43de-b939-2943ceed064e",
   "version": "7",
   "dialect": "postgresql",
@@ -6787,13 +6787,7 @@
           "name": "course_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
-        },
-        "draft_course_id": {
-          "name": "draft_course_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "session_id": {
           "name": "session_id",
@@ -6897,21 +6891,6 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "course_authoring_applications_draft_idx": {
-          "name": "course_authoring_applications_draft_idx",
-          "columns": [
-            {
-              "expression": "draft_course_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
@@ -6934,19 +6913,6 @@
           "tableTo": "courses",
           "columnsFrom": [
             "course_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "course_authoring_applications_draft_course_id_course_authoring_drafts_id_fk": {
-          "name": "course_authoring_applications_draft_course_id_course_authoring_drafts_id_fk",
-          "tableFrom": "course_authoring_applications",
-          "tableTo": "course_authoring_drafts",
-          "columnsFrom": [
-            "draft_course_id"
           ],
           "columnsTo": [
             "id"
@@ -7333,249 +7299,6 @@
           "tableTo": "course_authoring_context_bindings",
           "columnsFrom": [
             "binding_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.course_authoring_drafts": {
-      "name": "course_authoring_drafts",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        },
-        "owner_id": {
-          "name": "owner_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "creation_command_id": {
-          "name": "creation_command_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "luma_session_id": {
-          "name": "luma_session_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "cursor_sequence": {
-          "name": "cursor_sequence",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "last_polled_at": {
-          "name": "last_polled_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "course_id": {
-          "name": "course_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "last_activity_at": {
-          "name": "last_activity_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "expired_at": {
-          "name": "expired_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "discarded_at": {
-          "name": "discarded_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        }
-      },
-      "indexes": {
-        "course_authoring_drafts_tenant_id_idx": {
-          "name": "course_authoring_drafts_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "course_authoring_drafts_creation_unique": {
-          "name": "course_authoring_drafts_creation_unique",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "owner_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "creation_command_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "course_authoring_drafts_luma_session_unique": {
-          "name": "course_authoring_drafts_luma_session_unique",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "luma_session_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "course_authoring_drafts_poll_idx": {
-          "name": "course_authoring_drafts_poll_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "last_polled_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "\"course_authoring_drafts\".\"luma_session_id\" is not null and \"course_authoring_drafts\".\"course_id\" is null and \"course_authoring_drafts\".\"expired_at\" is null",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "course_authoring_drafts_expiration_idx": {
-          "name": "course_authoring_drafts_expiration_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "last_activity_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "\"course_authoring_drafts\".\"course_id\" is null and \"course_authoring_drafts\".\"discarded_at\" is null",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "course_authoring_drafts_tenant_id_tenants_id_fk": {
-          "name": "course_authoring_drafts_tenant_id_tenants_id_fk",
-          "tableFrom": "course_authoring_drafts",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "course_authoring_drafts_owner_id_users_id_fk": {
-          "name": "course_authoring_drafts_owner_id_users_id_fk",
-          "tableFrom": "course_authoring_drafts",
-          "tableTo": "users",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "course_authoring_drafts_course_id_courses_id_fk": {
-          "name": "course_authoring_drafts_course_id_courses_id_fk",
-          "tableFrom": "course_authoring_drafts",
-          "tableTo": "courses",
-          "columnsFrom": [
-            "course_id"
           ],
           "columnsTo": [
             "id"
@@ -21047,6 +20770,26 @@
           "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": false
+        },
+        "max_users": {
+          "name": "max_users",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_users_overflow_percentage": {
+          "name": "max_users_overflow_percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "user_capacity_alert_level": {
+          "name": "user_capacity_alert_level",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'within_limit'"
         }
       },
       "indexes": {

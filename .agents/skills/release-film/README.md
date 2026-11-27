@@ -236,7 +236,7 @@ describes the keys and the other commands.
   "brand": { "font": { "family": "all-round-gothic" }, "colors": { "accent": "#3f58b6", "frame": "#222949" } },
   "harness": {
     "config": "apps/web/playwright.config.ts",
-    "node": "22.15.0",
+    "node": "24.22.3",
     "install": [
       "cd ../.. && pnpm install --frozen-lockfile",
       "cd ../.. && pnpm -w packages:build",

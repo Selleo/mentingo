@@ -4,7 +4,7 @@ import type {
   CompetencyCatalogItem,
   CompetencyCondition,
   CompetencyInput,
-  CompetencyProfileItem,
+  CompetencyTrackItem,
   CompetencyReadiness,
   CompetencyReviewDecision,
   CompetencyReviewItem,
@@ -34,13 +34,13 @@ export type CompetenciesOverviewOptions = {
   onSetupStepStart: (step: CompetenciesSetupStep) => void;
 };
 
-export type CompetenciesProfileEditorOptions = {
-  profile?: CompetencyProfileItem;
+export type CompetenciesTrackEditorOptions = {
+  track?: CompetencyTrackItem;
   close: () => void;
 };
 
-export type CompetenciesProfilesOptions = {
-  onEdit: (profile: CompetencyProfileItem) => void;
+export type CompetenciesTracksOptions = {
+  onEdit: (track: CompetencyTrackItem) => void;
   onCreate?: () => void;
 };
 
@@ -104,6 +104,6 @@ export type CompetencyReviewDecisionDraft = {
 export type CompetenciesOverviewQueryOptions = PaginationReducerState & {
   canManage: boolean;
   view: OverviewView;
-  profileFilter: string;
+  trackFilter: string;
   statusFilter: CompetencyReadiness | null;
 };

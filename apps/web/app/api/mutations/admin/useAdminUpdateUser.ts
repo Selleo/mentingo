@@ -7,6 +7,7 @@ import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
 import { invalidateCertificateResetData } from "~/api/utils/invalidateCertificateResetData";
 import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
+import { invalidateTenantUserCountQueries } from "~/api/utils/invalidateTenantUserCountQueries";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -45,6 +46,7 @@ export function useAdminUpdateUser() {
       await queryClient.invalidateQueries(globalSettingsQueryOptions);
       await invalidateCertificateResetData();
       await invalidateLearningPathEnrollmentData();
+      await invalidateTenantUserCountQueries();
 
       await invalidateCourseStatisticsQueries();
     },

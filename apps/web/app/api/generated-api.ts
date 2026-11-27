@@ -9767,7 +9767,8 @@ export interface ListEmailTemplateEventsResponse {
       | "quiz_attempt_graded"
       | "quiz_grading_digest"
       | "forum_mention"
-      | "discussion_reply";
+      | "discussion_reply"
+      | "tenant_user_capacity";
     label: string;
     description: string;
     recipientPolicy: string;
@@ -10820,6 +10821,7 @@ export interface DuplicateEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -10857,6 +10859,7 @@ export interface DuplicateEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -11869,6 +11872,7 @@ export interface ListEmailTemplatesResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -11906,6 +11910,7 @@ export interface ListEmailTemplatesResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -12924,6 +12929,7 @@ export interface GetBuiltInEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -12961,6 +12967,7 @@ export interface GetBuiltInEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -13973,6 +13980,7 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -14010,6 +14018,7 @@ export interface CreateDraftFromBuiltInEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -15022,6 +15031,7 @@ export interface GetEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -15059,6 +15069,7 @@ export interface GetEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -16055,7 +16066,8 @@ export interface CreateEmailTemplateBody {
     | "quiz_attempt_graded"
     | "quiz_grading_digest"
     | "forum_mention"
-    | "discussion_reply";
+    | "discussion_reply"
+    | "tenant_user_capacity";
   populateEventTags?: boolean;
   /** @maxItems 100 */
   placeholders?: {
@@ -17059,6 +17071,7 @@ export interface CreateEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -17096,6 +17109,7 @@ export interface CreateEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -18094,6 +18108,7 @@ export interface UpdateEmailTemplateBody {
         | "quiz_grading_digest"
         | "forum_mention"
         | "discussion_reply"
+        | "tenant_user_capacity"
       )
     | null;
   name?: {
@@ -19096,6 +19111,7 @@ export interface UpdateEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -19133,6 +19149,7 @@ export interface UpdateEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -20150,6 +20167,7 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -20187,6 +20205,7 @@ export interface UpdateEmailTemplateBaseLanguageResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -21206,6 +21225,7 @@ export interface PublishEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -21243,6 +21263,7 @@ export interface PublishEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -22255,6 +22276,7 @@ export interface ArchiveEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -22292,6 +22314,7 @@ export interface ArchiveEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -23308,6 +23331,7 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -23345,6 +23369,7 @@ export interface RemoveEmailTemplateLanguageResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -24357,6 +24382,7 @@ export interface RestoreEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     event?:
@@ -24394,6 +24420,7 @@ export interface RestoreEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @maxItems 100 */
@@ -26344,6 +26371,7 @@ export interface PreviewEmailTemplateResponse {
           | "quiz_grading_digest"
           | "forum_mention"
           | "discussion_reply"
+          | "tenant_user_capacity"
         )
       | null;
     /** @default "en" */
@@ -26429,6 +26457,7 @@ export interface ListAutomationsResponse {
                     | "quiz_grading_digest"
                     | "forum_mention"
                     | "discussion_reply"
+                    | "tenant_user_capacity"
                   )
                 | null;
             };
@@ -26480,7 +26509,8 @@ export interface ListAutomationsResponse {
                           | "quiz_attempt_graded"
                           | "quiz_grading_digest"
                           | "forum_mention"
-                          | "discussion_reply";
+                          | "discussion_reply"
+                          | "tenant_user_capacity";
                       }
                     | {
                         type: "custom";
@@ -26595,6 +26625,7 @@ export interface ListAutomationsResponse {
                       | "quiz_grading_digest"
                       | "forum_mention"
                       | "discussion_reply"
+                      | "tenant_user_capacity"
                     )
                   | null;
               };
@@ -26646,7 +26677,8 @@ export interface ListAutomationsResponse {
                             | "quiz_attempt_graded"
                             | "quiz_grading_digest"
                             | "forum_mention"
-                            | "discussion_reply";
+                            | "discussion_reply"
+                            | "tenant_user_capacity";
                         }
                       | {
                           type: "custom";
@@ -26739,7 +26771,8 @@ export interface ListAutomationEventsResponse {
       | "quiz_attempt_graded"
       | "quiz_grading_digest"
       | "forum_mention"
-      | "discussion_reply";
+      | "discussion_reply"
+      | "tenant_user_capacity";
     label: string;
     description: string;
     recipientPolicy: string;
@@ -26810,7 +26843,8 @@ export interface ListAvailableEmailTemplatesResponse {
             | "quiz_attempt_graded"
             | "quiz_grading_digest"
             | "forum_mention"
-            | "discussion_reply";
+            | "discussion_reply"
+            | "tenant_user_capacity";
         }
       | {
           type: "custom";
@@ -26866,7 +26900,8 @@ export interface ListBuiltInAutomationTemplatesResponse {
       | "quiz_attempt_graded"
       | "quiz_grading_digest"
       | "forum_mention"
-      | "discussion_reply";
+      | "discussion_reply"
+      | "tenant_user_capacity";
     definition: {
       /**
        * @minLength 1
@@ -26940,6 +26975,7 @@ export interface ListBuiltInAutomationTemplatesResponse {
                       | "quiz_grading_digest"
                       | "forum_mention"
                       | "discussion_reply"
+                      | "tenant_user_capacity"
                     )
                   | null;
               };
@@ -26991,7 +27027,8 @@ export interface ListBuiltInAutomationTemplatesResponse {
                             | "quiz_attempt_graded"
                             | "quiz_grading_digest"
                             | "forum_mention"
-                            | "discussion_reply";
+                            | "discussion_reply"
+                            | "tenant_user_capacity";
                         }
                       | {
                           type: "custom";
@@ -27100,6 +27137,7 @@ export interface SimulateAutomationBody {
                   | "quiz_grading_digest"
                   | "forum_mention"
                   | "discussion_reply"
+                  | "tenant_user_capacity"
                 )
               | null;
           };
@@ -27151,7 +27189,8 @@ export interface SimulateAutomationBody {
                         | "quiz_attempt_graded"
                         | "quiz_grading_digest"
                         | "forum_mention"
-                        | "discussion_reply";
+                        | "discussion_reply"
+                        | "tenant_user_capacity";
                     }
                   | {
                       type: "custom";
@@ -27298,7 +27337,8 @@ export interface SimulateAutomationResponse {
               | "quiz_attempt_graded"
               | "quiz_grading_digest"
               | "forum_mention"
-              | "discussion_reply";
+              | "discussion_reply"
+              | "tenant_user_capacity";
           }
         | {
             type: "custom";
@@ -27386,6 +27426,7 @@ export interface CreateAutomationBody {
                   | "quiz_grading_digest"
                   | "forum_mention"
                   | "discussion_reply"
+                  | "tenant_user_capacity"
                 )
               | null;
           };
@@ -27437,7 +27478,8 @@ export interface CreateAutomationBody {
                         | "quiz_attempt_graded"
                         | "quiz_grading_digest"
                         | "forum_mention"
-                        | "discussion_reply";
+                        | "discussion_reply"
+                        | "tenant_user_capacity";
                     }
                   | {
                       type: "custom";
@@ -27550,6 +27592,7 @@ export interface CreateAutomationResponse {
                     | "quiz_grading_digest"
                     | "forum_mention"
                     | "discussion_reply"
+                    | "tenant_user_capacity"
                   )
                 | null;
             };
@@ -27601,7 +27644,8 @@ export interface CreateAutomationResponse {
                           | "quiz_attempt_graded"
                           | "quiz_grading_digest"
                           | "forum_mention"
-                          | "discussion_reply";
+                          | "discussion_reply"
+                          | "tenant_user_capacity";
                       }
                     | {
                         type: "custom";
@@ -27716,6 +27760,7 @@ export interface CreateAutomationResponse {
                       | "quiz_grading_digest"
                       | "forum_mention"
                       | "discussion_reply"
+                      | "tenant_user_capacity"
                     )
                   | null;
               };
@@ -27767,7 +27812,8 @@ export interface CreateAutomationResponse {
                             | "quiz_attempt_graded"
                             | "quiz_grading_digest"
                             | "forum_mention"
-                            | "discussion_reply";
+                            | "discussion_reply"
+                            | "tenant_user_capacity";
                         }
                       | {
                           type: "custom";
@@ -27884,6 +27930,7 @@ export interface CreateAutomationFromTemplateResponse {
                     | "quiz_grading_digest"
                     | "forum_mention"
                     | "discussion_reply"
+                    | "tenant_user_capacity"
                   )
                 | null;
             };
@@ -27935,7 +27982,8 @@ export interface CreateAutomationFromTemplateResponse {
                           | "quiz_attempt_graded"
                           | "quiz_grading_digest"
                           | "forum_mention"
-                          | "discussion_reply";
+                          | "discussion_reply"
+                          | "tenant_user_capacity";
                       }
                     | {
                         type: "custom";
@@ -28050,6 +28098,7 @@ export interface CreateAutomationFromTemplateResponse {
                       | "quiz_grading_digest"
                       | "forum_mention"
                       | "discussion_reply"
+                      | "tenant_user_capacity"
                     )
                   | null;
               };
@@ -28101,7 +28150,8 @@ export interface CreateAutomationFromTemplateResponse {
                             | "quiz_attempt_graded"
                             | "quiz_grading_digest"
                             | "forum_mention"
-                            | "discussion_reply";
+                            | "discussion_reply"
+                            | "tenant_user_capacity";
                         }
                       | {
                           type: "custom";
@@ -28218,6 +28268,7 @@ export interface GetAutomationResponse {
                     | "quiz_grading_digest"
                     | "forum_mention"
                     | "discussion_reply"
+                    | "tenant_user_capacity"
                   )
                 | null;
             };
@@ -28269,7 +28320,8 @@ export interface GetAutomationResponse {
                           | "quiz_attempt_graded"
                           | "quiz_grading_digest"
                           | "forum_mention"
-                          | "discussion_reply";
+                          | "discussion_reply"
+                          | "tenant_user_capacity";
                       }
                     | {
                         type: "custom";
@@ -28384,6 +28436,7 @@ export interface GetAutomationResponse {
                       | "quiz_grading_digest"
                       | "forum_mention"
                       | "discussion_reply"
+                      | "tenant_user_capacity"
                     )
                   | null;
               };
@@ -28435,7 +28488,8 @@ export interface GetAutomationResponse {
                             | "quiz_attempt_graded"
                             | "quiz_grading_digest"
                             | "forum_mention"
-                            | "discussion_reply";
+                            | "discussion_reply"
+                            | "tenant_user_capacity";
                         }
                       | {
                           type: "custom";
@@ -28551,6 +28605,7 @@ export interface UpdateAutomationBody {
                   | "quiz_grading_digest"
                   | "forum_mention"
                   | "discussion_reply"
+                  | "tenant_user_capacity"
                 )
               | null;
           };
@@ -28602,7 +28657,8 @@ export interface UpdateAutomationBody {
                         | "quiz_attempt_graded"
                         | "quiz_grading_digest"
                         | "forum_mention"
-                        | "discussion_reply";
+                        | "discussion_reply"
+                        | "tenant_user_capacity";
                     }
                   | {
                       type: "custom";
@@ -28715,6 +28771,7 @@ export interface UpdateAutomationResponse {
                     | "quiz_grading_digest"
                     | "forum_mention"
                     | "discussion_reply"
+                    | "tenant_user_capacity"
                   )
                 | null;
             };
@@ -28766,7 +28823,8 @@ export interface UpdateAutomationResponse {
                           | "quiz_attempt_graded"
                           | "quiz_grading_digest"
                           | "forum_mention"
-                          | "discussion_reply";
+                          | "discussion_reply"
+                          | "tenant_user_capacity";
                       }
                     | {
                         type: "custom";
@@ -28881,6 +28939,7 @@ export interface UpdateAutomationResponse {
                       | "quiz_grading_digest"
                       | "forum_mention"
                       | "discussion_reply"
+                      | "tenant_user_capacity"
                     )
                   | null;
               };
@@ -28932,7 +28991,8 @@ export interface UpdateAutomationResponse {
                             | "quiz_attempt_graded"
                             | "quiz_grading_digest"
                             | "forum_mention"
-                            | "discussion_reply";
+                            | "discussion_reply"
+                            | "tenant_user_capacity";
                         }
                       | {
                           type: "custom";
@@ -29056,6 +29116,7 @@ export interface DuplicateAutomationResponse {
                     | "quiz_grading_digest"
                     | "forum_mention"
                     | "discussion_reply"
+                    | "tenant_user_capacity"
                   )
                 | null;
             };
@@ -29107,7 +29168,8 @@ export interface DuplicateAutomationResponse {
                           | "quiz_attempt_graded"
                           | "quiz_grading_digest"
                           | "forum_mention"
-                          | "discussion_reply";
+                          | "discussion_reply"
+                          | "tenant_user_capacity";
                       }
                     | {
                         type: "custom";
@@ -29222,6 +29284,7 @@ export interface DuplicateAutomationResponse {
                       | "quiz_grading_digest"
                       | "forum_mention"
                       | "discussion_reply"
+                      | "tenant_user_capacity"
                     )
                   | null;
               };
@@ -29273,7 +29336,8 @@ export interface DuplicateAutomationResponse {
                             | "quiz_attempt_graded"
                             | "quiz_grading_digest"
                             | "forum_mention"
-                            | "discussion_reply";
+                            | "discussion_reply"
+                            | "tenant_user_capacity";
                         }
                       | {
                           type: "custom";
@@ -29390,6 +29454,7 @@ export interface ApplyAutomationBody {
                     | "quiz_grading_digest"
                     | "forum_mention"
                     | "discussion_reply"
+                    | "tenant_user_capacity"
                   )
                 | null;
             };
@@ -29441,7 +29506,8 @@ export interface ApplyAutomationBody {
                           | "quiz_attempt_graded"
                           | "quiz_grading_digest"
                           | "forum_mention"
-                          | "discussion_reply";
+                          | "discussion_reply"
+                          | "tenant_user_capacity";
                       }
                     | {
                         type: "custom";
@@ -29555,6 +29621,7 @@ export interface ApplyAutomationResponse {
                     | "quiz_grading_digest"
                     | "forum_mention"
                     | "discussion_reply"
+                    | "tenant_user_capacity"
                   )
                 | null;
             };
@@ -29606,7 +29673,8 @@ export interface ApplyAutomationResponse {
                           | "quiz_attempt_graded"
                           | "quiz_grading_digest"
                           | "forum_mention"
-                          | "discussion_reply";
+                          | "discussion_reply"
+                          | "tenant_user_capacity";
                       }
                     | {
                         type: "custom";
@@ -29721,6 +29789,7 @@ export interface ApplyAutomationResponse {
                       | "quiz_grading_digest"
                       | "forum_mention"
                       | "discussion_reply"
+                      | "tenant_user_capacity"
                     )
                   | null;
               };
@@ -29772,7 +29841,8 @@ export interface ApplyAutomationResponse {
                             | "quiz_attempt_graded"
                             | "quiz_grading_digest"
                             | "forum_mention"
-                            | "discussion_reply";
+                            | "discussion_reply"
+                            | "tenant_user_capacity";
                         }
                       | {
                           type: "custom";
@@ -29889,6 +29959,7 @@ export interface EnableAutomationResponse {
                     | "quiz_grading_digest"
                     | "forum_mention"
                     | "discussion_reply"
+                    | "tenant_user_capacity"
                   )
                 | null;
             };
@@ -29940,7 +30011,8 @@ export interface EnableAutomationResponse {
                           | "quiz_attempt_graded"
                           | "quiz_grading_digest"
                           | "forum_mention"
-                          | "discussion_reply";
+                          | "discussion_reply"
+                          | "tenant_user_capacity";
                       }
                     | {
                         type: "custom";
@@ -30055,6 +30127,7 @@ export interface EnableAutomationResponse {
                       | "quiz_grading_digest"
                       | "forum_mention"
                       | "discussion_reply"
+                      | "tenant_user_capacity"
                     )
                   | null;
               };
@@ -30106,7 +30179,8 @@ export interface EnableAutomationResponse {
                             | "quiz_attempt_graded"
                             | "quiz_grading_digest"
                             | "forum_mention"
-                            | "discussion_reply";
+                            | "discussion_reply"
+                            | "tenant_user_capacity";
                         }
                       | {
                           type: "custom";
@@ -30223,6 +30297,7 @@ export interface DisableAutomationResponse {
                     | "quiz_grading_digest"
                     | "forum_mention"
                     | "discussion_reply"
+                    | "tenant_user_capacity"
                   )
                 | null;
             };
@@ -30274,7 +30349,8 @@ export interface DisableAutomationResponse {
                           | "quiz_attempt_graded"
                           | "quiz_grading_digest"
                           | "forum_mention"
-                          | "discussion_reply";
+                          | "discussion_reply"
+                          | "tenant_user_capacity";
                       }
                     | {
                         type: "custom";
@@ -30389,6 +30465,7 @@ export interface DisableAutomationResponse {
                       | "quiz_grading_digest"
                       | "forum_mention"
                       | "discussion_reply"
+                      | "tenant_user_capacity"
                     )
                   | null;
               };
@@ -30440,7 +30517,8 @@ export interface DisableAutomationResponse {
                             | "quiz_attempt_graded"
                             | "quiz_grading_digest"
                             | "forum_mention"
-                            | "discussion_reply";
+                            | "discussion_reply"
+                            | "tenant_user_capacity";
                         }
                       | {
                           type: "custom";
@@ -30557,6 +30635,7 @@ export interface ArchiveAutomationResponse {
                     | "quiz_grading_digest"
                     | "forum_mention"
                     | "discussion_reply"
+                    | "tenant_user_capacity"
                   )
                 | null;
             };
@@ -30608,7 +30687,8 @@ export interface ArchiveAutomationResponse {
                           | "quiz_attempt_graded"
                           | "quiz_grading_digest"
                           | "forum_mention"
-                          | "discussion_reply";
+                          | "discussion_reply"
+                          | "tenant_user_capacity";
                       }
                     | {
                         type: "custom";
@@ -30723,6 +30803,7 @@ export interface ArchiveAutomationResponse {
                       | "quiz_grading_digest"
                       | "forum_mention"
                       | "discussion_reply"
+                      | "tenant_user_capacity"
                     )
                   | null;
               };
@@ -30774,7 +30855,8 @@ export interface ArchiveAutomationResponse {
                             | "quiz_attempt_graded"
                             | "quiz_grading_digest"
                             | "forum_mention"
-                            | "discussion_reply";
+                            | "discussion_reply"
+                            | "tenant_user_capacity";
                         }
                       | {
                           type: "custom";
@@ -30869,7 +30951,8 @@ export interface ListAutomationRunsResponse {
       | "quiz_attempt_graded"
       | "quiz_grading_digest"
       | "forum_mention"
-      | "discussion_reply";
+      | "discussion_reply"
+      | "tenant_user_capacity";
     status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
     createdAt: string;
     completedAt: string | null;
@@ -30938,7 +31021,8 @@ export interface GetAutomationRunResponse {
         | "quiz_attempt_graded"
         | "quiz_grading_digest"
         | "forum_mention"
-        | "discussion_reply";
+        | "discussion_reply"
+        | "tenant_user_capacity";
       status: "pending" | "processing" | "succeeded" | "warnings" | "failed" | "cancelled";
       createdAt: string;
       completedAt: string | null;
@@ -30992,7 +31076,8 @@ export interface GetAutomationRunResponse {
               | "quiz_attempt_graded"
               | "quiz_grading_digest"
               | "forum_mention"
-              | "discussion_reply";
+              | "discussion_reply"
+              | "tenant_user_capacity";
           }
         | {
             type: "custom";
@@ -34389,6 +34474,12 @@ export interface DiscoverPluginConnectionResponse {
       host: string;
       status: "active" | "inactive";
       accessEndsAt: string | null;
+      maxUsers: number | null;
+      /**
+       * @min 0
+       * @max 100
+       */
+      maxUsersOverflowPercentage: number;
     }[];
     canConfigurePlugins: boolean;
   };
@@ -34504,6 +34595,12 @@ export interface GetTenantsResponse {
     host: string;
     status: "active" | "inactive";
     accessEndsAt: string | null;
+    maxUsers: number | null;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxUsersOverflowPercentage: number;
   }[];
 }
 
@@ -34514,6 +34611,12 @@ export interface CreateTenantBody {
   host: string;
   status?: "active" | "inactive";
   accessEndsAt?: string | null;
+  maxUsers?: number | null;
+  /**
+   * @min 0
+   * @max 100
+   */
+  maxUsersOverflowPercentage?: number;
   /** @format email */
   adminEmail: string;
   /** @minLength 1 */
@@ -34532,6 +34635,12 @@ export interface CreateTenantResponse {
     status: "active" | "inactive";
     isManaging: boolean;
     accessEndsAt: string | null;
+    maxUsers: number | null;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxUsersOverflowPercentage: number;
     createdAt: string;
     updatedAt: string;
   };
@@ -34544,6 +34653,12 @@ export interface UpdateTenantBody {
   host?: string;
   status?: "active" | "inactive";
   accessEndsAt?: string | null;
+  maxUsers?: number | null;
+  /**
+   * @min 0
+   * @max 100
+   */
+  maxUsersOverflowPercentage?: number;
 }
 
 export interface UpdateTenantResponse {
@@ -34555,6 +34670,12 @@ export interface UpdateTenantResponse {
     status: "active" | "inactive";
     isManaging: boolean;
     accessEndsAt: string | null;
+    maxUsers: number | null;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxUsersOverflowPercentage: number;
     createdAt: string;
     updatedAt: string;
   };
@@ -34689,6 +34810,12 @@ export interface DeactivateTenantResponse {
     status: "active" | "inactive";
     isManaging: boolean;
     accessEndsAt: string | null;
+    maxUsers: number | null;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxUsersOverflowPercentage: number;
     createdAt: string;
     updatedAt: string;
   };
@@ -35012,6 +35139,12 @@ export interface FindAllTenantsResponse {
     status: "active" | "inactive";
     isManaging: boolean;
     accessEndsAt: string | null;
+    maxUsers: number | null;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxUsersOverflowPercentage: number;
     createdAt: string;
     updatedAt: string;
   } & {
@@ -35095,8 +35228,17 @@ export interface FindTenantByIdResponse {
     status: "active" | "inactive";
     isManaging: boolean;
     accessEndsAt: string | null;
+    maxUsers: number | null;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxUsersOverflowPercentage: number;
     createdAt: string;
     updatedAt: string;
+  } & {
+    /** @min 0 */
+    activeUsersCount: number;
   };
 }
 
@@ -35107,6 +35249,12 @@ export interface UpdateTenantByIdBody {
   host?: string;
   status?: "active" | "inactive";
   accessEndsAt?: string | null;
+  maxUsers?: number | null;
+  /**
+   * @min 0
+   * @max 100
+   */
+  maxUsersOverflowPercentage?: number;
 }
 
 export interface UpdateTenantByIdResponse {
@@ -35118,6 +35266,12 @@ export interface UpdateTenantByIdResponse {
     status: "active" | "inactive";
     isManaging: boolean;
     accessEndsAt: string | null;
+    maxUsers: number | null;
+    /**
+     * @min 0
+     * @max 100
+     */
+    maxUsersOverflowPercentage: number;
     createdAt: string;
     updatedAt: string;
   };
@@ -38494,6 +38648,7 @@ export interface GetCompetenciesConfigurationResponse {
     enabled: boolean;
     canManage: boolean;
     canPlan: boolean;
+    maxTracksPerPerson: number;
   };
 }
 
@@ -38504,8 +38659,8 @@ export interface GetCompetenciesSummaryResponse {
     pendingReviewCount: number;
     setup: {
       competencies: number;
-      profiles: number;
-      assignments: number;
+      tracks: number;
+      assignedPeople: number;
     };
   };
 }
@@ -38566,7 +38721,7 @@ export interface GetCompetencyCatalogResponse {
         }[];
       }[];
       categoryName: string | null;
-      profileCount: number;
+      trackCount: number;
     }[];
     pagination: {
       totalItems: number;
@@ -38576,7 +38731,7 @@ export interface GetCompetencyCatalogResponse {
   };
 }
 
-export interface GetCompetencyProfilesResponse {
+export interface GetCompetencyTracksResponse {
   data: {
     data: {
       /** @format uuid */
@@ -38609,12 +38764,15 @@ export interface GetCompetencyPeopleResponse {
       /** @format uuid */
       id: string;
       name: string;
-      profileId: string | null;
-      profileName: string | null;
+      tracks: {
+        /** @format uuid */
+        id: string;
+        name: string;
+      }[];
       profilePictureUrl: string | null;
       metCount: number;
       requirementCount: number;
-      readiness: "no_profile" | "missing" | "expiring" | "met";
+      readiness: "no_track" | "missing" | "expiring" | "met";
     }[];
     pagination: {
       totalItems: number;
@@ -38623,7 +38781,7 @@ export interface GetCompetencyPeopleResponse {
     };
     counts: {
       all: number;
-      no_profile: number;
+      no_track: number;
       missing: number;
       expiring: number;
       met: number;
@@ -38654,7 +38812,7 @@ export interface GetCompetencyMatrixResponse {
       page: number;
       perPage: number;
     };
-    profile: {
+    track: {
       /** @format uuid */
       id: string;
       revision: number;
@@ -38794,7 +38952,7 @@ export interface GetCompetencySubjectResponse {
       name: string;
       profilePictureUrl: string | null;
     } | null;
-    profile: {
+    tracks: {
       /** @format uuid */
       id: string;
       revision: number;
@@ -38809,17 +38967,20 @@ export interface GetCompetencySubjectResponse {
          */
         levelId: string;
       }[];
-    } | null;
+    }[];
     assessment: {
       /** @format uuid */
       subjectId: string;
-      profileId: string | null;
-      profileRevision: number | null;
+      tracks: {
+        /** @format uuid */
+        id: string;
+        revision: number;
+      }[];
       asOf: string;
       coverage: number | null;
       metCount: number;
       requirementCount: number;
-      readiness: "no_profile" | "missing" | "expiring" | "met";
+      readiness: "no_track" | "missing" | "expiring" | "met";
       requirements: {
         requirement: {
           /** @format uuid */
@@ -38830,6 +38991,7 @@ export interface GetCompetencySubjectResponse {
            */
           levelId: string;
         };
+        trackIds: string[];
         met: boolean;
         expiring: boolean;
         standing: {
@@ -39103,7 +39265,7 @@ export type ExecuteCompetenciesCommandBody =
       revision: number;
     }
   | {
-      operation: "save_profile";
+      operation: "save_track";
       /** @format uuid */
       id?: string;
       /** @min 1 */
@@ -39128,17 +39290,21 @@ export type ExecuteCompetenciesCommandBody =
       };
     }
   | {
-      operation: "delete_profile";
+      operation: "delete_track";
       /** @format uuid */
       id: string;
       /** @min 1 */
       revision: number;
     }
   | {
-      operation: "assign_profile";
+      operation: "assign_tracks";
       /** @format uuid */
       subjectId: string;
-      profileId: string | null;
+      /**
+       * @maxItems 5
+       * @uniqueItems true
+       */
+      trackIds: string[];
     }
   | {
       operation: "submit_evidence";
@@ -46115,7 +46281,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "quiz_attempt_graded"
         | "quiz_grading_digest"
         | "forum_mention"
-        | "discussion_reply",
+        | "discussion_reply"
+        | "tenant_user_capacity",
       params: RequestParams = {},
     ) =>
       this.request<GetBuiltInEmailTemplateResponse, any>({
@@ -46165,7 +46332,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "quiz_attempt_graded"
         | "quiz_grading_digest"
         | "forum_mention"
-        | "discussion_reply",
+        | "discussion_reply"
+        | "tenant_user_capacity",
       params: RequestParams = {},
     ) =>
       this.request<CreateDraftFromBuiltInEmailTemplateResponse, any>({
@@ -46547,7 +46715,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         | "quiz_attempt_graded"
         | "quiz_grading_digest"
         | "forum_mention"
-        | "discussion_reply",
+        | "discussion_reply"
+        | "tenant_user_capacity",
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
@@ -49531,7 +49700,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description Returns all tenants accessible to the current integration API key. Use this endpoint first to discover which tenant IDs you can operate on. For the rest of integration endpoints, pass one of those IDs in the X-Tenant-Id header.
+     * @description Returns all tenants accessible to the current integration API key. Use this endpoint first to discover which tenant IDs you can operate on. For the rest of integration endpoints, pass one of those IDs in the X-Tenant-Id header. Each tenant includes its user capacity: maxUsers (null means no limit) and maxUsersOverflowPercentage.
      *
      * @tags Integration
      * @name IntegrationControllerGetTenants
@@ -49547,7 +49716,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description Creates a new tenant and invites its initial admin user. Optional accessEndsAt blocks the tenant from that moment, like an inactive status. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     * @description Creates a new tenant and invites its initial admin user. Optional accessEndsAt blocks the tenant from that moment, like an inactive status. Optional maxUsers caps the tenant's users (archived and deleted users don't count; null means no limit) and maxUsersOverflowPercentage allows that many percent more, e.g. 200 with 10 allows 220. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
      *
      * @tags Integration
      * @name IntegrationControllerCreateTenant
@@ -49565,7 +49734,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description Updates the target tenant's name, host, status, or access end date. Send accessEndsAt as null to clear it. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     * @description Updates the target tenant's name, host, status, access end date, or user capacity. Send accessEndsAt or maxUsers as null to clear it. maxUsers caps the tenant's users (archived and deleted users don't count; null means no limit) and maxUsersOverflowPercentage allows that many percent more, e.g. 200 with 10 allows 220. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
      *
      * @tags Integration
      * @name IntegrationControllerUpdateTenant
@@ -49736,7 +49905,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description Creates a new user inside the tenant selected by X-Tenant-Id. Provide the user payload in the request body. The response returns the created user ID so your external system can persist the Mentingo mapping.
+     * @description Creates a new user inside the tenant selected by X-Tenant-Id. Provide the user payload in the request body. The response returns the created user ID so your external system can persist the Mentingo mapping. Fails with 409 user.error.userLimitReached when the tenant's user capacity is reached.
      *
      * @tags Integration
      * @name IntegrationControllerCreateUser
@@ -49799,7 +49968,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description Updates an existing tenant user identified by userId. Only fields included in the body are modified. Use this endpoint for profile, role, or status synchronization from an external identity source.
+     * @description Updates an existing tenant user identified by userId. Only fields included in the body are modified. Use this endpoint for profile, role, or status synchronization from an external identity source. Unarchiving a user fails with 409 user.error.userLimitReached when the tenant's user capacity is reached.
      *
      * @tags Integration
      * @name IntegrationControllerUpdateUser
@@ -51454,10 +51623,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CompetenciesControllerGetCompetencyProfiles
-     * @request GET:/api/competencies/profiles
+     * @name CompetenciesControllerGetCompetencyTracks
+     * @request GET:/api/competencies/tracks
      */
-    competenciesControllerGetCompetencyProfiles: (
+    competenciesControllerGetCompetencyTracks: (
       query?: {
         /**
          * @min 1
@@ -51481,8 +51650,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<GetCompetencyProfilesResponse, any>({
-        path: `/api/competencies/profiles`,
+      this.request<GetCompetencyTracksResponse, any>({
+        path: `/api/competencies/tracks`,
         method: "GET",
         query: query,
         format: "json",
@@ -51510,8 +51679,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @maxLength 200 */
         search?: string;
         /** @format uuid */
-        profileId?: string;
-        readiness?: "no_profile" | "missing" | "expiring" | "met";
+        trackId?: string;
+        readiness?: "no_track" | "missing" | "expiring" | "met";
         teamOnly?: "true" | "false";
       },
       params: RequestParams = {},
@@ -51533,7 +51702,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     competenciesControllerGetCompetencyMatrix: (
       query?: {
         /** @format uuid */
-        profileId?: string;
+        trackId?: string;
         /**
          * @min 1
          * @max 1000000
@@ -51622,7 +51791,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       subjectId: string,
       query?: {
         /** @format uuid */
-        profileId?: string;
+        trackId?: string;
       },
       params: RequestParams = {},
     ) =>

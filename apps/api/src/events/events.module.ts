@@ -18,6 +18,7 @@ import { StatisticsModule } from "src/statistics/statistics.module";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { NotifyAdminsHandler } from "src/user/handlers/notify-admins.handler";
 import { NotifyUsersHandler } from "src/user/handlers/notify-users.handler";
+import { TenantUserCapacityAlertHandler } from "src/user/handlers/tenant-user-capacity-alert.handler";
 import { UserModule } from "src/user/user.module";
 
 @Global()
@@ -40,6 +41,7 @@ import { UserModule } from "src/user/user.module";
   providers: [
     NotifyAdminsHandler,
     NotifyUsersHandler,
+    TenantUserCapacityAlertHandler,
     AnnouncementEmailHandler,
     CourseChatMentionEmailHandler,
     S3Service,

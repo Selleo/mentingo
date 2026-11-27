@@ -12,23 +12,23 @@ import {
 import { cn } from "~/lib/utils";
 
 import { COMPETENCIES_HANDLES } from "../../../../e2e/data/competencies/handles";
-import { tableHeadClassName } from "../utils/competenciesOverview.utils";
+import { formatTrackNames, tableHeadClassName } from "../utils/competenciesOverview.utils";
 
 import { CompetenciesPersonAvatar } from "./CompetenciesPersonAvatar";
-import { CompetenciesProfilePicker } from "./CompetenciesProfilePicker";
+import { CompetenciesTrackAssignment } from "./CompetenciesTrackAssignment";
 import { CompetencyReadinessBadge } from "./CompetencyReadinessBadge";
 
 import type { CompetenciesOverviewModel } from "../hooks/competencies-hook-models.types";
 
 type CompetenciesPeopleTableProps = Pick<
   CompetenciesOverviewModel,
-  "execute" | "isPending" | "profiles" | "people" | "canManage" | "onPersonOpen"
+  "execute" | "isPending" | "tracks" | "people" | "canManage" | "onPersonOpen"
 >;
 
 export function CompetenciesPeopleTable({
   execute,
   isPending,
-  profiles,
+  tracks,
   people,
   canManage,
   onPersonOpen,
@@ -41,8 +41,8 @@ export function CompetenciesPeopleTable({
           <TableHead className={cn(tableHeadClassName, "pl-6")}>
             {t("competencies.person")}
           </TableHead>
-          <TableHead className={cn(tableHeadClassName, "w-72 min-w-56")}>
-            {t("competencies.profile")}
+          <TableHead className={cn(tableHeadClassName, "w-80 min-w-64")}>
+            {t("competencies.tracks")}
           </TableHead>
           <TableHead className={cn(tableHeadClassName, "min-w-44")}>
             {t("competencies.overview.readiness")}
@@ -78,29 +78,28 @@ export function CompetenciesPeopleTable({
                 </span>
               </button>
             </TableCell>
-            <TableCell className="w-72 min-w-56">
-              {canManage && profiles.length > 0 ? (
-                <CompetenciesProfilePicker
-                  label={`${t("competencies.profile")}: ${item.name}`}
-                  hideLabel
-                  value={item.profileId ?? ""}
-                  selectedLabel={item.profileName ?? undefined}
-                  emptyLabel={t("competencies.noProfile")}
+            {canManage && tracks.length > 0 ? (
+              <TableCell className="w-80 min-w-64" onClick={(event) => event.stopPropagation()}>
+                <CompetenciesTrackAssignment
+                  personName={item.name}
+                  tracks={item.tracks}
                   disabled={isPending}
-                  onChange={(profileId) =>
+                  onChange={(trackIds) =>
                     void execute({
-                      operation: "assign_profile",
+                      operation: "assign_tracks",
                       subjectId: item.id,
-                      profileId: profileId || null,
+                      trackIds,
                     }).catch(() => undefined)
                   }
                 />
-              ) : (
+              </TableCell>
+            ) : (
+              <TableCell className="w-80 min-w-64">
                 <span className="body-sm text-neutral-900">
-                  {item.profileName ?? t("competencies.noProfile")}
+                  {formatTrackNames(item.tracks) || t("competencies.noTrack")}
                 </span>
-              )}
-            </TableCell>
+              </TableCell>
+            )}
             <TableCell className="min-w-44">
               {item.requirementCount > 0 ? (
                 <div className="flex items-center gap-3">

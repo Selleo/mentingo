@@ -23,7 +23,7 @@ const classes = [CertificatesService, LearningPathCertificateService];
 
 describe("certificate markup security", () => {
   const payload = `<b><img src=x onerror=alert(1)>&&""''<>`;
-  it.each(["studentName", "courseName", "completionDate", "expiryDate"])(
+  it.each(["studentName", "courseName", "completionDate", "expiryDate", "certificateId"])(
     "encodes all occurrences in %s",
     (field) => {
       const html = buildCertificateMarkup({ [field]: payload });
@@ -61,6 +61,7 @@ describe("certificate markup security", () => {
       const html = buildCertificateMarkup({
         expiryDate,
         isDownload: true,
+        certificateId: "00000000-0000-0000-0000-000000000001",
         platformLogoUrl: "data:image/png;base64,AA==",
         signatureImageUrl: "data:image/png;base64,AA==",
       });
@@ -72,6 +73,15 @@ describe("certificate markup security", () => {
         expect(CERTIFICATE_STYLES).toContain(`.${selector} {`);
       }
     }
+  });
+
+  it("labels the certificate ID only when one is provided", () => {
+    const certificateId = "00000000-0000-0000-0000-000000000001";
+
+    expect(buildCertificateMarkup({ lang: "pl", certificateId })).toContain(
+      `ID certyfikatu: ${certificateId}`,
+    );
+    expect(buildCertificateMarkup({ lang: "pl" })).not.toContain("ID certyfikatu");
   });
 
   it("omits student email from every certificate layout", () => {
@@ -282,6 +292,7 @@ describe("certificate download wiring", () => {
 
     expect(html).toContain('<html lang="pl">');
     expect(html).toContain("<title>Certyfikat ukończenia – Ścieżka</title>");
+    expect(html).toContain("ID certyfikatu: cert");
     expect(result.filename).toBe("Certyfikat - Ścieżka - Łukasz Żółkiewski.pdf");
   });
 
@@ -310,6 +321,7 @@ describe("certificate download wiring", () => {
 
     expect(html).toContain('<html lang="pl">');
     expect(html).toContain("<title>Certyfikat ukończenia – Pierwsza pomoc</title>");
+    expect(html).toContain("ID certyfikatu: cert");
     expect(result.filename).toBe("Certyfikat - Pierwsza pomoc - Łukasz Żółkiewski.pdf");
   });
 });
@@ -458,8 +470,8 @@ describe.each(classes)("%p rendering", (Service) => {
     await service.getPublicShareImage("cert", "en" as SupportedLanguages);
     const namespace =
       Service === CertificatesService
-        ? "certificate-share/v4"
-        : "learning-path-certificate-share/v2";
+        ? "certificate-share/v5"
+        : "learning-path-certificate-share/v3";
     expect(service.s3Service.getFileBuffer).toHaveBeenCalledWith(
       `tenant-a/${namespace}/cert/en.png`,
     );

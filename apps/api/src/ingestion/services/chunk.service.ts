@@ -1,6 +1,5 @@
 import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
-import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { MAX_INGESTION_FILE_SIZE_BYTES } from "@repo/shared";
@@ -12,7 +11,12 @@ import {
   SEARCH_EXTRACTABLE_FILE_TYPES,
 } from "src/ingestion/ingestion.config";
 
-import { CsvSearchLoader, SpreadsheetLoader, validateOfficeArchive } from "./search-file.loaders";
+import {
+  CsvSearchLoader,
+  PresentationLoader,
+  SpreadsheetLoader,
+  validateOfficeArchive,
+} from "./search-file.loaders";
 
 import type { TextExtractionBody } from "src/ingestion/ingestion.schema";
 
@@ -56,7 +60,7 @@ export class ChunkService {
     switch (file.mimetype) {
       case SEARCH_FILE_TYPES_MAP.PPTX:
         validateOfficeArchive(file.buffer);
-        return new PPTXLoader(fileBlob).load();
+        return new PresentationLoader(fileBlob).load();
       case SEARCH_FILE_TYPES_MAP.XLSX:
         validateOfficeArchive(file.buffer);
         return new SpreadsheetLoader(fileBlob).load();

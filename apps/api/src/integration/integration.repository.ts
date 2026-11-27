@@ -142,6 +142,8 @@ export class IntegrationRepository {
         host: tenants.host,
         status: tenants.status,
         accessEndsAt: tenants.accessEndsAt,
+        maxUsers: tenants.maxUsers,
+        maxUsersOverflowPercentage: tenants.maxUsersOverflowPercentage,
       })
       .from(tenants)
       .orderBy(tenants.name);
@@ -155,6 +157,8 @@ export class IntegrationRepository {
         host: tenants.host,
         status: tenants.status,
         accessEndsAt: tenants.accessEndsAt,
+        maxUsers: tenants.maxUsers,
+        maxUsersOverflowPercentage: tenants.maxUsersOverflowPercentage,
         isManaging: tenants.isManaging,
       })
       .from(tenants)

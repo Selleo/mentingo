@@ -1,6 +1,6 @@
 # Running Core AI tests and experiments
 
-Run commands from the repository root using Node 22.15+, pnpm and installed/built workspace dependencies. See the [matrix](core-test-case-matrix.md) for which cases each runner owns.
+Run commands from the repository root using Node 24.22+, pnpm and installed/built workspace dependencies. See the [matrix](core-test-case-matrix.md) for which cases each runner owns.
 
 ## Package commands for local use
 

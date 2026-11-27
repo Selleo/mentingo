@@ -993,6 +993,49 @@ export const AUTOMATION_TRIGGER_DEFINITIONS: AutomationTriggerDefinition[] = [
       ),
     ],
   },
+  {
+    type: AUTOMATION_EVENT_KINDS.TENANT_USER_CAPACITY,
+    kind: AUTOMATION_NODE_KINDS.TRIGGER,
+    labelKey: "automationBuilder.blocks.tenantUserCapacity",
+    providedVariables: [
+      variable(
+        "capacityTitle",
+        "automationBuilder.variables.capacityTitle",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "capacity_title",
+      ),
+      variable(
+        "capacityMessage",
+        "automationBuilder.variables.capacityMessage",
+        AUTOMATION_PLACEHOLDER_TYPES.STRING,
+        "capacity_message",
+      ),
+      variable(
+        "activeUsersCount",
+        "automationBuilder.variables.activeUsersCount",
+        AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+        "active_users_count",
+      ),
+      variable(
+        "maxUsers",
+        "automationBuilder.variables.maxUsers",
+        AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+        "max_users",
+      ),
+      variable(
+        "allowedUsersCount",
+        "automationBuilder.variables.allowedUsersCount",
+        AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+        "allowed_users_count",
+      ),
+      variable(
+        "usersUrl",
+        "automationBuilder.variables.usersUrl",
+        AUTOMATION_PLACEHOLDER_TYPES.URL,
+        "users_link",
+      ),
+    ],
+  },
 ];
 
 export const getAutomationTriggerDefinition = (type: AutomationEventKind) =>

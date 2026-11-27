@@ -29,6 +29,7 @@ import { getUserFinishedCourseEmailTranslations } from "./translations/userFinis
 import { getUserFirstLoginEmailTranslations } from "./translations/userFirstLogin";
 import { getUserInviteEmailTranslations } from "./translations/userInvite";
 import { getUserLongInactivityEmailTranslations } from "./translations/userLongInactivity";
+import { getTenantUserCapacityEmailTranslations } from "./translations/tenantUserCapacity";
 import { getUserShortInactivityEmailTranslations } from "./translations/userShortInactivity";
 import { getWelcomeEmailTranslations } from "./translations/welcome";
 
@@ -778,6 +779,47 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
       }),
       buttonUrl: "{{ live_training_link }}",
     });
+  }),
+  createEmailTemplateDefinition({
+    event: EMAIL_TEMPLATE_EVENTS.TENANT_USER_CAPACITY,
+    name: EMAIL_TEMPLATE_NAMES.TENANT_USER_CAPACITY,
+    description:
+      "Sent to administrators when the organization approaches its user limit, reaches it, or runs out of user slots.",
+    sourceTemplate: "TenantUserCapacityEmail",
+    subject: buildNormalizedLocalizedSubjectTemplates("tenantUserCapacityEmail"),
+    variables: [
+      defineEmailTemplateVariable(
+        "capacity_title",
+        "Capacity alert title",
+        "text",
+        "Your organization has reached its user limit",
+        { required: true },
+      ),
+      defineEmailTemplateVariable(
+        "capacity_message",
+        "Capacity alert message",
+        "text",
+        "200 users are active and your plan includes 200. You can add up to 220 users in total.",
+        { required: true },
+      ),
+      defineEmailTemplateVariable("active_users_count", "Active users", "number", 200),
+      defineEmailTemplateVariable("max_users", "Users in plan", "number", 200),
+      defineEmailTemplateVariable("allowed_users_count", "Allowed users", "number", 220),
+      defineEmailTemplateVariable(
+        "users_link",
+        "Users page link",
+        "url",
+        "https://example.com/admin/users",
+        { required: true },
+      ),
+    ],
+    getContent: (language) =>
+      getTenantUserCapacityEmailTranslations(
+        language,
+        "{{ capacity_title }}",
+        "{{ capacity_message }}",
+      ),
+    buttonUrl: "{{ users_link }}",
   }),
 ] as const;
 
