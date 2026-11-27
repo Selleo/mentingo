@@ -95,7 +95,7 @@ describe("AuthoringActivityRail asset decisions", () => {
           onSkipAsset={vi.fn()}
         />,
       );
-      expect(screen.getByText(/Ponowienie może naliczyć kolejną opłatę/)).toBeVisible();
+      expect(screen.getByText(/Nie udało się potwierdzić, że ta grafika powstała/)).toBeVisible();
       expect(screen.getByText("Szczegóły")).toBeVisible();
       expect(screen.getByText(assetTask.question!)).not.toBeVisible();
     } finally {
@@ -137,7 +137,7 @@ describe("AuthoringActivityRail asset decisions", () => {
     );
 
     expect(screen.getByText("Generated visual")).toBeVisible();
-    expect(screen.getByText(/Retrying could charge you again/)).toBeVisible();
+    expect(screen.getByText(/We couldn't confirm that this image was created/)).toBeVisible();
     expect(screen.getByText(longTitle.trim())).not.toBeVisible();
     expect(screen.getByText(diagnostic)).not.toBeVisible();
     expect(screen.getByText(`Generated visual: ${prompt}`)).not.toBeVisible();
@@ -486,9 +486,7 @@ describe("AuthoringActivityRail asset decisions", () => {
     expect(screen.getAllByText("Searching sources…").length).toBeGreaterThan(0);
     expect(screen.getByText("Updating your course")).toBeVisible();
     expect(
-      screen.getByText(
-        "The course-generation step could not finish. Retry it or change your instructions.",
-      ),
+      screen.getByText("This step couldn't finish. Try again or change your instructions."),
     ).toBeVisible();
     expect(screen.queryByText("task_execution_failed")).toBeNull();
     expect(screen.getByText("Live work")).toBeVisible();
@@ -1128,7 +1126,7 @@ describe("AuthoringActivityRail recovery", () => {
       );
       expect(
         screen.getByText(
-          "This step requires a service fix. Your completed work is saved; retrying cannot resolve this issue.",
+          "This step can't be finished right now, and trying again won't help. Your finished work is saved. Contact support if this keeps happening.",
         ),
       ).toBeVisible();
       expect(screen.getAllByRole("button", { name: "Retry failed parts" })).toHaveLength(1);

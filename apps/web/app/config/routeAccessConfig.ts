@@ -170,6 +170,12 @@ export const routeAccessConfig = createRouteConfig({
   "admin/beta-courses/new/standard": {
     allOf: [PERMISSIONS.COURSE_CREATE],
   },
+  "admin/beta-courses/new/standard/ai": {
+    allOf: [PERMISSIONS.COURSE_CREATE, PERMISSIONS.COURSE_AI_GENERATION],
+  },
+  "admin/beta-courses/new/ai": {
+    allOf: [PERMISSIONS.COURSE_CREATE, PERMISSIONS.COURSE_AI_GENERATION],
+  },
   "admin/courses/new-scorm": {
     allOf: [PERMISSIONS.COURSE_CREATE],
   },

@@ -10,7 +10,7 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { users } from "src/storage/schema";
 
 import { CourseAuthoringApplicationService } from "./course-authoring-application.service";
-import { CourseAuthoringContextService } from "./course-authoring-context.service";
+import { CourseAuthoringSessionService } from "./course-authoring-session.service";
 
 import type { OnModuleDestroy } from "@nestjs/common";
 import type { CourseAuthoringAutonomousApplyJob } from "src/queue/queue.types";
@@ -24,7 +24,7 @@ export class CourseAuthoringAutonomousWorker implements OnModuleDestroy {
     queue: QueueService,
     tenants: TenantDbRunnerService,
     private readonly courseAuthoringApplicationService: CourseAuthoringApplicationService,
-    private readonly courseAuthoringContextService: CourseAuthoringContextService,
+    private readonly courseAuthoringSessionService: CourseAuthoringSessionService,
     @Inject(DB) private readonly db: DatabasePg,
   ) {
     this.worker = new Worker<CourseAuthoringAutonomousApplyJob>(
@@ -54,13 +54,17 @@ export class CourseAuthoringAutonomousWorker implements OnModuleDestroy {
           ),
         );
       if (!user) throw new ForbiddenException("common.toast.noAccess");
-      const actor = await this.courseAuthoringContextService.authorize(job.courseId, {
-        userId: user.id,
-        email: user.email,
-        tenantId: job.tenantId,
-        roleSlugs: [],
-        permissions: [],
-      });
+      const { actor } = await this.courseAuthoringSessionService.authorizeAccess(
+        job.courseId,
+        job.sessionId,
+        {
+          userId: user.id,
+          email: user.email,
+          tenantId: job.tenantId,
+          roleSlugs: [],
+          permissions: [],
+        },
+      );
       return this.courseAuthoringApplicationService.enqueue(
         job.courseId,
         job.sessionId,

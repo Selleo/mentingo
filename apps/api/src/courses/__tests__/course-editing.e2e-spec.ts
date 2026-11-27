@@ -843,12 +843,15 @@ describe("Course editing (e2e)", () => {
         .send(await arrangeCourseDraft())
         .expect(201);
 
-      expect(stripeServiceMock.createProduct).toHaveBeenCalledWith({
-        name: "New course",
-        description: "New course description",
-        currency: DEFAULT_E2E_GLOBAL_SETTINGS.defaultCourseCurrency,
-        amountInCents: 1500,
-      });
+      expect(stripeServiceMock.createProduct).toHaveBeenCalledWith(
+        {
+          name: "New course",
+          description: "New course description",
+          currency: DEFAULT_E2E_GLOBAL_SETTINGS.defaultCourseCurrency,
+          amountInCents: 1500,
+        },
+        undefined,
+      );
       expect(await findCourse(response.body.data.id)).toMatchObject({
         stripeProductId: "prod_created",
         stripePriceId: "price_created",

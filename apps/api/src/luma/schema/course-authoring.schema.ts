@@ -41,6 +41,7 @@ export const authoringCourseContextSchema = Type.Object({
   description: Type.String(),
   baselineHash: Type.String(),
   fieldHashes: Type.Record(Type.String(), Type.String()),
+  tenantPalette: Type.Optional(Type.Array(Type.String(), { maxItems: 2 })),
   chapters: Type.Array(
     Type.Object({
       id: UUIDSchema,

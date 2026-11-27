@@ -1,6 +1,6 @@
 /** Stores idempotency claims and delivery state for course-authoring applications within a tenant. */
 import { ConflictException, Inject, Injectable } from "@nestjs/common";
-import { and, eq, sql, isNull, asc, desc, lt, inArray } from "drizzle-orm";
+import { and, eq, sql, isNull, asc, desc, lt, inArray, or } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
@@ -9,6 +9,14 @@ import { courseAuthoringApplications, courseAuthoringStagedAssets } from "src/st
 import type { CourseAuthoringApplicationClaim } from "./course-authoring.types";
 import type { UUIDType } from "src/common";
 import type { CourseAuthoringApplicationResult } from "src/storage/schema/course-authoring.schema";
+
+const receiptCourseId = sql<string>`coalesce(${courseAuthoringApplications.draftCourseId}, ${courseAuthoringApplications.courseId})`;
+
+const receiptCourseMatches = (courseId: string) =>
+  or(
+    eq(courseAuthoringApplications.courseId, courseId),
+    eq(courseAuthoringApplications.draftCourseId, courseId),
+  );
 
 @Injectable()
 /** Provides tenant-scoped persistence and idempotent application claims. */
@@ -24,7 +32,7 @@ export class CourseAuthoringApplicationRepository {
       .where(
         and(
           eq(courseAuthoringApplications.tenantId, tenantId),
-          eq(courseAuthoringApplications.courseId, courseId),
+          receiptCourseMatches(courseId),
           eq(courseAuthoringApplications.exportId, exportId),
         ),
       );
@@ -39,7 +47,7 @@ export class CourseAuthoringApplicationRepository {
       .where(
         and(
           eq(courseAuthoringApplications.tenantId, tenantId),
-          eq(courseAuthoringApplications.courseId, courseId),
+          receiptCourseMatches(courseId),
           eq(courseAuthoringApplications.sessionId, sessionId),
           sql`${courseAuthoringApplications.result}->>'status' in ('failed', 'conflict')`,
         ),
@@ -70,14 +78,16 @@ export class CourseAuthoringApplicationRepository {
       if (existing) {
         if (
           existing.exportHash !== claim.exportHash ||
-          existing.courseId !== claim.courseId ||
-          existing.sessionId !== claim.sessionId
+          (existing.draftCourseId ?? existing.courseId) !== claim.courseId ||
+          existing.sessionId !== claim.sessionId ||
+          (claim.draftCourseId !== undefined && existing.actorId !== claim.actorId)
         )
           throw new ConflictException("courseAuthoring.errors.exportIdentityConflict");
         return existing.result;
       }
       await transaction.insert(courseAuthoringApplications).values({
         ...claim,
+        courseId: claim.draftCourseId ? null : claim.courseId,
         // The text cast prevents postgres.js from encoding Drizzle's JSON text a second time.
         result: sql`${JSON.stringify(result)}::text::jsonb`,
       });
@@ -117,6 +127,20 @@ export class CourseAuthoringApplicationRepository {
       .limit(100);
   }
 
+  /** Lists unapplied objects for an expired pre-course session's discard. */
+  async draftStagedAssets(tenantId: UUIDType, sessionId: UUIDType) {
+    return this.db
+      .select({ id: courseAuthoringStagedAssets.id, key: courseAuthoringStagedAssets.storageKey })
+      .from(courseAuthoringStagedAssets)
+      .where(
+        and(
+          eq(courseAuthoringStagedAssets.tenantId, tenantId),
+          eq(courseAuthoringStagedAssets.sessionId, sessionId),
+          isNull(courseAuthoringStagedAssets.appliedAt),
+        ),
+      );
+  }
+
   /** Serializes deletion with an apply claim and keeps the row if storage deletion fails. */
   async cleanExpiredStagedAsset(
     tenantId: UUIDType,
@@ -150,7 +174,7 @@ export class CourseAuthoringApplicationRepository {
     return this.db
       .select({
         exportId: courseAuthoringApplications.exportId,
-        courseId: courseAuthoringApplications.courseId,
+        courseId: receiptCourseId,
         sessionId: courseAuthoringApplications.sessionId,
         exportHash: courseAuthoringApplications.exportHash,
       })
@@ -158,7 +182,7 @@ export class CourseAuthoringApplicationRepository {
       .where(
         and(
           eq(courseAuthoringApplications.tenantId, tenantId),
-          eq(courseAuthoringApplications.courseId, courseId),
+          receiptCourseMatches(courseId),
           eq(courseAuthoringApplications.sessionId, sessionId),
           isNull(courseAuthoringApplications.receiptDeliveredAt),
         ),
@@ -171,7 +195,7 @@ export class CourseAuthoringApplicationRepository {
     return this.db
       .select({
         exportId: courseAuthoringApplications.exportId,
-        courseId: courseAuthoringApplications.courseId,
+        courseId: receiptCourseId,
         sessionId: courseAuthoringApplications.sessionId,
         exportHash: courseAuthoringApplications.exportHash,
       })
@@ -223,8 +247,9 @@ export class CourseAuthoringApplicationRepository {
       if (existing) {
         if (
           existing.exportHash !== claim.exportHash ||
-          existing.courseId !== claim.courseId ||
-          existing.sessionId !== claim.sessionId
+          (existing.draftCourseId ?? existing.courseId) !== claim.courseId ||
+          existing.sessionId !== claim.sessionId ||
+          (claim.draftCourseId !== undefined && existing.actorId !== claim.actorId)
         ) {
           throw new ConflictException("courseAuthoring.errors.exportIdentityConflict");
         }
@@ -249,6 +274,7 @@ export class CourseAuthoringApplicationRepository {
       const result = await apply(transaction);
       await transaction.insert(courseAuthoringApplications).values({
         ...claim,
+        courseId: claim.draftCourseId ? result.entityMappings[claim.draftCourseId] : claim.courseId,
         result: sql`${JSON.stringify(result)}::text::jsonb`,
       });
       const appliedKeys = Object.values(result.assetMappings);

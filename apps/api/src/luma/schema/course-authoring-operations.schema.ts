@@ -4,6 +4,8 @@ import {
   ASSESSMENT_QUESTION_TYPES,
   ASSESSMENT_TEXT_COMPARISON_MODES,
   SUPPORTED_LANGUAGES,
+  MAX_COURSE_TITLE_LENGTH,
+  MAX_COURSE_LEARNING_OUTCOMES,
   type AssessmentQuestionType,
 } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
@@ -298,9 +300,38 @@ export const manualAuthoringOperationSchema = Type.Union([
   ),
 ]);
 
-/** Agent-generated frozen exports also support server-owned image placement. */
+/** A draft-only export creates one native course with the author's selected metadata. */
+export const authoringCourseCreateOperationSchema = Type.Object(
+  {
+    ...operationBase,
+    type: Type.Literal("course.create"),
+    baselineHash: Type.Null(),
+    dependencies: Type.Array(UUIDSchema, { maxItems: 0 }),
+    fieldBaselines: Type.Optional(Type.Object({}, strict)),
+    payload: Type.Object(
+      {
+        title: Type.String({ minLength: 1, maxLength: MAX_COURSE_TITLE_LENGTH }),
+        description: Type.String({ minLength: 1, maxLength: 20_000 }),
+        learningOutcomes: Type.Array(Type.String({ minLength: 1, maxLength: 1_000 }), {
+          maxItems: MAX_COURSE_LEARNING_OUTCOMES,
+        }),
+        language: Type.Enum(SUPPORTED_LANGUAGES),
+        categoryId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
+        categoryTitle: Type.Optional(
+          Type.Union([Type.String({ minLength: 1, maxLength: 120 }), Type.Null()]),
+        ),
+        thumbnailAssetId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
+      },
+      strict,
+    ),
+  },
+  strict,
+);
+
+/** Frozen exports may contain server-owned image placement or course creation. */
 export const authoringOperationSchema = Type.Union([
   manualAuthoringOperationSchema,
+  authoringCourseCreateOperationSchema,
   Type.Object(
     {
       ...operationBase,

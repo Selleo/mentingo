@@ -10,6 +10,7 @@ import { Value } from "@sinclair/typebox/value";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { enqueueAuthoringAutonomousEvent } from "./course-authoring-autonomous-event";
 import { CourseAuthoringContextBridgeRepository } from "./course-authoring-context-bridge.repository";
 import { LumaService } from "./luma.service";
 import { authoringEventsSchema } from "./schema/course-authoring-session.schema";
@@ -19,10 +20,7 @@ import type {
   CourseAuthoringContextRequest,
 } from "./course-authoring-context-bridge.types";
 import type { UUIDType } from "src/common";
-import type {
-  CourseAuthoringAutonomousApplyJob,
-  CourseAuthoringContextFulfillmentJob,
-} from "src/queue/queue.types";
+import type { CourseAuthoringContextFulfillmentJob } from "src/queue/queue.types";
 
 const contextRequestSchema = Type.Object({
   schemaVersion: Type.Literal(1),
@@ -37,23 +35,6 @@ const contextRequestSchema = Type.Object({
   targetKinds: Type.Array(Type.String()),
   requestHash: Type.String({ minLength: 1 }),
 });
-
-const autonomousApplyRequestSchema = Type.Object(
-  {
-    schemaVersion: Type.Literal(1),
-    sessionId: Type.String({ format: "uuid" }),
-    courseId: Type.String({ format: "uuid" }),
-    requestId: Type.String({ format: "uuid" }),
-    actorId: Type.String({ format: "uuid" }),
-    controlEpoch: Type.Integer({ minimum: 0 }),
-    proposalIds: Type.Array(Type.String({ format: "uuid" }), {
-      minItems: 1,
-      maxItems: 100,
-      uniqueItems: true,
-    }),
-  },
-  { additionalProperties: false },
-);
 
 @Injectable()
 export class CourseAuthoringContextBridgeService {
@@ -169,24 +150,8 @@ export class CourseAuthoringContextBridgeService {
       });
     // Enqueue before advancing the cursor: a process crash replays the event, and
     // BullMQ's deterministic ID deduplicates the already durable job.
-    for (const event of page.events.filter((item) => item.type === "autonomous.apply_requested")) {
-      if (!Value.Check(autonomousApplyRequestSchema, event.payload))
-        throw new Error("Invalid autonomous apply request");
-      const { schemaVersion: _schemaVersion, ...request } = event.payload;
-      if (request.sessionId !== binding.sessionId || request.courseId !== binding.courseId)
-        throw new Error("Autonomous apply request does not match its Core binding");
-      await this.queue.enqueue<CourseAuthoringAutonomousApplyJob>(
-        QUEUE_NAMES.COURSE_AUTHORING_AUTONOMOUS,
-        "apply-autonomous-request",
-        { ...request, tenantId: binding.tenantId, eventId: event.eventId },
-        {
-          jobId: `autonomous-${binding.tenantId}-${event.eventId}`,
-          attempts: 10,
-          backoff: { type: "exponential", delay: 1000 },
-          removeOnComplete: { age: 604800 },
-          removeOnFail: false,
-        },
-      );
+    for (const event of page.events) {
+      await enqueueAuthoringAutonomousEvent(this.queue, binding, event);
     }
     if (lastSequence > binding.cursorSequence || requests.length) {
       await this.repository.persistPage(binding, binding.cursorSequence, lastSequence, requests);

@@ -19,6 +19,7 @@ const commandId = "00000000-0000-4000-8000-000000000003";
 const oldVersion = "00000000-0000-4000-8000-000000000004";
 const newVersion = "00000000-0000-4000-8000-000000000005";
 const taskId = "00000000-0000-4000-8000-000000000008";
+const nativeCourseId = "00000000-0000-4000-8000-000000000010";
 const requestId = "00000000-0000-4000-8000-000000000009";
 const actor: CurrentUserType = {
   userId: "00000000-0000-4000-8000-000000000006",
@@ -126,7 +127,16 @@ describe("CourseAuthoringSessionService source refresh", () => {
     const createSession = jest.fn().mockResolvedValue(snapshot);
     const getSession = jest.fn().mockResolvedValue(snapshot);
     const sendCommand = jest.fn().mockResolvedValue(receipt);
-    const context = { authorize, getContext, prepareBlockIdentities: jest.fn() };
+    const assertCourseAccess = jest.fn().mockResolvedValue(undefined);
+    const context = {
+      authorize,
+      assertCourseAccess,
+      getContext,
+      prepareBlockIdentities: jest.fn(),
+    };
+    const accessDraft = jest.fn().mockResolvedValue(null);
+    const openDraft = jest.fn();
+    const authorizeDraft = jest.fn().mockResolvedValue(actor);
     const service = new CourseAuthoringSessionService(
       {
         getLumaClient: jest
@@ -135,6 +145,8 @@ describe("CourseAuthoringSessionService source refresh", () => {
       } as unknown as LumaService,
       context as unknown as CourseAuthoringContextService,
       { bind: jest.fn() } as never,
+      { access: accessDraft, authorize: authorizeDraft } as never,
+      { open: openDraft } as never,
     );
     const input: AuthoringCommandBody = {
       schemaVersion: 1,
@@ -147,6 +159,9 @@ describe("CourseAuthoringSessionService source refresh", () => {
       service,
       context,
       authorize,
+      assertCourseAccess,
+      accessDraft,
+      openDraft,
       snapshot,
       receipt,
       createSession,
@@ -163,6 +178,74 @@ describe("CourseAuthoringSessionService source refresh", () => {
     expect(result).not.toHaveProperty("usage");
     expect(result.reasoningControlAvailable).toBe(true);
     expect(Value.Check(authoringSessionSchema, test.snapshot)).toBe(false);
+  });
+
+  it("rejects an expired unbound draft retry before contacting the producer", async () => {
+    const test = setup();
+    test.openDraft.mockResolvedValueOnce({
+      id: courseId,
+      expiredAt: "2026-11-24T09:00:00.000Z",
+      lumaSessionId: null,
+    });
+
+    await expect(
+      test.service.openDraft({ commandId, language: SUPPORTED_LANGUAGES.EN }, actor),
+    ).rejects.toThrow("courseAuthoring.draft.expired");
+
+    expect(test.createSession).not.toHaveBeenCalled();
+    expect(test.getSession).not.toHaveBeenCalled();
+  });
+
+  it("requires native edit access before loading an attached draft snapshot", async () => {
+    const test = setup();
+    test.accessDraft.mockResolvedValue({ draft: { courseId: nativeCourseId }, actor });
+    test.assertCourseAccess.mockRejectedValueOnce(new ForbiddenException("common.toast.noAccess"));
+
+    await expect(test.service.get(courseId, sessionId, actor)).rejects.toThrow(
+      "common.toast.noAccess",
+    );
+
+    expect(test.assertCourseAccess).toHaveBeenCalledWith(nativeCourseId, actor);
+    expect(test.getSession).not.toHaveBeenCalled();
+  });
+
+  it("reports completion without fetching native data on the draft page", async () => {
+    const test = setup();
+    test.accessDraft.mockResolvedValue({ draft: { courseId: nativeCourseId }, actor });
+    test.assertCourseAccess.mockRejectedValueOnce(new ForbiddenException("common.toast.noAccess"));
+
+    await expect(
+      test.service.get(courseId, sessionId, actor, { reportDraftCompletion: true }),
+    ).rejects.toThrow("courseAuthoring.draft.courseCreated");
+
+    expect(test.getSession).not.toHaveBeenCalled();
+  });
+
+  it("reports completion only after initial draft access succeeds", async () => {
+    const test = setup();
+    test.accessDraft.mockRejectedValueOnce(new ForbiddenException("common.toast.noAccess"));
+
+    await expect(
+      test.service.get(courseId, sessionId, actor, { reportDraftCompletion: true }),
+    ).rejects.toThrow("common.toast.noAccess");
+
+    expect(test.assertCourseAccess).not.toHaveBeenCalled();
+    expect(test.getSession).not.toHaveBeenCalled();
+  });
+
+  it("returns an attached snapshot to an authorized editor without repeating authorization", async () => {
+    const test = setup();
+    test.accessDraft.mockResolvedValue({ draft: { courseId: nativeCourseId }, actor });
+    test.getSession.mockResolvedValue({ ...test.snapshot, courseId: nativeCourseId });
+
+    await expect(test.service.get(courseId, sessionId, actor)).resolves.toMatchObject({
+      courseId: nativeCourseId,
+      sessionId,
+    });
+
+    expect(test.accessDraft).toHaveBeenCalledTimes(1);
+    expect(test.assertCourseAccess).toHaveBeenCalledTimes(1);
+    expect(test.authorize).not.toHaveBeenCalled();
   });
 
   it("accepts a producer snapshot without accounting", async () => {
@@ -198,6 +281,8 @@ describe("CourseAuthoringSessionService source refresh", () => {
     const test = setup();
     const result = await test.service.command(courseId, sessionId, test.input, actor);
     expect(test.authorize).toHaveBeenCalledWith(courseId, actor);
+    expect(test.authorize).toHaveBeenCalledTimes(1);
+    expect(test.accessDraft).toHaveBeenCalledTimes(1);
     expect(test.sendCommand).toHaveBeenCalledWith({
       sessionId,
       command: { ...test.input, actorId: actor.userId },
@@ -525,6 +610,8 @@ describe("CourseAuthoringSessionService list", () => {
       } as unknown as LumaService,
       { authorize } as unknown as CourseAuthoringContextService,
       { bind: jest.fn() } as never,
+      { access: jest.fn().mockResolvedValue(null) } as never,
+      {} as never,
     );
     return { service, authorize, listSessions };
   }

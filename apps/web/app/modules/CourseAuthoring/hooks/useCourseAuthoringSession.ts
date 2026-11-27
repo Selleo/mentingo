@@ -15,6 +15,7 @@ export const useCourseAuthoringSession = (
   courseId: string,
   language: SupportedLanguages,
   sessionId: string,
+  contextEnabled = true,
 ) => {
   const sessionQuery = useCourseAuthoringSessionQuery(courseId, sessionId);
 
@@ -23,7 +24,7 @@ export const useCourseAuthoringSession = (
   const contextQuery = useCourseAuthoringContextQuery(
     courseId,
     sessionLanguage,
-    Boolean(sessionQuery.data),
+    contextEnabled && Boolean(sessionQuery.data),
   );
 
   /** Refreshes the current durable snapshot when a session is available. */

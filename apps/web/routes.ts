@@ -86,7 +86,13 @@ export const routes: (
           });
           route("envs", "modules/Admin/Envs/Envs.page.tsx");
           route("beta-courses/new", "modules/Admin/AddCourse/CourseTypeSelector.page.tsx");
-          route("beta-courses/new/standard", "modules/Admin/AddCourse/AddCourse.tsx");
+          route("beta-courses/new/standard", "modules/Admin/AddCourse/AddCourse.tsx", () => {
+            route("ai", "modules/CourseAuthoring/CourseAuthoringDraft.page.tsx");
+          });
+          route(
+            "beta-courses/new/ai",
+            "modules/CourseAuthoring/CourseAuthoringDraftRedirect.page.tsx",
+          );
           route("courses/new-scorm", "modules/Admin/Scorm/CreateNewScormCourse.page.tsx");
           route("courses/import-package", "modules/Admin/AddCourse/NativeArchiveImport.page.tsx");
           route("beta-courses/:id", "modules/Admin/EditCourse/EditCourse.tsx");

@@ -37,7 +37,7 @@ import type {
 } from "../courseAuthoring.types";
 
 type Props = {
-  course: CourseContext;
+  course: Pick<CourseContext, "chapters">;
   policy: SourcePolicy;
   strictSourceMode: boolean;
   autopilot?: boolean;

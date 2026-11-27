@@ -32,4 +32,15 @@ describe("route access inventory", () => {
     }
     expect(checkRouteAccess("reports", [])).toBe(false);
   });
+
+  it.each(["admin/beta-courses/new/standard/ai", "admin/beta-courses/new/ai"])(
+    "requires both course creation and AI generation permissions for %s",
+    (route) => {
+      expect(checkRouteAccess(route, [PERMISSIONS.COURSE_CREATE])).toBe(false);
+      expect(checkRouteAccess(route, [PERMISSIONS.COURSE_AI_GENERATION])).toBe(false);
+      expect(
+        checkRouteAccess(route, [PERMISSIONS.COURSE_CREATE, PERMISSIONS.COURSE_AI_GENERATION]),
+      ).toBe(true);
+    },
+  );
 });

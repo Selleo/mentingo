@@ -7,6 +7,7 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { CourseAuthoringApplicationRepository } from "./course-authoring-application.repository";
 import { CourseAuthoringApplicationService } from "./course-authoring-application.service";
+import { CourseAuthoringDraftTransitionService } from "./course-authoring-draft-transition.service";
 import { LumaService } from "./luma.service";
 
 import type { CourseAuthoringReceiptJob } from "./course-authoring.types";
@@ -24,6 +25,7 @@ export class CourseAuthoringReceiptService {
     private readonly queue: QueueService,
     private readonly tenants: TenantDbRunnerService,
     private readonly applications: CourseAuthoringApplicationService,
+    private readonly draftTransition: CourseAuthoringDraftTransitionService,
   ) {}
 
   /** Scans each tenant for undelivered receipts and enqueues stable retry jobs. */
@@ -90,6 +92,9 @@ export class CourseAuthoringReceiptService {
         reason: receipt.reason ?? null,
       },
     });
+    const nativeCourseId = receipt.entityMappings[data.courseId];
+    if (receipt.status === "applied" && nativeCourseId)
+      await this.draftTransition.resume(data, nativeCourseId);
     await this.receipts.markDelivered(data.tenantId, data.exportId, data.exportHash);
   }
 }

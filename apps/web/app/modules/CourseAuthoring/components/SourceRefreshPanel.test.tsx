@@ -87,11 +87,11 @@ describe("SourceRefreshPanel", () => {
     expect(screen.getByText("task-1")).toBeVisible();
     const lessonCheckbox = screen.getByRole("checkbox", { name: "Lesson one" });
     expect(lessonCheckbox).toBeChecked();
-    const resolveButton = screen.getByRole("button", { name: "Apply explicit mapping" });
+    const resolveButton = screen.getByRole("button", { name: "Save matches" });
     expect(resolveButton).toBeDisabled();
 
     await user.click(screen.getByRole("combobox"));
-    await user.click(screen.getByRole("option", { name: /Clear this/ }));
+    await user.click(screen.getByRole("option", { name: /Remove this rule/ }));
     expect(resolveButton).toBeEnabled();
     await user.click(resolveButton);
 
@@ -121,8 +121,8 @@ describe("SourceRefreshPanel", () => {
 
     await user.click(screen.getByRole("checkbox", { name: "Lesson one" }));
     await user.click(screen.getByRole("combobox"));
-    await user.click(screen.getByRole("option", { name: /Clear this/ }));
-    await user.click(screen.getByRole("button", { name: "Apply explicit mapping" }));
+    await user.click(screen.getByRole("option", { name: /Remove this rule/ }));
+    await user.click(screen.getByRole("button", { name: "Save matches" }));
 
     expect(onRefreshSource).toHaveBeenCalledWith(
       "old-source",
@@ -157,11 +157,11 @@ describe("SourceRefreshPanel", () => {
     const lessonCheckbox = screen.getByRole("checkbox", { name: "Lesson one" });
     expect(lessonCheckbox).toBeDisabled();
     await user.click(screen.getByRole("combobox"));
-    await user.click(screen.getByRole("option", { name: /Clear this/ }));
+    await user.click(screen.getByRole("option", { name: /Remove this rule/ }));
 
     expect(lessonCheckbox).toBeEnabled();
     expect(lessonCheckbox).toBeChecked();
-    await user.click(screen.getByRole("button", { name: "Apply explicit mapping" }));
+    await user.click(screen.getByRole("button", { name: "Save matches" }));
     expect(onRefreshSource).toHaveBeenCalledWith(
       "old-source",
       "replacement-source",
@@ -185,9 +185,7 @@ describe("SourceRefreshPanel", () => {
     expect(
       screen.getByText("The source selection changed. Review the current sources and try again."),
     ).toBeVisible();
-    expect(
-      screen.queryByRole("button", { name: "Apply explicit mapping" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Save matches" })).not.toBeInTheDocument();
     expect(onRefreshSource).not.toHaveBeenCalled();
   });
 
@@ -225,16 +223,16 @@ describe("SourceRefreshPanel", () => {
     );
     const choices = screen.getAllByRole("combobox");
     await user.click(choices[0]);
-    await user.click(screen.getAllByRole("option", { name: /Map to New section/ })[0]);
+    await user.click(screen.getAllByRole("option", { name: /Match with New section/ })[0]);
     await user.click(choices[1]);
-    await user.click(screen.getAllByRole("option", { name: /Map to New section/ })[0]);
-    expect(screen.getByRole("button", { name: "Apply explicit mapping" })).toBeDisabled();
-    expect(screen.getByText(/A section cannot be both required and excluded/)).toBeVisible();
+    await user.click(screen.getAllByRole("option", { name: /Match with New section/ })[0]);
+    expect(screen.getByRole("button", { name: "Save matches" })).toBeDisabled();
+    expect(screen.getByText(/A section can't be both required and excluded/)).toBeVisible();
     expect(onRefreshSource).not.toHaveBeenCalled();
 
     await user.click(choices[1]);
-    await user.click(screen.getByRole("option", { name: /Clear this/ }));
-    await user.click(screen.getByRole("button", { name: "Apply explicit mapping" }));
+    await user.click(screen.getByRole("option", { name: /Remove this rule/ }));
+    await user.click(screen.getByRole("button", { name: "Save matches" }));
     expect(onRefreshSource).toHaveBeenCalledWith(
       "old-source",
       "replacement-source",

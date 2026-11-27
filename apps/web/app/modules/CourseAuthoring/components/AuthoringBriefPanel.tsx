@@ -23,8 +23,10 @@ import type {
 
 export { getCourseAuthoringSourceError };
 
+type ComposerCourse = Pick<CourseContext, "language" | "chapters">;
+
 type Props = {
-  course: CourseContext;
+  course: ComposerCourse;
   disabled?: boolean;
   isSubmitting?: boolean;
   onSubmit: (request: AuthoringRequest) => Promise<void>;
@@ -90,7 +92,7 @@ export const freshSessionPolicy: SourcePolicy = {
 
 /** Builds course, chapter, lesson, and block targets from the current selection. */
 export const buildAuthoringTargets = (
-  course: CourseContext,
+  course: ComposerCourse,
   selectedTargetIds: string[],
   selectedBlockIds: string[],
 ): TargetRef[] => {

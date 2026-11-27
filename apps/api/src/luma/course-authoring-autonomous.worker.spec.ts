@@ -28,7 +28,7 @@ describe("CourseAuthoringAutonomousWorker", () => {
       permissions: [],
       roleSlugs: [],
     };
-    const context = { authorize: jest.fn().mockResolvedValue(actor) };
+    const context = { authorizeAccess: jest.fn().mockResolvedValue({ actor }) };
     const applications = { enqueue: jest.fn().mockResolvedValue({ status: "queued" }) };
     const worker = new CourseAuthoringAutonomousWorker(
       { getConnection: jest.fn() } as never,
@@ -45,7 +45,11 @@ describe("CourseAuthoringAutonomousWorker", () => {
     const test = setup();
     await test.worker.handleJob(job, test.tenants as never);
     expect(test.tenants.runWithTenant).toHaveBeenCalledWith(job.tenantId, expect.any(Function));
-    expect(test.context.authorize).toHaveBeenCalledWith(job.courseId, test.actor);
+    expect(test.context.authorizeAccess).toHaveBeenCalledWith(
+      job.courseId,
+      job.sessionId,
+      test.actor,
+    );
     expect(test.applications.enqueue).toHaveBeenCalledWith(
       job.courseId,
       job.sessionId,
@@ -64,7 +68,7 @@ describe("CourseAuthoringAutonomousWorker", () => {
     expect(missing.applications.enqueue).not.toHaveBeenCalled();
 
     const revoked = setup();
-    revoked.context.authorize.mockRejectedValue(new ForbiddenException());
+    revoked.context.authorizeAccess.mockRejectedValue(new ForbiddenException());
     await expect(revoked.worker.handleJob(job, revoked.tenants as never)).rejects.toBeInstanceOf(
       ForbiddenException,
     );

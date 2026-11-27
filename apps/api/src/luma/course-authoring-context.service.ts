@@ -45,6 +45,8 @@ import {
   lessons,
 } from "src/storage/schema";
 
+import { CourseAuthoringDraftContextService } from "./course-authoring-draft-context.service";
+
 import type {
   AuthoringChapterContext,
   AuthoringContextAssessmentRow,
@@ -95,6 +97,7 @@ export class CourseAuthoringContextService {
     private readonly quizAuthoring: QuizAuthoringService,
     private readonly mentorConfigurations: AiMentorConfigurationService,
     private readonly judgeConfigurations: AiJudgeConfigurationService,
+    private readonly draftContext: CourseAuthoringDraftContextService,
   ) {}
 
   /** Re-resolves permissions and course access for each request or background command. */
@@ -104,8 +107,13 @@ export class CourseAuthoringContextService {
     if (!hasPermission(currentActor.permissions, PERMISSIONS.COURSE_AI_GENERATION)) {
       throw new ForbiddenException("common.toast.noAccess");
     }
-    await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentActor, courseId);
+    await this.assertCourseAccess(courseId, currentActor);
     return currentActor;
+  }
+
+  /** Applies native course edit rights to a caller that has already refreshed their permissions. */
+  async assertCourseAccess(courseId: UUIDType, currentActor: CurrentUserType) {
+    await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentActor, courseId);
   }
 
   /** Reads only localized content lesson bodies within the actor-authorized course and tenant. */
@@ -296,6 +304,7 @@ export class CourseAuthoringContextService {
     return {
       courseId,
       language: query.language,
+      tenantPalette: await this.draftContext.tenantPalette(actor.tenantId),
       course: {
         id: course.id,
         status: course.status,

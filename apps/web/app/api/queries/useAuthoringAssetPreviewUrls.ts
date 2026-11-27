@@ -9,7 +9,8 @@ import { getAuthoringAssetIds } from "~/modules/CourseAuthoring/review/authoring
 type AuthoringAssetPreviewOptions = {
   courseId: string;
   sessionId: string | null | undefined;
-  html: string;
+  html?: string;
+  assetIds?: readonly string[];
   readyAssetIds: readonly string[];
 };
 
@@ -20,14 +21,18 @@ type ObjectUrlEntry = {
   url: string;
 };
 
-/** Fetch only referenced ready assets through Core's course-authorized preview endpoint. */
+/** Fetch ready assets referenced by a lesson body or a typed proposal field. */
 export const useAuthoringAssetPreviewUrls = ({
   courseId,
   sessionId,
   html,
+  assetIds,
   readyAssetIds,
 }: AuthoringAssetPreviewOptions) => {
-  const referencedAssetIds = useMemo(() => getAuthoringAssetIds(html), [html]);
+  const referencedAssetIds = useMemo(
+    () => assetIds ?? getAuthoringAssetIds(html ?? ""),
+    [assetIds, html],
+  );
   const requestedAssetIds = useMemo(() => {
     const readyIds = new Set(readyAssetIds);
     if (!courseId || !sessionId) return [];

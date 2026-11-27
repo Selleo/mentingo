@@ -206,12 +206,14 @@ export class CourseService {
     currentUser: CurrentUserType,
     isPlaywrightTest: boolean,
     dbInstance: DatabasePg,
+    stripeIdempotencyKey?: string,
   ) {
     return this.courseEditingService.createCourseInTransaction(
       createCourseBody,
       currentUser,
       isPlaywrightTest,
       dbInstance,
+      stripeIdempotencyKey,
     );
   }
 
@@ -219,8 +221,14 @@ export class CourseService {
     courseId: UUIDType,
     language: SupportedLanguages,
     currentUser: CurrentUserType,
+    transaction?: DatabasePg,
   ) {
-    return this.courseEditingService.publishCreateCourseEvent(courseId, language, currentUser);
+    return this.courseEditingService.publishCreateCourseEvent(
+      courseId,
+      language,
+      currentUser,
+      transaction,
+    );
   }
 
   async updateCourseMedia(

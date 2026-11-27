@@ -36323,6 +36323,7 @@ export interface OpenAuthoringSessionResponse {
             | "lesson"
             | "edit"
             | "source"
+            | "source_vision"
             | "asset"
             | "course_review"
           )
@@ -36471,6 +36472,7 @@ export interface GetAuthoringSessionResponse {
             | "lesson"
             | "edit"
             | "source"
+            | "source_vision"
             | "asset"
             | "course_review"
           )
@@ -38055,6 +38057,8 @@ export interface GetAuthoringCourseContextResponse {
     description: string;
     baselineHash: string;
     fieldHashes: object;
+    /** @maxItems 2 */
+    tenantPalette?: string[];
     chapters: {
       /** @format uuid */
       id: string;
@@ -38254,6 +38258,135 @@ export interface GetAuthoringCourseContextResponse {
           baselineHash: string;
         }[];
       }[];
+    }[];
+  };
+}
+
+export interface OpenAuthoringDraftBody {
+  /** @format uuid */
+  commandId: string;
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+}
+
+export interface OpenAuthoringDraftResponse {
+  data: {
+    reasoningControlAvailable?: boolean;
+    applicationDelta?: {
+      appliedOperationIds: string[];
+      idMappings: object;
+    };
+    schemaVersion: 1;
+    /** @format uuid */
+    sessionId: string;
+    /** @format uuid */
+    courseId: string;
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+    status: "active" | "paused" | "stopped" | "discarded";
+    snapshotSequence: number;
+    workspaceRevision: number;
+    records: {
+      /** @format uuid */
+      id: string;
+      kind: string;
+      payload: object;
+    }[];
+    turns?: {
+      /** @format uuid */
+      requestId: string;
+      messageId: string;
+      status: "queued" | "running" | "waiting_author" | "completed" | "failed" | "stopped";
+      taskIds: string[];
+      parts: {
+        /** @format uuid */
+        requestId: string;
+        messageId: string;
+        partId: string;
+        partKind: "text" | "tool" | "proposal" | "question";
+        taskId?: string | null;
+        status: "streaming" | "completed" | "failed" | "stopped" | "review";
+        /** @min 1 */
+        firstSequence: number;
+        /** @min 1 */
+        updatedSequence: number;
+        text?: string | null;
+        /** @maxItems 6 */
+        planSteps?: string[];
+        answer?: string | null;
+        tool?: {
+          toolCallId: string;
+          toolName: string;
+          display: string;
+          status: "started" | "completed" | "failed" | "stopped";
+          result?: {
+            query?: string | null;
+            queries?: string[] | null;
+            sources?:
+              | {
+                  /**
+                   * @minLength 1
+                   * @maxLength 2048
+                   */
+                  url: string;
+                  title?: string | null;
+                }[]
+              | null;
+            sourceCount?: number | null;
+            findingCount?: number | null;
+          } | null;
+        } | null;
+        artifact?: {
+          artifactKind: "proposal" | "question";
+          artifactId: string;
+        } | null;
+      }[];
+      /** @min 1 */
+      firstSequence: number;
+      /** @min 0 */
+      updatedSequence: number;
+    }[];
+    hasMoreTurns?: boolean;
+    nextBeforeRequestId?: string | null;
+    tasks: {
+      /** @format uuid */
+      taskId: string;
+      /** @format uuid */
+      requestId: string;
+      kind?:
+        | (
+            | "plan"
+            | "route"
+            | "research"
+            | "detailed_plan"
+            | "lesson"
+            | "edit"
+            | "source"
+            | "source_vision"
+            | "asset"
+            | "course_review"
+          )
+        | null;
+      status: string;
+      errorCode: string | null;
+      failure?: {
+        code: string;
+        category:
+          | "generation"
+          | "evidence"
+          | "author_decision"
+          | "provider"
+          | "configuration"
+          | "internal";
+        stage: string;
+        recoveryAction: "retry_failed_parts" | "answer_question" | "retry_provider" | "service_fix";
+        retryable: boolean;
+        affectedChapterIds: string[];
+        affectedLessonIds: string[];
+        correlationId: string | null;
+        detailKey: string | null;
+        /** @min 0 */
+        generationRevision: number;
+      } | null;
+      outputId: string | null;
     }[];
   };
 }
@@ -51111,6 +51244,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/luma/authoring/courses/${courseId}/context`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseAuthoringDraftControllerOpenAuthoringDraft
+     * @request POST:/api/luma/authoring/drafts
+     */
+    courseAuthoringDraftControllerOpenAuthoringDraft: (
+      data: OpenAuthoringDraftBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<OpenAuthoringDraftResponse, any>({
+        path: `/api/luma/authoring/drafts`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

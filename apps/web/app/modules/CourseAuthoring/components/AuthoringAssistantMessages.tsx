@@ -745,7 +745,7 @@ export const AuthoringAssistantMessages = ({
       value: activity.content,
     })),
     ...proposalGroups.map((group) => ({
-      id: `proposal-group-${group.taskId}`,
+      id: `proposal-group-${group.proposalIds[0] ?? group.taskId}`,
       requestId: group.requestId,
       kind: "proposalGroup" as const,
       taskId: group.taskId,

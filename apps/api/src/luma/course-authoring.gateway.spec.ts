@@ -1,10 +1,9 @@
-import { ForbiddenException, Logger, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, GoneException, Logger, NotFoundException } from "@nestjs/common";
 import { FormatRegistry } from "@sinclair/typebox";
 import { validate } from "uuid";
 
 import { CourseAuthoringGateway } from "./course-authoring.gateway";
 
-import type { CourseAuthoringContextService } from "./course-authoring-context.service";
 import type { CourseAuthoringSessionService } from "./course-authoring-session.service";
 import type { LumaService } from "./luma.service";
 import type { SubscribeAuthoringEventsOptions } from "@mentingo/luma-sdk";
@@ -55,8 +54,7 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
     const authorize = jest.fn().mockResolvedValue(undefined);
     const acceptRealtimeEvent = jest.fn().mockResolvedValue(undefined);
     const gateway = new CourseAuthoringGateway(
-      { get } as unknown as CourseAuthoringSessionService,
-      { authorize } as unknown as CourseAuthoringContextService,
+      { get, authorizeAccess: authorize } as unknown as CourseAuthoringSessionService,
       {
         getLumaClient: jest.fn().mockResolvedValue({ authoring: { subscribeEvents } }),
       } as unknown as LumaService,
@@ -109,6 +107,9 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
 
     await test.getOptions(0)?.onEvent(first);
     expect(test.socket.emit).toHaveBeenNthCalledWith(2, "authoring.event", first);
+    expect(test.authorize).toHaveBeenCalledWith(courseId, sessionId, test.socket.data.user, {
+      refreshDraftActivity: false,
+    });
 
     await test.getOptions(0)?.onEvent(second);
     expect(test.socket.emit).toHaveBeenNthCalledWith(3, "authoring.event", second);
@@ -287,24 +288,56 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
     test.gateway.onModuleDestroy();
   });
 
-  it("acknowledges a deleted session once without creating a subscription", async () => {
-    const test = setup();
-    const missing = new NotFoundException("courseAuthoring.errors.sessionNotFound");
-    test.get.mockRejectedValue(missing);
+  it.each([new NotFoundException(), new GoneException()])(
+    "rejects a terminal session once without creating a subscription (%s)",
+    async (error) => {
+      const test = setup();
+      test.get.mockRejectedValue(error);
 
-    await expect(
-      test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 }),
-    ).resolves.toEqual({
-      success: false,
+      await expect(
+        test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 }),
+      ).resolves.toEqual({
+        success: false,
+        sessionId,
+        code: "session_not_found",
+      });
+      expect(test.socket.emit).toHaveBeenCalledTimes(1);
+      expect(test.socket.emit).toHaveBeenCalledWith("authoring.error", {
+        sessionId,
+        code: "session_not_found",
+      });
+      expect(test.subscribeEvents).not.toHaveBeenCalled();
+    },
+  );
+
+  it("releases all subscribers when a draft expires before delivery", async () => {
+    const test = setup();
+    const second = test.createSocket("socket2");
+    await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
+    await test.gateway.join(second, { courseId, sessionId, afterSequence: 0 });
+    test.authorize.mockRejectedValueOnce(new GoneException());
+
+    await test.getOptions(0)?.onEvent({
+      schemaVersion: 1,
+      eventId: courseId,
       sessionId,
-      code: "session_not_found",
+      sequence: 5,
+      occurredAt: new Date().toISOString(),
+      type: "task.updated",
+      payload: {},
     });
-    expect(test.socket.emit).toHaveBeenCalledTimes(1);
-    expect(test.socket.emit).toHaveBeenCalledWith("authoring.error", {
-      sessionId,
-      code: "session_not_found",
-    });
-    expect(test.subscribeEvents).not.toHaveBeenCalled();
+
+    for (const member of [test.socket, second]) {
+      expect(member.emit).toHaveBeenCalledWith("authoring.error", {
+        sessionId,
+        code: "session_not_found",
+      });
+      expect(member.emit).not.toHaveBeenCalledWith("authoring.event", expect.anything());
+      expect(member.leave).toHaveBeenCalledTimes(1);
+    }
+    expect(test.getOptions(0)?.signal?.aborted).toBe(true);
+    expect(test.subscribeEvents).toHaveBeenCalledTimes(1);
+    test.gateway.onModuleDestroy();
   });
 
   it.each(["authenticateCurrent", "authorize"] as const)(
@@ -378,36 +411,39 @@ describe("CourseAuthoringGateway durable subscriptions", () => {
     test.gateway.onModuleDestroy();
   });
 
-  it("ends a missing session during recovery and releases its subscription", async () => {
-    const test = setup();
-    await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
-    test.get.mockRejectedValueOnce(new NotFoundException("courseAuthoring.errors.sessionNotFound"));
-    test.disconnect(0);
+  it.each([new NotFoundException(), new GoneException()])(
+    "ends a terminal session during recovery and releases its subscription (%s)",
+    async (error) => {
+      const test = setup();
+      await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
+      test.get.mockRejectedValueOnce(error);
+      test.disconnect(0);
 
-    await waitFor(() => {
-      const messages: readonly (readonly unknown[])[] = jest.mocked(test.socket.emit).mock.calls;
-      return messages.some(
-        ([name, payload]) =>
-          name === "authoring.error" &&
-          typeof payload === "object" &&
-          payload !== null &&
-          "code" in payload &&
-          payload.code === "session_not_found",
-      );
-    });
-    expect(test.socket.emit).toHaveBeenCalledWith("authoring.error", {
-      sessionId,
-      code: "session_not_found",
-    });
-    expect(test.subscribeEvents).toHaveBeenCalledTimes(1);
-    expect(test.getOptions(0)?.signal?.aborted).toBe(true);
-    expect(test.socket.leave).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        const messages: readonly (readonly unknown[])[] = jest.mocked(test.socket.emit).mock.calls;
+        return messages.some(
+          ([name, payload]) =>
+            name === "authoring.error" &&
+            typeof payload === "object" &&
+            payload !== null &&
+            "code" in payload &&
+            payload.code === "session_not_found",
+        );
+      });
+      expect(test.socket.emit).toHaveBeenCalledWith("authoring.error", {
+        sessionId,
+        code: "session_not_found",
+      });
+      expect(test.subscribeEvents).toHaveBeenCalledTimes(1);
+      expect(test.getOptions(0)?.signal?.aborted).toBe(true);
+      expect(test.socket.leave).toHaveBeenCalledTimes(1);
 
-    // A later explicit join must get a new consumer, rather than attach to a dead one.
-    await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
-    expect(test.subscribeEvents).toHaveBeenCalledTimes(2);
-    test.gateway.onModuleDestroy();
-  });
+      // A later explicit join must get a new consumer, rather than attach to a dead one.
+      await test.gateway.join(test.socket, { courseId, sessionId, afterSequence: 0 });
+      expect(test.subscribeEvents).toHaveBeenCalledTimes(2);
+      test.gateway.onModuleDestroy();
+    },
+  );
 
   it("logs a safe transport reason and connection duration before recovering", async () => {
     const test = setup();

@@ -3356,15 +3356,56 @@ export const emailTemplates = pgTable(
   }),
 );
 
+/** Private session identity until the approved course is committed. */
+export const courseAuthoringDrafts = pgTable(
+  "course_authoring_drafts",
+  {
+    ...id,
+    tenantId,
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    creationCommandId: uuid("creation_command_id").notNull(),
+    lumaSessionId: uuid("luma_session_id"),
+    cursorSequence: integer("cursor_sequence").notNull().default(0),
+    lastPolledAt: timestampWithTimezone({ name: "last_polled_at" }).notNull().defaultNow(),
+    courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }),
+    lastActivityAt: timestampWithTimezone({ name: "last_activity_at" }).notNull().defaultNow(),
+    expiredAt: timestampWithTimezone({ name: "expired_at" }),
+    discardedAt: timestampWithTimezone({ name: "discarded_at" }),
+    ...timestamps,
+  },
+  withTenantIdIndex("course_authoring_drafts", (table) => ({
+    creationUnique: uniqueIndex("course_authoring_drafts_creation_unique").on(
+      table.tenantId,
+      table.ownerId,
+      table.creationCommandId,
+    ),
+    sessionUnique: uniqueIndex("course_authoring_drafts_luma_session_unique").on(
+      table.tenantId,
+      table.lumaSessionId,
+    ),
+    pollIndex: index("course_authoring_drafts_poll_idx")
+      .on(table.tenantId, table.lastPolledAt)
+      .where(
+        sql`${table.lumaSessionId} is not null and ${table.courseId} is null and ${table.expiredAt} is null`,
+      ),
+    expirationIndex: index("course_authoring_drafts_expiration_idx")
+      .on(table.tenantId, table.lastActivityAt)
+      .where(sql`${table.courseId} is null and ${table.discardedAt} is null`),
+  })),
+);
+
 /** A committed row is the receipt: failed transactions never leave a success marker. */
 export const courseAuthoringApplications = pgTable(
   "course_authoring_applications",
   {
     ...id,
     tenantId,
-    courseId: uuid("course_id")
-      .notNull()
-      .references(() => courses.id, { onDelete: "cascade" }),
+    courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }),
+    draftCourseId: uuid("draft_course_id").references(() => courseAuthoringDrafts.id, {
+      onDelete: "cascade",
+    }),
     sessionId: uuid("session_id").notNull(),
     exportId: uuid("export_id").notNull(),
     exportHash: text("export_hash").notNull(),
@@ -3379,6 +3420,11 @@ export const courseAuthoringApplications = pgTable(
       table.exportId,
     ),
     courseIndex: index("course_authoring_applications_course_idx").on(table.courseId),
+    draftIndex: index("course_authoring_applications_draft_idx").on(table.draftCourseId),
+    subjectRequired: check(
+      "course_authoring_applications_subject_required",
+      sql`${table.courseId} is not null or ${table.draftCourseId} is not null`,
+    ),
   })),
 );
 

@@ -96,6 +96,18 @@ export const openAuthoringSession = async (
   return normalizeSession(response.data.data);
 };
 
+/** Opens a conversation before a native course exists. */
+export const openAuthoringDraft = async (
+  language: SupportedLanguages,
+  commandId: AuthoringSessionCommandId,
+): Promise<AuthoringSession> => {
+  const response = await ApiClient.api.courseAuthoringDraftControllerOpenAuthoringDraft(
+    { commandId, language },
+    { timeout: 10_000 },
+  );
+  return normalizeSession(response.data.data);
+};
+
 /** Lists one server-filtered, offset-paginated page of session-browser summaries before the UI chooses a timeline to restore. */
 export const listAuthoringSessions = async (
   courseId: string,

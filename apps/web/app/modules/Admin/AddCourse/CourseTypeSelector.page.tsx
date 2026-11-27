@@ -48,8 +48,6 @@ const CourseTypeSelectorPage = () => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const exitPath = getAddCourseExitPath(searchParams);
-  const getOptionHref = (option: CourseTypeOption) =>
-    option.id === "standard" ? withAddCourseContext(option.href, searchParams) : option.href;
 
   return (
     <main
@@ -71,7 +69,11 @@ const CourseTypeSelectorPage = () => {
               <CourseTypeCard
                 title={t(`adminCourseTypeSelector.${option.id}.title`)}
                 description={t(`adminCourseTypeSelector.${option.id}.description`)}
-                href={getOptionHref(option)}
+                href={
+                  option.id === "standard"
+                    ? withAddCourseContext(option.href, searchParams)
+                    : option.href
+                }
                 icon={option.icon}
                 accent={option.id}
                 testId={option.testId}

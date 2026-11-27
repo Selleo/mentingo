@@ -17,6 +17,7 @@ The main workflow starts in an empty course. The creator opens the curriculum ta
 
 ## Feature Functions
 
+- Choose **Standard**, then **Create with AI**, to start before a course exists. Review the proposed course details or use **Autopilot**, then continue to the curriculum in the same conversation. Authors need both course creation and AI-generation permissions. [Course authoring workflow](course-authoring-business-spec.md#create-a-course-with-ai)
 - Speed up early course design by generating chapters and lessons from a creator's prompt.
 - Let creators attach supported source files so the AI service can use internal context while drafting.
 - Show generation progress in the curriculum builder while the course structure is being created.

@@ -38,6 +38,7 @@ const ADMIN_LAYOUT_PERMISSIONS: PermissionKey[] = [
   PERMISSIONS.AUTOMATION_LOG_READ,
   PERMISSIONS.AI_THREAD_READ,
   PERMISSIONS.USER_MANAGE,
+  PERMISSIONS.COURSE_CREATE,
   PERMISSIONS.COURSE_UPDATE_OWN,
   PERMISSIONS.LEARNING_PATH_CREATE,
   PERMISSIONS.LEARNING_PATH_UPDATE,
@@ -56,6 +57,8 @@ export const shouldHideTopbarAndSidebar = (pathname: string) =>
   match(pathname)
     .with("/admin/beta-courses/new", () => true)
     .with("/admin/beta-courses/new/standard", () => true)
+    .with("/admin/beta-courses/new/standard/ai", () => true)
+    .with("/admin/beta-courses/new/ai", () => true)
     .with("/admin/courses/new-scorm", () => true)
     .with("/admin/courses/import-package", () => true)
     .when(
