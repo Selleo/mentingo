@@ -101,6 +101,7 @@ describe("AuthoringBlockId", () => {
       transformPasted!,
       copiedSlice,
       editor.view,
+      false,
     );
     expect(transformed.content.firstChild?.attrs.authoringBlockId).toBeNull();
 

@@ -13,6 +13,10 @@ export const tenantAccessEndsAtSchema = Type.Union([
   Type.Null(),
 ]);
 
+export const tenantMaxUsersSchema = Type.Union([Type.Integer({ minimum: 1 }), Type.Null()]);
+
+export const tenantMaxUsersOverflowPercentageSchema = Type.Integer({ minimum: 0, maximum: 100 });
+
 export const tenantResponseSchema = Type.Object({
   id: UUIDSchema,
   name: Type.String(),
@@ -20,9 +24,18 @@ export const tenantResponseSchema = Type.Object({
   status: Type.Enum(TENANT_STATUSES),
   isManaging: Type.Boolean(),
   accessEndsAt: tenantAccessEndsAtSchema,
+  maxUsers: tenantMaxUsersSchema,
+  maxUsersOverflowPercentage: tenantMaxUsersOverflowPercentageSchema,
   createdAt: Type.String(),
   updatedAt: Type.String(),
 });
+
+export const tenantDetailsResponseSchema = Type.Intersect([
+  tenantResponseSchema,
+  Type.Object({
+    activeUsersCount: Type.Integer({ minimum: 0 }),
+  }),
+]);
 
 export const tenantListSortFields = ["lastActivity", "activityCountLast14Days"] as const;
 
@@ -74,6 +87,8 @@ export const createTenantSchema = Type.Object(
     host: Type.String({ minLength: 1 }),
     status: Type.Optional(Type.Enum(TENANT_STATUSES)),
     accessEndsAt: Type.Optional(tenantAccessEndsAtSchema),
+    maxUsers: Type.Optional(tenantMaxUsersSchema),
+    maxUsersOverflowPercentage: Type.Optional(tenantMaxUsersOverflowPercentageSchema),
     adminEmail: Type.String({ format: "email" }),
     adminFirstName: Type.String({ minLength: 1 }),
     adminLastName: Type.String({ minLength: 1 }),
@@ -88,6 +103,8 @@ export const updateTenantSchema = Type.Object(
     host: Type.Optional(Type.String({ minLength: 1 })),
     status: Type.Optional(Type.Enum(TENANT_STATUSES)),
     accessEndsAt: Type.Optional(tenantAccessEndsAtSchema),
+    maxUsers: Type.Optional(tenantMaxUsersSchema),
+    maxUsersOverflowPercentage: Type.Optional(tenantMaxUsersOverflowPercentageSchema),
   },
   { additionalProperties: false },
 );

@@ -1,3 +1,33 @@
+<a name="v4.36.0"></a>
+
+## [v4.36.0] - 24.11.2026
+
+### Features:
+
+- add charts showing course activity and popularity to reports ([#2288](https://github.com/Selleo/mentingo/issues/2288))
+
+### Bug Fixes:
+
+- recognize PowerPoint files exported from Google Slides so they upload correctly ([#2339](https://github.com/Selleo/mentingo/issues/2339))
+
+- keep showing upload progress until attached files finish processing ([#2315](https://github.com/Selleo/mentingo/issues/2315))
+
+- show phishing training scenario names and descriptions in your language ([#2323](https://github.com/Selleo/mentingo/issues/2323))
+
+### Chores:
+
+- show the certificate ID on certificates ([#2336](https://github.com/Selleo/mentingo/issues/2336))
+
+- resolve security warnings in our development tools ([#2333](https://github.com/Selleo/mentingo/issues/2333))
+
+- patch the last critical security issues ([#2331](https://github.com/Selleo/mentingo/issues/2331))
+
+- close known security holes in third-party packages ([#2329](https://github.com/Selleo/mentingo/issues/2329))
+
+### Styles:
+
+- show quiz add question button as outline ([#2325](https://github.com/Selleo/mentingo/issues/2325))
+
 <a name="v4.35.0"></a>
 
 ## [v4.35.0] - 20.11.2026
@@ -37,6 +67,10 @@
 ### Chores:
 
 - support file drops across AI course creator ([#2316](https://github.com/Selleo/mentingo/issues/2316))
+
+### Documentation:
+
+- update changelog for version v4.35.0
 
 ### Tests:
 
@@ -3978,7 +4012,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.35.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.36.0...HEAD
+[v4.36.0]: https://github.com/Selleo/mentingo/compare/v4.35.0...v4.36.0
 [v4.35.0]: https://github.com/Selleo/mentingo/compare/v4.34.0...v4.35.0
 [v4.34.0]: https://github.com/Selleo/mentingo/compare/v4.33.0...v4.34.0
 [v4.33.0]: https://github.com/Selleo/mentingo/compare/v4.32.0...v4.33.0

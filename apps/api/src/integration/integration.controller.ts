@@ -322,7 +322,7 @@ export class IntegrationController {
   @ApiEndpointDocs({
     summary: "List all tenants for integration selection",
     description:
-      "Returns all tenants accessible to the current integration API key.\n\nUse this endpoint first to discover which tenant IDs you can operate on. For the rest of integration endpoints, pass one of those IDs in the X-Tenant-Id header.",
+      "Returns all tenants accessible to the current integration API key.\n\nUse this endpoint first to discover which tenant IDs you can operate on. For the rest of integration endpoints, pass one of those IDs in the X-Tenant-Id header.\n\nEach tenant includes its user capacity: maxUsers (null means no limit) and maxUsersOverflowPercentage.",
     headers: [
       {
         ...API_HEADERS.X_TENANT_ID,
@@ -346,7 +346,7 @@ export class IntegrationController {
   @ApiEndpointDocs({
     summary: "Create tenant via integration API",
     description:
-      "Creates a new tenant and invites its initial admin user. Optional accessEndsAt blocks the tenant from that moment, like an inactive status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+      "Creates a new tenant and invites its initial admin user. Optional accessEndsAt blocks the tenant from that moment, like an inactive status. Optional maxUsers caps the tenant's users (archived and deleted users don't count; null means no limit) and maxUsersOverflowPercentage allows that many percent more, e.g. 200 with 10 allows 220.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
     headers: [
       {
         ...API_HEADERS.X_TENANT_ID,
@@ -375,7 +375,7 @@ export class IntegrationController {
   @ApiEndpointDocs({
     summary: "Update tenant via integration API",
     description:
-      "Updates the target tenant's name, host, status, or access end date. Send accessEndsAt as null to clear it.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+      "Updates the target tenant's name, host, status, access end date, or user capacity. Send accessEndsAt or maxUsers as null to clear it. maxUsers caps the tenant's users (archived and deleted users don't count; null means no limit) and maxUsersOverflowPercentage allows that many percent more, e.g. 200 with 10 allows 220.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
     headers: [
       {
         ...API_HEADERS.X_TENANT_ID,
@@ -713,7 +713,7 @@ export class IntegrationController {
   @ApiEndpointDocs({
     summary: "Create user via integration API",
     description:
-      "Creates a new user inside the tenant selected by X-Tenant-Id.\n\nProvide the user payload in the request body. The response returns the created user ID so your external system can persist the Mentingo mapping.",
+      "Creates a new user inside the tenant selected by X-Tenant-Id.\n\nProvide the user payload in the request body. The response returns the created user ID so your external system can persist the Mentingo mapping.\n\nFails with 409 user.error.userLimitReached when the tenant's user capacity is reached.",
     headers: [API_HEADERS.X_TENANT_ID],
   })
   @Validate({
@@ -737,7 +737,7 @@ export class IntegrationController {
   @ApiEndpointDocs({
     summary: "Update user via integration API",
     description:
-      "Updates an existing tenant user identified by userId.\n\nOnly fields included in the body are modified. Use this endpoint for profile, role, or status synchronization from an external identity source.",
+      "Updates an existing tenant user identified by userId.\n\nOnly fields included in the body are modified. Use this endpoint for profile, role, or status synchronization from an external identity source.\n\nUnarchiving a user fails with 409 user.error.userLimitReached when the tenant's user capacity is reached.",
     headers: [API_HEADERS.X_TENANT_ID],
   })
   @Validate({

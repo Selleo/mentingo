@@ -3,7 +3,7 @@
 A recipe (the project add-on's ``harness`` key) says how to run the project's Playwright tests on this machine:
 
     {"config": "e2e/playwright.config.ts",   Playwright config, relative to the checkout
-     "node": "22.15.0", "pnpm": "10.22.0",   toolchain (asdf / npx); default: what is installed
+     "node": "24.22.3", "pnpm": "10.34.9",   toolchain (asdf / npx); default: what is installed
      "install": ["npm ci"],                  commands in the config's folder (``cd ..`` works)
      "services": [{"name": "postgres", "image": "pgvector/pgvector:pg16", "ports": ["54321:5432"],
                    "env": {...}, "health": "pg_isready"}],

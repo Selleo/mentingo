@@ -19,6 +19,10 @@ import {
 } from "~/modules/SuperAdmin/schemas/tenant.schema";
 import { TENANTS_PATH } from "~/modules/SuperAdmin/tenantsTable.constants";
 import { toAccessEndsAt } from "~/modules/SuperAdmin/utils/accessEnd.utils";
+import {
+  toMaxUsers,
+  toMaxUsersOverflowPercentage,
+} from "~/modules/SuperAdmin/utils/userCapacity.utils";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CREATE_TENANT_PAGE_HANDLES, TENANT_FORM_HANDLES } from "../../../e2e/data/tenants/handles";
@@ -37,15 +41,27 @@ export default function CreateTenantPage() {
       host: "",
       status: TENANT_STATUSES.ACTIVE,
       accessEndsAt: "",
+      maxUsers: "",
+      maxUsersOverflowPercentage: "",
       adminFirstName: "",
       adminLastName: "",
       adminEmail: "",
     },
   });
 
-  const onSubmit = async ({ accessEndsAt, ...tenant }: CreateTenantFormValues) => {
+  const onSubmit = async ({
+    accessEndsAt,
+    maxUsers,
+    maxUsersOverflowPercentage,
+    ...tenant
+  }: CreateTenantFormValues) => {
     await createTenant({
-      data: { ...tenant, accessEndsAt: toAccessEndsAt(accessEndsAt) },
+      data: {
+        ...tenant,
+        accessEndsAt: toAccessEndsAt(accessEndsAt),
+        maxUsers: toMaxUsers(maxUsers),
+        maxUsersOverflowPercentage: toMaxUsersOverflowPercentage(maxUsersOverflowPercentage),
+      },
     });
 
     queryClient.invalidateQueries({ queryKey: ["superAdminTenants"] });

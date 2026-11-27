@@ -271,6 +271,7 @@ export class LearningPathCertificateService {
       lang: shareLanguage,
       isDownload: true,
       certificateKind: CERTIFICATE_KIND.LEARNING_PATH,
+      certificateId,
       colorTheme: {
         titleColor: accentColor,
         certifyTextColor: accentColor,
@@ -457,6 +458,7 @@ export class LearningPathCertificateService {
       backgroundImageUrl: null,
       lang: context.language,
       certificateKind: CERTIFICATE_KIND.LEARNING_PATH,
+      certificateId: context.certificate.id,
       colorTheme: {
         titleColor: accentColor,
         certifyTextColor: accentColor,
@@ -645,6 +647,6 @@ export class LearningPathCertificateService {
     certificateId: UUIDType,
     language: SupportedLanguages,
   ) {
-    return `${tenantId}/learning-path-certificate-share/v2/${certificateId}/${language}.png`;
+    return `${tenantId}/learning-path-certificate-share/v3/${certificateId}/${language}.png`;
   }
 }

@@ -32,7 +32,7 @@ describe("CompetenciesService", () => {
     asOf: "2026-10-28T00:00:00.000Z",
     warningDays: null,
     person: null,
-    profile: null,
+    tracks: [],
     assessment: null,
     competencies: [],
     standings: [],
@@ -170,7 +170,7 @@ describe("CompetenciesService", () => {
       page: 1,
       perPage: 20,
       search: "ann",
-      profileId: undefined,
+      trackId: undefined,
       readiness: undefined,
       teamOnly: true,
     });

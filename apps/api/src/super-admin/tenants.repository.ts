@@ -179,6 +179,16 @@ export class TenantsRepository {
     return tenant ?? null;
   }
 
+  /** Users that count towards the tenant's user limit. */
+  async countActiveUsers(tenantId: string): Promise<number> {
+    const [{ activeUsersCount }] = await this.dbBase
+      .select({ activeUsersCount: count() })
+      .from(users)
+      .where(and(eq(users.tenantId, tenantId), eq(users.archived, false), isNull(users.deletedAt)));
+
+    return activeUsersCount;
+  }
+
   async findIdByHost(host: string): Promise<{ id: string } | null> {
     const [tenant] = await this.dbBase
       .select({ id: tenants.id })
@@ -197,6 +207,8 @@ export class TenantsRepository {
         host: input.host,
         status: input.status,
         accessEndsAt: input.accessEndsAt,
+        maxUsers: input.maxUsers,
+        maxUsersOverflowPercentage: input.maxUsersOverflowPercentage,
       })
       .returning();
     return tenant;

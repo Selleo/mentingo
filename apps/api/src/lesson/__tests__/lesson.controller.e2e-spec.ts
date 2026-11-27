@@ -1629,6 +1629,24 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           })),
         ),
       );
+
+      const feedback = await runtime.getQuizForDelivery(
+        lesson.id,
+        SUPPORTED_LANGUAGES.PL,
+        learner.id,
+        true,
+      );
+      const blankFeedback = [firstBlankId, secondBlankId].map((blankId) =>
+        feedback.questions[0].options?.find(({ id }) => id === blankId),
+      );
+
+      expect(blankFeedback).toEqual([
+        expect.objectContaining({ studentAnswer: selected[0], isCorrect: selected[0] === "Stop" }),
+        expect.objectContaining({
+          studentAnswer: selected[1],
+          isCorrect: selected[1] === "Report",
+        }),
+      ]);
     },
   );
 

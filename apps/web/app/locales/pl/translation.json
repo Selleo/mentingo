@@ -349,7 +349,8 @@
       "quiz_attempt_graded": "Quiz oceniony przez osobę oceniającą",
       "quiz_grading_digest": "Nowe odpowiedzi czekają na ocenę (codziennie)",
       "forum_mention": "Użytkownik oznaczony w temacie na forum",
-      "discussion_reply": "Nowe odpowiedzi w dyskusji (zbiorczo)"
+      "discussion_reply": "Nowe odpowiedzi w dyskusji (zbiorczo)",
+      "tenant_user_capacity": "Alert o limicie użytkowników"
     },
     "errors": {
       "incompleteButton": "Wpisz tekst przycisku i adres URL.",
@@ -4559,7 +4560,8 @@
   },
   "user": {
     "error": {
-      "archived": "Twoje konto zostało zarchiwizowane."
+      "archived": "Twoje konto zostało zarchiwizowane.",
+      "userLimitReached": "Twoja organizacja osiągnęła limit użytkowników. Zarchiwizuj lub usuń użytkowników albo skontaktuj się z pomocą techniczną, aby zwiększyć limit."
     }
   },
   "studentCoursesView": {
@@ -6209,8 +6211,6 @@
       "placeholder": "Szukaj organizacji..."
     },
     "table": {
-      "name": "Nazwa",
-      "host": "Host",
       "status": "Status",
       "managing": "Zarządzający",
       "lastActivity": "Ostatnia aktywność",
@@ -6228,7 +6228,14 @@
         "title": "Akcje",
         "enterSupportMode": "Wejdź w tryb wsparcia",
         "impersonateUser": "Wejdź jako użytkownik"
-      }
+      },
+      "organization": "Organizacja",
+      "accessEndsAt": "Koniec dostępu",
+      "unlimitedAccess": "Bez limitu",
+      "userCapacity": "Limit użytkowników",
+      "userCapacityValue": "{{used}} / {{allowed}}",
+      "userCapacityUnlimitedValue": "{{used}} / ∞",
+      "accessEndedAgo": "wygasł {{relativeTime}}"
     },
     "activityTrend": {
       "noActivity": "Brak aktywności",
@@ -6285,14 +6292,22 @@
         "firstAdmin": "Pierwszy administrator"
       },
       "accessEndsAtPlaceholder": "Dostęp nieograniczony",
-      "accessEndsAtClear": "Usuń datę końcową"
+      "accessEndsAtClear": "Usuń datę końcową",
+      "maxUsers": "Maksymalna liczba użytkowników",
+      "maxUsersHint": "Zarchiwizowani i usunięci użytkownicy nie są liczeni. Pozostaw puste, aby nie ustawiać limitu.",
+      "maxUsersPlaceholder": "Bez limitu",
+      "maxUsersOverflowPercentage": "Dozwolone przekroczenie (%)",
+      "maxUsersOverflowPercentageHint": "Dodatkowi użytkownicy ponad maksimum, np. 200 użytkowników + 10% pozwala na 220.",
+      "userLimitBelowUsage": "Ta organizacja ma {{activeUsersCount}} aktywnych użytkowników, a ten limit pozwala na {{allowedUsersCount}}. Nikt nie straci dostępu, ale nie będzie można dodawać użytkowników ani przywracać ich z archiwum, dopóki {{excessUsersCount}} nie zostanie zarchiwizowanych. Administratorzy otrzymają powiadomienie."
     },
     "validation": {
       "nameRequired": "Nazwa jest wymagana",
       "hostInvalid": "Host musi być prawidłowym adresem URL",
       "adminEmailRequired": "E-mail administratora jest wymagany",
       "adminFirstNameRequired": "Imię administratora jest wymagane",
-      "adminLastNameRequired": "Nazwisko administratora jest wymagane"
+      "adminLastNameRequired": "Nazwisko administratora jest wymagane",
+      "maxUsersInvalid": "Maksymalna liczba użytkowników musi być liczbą całkowitą nie mniejszą niż 1",
+      "maxUsersOverflowPercentageInvalid": "Przekroczenie musi być liczbą całkowitą od 0 do 100"
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organizacja została utworzona pomyślnie",
@@ -8058,7 +8073,8 @@
         "quiz_attempt_graded": "Uczestnik, którego odpowiedzi w quizie zostały ocenione.",
         "quiz_grading_digest": "Użytkownicy, którzy mogą oceniać odpowiedzi w quizach.",
         "forum_mention": "Użytkownicy oznaczeni we wpisie na forum.",
-        "discussion_reply": "Uczestnicy wątku lub tematu, którzy nie przeczytali odpowiedzi w aplikacji."
+        "discussion_reply": "Uczestnicy wątku lub tematu, którzy nie przeczytali odpowiedzi w aplikacji.",
+        "tenant_user_capacity": "Aktywni administratorzy organizacji."
       }
     },
     "mapping": {
@@ -8160,7 +8176,8 @@
       "quizAttemptGraded": "Quiz oceniony",
       "quizGradingDigest": "Podsumowanie kolejki ocen",
       "forumUserMentioned": "Wzmianka na forum",
-      "discussionReply": "Nowe odpowiedzi w dyskusji"
+      "discussionReply": "Nowe odpowiedzi w dyskusji",
+      "tenantUserCapacity": "Alert o limicie użytkowników"
     },
     "canvas": {
       "emptyTitle": "Płótno automatyzacji jest puste",
@@ -8331,7 +8348,13 @@
       "latestReply": "Ostatnia odpowiedź",
       "discussionUrl": "Link do dyskusji",
       "unsubscribeUrl": "Link wypisania",
-      "unfollowUrl": "Link do zakończenia obserwowania"
+      "unfollowUrl": "Link do zakończenia obserwowania",
+      "capacityTitle": "Tytuł alertu o limicie",
+      "capacityMessage": "Treść alertu o limicie",
+      "activeUsersCount": "Aktywni użytkownicy",
+      "maxUsers": "Użytkownicy w planie",
+      "allowedUsersCount": "Dozwoleni użytkownicy (z przekroczeniem)",
+      "usersUrl": "Link do strony użytkowników"
     },
     "simulation": {
       "title": "Wynik symulacji",
@@ -9054,7 +9077,7 @@
   },
   "competencies": {
     "deleteCompetency": "Usuń kompetencję",
-    "deleteCompetencyConfirmation": "Usunąć „{{name}}”? Spowoduje to trwałe usunięcie kompetencji ze wszystkich profili stanowisk oraz usunięcie jej historii potwierdzeń i załączonych dokumentów. Tej operacji nie można cofnąć.",
+    "deleteCompetencyConfirmation": "Usunąć „{{name}}”? Spowoduje to trwałe usunięcie kompetencji ze wszystkich profili kompetencji oraz usunięcie jej historii potwierdzeń i załączonych dokumentów. Tej operacji nie można cofnąć.",
     "notifications": {
       "categoryCreated": "Utworzono kategorię.",
       "categoryUpdated": "Zaktualizowano kategorię.",
@@ -9062,11 +9085,11 @@
       "competencyCreated": "Utworzono kompetencję.",
       "competencyUpdated": "Zaktualizowano kompetencję.",
       "competencyDeleted": "Usunięto kompetencję.",
-      "profileCreated": "Utworzono profil stanowiska.",
-      "profileUpdated": "Zaktualizowano profil stanowiska.",
-      "profileDeleted": "Usunięto profil stanowiska.",
-      "profileAssigned": "Przypisano profil stanowiska.",
-      "profileRemoved": "Usunięto przypisanie profilu stanowiska.",
+      "trackCreated": "Utworzono profil kompetencji.",
+      "trackUpdated": "Zaktualizowano profil kompetencji.",
+      "trackDeleted": "Usunięto profil kompetencji.",
+      "trackAssigned": "Przypisano profile kompetencji.",
+      "trackRemoved": "Usunięto przypisania profili kompetencji.",
       "documentSubmitted": "Przesłano dokument do weryfikacji.",
       "observationConfirmed": "Potwierdzono obserwację.",
       "qualificationsRecognized": "Uznano wcześniejsze kwalifikacje.",
@@ -9081,9 +9104,9 @@
       "categoryDeleteFailed": "Nie udało się usunąć kategorii. Spróbuj ponownie.",
       "competencySaveFailed": "Nie udało się zapisać kompetencji. Spróbuj ponownie.",
       "competencyDeleteFailed": "Nie udało się usunąć kompetencji. Spróbuj ponownie.",
-      "profileSaveFailed": "Nie udało się zapisać profilu stanowiska. Spróbuj ponownie.",
-      "profileDeleteFailed": "Nie udało się usunąć profilu stanowiska. Spróbuj ponownie.",
-      "profileAssignmentFailed": "Nie udało się zmienić przypisania profilu stanowiska. Spróbuj ponownie.",
+      "trackSaveFailed": "Nie udało się zapisać profilu kompetencji. Spróbuj ponownie.",
+      "trackDeleteFailed": "Nie udało się usunąć profilu kompetencji. Spróbuj ponownie.",
+      "trackAssignmentFailed": "Nie udało się zmienić przypisania profili kompetencji. Spróbuj ponownie.",
       "evidenceSubmitFailed": "Nie udało się przesłać potwierdzenia. Spróbuj ponownie.",
       "reviewFailed": "Nie udało się zapisać decyzji weryfikacyjnej. Spróbuj ponownie.",
       "revocationFailed": "Nie udało się cofnąć potwierdzenia. Spróbuj ponownie.",
@@ -9125,7 +9148,7 @@
       "saveChange": "Zapisz zmianę"
     },
     "searchCatalog": "Szukaj kompetencji…",
-    "searchProfiles": "Szukaj profili stanowisk…",
+    "searchTracks": "Szukaj profili kompetencji…",
     "noSearchResults": "Brak wyników. Spróbuj wpisać inne hasło.",
     "documents": "Dokumenty",
     "requiredDocuments": "Dokumenty do zgłoszenia",
@@ -9147,16 +9170,16 @@
     "own": "Moje kompetencje",
     "team": "Kompetencje zespołu",
     "people": "Pracownicy",
-    "peopleDescription": "Przeglądaj przypisane profile i bieżące statusy kompetencji.",
+    "peopleDescription": "Przeglądaj przypisane profile kompetencji i bieżące statusy kompetencji.",
     "review": "Do zatwierdzenia",
     "plans": "Plany rozwoju",
     "catalog": "Kompetencje",
-    "profiles": "Profile stanowisk",
+    "tracks": "Profile kompetencji",
     "person": "Pracownik",
-    "profile": "Profil stanowiskowy",
-    "compareProfile": "Porównaj z profilem",
-    "assignedProfile": "Przypisany profil",
-    "noProfile": "Brak przypisanego profilu",
+    "track": "Profil kompetencji",
+    "compareTrack": "Porównaj z profilem",
+    "assignedTrack": "Przypisane profile",
+    "noTrack": "Brak profilu kompetencji",
     "loading": "Wczytywanie kompetencji...",
     "retry": "Spróbuj ponownie",
     "serviceError": "Nie udało się wczytać lub zapisać kompetencji. Spróbuj ponownie.",
@@ -9225,13 +9248,14 @@
     "noManualConditions": "Brak warunków tego rodzaju.",
     "noEvidence": "Brak dowodów do Twojej weryfikacji.",
     "reasonLabel": "Uzasadnienie",
-    "editProfile": "Edytuj profil stanowiskowy",
-    "newProfile": "Nowy profil",
+    "editTrack": "Edytuj profil kompetencji",
+    "newTrack": "Nowy profil",
     "requiredCompetencies": "Wymagane kompetencje",
-    "deleteProfile": "Usuń profil",
-    "deleteProfileConfirmation": "Usunąć profil \"{{name}}\"?",
-    "profileInUse": "Przed usunięciem profilu usuń jego przypisania do pracowników.",
-    "noProfiles": "Brak profili stanowiskowych.",
+    "deleteTrack": "Usuń profil",
+    "deleteTrackConfirmation": "Usunąć profil \"{{name}}\"?",
+    "trackInUse": "Przed usunięciem profilu usuń jego przypisania do pracowników.",
+    "trackLimitReached": "Maksymalna liczba profili kompetencji na osobę: {{count}}.",
+    "noTracks": "Brak profili kompetencji.",
     "requiredLevel": "Wymagany poziom",
     "newAction": "Dodaj działanie rozwojowe",
     "noActions": "Brak działań rozwojowych.",
@@ -9330,11 +9354,11 @@
       "plans": "Przekształcaj luki w kursy, praktykę stanowiskową, mentoring i recertyfikację.",
       "people": "Przeglądaj pracowników i potwierdzone kompetencje.",
       "catalog": "Wspólny słownik kompetencji, poziomów i sposobów potwierdzania.",
-      "profiles": "Określ, czego pracownik potrzebuje, aby bezpiecznie i samodzielnie wykonywać rolę.",
+      "tracks": "Określ, czego pracownik potrzebuje, aby bezpiecznie i samodzielnie wykonywać rolę.",
       "settings": "Skonfiguruj ostrzeżenia o wygaśnięciu.",
-      "overview": "Zobacz, kto spełnia wymagania swojego profilu stanowiska i gdzie potrzebne jest działanie.",
-      "setup": "Zdefiniuj kompetencje, połącz je w profile stanowisk i skonfiguruj przypomnienia o wygasaniu.",
-      "ownWithoutProfile": "Śledź kompetencje wymagane na Twoim stanowisku i przesyłaj potwierdzające je dokumenty."
+      "overview": "Zobacz, kto spełnia wymagania swoich profili kompetencji i gdzie potrzebne jest działanie.",
+      "setup": "Zdefiniuj kompetencje, połącz je w profile kompetencji i skonfiguruj przypomnienia o wygasaniu.",
+      "ownWithoutTrack": "Śledź kompetencje wymagane na Twoim stanowisku i przesyłaj potwierdzające je dokumenty."
     },
     "setup": "Konfiguracja kompetencji",
     "levelComparison": "Twój / wymagany",
@@ -9372,9 +9396,9 @@
       "count_other": "{{count}} kompetencji",
       "count_few": "{{count}} kompetencje",
       "count_many": "{{count}} kompetencji",
-      "noProfileTitle": "Nie przypisano jeszcze profilu stanowiska",
-      "noProfileSelf": "Gdy administrator przypisze Ci profil stanowiska, zobaczysz wymagane kompetencje i kolejne kroki.",
-      "noProfileOther": "Przypisz profil stanowiska w zakładce Przegląd, aby zobaczyć, jakich kompetencji potrzebuje ta osoba.",
+      "noTrackTitle": "Nie przypisano jeszcze profilu kompetencji",
+      "noTrackSelf": "Gdy administrator przypisze Ci profile kompetencji, zobaczysz wymagane kompetencje i kolejne kroki.",
+      "noTrackOther": "Przypisz profile kompetencji w zakładce Przegląd, aby zobaczyć, jakich kompetencji potrzebuje ta osoba.",
       "requirementsTitle": "Wymagane kompetencje",
       "filters": {
         "all": "Wszystkie",
@@ -9412,7 +9436,7 @@
       "ready": "Spełnia wymagania",
       "expiring": "Wkrótce wygasa",
       "missing": "Brakujące kompetencje",
-      "noProfile": "Brak profilu stanowiska",
+      "noTrack": "Brak profilu kompetencji",
       "missingCount_one": "Brakuje {{count}}",
       "missingCount_few": "Brakuje {{count}}",
       "missingCount_many": "Brakuje {{count}}",
@@ -9430,20 +9454,20 @@
       "expiringNote_few": "Potwierdzenie wygasa w ciągu {{count}} dni",
       "expiringNote_many": "Potwierdzenie wygasa w ciągu {{count}} dni",
       "expiringNote_other": "Potwierdzenie wygasa w ciągu {{count}} dni",
-      "noProfileNote": "Przypisz profil stanowiska, aby śledzić gotowość",
+      "noTrackNote": "Przypisz profile kompetencji, aby śledzić gotowość",
       "peopleTitle": "Osoby",
-      "peopleDescription": "Przypisuj profile stanowisk i sprawdzaj, kto ma wszystkie wymagane kompetencje.",
+      "peopleDescription": "Przypisuj profile kompetencji i sprawdzaj, kto ma wszystkie wymagane kompetencje.",
       "teamDescription": "Sprawdź, kto w Twoim zespole ma wszystkie wymagane kompetencje.",
       "viewMode": "Widok",
       "views": {
         "list": "Lista",
         "matrix": "Macierz"
       },
-      "allProfiles": "Wszystkie profile stanowisk",
+      "allTracks": "Wszystkie profile kompetencji",
       "clearFilters": "Wyczyść filtry",
       "readiness": "Gotowość",
       "noMatches": "Żadna osoba nie pasuje do wybranych filtrów.",
-      "noMatrixPeople": "Nikt nie ma jeszcze przypisanego tego profilu stanowiska.",
+      "noMatrixPeople": "Nikt nie ma jeszcze przypisanego tego profilu kompetencji.",
       "allPeople": "Wszyscy"
     },
     "gettingStarted": {
@@ -9462,30 +9486,30 @@
           "description": "Opisz umiejętność, jej poziomy i sposób potwierdzenia każdego poziomu: kurs, dokument lub obserwację.",
           "action": "Dodaj kompetencję"
         },
-        "profiles": {
-          "title": "Zbuduj profil stanowiska",
+        "tracks": {
+          "title": "Zbuduj profil kompetencji",
           "description": "Wybierz kompetencje i poziomy wymagane na stanowisku.",
-          "action": "Utwórz profil stanowiska"
+          "action": "Utwórz profil kompetencji"
         },
         "assignments": {
           "title": "Przypisz osoby",
-          "description": "Przypisz profil stanowiska każdemu pracownikowi, aby zacząć śledzić jego gotowość.",
-          "action": "Przypisz profile stanowisk"
+          "description": "Przypisz profile kompetencji każdemu pracownikowi, aby zacząć śledzić jego gotowość.",
+          "action": "Przypisz profile kompetencji"
         }
       }
     },
     "setupSection": {
       "competenciesTitle": "Kompetencje",
       "competenciesDescription": "Umiejętności z poziomami. Każdy poziom określa, co go potwierdza: ukończenie kursu, zatwierdzony dokument lub obserwacja.",
-      "profilesTitle": "Profile stanowisk",
-      "profilesDescription": "Połącz kompetencje i wymagane poziomy dla stanowiska, a następnie przypisz profil osobom w zakładce Przegląd.",
+      "tracksTitle": "Profile kompetencji",
+      "tracksDescription": "Połącz kompetencje i wymagane poziomy dla stanowiska, a następnie przypisz profile osobom w zakładce Przegląd. Jedna osoba może mieć kilka profili.",
       "settingsTitle": "Przypomnienia o wygasaniu",
       "settingsDescription": "Wybierz, z jakim wyprzedzeniem oznaczać wygasające potwierdzenia.",
       "emptyCompetenciesTitle": "Brak kompetencji",
-      "emptyCompetencies": "Zacznij od dodania umiejętności, które śledzi Twoja organizacja. Następnie połączysz je w profile stanowisk.",
-      "emptyProfilesTitle": "Brak profili stanowisk",
-      "emptyProfiles": "Utwórz profil stanowiska, aby określić, jakich kompetencji wymaga dana rola.",
-      "emptyProfilesNeedsCompetencies": "Przed utworzeniem profilu stanowiska dodaj co najmniej jedną kompetencję z poziomem.",
+      "emptyCompetencies": "Zacznij od dodania umiejętności, które śledzi Twoja organizacja. Następnie połączysz je w profile kompetencji.",
+      "emptyTracksTitle": "Brak profili kompetencji",
+      "emptyTracks": "Utwórz profil kompetencji, aby określić, jakich kompetencji wymaga dana rola.",
+      "emptyTracksNeedsCompetencies": "Przed utworzeniem profilu kompetencji dodaj co najmniej jedną kompetencję z poziomem.",
       "requiredCompetenciesCount": "Wymagane kompetencje",
       "assignedPeople": "Przypisane osoby",
       "expiryOff": "Wył.",
@@ -9498,17 +9522,17 @@
       "competenciesNav_few": "{{count}} gotowe do użycia",
       "competenciesNav_many": "{{count}} gotowych do użycia",
       "competenciesNav_other": "{{count}} gotowych do użycia",
-      "profilesNav_one": "{{count}} przypisana osoba",
-      "profilesNav_few": "{{count}} przypisane osoby",
-      "profilesNav_many": "{{count}} przypisanych osób",
-      "profilesNav_other": "{{count}} przypisanych osób",
+      "tracksNav_one": "{{count}} przypisana osoba",
+      "tracksNav_few": "{{count}} przypisane osoby",
+      "tracksNav_many": "{{count}} przypisanych osób",
+      "tracksNav_other": "{{count}} przypisanych osób",
       "expiryNav_one": "Ostrzegaj {{count}} dzień przed wygaśnięciem",
       "expiryNav_few": "Ostrzegaj {{count}} dni przed wygaśnięciem",
       "expiryNav_many": "Ostrzegaj {{count}} dni przed wygaśnięciem",
       "expiryNav_other": "Ostrzegaj {{count}} dni przed wygaśnięciem",
       "expiryNavOff": "Nieskonfigurowane"
     },
-    "compareWithAssigned": "Porównaj z: przypisany profil",
+    "compareWithAssigned": "Porównaj z: przypisane profile",
     "select": {
       "search": "Szukaj…",
       "noResults": "Brak wyników."
@@ -9528,7 +9552,7 @@
       "pending_other": "{{count}} oczekuje",
       "notSubmitted": "Nie przesłano"
     },
-    "profileEditor": {
+    "trackEditor": {
       "addCompetency": "Dodaj kompetencję…",
       "requirementsHelp": "Dodaj każdą kompetencję wymaganą na stanowisku i wybierz wymagany poziom.",
       "noRequirements": "Nie dodano jeszcze kompetencji. Użyj „Dodaj kompetencję”, aby zbudować profil."
@@ -9599,7 +9623,7 @@
       "planGaps": "Zaplanuj te kompetencje",
       "emptyPlan": "Ten plan nie ma jeszcze kroków.",
       "emptyTitle": "Brak planów rozwoju",
-      "empty": "Plany pojawią się tu dla osób, których profil stanowiska ma brakujące kompetencje. Zacznij od przypisania profili w zakładce Przegląd."
+      "empty": "Plany pojawią się tu dla osób, którym brakuje kompetencji z ich profili kompetencji. Zacznij od przypisania profili w zakładce Przegląd."
     },
     "planBuilder": {
       "title": "Dodaj kroki do planu",
@@ -9608,7 +9632,7 @@
       "stepsTitle": "Kroki",
       "stepsHelp": "Każdy krok dotyczy jednego brakującego poziomu kompetencji. Właściciel planu i termin docelowy obowiązują dla wszystkich kroków.",
       "choosePerson": "Wybierz osobę, aby zobaczyć jej brakujące kompetencje.",
-      "noGaps": "Ta osoba spełnia wszystkie wymagania swojego profilu stanowiska.",
+      "noGaps": "Ta osoba spełnia wszystkie wymagania swoich profili kompetencji.",
       "addStep": "Dodaj krok",
       "submit_one": "Utwórz plan z {{count}} krokiem",
       "submit_few": "Utwórz plan z {{count}} krokami",
@@ -9631,7 +9655,7 @@
     "stepEditor": {
       "title": "Edytuj krok"
     },
-    "profilesTable": {
+    "tracksTable": {
       "allCompetencies": "Wszystkie kompetencje"
     },
     "reviewTable": {

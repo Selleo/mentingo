@@ -18,7 +18,7 @@ import {
 import { LESSON_PROGRESS_MEDIA_KIND } from "./LessonVideoProgressStrip.types";
 import {
   getLessonVideoResumeTarget,
-  hasStartedLessonVideo,
+  shouldBlockRequiredMediaLeave,
 } from "./LessonVideoProgressStrip.utils";
 import {
   getRequiredVideoLeavePreferenceKey,
@@ -96,9 +96,13 @@ export const RequiredVideoLeaveGuard = ({
   const [rememberDecision, setRememberDecision] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const hasStartedVideo = segments.some(hasStartedLessonVideo);
   const translationKeys = getRequiredMediaLeaveTranslationKeys(segments);
-  const shouldBlock = enabled && !lessonCompleted && hasStartedVideo && !dismissed;
+  const shouldBlock = shouldBlockRequiredMediaLeave({
+    enabled,
+    lessonCompleted,
+    dismissed,
+    segments,
+  });
 
   const blocker = useBlocker(shouldBlock);
   const previousBlockerStateRef = useRef(blocker.state);

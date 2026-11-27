@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { useDownloadCompetenciesAttachment } from "~/api/mutations/useDownloadCompetenciesAttachment";
 
+import { formatTrackNames } from "../utils/competenciesOverview.utils";
 import {
   REQUIREMENT_FILTER_VALUES,
   getSubjectMessageKeys,
@@ -36,11 +37,11 @@ export function useCompetencySubject({
   const standings = workspace.standings;
   const records = workspace.evidence;
   const personName = workspace.person?.name ?? t("competencies.archivedAccount");
-  const profileName = workspace.profile?.name;
+  const trackNames = formatTrackNames(workspace.tracks);
   const { summaryKey, statusKey } = getSubjectMessageKeys(assessment);
   const summaryMessage = t(summaryKey);
   const statusMessage = t(statusKey);
-  const { activeDefinitions, canInspectCompetencies, hasNoProfile, requirementRows } =
+  const { activeDefinitions, canInspectCompetencies, hasNoTrack, requirementRows } =
     getSubjectRequirements(workspace, userId, canManage);
   const visibleRequirementRows = requirementRows.filter((row) =>
     matchesRequirementFilter(row, requirementFilter),
@@ -64,11 +65,11 @@ export function useCompetencySubject({
     records,
     personName,
     profilePictureUrl: workspace.person?.profilePictureUrl ?? null,
-    profileName,
+    trackNames,
     summaryMessage,
     activeDefinitions,
     canInspectCompetencies,
-    hasNoProfile,
+    hasNoTrack,
     requirementRows,
     visibleRequirementRows,
     statusMessage,

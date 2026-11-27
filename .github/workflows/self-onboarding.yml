@@ -104,7 +104,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 22.15.0
+          node-version: 24.22.3
       - name: Resolve version and validate configuration
         id: source
         env:
@@ -351,7 +351,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 22.15.0
+          node-version: 24.22.3
       - name: Install the pinned Guide SDK and existing TUS client
         run: corepack pnpm install --frozen-lockfile
       - name: Restore the private publication bundle

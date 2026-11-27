@@ -96,6 +96,7 @@ export * from "./utils/sanitizeRichText";
 export * from "./utils/sanitizeRichTextSummary";
 export * from "./utils/seedEmail";
 export * from "./utils/stripHtmlTags";
+export * from "./utils/tenantUserCapacity";
 export * from "./utils/uiMessage";
 export * from "./utils/videoCoverage";
 export * from "./utils/videoUrls";

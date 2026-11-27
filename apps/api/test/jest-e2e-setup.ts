@@ -42,6 +42,7 @@ beforeAll(async () => {
   setupValidation();
   jest.spyOn(console, "log").mockImplementation(filteredLog);
   await rateLimitRedis.connect();
+  await resetRateLimits();
 });
 
 beforeEach(async () => {

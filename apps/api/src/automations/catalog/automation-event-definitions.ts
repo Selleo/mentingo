@@ -764,4 +764,56 @@ export const AUTOMATION_EVENT_DEFINITIONS: Omit<AutomationEventDefinition, "prov
         },
       ],
     },
+    {
+      kind: AUTOMATION_EVENT_KINDS.TENANT_USER_CAPACITY,
+      label: "User capacity alert",
+      description:
+        "Sent when the organization approaches its user limit (80% of the users in its plan), reaches it, or runs out of user slots including the allowed overflow.",
+      recipientPolicy:
+        "Active administrators of the organization. The in-app notification remains independent.",
+      fields: [
+        {
+          key: "capacity_title",
+          label: "Capacity alert title",
+          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
+          sampleValue: "Your organization has reached its user limit",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "capacity_message",
+          label: "Capacity alert message",
+          type: AUTOMATION_PLACEHOLDER_TYPES.STRING,
+          sampleValue: "200 users are active and your plan includes 200.",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "active_users_count",
+          label: "Active users",
+          type: AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+          sampleValue: 200,
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "max_users",
+          label: "Users in plan",
+          type: AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+          sampleValue: 200,
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "allowed_users_count",
+          label: "Allowed users",
+          type: AUTOMATION_PLACEHOLDER_TYPES.NUMBER,
+          sampleValue: 220,
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+        {
+          key: "users_link",
+          label: "Users page link",
+          type: AUTOMATION_PLACEHOLDER_TYPES.URL,
+          sampleValue: "https://example.com/admin/users",
+          sensitivity: AUTOMATION_FIELD_SENSITIVITIES.ORDINARY,
+        },
+      ],
+    },
   ];

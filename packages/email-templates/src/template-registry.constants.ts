@@ -238,4 +238,13 @@ export const EMAIL_TEMPLATE_NAMES: Record<
     es: "Nuevas respuestas en una discusión",
     fr: "Nouvelles réponses dans une discussion",
   },
+  TENANT_USER_CAPACITY: {
+    en: "User capacity alert",
+    pl: "Alert o limicie użytkowników",
+    de: "Warnung zur Benutzerkapazität",
+    lt: "Įspėjimas apie naudotojų talpą",
+    cs: "Upozornění na kapacitu uživatelů",
+    es: "Alerta de capacidad de usuarios",
+    fr: "Alerte de capacité d'utilisateurs",
+  },
 };

@@ -34,8 +34,9 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     include: [
       "./app/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-      // Recorder helper checks; Playwright only runs e2e/specs.
+      // Recorder helper and WCAG audit report checks; Playwright runs only *.spec.ts and *.audit.ts.
       "./e2e/utils/**/*.test.ts",
+      "./e2e/a11y-audit/**/*.test.ts",
     ],
     coverage: {
       exclude: ["**/browser.ts", "**/handler.ts"],

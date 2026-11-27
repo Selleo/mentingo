@@ -93,55 +93,33 @@ export const getCompletedAnswers = (
 ) => {
   if (!options?.length) return [];
 
-  const submittedOptions = options.filter((option) => option.isStudentAnswer);
-  const placedOptionIds = new Set<string>();
+  // A blank's option carries the word the learner placed there as `studentAnswer`; blanks the
+  // learner left empty stay empty, so the review never swaps in the correct word.
   const blankOptions = blankAnswerIds.length
     ? blankAnswerIds
-        .map((answerId, index) => {
-          const markerOption = options.find((option) => option.id === answerId);
-          const submittedOption = submittedOptions[index];
-
-          if (markerOption?.isStudentAnswer || markerOption?.studentAnswer != null) {
-            placedOptionIds.add(markerOption.id);
-            return markerOption;
-          }
-
-          if (submittedOption) {
-            placedOptionIds.add(submittedOption.id);
-            return { ...submittedOption, id: answerId };
-          }
-
-          if (markerOption?.isCorrect) {
-            placedOptionIds.add(markerOption.id);
-            return markerOption;
-          }
-
-          return undefined;
-        })
-        .filter((option): option is QuizQuestionOption => Boolean(option))
+        .map((answerId) => options.find((option) => option.id === answerId))
+        .filter((option): option is QuizQuestionOption => option?.studentAnswer != null)
     : options
-        .filter((option) => Boolean(option.isCorrect))
+        .filter((option) => option.studentAnswer != null)
         .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
         .slice(0, maxAnswersAmount);
 
-  const blankWords = blankOptions.map(
-    ({ id, optionText, displayOrder, isStudentAnswer, isCorrect, studentAnswer }, index) => {
-      const blankId = id ? createDndBlankId(id) : `${index + 1}`;
+  const blankWords = blankOptions.map(({ id, displayOrder, isCorrect, studentAnswer }, index) => {
+    const blankId = blankAnswerIds.length ? createDndBlankId(id) : `${index + 1}`;
 
-      return {
-        id: `${id ?? index + 1}:submitted`,
-        index: displayOrder ?? index + 1,
-        value: studentAnswer ?? optionText,
-        blankId,
-        isCorrect,
-        isStudentAnswer,
-        studentAnswerText: null,
-      };
-    },
-  );
+    return {
+      id: `${id}:submitted`,
+      index: displayOrder ?? index + 1,
+      value: studentAnswer,
+      blankId,
+      isCorrect,
+      isStudentAnswer: true,
+      studentAnswerText: null,
+    };
+  });
 
   const wordBankWords = options
-    .filter((option) => !placedOptionIds.has(option.id))
+    .filter((option) => !option.isStudentAnswer)
     .map(({ id, optionText, displayOrder, isStudentAnswer, isCorrect }) => ({
       id: id ?? `word-bank-${displayOrder ?? optionText}`,
       index: displayOrder ?? null,

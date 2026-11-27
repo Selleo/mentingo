@@ -11,6 +11,7 @@ import type {
   supportUsersSchema,
   tenantListSortSchema,
   tenantsListItemSchema,
+  tenantDetailsResponseSchema,
   tenantResponseSchema,
   tenantsListSchema,
   updateTenantSchema,
@@ -27,6 +28,7 @@ export type ListTenantsQuery = Static<typeof listTenantsQuerySchema>;
 export type TenantListSort = Static<typeof tenantListSortSchema>;
 export type { ListSupportUsersQuery };
 export type TenantResponse = Static<typeof tenantResponseSchema>;
+export type TenantDetailsResponse = Static<typeof tenantDetailsResponseSchema>;
 export type TenantsListItemResponse = Static<typeof tenantsListItemSchema>;
 export type TenantsListResponse = Static<typeof tenantsListSchema>;
 export type SupportUsersResponse = Static<typeof supportUsersSchema>;
@@ -51,6 +53,8 @@ export type CreateTenantRecord = {
   host: string;
   status: TenantStatus;
   accessEndsAt: string | null;
+  maxUsers: number | null;
+  maxUsersOverflowPercentage: number;
 };
 
 export type CreateTenantOptions = {
@@ -62,4 +66,6 @@ export type UpdateTenantRecord = {
   host?: string;
   status?: TenantStatus;
   accessEndsAt?: string | null;
+  maxUsers?: number | null;
+  maxUsersOverflowPercentage?: number;
 };

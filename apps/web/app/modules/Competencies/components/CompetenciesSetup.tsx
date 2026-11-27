@@ -12,14 +12,14 @@ import { SETUP_SECTIONS } from "../utils/competenciesSetup.utils";
 
 import { CompetenciesCatalog } from "./CompetenciesCatalog";
 import { CompetenciesCategories } from "./CompetenciesCategories";
-import { CompetenciesProfiles } from "./CompetenciesProfiles";
 import { CompetenciesSettings } from "./CompetenciesSettings";
 import { CompetenciesSetupPanel } from "./CompetenciesSetupPanel";
+import { CompetenciesTracks } from "./CompetenciesTracks";
 
 import type {
   CompetenciesSummary,
   CompetencyCatalogItem,
-  CompetencyProfileItem,
+  CompetencyTrackItem,
 } from "../competencies.types";
 import type { SetupSection } from "../utils/competenciesSetup.utils";
 import type { LucideIcon } from "lucide-react";
@@ -29,17 +29,17 @@ export function CompetenciesSetup({
   section,
   onSectionChange,
   onCompetencyEdit,
-  onProfileEdit,
+  onTrackEdit,
 }: {
   summary: CompetenciesSummary;
   section: SetupSection;
   onSectionChange: (section: SetupSection) => void;
   onCompetencyEdit: (value?: CompetencyCatalogItem) => void;
-  onProfileEdit: (profile?: CompetencyProfileItem) => void;
+  onTrackEdit: (track?: CompetencyTrackItem) => void;
 }) {
   const { t } = useTranslation();
   const { categoryCount, progress } = useCompetenciesSetupProgress(summary);
-  const canCreateProfile = progress[COMPETENCIES_SETUP_STEPS.COMPETENCIES];
+  const canCreateTrack = progress[COMPETENCIES_SETUP_STEPS.COMPETENCIES];
   const { warningDays } = summary;
   const completedSteps = Object.values(progress).filter(Boolean).length;
   const totalSteps = Object.values(progress).length;
@@ -69,11 +69,11 @@ export function CompetenciesSetup({
       meta: String(summary.setup.competencies),
     },
     {
-      value: SETUP_SECTIONS.PROFILES,
-      label: t("competencies.setupSection.profilesTitle"),
-      detail: t("competencies.setupSection.profilesNav", { count: summary.setup.assignments }),
+      value: SETUP_SECTIONS.TRACKS,
+      label: t("competencies.setupSection.tracksTitle"),
+      detail: t("competencies.setupSection.tracksNav", { count: summary.setup.assignedPeople }),
       icon: BriefcaseBusiness,
-      meta: String(summary.setup.profiles),
+      meta: String(summary.setup.tracks),
     },
     {
       value: SETUP_SECTIONS.EXPIRY,
@@ -190,14 +190,14 @@ export function CompetenciesSetup({
               <CompetenciesCategories />
             </CompetenciesSetupPanel>
           ))
-          .with(SETUP_SECTIONS.PROFILES, () => (
+          .with(SETUP_SECTIONS.TRACKS, () => (
             <CompetenciesSetupPanel
-              title={t("competencies.setupSection.profilesTitle")}
-              description={t("competencies.setupSection.profilesDescription")}
+              title={t("competencies.setupSection.tracksTitle")}
+              description={t("competencies.setupSection.tracksDescription")}
             >
-              <CompetenciesProfiles
-                onEdit={onProfileEdit}
-                onCreate={canCreateProfile ? () => onProfileEdit() : undefined}
+              <CompetenciesTracks
+                onEdit={onTrackEdit}
+                onCreate={canCreateTrack ? () => onTrackEdit() : undefined}
               />
             </CompetenciesSetupPanel>
           ))

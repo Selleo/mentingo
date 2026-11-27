@@ -29,6 +29,7 @@ import { DB } from "src/storage/db/db.providers";
 import { tenants, users } from "src/storage/schema";
 import { UserImportRepository } from "src/user/repositories/user-import.repository";
 import { importUserSchema } from "src/user/schemas/createUser.schema";
+import { UserLimitService } from "src/user/services/user-limit.service";
 import {
   USER_CREATION_FLOW_TYPE,
   type CreateUserContext,
@@ -62,6 +63,7 @@ export class UserImportService {
     private readonly settingsService: SettingsService,
     private readonly userImportRepository: UserImportRepository,
     private readonly notificationAccountActionService: NotificationAccountActionService,
+    private readonly userLimitService: UserLimitService,
   ) {}
 
   async importUsers(
@@ -401,6 +403,8 @@ export class UserImportService {
     if (!userImportRows.length) return [];
 
     const createdUserImportRows = await this.createUsersAndMapToImportRows(userImportRows, trx);
+
+    await this.userLimitService.enforceTenantUserLimit(context.creator.tenantId, trx);
 
     const userRoleAssignments = this.prepareUserRoleAssignments(createdUserImportRows);
     await this.insertUserRoleAssignmentsBulk(userRoleAssignments, trx);

@@ -38,6 +38,7 @@ export type BuildCertificateMarkupOptions = {
   isModal?: boolean;
   isDownload?: boolean;
   certificateKind?: CertificateKind;
+  certificateId?: string;
 };
 
 export const CERTIFICATE_KIND = {
@@ -62,6 +63,7 @@ const certificateTranslations = {
     date: "Data",
     expiryDate: "Wygasa",
     signature: "Podpis",
+    certificateId: "ID certyfikatu",
   },
   en: {
     documentTitle: "Certificate of completion",
@@ -77,6 +79,7 @@ const certificateTranslations = {
     date: "Date",
     expiryDate: "Expires",
     signature: "Signature",
+    certificateId: "Certificate ID",
   },
   de: {
     documentTitle: "Abschlusszertifikat",
@@ -92,6 +95,7 @@ const certificateTranslations = {
     date: "Datum",
     expiryDate: "Läuft ab",
     signature: "Unterschrift",
+    certificateId: "Zertifikat-ID",
   },
   lt: {
     documentTitle: "Baigimo sertifikatas",
@@ -107,6 +111,7 @@ const certificateTranslations = {
     date: "Data",
     expiryDate: "Galioja iki",
     signature: "Parašas",
+    certificateId: "Sertifikato ID",
   },
   cs: {
     documentTitle: "Certifikát o absolvování",
@@ -122,6 +127,7 @@ const certificateTranslations = {
     date: "Datum",
     expiryDate: "Platí do",
     signature: "Podpis",
+    certificateId: "ID certifikátu",
   },
   es: {
     documentTitle: "Certificado de finalización",
@@ -137,6 +143,7 @@ const certificateTranslations = {
     date: "Fecha",
     expiryDate: "Caduca",
     signature: "Firma",
+    certificateId: "ID del certificado",
   },
   fr: {
     documentTitle: "Certificat de réussite",
@@ -152,6 +159,7 @@ const certificateTranslations = {
     date: "Date",
     expiryDate: "Expire le",
     signature: "Signature",
+    certificateId: "ID du certificat",
   },
 };
 
@@ -168,6 +176,7 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
     colorTheme = defaultCertificateRenderTheme,
     isDownload = false,
     certificateKind = CERTIFICATE_KIND.COURSE,
+    certificateId = "",
   } = options;
 
   const t = certificateTranslations[lang];
@@ -186,6 +195,7 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
     logoColor: resolveColor("logoColor"),
   };
   const backgroundStyle = [
+    "position:relative;",
     backgroundImageUrl
       ? `background-image:url("${escapeCssUrl(backgroundImageUrl)}");background-size:100% 100%;background-position:center;background-repeat:no-repeat;`
       : "background-color:white;",
@@ -218,6 +228,14 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
           ${escapeHtml(t.expiryDate)}
         </p>
       </div>`
+    : "";
+  const certificateIdMarkup = certificateId
+    ? `<p
+        class="text-center whitespace-nowrap"
+        style="position:absolute;left:0;right:0;bottom:16px;font-size:12px;letter-spacing:.05em;opacity:.7;color:${escapeHtml(safeTheme.labelTextColor)};"
+      >
+        ${escapeHtml(t.certificateId)}: ${escapeHtml(certificateId)}
+      </p>`
     : "";
 
   const certificateBodyMarkup = `<div
@@ -303,6 +321,8 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
         </p>
       </div>
     </div>
+
+    ${certificateIdMarkup}
   </div>`;
 
   if (!isDownload) return certificateBodyMarkup;
