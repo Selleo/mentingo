@@ -1,6 +1,7 @@
 /** Internal job, claim, and realtime contracts used by the Core authoring workflow. */
 import type { AuthoringOperation } from "./schema/course-authoring-operations.schema";
 import type { UUIDType } from "src/common";
+import type { courseAuthoringDrafts } from "src/storage/schema";
 
 export type CourseAuthoringDraftIdentity = {
   tenantId: UUIDType;
@@ -8,6 +9,13 @@ export type CourseAuthoringDraftIdentity = {
   sessionId: UUIDType;
   ownerId: UUIDType;
 };
+
+export type CourseAuthoringDraft = typeof courseAuthoringDrafts.$inferSelect;
+
+export type CourseAuthoringInactiveDraftCursor = Pick<
+  CourseAuthoringDraft,
+  "lastActivityAt" | "id"
+>;
 
 export type CourseAuthoringSessionAccessOptions = {
   refreshDraftActivity?: boolean;
@@ -57,6 +65,7 @@ export interface CourseAuthoringSubscription {
 export interface CourseAuthoringApplyJob {
   draftCourseId?: UUIDType;
   acknowledgeAssessmentChanges?: boolean;
+  omittedAssetIds?: UUIDType[];
   courseId: UUIDType;
   sessionId: UUIDType;
   exportId: UUIDType;

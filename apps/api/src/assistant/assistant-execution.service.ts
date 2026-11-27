@@ -23,11 +23,12 @@ import {
   hasAssistantReadableContent,
 } from "./assistant-links";
 import { getAssistantReadActivity } from "./assistant-progress";
+import { AssistantRealtimeService } from "./assistant-realtime.service";
 import { AssistantRepository } from "./assistant.repository";
 import { assistantProductTutorialSearchSchema } from "./schemas/assistant-product-tutorial.schema";
 import { validateAssistantOutcome } from "./workflow/assistant-outcome";
 
-import type { AssistantRunIdentity, AssistantSource } from "./assistant.types";
+import type { AssistantRunIdentity, AssistantRunUpdate, AssistantSource } from "./assistant.types";
 import type { AssistantOutcome } from "./workflow/assistant-outcome.types";
 import type { LanguageModelV4 } from "@ai-sdk/provider";
 
@@ -39,7 +40,15 @@ export class AssistantExecutionService {
     private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly aiRuntimeService: AiRuntimeService,
     private readonly promptService: PromptService,
+    private readonly assistantRealtimeService: AssistantRealtimeService,
   ) {}
+
+  /** Broadcasts only checkpoints that the committed update actually wrote. */
+  private async updateRun(input: AssistantRunIdentity, update: AssistantRunUpdate) {
+    const { run, message } = await this.assistantRepository.updateRun(input, update);
+    if (message) this.assistantRealtimeService.publish(run, message);
+    return run;
+  }
 
   private async requireActive(input: AssistantRunIdentity) {
     const run = await this.assistantRepository.getRun(input);
@@ -52,7 +61,7 @@ export class AssistantExecutionService {
     if (!tenant || !isTenantAccessActive(tenant)) {
       // Background steps bypass HTTP tenant resolution. Suspension is terminal for this run,
       // so reactivation cannot resume a previously authorized generation or overwrite its result.
-      await this.assistantRepository.updateRun(input, {
+      await this.updateRun(input, {
         status: ASSISTANT_RUN_STATUSES.FAILED,
         errorCode: tenant
           ? ASSISTANT_RUN_ERROR_CODES.TENANT_INACTIVE
@@ -71,7 +80,7 @@ export class AssistantExecutionService {
   async loadContext(input: AssistantRunIdentity) {
     return this.tenantDbRunnerService.runWithTenant(input.tenantId, async () => {
       const run = await this.requireActive(input);
-      await this.assistantRepository.updateRun(input, { status: ASSISTANT_RUN_STATUSES.RUNNING });
+      await this.updateRun(input, { status: ASSISTANT_RUN_STATUSES.RUNNING });
       // Resolve module availability before the model can classify a reply as conversation.
       // This metadata handshake is not evidence for factual content answers.
       const capabilityResult = await this.mcpHttpService.executeNativeReadTool(
@@ -136,7 +145,7 @@ export class AssistantExecutionService {
   async getModel(input: AssistantRunIdentity): Promise<LanguageModelV4> {
     return this.tenantDbRunnerService.runWithTenant(input.tenantId, async () => {
       await this.requireActive(input);
-      await this.assistantRepository.updateRun(input, {
+      await this.updateRun(input, {
         activity: ASSISTANT_RUN_ACTIVITIES.THINKING,
       });
       const model = await this.aiRuntimeService.getAssistantLanguageModel();
@@ -166,7 +175,7 @@ export class AssistantExecutionService {
             [...latest.sources, ...sources].map((source) => [source.url, source]),
           ).values(),
         ].slice(0, 100);
-        await this.assistantRepository.updateRun(input, {
+        await this.updateRun(input, {
           sources: all,
           recordTool: { readable: hasAssistantReadableContent(name, result.structuredContent) },
         });
@@ -178,7 +187,7 @@ export class AssistantExecutionService {
   async setActivity(input: AssistantRunIdentity, activity: AssistantRunActivity): Promise<void> {
     await this.tenantDbRunnerService.runWithTenant(input.tenantId, async () => {
       await this.requireActive(input);
-      await this.assistantRepository.updateRun(input, { activity });
+      await this.updateRun(input, { activity });
     });
   }
 
@@ -200,7 +209,7 @@ export class AssistantExecutionService {
       const run = await this.requireActive(input);
       if (!validateAssistantOutcome({ kind, text, requiresReadableContent }, run).accepted) return;
       const grounded = groundAssistantText(text, run.sources);
-      await this.assistantRepository.updateRun(input, {
+      await this.updateRun(input, {
         status: ASSISTANT_RUN_STATUSES.RUNNING,
         text: grounded,
         messageSources: selectAssistantSources(grounded, run.sources),
@@ -220,7 +229,7 @@ export class AssistantExecutionService {
       const validation = validateAssistantOutcome({ kind, text, requiresReadableContent }, run);
       if (!validation.accepted) return validation;
       const grounded = groundAssistantText(text, run.sources);
-      await this.assistantRepository.updateRun(input, {
+      await this.updateRun(input, {
         status: ASSISTANT_RUN_STATUSES.COMPLETED,
         text: grounded,
         messageSources: selectAssistantSources(grounded, run.sources),
@@ -231,7 +240,7 @@ export class AssistantExecutionService {
 
   async fail(input: AssistantRunIdentity, errorCode: string) {
     await this.tenantDbRunnerService.runWithTenant(input.tenantId, () =>
-      this.assistantRepository.updateRun(input, {
+      this.updateRun(input, {
         status: ASSISTANT_RUN_STATUSES.FAILED,
         errorCode: /^[A-Z_]{1,80}$/.test(errorCode)
           ? errorCode

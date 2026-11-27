@@ -20,6 +20,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 
+import { canOmitAuthoringAsset } from "../authoringAssetOmission";
 import { parseFetchedResearchSources } from "../authoringSources";
 import {
   authoringTaskFailureLabel,
@@ -1380,8 +1381,7 @@ export const AuthoringActivityRail = ({
                     key={asset.taskId}
                     asset={asset}
                     omitted={
-                      !asset.request.required &&
-                      asset.request.purpose !== "podcast" &&
+                      canOmitAuthoringAsset(asset) &&
                       omittedOptionalAssetIds.includes(asset.request.assetId)
                     }
                     busy={busy}

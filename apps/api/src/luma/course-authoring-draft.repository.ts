@@ -1,12 +1,15 @@
 /** Stores private pre-course session ownership, activity and the one-time native course binding. */
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { and, asc, eq, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
+import { and, asc, eq, gt, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 import { courseAuthoringDrafts } from "src/storage/schema";
 
-import type { CourseAuthoringDraftIdentity } from "./course-authoring.types";
+import type {
+  CourseAuthoringDraftIdentity,
+  CourseAuthoringInactiveDraftCursor,
+} from "./course-authoring.types";
 
 @Injectable()
 export class CourseAuthoringDraftRepository {
@@ -162,8 +165,13 @@ export class CourseAuthoringDraftRepository {
       );
   }
 
-  /** Reads candidates without holding a database lock during the producer health check. */
-  async inactive(tenantId: string, before: Date) {
+  /** Pages candidates by keyset so drafts whose cleanup keeps failing cannot hide later ones. */
+  async inactive(
+    tenantId: string,
+    before: Date,
+    after: CourseAuthoringInactiveDraftCursor | null,
+    limit: number,
+  ) {
     return this.db
       .select()
       .from(courseAuthoringDrafts)
@@ -173,10 +181,19 @@ export class CourseAuthoringDraftRepository {
           isNull(courseAuthoringDrafts.courseId),
           isNull(courseAuthoringDrafts.discardedAt),
           lt(courseAuthoringDrafts.lastActivityAt, before.toISOString()),
+          after
+            ? or(
+                gt(courseAuthoringDrafts.lastActivityAt, after.lastActivityAt),
+                and(
+                  eq(courseAuthoringDrafts.lastActivityAt, after.lastActivityAt),
+                  gt(courseAuthoringDrafts.id, after.id),
+                ),
+              )
+            : undefined,
         ),
       )
-      .orderBy(asc(courseAuthoringDrafts.lastActivityAt))
-      .limit(100);
+      .orderBy(asc(courseAuthoringDrafts.lastActivityAt), asc(courseAuthoringDrafts.id))
+      .limit(limit);
   }
 
   /** Fences inactivity against a new owner heartbeat or the transaction that attaches a course. */

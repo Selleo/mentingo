@@ -12,6 +12,10 @@ import { Toast, ToastProvider, ToastViewport } from "~/components/ui/toast";
 import { useAuthStore } from "~/modules/Auth/authStore";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 import {
+  joinRetryDelay,
+  MAX_JOIN_ATTEMPTS,
+} from "~/modules/CourseAuthoring/authoringNotificationStream";
+import {
   authoringSessionVisibility,
   useVisibleAuthoringSession,
 } from "~/modules/CourseAuthoring/authoringSessionVisibility";
@@ -190,6 +194,45 @@ describe("global authoring notification ownership", () => {
     expect(mocks.toast).not.toHaveBeenCalled();
     unmount();
   });
+
+  it.each([
+    ["finished", "completed", 1],
+    ["still running", "running", 2],
+  ] as const)(
+    "retries failed joins with backoff, then refreshes a %s session over HTTP",
+    async (_label, status, sockets) => {
+      queryClient.setQueryData(key, session("running"));
+      mocks.getSession.mockResolvedValue(session(status, 3));
+      const { unmount } = renderHook(useGlobalCourseAuthoringNotifications);
+      const joins = () =>
+        connection.socket.emit.mock.calls.filter(([event]) => event === "join:course-authoring");
+      const failLastJoin = () =>
+        act(() => {
+          const reply = joins().at(-1)?.[2] as (error: Error | null, reply?: unknown) => void;
+          reply(null, { code: "join_failed" });
+        });
+
+      for (let failedJoins = 1; failedJoins < MAX_JOIN_ATTEMPTS; failedJoins += 1) {
+        failLastJoin();
+        await act(() => vi.advanceTimersByTimeAsync(joinRetryDelay(failedJoins) - 1));
+        expect(joins()).toHaveLength(failedJoins);
+        await act(() => vi.advanceTimersByTimeAsync(1));
+        expect(joins()).toHaveLength(failedJoins + 1);
+      }
+      expect(mocks.getSession).not.toHaveBeenCalled();
+
+      failLastJoin();
+      await act(() => vi.advanceTimersByTimeAsync(0));
+      expect(connection.socket.emit).toHaveBeenCalledWith("leave:course-authoring", {
+        sessionId: "session-a",
+      });
+      expect(connection.dispose).toHaveBeenCalledOnce();
+      expect(mocks.getSession).toHaveBeenCalledOnce();
+      expect(queryClient.getQueryData<AuthoringSession>(key)?.snapshotSequence).toBe(3);
+      expect(mocks.openSocket).toHaveBeenCalledTimes(sockets);
+      unmount();
+    },
+  );
 
   it.each([
     ["waiting_author", "AI needs your input to continue."],

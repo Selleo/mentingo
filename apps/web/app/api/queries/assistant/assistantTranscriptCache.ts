@@ -47,14 +47,10 @@ export function isNewerAssistantRun(candidate: Run, current: Run) {
 }
 
 function compareMessages(first: Message, second: Message) {
-  return (
-    compareDates(first.createdAt, second.createdAt) ||
-    (first.role !== second.role
-      ? first.role === ASSISTANT_MESSAGE_ROLES.USER
-        ? -1
-        : 1
-      : first.id.localeCompare(second.id))
-  );
+  const byDate = compareDates(first.createdAt, second.createdAt);
+  if (byDate) return byDate;
+  if (first.role === second.role) return first.id.localeCompare(second.id);
+  return first.role === ASSISTANT_MESSAGE_ROLES.USER ? -1 : 1;
 }
 
 /** A checkpoint contains the whole saved reply, so later checkpoints supersede missed partial text. */
@@ -122,8 +118,27 @@ export function keepNewerAssistantTranscript(previous: unknown, incoming: unknow
   const currentRun = current?.pages[0]?.latestRun;
   const nextRun = next.pages[0]?.latestRun;
   if (!current || !currentRun) return next;
-  if (!nextRun || compareRuns(currentRun, nextRun) > 0) return current;
-  return next;
+  if (nextRun && compareRuns(currentRun, nextRun) <= 0) return next;
+  if (next.pages.length <= current.pages.length) return current;
+  // Keep the newer checkpoint but still show older pages loaded while it arrived.
+  const loadedIds = new Set(current.pages.flatMap((page) => page.items.map(({ id }) => id)));
+  const olderPages = next.pages.slice(current.pages.length).map((page) => ({
+    ...page,
+    items: page.items.filter(({ id }) => !loadedIds.has(id)),
+    totalItems: current.pages[0]?.totalItems ?? page.totalItems,
+    latestRun: currentRun,
+  }));
+  return {
+    pages: [...current.pages, ...olderPages],
+    pageParams: [...current.pageParams, ...next.pageParams.slice(current.pageParams.length)],
+  };
+}
+
+/** Realtime events are best-effort, so an active run is periodically reconciled over HTTP. */
+export const ACTIVE_RUN_REFRESH_MS = 15_000;
+
+export function assistantTranscriptRefetchInterval(cache: AssistantTranscriptCache | undefined) {
+  return isAssistantRunActive(cache?.pages[0]?.latestRun) ? ACTIVE_RUN_REFRESH_MS : false;
 }
 
 export function settledAssistantMessages(messages: Message[], run: Run | null | undefined) {

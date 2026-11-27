@@ -33,6 +33,8 @@ export type AssistantSendResult = {
   assistantMessage: AssistantMessage;
   run: AssistantRun;
 };
+export type AssistantSendOutcome = AssistantSendResult & { created: boolean };
+export type AssistantRunCheckpoint = { run: AssistantRun; message?: AssistantMessage };
 export type AssistantPageInput = { page?: number; perPage?: number };
 export type AssistantPage<T> = { items: T[]; page: number; perPage: number; totalItems: number };
 export type { AssistantSource };

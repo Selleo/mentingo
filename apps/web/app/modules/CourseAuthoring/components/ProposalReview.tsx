@@ -43,6 +43,7 @@ import { AuthoringOperationPreview } from "./AuthoringOperationPreview";
 import { AuthoringRequestHistory } from "./AuthoringRequestHistory";
 
 import type {
+  AssetRequestView,
   AuthoringOperation,
   AuthoringRequestView,
   AuthoringTask,
@@ -162,6 +163,7 @@ type Props = {
   attemptedTargetIds?: string[];
   readyAssetIds?: string[];
   failedOptionalAssetIds?: string[];
+  omittablePodcastAssetIds?: string[];
   omittedOptionalAssetIds?: string[];
   onOmittedOptionalAssetIdsChange?: (assetIds: string[]) => void;
   selectedProposalIds?: string[];
@@ -870,6 +872,7 @@ export const ProposalReview = ({
   attemptedTargetIds = [],
   readyAssetIds = [],
   failedOptionalAssetIds = [],
+  omittablePodcastAssetIds = [],
   omittedOptionalAssetIds,
   onOmittedOptionalAssetIdsChange,
   selectedProposalIds,
@@ -894,6 +897,12 @@ export const ProposalReview = ({
   ];
   const updateOmittedOptionalAssetIds =
     onOmittedOptionalAssetIdsChange ?? setLocalOmittedOptionalAssetIds;
+  const canOmitAsset = (asset: AssetRequestView) =>
+    asset.purpose === "podcast"
+      ? omittablePodcastAssetIds.includes(asset.assetId)
+      : !asset.required;
+  const isAssetOmitted = (asset: AssetRequestView) =>
+    canOmitAsset(asset) && effectiveOmittedOptionalAssetIds.includes(asset.assetId);
   useEffect(() => {
     const acceptedIds = new Set(
       proposals
@@ -939,7 +948,10 @@ export const ProposalReview = ({
   );
   const readyAssets = useMemo(() => new Set(readyAssetIds), [readyAssetIds]);
   const pendingRequiredAssets = selectedAssets.filter(
-    (asset) => (asset.required || asset.purpose === "podcast") && !readyAssets.has(asset.assetId),
+    (asset) =>
+      (asset.required || asset.purpose === "podcast") &&
+      !readyAssets.has(asset.assetId) &&
+      !isAssetOmitted(asset),
   );
   const pendingOptionalAssets = selectedAssets.filter(
     (asset) =>
@@ -948,14 +960,8 @@ export const ProposalReview = ({
       !readyAssets.has(asset.assetId) &&
       !effectiveOmittedOptionalAssetIds.includes(asset.assetId),
   );
-  const selectedAssetIds = useMemo(
-    () =>
-      new Set(
-        selectedAssets
-          .filter((asset) => !asset.required && asset.purpose !== "podcast")
-          .map((asset) => asset.assetId),
-      ),
-    [selectedAssets],
+  const selectedAssetIds = new Set(
+    selectedAssets.filter(canOmitAsset).map((asset) => asset.assetId),
   );
   const hasAssessmentImpact = useMemo(
     () =>
@@ -1009,11 +1015,7 @@ export const ProposalReview = ({
         showSelection={!autoApplyReadyContent}
         disabled={busy || applyState !== "idle"}
         applyDisabled={proposal.assetRequests?.some(
-          (asset) =>
-            !readyAssets.has(asset.assetId) &&
-            (asset.required ||
-              asset.purpose === "podcast" ||
-              !effectiveOmittedOptionalAssetIds.includes(asset.assetId)),
+          (asset) => !readyAssets.has(asset.assetId) && !isAssetOmitted(asset),
         )}
         onSelectedChange={(checked) =>
           updateSelected((current) =>
@@ -1072,10 +1074,13 @@ export const ProposalReview = ({
               const ready = readyAssets.has(asset.assetId);
               const podcast = asset.purpose === "podcast";
               const required = asset.required || podcast;
-              const omitted = !required && effectiveOmittedOptionalAssetIds.includes(asset.assetId);
+              const omittable = canOmitAsset(asset);
+              const omitted = isAssetOmitted(asset);
               let assetNotReadyKey = "courseAuthoring.review.optionalAssetOmitHint";
               if (required) assetNotReadyKey = "courseAuthoring.review.requiredAssetNotReady";
               if (podcast) assetNotReadyKey = "courseAuthoring.review.podcastNotReady";
+              if (podcast && omittable)
+                assetNotReadyKey = "courseAuthoring.activityRail.podcastFailedTerminal";
               return (
                 <div
                   key={asset.assetId}
@@ -1113,7 +1118,7 @@ export const ProposalReview = ({
                       </p>
                       <AuthoringAssetDetails asset={asset} />
                     </div>
-                    {!required && (
+                    {omittable && (
                       <div className="flex shrink-0 items-start gap-2 text-xs text-neutral-700">
                         <Checkbox
                           aria-label={t("courseAuthoring.review.omitOptionalAsset", {

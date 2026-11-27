@@ -1,4 +1,7 @@
-import { authoringSessionKey } from "~/api/queries/useCourseAuthoringSessionQuery";
+import {
+  authoringSessionKey,
+  authoringSessionQueryOptions,
+} from "~/api/queries/useCourseAuthoringSessionQuery";
 
 import {
   authoringSessionVisibility,
@@ -8,13 +11,14 @@ import {
   AUTHORING_TASK_KIND,
   AUTHORING_TASK_STATUS,
   AUTHORING_TURN_STATUS,
+  AUTHORING_STREAM_LOSS,
   AUTHORING_WORK_STATUS,
 } from "./courseAuthoring.constants";
 import { projectWorkspaceRecords } from "./courseAuthoring.records";
 import { PROPOSAL_DECISION } from "./review/curriculumReview.constants";
 
 import type { AUTHORING_WORK_OUTCOME } from "./courseAuthoring.constants";
-import type { AuthoringSession } from "./courseAuthoring.types";
+import type { AuthoringSession, AuthoringStreamLoss } from "./courseAuthoring.types";
 import type { QueryClient } from "@tanstack/react-query";
 
 export type AuthoringWorkOutcome =
@@ -157,7 +161,11 @@ export const observeAuthoringWork = ({
   longRunningMs = 10_000,
 }: {
   client: QueryClient;
-  watch: (session: AuthoringSession, publish: (next: AuthoringSession) => void) => () => void;
+  watch: (
+    session: AuthoringSession,
+    publish: (next: AuthoringSession) => void,
+    onLoss: (reason: AuthoringStreamLoss) => void,
+  ) => () => void;
   notify: (outcome: AuthoringWorkOutcome, session: AuthoringSession) => void;
   seedCachedSessions?: boolean;
   longRunningMs?: number;
@@ -183,7 +191,8 @@ export const observeAuthoringWork = ({
     if (entry.stopWatching) return;
 
     const key = authoringSessionVisibilityKey(cacheCourseId, session.sessionId);
-    entry.stopWatching = watch(session, (snapshot) => {
+    const subscription: { stop?: () => void } = {};
+    const publish = (snapshot: AuthoringSession) => {
       if (
         disposed ||
         snapshot.sessionId !== session.sessionId ||
@@ -195,7 +204,29 @@ export const observeAuthoringWork = ({
         (current) =>
           !current || snapshot.snapshotSequence >= current.snapshotSequence ? snapshot : current,
       );
-    });
+    };
+    const handleLoss = (reason: AuthoringStreamLoss) => {
+      const current = watched.get(key);
+      if (disposed || !current || current.stopWatching !== subscription.stop) return;
+      current.stopWatching = undefined;
+      if (reason === AUTHORING_STREAM_LOSS.REVOKED) {
+        watched.delete(key);
+        return;
+      }
+      // One HTTP snapshot replaces the lost stream; still-active work then rejoins the socket.
+      void client
+        .fetchQuery({
+          ...authoringSessionQueryOptions(cacheCourseId, session.sessionId),
+          staleTime: 0,
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          const latest = watched.get(key);
+          if (!disposed && latest) reconcileWatch(latest);
+        });
+    };
+    subscription.stop = watch(session, publish, handleLoss);
+    entry.stopWatching = subscription.stop;
   };
 
   const accept = (session: AuthoringSession, cacheCourseId: string) => {

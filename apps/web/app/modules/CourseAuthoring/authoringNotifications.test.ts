@@ -2,8 +2,16 @@ import { QueryClient } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { observeAuthoringWork } from "./authoringNotifications";
+import {
+  authoringSessionVisibility,
+  authoringSessionVisibilityKey,
+} from "./authoringSessionVisibility";
 
-import type { AuthoringSession, AuthoringTurnStatus } from "./courseAuthoring.types";
+import type {
+  AuthoringSession,
+  AuthoringStreamLoss,
+  AuthoringTurnStatus,
+} from "./courseAuthoring.types";
 
 const session = (
   status: AuthoringTurnStatus,
@@ -78,7 +86,11 @@ describe("global authoring work observer", () => {
   const notify = vi.fn();
   const stopWatching = vi.fn();
   const watch = vi.fn(
-    (_session: AuthoringSession, _publish: (next: AuthoringSession) => void) => stopWatching,
+    (
+      _session: AuthoringSession,
+      _publish: (next: AuthoringSession) => void,
+      _onLoss: (reason: AuthoringStreamLoss) => void,
+    ) => stopWatching,
   );
   const start = (longRunningMs = 0) => {
     dispose = observeAuthoringWork({
@@ -367,6 +379,20 @@ describe("global authoring work observer", () => {
       expect(notify).not.toHaveBeenCalled();
     },
   );
+  it("forgets a session whose background stream was revoked", () => {
+    authoringSessionVisibility.setState({}, true);
+    start();
+    client.setQueryData(key(), session("running"));
+    const [, , onLoss] = watch.mock.calls[0];
+    onLoss("revoked");
+    authoringSessionVisibility.setState({
+      [authoringSessionVisibilityKey("course-1", "other")]: 1,
+    });
+    client.removeQueries({ queryKey: key(), exact: true });
+    authoringSessionVisibility.setState({}, true);
+    expect(watch).toHaveBeenCalledOnce();
+    expect(notify).not.toHaveBeenCalled();
+  });
   it("ignores stale snapshots and suppresses a late event after logout", () => {
     start();
     client.setQueryData(key(), session("running", 5));

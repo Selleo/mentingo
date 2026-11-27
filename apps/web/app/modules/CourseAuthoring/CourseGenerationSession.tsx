@@ -27,6 +27,7 @@ import { cn } from "~/lib/utils";
 
 import { COURSE_AUTHORING_HANDLES } from "../../../e2e/data/curriculum/handles";
 
+import { omittablePodcastAssetIds, omittedPodcastAssetIds } from "./authoringAssetOmission";
 import {
   assetSelectionKey,
   readOmittedAssets,
@@ -103,11 +104,12 @@ import type {
 } from "./courseAuthoring.types";
 import type { SupportedLanguages } from "@repo/shared";
 
-const reviewPodcastAssets = (proposals: ProposalView[]) => [
+/** Podcasts that still gate apply; an omitted terminally failed podcast no longer does. */
+const reviewPodcastAssets = (proposals: ProposalView[], omittedAssetIds: string[] = []) => [
   ...new Map(
     proposals
       .flatMap((proposal) => proposal.assetRequests ?? [])
-      .filter((asset) => asset.purpose === "podcast")
+      .filter((asset) => asset.purpose === "podcast" && !omittedAssetIds.includes(asset.assetId))
       .map(
         ({ assetId, operationId, altText }) =>
           [assetId, { assetId, operationId, altText }] as const,
@@ -523,7 +525,10 @@ export const CourseGenerationSession = ({
           targetedMentorOperationIds: targetedMentorOperationIds(session?.records ?? []),
           authoringSessionId: session?.sessionId,
           readyAssetIds: projection.readyAssetIds,
-          podcastAssets: reviewPodcastAssets(projection.proposals),
+          podcastAssets: reviewPodcastAssets(
+            projection.proposals,
+            omittedPodcastAssetIds(projection.assetTasks, omittedOptionalAssetIds),
+          ),
           podcastTasks: projection.assetTasks.filter(
             (asset) => asset.request.purpose === "podcast",
           ),
@@ -536,6 +541,7 @@ export const CourseGenerationSession = ({
     projection.sources,
     projection.readyAssetIds,
     projection.assetTasks,
+    omittedOptionalAssetIds,
     session?.sessionId,
     session?.records,
     session?.status,
@@ -901,16 +907,25 @@ export const CourseGenerationSession = ({
       const selectedProposals = latestProjection.proposals.filter((proposal) =>
         proposalIds.includes(proposal.id),
       );
+      const omittablePodcasts = omittablePodcastAssetIds(latestProjection.assetTasks);
       if (
-        reviewPodcastAssets(selectedProposals).some(
-          (asset) => !latestProjection.readyAssetIds.includes(asset.assetId),
-        )
+        reviewPodcastAssets(
+          selectedProposals,
+          omittedPodcastAssetIds(latestProjection.assetTasks, [
+            ...omitOptionalAssetIds,
+            ...omittedOptionalAssetIdsRef.current,
+          ]),
+        ).some((asset) => !latestProjection.readyAssetIds.includes(asset.assetId))
       )
         throw new Error(t("courseAuthoring.review.podcastNotReady"));
       const optionalAssetIds = new Set(
         selectedProposals
           .flatMap((proposal) => proposal.assetRequests ?? [])
-          .filter((asset) => !asset.required && asset.purpose !== "podcast")
+          .filter((asset) =>
+            asset.purpose === "podcast"
+              ? omittablePodcasts.includes(asset.assetId)
+              : !asset.required,
+          )
           .map((asset) => asset.assetId),
       );
       const request = {
@@ -1039,6 +1054,7 @@ export const CourseGenerationSession = ({
       if (
         reviewPodcastAssets(
           availableProposals.filter((proposal) => selectedIds.has(proposal.id)),
+          omittedPodcastAssetIds(latestProjection.assetTasks, omittedOptionalAssetIdsRef.current),
         ).some((asset) => !latestProjection.readyAssetIds.includes(asset.assetId))
       )
         throw new Error(t("courseAuthoring.review.podcastNotReady"));
@@ -1248,7 +1264,10 @@ export const CourseGenerationSession = ({
           authoringSessionId: session?.sessionId,
           readyAssetIds: projection.readyAssetIds,
           proposals: toReviewProposals(reviewable),
-          podcastAssets: reviewPodcastAssets(reviewable),
+          podcastAssets: reviewPodcastAssets(
+            reviewable,
+            omittedPodcastAssetIds(projection.assetTasks, omittedOptionalAssetIdsRef.current),
+          ),
           podcastTasks: projection.assetTasks.filter(
             (asset) => asset.request.purpose === "podcast",
           ),
@@ -1328,7 +1347,10 @@ export const CourseGenerationSession = ({
           authoringSessionId: session?.sessionId,
           readyAssetIds: projection.readyAssetIds,
           proposals: toReviewProposals([proposal]),
-          podcastAssets: reviewPodcastAssets([proposal]),
+          podcastAssets: reviewPodcastAssets(
+            [proposal],
+            omittedPodcastAssetIds(projection.assetTasks, omittedOptionalAssetIdsRef.current),
+          ),
           podcastTasks: projection.assetTasks.filter(
             (asset) => asset.request.purpose === "podcast",
           ),
@@ -1951,6 +1973,7 @@ export const CourseGenerationSession = ({
                     !asset.ready,
                 )
                 .map((asset) => asset.request.assetId)}
+              omittablePodcastAssetIds={omittablePodcastAssetIds(projection.assetTasks)}
               omittedOptionalAssetIds={omittedOptionalAssetIds}
               onOmittedOptionalAssetIdsChange={setOmittedOptionalAssetIds}
             />

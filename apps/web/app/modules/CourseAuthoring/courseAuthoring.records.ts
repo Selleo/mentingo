@@ -4,6 +4,7 @@ import { isEqual } from "lodash-es";
 
 import { toPlainTextPreview } from "~/components/RichText/viewer.utils";
 
+import { isTerminalAuthoringTaskFailure } from "./authoringTaskFailure";
 import {
   AUTHORING_APPLICATION_STATUS,
   AUTHORING_ASSET_SOURCE_TYPE,
@@ -816,6 +817,7 @@ const parseAssetTask = (
     question: question ? stringValue(question.payload.question) : null,
     action: action === "asset.retry_submission" ? action : null,
     ready: readyAssetIds.has(request.assetId),
+    terminalFailure: task ? isTerminalAuthoringTaskFailure(task) : false,
   };
 };
 

@@ -112,8 +112,16 @@ function readFrozenExport(
   return response;
 }
 
-/** Checks both planned placements and their frozen, downloadable podcast manifests. */
-function validateFrozenPodcasts(exported: FrozenAuthoringExport, session: AuthoringSession) {
+/**
+ * Checks both planned placements and their frozen, downloadable podcast manifests. The producer
+ * only accepts omitting a podcast whose generation failed terminally; such a podcast must leave
+ * neither a manifest nor a placement behind.
+ */
+function validateFrozenPodcasts(
+  exported: FrozenAuthoringExport,
+  session: AuthoringSession,
+  omittedAssetIds: readonly string[] = [],
+) {
   if ("deferredPodcasts" in exported && exported.deferredPodcasts !== undefined) {
     const legacy = exported.deferredPodcasts;
     if (!Array.isArray(legacy) || legacy.length)
@@ -126,7 +134,13 @@ function validateFrozenPodcasts(exported: FrozenAuthoringExport, session: Author
   if (assetsById.size !== podcastAssets.length)
     throw new BadRequestException("courseAuthoring.errors.invalidOperations");
 
+  const omitted = new Set(omittedAssetIds);
   for (const request of plannedPodcasts(session, exported.proposalIds)) {
+    if (omitted.has(request.assetId)) {
+      if (assetsById.has(request.assetId))
+        throw new BadRequestException("courseAuthoring.errors.invalidOperations");
+      continue;
+    }
     if (
       operationIds.has(request.operationId) &&
       assetsById.get(request.assetId)?.operationId !== request.operationId
@@ -228,11 +242,6 @@ export class CourseAuthoringApplicationService {
     const client = await this.luma.getLumaClient();
     const proposalIds = [...new Set(input.proposalIds)].sort();
     const omitOptionalAssetIds = [...new Set(input.omitOptionalAssetIds ?? [])].sort();
-    if (omitOptionalAssetIds.length) {
-      const omitted = new Set(omitOptionalAssetIds);
-      if (plannedPodcasts(session, proposalIds).some((request) => omitted.has(request.assetId)))
-        throw new ConflictException("courseAuthoring.errors.invalidOperations");
-    }
     const terminal = await this.receipts.latestTerminalSessionReceipt(
       actor.tenantId,
       courseId,
@@ -292,7 +301,7 @@ export class CourseAuthoringApplicationService {
         throw new BadGatewayException("adminCourseView.toast.lumaServiceUnavailable");
       });
     const exported = readFrozenExport(response, { courseId, sessionId });
-    validateFrozenPodcasts(exported, session);
+    validateFrozenPodcasts(exported, session, omitOptionalAssetIds);
     const queue = this.queue.getQueue(QUEUE_NAMES.COURSE_AUTHORING_APPLY);
     const jobId = `${actor.tenantId}-${exported.exportId}`;
     const existingJob = await queue.getJob(jobId);
@@ -317,6 +326,7 @@ export class CourseAuthoringApplicationService {
         exportId: exported.exportId,
         actor,
         acknowledgeAssessmentChanges: input.acknowledgeAssessmentChanges,
+        ...(omitOptionalAssetIds.length ? { omittedAssetIds: omitOptionalAssetIds } : {}),
         ...(access.draft ? { draftCourseId: access.draft.id } : {}),
       },
       {
@@ -492,7 +502,7 @@ export class CourseAuthoringApplicationService {
     );
     if (courseCreate !== Boolean(draft) || (courseCreate && exported.operations.length !== 1))
       throw new BadRequestException("courseAuthoring.errors.invalidOperations");
-    validateFrozenPodcasts(exported, session);
+    validateFrozenPodcasts(exported, session, data.omittedAssetIds);
     const existing = await this.receipts.findReceipt(data.courseId, data.exportId, actor.tenantId);
     if (existing && existing.status !== "applied")
       throw new ConflictException(existing.reason ?? "courseAuthoring.errors.applicationFailed");

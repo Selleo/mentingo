@@ -173,6 +173,11 @@ export const AUTHORING_WORK_STATUS = {
   STOPPED: "stopped",
 } as const;
 
+export const AUTHORING_STREAM_LOSS = {
+  REVOKED: "revoked",
+  UNAVAILABLE: "unavailable",
+} as const;
+
 export const AUTHORING_APPLY_STATE = {
   ...PROPOSAL_APPLICATION_STATUS,
   IDLE: "idle",

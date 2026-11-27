@@ -334,6 +334,7 @@ describe("CurriculumReviewWorkspace", () => {
               revision: null,
               question: null,
               ready: false,
+              terminalFailure: false,
             },
           ],
           readyAssetIds: ["ready-audio"],

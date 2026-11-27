@@ -74,6 +74,7 @@ describe("skipped optional image readiness", () => {
     taskId: "image-task",
     parentTaskId: "task",
     ready: false,
+    terminalFailure: false,
     status: "waiting_author",
     revision: 1,
     action: "asset.retry_submission",
