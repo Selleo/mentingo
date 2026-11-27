@@ -314,6 +314,12 @@ export class CalendarConnectionRepository {
     await this.db.delete(calendarOutboundEvents).where(eq(calendarOutboundEvents.id, id));
   }
 
+  async deleteOutboundMappingsForConnection(connectionId: UUIDType) {
+    await this.db
+      .delete(calendarOutboundEvents)
+      .where(eq(calendarOutboundEvents.connectionId, connectionId));
+  }
+
   async listConnectionsNeedingSubscriptionRenewal(provider: CalendarProvider, renewBefore: string) {
     return this.db
       .select()

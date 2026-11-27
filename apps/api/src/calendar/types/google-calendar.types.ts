@@ -123,6 +123,7 @@ export type GoogleCalendarOutboundEvent = {
   start: GoogleCalendarEventDateTime;
   end: GoogleCalendarEventDateTime;
   location?: string;
+  status: "confirmed";
   extendedProperties: { private: Record<typeof GOOGLE_CALENDAR_MANAGED_EVENT_PROPERTY, string> };
 };
 

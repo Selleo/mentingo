@@ -58,6 +58,8 @@ const courseDueDate = (): CalendarOutboundCandidate =>
     courseTitle: "Security basics",
   });
 
+const GOOGLE_EVENT_ID_PATTERN = /^[0-9a-v]{5,1024}$/;
+
 describe("GoogleCalendarOutboundService", () => {
   const calendarConnectionRepository = {
     getConnectionById: jest.fn(),
@@ -67,6 +69,7 @@ describe("GoogleCalendarOutboundService", () => {
     upsertOutboundMapping: jest.fn(),
     listOutboundMappings: jest.fn(),
     deleteOutboundMapping: jest.fn(),
+    deleteOutboundMappingsForConnection: jest.fn(),
   };
   const googleCalendarApiClient = {
     getCalendar: jest.fn(),
@@ -93,6 +96,7 @@ describe("GoogleCalendarOutboundService", () => {
     googleCalendarAccessTokenService.getAccessToken.mockResolvedValue("access-token");
     googleCalendarApiClient.getCalendar.mockResolvedValue({ id: "mentingo-calendar" });
     googleCalendarApiClient.createEvent.mockResolvedValue({ id: "google-event-1" });
+    googleCalendarApiClient.updateEvent.mockResolvedValue(undefined);
   });
 
   it("exports a live training as a marked timed event and stores the mapping", async () => {
@@ -103,12 +107,14 @@ describe("GoogleCalendarOutboundService", () => {
     expect(googleCalendarApiClient.createEvent).toHaveBeenCalledWith(
       "access-token",
       "mentingo-calendar",
+      expect.stringMatching(GOOGLE_EVENT_ID_PATTERN),
       {
         summary: "Onboarding live training",
         description: "Bring your questions\n\nThis session is managed in Mentingo.",
         start: { dateTime: "2026-07-22T09:00:00.000Z", timeZone: "Europe/Warsaw" },
         end: { dateTime: "2026-07-22T10:00:00.000Z", timeZone: "Europe/Warsaw" },
         location: "Room 4",
+        status: "confirmed",
         extendedProperties: { private: { [GOOGLE_CALENDAR_MANAGED_EVENT_PROPERTY]: "true" } },
       },
     );
@@ -116,7 +122,7 @@ describe("GoogleCalendarOutboundService", () => {
       connectionId: connection().id,
       calendarEventId: liveTraining().calendarEventId,
       userId: liveTraining().recipientId,
-      externalEventId: "google-event-1",
+      externalEventId: googleCalendarApiClient.createEvent.mock.calls[0][2],
     });
     expect(calendarConnectionRepository.updateConnection).toHaveBeenLastCalledWith(
       connection().id,
@@ -132,6 +138,7 @@ describe("GoogleCalendarOutboundService", () => {
     expect(googleCalendarApiClient.createEvent).toHaveBeenCalledWith(
       "access-token",
       "mentingo-calendar",
+      expect.any(String),
       expect.objectContaining({
         start: { date: "2026-07-25" },
         end: { date: "2026-07-26" },
@@ -141,6 +148,7 @@ describe("GoogleCalendarOutboundService", () => {
     expect(googleCalendarApiClient.createEvent).toHaveBeenCalledWith(
       "access-token",
       "mentingo-calendar",
+      expect.any(String),
       expect.not.objectContaining({ location: expect.anything() }),
     );
   });
@@ -175,7 +183,43 @@ describe("GoogleCalendarOutboundService", () => {
 
     expect(googleCalendarApiClient.createEvent).toHaveBeenCalled();
     expect(calendarConnectionRepository.upsertOutboundMapping).toHaveBeenCalledWith(
-      expect.objectContaining({ externalEventId: "google-event-1" }),
+      expect.objectContaining({ externalEventId: expect.stringMatching(GOOGLE_EVENT_ID_PATTERN) }),
+    );
+  });
+
+  it("creates the same Google event ID for a commitment on every run", async () => {
+    calendarConnectionRepository.listOutboundCandidates.mockResolvedValue([liveTraining()]);
+
+    await service.exportMentingoEventsToGoogleCalendar(connection().id);
+    await service.exportMentingoEventsToGoogleCalendar(connection().id);
+
+    const [firstEventId, secondEventId] = googleCalendarApiClient.createEvent.mock.calls.map(
+      (call) => call[2],
+    );
+    expect(firstEventId).toBe(secondEventId);
+  });
+
+  it("reconciles an event created by an interrupted run instead of duplicating it", async () => {
+    calendarConnectionRepository.listOutboundCandidates.mockResolvedValue([liveTraining()]);
+    googleCalendarApiClient.createEvent.mockRejectedValue(
+      new GoogleCalendarApiError("Duplicate", false, 409),
+    );
+
+    await service.exportMentingoEventsToGoogleCalendar(connection().id);
+
+    const eventId = googleCalendarApiClient.createEvent.mock.calls[0][2];
+    expect(googleCalendarApiClient.updateEvent).toHaveBeenCalledWith(
+      "access-token",
+      "mentingo-calendar",
+      eventId,
+      expect.objectContaining({ summary: "Onboarding live training", status: "confirmed" }),
+    );
+    expect(calendarConnectionRepository.upsertOutboundMapping).toHaveBeenCalledWith(
+      expect.objectContaining({ externalEventId: eventId }),
+    );
+    expect(calendarConnectionRepository.updateConnection).toHaveBeenLastCalledWith(
+      connection().id,
+      expect.objectContaining({ outboundStatus: CALENDAR_OUTBOUND_STATUSES.CONNECTED }),
     );
   });
 
@@ -239,7 +283,7 @@ describe("GoogleCalendarOutboundService", () => {
     });
   });
 
-  it("disables export when the user deleted the Mentingo calendar", async () => {
+  it("disables export and forgets the deleted Mentingo calendar so it can be recreated", async () => {
     calendarConnectionRepository.listOutboundCandidates.mockResolvedValue([liveTraining()]);
     googleCalendarApiClient.getCalendar.mockRejectedValue(
       new GoogleCalendarApiError("Not found", false, 404),
@@ -253,8 +297,12 @@ describe("GoogleCalendarOutboundService", () => {
       {
         outboundSyncEnabled: false,
         outboundStatus: CALENDAR_OUTBOUND_STATUSES.DISABLED,
+        outboundCalendarId: null,
         outboundErrorCode: CALENDAR_OUTBOUND_ERROR_CODES.CALENDAR_DELETED,
       },
+    );
+    expect(calendarConnectionRepository.deleteOutboundMappingsForConnection).toHaveBeenCalledWith(
+      connection().id,
     );
   });
 

@@ -105,7 +105,6 @@ export function GoogleCalendarCard() {
   const startAuthorization = (replace = false) => {
     const url = new URL(`${baseUrl}/api/auth/google-calendar`);
     url.searchParams.set("replace", String(replace));
-    url.searchParams.set("outbound", "true");
     window.location.assign(url.toString());
   };
 

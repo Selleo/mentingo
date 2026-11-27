@@ -200,6 +200,62 @@ describe("GoogleCalendarService", () => {
       expect(googleCalendarSyncQueueService.enqueueOutboundSync).not.toHaveBeenCalled();
     });
 
+    it("keeps export off when reconnecting an account that only imports", async () => {
+      await service.completeAuthorization({ code: "code", state: "signed-state" });
+
+      expect(calendarConnectionRepository.updateConnection).toHaveBeenCalledWith(
+        connection().id,
+        expect.objectContaining({
+          outboundSyncEnabled: false,
+          outboundStatus: CALENDAR_OUTBOUND_STATUSES.DISABLED,
+        }),
+      );
+      expect(googleCalendarSyncQueueService.enqueueOutboundSync).not.toHaveBeenCalled();
+    });
+
+    it("keeps export on when reconnecting an account that already exports", async () => {
+      const exportingConnection = connection({ outboundSyncEnabled: true });
+      calendarConnectionRepository.getConnectionByUserId.mockResolvedValue(exportingConnection);
+      calendarConnectionRepository.updateConnection.mockResolvedValue(exportingConnection);
+
+      await service.completeAuthorization({ code: "code", state: "signed-state" });
+
+      expect(calendarConnectionRepository.updateConnection).toHaveBeenCalledWith(
+        connection().id,
+        expect.objectContaining({
+          outboundSyncEnabled: true,
+          outboundStatus: CALENDAR_OUTBOUND_STATUSES.QUEUED,
+        }),
+      );
+      expect(googleCalendarSyncQueueService.enqueueOutboundSync).toHaveBeenCalledWith(
+        expect.objectContaining({ connectionId: connection().id }),
+      );
+    });
+
+    it("does not carry export over to a replacement Google account", async () => {
+      calendarConnectionRepository.getConnectionByUserId.mockResolvedValue(
+        connection({ outboundSyncEnabled: true }),
+      );
+      tenantStateService.verifyGoogleCalendar.mockResolvedValue({
+        tenantId: connection().tenantId,
+        userId: connection().userId,
+        purpose: "google_calendar",
+        nonce: "nonce",
+        replace: true,
+        outboundSync: false,
+        origin: TENANT_ORIGIN,
+      });
+      googleCalendarApiClient.getProfile.mockResolvedValue({
+        sub: "another-google-user",
+        email: "other@example.com",
+      });
+
+      await service.completeAuthorization({ code: "code", state: "signed-state" });
+
+      expect(calendarConnectionRepository.createConnection).toHaveBeenCalled();
+      expect(googleCalendarSyncQueueService.enqueueOutboundSync).not.toHaveBeenCalled();
+    });
+
     it("does not connect when the user declines a required calendar permission", async () => {
       googleCalendarApiClient.exchangeAuthorizationCode.mockResolvedValue({
         access_token: "access-token",

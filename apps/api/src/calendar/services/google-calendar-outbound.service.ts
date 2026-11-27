@@ -1,3 +1,5 @@
+import crypto from "node:crypto";
+
 import { Injectable } from "@nestjs/common";
 import { CALENDAR_OUTBOUND_STATUSES, CALENDAR_PROVIDERS } from "@repo/shared";
 import { match } from "ts-pattern";
@@ -113,9 +115,11 @@ export class GoogleCalendarOutboundService {
         if (updated) continue;
       }
 
-      const createdEvent = await this.googleCalendarApiClient.createEvent(
+      const externalEventId = this.getGoogleEventId(connectionId, calendarId, candidate);
+      await this.createOrReconcileExportedEvent(
         accessToken,
         calendarId,
+        externalEventId,
         googleEvent,
       );
 
@@ -123,11 +127,36 @@ export class GoogleCalendarOutboundService {
         connectionId,
         calendarEventId: candidate.calendarEventId,
         userId: candidate.recipientId,
-        externalEventId: createdEvent.id,
+        externalEventId,
       });
     }
 
     return exportedEventKeys;
+  }
+
+  private async createOrReconcileExportedEvent(
+    accessToken: string,
+    calendarId: string,
+    externalEventId: string,
+    googleEvent: GoogleCalendarOutboundEvent,
+  ) {
+    try {
+      await this.googleCalendarApiClient.createEvent(
+        accessToken,
+        calendarId,
+        externalEventId,
+        googleEvent,
+      );
+    } catch (error) {
+      if (!(error instanceof GoogleCalendarApiError) || !error.conflict) throw error;
+
+      await this.googleCalendarApiClient.updateEvent(
+        accessToken,
+        calendarId,
+        externalEventId,
+        googleEvent,
+      );
+    }
   }
 
   private async updateExportedEvent(
@@ -222,9 +251,11 @@ export class GoogleCalendarOutboundService {
       if (!(error instanceof GoogleCalendarApiError) || !error.notFound) throw error;
     }
 
+    await this.calendarConnectionRepository.deleteOutboundMappingsForConnection(connection.id);
     await this.calendarConnectionRepository.updateConnection(connection.id, {
       outboundSyncEnabled: false,
       outboundStatus: CALENDAR_OUTBOUND_STATUSES.DISABLED,
+      outboundCalendarId: null,
       outboundErrorCode: CALENDAR_OUTBOUND_ERROR_CODES.CALENDAR_DELETED,
     });
 
@@ -245,6 +276,7 @@ export class GoogleCalendarOutboundService {
       description: this.getEventDescription(candidate),
       ...this.getEventTimeRange(candidate),
       ...(candidate.location ? { location: candidate.location } : {}),
+      status: "confirmed",
       extendedProperties: { private: { [GOOGLE_CALENDAR_MANAGED_EVENT_PROPERTY]: "true" } },
     };
   }
@@ -305,6 +337,17 @@ export class GoogleCalendarOutboundService {
 
   private getNextCalendarDate(date: string) {
     return new Date(Date.parse(`${date}T00:00:00Z`) + DAY_MS).toISOString().slice(0, 10);
+  }
+
+  private getGoogleEventId(
+    connectionId: UUIDType,
+    calendarId: string,
+    candidate: CalendarOutboundCandidate,
+  ) {
+    return crypto
+      .createHash("sha256")
+      .update(`${connectionId}:${calendarId}:${candidate.calendarEventId}:${candidate.recipientId}`)
+      .digest("hex");
   }
 
   private getExportedEventKey(calendarEventId: string, userId: string) {

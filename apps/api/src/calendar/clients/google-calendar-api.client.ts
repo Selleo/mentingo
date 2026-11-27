@@ -53,6 +53,10 @@ export class GoogleCalendarApiError extends Error {
   get notFound() {
     return this.statusCode === 404 || this.statusCode === 410;
   }
+
+  get conflict() {
+    return this.statusCode === 409;
+  }
 }
 
 @Injectable()
@@ -137,11 +141,12 @@ export class GoogleCalendarApiClient {
   async createEvent(
     accessToken: string,
     calendarId: string,
+    eventId: string,
     event: GoogleCalendarOutboundEvent,
   ): Promise<GoogleCalendarEvent> {
     return this.sendRequest<GoogleCalendarEvent>("post", this.getEventsUrl(calendarId), {
       accessToken,
-      data: event,
+      data: { id: eventId, ...event },
     });
   }
 

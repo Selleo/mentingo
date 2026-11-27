@@ -171,7 +171,8 @@ export class GoogleCalendarService {
     if (existing && !isSameAccount) await this.disconnectConnection(existing);
 
     const encryptedRefreshToken = this.calendarTokenEncryptionService.encrypt(token.refresh_token);
-    const outboundSyncEnabled = Boolean(state.outboundSync || existing?.outboundSyncEnabled);
+    const preservesOutboundPreference = Boolean(isSameAccount && existing?.outboundSyncEnabled);
+    const outboundSyncEnabled = state.outboundSync || preservesOutboundPreference;
 
     const connection =
       existing && isSameAccount
