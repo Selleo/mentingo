@@ -159,3 +159,40 @@ export const ROLE_OVERRIDE_RESTORE_CASES = [
     expected: { status: 403, rolesOverridden: true },
   },
 ] as const;
+
+export const REUSED_EMAIL_EXTERNAL_ID = "google-user-new-anna";
+
+export const RENAMED_USER_SIGN_IN_CASES = [
+  {
+    title: "signs a user renamed in Google in to their account when registration is invite only",
+    inviteOnlyRegistration: true,
+  },
+  {
+    title: "signs a user renamed in Google in to their account instead of registering a second one",
+    inviteOnlyRegistration: false,
+  },
+] as const;
+
+export const DIRECTORY_CONFIGURATION_REQUESTS = {
+  CONNECTION_SETTINGS: "connection_settings",
+  ROLE_MAPPINGS: "role_mappings",
+  MANUAL_SYNC: "manual_sync",
+} as const;
+
+export type DirectoryConfigurationRequest =
+  (typeof DIRECTORY_CONFIGURATION_REQUESTS)[keyof typeof DIRECTORY_CONFIGURATION_REQUESTS];
+
+export const DIRECTORY_CONFIGURATION_WITHOUT_USER_MANAGEMENT_CASES = [
+  {
+    title: "refuses to change the default role without user management",
+    configurationRequest: DIRECTORY_CONFIGURATION_REQUESTS.CONNECTION_SETTINGS,
+  },
+  {
+    title: "refuses to map directory groups to roles without user management",
+    configurationRequest: DIRECTORY_CONFIGURATION_REQUESTS.ROLE_MAPPINGS,
+  },
+  {
+    title: "refuses to start a sync without user management",
+    configurationRequest: DIRECTORY_CONFIGURATION_REQUESTS.MANUAL_SYNC,
+  },
+] as const;

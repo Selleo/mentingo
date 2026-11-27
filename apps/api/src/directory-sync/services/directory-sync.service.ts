@@ -6,7 +6,7 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 
-import { hasPermission } from "src/common/permissions/permission.utils";
+import { hasAllPermissions } from "src/common/permissions/permission.utils";
 import { PermissionsService } from "src/permissions/permissions.service";
 
 import {
@@ -343,8 +343,9 @@ export class DirectorySyncService {
   /**
    * Changes are recorded under the user who started the run: the admin who clicked Sync now,
    * or for scheduled runs the admin who set up the connection. That user is also protected from
-   * being demoted or archived by the run. Only active users who may still manage directory sync
-   * qualify; otherwise any active admin is used.
+   * being demoted or archived by the run. Only active users who may still manage both directory
+   * sync and users qualify, so a run never assigns roles under someone who could not assign them
+   * by hand; otherwise any active admin is used.
    */
   private async resolveSyncActor(
     run: DirectorySyncRun,
@@ -366,8 +367,12 @@ export class DirectorySyncService {
 
       const { roleSlugs, permissions } =
         await this.permissionsService.getUserAccess(candidateUserId);
+      const canManageDirectoryUsers = hasAllPermissions(permissions, [
+        PERMISSIONS.DIRECTORY_SYNC_MANAGE,
+        PERMISSIONS.USER_MANAGE,
+      ]);
 
-      if (!hasPermission(permissions, PERMISSIONS.DIRECTORY_SYNC_MANAGE)) continue;
+      if (!canManageDirectoryUsers) continue;
 
       return {
         userId: candidateUserId,

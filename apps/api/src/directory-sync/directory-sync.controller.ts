@@ -166,9 +166,14 @@ export class DirectorySyncController {
   async replaceDirectorySyncRoleMappings(
     @Param("provider") provider: DirectorySyncProvider,
     @Body() roleMappings: ReplaceDirectorySyncRoleMappingsBody,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<DirectorySyncConnectionResponse>> {
     return new BaseResponse(
-      await this.directorySyncConnectionService.replaceRoleMappings(provider, roleMappings),
+      await this.directorySyncConnectionService.replaceRoleMappings(
+        provider,
+        roleMappings,
+        currentUser,
+      ),
     );
   }
 

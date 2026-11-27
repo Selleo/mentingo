@@ -73,6 +73,8 @@ export const ROLE_ROUTE_ACCESS: Record<string, RoleRouteAccess> = {
       "/admin/courses",
       "/admin/beta-courses/new",
       "/admin/beta-courses/new/standard",
+      "/admin/beta-courses/new/standard/ai",
+      "/admin/beta-courses/new/ai",
       "/admin/courses/new-scorm",
       "/admin/courses/import-package",
       "/admin/beta-courses/:id",

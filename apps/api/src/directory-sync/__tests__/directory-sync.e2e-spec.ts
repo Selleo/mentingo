@@ -1,8 +1,11 @@
 import { faker } from "@faker-js/faker";
+import { UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
 import {
   DIRECTORY_SYNC_CHANGE_SOURCE,
   DIRECTORY_SYNC_CONNECTION_STATUSES,
   DIRECTORY_SYNC_ERROR_KEYS,
+  DIRECTORY_SYNC_PROVIDERS,
   DIRECTORY_SYNC_RUN_STATUSES,
   DIRECTORY_SYNC_RUN_TRIGGERS,
   PERMISSIONS,
@@ -10,10 +13,11 @@ import {
   type DirectorySyncRunStatus,
   type SystemRoleSlug,
 } from "@repo/shared";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 import { match } from "ts-pattern";
 
+import { AuthService } from "src/auth/auth.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   activityLogs,
@@ -21,6 +25,7 @@ import {
   groupUsers,
   permissionRoles,
   permissionUserRoles,
+  settings,
   userExternalIdentities,
   users,
   directorySyncConnections,
@@ -38,6 +43,10 @@ import {
 import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import {
+  assignCustomRoleToUserInTests,
+  findPermissionRoleIdInTests,
+} from "../../../test/helpers/permission-role-helpers";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 import { waitForOutbox } from "../../../test/helpers/wait-for-outbox";
 import { DirectoryObjectsNotFoundError } from "../directory-sync.errors";
@@ -51,6 +60,8 @@ import {
   ACCOUNT_STATES,
   ACCOUNT_SYNC_CASES,
   ARCHIVE_LIMIT_CASES,
+  DIRECTORY_CONFIGURATION_REQUESTS,
+  DIRECTORY_CONFIGURATION_WITHOUT_USER_MANAGEMENT_CASES,
   DIRECTORY_STATES,
   DIRECTORY_SYNC_TABLES,
   GOOGLE_ADMINS_GROUP_ID,
@@ -58,6 +69,8 @@ import {
   GOOGLE_SALES_GROUP_ID,
   LAST_ACTIVE_ADMIN_ERROR_KEY,
   RENAMED_SYNCED_USER_EMAIL,
+  RENAMED_USER_SIGN_IN_CASES,
+  REUSED_EMAIL_EXTERNAL_ID,
   ROLE_OVERRIDE_RESTORE_CASES,
   RUN_COMPLETION_TIMEOUT_MILLISECONDS,
   RUN_POLL_INTERVAL_MILLISECONDS,
@@ -68,6 +81,7 @@ import {
   SYNCED_USER_EXTERNAL_ID,
   UNFINISHED_RUN_STATUS_CASES,
   type AccountState,
+  type DirectoryConfigurationRequest,
   type DirectoryState,
 } from "./directory-sync.scenarios";
 
@@ -93,6 +107,8 @@ describe("Directory sync (e2e)", () => {
   let directorySyncRunService: DirectorySyncRunService;
   let directorySyncConnectionService: DirectorySyncConnectionService;
   let directorySyncCron: DirectorySyncCron;
+  let authService: AuthService;
+  let jwtService: JwtService;
 
   beforeAll(async () => {
     const context = await createE2ETest({ useDbProxy: true, enableActivityLogs: true });
@@ -108,6 +124,8 @@ describe("Directory sync (e2e)", () => {
     directorySyncRunService = app.get(DirectorySyncRunService);
     directorySyncConnectionService = app.get(DirectorySyncConnectionService);
     directorySyncCron = app.get(DirectorySyncCron);
+    authService = app.get(AuthService);
+    jwtService = app.get(JwtService);
     googleWorkspaceDirectoryClient = app.get(GoogleWorkspaceDirectoryClient);
     listDirectoryUsersInScope = jest.spyOn(
       googleWorkspaceDirectoryClient,
@@ -188,6 +206,37 @@ describe("Directory sync (e2e)", () => {
         firstName: account.firstName,
         lastName: account.lastName,
       });
+    });
+  });
+
+  describe("Google sign-in", () => {
+    it.each(RENAMED_USER_SIGN_IN_CASES)("$title", async ({ inviteOnlyRegistration }) => {
+      const { connection, syncStarter } = await arrangeConnection();
+      const account = await arrangeLinkedAccount(connection, {
+        archived: false,
+        archivedByDirectorySync: false,
+      });
+      await synchronizeDirectory(
+        connection,
+        [buildDirectoryUser({ email: RENAMED_SYNCED_USER_EMAIL })],
+        syncStarter.id,
+      );
+      await runAsTenant(defaultTenantId, () => createSettingsFactory(db, account.id).create());
+      await setInviteOnlyRegistration(inviteOnlyRegistration);
+
+      const tokens = await signInWithGoogle(RENAMED_SYNCED_USER_EMAIL, SYNCED_USER_EXTERNAL_ID);
+
+      expect(jwtService.decode(tokens.accessToken)).toMatchObject({ userId: account.id });
+      expect(await findAccountsByEmail(RENAMED_SYNCED_USER_EMAIL)).toEqual([]);
+    });
+
+    it("refuses another Google account that now uses a synced user's previous email", async () => {
+      const { connection } = await arrangeConnection();
+      await arrangeLinkedAccount(connection, { archived: false, archivedByDirectorySync: false });
+
+      await expect(
+        signInWithGoogle(SYNCED_USER_EMAIL, REUSED_EMAIL_EXTERNAL_ID),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
     });
   });
 
@@ -649,6 +698,46 @@ describe("Directory sync (e2e)", () => {
       expect(await findRunsForConnection(connection.id)).toEqual([]);
     });
 
+    it.each(DIRECTORY_CONFIGURATION_WITHOUT_USER_MANAGEMENT_CASES)(
+      "$title",
+      async ({ configurationRequest }) => {
+        const { connection } = await arrangeConnection();
+        const directoryManager = await arrangeUserWithOnlyDirectorySyncPermission();
+        const studentRoleId = await runAsTenant(defaultTenantId, () =>
+          findPermissionRoleIdInTests(db, defaultTenantId, SYSTEM_ROLE_SLUGS.STUDENT),
+        );
+
+        await sendDirectoryConfigurationRequest(connection, configurationRequest, studentRoleId)
+          .set("Cookie", await cookieFor(directoryManager, app))
+          .expect(403);
+
+        expect(await findRunsForConnection(connection.id)).toEqual([]);
+      },
+    );
+
+    it("does not record a sync under a user who cannot manage users", async () => {
+      const directoryManager = await arrangeUserWithOnlyDirectorySyncPermission();
+      const { connection, syncStarter } = await arrangeConnection();
+      const account = await arrangeLinkedAccount(connection, {
+        archived: false,
+        archivedByDirectorySync: false,
+      });
+
+      await synchronizeDirectory(
+        connection,
+        directoryUsersFor(DIRECTORY_STATES.SUSPENDED),
+        directoryManager.id,
+      );
+      const activityLogActorIds = await waitForOutbox(
+        app,
+        () => findActivityLogActorIds(account.id),
+        (actorIds) => actorIds.length > 0,
+      );
+
+      expect(activityLogActorIds).not.toContain(directoryManager.id);
+      expect(activityLogActorIds).toContain(syncStarter.id);
+    });
+
     it.each(ROLE_OVERRIDE_RESTORE_CASES)("$title", async ({ requesterRoleSlug, expected }) => {
       const { connection } = await arrangeConnection();
       const account = await arrangeLinkedAccount(connection, {
@@ -824,6 +913,77 @@ describe("Directory sync (e2e)", () => {
       });
     });
 
+  const arrangeUserWithOnlyDirectorySyncPermission = () =>
+    runAsTenant(defaultTenantId, async () => {
+      const user = await createUserFactory(db)
+        .withCredentials({ password: SYNC_STARTER_PASSWORD })
+        .withUserSettings(db)
+        .create({
+          tenantId: defaultTenantId,
+          email: `directory-manager-${faker.string.alphanumeric(6)}@mentingo.test`,
+        });
+      await assignCustomRoleToUserInTests(db, user.id, defaultTenantId, [
+        PERMISSIONS.DIRECTORY_SYNC_MANAGE,
+      ]);
+
+      return user;
+    });
+
+  const sendDirectoryConfigurationRequest = (
+    connection: DirectorySyncConnection,
+    configurationRequest: DirectoryConfigurationRequest,
+    roleId: UUIDType,
+  ) => {
+    const connectionPath = `/api/directory-sync/${connection.provider}/connection`;
+
+    return match(configurationRequest)
+      .with(DIRECTORY_CONFIGURATION_REQUESTS.CONNECTION_SETTINGS, () =>
+        request(app.getHttpServer()).put(connectionPath).send({
+          administratorEmail: connection.administratorEmail,
+          scopeType: connection.scopeType,
+          scopeExternalIds: connection.scopeExternalIds,
+          defaultRoleId: roleId,
+          archiveUsersOutsideScope: connection.archiveUsersOutsideScope,
+          sendWelcomeEmail: connection.sendWelcomeEmail,
+          archiveLimitPercentage: connection.archiveLimitPercentage,
+        }),
+      )
+      .with(DIRECTORY_CONFIGURATION_REQUESTS.ROLE_MAPPINGS, () =>
+        request(app.getHttpServer())
+          .put(`${connectionPath}/role-mappings`)
+          .send([
+            {
+              externalGroupId: GOOGLE_ADMINS_GROUP_ID,
+              externalGroupEmail: "admins@workspace.test",
+              roleId,
+              priority: 0,
+            },
+          ]),
+      )
+      .with(DIRECTORY_CONFIGURATION_REQUESTS.MANUAL_SYNC, () =>
+        request(app.getHttpServer()).post(`${connectionPath}/synchronizations`),
+      )
+      .exhaustive();
+  };
+
+  const setInviteOnlyRegistration = (inviteOnlyRegistration: boolean) =>
+    baseDb
+      .update(settings)
+      .set({
+        settings: sql`jsonb_set(${settings.settings}, '{inviteOnlyRegistration}', to_jsonb(${inviteOnlyRegistration}::boolean))`,
+      })
+      .where(and(eq(settings.tenantId, defaultTenantId), isNull(settings.userId)));
+
+  const signInWithGoogle = (email: string, externalId: string) =>
+    runAsTenant(defaultTenantId, () =>
+      authService.handleProviderLoginCallback({
+        email,
+        firstName: "Anna",
+        lastName: "Synced",
+        identity: { provider: DIRECTORY_SYNC_PROVIDERS.GOOGLE_WORKSPACE, externalId },
+      }),
+    );
+
   /** Simulates the stale-run cleanup or a disconnect closing the run while the worker is busy. */
   const closeUnfinishedRuns = (connectionId: UUIDType) =>
     baseDb
@@ -915,6 +1075,15 @@ describe("Directory sync (e2e)", () => {
       .where(eq(activityLogs.resourceId, userId));
 
     return logs.map((log) => log.metadata.context?.source);
+  };
+
+  const findActivityLogActorIds = async (userId: UUIDType) => {
+    const logs = await baseDb
+      .select({ actorId: activityLogs.actorId })
+      .from(activityLogs)
+      .where(eq(activityLogs.resourceId, userId));
+
+    return logs.map((log) => log.actorId);
   };
 
   const findRun = async (runId: UUIDType) => {

@@ -1,9 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray, isNull } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 import { userExternalIdentities, users } from "src/storage/schema";
+
+import type { DirectorySyncProvider } from "@repo/shared";
 
 export type UserExternalIdentityInsert = typeof userExternalIdentities.$inferInsert;
 
@@ -33,6 +35,23 @@ export class UserExternalIdentityRepository {
       .limit(1);
 
     return identity ?? null;
+  }
+
+  async findUserByExternalIdentity(provider: DirectorySyncProvider, externalId: string) {
+    const [user] = await this.db
+      .select(getTableColumns(users))
+      .from(userExternalIdentities)
+      .innerJoin(users, eq(users.id, userExternalIdentities.userId))
+      .where(
+        and(
+          eq(userExternalIdentities.provider, provider),
+          eq(userExternalIdentities.externalId, externalId),
+          isNull(users.deletedAt),
+        ),
+      )
+      .limit(1);
+
+    return user ?? null;
   }
 
   async insertIdentities(identities: UserExternalIdentityInsert[]) {

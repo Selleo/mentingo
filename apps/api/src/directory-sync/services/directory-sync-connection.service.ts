@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -8,10 +9,12 @@ import {
   DIRECTORY_SYNC_CONNECTION_STATUSES,
   DIRECTORY_SYNC_ERROR_KEYS,
   DIRECTORY_SYNC_SCOPE_TYPES,
+  PERMISSIONS,
   type DirectorySyncProvider,
 } from "@repo/shared";
 import { match } from "ts-pattern";
 
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { GroupService } from "src/group/group.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
@@ -82,6 +85,7 @@ export class DirectorySyncConnectionService {
     connectionSettings: UpsertDirectorySyncConnectionBody,
     currentUser: CurrentUserType,
   ) {
+    this.assertCanManageUsers(currentUser);
     await this.assertRolesExist([connectionSettings.defaultRoleId]);
 
     const scopeExternalIds = this.resolveScopeExternalIds(connectionSettings);
@@ -183,7 +187,9 @@ export class DirectorySyncConnectionService {
   async replaceRoleMappings(
     provider: DirectorySyncProvider,
     roleMappings: ReplaceDirectorySyncRoleMappingsBody,
+    currentUser: CurrentUserType,
   ) {
+    this.assertCanManageUsers(currentUser);
     const connection = await this.getExistingConnection(provider);
 
     this.assertRoleMappingsAreUnique(roleMappings);
@@ -246,6 +252,7 @@ export class DirectorySyncConnectionService {
   }
 
   async requestManualSync(provider: DirectorySyncProvider, currentUser: CurrentUserType) {
+    this.assertCanManageUsers(currentUser);
     const connection = await this.getExistingConnection(provider);
     const queuedRun = await this.directorySyncRunService.requestManualDirectorySync(
       connection.id,
@@ -364,6 +371,16 @@ export class DirectorySyncConnectionService {
         },
       )
       .exhaustive();
+  }
+
+  /**
+   * The connection's roles, archiving and the sync itself create, archive and assign roles to
+   * users, so they need the same user management permission as doing that by hand.
+   */
+  private assertCanManageUsers(currentUser: CurrentUserType) {
+    if (!hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE)) {
+      throw new ForbiddenException("common.toast.noAccess");
+    }
   }
 
   private assertRoleMappingsAreUnique(roleMappings: ReplaceDirectorySyncRoleMappingsBody) {
