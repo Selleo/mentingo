@@ -26,8 +26,6 @@ import type { MessageRole } from "src/ai/utils/ai.type";
 import type { CompiledTemplate } from "src/ai/utils/prompt.type";
 import type { UUIDType } from "src/common";
 
-const mentorConductSection = /^<conduct_boundaries>\n[\s\S]+?^<\/conduct_boundaries>$/m;
-
 @Injectable()
 export class PromptService implements OnModuleInit {
   private prompts = new Map<promptId, CompiledTemplate>();
@@ -95,12 +93,7 @@ export class PromptService implements OnModuleInit {
         id: systemPrompt.id,
         role: systemPrompt.role,
         userName: null,
-        content: mentorConductSection.test(systemPrompt.content)
-          ? systemPrompt.content
-          : this.includeMentorConduct(
-              systemPrompt.content,
-              await this.aiRepository.findMentorTypeByThreadId(threadId),
-            ),
+        content: systemPrompt.content,
       });
     }
 
@@ -281,16 +274,8 @@ export class PromptService implements OnModuleInit {
       });
 
     const prompt = `${mentorPrompt}\n\n${learnerNameAddon}`;
-    return mentorConductSection.test(prompt) ? prompt : this.includeMentorConduct(prompt, mode);
-  }
 
-  /** Read the policy from the base YAML for snapshots that predate the conduct section. */
-  private includeMentorConduct(prompt: string, mode: AiMentorType | null) {
-    const template = mode === AI_MENTOR_TYPE.ROLEPLAY ? "roleplayPrompt" : "teacherPrompt";
-    const section = promptTemplates[template].template.match(mentorConductSection)?.[0];
-    if (!section) throw new Error(`Missing conduct section in ${template}`);
-
-    return `${prompt}\n\n${section}`;
+    return prompt;
   }
 
   async loadPrompt<K extends keyof typeof PROMPT_MAP>(id: K, vars: Static<(typeof PROMPT_MAP)[K]>) {

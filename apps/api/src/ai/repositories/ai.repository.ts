@@ -280,23 +280,6 @@ export class AiRepository {
       .returning();
   }
 
-  async findMentorTypeByThreadId(threadId: UUIDType) {
-    const [configuration] = await this.db
-      .select({ type: aiMentorConfigurations.type })
-      .from(aiMentorThreads)
-      .innerJoin(
-        aiMentorConfigurations,
-        or(
-          eq(aiMentorConfigurations.aiMentorLessonId, aiMentorThreads.aiMentorLessonId),
-          eq(aiMentorConfigurations.practiceSessionId, aiMentorThreads.practiceSessionId),
-        ),
-      )
-      .where(eq(aiMentorThreads.id, threadId))
-      .limit(1);
-
-    return configuration?.type ?? null;
-  }
-
   async findMentorLessonByThreadId(threadId: UUIDType, language: SupportedLanguages) {
     const localizedFieldWithFallback = (field: AnyPgColumn) => sql<string>`COALESCE(
       NULLIF(${this.localizationService.getLocalizedSqlField(field, language)}, ''),

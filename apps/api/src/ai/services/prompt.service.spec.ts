@@ -47,7 +47,6 @@ describe("PromptService learner-name personalization", () => {
         difficulty: "realistic",
         factsAndConstraints: null,
       }),
-      findMentorTypeByThreadId: jest.fn().mockResolvedValue(type),
       findGroupsByThreadId: jest.fn().mockResolvedValue([]),
       insertMessage: jest.fn().mockResolvedValue([]),
     };
@@ -118,7 +117,7 @@ describe("PromptService learner-name personalization", () => {
         learnerRole: "Sprzedawca",
       }),
     );
-    expect(prompt).toContain("ROLEPLAY_PROMPT\n\nLEARNER_NAME_RULES\n\n<conduct_boundaries>");
+    expect(prompt).toBe("ROLEPLAY_PROMPT\n\nLEARNER_NAME_RULES");
     expect(tokenService.countTokens).toHaveBeenCalledWith(expect.any(String), prompt);
     expect(aiRepository.insertMessage).toHaveBeenCalledWith({
       tokenCount: 42,
@@ -290,27 +289,6 @@ describe("PromptService learner-name personalization", () => {
       expect(textPrompt.some((message) => message.content === speechPolicy)).toBe(false);
     },
   );
-
-  it("adds the appropriate policy inside the stored system message for legacy threads", async () => {
-    const { aiRepository, service } = createService(AI_MENTOR_TYPE.TEACHER);
-    aiRepository.findFirstMessageByRoleAndThread.mockResolvedValueOnce({
-      id: "stored-teacher",
-      role: MESSAGE_ROLE.SYSTEM,
-      content: "Stored lesson instructions",
-    });
-
-    const prompt = await service.buildPrompt(threadId, "Hello");
-
-    expect(prompt.filter(({ role }) => role === MESSAGE_ROLE.SYSTEM)).toEqual([
-      expect.objectContaining({
-        id: "stored-teacher",
-        content: expect.stringContaining("Stored lesson instructions\n\n<conduct_boundaries>"),
-      }),
-    ]);
-    expect(prompt[0].content).toContain(
-      "pause the lesson until the learner continues respectfully",
-    );
-  });
 
   it("adds learner delivery timing as a separate voice system message", async () => {
     const { service } = createService();
