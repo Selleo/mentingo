@@ -32,6 +32,7 @@ export interface WsUser {
   userId: string;
   sessionId: string;
   sessionVersion: string;
+  accessVersion: string;
   email: string;
   roleSlugs: string[];
   permissions: PermissionKey[];

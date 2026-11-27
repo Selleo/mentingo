@@ -54,6 +54,7 @@ it("delivers persisted updates to the matching room and disconnects only the rev
           verifySessionToken: async (token: string) => ({
             ...sessions.get(token),
             sessionVersion: "1",
+            accessVersion: "synthetic-access-version",
           }),
         },
       },

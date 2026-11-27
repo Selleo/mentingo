@@ -27,6 +27,7 @@ const user: WsUser = {
   userId: "learner-1",
   sessionId: "s".repeat(32),
   sessionVersion: "v".repeat(32),
+  accessVersion: "a".repeat(32),
   tenantId: "tenant-1",
   email: "learner@example.com",
   permissions: [],

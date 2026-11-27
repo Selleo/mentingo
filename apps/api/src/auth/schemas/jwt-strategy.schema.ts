@@ -29,6 +29,7 @@ export const jwtPayloadSchema = Type.Object({
     Type.Union(Object.values(PERMISSIONS).map((permission) => Type.Literal(permission))),
   ),
   tenantId: UUIDSchema,
+  accessVersion: Type.Optional(Type.String({ minLength: 32 })),
   isSupportMode: Type.Optional(Type.Boolean()),
   supportSessionId: Type.Optional(UUIDSchema),
   supportExpiresAt: Type.Optional(Type.String()),

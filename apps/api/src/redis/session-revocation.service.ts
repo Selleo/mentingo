@@ -7,7 +7,15 @@ import { REFRESH_TOKEN_EXPIRATION_SECONDS } from "src/auth/consts";
 import { REDIS_CLIENT } from "src/redis/redis.tokens";
 import { RedisClient } from "src/redis/redis.types";
 
-import type { ActiveSessionIdentity, SessionIdentity } from "./session-revocation.types";
+import type {
+  AccessTokenIdentity,
+  ActiveAccessTokenIdentity,
+  InactiveAccessTokens,
+  SessionIdentity,
+} from "./session-revocation.types";
+
+/** No access token outlives its refresh token, so the version must live at least that long. */
+const ACCESS_VERSION_TTL_SECONDS = REFRESH_TOKEN_EXPIRATION_SECONDS;
 
 @Injectable()
 export class SessionRevocationService {
@@ -23,6 +31,35 @@ export class SessionRevocationService {
 
   async revokeUserSessions(userId: string): Promise<void> {
     await this.redisClient.set(this.getUserVersionKey(userId), nanoid(32));
+  }
+
+  /**
+   * The version every access token minted now must carry, created when missing and kept alive at
+   * least as long as any token minted with it. Read it before the user's permissions, so a token
+   * can never pair new permissions with an outdated version.
+   */
+  async ensureUserAccessVersion(userId: string): Promise<string> {
+    const accessVersion = await this.redisClient.eval(
+      `redis.call('SET', KEYS[1], ARGV[1], 'NX', 'EX', ARGV[2])
+       redis.call('EXPIRE', KEYS[1], ARGV[2], 'GT')
+       return redis.call('GET', KEYS[1])`,
+      {
+        keys: [this.getUserAccessVersionKey(userId)],
+        arguments: [nanoid(32), String(ACCESS_VERSION_TTL_SECONDS)],
+      },
+    );
+
+    if (typeof accessVersion !== "string")
+      throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_EXPIRED);
+
+    return accessVersion;
+  }
+
+  /** Rejects the user's existing access tokens while keeping sessions, so a refresh mints fresh ones. */
+  async rotateUserAccessVersion(userId: string): Promise<void> {
+    await this.redisClient.set(this.getUserAccessVersionKey(userId), nanoid(32), {
+      EX: ACCESS_VERSION_TTL_SECONDS,
+    });
   }
 
   async assertUserSessionVersion(userId: string, version?: string): Promise<void> {
@@ -53,28 +90,72 @@ export class SessionRevocationService {
     if (!sessionId || !sessionVersion)
       throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
 
-    const [inactiveSession] = await this.findInactiveSessions([
-      { userId, sessionId, sessionVersion },
+    const [userVersion, sessionRecordVersion] = await this.redisClient.mGet([
+      this.getUserVersionKey(userId),
+      this.getSessionKey(userId, sessionId),
     ]);
-    if (inactiveSession) throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
+    if (userVersion !== sessionVersion || sessionRecordVersion !== sessionVersion)
+      throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
   }
 
-  /** Returns the identities whose session was revoked or expired, checked with one Redis round-trip. */
-  async findInactiveSessions<T extends ActiveSessionIdentity>(identities: T[]): Promise<T[]> {
-    if (!identities.length) return [];
+  /**
+   * Checks an access token's session and its access version with one Redis round-trip. A missing or
+   * outdated access version only expires the token, so the session can still be refreshed.
+   */
+  async assertAccessTokenActive({
+    userId,
+    sessionId,
+    sessionVersion,
+    accessVersion,
+  }: AccessTokenIdentity): Promise<void> {
+    if (!sessionId || !sessionVersion)
+      throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
+
+    const [userVersion, sessionRecordVersion, currentAccessVersion] = await this.redisClient.mGet([
+      this.getUserVersionKey(userId),
+      this.getSessionKey(userId, sessionId),
+      this.getUserAccessVersionKey(userId),
+    ]);
+
+    if (userVersion !== sessionVersion || sessionRecordVersion !== sessionVersion)
+      throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
+
+    if (!accessVersion || currentAccessVersion !== accessVersion)
+      throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_EXPIRED);
+  }
+
+  /**
+   * Sorts out the access tokens whose session was revoked and those whose access version is outdated,
+   * checked with one Redis round-trip. The rules match `assertAccessTokenActive`.
+   */
+  async findInactiveAccessTokens<T extends ActiveAccessTokenIdentity>(
+    identities: T[],
+  ): Promise<InactiveAccessTokens<T>> {
+    const inactiveAccessTokens: InactiveAccessTokens<T> = { revoked: [], expired: [] };
+    if (!identities.length) return inactiveAccessTokens;
 
     const storedValues = await this.redisClient.mGet(
       identities.flatMap(({ userId, sessionId }) => [
         this.getUserVersionKey(userId),
         this.getSessionKey(userId, sessionId),
+        this.getUserAccessVersionKey(userId),
       ]),
     );
-    const storedVersionPairs = chunk(storedValues, 2);
+    const storedVersions = chunk(storedValues, 3);
 
-    return identities.filter(({ sessionVersion }, index) => {
-      const [userVersion, sessionRecordVersion] = storedVersionPairs[index];
-      return userVersion !== sessionVersion || sessionRecordVersion !== sessionVersion;
+    identities.forEach((identity, index) => {
+      const [userVersion, sessionRecordVersion, currentAccessVersion] = storedVersions[index];
+
+      if (
+        userVersion !== identity.sessionVersion ||
+        sessionRecordVersion !== identity.sessionVersion
+      )
+        inactiveAccessTokens.revoked.push(identity);
+      else if (!identity.accessVersion || currentAccessVersion !== identity.accessVersion)
+        inactiveAccessTokens.expired.push(identity);
     });
+
+    return inactiveAccessTokens;
   }
 
   async extendSession(
@@ -106,6 +187,10 @@ export class SessionRevocationService {
 
   private getUserVersionKey(userId: string) {
     return `auth:session-version:${userId}`;
+  }
+
+  private getUserAccessVersionKey(userId: string) {
+    return `auth:access-version:${userId}`;
   }
 
   private getSessionKey(userId: string, sessionId: string) {

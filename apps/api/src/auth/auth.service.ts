@@ -481,6 +481,7 @@ export class AuthService {
       return this.sessionService.createMfaChallenge({ userId, email, tenantId }, authContext);
     }
 
+    const accessVersion = await this.sessionRevocationService.ensureUserAccessVersion(userId);
     const { permissions, roleSlugs } = await this.permissionsService.getUserAccess(userId);
 
     const tokens = await this.signTokens({
@@ -493,6 +494,7 @@ export class AuthService {
       tenantId,
       roleSlugs,
       permissions,
+      accessVersion,
     });
 
     return { ...tokens, shouldVerifyMFA: false };
@@ -531,6 +533,9 @@ export class AuthService {
     if (!originalUser || !targetUser)
       throw new UnauthorizedException("supportMode.errors.invalidSession");
 
+    const accessVersion = await this.sessionRevocationService.ensureUserAccessVersion(
+      targetUser.id,
+    );
     const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(
       targetUser.id,
       this.dbAdmin,
@@ -554,6 +559,7 @@ export class AuthService {
       email: targetUser.email,
       roleSlugs,
       permissions,
+      accessVersion,
       tenantId: targetUser.tenantId,
       isSupportMode: true,
       supportSessionId: session.id,

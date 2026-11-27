@@ -25,6 +25,7 @@ const claims = {
   userId: "synthetic-user",
   sessionId: "synthetic-login-session",
   sessionVersion: "1",
+  accessVersion: "synthetic-access-version",
   tenantId: "synthetic-tenant",
   email: "authoring-recovery@example.invalid",
   roleSlugs: [],

@@ -45,11 +45,13 @@ export class WsJwtGuard implements CanActivate {
         AUTH_TOKEN_PURPOSE.ACCESS,
       );
       if (!payload.sessionId) throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_REVOKED);
+      if (!payload.accessVersion) throw new UnauthorizedException(AUTH_ERROR_KEYS.SESSION_EXPIRED);
 
       const user: WsUser = {
         userId: payload.userId,
         sessionId: payload.sessionId,
         sessionVersion: payload.sessionVersion,
+        accessVersion: payload.accessVersion,
         email: payload.email,
         roleSlugs: payload.roleSlugs ?? [],
         permissions: payload.permissions ?? [],
@@ -77,9 +79,7 @@ export class WsJwtGuard implements CanActivate {
         });
         throw new WsException("Authentication temporarily unavailable");
       }
-      if (error instanceof Error && error.name === "TokenExpiredError") {
-        client.emit(AUTH_SOCKET_EVENTS.SESSION_EXPIRED);
-      }
+      if (this.isRefreshableExpiry(error)) client.emit(AUTH_SOCKET_EVENTS.SESSION_EXPIRED);
       client.disconnect(true);
       if (error instanceof WsAuthenticationException) throw error;
 
@@ -91,6 +91,13 @@ export class WsJwtGuard implements CanActivate {
   private assertSocketConnected(client: AuthenticatedSocket): void {
     if (client.connected === false)
       throw new WsAuthenticationException("Unauthorized: Socket disconnected");
+  }
+
+  /** JWT expiry and outdated access versions keep the session, so the client can refresh and reconnect. */
+  private isRefreshableExpiry(error: unknown): boolean {
+    if (error instanceof UnauthorizedException)
+      return error.message === AUTH_ERROR_KEYS.SESSION_EXPIRED;
+    return error instanceof Error && error.name === "TokenExpiredError";
   }
 
   /** Only explicit access denials and JWT validation errors terminate a browser session. */
