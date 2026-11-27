@@ -57,6 +57,7 @@ export interface CourseAuthoringSubscription {
 export interface CourseAuthoringApplyJob {
   draftCourseId?: UUIDType;
   acknowledgeAssessmentChanges?: boolean;
+  omittedAssetIds?: UUIDType[];
   courseId: UUIDType;
   sessionId: UUIDType;
   exportId: UUIDType;

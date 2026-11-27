@@ -191,9 +191,72 @@ describe("Podcast apply readiness", () => {
     ],
   };
 
-  it("refuses to omit a planned podcast before freezing the export", async () => {
+  it("queues an omitted terminally failed podcast without its placement or asset", async () => {
     const test = setup();
     test.getSession.mockResolvedValue(planned);
+    test.getJob.mockResolvedValueOnce(undefined);
+    test.exported.operations = [lesson("<p>Lesson text.</p>")];
+    test.exported.exportHash = courseAuthoringExportHash(test.exported);
+
+    await test.service.enqueue(
+      courseId,
+      sessionId,
+      { commandId: exportId, proposalIds: [assetId], omitOptionalAssetIds: [assetId] },
+      actor,
+    );
+    expect(test.client.authoring.prepareExport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        request: expect.objectContaining({ omitOptionalAssetIds: [assetId] }),
+      }),
+    );
+    expect(test.enqueue).toHaveBeenCalledWith(
+      expect.anything(),
+      "apply",
+      expect.objectContaining({ omittedAssetIds: [assetId] }),
+      expect.anything(),
+    );
+
+    await test.service.process({
+      courseId,
+      sessionId,
+      exportId,
+      actor,
+      omittedAssetIds: [assetId],
+    });
+    expect(test.applyPreparedExport).toHaveBeenCalled();
+    expect(test.client.authoring.downloadAsset).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      "keeps its audio placement",
+      `<audio data-node-type="audio" data-authoring-asset-id="${assetId}" src="authoring-asset:${assetId}"></audio>`,
+      false,
+      "courseAuthoring.errors.assetNotReady",
+    ],
+    [
+      "still ships its asset",
+      "<p>Lesson text.</p>",
+      true,
+      "courseAuthoring.errors.invalidOperations",
+    ],
+  ])("rejects an omitted podcast that %s", async (_label, description, withAsset, error) => {
+    const test = setup();
+    test.getSession.mockResolvedValue(planned);
+    test.exported.operations = [lesson(description)];
+    if (withAsset)
+      test.exported.assets = [
+        {
+          assetId,
+          operationId,
+          role: "podcast",
+          mimeType: "audio/mpeg",
+          byteSize: 10,
+          revision: 1,
+          required: true,
+          sha256: "0".repeat(64),
+        },
+      ];
 
     await expect(
       test.service.enqueue(
@@ -202,8 +265,7 @@ describe("Podcast apply readiness", () => {
         { commandId: exportId, proposalIds: [assetId], omitOptionalAssetIds: [assetId] },
         actor,
       ),
-    ).rejects.toThrow("courseAuthoring.errors.invalidOperations");
-    expect(test.client.authoring.prepareExport).not.toHaveBeenCalled();
+    ).rejects.toThrow(error);
     expect(test.enqueue).not.toHaveBeenCalled();
   });
 

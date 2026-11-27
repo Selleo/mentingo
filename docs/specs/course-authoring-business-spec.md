@@ -38,7 +38,7 @@ Course authors describe the course material or changes they need in AI course ge
 - Edits require at least one valid course operation before they can become a reviewable proposal. Ambiguous target scope must be resolved before writing; an empty edit is invalid rather than a course change.
 - Stop active generation from the composer while keeping Send available for a new request. When a step fails, see whether it needs a fresh draft, a provider retry, an author answer, or a service fix. Retry failed parts while preserving completed chapter plans, research and author approvals.
 - Generate visuals with OpenAI GPT Image Sunburst. The authoring agent selects standard quality for ordinary visuals and premium quality when additional detail improves learning. Explicitly approve uncertain generation retries and omit optional visuals from an application when appropriate. Public-web image import is outside this authoring scope.
-- Add a short conversation to a content lesson when a case, differing perspectives, or a trade-off benefits from two speakers. Review the podcast in the lesson and let learners play it inline.
+- Add a short podcast to a content lesson, as a single-voice explanation or a two-speaker conversation when a case, differing perspectives, or a trade-off benefits from dialogue. The AI plans a limited number of podcasts per course. Review the podcast in the lesson and let learners play it inline.
 - Provider usage is recorded for operational accounting; it is not displayed in the authoring interaction.
 
 The conversation treats internal execution records as background state, not missing chat
@@ -48,7 +48,10 @@ session snapshot automatically instead of asking the author to reload the page.
 Opening the workspace loads the saved session. Socket.IO then carries session updates
 in sequence, including draft attachment and podcast readiness. Background notifications
 also follow the stream after the drawer closes. A sequence gap is recovered over the
-socket, with a bounded HTTP read available when transport recovery needs it.
+socket, with a bounded HTTP read available when transport recovery needs it. A failed
+background join retries with bounded backoff; if the session stays unreachable, one HTTP
+snapshot refresh replaces the stream and still-active work joins again. Revoked access or a
+missing session ends background tracking for that session.
 
 The source policy supports explicit web/general authority and persisted section constraints for
 backend processing. Uploading a file adds its returned source version to the current session
@@ -130,7 +133,7 @@ Authors return to the same saved conversation after connection loss without resu
 
 Task lifecycle events also carry safe task diagnostics and result identifiers. A retry reuses the failed task and clears its earlier error as soon as it is queued or running; a later success replaces the failed state in the open chat. The browser localizes these stable diagnostic codes and never receives worker exception text or tracebacks.
 
-The current rich-text lesson format and stable block identity remain authoritative. The workflow does not create a new learner-completion or certificate policy. Closing the drawer never triggers automatic navigation. Durable `assistant` records are rendered as assistant chat bubbles; incomplete records are ignored rather than replaced with fabricated text. The interaction follows the bottom while the author is at the latest position, including message growth, and excludes source-ingestion tasks from agent work when their source record identifies the task.
+The current rich-text lesson format and stable block identity remain authoritative. The workflow does not create a new learner-completion or certificate policy; applied podcasts are ordinary lesson audio and follow the existing audio-completion setting. Closing the drawer never triggers automatic navigation. Durable `assistant` records are rendered as assistant chat bubbles; incomplete records are ignored rather than replaced with fabricated text. The interaction follows the bottom while the author is at the latest position, including message growth, and excludes source-ingestion tasks from agent work when their source record identifies the task.
 
 An empty-target request first passes through conversational routing. Greetings and guidance remain conversation only; whole-course generation enters course planning; a request to add chapters enters append-only planning; clear research requests use permitted web research; and existing-content edits resolve only trusted course targets or ask one focused clarification.
 
@@ -145,7 +148,12 @@ Verification for chapter progress (2026-10-05): all 332 CourseAuthoring unit tes
 Lesson podcasts generate alongside visuals when they add a useful teaching perspective. The
 author can preview the rest of the lesson while its audio is being prepared. Apply becomes
 available once the planned assets are ready, and includes the podcast at its saved placement.
-If generation fails, the author can retry the audio independently. Mentingo AI
+Planned podcasts are required by default. If generation fails, the author can retry the audio
+independently; when generation has failed terminally, the author can instead omit that podcast
+and apply the lesson without it. An omitted podcast leaves neither its audio placement nor its
+file in the applied lesson. Applied podcasts are lesson audio resources, so when the
+organization turns on audio completion tracking, learners must listen to them to complete the
+lesson. Mentingo AI
 uses the organization's selected speech provider and its language-specific voice pool or
 built-in presets. The saved cast stays consistent through retries.
 
