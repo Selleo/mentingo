@@ -1,7 +1,6 @@
 /** Replays private draft events and discards inactive sessions under tenant scope. */
 import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { isAxiosError } from "axios";
 import { v5 as uuidv5 } from "uuid";
@@ -11,30 +10,35 @@ import { S3Service } from "src/s3/s3.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { CourseAuthoringApplicationRepository } from "./course-authoring-application.repository";
-import { enqueueAuthoringAutonomousEvent } from "./course-authoring-autonomous-event";
+import {
+  enqueueAuthoringAutonomousEvent,
+  InvalidAutonomousApplyRequestError,
+} from "./course-authoring-autonomous-event";
 import { CourseAuthoringDraftRepository } from "./course-authoring-draft.repository";
 import { LumaService } from "./luma.service";
-import { authoringEventsSchema } from "./schema/course-authoring-session.schema";
+import {
+  authoringDraftActivitySchema,
+  authoringEventsSchema,
+} from "./schema/course-authoring-session.schema";
+
+import type {
+  CourseAuthoringDraft,
+  CourseAuthoringInactiveDraftCursor,
+} from "./course-authoring.types";
 
 const DRAFT_IDLE_MS = 60 * 60 * 1000;
 const DRAFT_DISCARD_NAMESPACE = "2f5bfbf8-2f22-4706-9c04-1ad6545fc098";
 const ACTIVE_TASK_STATUSES = new Set(["queued", "running", "waiting_dependencies"]);
-
-type Draft = Awaited<ReturnType<CourseAuthoringDraftRepository["inactive"]>>[number];
-
-const draftActivitySchema = Type.Object({
-  sessionId: Type.String({ format: "uuid" }),
-  courseId: Type.String({ format: "uuid" }),
-  status: Type.String(),
-  pendingWork: Type.Optional(Type.Boolean()),
-  tasks: Type.Array(Type.Object({ status: Type.String() })),
-});
+const DRAFT_SWEEP_PAGE_SIZE = 100;
+const MAX_EVENT_ENQUEUE_ATTEMPTS = 30;
+const MAX_TRACKED_EVENT_FAILURES = 1000;
 
 @Injectable()
 export class CourseAuthoringDraftLifecycleService {
   private readonly logger = new Logger(CourseAuthoringDraftLifecycleService.name);
   private polling = false;
   private sweeping = false;
+  private readonly eventFailures = new Map<string, { sequence: number; attempts: number }>();
 
   constructor(
     private readonly courseAuthoringDraftRepository: CourseAuthoringDraftRepository,
@@ -72,7 +76,7 @@ export class CourseAuthoringDraftLifecycleService {
   }
 
   /** Verifies contiguous producer events and commits the cursor after durable queue handoff. */
-  private async pollDraft(draft: Draft) {
+  private async pollDraft(draft: CourseAuthoringDraft) {
     const sessionId = draft.lumaSessionId;
     if (!sessionId) return;
     const client = await this.lumaService.getLumaClient();
@@ -87,13 +91,25 @@ export class CourseAuthoringDraftLifecycleService {
     for (const event of page.events) {
       if (event.sessionId !== sessionId || event.sequence !== cursor + 1)
         throw new Error("Invalid draft event sequence");
-      await enqueueAuthoringAutonomousEvent(
-        this.queueService,
-        { sessionId, courseId: draft.id, tenantId: draft.tenantId, ownerId: draft.ownerId },
-        event,
-      );
+      try {
+        await enqueueAuthoringAutonomousEvent(
+          this.queueService,
+          { sessionId, courseId: draft.id, tenantId: draft.tenantId, ownerId: draft.ownerId },
+          event,
+        );
+      } catch (error) {
+        if (
+          !(error instanceof InvalidAutonomousApplyRequestError) &&
+          !this.exhaustedEnqueueAttempts(draft, event.sequence)
+        )
+          throw error;
+        this.logger.error(
+          `Skipping an undeliverable AI course draft event eventId=${event.eventId}`,
+        );
+      }
       cursor = event.sequence;
     }
+    this.eventFailures.delete(`${draft.tenantId}:${draft.id}`);
     await this.courseAuthoringDraftRepository.markPolled(
       draft.tenantId,
       draft.id,
@@ -110,13 +126,24 @@ export class CourseAuthoringDraftLifecycleService {
     const before = new Date(Date.now() - DRAFT_IDLE_MS);
     try {
       await this.runForEachTenant(async (tenantId) => {
-        for (const draft of await this.courseAuthoringDraftRepository.inactive(tenantId, before)) {
-          try {
-            await this.discardDraft(draft, before);
-          } catch {
-            this.logger.warn("An inactive AI course draft cleanup will retry on the next sweep");
+        let after: CourseAuthoringInactiveDraftCursor | null = null;
+        let page: CourseAuthoringDraft[];
+        do {
+          page = await this.courseAuthoringDraftRepository.inactive(
+            tenantId,
+            before,
+            after,
+            DRAFT_SWEEP_PAGE_SIZE,
+          );
+          for (const draft of page) {
+            try {
+              await this.discardDraft(draft, before);
+            } catch {
+              this.logger.warn("An inactive AI course draft cleanup will retry on the next sweep");
+            }
+            after = { lastActivityAt: draft.lastActivityAt, id: draft.id };
           }
-        }
+        } while (page.length === DRAFT_SWEEP_PAGE_SIZE);
       });
     } finally {
       this.sweeping = false;
@@ -124,7 +151,7 @@ export class CourseAuthoringDraftLifecycleService {
   }
 
   /** Checks producer work before fencing the draft and deleting its unapplied Core objects. */
-  private async discardDraft(draft: Draft, before: Date) {
+  private async discardDraft(draft: CourseAuthoringDraft, before: Date) {
     const { tenantId, id, lumaSessionId, ownerId } = draft;
     let producerState: "missing" | "owned" | "unverified" = "missing";
     const client = lumaSessionId ? await this.lumaService.getLumaClient() : null;
@@ -132,7 +159,7 @@ export class CourseAuthoringDraftLifecycleService {
       try {
         const snapshot: unknown = await client.authoring.getSession({ sessionId: lumaSessionId });
         if (
-          !Value.Check(draftActivitySchema, snapshot) ||
+          !Value.Check(authoringDraftActivitySchema, snapshot) ||
           snapshot.sessionId !== lumaSessionId ||
           snapshot.courseId !== id
         ) {
@@ -197,6 +224,21 @@ export class CourseAuthoringDraftLifecycleService {
       }
     }
     await this.courseAuthoringDraftRepository.markDiscarded(tenantId, id);
+  }
+
+  /** Counts consecutive enqueue failures of a draft's next event; bounded so the map cannot grow unchecked. */
+  private exhaustedEnqueueAttempts(draft: CourseAuthoringDraft, sequence: number) {
+    const key = `${draft.tenantId}:${draft.id}`;
+    const previous = this.eventFailures.get(key);
+    const attempts = previous?.sequence === sequence ? previous.attempts + 1 : 1;
+    this.eventFailures.delete(key);
+    if (attempts >= MAX_EVENT_ENQUEUE_ATTEMPTS) return true;
+    if (this.eventFailures.size >= MAX_TRACKED_EVENT_FAILURES) {
+      const [oldest] = this.eventFailures.keys();
+      if (oldest !== undefined) this.eventFailures.delete(oldest);
+    }
+    this.eventFailures.set(key, { sequence, attempts });
+    return false;
   }
 
   /** Keeps one tenant failure from blocking unrelated sessions and tenants. */

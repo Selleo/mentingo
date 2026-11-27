@@ -408,6 +408,14 @@ export const authoringEventsSchema = Type.Object({
     hasMore: Type.Boolean(),
   }),
 });
+/** Minimal producer snapshot the draft sweep trusts before discarding an inactive session. */
+export const authoringDraftActivitySchema = Type.Object({
+  sessionId: Type.String({ format: "uuid" }),
+  courseId: Type.String({ format: "uuid" }),
+  status: Type.String(),
+  pendingWork: Type.Optional(Type.Boolean()),
+  tasks: Type.Array(Type.Object({ status: Type.String() })),
+});
 export type CreateAuthoringSessionBody = Static<typeof createAuthoringSessionSchema>;
 export type AuthoringCommandBody = Static<typeof authoringCommandBodySchema>;
 export type PrepareAuthoringExportBody = Static<typeof prepareAuthoringExportSchema>;

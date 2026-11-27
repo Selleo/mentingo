@@ -25,6 +25,9 @@ const autonomousApplyRequestSchema = Type.Object(
   { additionalProperties: false },
 );
 
+/** A producer event that can never be handed off, unlike a transient queue failure. */
+export class InvalidAutonomousApplyRequestError extends Error {}
+
 /** Enqueues durably before a poller advances its cursor; the job ID deduplicates replay. */
 export async function enqueueAuthoringAutonomousEvent(
   queueService: QueueService,
@@ -33,7 +36,7 @@ export async function enqueueAuthoringAutonomousEvent(
 ) {
   if (event.type !== "autonomous.apply_requested") return;
   if (!Value.Check(autonomousApplyRequestSchema, event.payload))
-    throw new Error("Invalid autonomous apply request");
+    throw new InvalidAutonomousApplyRequestError("Invalid autonomous apply request");
   const { schemaVersion: _schemaVersion, ...request } = event.payload;
   if (
     event.sessionId !== binding.sessionId ||
@@ -41,7 +44,9 @@ export async function enqueueAuthoringAutonomousEvent(
     request.courseId !== binding.courseId ||
     (binding.ownerId !== undefined && request.actorId !== binding.ownerId)
   )
-    throw new Error("Autonomous apply request does not match its Core binding");
+    throw new InvalidAutonomousApplyRequestError(
+      "Autonomous apply request does not match its Core binding",
+    );
   await queueService.enqueue<CourseAuthoringAutonomousApplyJob>(
     QUEUE_NAMES.COURSE_AUTHORING_AUTONOMOUS,
     "apply-autonomous-request",

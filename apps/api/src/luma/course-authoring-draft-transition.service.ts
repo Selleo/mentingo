@@ -30,6 +30,19 @@ export class CourseAuthoringDraftTransitionService {
     const draft = await this.drafts.find(data.tenantId, data.courseId);
     if (draft?.courseId !== nativeCourseId || draft.lumaSessionId !== data.sessionId)
       throw new ConflictException("courseAuthoring.errors.exportIdentityConflict");
+    const client = await this.luma.getLumaClient();
+    const session = await client.authoring.getSession({ sessionId: data.sessionId });
+    if (session.courseId !== nativeCourseId || session.sessionId !== data.sessionId)
+      throw new ConflictException("courseAuthoring.errors.exportIdentityConflict");
+    // Bind before access checks so later producer events stay routable; each event rechecks access.
+    await this.bridge.bind({
+      tenantId: data.tenantId,
+      courseId: nativeCourseId,
+      sessionId: data.sessionId,
+      actorId: draft.ownerId,
+      language: session.language,
+      cursorSequence: session.snapshotSequence,
+    });
     const [owner] = await this.db
       .select({ id: users.id, email: users.email })
       .from(users)
@@ -49,10 +62,6 @@ export class CourseAuthoringDraftTransitionService {
       roleSlugs: [],
       permissions: [],
     };
-    const client = await this.luma.getLumaClient();
-    const session = await client.authoring.getSession({ sessionId: data.sessionId });
-    if (session.courseId !== nativeCourseId || session.sessionId !== data.sessionId)
-      throw new ConflictException("courseAuthoring.errors.exportIdentityConflict");
     const context = await this.context
       .getContext(nativeCourseId, { language: session.language }, actor)
       .catch((error: unknown) => {
@@ -60,14 +69,6 @@ export class CourseAuthoringDraftTransitionService {
         throw error;
       });
     if (!context) return;
-    await this.bridge.bind({
-      tenantId: data.tenantId,
-      courseId: nativeCourseId,
-      sessionId: data.sessionId,
-      actorId: owner.id,
-      language: session.language,
-      cursorSequence: session.snapshotSequence,
-    });
     await client.authoring
       .sendCommand({
         sessionId: data.sessionId,
