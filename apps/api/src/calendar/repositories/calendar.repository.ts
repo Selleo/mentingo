@@ -2,10 +2,12 @@ import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import {
   CALENDAR_EVENT_STATUSES,
   CALENDAR_EVENT_SOURCE_TYPES,
+  CALENDAR_PROVIDERS,
   ENTITY_TYPES,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
 } from "@repo/shared";
 import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
+import { match } from "ts-pattern";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { mergeJsonbField } from "src/common/helpers/sqlHelpers";
@@ -20,6 +22,7 @@ import {
   liveTrainingMembers,
   liveTrainingSessions,
   liveTrainings,
+  calendarConnections,
   calendarExternalEvents,
   resourceEntity,
   resources,
@@ -35,13 +38,14 @@ import type {
   CourseDueDateCalendarEventPayload,
   CourseDueDateCalendarEventUpsertInput,
   GroupCourseDueDateRow,
+  ExternalCalendarEventPayload,
+  ExternalCalendarEventRow,
   LiveTrainingCalendarEventPayload,
-  MicrosoftOutlookCalendarEventPayload,
-  MicrosoftOutlookCalendarEventRow,
 } from "../types/calendar.types";
 import type {
   CalendarEventStatus,
   CalendarEventSourceType,
+  CalendarProvider,
   LiveTrainingResourceRelationshipType,
   SupportedLanguages,
 } from "@repo/shared";
@@ -79,15 +83,27 @@ export class CalendarRepository {
       .orderBy(courseDueDateEvents.startsAt);
   }
 
-  async getMicrosoftCalendarEventRows(
+  async getExternalCalendarEventRows(
+    provider: CalendarProvider,
     conditions: CalendarEventListConditions,
     language: SupportedLanguages,
-  ): Promise<MicrosoftOutlookCalendarEventRow[]> {
+  ): Promise<ExternalCalendarEventRow[]> {
+    const { sourceType, payloadKey } = match(provider)
+      .with(CALENDAR_PROVIDERS.MICROSOFT, () => ({
+        sourceType: CALENDAR_EVENT_SOURCE_TYPES.MICROSOFT_OUTLOOK,
+        payloadKey: "outlookCalendar",
+      }))
+      .with(CALENDAR_PROVIDERS.GOOGLE, () => ({
+        sourceType: CALENDAR_EVENT_SOURCE_TYPES.GOOGLE_CALENDAR,
+        payloadKey: "googleCalendar",
+      }))
+      .exhaustive();
+
     return this.db
       .select({
         id: calendarEvents.id,
         uid: calendarEvents.uid,
-        sourceType: sql<CalendarEventSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.MICROSOFT_OUTLOOK}`,
+        sourceType: sql<CalendarEventSourceType>`${sourceType}::text`,
         sourceId: calendarExternalEvents.id,
         title: this.localizationService.getLocalizedSqlField(
           calendarEvents.title,
@@ -101,9 +117,9 @@ export class CalendarRepository {
         timezone: calendarEvents.timezone,
         location: calendarEvents.location,
         status: calendarEvents.status,
-        payload: sql<MicrosoftOutlookCalendarEventPayload>`
+        payload: sql<ExternalCalendarEventPayload>`
           jsonb_build_object(
-            'outlookCalendar',
+            ${payloadKey}::text,
             jsonb_build_object(
               'webLink', ${calendarExternalEvents.webLink},
               'isSensitive', ${calendarExternalEvents.sensitivity} IN ('private', 'confidential'),
@@ -115,7 +131,11 @@ export class CalendarRepository {
       })
       .from(calendarExternalEvents)
       .innerJoin(calendarEvents, eq(calendarEvents.id, calendarExternalEvents.calendarEventId))
-      .where(and(...conditions))
+      .innerJoin(
+        calendarConnections,
+        eq(calendarConnections.id, calendarExternalEvents.connectionId),
+      )
+      .where(and(eq(calendarConnections.provider, provider), ...conditions))
       .orderBy(calendarEvents.startsAt);
   }
 

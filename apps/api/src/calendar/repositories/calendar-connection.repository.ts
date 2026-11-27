@@ -2,10 +2,10 @@ import { Inject, Injectable } from "@nestjs/common";
 import {
   CALENDAR_EVENT_SOURCE_TYPES,
   CALENDAR_EVENT_STATUSES,
-  CALENDAR_PROVIDERS,
+  CALENDAR_CONNECTION_STATUSES,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
-  MICROSOFT_CALENDAR_CONNECTION_STATUSES,
   SUPPORTED_LANGUAGES,
+  type CalendarProvider,
 } from "@repo/shared";
 import { and, eq, gt, inArray, isNotNull, isNull, lt, notInArray, or, sql } from "drizzle-orm";
 import { aliasedTable } from "drizzle-orm/alias";
@@ -30,31 +30,32 @@ import {
   users,
 } from "src/storage/schema";
 
-import type { MicrosoftCalendarOutboundSourceType } from "../calendar.constants";
+import { EXTERNAL_CALENDAR_EVENT_UID_PREFIXES } from "../calendar.constants";
+
+import type { CalendarOutboundSourceType } from "../calendar.constants";
 import type {
-  MappedMicrosoftCalendarEvent,
-  MicrosoftCalendarConnectionCreateInput,
-  MicrosoftCalendarConnectionUpdate,
-  OutboundCandidate,
-} from "../types/microsoft-calendar.types";
+  CalendarConnectionCreateInput,
+  CalendarConnectionOwner,
+  CalendarConnectionUpdate,
+  CalendarOutboundCandidate,
+  CalendarOutboundMappingInput,
+  MappedExternalCalendarEvent,
+} from "../types/calendar-connection.types";
 
 @Injectable()
-export class MicrosoftCalendarRepository {
+export class CalendarConnectionRepository {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     @Inject(DB_ADMIN) private readonly databaseAdmin: DatabasePg,
     private readonly localizationService: LocalizationService,
   ) {}
 
-  async getConnectionByUserId(userId: UUIDType) {
+  async getConnectionByUserId(userId: UUIDType, provider: CalendarProvider) {
     const [connection] = await this.db
       .select()
       .from(calendarConnections)
       .where(
-        and(
-          eq(calendarConnections.userId, userId),
-          eq(calendarConnections.provider, CALENDAR_PROVIDERS.MICROSOFT),
-        ),
+        and(eq(calendarConnections.userId, userId), eq(calendarConnections.provider, provider)),
       )
       .limit(1);
     return connection ?? null;
@@ -79,21 +80,21 @@ export class MicrosoftCalendarRepository {
     return connection ?? null;
   }
 
-  async getConnectionBySubscriptionId(subscriptionId: string) {
+  async getConnectionBySubscriptionId(subscriptionId: string, provider: CalendarProvider) {
     const [connection] = await this.databaseAdmin
       .select()
       .from(calendarConnections)
       .where(
         and(
           eq(calendarConnections.subscriptionId, subscriptionId),
-          eq(calendarConnections.provider, CALENDAR_PROVIDERS.MICROSOFT),
+          eq(calendarConnections.provider, provider),
         ),
       )
       .limit(1);
     return connection ?? null;
   }
 
-  async createConnection(input: MicrosoftCalendarConnectionCreateInput) {
+  async createConnection(input: CalendarConnectionCreateInput) {
     const [connection] = await this.db
       .insert(calendarConnections)
       .values({
@@ -107,7 +108,7 @@ export class MicrosoftCalendarRepository {
     return connection;
   }
 
-  async updateConnection(connectionId: UUIDType, update: MicrosoftCalendarConnectionUpdate) {
+  async updateConnection(connectionId: UUIDType, update: CalendarConnectionUpdate) {
     const [connection] = await this.db
       .update(calendarConnections)
       .set(update)
@@ -116,27 +117,21 @@ export class MicrosoftCalendarRepository {
     return connection ?? null;
   }
 
-  async listConnectionsForReconciliation() {
+  async listConnectionsForReconciliation(provider: CalendarProvider) {
     return this.db
       .select()
       .from(calendarConnections)
-      .where(
-        or(
-          eq(calendarConnections.status, MICROSOFT_CALENDAR_CONNECTION_STATUSES.CONNECTED),
-          eq(calendarConnections.status, MICROSOFT_CALENDAR_CONNECTION_STATUSES.ERROR),
-          eq(calendarConnections.provider, CALENDAR_PROVIDERS.MICROSOFT),
-        ),
-      );
+      .where(eq(calendarConnections.provider, provider));
   }
 
-  async listOutboundConnections() {
+  async listOutboundConnections(provider: CalendarProvider) {
     return this.db
       .select()
       .from(calendarConnections)
       .where(
         and(
           eq(calendarConnections.outboundSyncEnabled, true),
-          eq(calendarConnections.provider, CALENDAR_PROVIDERS.MICROSOFT),
+          eq(calendarConnections.provider, provider),
         ),
       );
   }
@@ -156,12 +151,7 @@ export class MicrosoftCalendarRepository {
     return mapping ?? null;
   }
 
-  async upsertOutboundMapping(input: {
-    connectionId: UUIDType;
-    calendarEventId: UUIDType;
-    userId: UUIDType;
-    externalEventId: string;
-  }) {
+  async upsertOutboundMapping(input: CalendarOutboundMappingInput) {
     const [mapping] = await this.db
       .insert(calendarOutboundEvents)
       .values(input)
@@ -189,7 +179,7 @@ export class MicrosoftCalendarRepository {
     connectionId: UUIDType,
     start: string,
     end: string,
-  ): Promise<OutboundCandidate[]> {
+  ): Promise<CalendarOutboundCandidate[]> {
     const [connection] = await this.db
       .select({ userId: calendarConnections.userId })
       .from(calendarConnections)
@@ -219,7 +209,7 @@ export class MicrosoftCalendarRepository {
           allDay: calendarEvents.allDay,
           timezone: calendarEvents.timezone,
           location: calendarEvents.location,
-          sourceType: sql<MicrosoftCalendarOutboundSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.LIVE_TRAINING}`,
+          sourceType: sql<CalendarOutboundSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.LIVE_TRAINING}`,
           sourceId: liveTrainings.id,
           recipientId: users.id,
           groupName: sql<string | null>`NULL::text`,
@@ -276,7 +266,7 @@ export class MicrosoftCalendarRepository {
           allDay: calendarEvents.allDay,
           timezone: calendarEvents.timezone,
           location: calendarEvents.location,
-          sourceType: sql<MicrosoftCalendarOutboundSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.COURSE_DUE_DATE}`,
+          sourceType: sql<CalendarOutboundSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.COURSE_DUE_DATE}`,
           sourceId: groupCourses.courseId,
           recipientId: users.id,
           groupName: this.localizationService.getLocalizedSqlField(
@@ -316,7 +306,7 @@ export class MicrosoftCalendarRepository {
       return [...liveTrainingRows, ...courseDueDateRows];
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to load Microsoft outbound candidates: ${message}`);
+      throw new Error(`Failed to load calendar outbound candidates: ${message}`);
     }
   }
 
@@ -324,15 +314,22 @@ export class MicrosoftCalendarRepository {
     await this.db.delete(calendarOutboundEvents).where(eq(calendarOutboundEvents.id, id));
   }
 
-  async listConnectionsNeedingSubscriptionRenewal(renewBefore: string) {
+  async deleteOutboundMappingsForConnection(connectionId: UUIDType) {
+    await this.db
+      .delete(calendarOutboundEvents)
+      .where(eq(calendarOutboundEvents.connectionId, connectionId));
+  }
+
+  async listConnectionsNeedingSubscriptionRenewal(provider: CalendarProvider, renewBefore: string) {
     return this.db
       .select()
       .from(calendarConnections)
       .where(
         and(
+          eq(calendarConnections.provider, provider),
           or(
-            eq(calendarConnections.status, MICROSOFT_CALENDAR_CONNECTION_STATUSES.CONNECTED),
-            eq(calendarConnections.status, MICROSOFT_CALENDAR_CONNECTION_STATUSES.ERROR),
+            eq(calendarConnections.status, CALENDAR_CONNECTION_STATUSES.CONNECTED),
+            eq(calendarConnections.status, CALENDAR_CONNECTION_STATUSES.ERROR),
           ),
           or(
             sql`${calendarConnections.subscriptionExpiresAt} IS NULL`,
@@ -342,8 +339,9 @@ export class MicrosoftCalendarRepository {
       );
   }
 
-  async upsertEvent(connectionId: UUIDType, userId: UUIDType, event: MappedMicrosoftCalendarEvent) {
-    const uid = `microsoft-outlook:${userId}:${event.externalEventId}`;
+  async upsertEvent(connection: CalendarConnectionOwner, event: MappedExternalCalendarEvent) {
+    const { id: connectionId, userId, provider } = connection;
+    const uid = `${EXTERNAL_CALENDAR_EVENT_UID_PREFIXES[provider]}:${userId}:${event.externalEventId}`;
 
     return this.db.transaction(async (trx) => {
       const [calendarEvent] = await trx

@@ -3,9 +3,13 @@ import crypto from "crypto";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
-import { MICROSOFT_CALENDAR_OAUTH_PURPOSE } from "src/calendar/calendar.constants";
+import {
+  GOOGLE_CALENDAR_OAUTH_PURPOSE,
+  MICROSOFT_CALENDAR_OAUTH_PURPOSE,
+} from "src/calendar/calendar.constants";
 import { EnvService } from "src/env/services/env.service";
 
+import type { GoogleCalendarOAuthState } from "src/calendar/types/google-calendar.types";
 import type { MicrosoftCalendarOAuthState } from "src/calendar/types/microsoft-calendar.types";
 
 type TenantStatePayload = {
@@ -42,6 +46,13 @@ export class TenantStateService {
     return this.signPayload({ ...payload, iat: now, exp: now + this.STATE_TTL_MS });
   }
 
+  async signGoogleCalendar(
+    payload: Omit<GoogleCalendarOAuthState, "iat" | "exp">,
+  ): Promise<string> {
+    const now = Date.now();
+    return this.signPayload({ ...payload, iat: now, exp: now + this.STATE_TTL_MS });
+  }
+
   async verify(state: string): Promise<string | null> {
     const [body, signature] = state.split(".");
 
@@ -72,7 +83,23 @@ export class TenantStateService {
     return payload;
   }
 
-  private async signPayload(payload: TenantStatePayload | MicrosoftCalendarOAuthState) {
+  async verifyGoogleCalendar(state: string): Promise<GoogleCalendarOAuthState | null> {
+    const payload = await this.verifyPayload<GoogleCalendarOAuthState>(state);
+    if (
+      !payload ||
+      payload.purpose !== GOOGLE_CALENDAR_OAUTH_PURPOSE ||
+      !payload.userId ||
+      !payload.nonce ||
+      !payload.origin
+    ) {
+      return null;
+    }
+    return payload;
+  }
+
+  private async signPayload(
+    payload: TenantStatePayload | MicrosoftCalendarOAuthState | GoogleCalendarOAuthState,
+  ) {
     const body = this.base64UrlEncode(JSON.stringify(payload));
     const signature = this.base64UrlEncode(await this.hashHmac(body));
     return `${body}.${signature}`;

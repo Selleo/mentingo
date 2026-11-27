@@ -1,10 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
+import { CALENDAR_PROVIDERS } from "@repo/shared";
 
 import { processInBatches } from "src/common/utils/processInBatches";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
-import { MicrosoftCalendarRepository } from "../repositories/microsoft-calendar.repository";
+import { CalendarConnectionRepository } from "../repositories/calendar-connection.repository";
 import { MicrosoftCalendarSyncQueueService } from "../services/microsoft-calendar-sync-queue.service";
 import { MICROSOFT_CALENDAR_SYNC_REASONS } from "../types/microsoft-calendar.types";
 
@@ -14,14 +15,16 @@ const MICROSOFT_CALENDAR_SYNC_BATCH_SIZE = 25;
 export class MicrosoftCalendarCron {
   constructor(
     private readonly tenantDbRunnerService: TenantDbRunnerService,
-    private readonly microsoftCalendarRepository: MicrosoftCalendarRepository,
+    private readonly calendarConnectionRepository: CalendarConnectionRepository,
     private readonly microsoftCalendarSyncQueueService: MicrosoftCalendarSyncQueueService,
   ) {}
 
   @Cron(CronExpression.EVERY_6_HOURS)
   async reconcile() {
     await this.tenantDbRunnerService.runForEachTenant(async (tenantId) => {
-      const connections = await this.microsoftCalendarRepository.listConnectionsForReconciliation();
+      const connections = await this.calendarConnectionRepository.listConnectionsForReconciliation(
+        CALENDAR_PROVIDERS.MICROSOFT,
+      );
       await processInBatches(
         connections,
         (connection) =>
@@ -52,7 +55,8 @@ export class MicrosoftCalendarCron {
 
     await this.tenantDbRunnerService.runForEachTenant(async (tenantId) => {
       const connections =
-        await this.microsoftCalendarRepository.listConnectionsNeedingSubscriptionRenewal(
+        await this.calendarConnectionRepository.listConnectionsNeedingSubscriptionRenewal(
+          CALENDAR_PROVIDERS.MICROSOFT,
           renewBefore,
         );
 

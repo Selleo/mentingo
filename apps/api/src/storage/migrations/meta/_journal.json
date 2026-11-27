@@ -1849,6 +1849,13 @@
       "when": 1795787120023,
       "tag": "0263_clear_author_of_user_capacity_alerts",
       "breakpoints": true
+    },
+    {
+      "idx": 264,
+      "version": "7",
+      "when": 1795790862028,
+      "tag": "0264_add_calendar_subscription_resource_id",
+      "breakpoints": true
     }
   ]
 }

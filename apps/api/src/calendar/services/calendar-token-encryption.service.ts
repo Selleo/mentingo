@@ -4,10 +4,10 @@ import { Injectable } from "@nestjs/common";
 
 import { decryptWithAesGcm, encryptWithAesGcm } from "src/common/utils/aesGcm";
 
-import type { EncryptedMicrosoftRefreshToken } from "../types/microsoft-calendar.types";
+import type { EncryptedCalendarRefreshToken } from "../types/calendar-connection.types";
 
 @Injectable()
-export class MicrosoftCalendarTokenEncryptionService {
+export class CalendarTokenEncryptionService {
   private readonly keyEncryptionKey: Buffer;
 
   constructor() {
@@ -18,7 +18,7 @@ export class MicrosoftCalendarTokenEncryptionService {
     }
   }
 
-  encrypt(refreshToken: string): EncryptedMicrosoftRefreshToken {
+  encrypt(refreshToken: string): EncryptedCalendarRefreshToken {
     const dataEncryptionKey = crypto.randomBytes(32);
 
     const encryptedToken = encryptWithAesGcm(dataEncryptionKey, refreshToken);
@@ -34,7 +34,7 @@ export class MicrosoftCalendarTokenEncryptionService {
     };
   }
 
-  decrypt(encrypted: EncryptedMicrosoftRefreshToken): string {
+  decrypt(encrypted: EncryptedCalendarRefreshToken): string {
     const dataEncryptionKey = decryptWithAesGcm(this.keyEncryptionKey, {
       ciphertext: Buffer.from(encrypted.refreshTokenEncryptedDek, "base64"),
       iv: Buffer.from(encrypted.refreshTokenEncryptedDekIv, "base64"),

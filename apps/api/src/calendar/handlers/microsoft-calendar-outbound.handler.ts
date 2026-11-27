@@ -1,3 +1,5 @@
+import { CALENDAR_PROVIDERS } from "@repo/shared";
+
 import { processInBatches } from "src/common/utils/processInBatches";
 import {
   CreateLiveTrainingEvent,
@@ -8,7 +10,7 @@ import {
 } from "src/events";
 import { OutboxEventsHandler } from "src/outbox/outbox.decorators";
 
-import { MicrosoftCalendarRepository } from "../repositories/microsoft-calendar.repository";
+import { CalendarConnectionRepository } from "../repositories/calendar-connection.repository";
 import { MicrosoftCalendarSyncQueueService } from "../services/microsoft-calendar-sync-queue.service";
 import { MICROSOFT_CALENDAR_SYNC_REASONS } from "../types/microsoft-calendar.types";
 
@@ -34,12 +36,14 @@ export class MicrosoftCalendarOutboundHandler
   implements OutboxEventsHandlerOf<CalendarOutboundEvent>
 {
   constructor(
-    private readonly microsoftCalendarRepository: MicrosoftCalendarRepository,
+    private readonly calendarConnectionRepository: CalendarConnectionRepository,
     private readonly microsoftCalendarSyncQueueService: MicrosoftCalendarSyncQueueService,
   ) {}
 
   async handleOutboxEvent(_event: CalendarOutboundEvent) {
-    const connections = await this.microsoftCalendarRepository.listOutboundConnections();
+    const connections = await this.calendarConnectionRepository.listOutboundConnections(
+      CALENDAR_PROVIDERS.MICROSOFT,
+    );
 
     await processInBatches(
       connections,

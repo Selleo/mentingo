@@ -1193,6 +1193,69 @@
       "authorization_failed": "L'autorisation du calendrier Microsoft a échoué. Veuillez réessayer."
     }
   },
+  "googleCalendar": {
+    "title": "Google Agenda",
+    "description": "Importez votre agenda Google principal dans Mentingo. Google Agenda reste la source de référence.",
+    "account": "Compte connecté",
+    "lastSync": "Dernière synchronisation réussie",
+    "status": {
+      "disconnected": "Déconnecté",
+      "syncing": "Synchronisation",
+      "connected": "Connecté",
+      "error": "Action requise",
+      "reconnect_required": "Reconnexion requise"
+    },
+    "action": {
+      "connect": "Connecter Google Agenda",
+      "sync": "Synchroniser maintenant",
+      "syncCalendar": "Synchroniser Google Agenda",
+      "reconnect": "Reconnecter",
+      "replace": "Utiliser un autre compte",
+      "disconnect": "Déconnecter",
+      "continue": "Continuer vers Google"
+    },
+    "errors": {
+      "unavailable": "L'intégration Google Agenda n'est pas configurée.",
+      "invalidState": "Le lien d'autorisation Google Agenda est invalide ou a expiré. Veuillez réessayer.",
+      "refreshTokenMissing": "Google n'a pas accordé l'accès hors ligne. Veuillez reconnecter Google Agenda.",
+      "connectionNotFound": "Google Agenda n'est pas connecté.",
+      "reconnectRequired": "Reconnectez votre compte Google pour continuer.",
+      "syncInProgress": "Google Agenda est déjà en cours de synchronisation.",
+      "syncCooldown": "Veuillez patienter avant de lancer une nouvelle synchronisation."
+    },
+    "stale": {
+      "title": "Les données de l'agenda ne sont peut-être pas à jour",
+      "description": "Vos événements importés restent visibles. Réessayez la synchronisation ou reconnectez votre compte Google."
+    },
+    "disconnect": {
+      "title": "Déconnecter Google Agenda ?",
+      "description": "Cela supprime de Mentingo les événements importés depuis Google Agenda. Votre Google Agenda n'est pas modifié."
+    },
+    "replace": {
+      "title": "Connecter un autre compte Google ?",
+      "description": "La connexion pour {{email}} et ses événements importés seront supprimés avant la synchronisation du nouveau compte."
+    },
+    "outbound": {
+      "title": "Synchroniser les événements Mentingo",
+      "description": "Exportez les formations en direct et les échéances de cours vers un agenda Mentingo distinct dans Google Agenda.",
+      "calendarDeleted": "L'agenda Mentingo a été supprimé dans Google Agenda. Réactivez l'export pour le recréer."
+    },
+    "toast": {
+      "syncQueued": "La synchronisation de Google Agenda a démarré.",
+      "syncFailed": "Google Agenda n'a pas pu être synchronisé.",
+      "disconnected": "Google Agenda a été déconnecté.",
+      "disconnectFailed": "Google Agenda n'a pas pu être déconnecté.",
+      "outboundEnabled": "Les événements Mentingo seront exportés vers Google Agenda.",
+      "outboundDisabled": "L'export des événements Mentingo a été désactivé.",
+      "outboundFailed": "Les événements Mentingo n'ont pas pu être exportés."
+    },
+    "oauth": {
+      "connected": "Google Agenda est en cours de connexion et la première synchronisation a démarré.",
+      "replacement_required": "Confirmez le remplacement du compte avant de connecter un autre compte Google.",
+      "permissions_missing": "Autorisez toutes les permissions Google Agenda demandées pour connecter votre agenda.",
+      "authorization_failed": "L'autorisation Google Agenda a échoué. Veuillez réessayer."
+    }
+  },
   "calendarView": {
     "title": "Calendrier",
     "description": "Afficher les événements d'apprentissage programmés.",
@@ -1205,6 +1268,13 @@
     "microsoft": {
       "staleWarning": "Les événements Microsoft peuvent être obsolètes. Reconnectez-vous ou réessayez à partir des paramètres du compte.",
       "horizonNotice": "Les événements Microsoft sont importés d’il y a 30 jours jusqu’à 6 mois à l’avance, cette plage peut donc être incomplète."
+    },
+    "google": {
+      "staleWarning": "Les événements Google Agenda ne sont peut-être pas à jour. Reconnectez-vous ou réessayez depuis les paramètres du compte.",
+      "horizonNotice": "Les événements Google Agenda sont importés de 30 jours en arrière à 6 mois à l'avance, cette période peut donc être incomplète."
+    },
+    "externalCalendars": {
+      "horizonNotice": "Les événements Outlook et Google Agenda sont importés de 30 jours en arrière à 6 mois à l'avance, cette période peut donc être incomplète."
     },
     "view": {
       "month": "Mois",
@@ -1290,12 +1360,14 @@
         "edit": "Modifier l'événement",
         "goToLiveTraining": "Accédez à la formation en direct",
         "goToCourse": "Aller au cours",
-        "openOutlook": "Ouvrir dans Outlook"
+        "openOutlook": "Ouvrir dans Outlook",
+        "openGoogleCalendar": "Ouvrir dans Google Agenda"
       },
       "sourceType": {
         "liveTraining": "Formation en direct",
         "courseDueDate": "Date d'échéance du cours",
-        "microsoftOutlook": "Microsoft Outlook"
+        "microsoftOutlook": "Microsoft Outlook",
+        "googleCalendar": "Google Agenda"
       },
       "field": {
         "time": "Temps",
@@ -2651,6 +2723,10 @@
         "title": "Calendrier Microsoft",
         "description": "Synchroniser les formations en direct avec les calendriers Microsoft Outlook."
       },
+      "googleCalendar": {
+        "title": "Google Agenda",
+        "description": "Synchronisez les agendas Google et exportez les formations en direct et les échéances de cours vers Google Agenda."
+      },
       "payments": {
         "title": "Paiements",
         "description": "Clés Stripe pour vendre des cours et vérifier les webhooks de paiement."
@@ -2698,6 +2774,12 @@
       },
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Secret client du calendrier Microsoft"
+      },
+      "GOOGLE_CALENDAR_CLIENT_ID": {
+        "label": "Client ID Google Agenda"
+      },
+      "GOOGLE_CALENDAR_CLIENT_SECRET": {
+        "label": "Client Secret Google Agenda"
       },
       "OPENAI_API_KEY": {
         "label": "Clé API OpenAI"

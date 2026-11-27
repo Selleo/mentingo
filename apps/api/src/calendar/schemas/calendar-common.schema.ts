@@ -38,6 +38,12 @@ export const calendarEventCourseDueDatePayloadSchema = Type.Object({
   dueDate: Type.String(),
 });
 
+export const calendarEventExternalPayloadSchema = Type.Object({
+  webLink: Type.Union([Type.String(), Type.Null()]),
+  isSensitive: Type.Boolean(),
+  availability: Type.Enum(OUTLOOK_EVENT_AVAILABILITIES),
+});
+
 export const calendarEventPayloadSchema = Type.Union([
   Type.Object({
     liveTraining: calendarEventLiveTrainingPayloadSchema,
@@ -46,11 +52,10 @@ export const calendarEventPayloadSchema = Type.Union([
     courseDueDate: calendarEventCourseDueDatePayloadSchema,
   }),
   Type.Object({
-    outlookCalendar: Type.Object({
-      webLink: Type.Union([Type.String(), Type.Null()]),
-      isSensitive: Type.Boolean(),
-      availability: Type.Enum(OUTLOOK_EVENT_AVAILABILITIES),
-    }),
+    outlookCalendar: calendarEventExternalPayloadSchema,
+  }),
+  Type.Object({
+    googleCalendar: calendarEventExternalPayloadSchema,
   }),
 ]);
 
@@ -128,11 +133,10 @@ export const calendarEventDetailsPayloadSchema = Type.Union([
   }),
   calendarEventCourseDueDateDetailsSchema,
   Type.Object({
-    outlookCalendar: Type.Object({
-      webLink: Type.Union([Type.String(), Type.Null()]),
-      isSensitive: Type.Boolean(),
-      availability: Type.Enum(OUTLOOK_EVENT_AVAILABILITIES),
-    }),
+    outlookCalendar: calendarEventExternalPayloadSchema,
+  }),
+  Type.Object({
+    googleCalendar: calendarEventExternalPayloadSchema,
   }),
 ]);
 

@@ -3333,6 +3333,14 @@
                 "type": "string"
               },
               {
+                "const": "GOOGLE_CALENDAR_CLIENT_ID",
+                "type": "string"
+              },
+              {
+                "const": "GOOGLE_CALENDAR_CLIENT_SECRET",
+                "type": "string"
+              },
+              {
                 "const": "OPENAI_API_KEY",
                 "type": "string"
               },
@@ -3474,6 +3482,14 @@
                     },
                     {
                       "const": "MICROSOFT_CALENDAR_CLIENT_SECRET",
+                      "type": "string"
+                    },
+                    {
+                      "const": "GOOGLE_CALENDAR_CLIENT_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "GOOGLE_CALENDAR_CLIENT_SECRET",
                       "type": "string"
                     },
                     {

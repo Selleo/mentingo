@@ -33,15 +33,26 @@ export type CourseDueDateCalendarEventUpsertInput = {
 export type CalendarEventSourcePayload =
   | LiveTrainingCalendarEventPayload
   | CourseDueDateCalendarEventPayload
-  | MicrosoftOutlookCalendarEventPayload;
+  | MicrosoftOutlookCalendarEventPayload
+  | GoogleCalendarEventPayload;
+
+export type ExternalCalendarEventDetails = {
+  webLink: string | null;
+  isSensitive: boolean;
+  availability: OutlookEventAvailability;
+};
 
 export type MicrosoftOutlookCalendarEventPayload = {
-  outlookCalendar: {
-    webLink: string | null;
-    isSensitive: boolean;
-    availability: OutlookEventAvailability;
-  };
+  outlookCalendar: ExternalCalendarEventDetails;
 };
+
+export type GoogleCalendarEventPayload = {
+  googleCalendar: ExternalCalendarEventDetails;
+};
+
+export type ExternalCalendarEventPayload =
+  | MicrosoftOutlookCalendarEventPayload
+  | GoogleCalendarEventPayload;
 
 export type LiveTrainingCalendarEventPayload = {
   liveTraining: {
@@ -85,8 +96,8 @@ export type CalendarEventNormalizedRow = {
   authorId: UUIDType | null;
 };
 
-export type MicrosoftOutlookCalendarEventRow = Omit<CalendarEventNormalizedRow, "payload"> & {
-  payload: MicrosoftOutlookCalendarEventPayload;
+export type ExternalCalendarEventRow = Omit<CalendarEventNormalizedRow, "payload"> & {
+  payload: ExternalCalendarEventPayload;
 };
 
 export type CalendarEventLinkedCourse = {

@@ -29,7 +29,7 @@ The main workflows are split between an admin environment screen for secrets and
 
 ## End-User Value
 
-Administrators can adjust integrations without deployments and without exposing secrets broadly. This makes it easier to maintain SSO, Microsoft Calendar synchronization, paid-course checkout, AI features, video services, and live-session infrastructure as tenant needs change.
+Administrators can adjust integrations without deployments and without exposing secrets broadly. This makes it easier to maintain SSO, Microsoft and Google Calendar synchronization, paid-course checkout, AI features, video services, and live-session infrastructure as tenant needs change.
 
 External systems can automate repetitive HR and L&D operations instead of relying on spreadsheets or manual updates. A source-of-truth system can provision customer tenants, deactivate tenants that should no longer have access, manage users, align group membership, enroll learners, and read training results through a controlled API boundary.
 
@@ -37,7 +37,7 @@ External systems can automate repetitive HR and L&D operations instead of relyin
 
 On the environment screen, administrators reveal only the secret they want to inspect or edit. Mentingo submits changed values in bulk, stores them server-side, and refreshes the frontend checks that decide whether related features should be visible.
 
-Microsoft Calendar connections use the calendar client ID and client secret saved for the tenant on this screen. Deployment-level environment values do not substitute for missing tenant credentials, so one tenant cannot inherit another installation-wide calendar application configuration.
+Microsoft Calendar connections use the calendar client ID and client secret saved for the tenant on this screen. Deployment-level environment values do not substitute for missing tenant credentials, so one tenant cannot inherit another installation-wide calendar application configuration. Google Calendar connections work the same way with the Google Calendar client ID and client secret, which are separate from the Google sign-in credentials.
 
 In account settings, administrators can see integration key status, prefix, creation date, and last-used date. Generating or rotating a key shows the raw key immediately; after that, only metadata remains visible, so the caller must store the key securely.
 
@@ -55,7 +55,7 @@ Tenant lifecycle automation is available only to integration keys owned by a man
 - Key permissions are `PERMISSIONS.ENV_MANAGE`, `PERMISSIONS.INTEGRATION_KEY_MANAGE`, `PERMISSIONS.INTEGRATION_API_USE`, and `PERMISSIONS.TENANT_MANAGE` for integration tenant lifecycle calls.
 - Every AI feature, including the Core assistant and global search, calls Luma first when Luma runs the capability on a Custom profile and falls back to the OpenAI key otherwise, so organisations can move AI traffic onto self-hosted models without losing availability. See `docs/configuration.md`.
 - The assistant uses the existing native Luma Mentor SDK for tool-capable chat. Core retains permission-checked read tools and their results across model steps; the integration does not grant additional access or change the existing OpenAI fallback. Course-source vision remains independently configured in Luma.
-- Supported environment metadata includes OAuth providers, Microsoft Calendar client credentials, OpenAI, Bunny Stream, Stripe, Slack, Luma, and LiveKit values. Microsoft Calendar authentication reads its credentials exclusively from tenant-managed secrets.
+- Supported environment metadata includes OAuth providers, Microsoft and Google Calendar client credentials, OpenAI, Bunny Stream, Stripe, Slack, Luma, and LiveKit values. Microsoft Calendar authentication reads its credentials exclusively from tenant-managed secrets.
 
 ## Test Evidence
 

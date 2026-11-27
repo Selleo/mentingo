@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useCurrentUser } from "~/api/queries";
 import { useConfigurationState } from "~/api/queries/admin/useConfigurationState";
+import { useGoogleCalendarConnection } from "~/api/queries/calendar/useGoogleCalendarConnection";
 import { useMicrosoftCalendarConnection } from "~/api/queries/calendar/useMicrosoftCalendarConnection";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useUserSettings } from "~/api/queries/useUserSettings";
@@ -62,6 +63,7 @@ export default function SettingsPage() {
   const { data: userSettings, isLoading: isLoadingUserSettings } = useUserSettings(!isSupportMode);
   const { data: globalSettings, isLoading: isLoadingGlobalSettings } = useGlobalSettings();
   const { data: microsoftCalendarConnection } = useMicrosoftCalendarConnection(!isSupportMode);
+  const { data: googleCalendarConnection } = useGoogleCalendarConnection(!isSupportMode);
   const { data: configurationState } = useConfigurationState({
     enabled: canManageEnvs,
   });
@@ -90,7 +92,9 @@ export default function SettingsPage() {
   const hasConfigurationIssues =
     canManageEnvs && configurationState?.hasIssues && !configurationState?.isWarningDismissed;
   const hasIntegrationsAvailable =
-    canManageIntegrationApi || Boolean(microsoftCalendarConnection?.available);
+    canManageIntegrationApi ||
+    Boolean(microsoftCalendarConnection?.available) ||
+    Boolean(googleCalendarConnection?.available);
 
   return (
     <PageWrapper

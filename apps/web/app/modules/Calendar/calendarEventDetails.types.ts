@@ -14,6 +14,10 @@ export type OutlookCalendarPayload = Extract<
   CalendarEventDetails["payload"],
   { outlookCalendar: unknown }
 >["outlookCalendar"];
+export type GoogleCalendarPayload = Extract<
+  CalendarEventDetails["payload"],
+  { googleCalendar: unknown }
+>["googleCalendar"];
 
 export type LiveTrainingCalendarEventDetails = CalendarEventDetails & {
   payload: {
@@ -30,5 +34,11 @@ export type CourseDueDateCalendarEventDetails = CalendarEventDetails & {
 export type OutlookCalendarEventDetails = CalendarEventDetails & {
   payload: {
     outlookCalendar: OutlookCalendarPayload;
+  };
+};
+
+export type GoogleCalendarEventDetails = CalendarEventDetails & {
+  payload: {
+    googleCalendar: GoogleCalendarPayload;
   };
 };

@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import {
   CALENDAR_EVENT_SOURCE_TYPES,
   CALENDAR_EVENT_SOURCE_ROLES,
+  CALENDAR_PROVIDERS,
   COURSE_ENROLLMENT,
   DASHBOARD_CALENDAR_VIEWS,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
@@ -10,6 +11,7 @@ import {
   LIVE_TRAINING_VISIBILITY_SCOPES,
   PERMISSIONS,
   type CalendarEventSourceRole,
+  type CalendarProvider,
   type LiveTrainingResourceRelationshipType,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -137,7 +139,8 @@ export class CalendarService {
     return Promise.all([
       this.getLiveTrainingEvents(query, currentUser),
       this.getCourseDueDateEvents(query, currentUser),
-      this.getMicrosoftOutlookEvents(query, currentUser),
+      this.getExternalCalendarEvents(CALENDAR_PROVIDERS.MICROSOFT, query, currentUser),
+      this.getExternalCalendarEvents(CALENDAR_PROVIDERS.GOOGLE, query, currentUser),
     ]);
   }
 
@@ -149,11 +152,23 @@ export class CalendarService {
     return Promise.all([
       this.getLiveTrainingEventDetails(eventId, language, currentUser),
       this.getCourseDueDateEventDetails(eventId, language, currentUser),
-      this.getMicrosoftOutlookEventDetails(eventId, language, currentUser),
+      this.getExternalCalendarEventDetails(
+        CALENDAR_PROVIDERS.MICROSOFT,
+        eventId,
+        language,
+        currentUser,
+      ),
+      this.getExternalCalendarEventDetails(
+        CALENDAR_PROVIDERS.GOOGLE,
+        eventId,
+        language,
+        currentUser,
+      ),
     ]);
   }
 
-  private async getMicrosoftOutlookEvents(
+  private async getExternalCalendarEvents(
+    provider: CalendarProvider,
     query: GetCalendarEventsQuery,
     currentUser: CurrentUserType,
   ): Promise<CalendarEventListItem[]> {
@@ -165,15 +180,21 @@ export class CalendarService {
       gt(calendarEvents.endsAt, query.start),
     ];
 
-    return this.calendarRepository.getMicrosoftCalendarEventRows(conditions, query.language);
+    return this.calendarRepository.getExternalCalendarEventRows(
+      provider,
+      conditions,
+      query.language,
+    );
   }
 
-  private async getMicrosoftOutlookEventDetails(
+  private async getExternalCalendarEventDetails(
+    provider: CalendarProvider,
     eventId: UUIDType,
     language: SupportedLanguages,
     currentUser: CurrentUserType,
   ): Promise<CalendarEventDetails | null> {
-    const [event] = await this.calendarRepository.getMicrosoftCalendarEventRows(
+    const [event] = await this.calendarRepository.getExternalCalendarEventRows(
+      provider,
       [
         isNull(calendarEvents.deletedAt),
         eq(calendarEvents.id, eventId),

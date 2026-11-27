@@ -33,6 +33,14 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.MICROSOFT_CALENDAR_CLIENT_SECRET.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  GOOGLE_CALENDAR_CLIENT_ID: {
+    labelKey: "adminEnvsView.form.GOOGLE_CALENDAR_CLIENT_ID.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  GOOGLE_CALENDAR_CLIENT_SECRET: {
+    labelKey: "adminEnvsView.form.GOOGLE_CALENDAR_CLIENT_SECRET.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
   OPENAI_API_KEY: {
     labelKey: "adminEnvsView.form.OPENAI_API_KEY.label",
     placeholderKey: "adminEnvsView.form.placeholder",
@@ -195,6 +203,12 @@ export const ENV_GROUPS = [
     secretNames: ["MICROSOFT_CALENDAR_CLIENT_ID", "MICROSOFT_CALENDAR_CLIENT_SECRET"],
   },
   {
+    id: "googleCalendar",
+    titleKey: "adminEnvsView.groups.googleCalendar.title",
+    descriptionKey: "adminEnvsView.groups.googleCalendar.description",
+    secretNames: ["GOOGLE_CALENDAR_CLIENT_ID", "GOOGLE_CALENDAR_CLIENT_SECRET"],
+  },
+  {
     id: "liveTraining",
     titleKey: "adminEnvsView.groups.liveTraining.title",
     descriptionKey: "adminEnvsView.groups.liveTraining.description",
@@ -242,6 +256,7 @@ export const ENV_GROUP_PRESENTATION = {
   entraIdSignIn: { icon: EntraId, category: "signIn", services: ["entra_id_authorization"] },
   slackSignIn: { icon: Slack, category: "signIn", services: ["slack_authorization"] },
   microsoftCalendar: { icon: CalendarSync, category: "calendar", services: ["microsoft_calendar"] },
+  googleCalendar: { icon: CalendarSync, category: "calendar", services: ["google_calendar"] },
   payments: { icon: WalletCards, category: "payments", services: ["stripe"] },
   videoStreaming: { icon: Clapperboard, category: "video", services: ["bunny"] },
   artificialIntelligence: { icon: BrainCircuit, category: "ai", services: ["openAI", "luma"] },

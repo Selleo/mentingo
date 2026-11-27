@@ -6407,6 +6407,39 @@
           "outcomes": [
             "Connection and synchronization state are visible."
           ]
+        },
+        {
+          "id": "connect-google-calendar",
+          "title": "Manage a Google calendar connection",
+          "description": "Manage a Google calendar connection in Mentingo.",
+          "audiences": [
+            "learner"
+          ],
+          "featureRequirements": [],
+          "pageKeys": [
+            "calendar"
+          ],
+          "specPaths": [
+            "docs/specs/calendar-business-spec.md"
+          ],
+          "watchPaths": [
+            "apps/web/app/modules/Calendar/**",
+            "apps/api/src/calendar/**",
+            "apps/api/src/live-training/**"
+          ],
+          "goal": "Manage a Google calendar connection.",
+          "preconditions": [
+            "Use localized synthetic data in the isolated demo tenant; required features and account permissions are enabled off camera.",
+            "A sandbox Google account/OAuth fixture is available; do not connect a real personal account."
+          ],
+          "actions": [
+            "Open Settings Integrations.",
+            "Connect the staged sandbox Google account and inspect sync status.",
+            "Run manual synchronization or disconnect the disposable connection."
+          ],
+          "outcomes": [
+            "Connection and synchronization state are visible."
+          ]
         }
       ],
       "videos": [
@@ -6426,6 +6459,14 @@
           "description": "Manage Outlook synchronization in Mentingo.",
           "flowIds": [
             "connect-calendar"
+          ]
+        },
+        {
+          "key": "calendar.google-integration",
+          "title": "Manage Google Calendar synchronization",
+          "description": "Manage Google Calendar synchronization in Mentingo.",
+          "flowIds": [
+            "connect-google-calendar"
           ]
         }
       ]

@@ -1187,6 +1187,69 @@
       "authorization_failed": "La autorización del Calendario de Microsoft ha fallado. Inténtalo de nuevo."
     }
   },
+  "googleCalendar": {
+    "title": "Google Calendar",
+    "description": "Trae tu calendario principal de Google a Mentingo. Google Calendar sigue siendo la fuente de verdad.",
+    "account": "Cuenta conectada",
+    "lastSync": "Última sincronización correcta",
+    "status": {
+      "disconnected": "Desconectado",
+      "syncing": "Sincronizando",
+      "connected": "Conectado",
+      "error": "Requiere atención",
+      "reconnect_required": "Es necesario volver a conectar"
+    },
+    "action": {
+      "connect": "Conectar Google Calendar",
+      "sync": "Sincronizar ahora",
+      "syncCalendar": "Sincronizar Google Calendar",
+      "reconnect": "Volver a conectar",
+      "replace": "Usar otra cuenta",
+      "disconnect": "Desconectar",
+      "continue": "Continuar a Google"
+    },
+    "errors": {
+      "unavailable": "La integración con Google Calendar no está configurada.",
+      "invalidState": "El enlace de autorización de Google Calendar no es válido o ha caducado. Inténtalo de nuevo.",
+      "refreshTokenMissing": "Google no concedió acceso sin conexión. Vuelve a conectar Google Calendar.",
+      "connectionNotFound": "Google Calendar no está conectado.",
+      "reconnectRequired": "Vuelve a conectar tu cuenta de Google para continuar.",
+      "syncInProgress": "Google Calendar ya se está sincronizando.",
+      "syncCooldown": "Espera antes de iniciar otra sincronización."
+    },
+    "stale": {
+      "title": "Es posible que los datos del calendario no estén actualizados",
+      "description": "Tus eventos importados siguen visibles. Intenta sincronizar de nuevo o vuelve a conectar tu cuenta de Google."
+    },
+    "disconnect": {
+      "title": "¿Desconectar Google Calendar?",
+      "description": "Esto elimina de Mentingo los eventos importados de Google Calendar. Tu Google Calendar no se modifica."
+    },
+    "replace": {
+      "title": "¿Conectar otra cuenta de Google?",
+      "description": "La conexión de {{email}} y sus eventos importados se eliminarán antes de sincronizar la nueva cuenta."
+    },
+    "outbound": {
+      "title": "Sincronizar eventos de Mentingo",
+      "description": "Exporta las formaciones en directo y las fechas límite de los cursos a un calendario Mentingo independiente en Google Calendar.",
+      "calendarDeleted": "El calendario Mentingo se eliminó en Google Calendar. Vuelve a activar la exportación para recrearlo."
+    },
+    "toast": {
+      "syncQueued": "Se ha iniciado la sincronización de Google Calendar.",
+      "syncFailed": "No se pudo sincronizar Google Calendar.",
+      "disconnected": "Google Calendar se ha desconectado.",
+      "disconnectFailed": "No se pudo desconectar Google Calendar.",
+      "outboundEnabled": "Los eventos de Mentingo se exportarán a Google Calendar.",
+      "outboundDisabled": "Se ha desactivado la exportación de eventos de Mentingo.",
+      "outboundFailed": "No se pudieron exportar los eventos de Mentingo."
+    },
+    "oauth": {
+      "connected": "Google Calendar se está conectando y se ha iniciado la primera sincronización.",
+      "replacement_required": "Confirma el cambio de cuenta antes de conectar otra cuenta de Google.",
+      "permissions_missing": "Concede todos los permisos de Google Calendar solicitados para conectar tu calendario.",
+      "authorization_failed": "La autorización de Google Calendar ha fallado. Inténtalo de nuevo."
+    }
+  },
   "calendarView": {
     "title": "Calendario",
     "description": "Consulta los eventos de aprendizaje programados.",
@@ -1199,6 +1262,13 @@
     "microsoft": {
       "staleWarning": "Los eventos de Microsoft pueden estar desactualizados. Vuelve a conectar o reintenta desde los ajustes de la cuenta.",
       "horizonNotice": "Los eventos de Microsoft se importan desde 30 días atrás hasta 6 meses adelante, por lo que este intervalo puede estar incompleto."
+    },
+    "google": {
+      "staleWarning": "Es posible que los eventos de Google Calendar no estén actualizados. Vuelve a conectar o reintenta desde la configuración de la cuenta.",
+      "horizonNotice": "Los eventos de Google Calendar se importan desde hace 30 días hasta 6 meses en adelante, por lo que este rango puede estar incompleto."
+    },
+    "externalCalendars": {
+      "horizonNotice": "Los eventos de Outlook y Google Calendar se importan desde hace 30 días hasta 6 meses en adelante, por lo que este rango puede estar incompleto."
     },
     "view": {
       "month": "Mes",
@@ -1284,12 +1354,14 @@
         "edit": "Editar evento",
         "goToLiveTraining": "Ir a la formación en vivo",
         "goToCourse": "Ir al curso",
-        "openOutlook": "Abrir en Outlook"
+        "openOutlook": "Abrir en Outlook",
+        "openGoogleCalendar": "Abrir en Google Calendar"
       },
       "sourceType": {
         "liveTraining": "Formación en vivo",
         "courseDueDate": "Fecha límite del curso",
-        "microsoftOutlook": "Microsoft Outlook"
+        "microsoftOutlook": "Microsoft Outlook",
+        "googleCalendar": "Google Calendar"
       },
       "field": {
         "time": "Hora",
@@ -2649,6 +2721,10 @@
         "title": "Calendario de Microsoft",
         "description": "Sincroniza las formaciones en directo con los calendarios de Microsoft Outlook."
       },
+      "googleCalendar": {
+        "title": "Google Calendar",
+        "description": "Sincroniza calendarios de Google y exporta formaciones en directo y fechas límite de cursos a Google Calendar."
+      },
       "payments": {
         "title": "Pagos",
         "description": "Claves de Stripe para vender cursos y verificar los webhooks de pago."
@@ -2696,6 +2772,12 @@
       },
       "MICROSOFT_CALENDAR_CLIENT_SECRET": {
         "label": "Secreto de cliente del calendario de Microsoft"
+      },
+      "GOOGLE_CALENDAR_CLIENT_ID": {
+        "label": "Client ID de Google Calendar"
+      },
+      "GOOGLE_CALENDAR_CLIENT_SECRET": {
+        "label": "Client Secret de Google Calendar"
       },
       "OPENAI_API_KEY": {
         "label": "Clave de API de OpenAI"
