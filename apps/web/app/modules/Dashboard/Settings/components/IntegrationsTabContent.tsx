@@ -1,5 +1,5 @@
-import { GoogleCalendarCard } from "./GoogleCalendarCard";
 import { DirectorySyncCard } from "./directory-sync/DirectorySyncCard";
+import { GoogleCalendarCard } from "./GoogleCalendarCard";
 import { IntegrationApiKeysCard } from "./IntegrationApiKeysCard";
 import { MicrosoftCalendarCard } from "./MicrosoftCalendarCard";
 
