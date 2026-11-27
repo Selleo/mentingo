@@ -7228,6 +7228,8 @@
       "retryPodcastApproval": "Es posible que el proveedor haya aceptado la solicitud anterior. Reintentar puede generar otro cargo.",
       "requiredScopeChange": "Obligatorio: cambiar el alcance",
       "skipOptionalAsset": "Omitir imagen",
+      "omitFailedPodcast": "Omitir pódcast",
+      "podcastFailedTerminal": "No se pudo crear este pódcast. Omítelo para aplicar la lección sin él o pide a la IA que cambie la propuesta.",
       "requiredCannotSkip": "Este elemento multimedia es obligatorio y no se puede omitir. Si no se puede crear, pide a la IA que cambie la propuesta para que no sea necesario.",
       "applicationHistory": "Cambios aplicados",
       "apply": "Aplicar {{id}}",

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
+import { canOmitAuthoringAsset } from "../authoringAssetOmission";
 import { AUTHORING_TASK_STATUS } from "../courseAuthoring.constants";
 
 import { AuthoringAssetDetails, AuthoringAssetTitle } from "./AuthoringAssetDetails";
@@ -29,17 +30,19 @@ export function AuthoringAssetDecision({
   const { t } = useTranslation();
   const podcast = asset.request.purpose === "podcast";
   const required = asset.request.required || podcast;
+  const canOmit = canOmitAuthoringAsset(asset);
   let AssetStatusIcon = podcast ? AudioLines : Image;
   if (omitted) AssetStatusIcon = Check;
   const canRetry = asset.action
     ? asset.revision !== null
-    : podcast && asset.status === AUTHORING_TASK_STATUS.FAILED;
+    : podcast && asset.status === AUTHORING_TASK_STATUS.FAILED && !asset.terminalFailure;
   let explanationKey = "courseAuthoring.activityRail.assetDecisionFallback";
   if (asset.action) explanationKey = "courseAuthoring.activityRail.retryApprovalExplanation";
   if (podcast) {
     explanationKey = asset.action
       ? "courseAuthoring.activityRail.retryPodcastApproval"
       : "courseAuthoring.review.podcastNotReady";
+    if (canOmit) explanationKey = "courseAuthoring.activityRail.podcastFailedTerminal";
   }
   let statusKey = "courseAuthoring.activityRail.optional";
   if (required) statusKey = "courseAuthoring.activityRail.required";
@@ -81,7 +84,7 @@ export function AuthoringAssetDecision({
                     : "courseAuthoring.activityRail.approveRetry",
                 )}
               </Button>
-              {!required && (
+              {canOmit && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -89,7 +92,11 @@ export function AuthoringAssetDecision({
                   className="h-8 px-2.5 text-xs text-neutral-800"
                   onClick={onSkip}
                 >
-                  {t("courseAuthoring.activityRail.skipOptionalAsset")}
+                  {t(
+                    podcast
+                      ? "courseAuthoring.activityRail.omitFailedPodcast"
+                      : "courseAuthoring.activityRail.skipOptionalAsset",
+                  )}
                 </Button>
               )}
             </>

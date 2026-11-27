@@ -7290,6 +7290,8 @@
       "retryPodcastApproval": "The provider may have accepted the previous request. Retrying may incur another charge.",
       "requiredScopeChange": "Required: scope change",
       "skipOptionalAsset": "Skip image",
+      "omitFailedPodcast": "Omit podcast",
+      "podcastFailedTerminal": "This podcast couldn't be created. Omit it to apply the lesson without it, or ask the AI to change the proposal.",
       "requiredCannotSkip": "This media item is required and can't be skipped. If it can't be created, ask the AI to change the proposal so it isn't needed.",
       "applicationHistory": "Applied changes",
       "apply": "Apply {{id}}",

@@ -53,6 +53,13 @@ export const canRetryAuthoringTask = (task: AuthoringTask): boolean => {
   );
 };
 
+/** A failure that neither a retry nor an author answer can recover. */
+export const isTerminalAuthoringTaskFailure = (task: AuthoringTask): boolean =>
+  task.status === AUTHORING_TASK_STATUS.FAILED &&
+  Boolean(task.failure) &&
+  (task.failure?.retryable === false ||
+    task.failure?.recoveryAction === AUTHORING_RECOVERY_ACTION.SERVICE_FIX);
+
 export const authoringTaskRetryLabel = (task: AuthoringTask): string => {
   if (task.failure?.recoveryAction === AUTHORING_RECOVERY_ACTION.RETRY_FAILED_PARTS)
     return "retryFailedParts";

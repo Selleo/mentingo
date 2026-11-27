@@ -21,6 +21,7 @@ const assetTask: AssetTaskView = {
   question: "Approve another diagram submission?",
   action: "asset.retry_submission",
   ready: false,
+  terminalFailure: false,
   request: {
     assetId: "asset-1",
     operationId: "operation-1",
@@ -400,6 +401,46 @@ describe("AuthoringActivityRail asset decisions", () => {
     expect(screen.queryByRole("button", { name: "Skip image" })).not.toBeInTheDocument();
     await userEvent.setup().click(screen.getByRole("button", { name: "Retry podcast" }));
     expect(onRetry).toHaveBeenCalledWith(podcast.taskId);
+  });
+
+  it("offers omission instead of retry only for a terminally failed podcast", async () => {
+    const onSkipAsset = vi.fn();
+    const podcast: AssetTaskView = {
+      ...assetTask,
+      status: "failed",
+      action: null,
+      revision: null,
+      question: null,
+      terminalFailure: true,
+      request: {
+        ...assetTask.request,
+        purpose: "podcast",
+        altText: "Lesson discussion",
+        source: { type: "podcast", content: "Explore the trade-off" },
+      },
+    };
+    renderWith().render(
+      <AuthoringActivityRail
+        tasks={[]}
+        questions={[]}
+        assetTasks={[
+          podcast,
+          { ...podcast, taskId: "running", status: "running", terminalFailure: false },
+        ]}
+        applications={[]}
+        connection="live"
+        onRetry={vi.fn()}
+        onStopRequest={vi.fn()}
+        onAnswer={vi.fn()}
+        onAssetAction={vi.fn()}
+        onSkipAsset={onSkipAsset}
+      />,
+    );
+
+    expect(screen.getAllByRole("button", { name: "Omit podcast" })).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Retry podcast" })).toBeDisabled();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Omit podcast" }));
+    expect(onSkipAsset).toHaveBeenCalledWith(podcast.request.assetId);
   });
 
   it("keeps the running task stop action compact and request-scoped", async () => {

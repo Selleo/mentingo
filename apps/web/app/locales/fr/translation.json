@@ -7022,6 +7022,8 @@
       "retryPodcastApproval": "Le fournisseur a peut-être accepté la demande précédente. Une nouvelle tentative peut entraîner des frais supplémentaires.",
       "requiredScopeChange": "Obligatoire : modifier le périmètre",
       "skipOptionalAsset": "Ignorer l’image",
+      "omitFailedPodcast": "Omettre le podcast",
+      "podcastFailedTerminal": "Ce podcast n’a pas pu être créé. Omettez-le pour appliquer la leçon sans lui, ou demandez à l’IA de modifier la proposition.",
       "requiredCannotSkip": "Ce média est obligatoire et ne peut pas être ignoré. S’il ne peut pas être créé, demandez à l’IA de modifier la proposition pour s’en passer.",
       "applicationHistory": "Modifications appliquées",
       "apply": "Appliquer {{id}}",

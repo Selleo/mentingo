@@ -52,6 +52,7 @@ it("refreshes a podcast's retry and ready state without replacing the open revie
       question: null,
       action: null,
       ready: false,
+      terminalFailure: false,
     },
   ];
 

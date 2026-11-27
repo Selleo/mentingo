@@ -7347,6 +7347,8 @@
       "retryPodcastApproval": "Dostawca mógł przyjąć poprzednie żądanie. Ponowienie może wiązać się z dodatkową opłatą.",
       "requiredScopeChange": "Wymagana zmiana zakresu",
       "skipOptionalAsset": "Pomiń obraz",
+      "omitFailedPodcast": "Pomiń podcast",
+      "podcastFailedTerminal": "Nie udało się utworzyć tego podcastu. Pomiń go, aby zastosować lekcję bez niego, albo poproś AI o zmianę propozycji.",
       "requiredCannotSkip": "Ten materiał jest wymagany i nie można go pominąć. Jeśli nie da się go utworzyć, poproś AI o zmianę propozycji tak, by nie był potrzebny.",
       "applicationHistory": "Zastosowane zmiany",
       "apply": "Zastosowanie {{id}}",

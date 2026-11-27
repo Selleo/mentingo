@@ -851,6 +851,46 @@ describe("ProposalReview", () => {
     expect(onApply).not.toHaveBeenCalled();
   });
 
+  it("lets the author omit a terminally failed podcast and applies without it", async () => {
+    const user = userEvent.setup();
+    const onApply = vi.fn();
+    const proposal: ProposalView = {
+      ...attemptedQuizProposal,
+      id: "proposal-podcast",
+      summary: "Add lesson podcast",
+      assetRequests: [
+        {
+          assetId: "podcast",
+          operationId: "operation-asset",
+          purpose: "podcast",
+          required: true,
+          altText: "Lesson discussion",
+          source: { type: "podcast", content: "Explore the trade-off" },
+        },
+      ],
+      assetIds: ["podcast"],
+    };
+
+    renderWith().render(
+      <ProposalReview
+        proposals={[proposal]}
+        omittablePodcastAssetIds={["podcast"]}
+        onAccept={vi.fn()}
+        onReject={vi.fn()}
+        onRegenerate={vi.fn()}
+        onApply={onApply}
+      />,
+    );
+
+    await user.click(screen.getByLabelText("Select Add lesson podcast"));
+    const apply = screen.getByRole("button", { name: "Apply selected" });
+    expect(apply).toBeDisabled();
+    await user.click(screen.getByLabelText("Omit optional asset Lesson discussion"));
+    expect(apply).toBeEnabled();
+    await user.click(apply);
+    expect(onApply).toHaveBeenCalledWith(["proposal-podcast"], false, ["podcast"]);
+  });
+
   it("does not offer omission for an unavailable required visual", async () => {
     const user = userEvent.setup();
     const proposal: ProposalView = {

@@ -7269,6 +7269,8 @@
       "retryPodcastApproval": "Der Anbieter könnte die vorherige Anfrage angenommen haben. Ein erneuter Versuch kann zusätzliche Kosten verursachen.",
       "requiredScopeChange": "Umfang muss geändert werden",
       "skipOptionalAsset": "Bild überspringen",
+      "omitFailedPodcast": "Podcast weglassen",
+      "podcastFailedTerminal": "Dieser Podcast konnte nicht erstellt werden. Lassen Sie ihn weg, um die Lektion ohne ihn zu übernehmen, oder bitten Sie die KI, den Vorschlag zu ändern.",
       "requiredCannotSkip": "Dieses Medium ist erforderlich und kann nicht übersprungen werden. Wenn es nicht erstellt werden kann, bitten Sie die KI, den Vorschlag so zu ändern, dass es nicht nötig ist.",
       "applicationHistory": "Übernommene Änderungen",
       "apply": "Übernahme {{id}}",

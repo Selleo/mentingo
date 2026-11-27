@@ -7282,6 +7282,8 @@
       "retryPodcastApproval": "Teikėjas galėjo priimti ankstesnę užklausą. Pakartotinis bandymas gali kainuoti papildomai.",
       "requiredScopeChange": "Privaloma: keisti apimtį",
       "skipOptionalAsset": "Praleisti vaizdą",
+      "omitFailedPodcast": "Praleisti tinklalaidę",
+      "podcastFailedTerminal": "Šios tinklalaidės sukurti nepavyko. Praleiskite ją, kad pamoką pritaikytumėte be jos, arba paprašykite DI pakeisti pasiūlymą.",
       "requiredCannotSkip": "Ši medija privaloma ir jos praleisti negalima. Jei jos sukurti nepavyksta, paprašykite DI pakeisti pasiūlymą, kad jos nereikėtų.",
       "applicationHistory": "Pritaikyti pakeitimai",
       "apply": "Taikyti {{id}}",

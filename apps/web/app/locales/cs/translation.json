@@ -7287,6 +7287,8 @@
       "retryPodcastApproval": "Poskytovatel mohl předchozí požadavek přijmout. Další pokus může být zpoplatněn.",
       "requiredScopeChange": "Povinné: změna rozsahu",
       "skipOptionalAsset": "Přeskočit obrázek",
+      "omitFailedPodcast": "Vynechat podcast",
+      "podcastFailedTerminal": "Tento podcast se nepodařilo vytvořit. Vynechte ho a použijte lekci bez něj, nebo požádejte AI o úpravu návrhu.",
       "requiredCannotSkip": "Toto médium je povinné a nelze ho přeskočit. Pokud ho nelze vytvořit, požádejte AI o úpravu návrhu, aby nebylo potřeba.",
       "applicationHistory": "Použité změny",
       "apply": "Použít {{id}}",

@@ -419,6 +419,7 @@ export type AssetTaskView = {
   question: string | null;
   action: "asset.retry_submission" | null;
   ready: boolean;
+  terminalFailure: boolean;
 };
 
 export type PreviewView = {
