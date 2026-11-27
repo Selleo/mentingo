@@ -354,7 +354,8 @@
       "quiz_grading_digest": "Nuevas respuestas pendientes de revisión (diario)",
       "forum_mention": "Usuario mencionado en un tema del foro",
       "discussion_reply": "Nuevas respuestas en una discusión (agrupadas)",
-      "tenant_user_capacity": "Alerta de capacidad de usuarios"
+      "tenant_user_capacity": "Alerta de capacidad de usuarios",
+      "content_marketplace_course_update": "Actualización de curso del marketplace"
     },
     "errors": {
       "incompleteButton": "Introduce el texto del botón y la URL.",
@@ -8261,7 +8262,8 @@
         "quiz_grading_digest": "Los usuarios que pueden calificar respuestas de cuestionarios.",
         "forum_mention": "Los usuarios mencionados en la publicación del foro.",
         "discussion_reply": "Participantes del hilo o tema que no han leído las respuestas en la aplicación.",
-        "tenant_user_capacity": "Administradores activos de la organización."
+        "tenant_user_capacity": "Administradores activos de la organización.",
+        "content_marketplace_course_update": "Administradores activos de la organización."
       }
     },
     "mapping": {
@@ -8364,7 +8366,8 @@
       "quizGradingDigest": "Resumen de la cola de calificación",
       "forumUserMentioned": "Mención en el foro",
       "discussionReply": "Nuevas respuestas en una discusión",
-      "tenantUserCapacity": "Alerta de capacidad de usuarios"
+      "tenantUserCapacity": "Alerta de capacidad de usuarios",
+      "contentMarketplaceCourseUpdate": "Actualización de curso del marketplace"
     },
     "canvas": {
       "emptyTitle": "El lienzo de automatización está vacío",
@@ -8541,7 +8544,11 @@
       "activeUsersCount": "Usuarios activos",
       "maxUsers": "Usuarios del plan",
       "allowedUsersCount": "Usuarios permitidos (con exceso)",
-      "usersUrl": "Enlace a la página de usuarios"
+      "usersUrl": "Enlace a la página de usuarios",
+      "marketplaceUrl": "Enlace al marketplace",
+      "coursesWithNewVersion": "Cursos con una nueva versión",
+      "allCoursesWithNewVersion": "Todos los cursos con una nueva versión",
+      "coursesWithNewVersionCount": "Número de cursos con una nueva versión"
     },
     "simulation": {
       "title": "Resultado de la simulación",

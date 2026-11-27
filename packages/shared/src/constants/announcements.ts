@@ -21,6 +21,7 @@ export const ANNOUNCEMENT_SOURCE_TYPES = {
   QUIZ_GRADING: "quiz_grading",
   FORUM: "forum",
   TENANT_USER_CAPACITY: "tenant_user_capacity",
+  CONTENT_MARKETPLACE_COURSE_UPDATE: "content_marketplace_course_update",
 } as const;
 
 export type AnnouncementSourceType =

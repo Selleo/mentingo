@@ -354,7 +354,8 @@
       "quiz_grading_digest": "Nowe odpowiedzi czekają na ocenę (codziennie)",
       "forum_mention": "Użytkownik oznaczony w temacie na forum",
       "discussion_reply": "Nowe odpowiedzi w dyskusji (zbiorczo)",
-      "tenant_user_capacity": "Alert o limicie użytkowników"
+      "tenant_user_capacity": "Alert o limicie użytkowników",
+      "content_marketplace_course_update": "Aktualizacja kursu z katalogu kursów"
     },
     "errors": {
       "incompleteButton": "Wpisz tekst przycisku i adres URL.",
@@ -8079,7 +8080,8 @@
         "quiz_grading_digest": "Użytkownicy, którzy mogą oceniać odpowiedzi w quizach.",
         "forum_mention": "Użytkownicy oznaczeni we wpisie na forum.",
         "discussion_reply": "Uczestnicy wątku lub tematu, którzy nie przeczytali odpowiedzi w aplikacji.",
-        "tenant_user_capacity": "Aktywni administratorzy organizacji."
+        "tenant_user_capacity": "Aktywni administratorzy organizacji.",
+        "content_marketplace_course_update": "Aktywni administratorzy organizacji."
       }
     },
     "mapping": {
@@ -8182,7 +8184,8 @@
       "quizGradingDigest": "Podsumowanie kolejki ocen",
       "forumUserMentioned": "Wzmianka na forum",
       "discussionReply": "Nowe odpowiedzi w dyskusji",
-      "tenantUserCapacity": "Alert o limicie użytkowników"
+      "tenantUserCapacity": "Alert o limicie użytkowników",
+      "contentMarketplaceCourseUpdate": "Aktualizacja kursu z katalogu kursów"
     },
     "canvas": {
       "emptyTitle": "Płótno automatyzacji jest puste",
@@ -8359,7 +8362,11 @@
       "activeUsersCount": "Aktywni użytkownicy",
       "maxUsers": "Użytkownicy w planie",
       "allowedUsersCount": "Dozwoleni użytkownicy (z przekroczeniem)",
-      "usersUrl": "Link do strony użytkowników"
+      "usersUrl": "Link do strony użytkowników",
+      "marketplaceUrl": "Link do katalogu kursów",
+      "coursesWithNewVersion": "Kursy z nową wersją",
+      "allCoursesWithNewVersion": "Wszystkie kursy z nową wersją",
+      "coursesWithNewVersionCount": "Liczba kursów z nową wersją"
     },
     "simulation": {
       "title": "Wynik symulacji",

@@ -36,6 +36,23 @@ export const CONTENT_MARKETPLACE_EVENT_DELIVERY = {
   CONCURRENCY: 2,
 } as const;
 
+export const CONTENT_MARKETPLACE_UPDATE_CHECK = {
+  JOB_NAME: "check-content-marketplace-course-updates",
+  ATTEMPTS: 3,
+  BACKOFF_DELAY_MS: 60_000,
+  CONCURRENCY: 2,
+  LISTING_BATCH_SIZE: 5,
+  SCHEDULE_SLOT_MS: 60_000,
+  DEDUPLICATION_WINDOW_SECONDS: 60 * 60,
+} as const;
+
+export const CONTENT_MARKETPLACE_PAGE_PATH = "/content-marketplace";
+
+export const CONTENT_MARKETPLACE_UPDATE_NOTICE = {
+  NAMED_COURSES: 2,
+  MIN_SUMMARIZED_COURSES: 2,
+} as const;
+
 export const CONTENT_MARKETPLACE_ERRORS = {
   UNAVAILABLE: "contentMarketplace.error.unavailable",
   LISTING_NOT_FOUND: "contentMarketplace.error.listingNotFound",

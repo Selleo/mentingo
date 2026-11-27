@@ -13477,6 +13477,10 @@
                 {
                   "const": "tenant_user_capacity",
                   "type": "string"
+                },
+                {
+                  "const": "content_marketplace_course_update",
+                  "type": "string"
                 }
               ]
             }
@@ -13639,6 +13643,10 @@
                 },
                 {
                   "const": "tenant_user_capacity",
+                  "type": "string"
+                },
+                {
+                  "const": "content_marketplace_course_update",
                   "type": "string"
                 }
               ]
@@ -14591,6 +14599,10 @@
                 },
                 {
                   "const": "tenant_user_capacity",
+                  "type": "string"
+                },
+                {
+                  "const": "content_marketplace_course_update",
                   "type": "string"
                 }
               ]
@@ -71889,7 +71901,14 @@
                   "type": "string"
                 },
                 "authorId": {
-                  "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "audience": {
                   "type": "string"
@@ -72159,7 +72178,14 @@
                   "type": "string"
                 },
                 "authorId": {
-                  "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "audience": {
                   "type": "string"
@@ -72525,7 +72551,14 @@
                 "type": "string"
               },
               "authorId": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "audience": {
                 "type": "string"
@@ -75091,6 +75124,10 @@
                     },
                     {
                       "const": "tenant_user_capacity",
+                      "type": "string"
+                    },
+                    {
+                      "const": "content_marketplace_course_update",
                       "type": "string"
                     }
                   ]
@@ -79478,6 +79515,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -79624,6 +79665,10 @@
                       },
                       {
                         "const": "tenant_user_capacity",
+                        "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
                         "type": "string"
                       }
                     ]
@@ -83827,6 +83872,10 @@
                         {
                           "const": "tenant_user_capacity",
                           "type": "string"
+                        },
+                        {
+                          "const": "content_marketplace_course_update",
+                          "type": "string"
                         }
                       ]
                     },
@@ -83973,6 +84022,10 @@
                         },
                         {
                           "const": "tenant_user_capacity",
+                          "type": "string"
+                        },
+                        {
+                          "const": "content_marketplace_course_update",
                           "type": "string"
                         }
                       ]
@@ -88201,6 +88254,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -88347,6 +88404,10 @@
                       },
                       {
                         "const": "tenant_user_capacity",
+                        "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
                         "type": "string"
                       }
                     ]
@@ -92548,6 +92609,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -92694,6 +92759,10 @@
                       },
                       {
                         "const": "tenant_user_capacity",
+                        "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
                         "type": "string"
                       }
                     ]
@@ -96895,6 +96964,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -97041,6 +97114,10 @@
                       },
                       {
                         "const": "tenant_user_capacity",
+                        "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
                         "type": "string"
                       }
                     ]
@@ -101133,6 +101210,10 @@
               {
                 "const": "tenant_user_capacity",
                 "type": "string"
+              },
+              {
+                "const": "content_marketplace_course_update",
+                "type": "string"
               }
             ]
           },
@@ -105177,6 +105258,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -105323,6 +105408,10 @@
                       },
                       {
                         "const": "tenant_user_capacity",
+                        "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
                         "type": "string"
                       }
                     ]
@@ -109417,6 +109506,10 @@
                   {
                     "const": "tenant_user_capacity",
                     "type": "string"
+                  },
+                  {
+                    "const": "content_marketplace_course_update",
+                    "type": "string"
                   }
                 ]
               },
@@ -113426,6 +113519,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -113572,6 +113669,10 @@
                       },
                       {
                         "const": "tenant_user_capacity",
+                        "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
                         "type": "string"
                       }
                     ]
@@ -117815,6 +117916,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -117961,6 +118066,10 @@
                       },
                       {
                         "const": "tenant_user_capacity",
+                        "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
                         "type": "string"
                       }
                     ]
@@ -122208,6 +122317,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -122354,6 +122467,10 @@
                       },
                       {
                         "const": "tenant_user_capacity",
+                        "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
                         "type": "string"
                       }
                     ]
@@ -126555,6 +126672,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -126701,6 +126822,10 @@
                       },
                       {
                         "const": "tenant_user_capacity",
+                        "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
                         "type": "string"
                       }
                     ]
@@ -130913,6 +131038,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -131059,6 +131188,10 @@
                       },
                       {
                         "const": "tenant_user_capacity",
+                        "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
                         "type": "string"
                       }
                     ]
@@ -135260,6 +135393,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -135406,6 +135543,10 @@
                       },
                       {
                         "const": "tenant_user_capacity",
+                        "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
                         "type": "string"
                       }
                     ]
@@ -143322,6 +143463,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -143636,6 +143781,10 @@
                                           {
                                             "const": "tenant_user_capacity",
                                             "type": "string"
+                                          },
+                                          {
+                                            "const": "content_marketplace_course_update",
+                                            "type": "string"
                                           }
                                         ]
                                       },
@@ -143838,6 +143987,10 @@
                                                   },
                                                   {
                                                     "const": "tenant_user_capacity",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "content_marketplace_course_update",
                                                     "type": "string"
                                                   }
                                                 ]
@@ -144327,6 +144480,10 @@
                                                   {
                                                     "const": "tenant_user_capacity",
                                                     "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "content_marketplace_course_update",
+                                                    "type": "string"
                                                   }
                                                 ]
                                               },
@@ -144529,6 +144686,10 @@
                                                           },
                                                           {
                                                             "const": "tenant_user_capacity",
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "const": "content_marketplace_course_update",
                                                             "type": "string"
                                                           }
                                                         ]
@@ -144990,6 +145151,10 @@
                     {
                       "const": "tenant_user_capacity",
                       "type": "string"
+                    },
+                    {
+                      "const": "content_marketplace_course_update",
+                      "type": "string"
                     }
                   ]
                 },
@@ -145405,6 +145570,10 @@
                             {
                               "const": "tenant_user_capacity",
                               "type": "string"
+                            },
+                            {
+                              "const": "content_marketplace_course_update",
+                              "type": "string"
                             }
                           ]
                         }
@@ -145712,6 +145881,10 @@
                     {
                       "const": "tenant_user_capacity",
                       "type": "string"
+                    },
+                    {
+                      "const": "content_marketplace_course_update",
+                      "type": "string"
                     }
                   ]
                 },
@@ -145954,6 +146127,10 @@
                                               {
                                                 "const": "tenant_user_capacity",
                                                 "type": "string"
+                                              },
+                                              {
+                                                "const": "content_marketplace_course_update",
+                                                "type": "string"
                                               }
                                             ]
                                           },
@@ -146156,6 +146333,10 @@
                                                       },
                                                       {
                                                         "const": "tenant_user_capacity",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "content_marketplace_course_update",
                                                         "type": "string"
                                                       }
                                                     ]
@@ -146627,6 +146808,10 @@
                                     {
                                       "const": "tenant_user_capacity",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "content_marketplace_course_update",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -146829,6 +147014,10 @@
                                             },
                                             {
                                               "const": "tenant_user_capacity",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "content_marketplace_course_update",
                                               "type": "string"
                                             }
                                           ]
@@ -147561,6 +147750,10 @@
                                 {
                                   "const": "tenant_user_capacity",
                                   "type": "string"
+                                },
+                                {
+                                  "const": "content_marketplace_course_update",
+                                  "type": "string"
                                 }
                               ]
                             }
@@ -147892,6 +148085,10 @@
                                     {
                                       "const": "tenant_user_capacity",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "content_marketplace_course_update",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -148094,6 +148291,10 @@
                                             },
                                             {
                                               "const": "tenant_user_capacity",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "content_marketplace_course_update",
                                               "type": "string"
                                             }
                                           ]
@@ -148561,6 +148762,10 @@
                                         {
                                           "const": "tenant_user_capacity",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "content_marketplace_course_update",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -148763,6 +148968,10 @@
                                                 },
                                                 {
                                                   "const": "tenant_user_capacity",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
                                                   "type": "string"
                                                 }
                                               ]
@@ -149252,6 +149461,10 @@
                                                 {
                                                   "const": "tenant_user_capacity",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -149454,6 +149667,10 @@
                                                         },
                                                         {
                                                           "const": "tenant_user_capacity",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "content_marketplace_course_update",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -149951,6 +150168,10 @@
                                         {
                                           "const": "tenant_user_capacity",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "content_marketplace_course_update",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -150153,6 +150374,10 @@
                                                 },
                                                 {
                                                   "const": "tenant_user_capacity",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
                                                   "type": "string"
                                                 }
                                               ]
@@ -150642,6 +150867,10 @@
                                                 {
                                                   "const": "tenant_user_capacity",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -150844,6 +151073,10 @@
                                                         },
                                                         {
                                                           "const": "tenant_user_capacity",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "content_marketplace_course_update",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -151341,6 +151574,10 @@
                                         {
                                           "const": "tenant_user_capacity",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "content_marketplace_course_update",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -151543,6 +151780,10 @@
                                                 },
                                                 {
                                                   "const": "tenant_user_capacity",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
                                                   "type": "string"
                                                 }
                                               ]
@@ -152032,6 +152273,10 @@
                                                 {
                                                   "const": "tenant_user_capacity",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -152234,6 +152479,10 @@
                                                         },
                                                         {
                                                           "const": "tenant_user_capacity",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "content_marketplace_course_update",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -152728,6 +152977,10 @@
                                     {
                                       "const": "tenant_user_capacity",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "content_marketplace_course_update",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -152930,6 +153183,10 @@
                                             },
                                             {
                                               "const": "tenant_user_capacity",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "content_marketplace_course_update",
                                               "type": "string"
                                             }
                                           ]
@@ -153393,6 +153650,10 @@
                                         {
                                           "const": "tenant_user_capacity",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "content_marketplace_course_update",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -153595,6 +153856,10 @@
                                                 },
                                                 {
                                                   "const": "tenant_user_capacity",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
                                                   "type": "string"
                                                 }
                                               ]
@@ -154084,6 +154349,10 @@
                                                 {
                                                   "const": "tenant_user_capacity",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -154286,6 +154555,10 @@
                                                         },
                                                         {
                                                           "const": "tenant_user_capacity",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "content_marketplace_course_update",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -154804,6 +155077,10 @@
                                         {
                                           "const": "tenant_user_capacity",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "content_marketplace_course_update",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -155006,6 +155283,10 @@
                                                 },
                                                 {
                                                   "const": "tenant_user_capacity",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
                                                   "type": "string"
                                                 }
                                               ]
@@ -155495,6 +155776,10 @@
                                                 {
                                                   "const": "tenant_user_capacity",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -155697,6 +155982,10 @@
                                                         },
                                                         {
                                                           "const": "tenant_user_capacity",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "content_marketplace_course_update",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -156195,6 +156484,10 @@
                                         {
                                           "const": "tenant_user_capacity",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "content_marketplace_course_update",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -156397,6 +156690,10 @@
                                                 },
                                                 {
                                                   "const": "tenant_user_capacity",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
                                                   "type": "string"
                                                 }
                                               ]
@@ -156866,6 +157163,10 @@
                                         {
                                           "const": "tenant_user_capacity",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "content_marketplace_course_update",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -157068,6 +157369,10 @@
                                                 },
                                                 {
                                                   "const": "tenant_user_capacity",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
                                                   "type": "string"
                                                 }
                                               ]
@@ -157557,6 +157862,10 @@
                                                 {
                                                   "const": "tenant_user_capacity",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -157759,6 +158068,10 @@
                                                         },
                                                         {
                                                           "const": "tenant_user_capacity",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "content_marketplace_course_update",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -158256,6 +158569,10 @@
                                         {
                                           "const": "tenant_user_capacity",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "content_marketplace_course_update",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -158458,6 +158775,10 @@
                                                 },
                                                 {
                                                   "const": "tenant_user_capacity",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
                                                   "type": "string"
                                                 }
                                               ]
@@ -158947,6 +159268,10 @@
                                                 {
                                                   "const": "tenant_user_capacity",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -159149,6 +159474,10 @@
                                                         },
                                                         {
                                                           "const": "tenant_user_capacity",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "content_marketplace_course_update",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -159646,6 +159975,10 @@
                                         {
                                           "const": "tenant_user_capacity",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "content_marketplace_course_update",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -159848,6 +160181,10 @@
                                                 },
                                                 {
                                                   "const": "tenant_user_capacity",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
                                                   "type": "string"
                                                 }
                                               ]
@@ -160337,6 +160674,10 @@
                                                 {
                                                   "const": "tenant_user_capacity",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -160539,6 +160880,10 @@
                                                         },
                                                         {
                                                           "const": "tenant_user_capacity",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "content_marketplace_course_update",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -161036,6 +161381,10 @@
                                         {
                                           "const": "tenant_user_capacity",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "content_marketplace_course_update",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -161238,6 +161587,10 @@
                                                 },
                                                 {
                                                   "const": "tenant_user_capacity",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
                                                   "type": "string"
                                                 }
                                               ]
@@ -161727,6 +162080,10 @@
                                                 {
                                                   "const": "tenant_user_capacity",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "content_marketplace_course_update",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -161929,6 +162286,10 @@
                                                         },
                                                         {
                                                           "const": "tenant_user_capacity",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "content_marketplace_course_update",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -162396,6 +162757,10 @@
                     {
                       "const": "tenant_user_capacity",
                       "type": "string"
+                    },
+                    {
+                      "const": "content_marketplace_course_update",
+                      "type": "string"
                     }
                   ]
                 },
@@ -162713,6 +163078,10 @@
                       {
                         "const": "tenant_user_capacity",
                         "type": "string"
+                      },
+                      {
+                        "const": "content_marketplace_course_update",
+                        "type": "string"
                       }
                     ]
                   },
@@ -162957,6 +163326,10 @@
                                 },
                                 {
                                   "const": "tenant_user_capacity",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "content_marketplace_course_update",
                                   "type": "string"
                                 }
                               ]

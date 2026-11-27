@@ -119,6 +119,23 @@ export const contentMarketplaceCourseCopiedEventSchema = Type.Object({
   courseCopiedData: contentMarketplaceCourseCopiedDataSchema,
 });
 
+export const contentMarketplaceCourseUpdateSchema = Type.Object({
+  courseId: UUIDSchema,
+  listingId: UUIDSchema,
+  versionId: UUIDSchema,
+});
+
+export const contentMarketplaceCourseUpdatesAvailableDataSchema = Type.Object({
+  tenantId: UUIDSchema,
+  courseUpdates: Type.Array(contentMarketplaceCourseUpdateSchema, { minItems: 1 }),
+});
+
+export const contentMarketplaceCourseUpdatesAvailableEventSchema = Type.Object({
+  courseUpdatesAvailableData: contentMarketplaceCourseUpdatesAvailableDataSchema,
+});
+
+export const contentMarketplaceUpdateCheckSchema = Type.Object({ tenantId: UUIDSchema });
+
 export const contentMarketplaceAnalyticsEventSchema = Type.Union([
   Type.Object({
     id: UUIDSchema,
@@ -157,3 +174,5 @@ export type ContentMarketplaceAnalyticsEvent = Static<
   typeof contentMarketplaceAnalyticsEventSchema
 >;
 export type ContentMarketplaceEventDelivery = Static<typeof contentMarketplaceEventDeliverySchema>;
+export type ContentMarketplaceUpdateCheck = Static<typeof contentMarketplaceUpdateCheckSchema>;
+export type ContentMarketplaceCourseUpdate = Static<typeof contentMarketplaceCourseUpdateSchema>;

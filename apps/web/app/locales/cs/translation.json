@@ -354,7 +354,8 @@
       "quiz_grading_digest": "Nové odpovědi čekají na hodnocení (denně)",
       "forum_mention": "Uživatel zmíněn v tématu fóra",
       "discussion_reply": "Nové odpovědi v diskusi (souhrnně)",
-      "tenant_user_capacity": "Upozornění na kapacitu uživatelů"
+      "tenant_user_capacity": "Upozornění na kapacitu uživatelů",
+      "content_marketplace_course_update": "Aktualizace kurzu z marketplace"
     },
     "errors": {
       "incompleteButton": "Zadejte popisek tlačítka a URL.",
@@ -8337,7 +8338,8 @@
         "quiz_grading_digest": "Uživatelé, kteří mohou hodnotit odpovědi v kvízech.",
         "forum_mention": "Uživatelé zmínění v příspěvku na fóru.",
         "discussion_reply": "Účastníci vlákna nebo tématu, kteří si odpovědi v aplikaci nepřečetli.",
-        "tenant_user_capacity": "Aktivní správci organizace."
+        "tenant_user_capacity": "Aktivní správci organizace.",
+        "content_marketplace_course_update": "Aktivní správci organizace."
       }
     },
     "mapping": {
@@ -8440,7 +8442,8 @@
       "quizGradingDigest": "Přehled fronty hodnocení",
       "forumUserMentioned": "Zmínka ve fóru",
       "discussionReply": "Nové odpovědi v diskusi",
-      "tenantUserCapacity": "Upozornění na kapacitu uživatelů"
+      "tenantUserCapacity": "Upozornění na kapacitu uživatelů",
+      "contentMarketplaceCourseUpdate": "Aktualizace kurzu z marketplace"
     },
     "canvas": {
       "emptyTitle": "Vaše plátno automatizace je prázdné",
@@ -8613,7 +8616,11 @@
       "activeUsersCount": "Aktivní uživatelé",
       "maxUsers": "Uživatelé v plánu",
       "allowedUsersCount": "Povolení uživatelé (s překročením)",
-      "usersUrl": "Odkaz na stránku uživatelů"
+      "usersUrl": "Odkaz na stránku uživatelů",
+      "marketplaceUrl": "Odkaz na marketplace",
+      "coursesWithNewVersion": "Kurzy s novou verzí",
+      "allCoursesWithNewVersion": "Všechny kurzy s novou verzí",
+      "coursesWithNewVersionCount": "Počet kurzů s novou verzí"
     },
     "simulation": {
       "title": "Výsledek simulace",

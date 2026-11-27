@@ -219,6 +219,15 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     es: "{{capacityTitle}}",
     fr: "{{capacityTitle}}",
   },
+  contentMarketplaceCourseUpdateEmail: {
+    en: "Course updates in the content marketplace",
+    pl: "Aktualizacje kursów w katalogu kursów",
+    de: "Kursaktualisierungen im Marketplace",
+    lt: "Kursų atnaujinimai marketplace",
+    cs: "Aktualizace kurzů v marketplace",
+    es: "Actualizaciones de cursos en el marketplace",
+    fr: "Mises à jour de cours dans le marketplace",
+  },
 } as const;
 
 export const getEmailSubject = (

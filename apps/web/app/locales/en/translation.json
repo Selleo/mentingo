@@ -354,7 +354,8 @@
       "quiz_grading_digest": "New answers waiting for review (daily)",
       "forum_mention": "User mentioned in a forum topic",
       "discussion_reply": "New replies in a discussion (grouped)",
-      "tenant_user_capacity": "User capacity alert"
+      "tenant_user_capacity": "User capacity alert",
+      "content_marketplace_course_update": "Marketplace course update"
     },
     "errors": {
       "incompleteButton": "Enter a button label and URL.",
@@ -8332,7 +8333,8 @@
         "quiz_grading_digest": "Users who can grade quiz answers.",
         "forum_mention": "The users mentioned in the forum post.",
         "discussion_reply": "Participants of the thread or topic who have not read the replies in the application.",
-        "tenant_user_capacity": "Active administrators of the organization."
+        "tenant_user_capacity": "Active administrators of the organization.",
+        "content_marketplace_course_update": "Active administrators of the organization."
       }
     },
     "mapping": {
@@ -8435,7 +8437,8 @@
       "quizGradingDigest": "Grading queue digest",
       "forumUserMentioned": "Forum mention",
       "discussionReply": "New replies in a discussion",
-      "tenantUserCapacity": "User capacity alert"
+      "tenantUserCapacity": "User capacity alert",
+      "contentMarketplaceCourseUpdate": "Marketplace course update"
     },
     "canvas": {
       "emptyTitle": "Your automation canvas is empty",
@@ -8612,7 +8615,11 @@
       "activeUsersCount": "Active users",
       "maxUsers": "Users in plan",
       "allowedUsersCount": "Allowed users (with overflow)",
-      "usersUrl": "Users page link"
+      "usersUrl": "Users page link",
+      "marketplaceUrl": "Content marketplace link",
+      "coursesWithNewVersion": "Courses with a new version",
+      "allCoursesWithNewVersion": "All courses with a new version",
+      "coursesWithNewVersionCount": "Number of courses with a new version"
     },
     "simulation": {
       "title": "Simulation Result",

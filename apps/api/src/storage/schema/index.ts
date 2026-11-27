@@ -2104,9 +2104,7 @@ export const announcements = pgTable(
     ...timestamps,
     title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
     content: jsonb("content").$type<LocalizedText>().default({}).notNull(),
-    authorId: uuid("author_id")
-      .references(() => users.id, { onDelete: "cascade" })
-      .notNull(),
+    authorId: uuid("author_id").references(() => users.id, { onDelete: "cascade" }),
     audience: text("audience")
       .$type<AnnouncementAudience>()
       .notNull()
@@ -3757,6 +3755,7 @@ export const contentMarketplaceCourseLineages = pgTable(
     listingId: uuid("listing_id").notNull(),
     versionId: uuid("version_id").notNull(),
     acquisitionId: uuid("acquisition_id").notNull(),
+    notifiedUpdateVersionId: uuid("notified_update_version_id"),
     tenantId,
   },
   withTenantIdIndex("content_marketplace_course_lineages"),
