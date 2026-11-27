@@ -1433,6 +1433,9 @@ export const CourseGenerationSession = ({
       )
       .map((task) => task.taskId),
   ]);
+  const assetPurposeByTaskId = new Map(
+    projection.assetTasks.map(({ taskId, request }) => [taskId, request.purpose]),
+  );
   const agentTasks = attachAuthoringWorkProgress(
     session?.tasks.filter(
       (task) =>
@@ -1440,7 +1443,10 @@ export const CourseGenerationSession = ({
         (task.kind !== AUTHORING_TASK_KIND.ROUTE || task.status === AUTHORING_TASK_STATUS.FAILED),
     ) ?? [],
     session?.records ?? [],
-  );
+  ).map((task) => {
+    const assetPurpose = assetPurposeByTaskId.get(task.taskId);
+    return assetPurpose ? { ...task, assetPurpose } : task;
+  });
   const knownTaskLabels = Object.fromEntries([
     ...projection.proposals.flatMap((proposal) =>
       proposal.taskId ? [[proposal.taskId, proposal.summary]] : [],

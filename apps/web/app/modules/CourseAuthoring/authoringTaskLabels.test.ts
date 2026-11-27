@@ -147,6 +147,22 @@ describe("authoringPhaseLabel", () => {
     });
   });
 
+  it("numbers podcasts separately from visuals in the same request", () => {
+    const tasks = [
+      task({ taskId: "asset-1", requestId: "request-1", kind: "asset", assetPurpose: "lesson" }),
+      task({ taskId: "asset-2", requestId: "request-1", kind: "asset", assetPurpose: "podcast" }),
+      task({ taskId: "asset-3", requestId: "request-1", kind: "asset", assetPurpose: "lesson" }),
+      task({ taskId: "asset-4", requestId: "request-1", kind: "asset", assetPurpose: "podcast" }),
+    ];
+
+    expect(authoringTaskDisplayLabels(tasks, {}, t)).toEqual({
+      "asset-1": "creatingVisual (1)",
+      "asset-2": "creatingPodcast (1)",
+      "asset-3": "creatingVisual (2)",
+      "asset-4": "creatingPodcast (2)",
+    });
+  });
+
   it("leaves a lone task out so its own view does not repeat its plain phase label", () => {
     const tasks = [task({ taskId: "task-a", requestId: "request-1", kind: "lesson" })];
 

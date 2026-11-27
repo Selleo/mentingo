@@ -7092,6 +7092,7 @@
       "distinctTaskLabel": "{{label}} · {{number}}",
       "readingSources": "Quellen werden gelesen…",
       "creatingVisual": "Grafik wird erstellt…",
+      "creatingPodcast": "Podcast wird erstellt…",
       "updatingCourse": "Kurs wird aktualisiert …",
       "waiting": "Deine Eingabe wird benötigt",
       "failed": "Einige Aufgaben benötigen Aufmerksamkeit",

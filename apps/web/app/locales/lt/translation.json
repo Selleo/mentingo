@@ -7105,6 +7105,7 @@
       "distinctTaskLabel": "{{label}} · {{number}}",
       "readingSources": "Skaitomi jūsų šaltiniai…",
       "creatingVisual": "Kuriamas vaizdas…",
+      "creatingPodcast": "Kuriama tinklalaidė…",
       "updatingCourse": "Atnaujinamas jūsų kursas…",
       "waiting": "Reikia jūsų atsakymo",
       "failed": "Kai kurioms užduotims reikia dėmesio",

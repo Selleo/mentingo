@@ -88,6 +88,7 @@ export type AuthoringTask = {
   errorCode: string | null;
   outputId: string | null;
   workProgress?: AuthoringWorkProgress;
+  assetPurpose?: AssetRequestView["purpose"];
   failure?: AuthoringTaskFailure | null;
 };
 
