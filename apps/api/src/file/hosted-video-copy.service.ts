@@ -1,12 +1,16 @@
+import { setTimeout as delay } from "node:timers/promises";
+
 import { Injectable, Logger } from "@nestjs/common";
 import { VIDEO_PROVIDERS } from "@repo/shared";
 import { match, P } from "ts-pattern";
 
+import { VideoUploadError } from "src/bunny/bunnyStream.errors";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import {
   HOSTED_VIDEO_STATUSES,
+  HOSTED_VIDEO_UPLOAD_RETRY,
   HOSTED_VIDEO_UPLOAD_STALE_AFTER_MS,
 } from "./hosted-video.constants";
 import { HostedVideoCopyInProgressError } from "./hosted-video.errors";
@@ -127,18 +131,44 @@ export class HostedVideoCopyService {
     return copy.reference;
   }
 
+  /**
+   * Uploads into a fresh provider video. An upload cut off by the network is retried with a new
+   * provider video, because a partially uploaded one cannot be resumed.
+   */
   private async uploadClaimedCopy(copy: HostedVideo, request: HostedVideoCopyRequest) {
-    const providerVideoId = await this.createProviderVideo(copy, request);
-    const reference = buildBunnyVideoReference(providerVideoId);
-    await this.hostedVideoRepository.recordCreatedVideo(copy.id, providerVideoId, reference);
+    for (let attempt = 1; ; attempt += 1) {
+      const providerVideoId = await this.createProviderVideo(copy, request);
+      const reference = buildBunnyVideoReference(providerVideoId);
+      await this.hostedVideoRepository.recordCreatedVideo(copy.id, providerVideoId, reference);
 
-    let sourceVideo: HostedVideoSourceStream | undefined;
+      try {
+        await this.uploadSourceVideoContent(providerVideoId, request);
+      } catch (error) {
+        await this.deleteProviderVideo(request.targetTenantId, providerVideoId);
+
+        if (!this.canRetryUpload(error, attempt)) {
+          await this.hostedVideoRepository.updateStatus(copy.id, HOSTED_VIDEO_STATUSES.FAILED);
+          throw error;
+        }
+
+        this.logger.warn(
+          `Retrying the upload of ${request.sourceReference} after attempt ${attempt} failed: ${
+            error instanceof Error ? error.message : error
+          }`,
+        );
+        await delay(HOSTED_VIDEO_UPLOAD_RETRY.BASE_DELAY_MS * attempt);
+        continue;
+      }
+
+      await this.hostedVideoRepository.updateStatus(copy.id, HOSTED_VIDEO_STATUSES.PROCESSING);
+      return reference;
+    }
+  }
+
+  private async uploadSourceVideoContent(providerVideoId: string, request: HostedVideoCopyRequest) {
+    const { stream, contentType }: HostedVideoSourceStream = await request.openSourceVideo();
 
     try {
-      sourceVideo = await request.openSourceVideo();
-
-      const { stream, contentType } = sourceVideo;
-
       await this.tenantDbRunnerService.runWithTenant(request.targetTenantId, () =>
         this.bunnyStreamService.uploadVideoContent({
           videoId: providerVideoId,
@@ -146,16 +176,17 @@ export class HostedVideoCopyService {
           contentType,
         }),
       );
-    } catch (error) {
-      await this.hostedVideoRepository.updateStatus(copy.id, HOSTED_VIDEO_STATUSES.FAILED);
-      await this.deleteProviderVideo(request.targetTenantId, providerVideoId);
-      throw error;
     } finally {
-      sourceVideo?.stream.destroy();
+      stream.destroy();
     }
+  }
 
-    await this.hostedVideoRepository.updateStatus(copy.id, HOSTED_VIDEO_STATUSES.PROCESSING);
-    return reference;
+  private canRetryUpload(error: unknown, attempt: number): boolean {
+    return (
+      error instanceof VideoUploadError &&
+      error.isTransient &&
+      attempt < HOSTED_VIDEO_UPLOAD_RETRY.MAX_ATTEMPTS
+    );
   }
 
   /**

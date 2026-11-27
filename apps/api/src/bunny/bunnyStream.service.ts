@@ -1,11 +1,17 @@
 import { createHash, createHmac, timingSafeEqual } from "crypto";
 
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { HttpStatus, Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
+import { match, P } from "ts-pattern";
 
-import { BUNNY_CDN_TOKEN_EXPIRY } from "src/bunny/bunnyStream.constants";
+import {
+  BUNNY_CDN_TOKEN_EXPIRY,
+  VIDEO_MP4_UNAVAILABLE_REASONS,
+} from "src/bunny/bunnyStream.constants";
+import { VideoMp4UnavailableError, VideoUploadError } from "src/bunny/bunnyStream.errors";
 import { EnvService } from "src/env/services/env.service";
+import { BUNNY_API_VIDEO_STATUSES } from "src/file/video-metadata.constants";
 import { dbAls } from "src/storage/db/db-als.store";
 
 import type { AxiosInstance } from "axios";
@@ -15,6 +21,7 @@ import type {
   BunnyMp4FallbackResolution,
   BunnyConfig,
   BunnyVideoDetails,
+  VideoMp4UnavailableReason,
 } from "src/bunny/bunnyStream.types";
 
 const BUNNY_MP4_FALLBACK_RESOLUTIONS: BunnyMp4FallbackResolution[] = [720, 480, 360, 240];
@@ -192,10 +199,10 @@ export class BunnyStreamService {
         timeout: 0,
       });
     } catch (error) {
-      throw new Error(
-        `Bunny stream upload failed for video ${params.videoId}: ${this.getAxiosErrorMessage(
-          error,
-        )}`,
+      throw new VideoUploadError(
+        params.videoId,
+        this.isTransientRequestFailure(error),
+        this.getAxiosErrorMessage(error),
       );
     }
   }
@@ -319,7 +326,33 @@ export class BunnyStreamService {
       if (downloaded) return downloaded;
     }
 
-    throw new Error(`No MP4 fallback was available for Bunny video ${videoId}.`);
+    throw new VideoMp4UnavailableError(videoId, await this.findMp4UnavailableReason(videoId));
+  }
+
+  /** Bunny creates MP4 fallbacks only once encoding finishes, and only with MP4 fallback enabled. */
+  private async findMp4UnavailableReason(videoId: string): Promise<VideoMp4UnavailableReason> {
+    const { status } = await this.getVideo(videoId);
+
+    return match(Number(status))
+      .with(BUNNY_API_VIDEO_STATUSES.FINISHED, () => VIDEO_MP4_UNAVAILABLE_REASONS.NOT_GENERATED)
+      .with(
+        P.union(BUNNY_API_VIDEO_STATUSES.ERROR, BUNNY_API_VIDEO_STATUSES.UPLOAD_FAILED),
+        () => VIDEO_MP4_UNAVAILABLE_REASONS.ENCODING_FAILED,
+      )
+      .otherwise(() => VIDEO_MP4_UNAVAILABLE_REASONS.STILL_PROCESSING);
+  }
+
+  /** Dropped connections, rate limits, and server errors can succeed when the request is sent again. */
+  private isTransientRequestFailure(error: unknown): boolean {
+    if (!axios.isAxiosError(error)) return false;
+
+    const status = error.response?.status;
+
+    return (
+      status === undefined ||
+      status === HttpStatus.TOO_MANY_REQUESTS ||
+      status >= HttpStatus.INTERNAL_SERVER_ERROR
+    );
   }
 
   private getMp4FallbackResolutionOrder(preferredResolution: BunnyMp4FallbackResolution) {
