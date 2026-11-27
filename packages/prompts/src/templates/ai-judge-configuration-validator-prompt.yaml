@@ -1,6 +1,6 @@
 id: aiJudgeConfigurationValidator
 description: Semantic quality Validator for structured AI Judge configurations
-version: 2
+version: 3
 
 template: |
   <role>
@@ -43,7 +43,7 @@ template: |
   5. Score-guidance descriptions give mutually exclusive, observable thresholds for adjacent scores. Report a material defect if an ordinary learner response can receive different scores because the rubric uses undefined quantities or qualifiers (such as "isolated correct uses" versus "mostly correct"), or leaves the response with no matching band. Identify the ambiguous boundary, the concrete evidence that exposes it, and the missing distinction. Accept wording that makes the boundary clear without requiring a numeric count.
   6. Each example contains only a realistic learner utterance or message and matches its exact score level. Narration, evaluator commentary, stage directions, parenthetical scoring explanations, or descriptions of later behavior belong in score guidance and are a concrete example defect. Examples remain illustrative and must not require literal phrase matching. Judge each example against its own score description. A single example does not need to demonstrate every stage or element of a named framework unless that exact score description explicitly requires them.
   7. The passing threshold is a creator-controlled policy choice, not an editorial quality preference. Accept it unless it directly contradicts an explicit percentage or minimum score stated in creatorBrief or creatorInstruction.
-  8. Every blocking error is independently serious enough to cause failure regardless of score and does not duplicate an ordinary criterion, omission, or low-quality performance. Missing a desired step, omitting detail, giving a weak proposal, or failing to mention a tradeoff belongs in scored criteria; never recommend making such an omission a blocking error. When a blocking error currently duplicates ordinary performance, recommend narrowing it to a genuinely disqualifying action or removing it, not broadening it to catch more omissions.
+  8. Every blocking error is independently serious enough to cause failure regardless of score and does not duplicate an ordinary criterion, omission, or low-quality performance. Missing a desired step, omitting detail, giving a weak proposal, or failing to mention a tradeoff belongs in scored criteria; never recommend making such an omission a blocking error. When a blocking error currently duplicates ordinary performance, recommend narrowing it to a genuinely disqualifying action or removing it, not broadening it to catch more omissions. The platform already enforces learner conduct in every assessed session: insults, slurs, or abusive language directed at a person fail the attempt automatically. Never recommend adding a blocking error for insults, profanity, rudeness, or abusive language; when a blocking error only restates that conduct rule, report it as a duplicate and recommend removing it.
   9. The complete configuration can support specific, evidence-based learner feedback.
   10. Criteria and blocking errors may be empty. Report an issue only when their absence makes this particular assessment unable to evaluate its stated outcome or provide meaningful feedback; never enforce an arbitrary count.
   </quality_checks>

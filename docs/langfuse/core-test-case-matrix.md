@@ -416,9 +416,20 @@ Earlier failures, fixture/oracle revisions and saved-output reassessments remain
 ## Course generator and Mentor conduct
 
 The Mentor conduct cases use synthetic Polish turns to check disengagement after a repeated
-insult, verification of the learner's own profanity and acceptance of a neutrally reported
-quotation. The prompt experiment uses the bundled scenario instructions. The Judge service
-tests exercise the verification and result persistence paths separately.
+insult, verification of an insult the learner directs at a person, and acceptance of a neutrally
+reported quotation and of casual profanity that targets no one. The prompt experiment uses the
+bundled scenario instructions. These four cases are not yet part of the verified-result table
+above and have no recorded model run. The oracle spec keeps their rule text and Roleplay boundary
+identical to `mentor-conduct.ts`. The Judge service tests exercise the verification and result
+persistence paths separately, and an API e2e test reads a persisted conduct failure (stored without
+a configured blocking-error ID) back through the Practice response.
+
+Judge configuration score bands are covered only at the prompt-contract level. The oracle spec
+checks that the rendered generator and validator prompts require mutually exclusive, observable
+score bands, include the 0/1/2 count example, name undefined qualifiers such as "mostly correct"
+as defects and exclude learner conduct from lesson blocking errors. No deterministic check
+establishes that a model rejects ambiguous bands or accepts count-based bands; that needs an
+explicit `judge-config-create` / `judge-config-validate` model run with reviewed outputs.
 
 The podcast review fixture is in [course-generator-media-v1.json](../evaluation-datasets/course-generator-media-v1.json).
 The Vitest component test renders a failed required podcast, checks the media heading and retry

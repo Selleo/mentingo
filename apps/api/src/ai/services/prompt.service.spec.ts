@@ -7,6 +7,7 @@ import {
 
 import { PromptService } from "src/ai/services/prompt.service";
 import { MESSAGE_ROLE } from "src/ai/utils/ai.type";
+import { getMentorConductInstructions } from "src/ai/utils/mentor-conduct";
 
 import type { AiRepository } from "src/ai/repositories/ai.repository";
 import type { MessageService } from "src/ai/services/message.service";
@@ -47,6 +48,7 @@ describe("PromptService learner-name personalization", () => {
         difficulty: "realistic",
         factsAndConstraints: null,
       }),
+      findMentorTypeByThreadId: jest.fn().mockResolvedValue(type),
       findGroupsByThreadId: jest.fn().mockResolvedValue([]),
       insertMessage: jest.fn().mockResolvedValue([]),
     };
@@ -270,11 +272,17 @@ describe("PromptService learner-name personalization", () => {
 
       expect(textPrompt.some((message) => message.content === systemPrompt)).toBe(true);
       for (const prompt of [textPrompt, voicePrompt]) {
-        const boundaries = prompt.find(({ content }) =>
-          content.includes("If the scenario explicitly defines how the character reacts"),
+        const boundaries = prompt.find(
+          ({ content }) => content === getMentorConductInstructions(type),
         );
+        expect(boundaries?.role).toBe(MESSAGE_ROLE.SYSTEM);
         expect(boundaries?.content).toContain("stay disengaged in later turns");
-        expect(boundaries?.content).toContain("Treat neutral discussion or quotations");
+        expect(boundaries?.content).toContain("Casual profanity that is not aimed at a person");
+        if (type === AI_MENTOR_TYPE.TEACHER) {
+          expect(boundaries?.content).not.toMatch(/in character|roleplay/i);
+        } else {
+          expect(boundaries?.content).toContain("react naturally in character");
+        }
       }
       expect(textPrompt.some((message) => message.content === speechPolicy)).toBe(false);
     },

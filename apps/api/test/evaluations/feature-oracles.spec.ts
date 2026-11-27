@@ -4,6 +4,13 @@ import { resolve } from "node:path";
 
 import { AI_MENTOR_ROLEPLAY_DIFFICULTY, AI_MENTOR_TEACHING_STYLE } from "@repo/shared";
 
+import {
+  MENTOR_CONDUCT_BLOCKING_ERROR,
+  ROLEPLAY_MENTOR_CONDUCT_INSTRUCTIONS,
+} from "src/ai/utils/mentor-conduct";
+
+import { prepareFeaturePrompt } from "./feature-task";
+
 import type { FeatureCatalogue } from "./feature-catalogue.types";
 
 const catalogue = JSON.parse(
@@ -317,6 +324,56 @@ describe("task-specific Core oracle regression contracts", () => {
       expect(rubric).toContain("final output is the native domain configuration");
       expect(rubric).toContain("Keep strict provider-schema checks enforced");
     }
+  });
+
+  it("keeps the Mentor conduct cases in sync with the runtime rule and boundary", () => {
+    const verifierCases = feature("mentor-blocker-verification").items.filter((item) =>
+      item.id.startsWith("mentor-conduct-verifier-"),
+    );
+    expect(
+      Object.fromEntries(verifierCases.map((item) => [item.id, item.expectedOutput.requiredFacts])),
+    ).toEqual({
+      "mentor-conduct-verifier-direct-pl-v1": ["Expected blockers: [B1]"],
+      "mentor-conduct-verifier-reported-pl-v1": ["Expected blockers: []"],
+      "mentor-conduct-verifier-casual-profanity-pl-v1": ["Expected blockers: []"],
+    });
+    for (const item of verifierCases) {
+      expect(item.input.task.variables?.blockingError).toBe(
+        MENTOR_CONDUCT_BLOCKING_ERROR.description,
+      );
+      expect(item.input.sourceDocuments.map((document) => document.text)).toEqual([
+        MENTOR_CONDUCT_BLOCKING_ERROR.description,
+      ]);
+      expect(item.metadata).not.toHaveProperty("history");
+    }
+
+    const disengagement = feature("mentor-roleplay-chat").items.find(
+      (item) => item.id === "mentor-conduct-roleplay-disengagement-pl-v1",
+    );
+    if (!disengagement) throw new Error("Missing Mentor conduct disengagement case");
+    expect(disengagement.input.task.messages?.[0]).toEqual({
+      role: "system",
+      content: ROLEPLAY_MENTOR_CONDUCT_INSTRUCTIONS,
+    });
+    expect(disengagement.input.task.variables).not.toHaveProperty("blockingError");
+    expect(disengagement.input.task.variables).not.toHaveProperty("assessmentConfiguration");
+  });
+
+  it("renders measurable score bands and the platform conduct rule into Judge configuration prompts", () => {
+    const systemPrompt = (featureId: string) =>
+      prepareFeaturePrompt(feature(featureId).items[0]).request.messages[0].content;
+
+    const generator = systemPrompt("judge-config-create");
+    expect(generator).toContain("Use mutually exclusive bands");
+    expect(generator).toContain('"mostly correct"');
+    expect(generator).toContain("use 0 for neither distinction, 1 for exactly one, and 2 for both");
+    expect(generator).toContain("Never add a blocking error for insults");
+
+    const validator = systemPrompt("judge-config-validate");
+    expect(validator).toContain("mutually exclusive, observable thresholds for adjacent scores");
+    expect(validator).toContain('"mostly correct"');
+    expect(validator).toContain("Accept wording that makes the boundary clear");
+    expect(validator).toContain("Never recommend adding a blocking error for insults");
   });
 
   it("keeps actionable missing-badge policy, role and completion boundaries without demanding normal collection recitation", () => {
