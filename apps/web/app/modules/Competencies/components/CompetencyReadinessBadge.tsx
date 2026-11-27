@@ -31,9 +31,9 @@ export function CompetencyReadinessBadge({
         {t("competencies.readiness.missingCount", { count: missingCount })}
       </Badge>
     ))
-    .with(COMPETENCY_READINESS.NO_PROFILE, () => (
+    .with(COMPETENCY_READINESS.NO_TRACK, () => (
       <Badge variant="notStarted" className="w-fit whitespace-nowrap text-xs">
-        {t("competencies.readiness.noProfile")}
+        {t("competencies.readiness.noTrack")}
       </Badge>
     ))
     .exhaustive();

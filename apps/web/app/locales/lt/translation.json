@@ -349,7 +349,8 @@
       "quiz_attempt_graded": "Testą įvertino vertintojas",
       "quiz_grading_digest": "Nauji atsakymai laukia įvertinimo (kasdien)",
       "forum_mention": "Naudotojas paminėtas forumo temoje",
-      "discussion_reply": "Nauji atsakymai diskusijoje (sugrupuoti)"
+      "discussion_reply": "Nauji atsakymai diskusijoje (sugrupuoti)",
+      "tenant_user_capacity": "Įspėjimas apie naudotojų talpą"
     },
     "errors": {
       "incompleteButton": "Įveskite mygtuko tekstą ir URL.",
@@ -4293,7 +4294,8 @@
   },
   "user": {
     "error": {
-      "archived": "Jūsų paskyra suarchyvuota."
+      "archived": "Jūsų paskyra suarchyvuota.",
+      "userLimitReached": "Jūsų organizacija pasiekė naudotojų limitą. Suarchyvuokite arba ištrinkite naudotojus arba susisiekite su pagalba, kad limitas būtų padidintas."
     }
   },
   "studentCoursesView": {
@@ -6347,8 +6349,6 @@
       "placeholder": "Ieškoti organizacijų..."
     },
     "table": {
-      "name": "Vardas",
-      "host": "Šeimininkas",
       "status": "Būsena",
       "managing": "Valdymas",
       "lastActivity": "Paskutinė veikla",
@@ -6366,7 +6366,14 @@
         "title": "Veiksmai",
         "enterSupportMode": "Įjunkite palaikymo režimą",
         "impersonateUser": "Apsimesti naudotoju"
-      }
+      },
+      "organization": "Organizacija",
+      "accessEndsAt": "Prieiga baigiasi",
+      "unlimitedAccess": "Neribota",
+      "userCapacity": "Naudotojų talpa",
+      "userCapacityValue": "{{used}} / {{allowed}}",
+      "userCapacityUnlimitedValue": "{{used}} / ∞",
+      "accessEndedAgo": "baigėsi {{relativeTime}}"
     },
     "activityTrend": {
       "noActivity": "Veiklos nėra",
@@ -6423,14 +6430,22 @@
         "firstAdmin": "Pirmasis administratorius"
       },
       "accessEndsAtPlaceholder": "Neribota prieiga",
-      "accessEndsAtClear": "Pašalinti pabaigos datą"
+      "accessEndsAtClear": "Pašalinti pabaigos datą",
+      "maxUsers": "Didžiausias naudotojų skaičius",
+      "maxUsersHint": "Suarchyvuoti ir ištrinti naudotojai neskaičiuojami. Palikite tuščią, jei limito nėra.",
+      "maxUsersPlaceholder": "Be limito",
+      "maxUsersOverflowPercentage": "Leidžiamas viršijimas (%)",
+      "maxUsersOverflowPercentageHint": "Papildomi naudotojai virš maksimumo, pvz., 200 naudotojų + 10 % leidžia 220.",
+      "userLimitBelowUsage": "Šioje organizacijoje yra {{activeUsersCount}} aktyvių naudotojų, o šis limitas leidžia {{allowedUsersCount}}. Niekas nepraras prieigos, tačiau naudotojų pridėti ar išarchyvuoti nebus galima, kol nebus suarchyvuota {{excessUsersCount}}. Administratoriai bus informuoti."
     },
     "validation": {
       "nameRequired": "Reikalingas vardas",
       "hostInvalid": "Priegloba turi būti galiojantis URL",
       "adminEmailRequired": "Reikalingas administratoriaus el",
       "adminFirstNameRequired": "Būtinas administratoriaus vardas",
-      "adminLastNameRequired": "Reikalinga administratoriaus pavardė"
+      "adminLastNameRequired": "Reikalinga administratoriaus pavardė",
+      "maxUsersInvalid": "Didžiausias naudotojų skaičius turi būti sveikasis skaičius, ne mažesnis nei 1",
+      "maxUsersOverflowPercentageInvalid": "Viršijimas turi būti sveikasis skaičius nuo 0 iki 100"
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organizacija sėkmingai sukurta",
@@ -7985,7 +8000,8 @@
         "quiz_attempt_graded": "Besimokantysis, kurio testo atsakymai buvo įvertinti.",
         "quiz_grading_digest": "Naudotojai, galintys vertinti testų atsakymus.",
         "forum_mention": "Forumo įraše paminėti naudotojai.",
-        "discussion_reply": "Gijos arba temos dalyviai, kurie neperskaitė atsakymų programoje."
+        "discussion_reply": "Gijos arba temos dalyviai, kurie neperskaitė atsakymų programoje.",
+        "tenant_user_capacity": "Aktyvūs organizacijos administratoriai."
       }
     },
     "mapping": {
@@ -8088,7 +8104,8 @@
       "quizAttemptGraded": "Testas įvertintas",
       "quizGradingDigest": "Vertinimo eilės suvestinė",
       "forumUserMentioned": "Paminėjimas forume",
-      "discussionReply": "Nauji atsakymai diskusijoje"
+      "discussionReply": "Nauji atsakymai diskusijoje",
+      "tenantUserCapacity": "Įspėjimas apie naudotojų talpą"
     },
     "canvas": {
       "emptyTitle": "Jūsų automatizavimo drobė tuščia",
@@ -8256,7 +8273,13 @@
       "latestReply": "Naujausias atsakymas",
       "discussionUrl": "Diskusijos nuoroda",
       "unsubscribeUrl": "Atsisakymo nuoroda",
-      "unfollowUrl": "Nuoroda nebesekti"
+      "unfollowUrl": "Nuoroda nebesekti",
+      "capacityTitle": "Įspėjimo apie talpą pavadinimas",
+      "capacityMessage": "Įspėjimo apie talpą tekstas",
+      "activeUsersCount": "Aktyvūs naudotojai",
+      "maxUsers": "Naudotojai plane",
+      "allowedUsersCount": "Leidžiami naudotojai (su viršijimu)",
+      "usersUrl": "Naudotojų puslapio nuoroda"
     },
     "simulation": {
       "title": "Simuliacijos rezultatas",
@@ -8961,7 +8984,7 @@
   },
   "competencies": {
     "deleteCompetency": "Ištrinti kompetenciją",
-    "deleteCompetencyConfirmation": "Ištrinti „{{name}}“? Kompetencija bus visam laikui pašalinta iš visų pareigų profilių kartu su jos patvirtinimų istorija ir pridėtais dokumentais. Šio veiksmo negalima atšaukti.",
+    "deleteCompetencyConfirmation": "Ištrinti „{{name}}“? Kompetencija bus visam laikui pašalinta iš visų kompetencijų profilių kartu su jos patvirtinimų istorija ir pridėtais dokumentais. Šio veiksmo negalima atšaukti.",
     "notifications": {
       "categoryCreated": "Kategorija sukurta.",
       "categoryUpdated": "Kategorija atnaujinta.",
@@ -8969,11 +8992,11 @@
       "competencyCreated": "Kompetencija sukurta.",
       "competencyUpdated": "Kompetencija atnaujinta.",
       "competencyDeleted": "Kompetencija ištrinta.",
-      "profileCreated": "Pareigų profilis sukurtas.",
-      "profileUpdated": "Pareigų profilis atnaujintas.",
-      "profileDeleted": "Pareigų profilis ištrintas.",
-      "profileAssigned": "Pareigų profilis priskirtas.",
-      "profileRemoved": "Pareigų profilio priskyrimas pašalintas.",
+      "trackCreated": "Kompetencijų profilis sukurtas.",
+      "trackUpdated": "Kompetencijų profilis atnaujintas.",
+      "trackDeleted": "Kompetencijų profilis ištrintas.",
+      "trackAssigned": "Kompetencijų profiliai priskirti.",
+      "trackRemoved": "Kompetencijų profilių priskyrimai pašalinti.",
       "documentSubmitted": "Dokumentas pateiktas peržiūrai.",
       "observationConfirmed": "Stebėjimas patvirtintas.",
       "qualificationsRecognized": "Ankstesnės kvalifikacijos pripažintos.",
@@ -8988,9 +9011,9 @@
       "categoryDeleteFailed": "Nepavyko ištrinti kategorijos. Bandykite dar kartą.",
       "competencySaveFailed": "Nepavyko išsaugoti kompetencijos. Bandykite dar kartą.",
       "competencyDeleteFailed": "Nepavyko ištrinti kompetencijos. Bandykite dar kartą.",
-      "profileSaveFailed": "Nepavyko išsaugoti pareigų profilio. Bandykite dar kartą.",
-      "profileDeleteFailed": "Nepavyko ištrinti pareigų profilio. Bandykite dar kartą.",
-      "profileAssignmentFailed": "Nepavyko pakeisti pareigų profilio priskyrimo. Bandykite dar kartą.",
+      "trackSaveFailed": "Nepavyko išsaugoti kompetencijų profilio. Bandykite dar kartą.",
+      "trackDeleteFailed": "Nepavyko ištrinti kompetencijų profilio. Bandykite dar kartą.",
+      "trackAssignmentFailed": "Nepavyko pakeisti kompetencijų profilių priskyrimo. Bandykite dar kartą.",
       "evidenceSubmitFailed": "Nepavyko pateikti patvirtinimo. Bandykite dar kartą.",
       "reviewFailed": "Nepavyko išsaugoti peržiūros sprendimo. Bandykite dar kartą.",
       "revocationFailed": "Nepavyko atšaukti patvirtinimo. Bandykite dar kartą.",
@@ -9032,7 +9055,7 @@
       "saveChange": "Išsaugoti pakeitimą"
     },
     "searchCatalog": "Ieškoti kompetencijų…",
-    "searchProfiles": "Ieškoti pareigybių profilių…",
+    "searchTracks": "Ieškoti kompetencijų profilių…",
     "noSearchResults": "Rezultatų nerasta. Pabandykite kitą paieškos frazę.",
     "documents": "Dokumentai",
     "requiredDocuments": "Pateiktini dokumentai",
@@ -9054,16 +9077,16 @@
     "own": "Mano kompetencijos",
     "team": "Komandos kompetencijos",
     "people": "Darbuotojai",
-    "peopleDescription": "Peržiūrėkite priskirtus profilius ir dabartines kompetencijų būsenas.",
+    "peopleDescription": "Peržiūrėkite priskirtus kompetencijų profilius ir dabartines kompetencijų būsenas.",
     "review": "Laukia patvirtinimo",
     "plans": "Tobulėjimo planai",
     "catalog": "Kompetencijos",
-    "profiles": "Pareigybių profiliai",
+    "tracks": "Kompetencijų profiliai",
     "person": "Asmuo",
-    "profile": "Pareigybės profilis",
-    "compareProfile": "Palyginti su profiliu",
-    "assignedProfile": "Priskirtas profilis",
-    "noProfile": "Profilis nepriskirtas",
+    "track": "Kompetencijų profilis",
+    "compareTrack": "Palyginti su profiliu",
+    "assignedTrack": "Priskirti profiliai",
+    "noTrack": "Nėra kompetencijų profilio",
     "loading": "Įkeliamos kompetencijos...",
     "retry": "Bandyti dar kartą",
     "serviceError": "Nepavyko įkelti arba išsaugoti kompetencijų. Bandykite dar kartą.",
@@ -9116,7 +9139,7 @@
     "unavailableLevel": "Istorinis lygis",
     "archivedAccount": "Archyvuota paskyra",
     "coverageValue": "{{value}}%",
-    "coverage": "Profilio atitiktis",
+    "coverage": "Reikalavimų atitiktis",
     "notEvaluated": "Neįvertinta",
     "searchPeople": "Ieškoti asmens",
     "inspectCompetency": "Peržiūrėti kompetenciją",
@@ -9132,13 +9155,14 @@
     "noManualConditions": "Nėra šio tipo sąlygų.",
     "noEvidence": "Nėra peržiūros laukiančių įrodymų.",
     "reasonLabel": "Pagrindimas",
-    "editProfile": "Redaguoti pareigybės profilį",
-    "newProfile": "Naujas profilis",
+    "editTrack": "Redaguoti kompetencijų profilį",
+    "newTrack": "Naujas profilis",
     "requiredCompetencies": "Reikalingos kompetencijos",
-    "deleteProfile": "Ištrinti profilį",
-    "deleteProfileConfirmation": "Ištrinti profilį \"{{name}}\"?",
-    "profileInUse": "Prieš ištrindami profilį, pašalinkite jo priskyrimus darbuotojams.",
-    "noProfiles": "Pareigybių profilių dar nėra.",
+    "deleteTrack": "Ištrinti profilį",
+    "deleteTrackConfirmation": "Ištrinti profilį \"{{name}}\"?",
+    "trackInUse": "Prieš ištrindami profilį, pašalinkite jo priskyrimus darbuotojams.",
+    "trackLimitReached": "Didžiausias kompetencijų profilių skaičius vienam asmeniui: {{count}}.",
+    "noTracks": "Kompetencijų profilių dar nėra.",
     "requiredLevel": "Reikalingas lygis",
     "newAction": "Pridėti tobulėjimo veiksmą",
     "noActions": "Tobulėjimo veiksmų dar nėra.",
@@ -9237,11 +9261,11 @@
       "plans": "Spragas paverskite kursais, praktika, mentoryste ir pakartotiniu sertifikavimu.",
       "people": "Peržiūrėkite darbuotojus ir jų patvirtintas kompetencijas.",
       "catalog": "Bendras kompetencijų, lygių ir patvirtinimo būdų katalogas.",
-      "profiles": "Nustatykite, ko darbuotojui reikia saugiai ir savarankiškai atlikti pareigas.",
+      "tracks": "Nustatykite, ko darbuotojui reikia saugiai ir savarankiškai atlikti pareigas.",
       "settings": "Nustatykite galiojimo pabaigos įspėjimus.",
-      "overview": "Peržiūrėkite, kas atitinka savo pareigybės profilio reikalavimus ir kur reikia veiksmų.",
-      "setup": "Apibrėžkite kompetencijas, sujunkite jas į pareigybių profilius ir sukonfigūruokite galiojimo pabaigos priminimus.",
-      "ownWithoutProfile": "Stebėkite savo pareigoms reikalingas kompetencijas ir pateikite jas patvirtinančius dokumentus."
+      "overview": "Peržiūrėkite, kas atitinka savo kompetencijų profilių reikalavimus ir kur reikia veiksmų.",
+      "setup": "Apibrėžkite kompetencijas, sujunkite jas į kompetencijų profilius ir sukonfigūruokite galiojimo pabaigos priminimus.",
+      "ownWithoutTrack": "Stebėkite savo pareigoms reikalingas kompetencijas ir pateikite jas patvirtinančius dokumentus."
     },
     "setup": "Kompetencijų nustatymai",
     "levelComparison": "Jūsų / reikalaujamas",
@@ -9279,9 +9303,9 @@
       "count_other": "{{count}} kompetencijų",
       "count_few": "{{count}} kompetencijos",
       "count_many": "{{count}} kompetencijos",
-      "noProfileTitle": "Pareigybės profilis dar nepriskirtas",
-      "noProfileSelf": "Kai administratorius priskirs jums pareigybės profilį, matysite reikalingas kompetencijas ir tolesnius veiksmus.",
-      "noProfileOther": "Priskirkite pareigybės profilį skirtuke Apžvalga, kad matytumėte, kokių kompetencijų reikia šiam asmeniui.",
+      "noTrackTitle": "Kompetencijų profilis dar nepriskirtas",
+      "noTrackSelf": "Kai administratorius priskirs jums kompetencijų profilius, matysite reikalingas kompetencijas ir tolesnius veiksmus.",
+      "noTrackOther": "Priskirkite kompetencijų profilius skirtuke Apžvalga, kad matytumėte, kokių kompetencijų reikia šiam asmeniui.",
       "requirementsTitle": "Reikalingos kompetencijos",
       "filters": {
         "all": "Visos",
@@ -9319,7 +9343,7 @@
       "ready": "Atitinka reikalavimus",
       "expiring": "Netrukus baigsis",
       "missing": "Trūkstamos kompetencijos",
-      "noProfile": "Nėra pareigybės profilio",
+      "noTrack": "Nėra kompetencijų profilio",
       "missingCount_one": "Trūksta {{count}}",
       "missingCount_few": "Trūksta {{count}}",
       "missingCount_many": "Trūksta {{count}}",
@@ -9337,20 +9361,20 @@
       "expiringNote_few": "Patvirtinimas baigsis per {{count}} dienas",
       "expiringNote_many": "Patvirtinimas baigsis per {{count}} dienos",
       "expiringNote_other": "Patvirtinimas baigsis per {{count}} dienų",
-      "noProfileNote": "Priskirkite pareigybės profilį, kad stebėtumėte pasirengimą",
+      "noTrackNote": "Priskirkite kompetencijų profilius, kad stebėtumėte pasirengimą",
       "peopleTitle": "Žmonės",
-      "peopleDescription": "Priskirkite pareigybių profilius ir patikrinkite, kas turi visas reikiamas kompetencijas.",
+      "peopleDescription": "Priskirkite kompetencijų profilius ir patikrinkite, kas turi visas reikiamas kompetencijas.",
       "teamDescription": "Patikrinkite, kas jūsų komandoje turi visas reikiamas kompetencijas.",
       "viewMode": "Rodinys",
       "views": {
         "list": "Sąrašas",
         "matrix": "Matrica"
       },
-      "allProfiles": "Visi pareigybių profiliai",
+      "allTracks": "Visi kompetencijų profiliai",
       "clearFilters": "Išvalyti filtrus",
       "readiness": "Pasirengimas",
       "noMatches": "Pasirinktus filtrus atitinkančių žmonių nėra.",
-      "noMatrixPeople": "Šis pareigybės profilis dar niekam nepriskirtas.",
+      "noMatrixPeople": "Šis kompetencijų profilis dar niekam nepriskirtas.",
       "allPeople": "Visi"
     },
     "gettingStarted": {
@@ -9369,30 +9393,30 @@
           "description": "Aprašykite įgūdį, jo lygius ir tai, kaip patvirtinamas kiekvienas lygis: kursas, dokumentas ar stebėjimas.",
           "action": "Pridėti kompetenciją"
         },
-        "profiles": {
-          "title": "Sukurkite pareigybės profilį",
+        "tracks": {
+          "title": "Sukurkite kompetencijų profilį",
           "description": "Pasirinkite kompetencijas ir lygius, kurių reikalauja pareigybė.",
-          "action": "Sukurti pareigybės profilį"
+          "action": "Sukurti kompetencijų profilį"
         },
         "assignments": {
           "title": "Priskirkite žmones",
-          "description": "Priskirkite kiekvienam darbuotojui pareigybės profilį, kad pradėtumėte stebėti jo pasirengimą.",
-          "action": "Priskirti pareigybių profilius"
+          "description": "Priskirkite kiekvienam darbuotojui kompetencijų profilius, kad pradėtumėte stebėti jo pasirengimą.",
+          "action": "Priskirti kompetencijų profilius"
         }
       }
     },
     "setupSection": {
       "competenciesTitle": "Kompetencijos",
       "competenciesDescription": "Įgūdžiai su lygiais. Kiekvienas lygis nurodo, kas jį patvirtina: baigtas kursas, patvirtintas dokumentas ar stebėjimas.",
-      "profilesTitle": "Pareigybių profiliai",
-      "profilesDescription": "Sujunkite pareigybei reikalingas kompetencijas ir lygius, tada priskirkite profilį žmonėms skirtuke Apžvalga.",
+      "tracksTitle": "Kompetencijų profiliai",
+      "tracksDescription": "Sujunkite pareigybei reikalingas kompetencijas ir lygius, tada priskirkite profilius žmonėms skirtuke Apžvalga. Asmuo gali turėti daugiau nei vieną profilį.",
       "settingsTitle": "Galiojimo pabaigos priminimai",
       "settingsDescription": "Pasirinkite, kaip anksti žymėti baigiančius galioti patvirtinimus.",
       "emptyCompetenciesTitle": "Kompetencijų dar nėra",
-      "emptyCompetencies": "Pradėkite pridėdami įgūdžius, kuriuos stebi jūsų organizacija. Vėliau sugrupuosite juos į pareigybių profilius.",
-      "emptyProfilesTitle": "Pareigybių profilių dar nėra",
-      "emptyProfiles": "Sukurkite pareigybės profilį ir nurodykite, kokių kompetencijų reikalauja pareigybė.",
-      "emptyProfilesNeedsCompetencies": "Prieš kurdami pareigybės profilį pridėkite bent vieną kompetenciją su lygiu.",
+      "emptyCompetencies": "Pradėkite pridėdami įgūdžius, kuriuos stebi jūsų organizacija. Vėliau sugrupuosite juos į kompetencijų profilius.",
+      "emptyTracksTitle": "Kompetencijų profilių dar nėra",
+      "emptyTracks": "Sukurkite kompetencijų profilį ir nurodykite, kokių kompetencijų reikalauja pareigybė.",
+      "emptyTracksNeedsCompetencies": "Prieš kurdami kompetencijų profilį pridėkite bent vieną kompetenciją su lygiu.",
       "requiredCompetenciesCount": "Reikalingos kompetencijos",
       "assignedPeople": "Priskirti žmonės",
       "expiryOff": "Išj.",
@@ -9405,17 +9429,17 @@
       "competenciesNav_few": "{{count}} paruoštos naudoti",
       "competenciesNav_many": "{{count}} paruoštos naudoti",
       "competenciesNav_other": "{{count}} paruoštų naudoti",
-      "profilesNav_one": "{{count}} priskirtas asmuo",
-      "profilesNav_few": "{{count}} priskirti asmenys",
-      "profilesNav_many": "{{count}} priskirto asmens",
-      "profilesNav_other": "{{count}} priskirtų asmenų",
+      "tracksNav_one": "{{count}} priskirtas asmuo",
+      "tracksNav_few": "{{count}} priskirti asmenys",
+      "tracksNav_many": "{{count}} priskirto asmens",
+      "tracksNav_other": "{{count}} priskirtų asmenų",
       "expiryNav_one": "Įspėti likus {{count}} dienai",
       "expiryNav_few": "Įspėti likus {{count}} dienoms",
       "expiryNav_many": "Įspėti likus {{count}} dienos",
       "expiryNav_other": "Įspėti likus {{count}} dienų",
       "expiryNavOff": "Nesukonfigūruota"
     },
-    "compareWithAssigned": "Palyginti su: priskirtu profiliu",
+    "compareWithAssigned": "Palyginti su: priskirtais profiliais",
     "select": {
       "search": "Ieškoti…",
       "noResults": "Nieko nerasta."
@@ -9435,7 +9459,7 @@
       "pending_other": "{{count}} laukia",
       "notSubmitted": "Nepateikta"
     },
-    "profileEditor": {
+    "trackEditor": {
       "addCompetency": "Pridėti kompetenciją…",
       "requirementsHelp": "Pridėkite kiekvieną pareigybei reikalingą kompetenciją ir pasirinkite reikiamą lygį.",
       "noRequirements": "Kompetencijų dar nepridėta. Profilį sukursite naudodami „Pridėti kompetenciją“."
@@ -9506,7 +9530,7 @@
       "planGaps": "Suplanuoti šias kompetencijas",
       "emptyPlan": "Šiame plane dar nėra žingsnių.",
       "emptyTitle": "Ugdymo planų dar nėra",
-      "empty": "Planai čia atsiras žmonėms, kurių pareigybės profilyje trūksta kompetencijų. Pradėkite priskirdami profilius skirtuke Apžvalga."
+      "empty": "Planai čia atsiras žmonėms, kuriems trūksta kompetencijų iš jų kompetencijų profilių. Pradėkite priskirdami profilius skirtuke Apžvalga."
     },
     "planBuilder": {
       "title": "Pridėti žingsnių į planą",
@@ -9515,7 +9539,7 @@
       "stepsTitle": "Žingsniai",
       "stepsHelp": "Kiekvienas žingsnis skirtas vienam trūkstamam kompetencijos lygiui. Plano atsakingas asmuo ir tikslinė data taikomi visiems žingsniams.",
       "choosePerson": "Pasirinkite asmenį, kad matytumėte jo trūkstamas kompetencijas.",
-      "noGaps": "Šis asmuo atitinka visus savo pareigybės profilio reikalavimus.",
+      "noGaps": "Šis asmuo atitinka visus savo kompetencijų profilių reikalavimus.",
       "addStep": "Pridėti žingsnį",
       "submit_one": "Sukurti planą su {{count}} žingsniu",
       "submit_few": "Sukurti planą su {{count}} žingsniais",
@@ -9538,7 +9562,7 @@
     "stepEditor": {
       "title": "Redaguoti žingsnį"
     },
-    "profilesTable": {
+    "tracksTable": {
       "allCompetencies": "Visos kompetencijos"
     },
     "reviewTable": {

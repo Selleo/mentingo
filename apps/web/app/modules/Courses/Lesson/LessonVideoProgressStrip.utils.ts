@@ -105,6 +105,27 @@ export const isLessonVideoProgressSegmentComplete = (segment: LessonVideoProgres
 export const hasStartedLessonVideo = (segment: LessonVideoProgressSegment) =>
   segment.coveragePercent > 0 || segment.watchedRanges.length > 0;
 
+export const shouldBlockRequiredMediaLeave = ({
+  enabled,
+  lessonCompleted,
+  dismissed,
+  segments,
+}: {
+  enabled: boolean;
+  lessonCompleted: boolean;
+  dismissed: boolean;
+  segments: LessonVideoProgressSegment[];
+}) => {
+  if (!enabled || lessonCompleted || dismissed) return false;
+
+  const hasStartedMedia = segments.some(hasStartedLessonVideo);
+  const hasIncompleteMedia = segments.some(
+    (segment) => !isLessonVideoProgressSegmentComplete(segment),
+  );
+
+  return hasStartedMedia && hasIncompleteMedia;
+};
+
 export const getLessonVideoResumeTarget = (
   segments: LessonVideoProgressSegment[],
   lastActiveResourceEntityId: string | null,

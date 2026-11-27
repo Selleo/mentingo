@@ -12,17 +12,17 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 
-import { useCompetenciesProfileEditor } from "../hooks/useCompetenciesProfileEditor";
+import { useCompetenciesTrackEditor } from "../hooks/useCompetenciesTrackEditor";
 
 import { CompetenciesCompetencyPicker } from "./CompetenciesCompetencyPicker";
-import { CompetenciesProfileRequirementList } from "./CompetenciesProfileRequirementList";
+import { CompetenciesTrackRequirementList } from "./CompetenciesTrackRequirementList";
 import { CompetencyEditor } from "./CompetencyEditor";
 
-import type { CompetenciesProfileEditorOptions } from "../hooks/competencies-hooks.types";
+import type { CompetenciesTrackEditorOptions } from "../hooks/competencies-hooks.types";
 
-export type CompetenciesProfileEditorProps = CompetenciesProfileEditorOptions;
+export type CompetenciesTrackEditorProps = CompetenciesTrackEditorOptions;
 
-export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfileEditorProps) {
+export function CompetenciesTrackEditor({ track, close }: CompetenciesTrackEditorProps) {
   const {
     competencyEditorOpen,
     setCompetencyEditorOpen,
@@ -30,7 +30,7 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
     addRequirement,
     removeRequirement,
     updateRequirementLevel,
-    saveProfileDraft,
+    saveTrackDraft,
     t,
     execute,
     isPending,
@@ -42,7 +42,7 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
     setValue,
     isAvailableCompetency,
     isResolvingRequirements,
-  } = useCompetenciesProfileEditor({ profile, close });
+  } = useCompetenciesTrackEditor({ track, close });
   return (
     <Dialog
       open
@@ -55,26 +55,24 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
         aria-describedby={undefined}
       >
         <DialogHeader className="shrink-0 border-b border-neutral-200 px-6 py-5">
-          <DialogTitle>
-            {t(profile ? "competencies.editProfile" : "competencies.newProfile")}
-          </DialogTitle>
+          <DialogTitle>{t(track ? "competencies.editTrack" : "competencies.newTrack")}</DialogTitle>
         </DialogHeader>
-        <form className="flex min-h-0 flex-col" onSubmit={saveProfileDraft}>
+        <form className="flex min-h-0 flex-col" onSubmit={saveTrackDraft}>
           <div className="min-h-0 overflow-y-auto px-6 py-5">
             <fieldset disabled={isPending} className="flex flex-col gap-4">
               <div className="space-y-2">
-                <Label htmlFor="profile-name">{t("competencies.name")}</Label>
+                <Label htmlFor="track-name">{t("competencies.name")}</Label>
                 <Input
-                  id="profile-name"
+                  id="track-name"
                   required
                   value={value.name}
                   onChange={(event) => setValue({ ...value, name: event.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="profile-description">{t("competencies.description")}</Label>
+                <Label htmlFor="track-description">{t("competencies.description")}</Label>
                 <Textarea
-                  id="profile-description"
+                  id="track-description"
                   value={value.description}
                   onChange={(event) => setValue({ ...value, description: event.target.value })}
                 />
@@ -82,19 +80,19 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
               <div className="flex min-h-0 flex-col gap-3">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div className="space-y-0.5">
-                    <Label id="profile-requirements-label">
+                    <Label id="track-requirements-label">
                       {t("competencies.requiredCompetencies")}
                     </Label>
                     <p className="details text-neutral-700">
-                      {t("competencies.profileEditor.requirementsHelp")}
+                      {t("competencies.trackEditor.requirementsHelp")}
                     </p>
                   </div>
                   <CompetenciesCompetencyPicker
-                    label={t("competencies.profileEditor.addCompetency")}
+                    label={t("competencies.trackEditor.addCompetency")}
                     hideLabel
                     className="w-full sm:w-72"
                     value=""
-                    placeholder={t("competencies.profileEditor.addCompetency")}
+                    placeholder={t("competencies.trackEditor.addCompetency")}
                     isAvailable={isAvailableCompetency}
                     onChange={addRequirement}
                     createAction={{
@@ -105,10 +103,10 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
                 </div>
                 {value.requirements.length === 0 ? (
                   <p className="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-4 py-8 text-center text-sm text-neutral-800">
-                    {t("competencies.profileEditor.noRequirements")}
+                    {t("competencies.trackEditor.noRequirements")}
                   </p>
                 ) : (
-                  <CompetenciesProfileRequirementList
+                  <CompetenciesTrackRequirementList
                     removeRequirement={removeRequirement}
                     updateRequirementLevel={updateRequirementLevel}
                     catalog={catalog}
@@ -120,7 +118,7 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
             </fieldset>
           </div>
           <DialogFooter className="shrink-0 gap-2 border-t border-neutral-200 px-6 py-4 sm:gap-0">
-            {profile && (
+            {track && (
               <Button
                 type="button"
                 variant="outline"
@@ -155,12 +153,11 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t("competencies.deleteProfile")}</DialogTitle>
+              <DialogTitle>{t("competencies.deleteTrack")}</DialogTitle>
               <DialogDescription>
-                {t(
-                  assigned ? "competencies.profileInUse" : "competencies.deleteProfileConfirmation",
-                  { name: profile?.name },
-                )}
+                {t(assigned ? "competencies.trackInUse" : "competencies.deleteTrackConfirmation", {
+                  name: track?.name,
+                })}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -173,16 +170,16 @@ export function CompetenciesProfileEditor({ profile, close }: CompetenciesProfil
                 type="button"
                 disabled={isPending || assigned}
                 onClick={async () => {
-                  if (!profile) return;
+                  if (!track) return;
                   try {
                     await execute({
-                      operation: "delete_profile",
-                      id: profile.id,
-                      revision: profile.revision,
+                      operation: "delete_track",
+                      id: track.id,
+                      revision: track.revision,
                     });
                     close();
                   } catch {
-                    /* Retain the profile on failure. */
+                    /* Retain the track on failure. */
                   }
                 }}
               >

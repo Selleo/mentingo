@@ -24,6 +24,7 @@ import {
   MessagesSquare,
   UserCheck,
   UserPlus,
+  UsersRound,
   Video,
   VideoOff,
   Zap,
@@ -60,6 +61,7 @@ const TRIGGER_ICONS: Record<AutomationEventKind, LucideIcon> = {
   [AUTOMATION_EVENT_KINDS.QUIZ_GRADING_DIGEST]: ClipboardList,
   [AUTOMATION_EVENT_KINDS.FORUM_MENTION]: AtSign,
   [AUTOMATION_EVENT_KINDS.DISCUSSION_REPLY]: MessagesSquare,
+  [AUTOMATION_EVENT_KINDS.TENANT_USER_CAPACITY]: UsersRound,
 };
 
 export function AutomationNodeIcon({ eventKind }: { eventKind?: AutomationEventKind | null }) {

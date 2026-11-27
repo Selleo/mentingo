@@ -13473,6 +13473,10 @@
                 {
                   "const": "discussion_reply",
                   "type": "string"
+                },
+                {
+                  "const": "tenant_user_capacity",
+                  "type": "string"
                 }
               ]
             }
@@ -13631,6 +13635,10 @@
                 },
                 {
                   "const": "discussion_reply",
+                  "type": "string"
+                },
+                {
+                  "const": "tenant_user_capacity",
                   "type": "string"
                 }
               ]
@@ -14579,6 +14587,10 @@
                 },
                 {
                   "const": "discussion_reply",
+                  "type": "string"
+                },
+                {
+                  "const": "tenant_user_capacity",
                   "type": "string"
                 }
               ]
@@ -21148,7 +21160,7 @@
       "get": {
         "operationId": "IntegrationController_getTenants",
         "summary": "List all tenants for integration selection",
-        "description": "Returns all tenants accessible to the current integration API key.\n\nUse this endpoint first to discover which tenant IDs you can operate on. For the rest of integration endpoints, pass one of those IDs in the X-Tenant-Id header.",
+        "description": "Returns all tenants accessible to the current integration API key.\n\nUse this endpoint first to discover which tenant IDs you can operate on. For the rest of integration endpoints, pass one of those IDs in the X-Tenant-Id header.\n\nEach tenant includes its user capacity: maxUsers (null means no limit) and maxUsersOverflowPercentage.",
         "parameters": [
           {
             "name": "X-API-Key",
@@ -21193,7 +21205,7 @@
       "post": {
         "operationId": "IntegrationController_createTenant",
         "summary": "Create tenant via integration API",
-        "description": "Creates a new tenant and invites its initial admin user. Optional accessEndsAt blocks the tenant from that moment, like an inactive status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "description": "Creates a new tenant and invites its initial admin user. Optional accessEndsAt blocks the tenant from that moment, like an inactive status. Optional maxUsers caps the tenant's users (archived and deleted users don't count; null means no limit) and maxUsersOverflowPercentage allows that many percent more, e.g. 200 with 10 allows 220.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
         "parameters": [
           {
             "name": "X-API-Key",
@@ -21250,7 +21262,7 @@
       "patch": {
         "operationId": "IntegrationController_updateTenant",
         "summary": "Update tenant via integration API",
-        "description": "Updates the target tenant's name, host, status, or access end date. Send accessEndsAt as null to clear it.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "description": "Updates the target tenant's name, host, status, access end date, or user capacity. Send accessEndsAt or maxUsers as null to clear it. maxUsers caps the tenant's users (archived and deleted users don't count; null means no limit) and maxUsersOverflowPercentage allows that many percent more, e.g. 200 with 10 allows 220.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
         "parameters": [
           {
             "name": "X-API-Key",
@@ -21811,7 +21823,7 @@
       "post": {
         "operationId": "IntegrationController_createUser",
         "summary": "Create user via integration API",
-        "description": "Creates a new user inside the tenant selected by X-Tenant-Id.\n\nProvide the user payload in the request body. The response returns the created user ID so your external system can persist the Mentingo mapping.",
+        "description": "Creates a new user inside the tenant selected by X-Tenant-Id.\n\nProvide the user payload in the request body. The response returns the created user ID so your external system can persist the Mentingo mapping.\n\nFails with 409 user.error.userLimitReached when the tenant's user capacity is reached.",
         "parameters": [
           {
             "name": "X-API-Key",
@@ -22025,7 +22037,7 @@
       "patch": {
         "operationId": "IntegrationController_updateUser",
         "summary": "Update user via integration API",
-        "description": "Updates an existing tenant user identified by userId.\n\nOnly fields included in the body are modified. Use this endpoint for profile, role, or status synchronization from an external identity source.",
+        "description": "Updates an existing tenant user identified by userId.\n\nOnly fields included in the body are modified. Use this endpoint for profile, role, or status synchronization from an external identity source.\n\nUnarchiving a user fails with 409 user.error.userLimitReached when the tenant's user capacity is reached.",
         "parameters": [
           {
             "name": "X-API-Key",
@@ -26112,9 +26124,9 @@
         }
       }
     },
-    "/api/competencies/profiles": {
+    "/api/competencies/tracks": {
       "get": {
-        "operationId": "CompetenciesController_getCompetencyProfiles",
+        "operationId": "CompetenciesController_getCompetencyTracks",
         "parameters": [
           {
             "name": "page",
@@ -26174,7 +26186,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetCompetencyProfilesResponse"
+                  "$ref": "#/components/schemas/GetCompetencyTracksResponse"
                 }
               }
             }
@@ -26216,7 +26228,7 @@
             }
           },
           {
-            "name": "profileId",
+            "name": "trackId",
             "required": false,
             "in": "query",
             "schema": {
@@ -26231,7 +26243,7 @@
             "schema": {
               "anyOf": [
                 {
-                  "const": "no_profile",
+                  "const": "no_track",
                   "type": "string"
                 },
                 {
@@ -26285,7 +26297,7 @@
         "operationId": "CompetenciesController_getCompetencyMatrix",
         "parameters": [
           {
-            "name": "profileId",
+            "name": "trackId",
             "required": false,
             "in": "query",
             "schema": {
@@ -26503,7 +26515,7 @@
             }
           },
           {
-            "name": "profileId",
+            "name": "trackId",
             "required": false,
             "in": "query",
             "schema": {
@@ -75028,6 +75040,10 @@
                     {
                       "const": "discussion_reply",
                       "type": "string"
+                    },
+                    {
+                      "const": "tenant_user_capacity",
+                      "type": "string"
                     }
                   ]
                 },
@@ -79410,6 +79426,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -79552,6 +79572,10 @@
                       },
                       {
                         "const": "discussion_reply",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
                         "type": "string"
                       }
                     ]
@@ -83751,6 +83775,10 @@
                         {
                           "const": "discussion_reply",
                           "type": "string"
+                        },
+                        {
+                          "const": "tenant_user_capacity",
+                          "type": "string"
                         }
                       ]
                     },
@@ -83893,6 +83921,10 @@
                         },
                         {
                           "const": "discussion_reply",
+                          "type": "string"
+                        },
+                        {
+                          "const": "tenant_user_capacity",
                           "type": "string"
                         }
                       ]
@@ -88117,6 +88149,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -88259,6 +88295,10 @@
                       },
                       {
                         "const": "discussion_reply",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
                         "type": "string"
                       }
                     ]
@@ -92456,6 +92496,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -92598,6 +92642,10 @@
                       },
                       {
                         "const": "discussion_reply",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
                         "type": "string"
                       }
                     ]
@@ -96795,6 +96843,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -96937,6 +96989,10 @@
                       },
                       {
                         "const": "discussion_reply",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
                         "type": "string"
                       }
                     ]
@@ -101025,6 +101081,10 @@
               {
                 "const": "discussion_reply",
                 "type": "string"
+              },
+              {
+                "const": "tenant_user_capacity",
+                "type": "string"
               }
             ]
           },
@@ -105065,6 +105125,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -105207,6 +105271,10 @@
                       },
                       {
                         "const": "discussion_reply",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
                         "type": "string"
                       }
                     ]
@@ -109297,6 +109365,10 @@
                   {
                     "const": "discussion_reply",
                     "type": "string"
+                  },
+                  {
+                    "const": "tenant_user_capacity",
+                    "type": "string"
                   }
                 ]
               },
@@ -113302,6 +113374,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -113444,6 +113520,10 @@
                       },
                       {
                         "const": "discussion_reply",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
                         "type": "string"
                       }
                     ]
@@ -117683,6 +117763,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -117825,6 +117909,10 @@
                       },
                       {
                         "const": "discussion_reply",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
                         "type": "string"
                       }
                     ]
@@ -122068,6 +122156,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -122210,6 +122302,10 @@
                       },
                       {
                         "const": "discussion_reply",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
                         "type": "string"
                       }
                     ]
@@ -126407,6 +126503,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -126549,6 +126649,10 @@
                       },
                       {
                         "const": "discussion_reply",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
                         "type": "string"
                       }
                     ]
@@ -130757,6 +130861,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -130899,6 +131007,10 @@
                       },
                       {
                         "const": "discussion_reply",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
                         "type": "string"
                       }
                     ]
@@ -135096,6 +135208,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -135238,6 +135354,10 @@
                       },
                       {
                         "const": "discussion_reply",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
                         "type": "string"
                       }
                     ]
@@ -143150,6 +143270,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -143460,6 +143584,10 @@
                                           {
                                             "const": "discussion_reply",
                                             "type": "string"
+                                          },
+                                          {
+                                            "const": "tenant_user_capacity",
+                                            "type": "string"
                                           }
                                         ]
                                       },
@@ -143658,6 +143786,10 @@
                                                   },
                                                   {
                                                     "const": "discussion_reply",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "tenant_user_capacity",
                                                     "type": "string"
                                                   }
                                                 ]
@@ -144143,6 +144275,10 @@
                                                   {
                                                     "const": "discussion_reply",
                                                     "type": "string"
+                                                  },
+                                                  {
+                                                    "const": "tenant_user_capacity",
+                                                    "type": "string"
                                                   }
                                                 ]
                                               },
@@ -144341,6 +144477,10 @@
                                                           },
                                                           {
                                                             "const": "discussion_reply",
+                                                            "type": "string"
+                                                          },
+                                                          {
+                                                            "const": "tenant_user_capacity",
                                                             "type": "string"
                                                           }
                                                         ]
@@ -144798,6 +144938,10 @@
                     {
                       "const": "discussion_reply",
                       "type": "string"
+                    },
+                    {
+                      "const": "tenant_user_capacity",
+                      "type": "string"
                     }
                   ]
                 },
@@ -145209,6 +145353,10 @@
                             {
                               "const": "discussion_reply",
                               "type": "string"
+                            },
+                            {
+                              "const": "tenant_user_capacity",
+                              "type": "string"
                             }
                           ]
                         }
@@ -145512,6 +145660,10 @@
                     {
                       "const": "discussion_reply",
                       "type": "string"
+                    },
+                    {
+                      "const": "tenant_user_capacity",
+                      "type": "string"
                     }
                   ]
                 },
@@ -145750,6 +145902,10 @@
                                               {
                                                 "const": "discussion_reply",
                                                 "type": "string"
+                                              },
+                                              {
+                                                "const": "tenant_user_capacity",
+                                                "type": "string"
                                               }
                                             ]
                                           },
@@ -145948,6 +146104,10 @@
                                                       },
                                                       {
                                                         "const": "discussion_reply",
+                                                        "type": "string"
+                                                      },
+                                                      {
+                                                        "const": "tenant_user_capacity",
                                                         "type": "string"
                                                       }
                                                     ]
@@ -146415,6 +146575,10 @@
                                     {
                                       "const": "discussion_reply",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "tenant_user_capacity",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -146613,6 +146777,10 @@
                                             },
                                             {
                                               "const": "discussion_reply",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "tenant_user_capacity",
                                               "type": "string"
                                             }
                                           ]
@@ -147341,6 +147509,10 @@
                                 {
                                   "const": "discussion_reply",
                                   "type": "string"
+                                },
+                                {
+                                  "const": "tenant_user_capacity",
+                                  "type": "string"
                                 }
                               ]
                             }
@@ -147668,6 +147840,10 @@
                                     {
                                       "const": "discussion_reply",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "tenant_user_capacity",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -147866,6 +148042,10 @@
                                             },
                                             {
                                               "const": "discussion_reply",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "tenant_user_capacity",
                                               "type": "string"
                                             }
                                           ]
@@ -148329,6 +148509,10 @@
                                         {
                                           "const": "discussion_reply",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "tenant_user_capacity",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -148527,6 +148711,10 @@
                                                 },
                                                 {
                                                   "const": "discussion_reply",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
                                                   "type": "string"
                                                 }
                                               ]
@@ -149012,6 +149200,10 @@
                                                 {
                                                   "const": "discussion_reply",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -149210,6 +149402,10 @@
                                                         },
                                                         {
                                                           "const": "discussion_reply",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "tenant_user_capacity",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -149703,6 +149899,10 @@
                                         {
                                           "const": "discussion_reply",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "tenant_user_capacity",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -149901,6 +150101,10 @@
                                                 },
                                                 {
                                                   "const": "discussion_reply",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
                                                   "type": "string"
                                                 }
                                               ]
@@ -150386,6 +150590,10 @@
                                                 {
                                                   "const": "discussion_reply",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -150584,6 +150792,10 @@
                                                         },
                                                         {
                                                           "const": "discussion_reply",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "tenant_user_capacity",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -151077,6 +151289,10 @@
                                         {
                                           "const": "discussion_reply",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "tenant_user_capacity",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -151275,6 +151491,10 @@
                                                 },
                                                 {
                                                   "const": "discussion_reply",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
                                                   "type": "string"
                                                 }
                                               ]
@@ -151760,6 +151980,10 @@
                                                 {
                                                   "const": "discussion_reply",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -151958,6 +152182,10 @@
                                                         },
                                                         {
                                                           "const": "discussion_reply",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "tenant_user_capacity",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -152448,6 +152676,10 @@
                                     {
                                       "const": "discussion_reply",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "tenant_user_capacity",
+                                      "type": "string"
                                     }
                                   ]
                                 },
@@ -152646,6 +152878,10 @@
                                             },
                                             {
                                               "const": "discussion_reply",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "const": "tenant_user_capacity",
                                               "type": "string"
                                             }
                                           ]
@@ -153105,6 +153341,10 @@
                                         {
                                           "const": "discussion_reply",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "tenant_user_capacity",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -153303,6 +153543,10 @@
                                                 },
                                                 {
                                                   "const": "discussion_reply",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
                                                   "type": "string"
                                                 }
                                               ]
@@ -153788,6 +154032,10 @@
                                                 {
                                                   "const": "discussion_reply",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -153986,6 +154234,10 @@
                                                         },
                                                         {
                                                           "const": "discussion_reply",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "tenant_user_capacity",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -154500,6 +154752,10 @@
                                         {
                                           "const": "discussion_reply",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "tenant_user_capacity",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -154698,6 +154954,10 @@
                                                 },
                                                 {
                                                   "const": "discussion_reply",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
                                                   "type": "string"
                                                 }
                                               ]
@@ -155183,6 +155443,10 @@
                                                 {
                                                   "const": "discussion_reply",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -155381,6 +155645,10 @@
                                                         },
                                                         {
                                                           "const": "discussion_reply",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "tenant_user_capacity",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -155875,6 +156143,10 @@
                                         {
                                           "const": "discussion_reply",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "tenant_user_capacity",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -156073,6 +156345,10 @@
                                                 },
                                                 {
                                                   "const": "discussion_reply",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
                                                   "type": "string"
                                                 }
                                               ]
@@ -156538,6 +156814,10 @@
                                         {
                                           "const": "discussion_reply",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "tenant_user_capacity",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -156736,6 +157016,10 @@
                                                 },
                                                 {
                                                   "const": "discussion_reply",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
                                                   "type": "string"
                                                 }
                                               ]
@@ -157221,6 +157505,10 @@
                                                 {
                                                   "const": "discussion_reply",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -157419,6 +157707,10 @@
                                                         },
                                                         {
                                                           "const": "discussion_reply",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "tenant_user_capacity",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -157912,6 +158204,10 @@
                                         {
                                           "const": "discussion_reply",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "tenant_user_capacity",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -158110,6 +158406,10 @@
                                                 },
                                                 {
                                                   "const": "discussion_reply",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
                                                   "type": "string"
                                                 }
                                               ]
@@ -158595,6 +158895,10 @@
                                                 {
                                                   "const": "discussion_reply",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -158793,6 +159097,10 @@
                                                         },
                                                         {
                                                           "const": "discussion_reply",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "tenant_user_capacity",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -159286,6 +159594,10 @@
                                         {
                                           "const": "discussion_reply",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "tenant_user_capacity",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -159484,6 +159796,10 @@
                                                 },
                                                 {
                                                   "const": "discussion_reply",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
                                                   "type": "string"
                                                 }
                                               ]
@@ -159969,6 +160285,10 @@
                                                 {
                                                   "const": "discussion_reply",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -160167,6 +160487,10 @@
                                                         },
                                                         {
                                                           "const": "discussion_reply",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "tenant_user_capacity",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -160660,6 +160984,10 @@
                                         {
                                           "const": "discussion_reply",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "tenant_user_capacity",
+                                          "type": "string"
                                         }
                                       ]
                                     },
@@ -160858,6 +161186,10 @@
                                                 },
                                                 {
                                                   "const": "discussion_reply",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
                                                   "type": "string"
                                                 }
                                               ]
@@ -161343,6 +161675,10 @@
                                                 {
                                                   "const": "discussion_reply",
                                                   "type": "string"
+                                                },
+                                                {
+                                                  "const": "tenant_user_capacity",
+                                                  "type": "string"
                                                 }
                                               ]
                                             },
@@ -161541,6 +161877,10 @@
                                                         },
                                                         {
                                                           "const": "discussion_reply",
+                                                          "type": "string"
+                                                        },
+                                                        {
+                                                          "const": "tenant_user_capacity",
                                                           "type": "string"
                                                         }
                                                       ]
@@ -162004,6 +162344,10 @@
                     {
                       "const": "discussion_reply",
                       "type": "string"
+                    },
+                    {
+                      "const": "tenant_user_capacity",
+                      "type": "string"
                     }
                   ]
                 },
@@ -162317,6 +162661,10 @@
                       {
                         "const": "discussion_reply",
                         "type": "string"
+                      },
+                      {
+                        "const": "tenant_user_capacity",
+                        "type": "string"
                       }
                     ]
                   },
@@ -162557,6 +162905,10 @@
                                 },
                                 {
                                   "const": "discussion_reply",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "tenant_user_capacity",
                                   "type": "string"
                                 }
                               ]
@@ -178618,6 +178970,22 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "maxUsers": {
+                      "anyOf": [
+                        {
+                          "minimum": 1,
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "maxUsersOverflowPercentage": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
                     }
                   },
                   "required": [
@@ -178625,7 +178993,9 @@
                     "name",
                     "host",
                     "status",
-                    "accessEndsAt"
+                    "accessEndsAt",
+                    "maxUsers",
+                    "maxUsersOverflowPercentage"
                   ]
                 }
               },
@@ -178980,6 +179350,22 @@
                       "type": "null"
                     }
                   ]
+                },
+                "maxUsers": {
+                  "anyOf": [
+                    {
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "maxUsersOverflowPercentage": {
+                  "minimum": 0,
+                  "maximum": 100,
+                  "type": "integer"
                 }
               },
               "required": [
@@ -178987,7 +179373,9 @@
                 "name",
                 "host",
                 "status",
-                "accessEndsAt"
+                "accessEndsAt",
+                "maxUsers",
+                "maxUsersOverflowPercentage"
               ]
             }
           }
@@ -179030,6 +179418,22 @@
                 "type": "null"
               }
             ]
+          },
+          "maxUsers": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "maxUsersOverflowPercentage": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
           },
           "adminEmail": {
             "format": "email",
@@ -179126,6 +179530,22 @@
                   }
                 ]
               },
+              "maxUsers": {
+                "anyOf": [
+                  {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "maxUsersOverflowPercentage": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -179140,6 +179560,8 @@
               "status",
               "isManaging",
               "accessEndsAt",
+              "maxUsers",
+              "maxUsersOverflowPercentage",
               "createdAt",
               "updatedAt"
             ]
@@ -179183,6 +179605,22 @@
                 "type": "null"
               }
             ]
+          },
+          "maxUsers": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "maxUsersOverflowPercentage": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
           }
         }
       },
@@ -179228,6 +179666,22 @@
                   }
                 ]
               },
+              "maxUsers": {
+                "anyOf": [
+                  {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "maxUsersOverflowPercentage": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -179242,6 +179696,8 @@
               "status",
               "isManaging",
               "accessEndsAt",
+              "maxUsers",
+              "maxUsersOverflowPercentage",
               "createdAt",
               "updatedAt"
             ]
@@ -179723,6 +180179,22 @@
                   }
                 ]
               },
+              "maxUsers": {
+                "anyOf": [
+                  {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "maxUsersOverflowPercentage": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -179737,6 +180209,8 @@
               "status",
               "isManaging",
               "accessEndsAt",
+              "maxUsers",
+              "maxUsersOverflowPercentage",
               "createdAt",
               "updatedAt"
             ]
@@ -181186,6 +181660,22 @@
                         }
                       ]
                     },
+                    "maxUsers": {
+                      "anyOf": [
+                        {
+                          "minimum": 1,
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "maxUsersOverflowPercentage": {
+                      "minimum": 0,
+                      "maximum": 100,
+                      "type": "integer"
+                    },
                     "createdAt": {
                       "type": "string"
                     },
@@ -181200,6 +181690,8 @@
                     "status",
                     "isManaging",
                     "accessEndsAt",
+                    "maxUsers",
+                    "maxUsersOverflowPercentage",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -181495,59 +181987,94 @@
         "properties": {
           "data": {
             "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "host": {
-                "type": "string"
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "active",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
                     "type": "string"
                   },
-                  {
-                    "const": "inactive",
-                    "type": "string"
-                  }
-                ]
-              },
-              "isManaging": {
-                "type": "boolean"
-              },
-              "accessEndsAt": {
-                "anyOf": [
-                  {
-                    "format": "date-time",
+                  "name": {
                     "type": "string"
                   },
-                  {
-                    "type": "null"
+                  "host": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "inactive",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isManaging": {
+                    "type": "boolean"
+                  },
+                  "accessEndsAt": {
+                    "anyOf": [
+                      {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "maxUsers": {
+                    "anyOf": [
+                      {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "maxUsersOverflowPercentage": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
                   }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "host",
+                  "status",
+                  "isManaging",
+                  "accessEndsAt",
+                  "maxUsers",
+                  "maxUsersOverflowPercentage",
+                  "createdAt",
+                  "updatedAt"
                 ]
               },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
+              {
+                "type": "object",
+                "properties": {
+                  "activeUsersCount": {
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "activeUsersCount"
+                ]
               }
-            },
-            "required": [
-              "id",
-              "name",
-              "host",
-              "status",
-              "isManaging",
-              "accessEndsAt",
-              "createdAt",
-              "updatedAt"
             ]
           }
         },
@@ -181589,6 +182116,22 @@
                 "type": "null"
               }
             ]
+          },
+          "maxUsers": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "maxUsersOverflowPercentage": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
           }
         }
       },
@@ -181634,6 +182177,22 @@
                   }
                 ]
               },
+              "maxUsers": {
+                "anyOf": [
+                  {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "maxUsersOverflowPercentage": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -181648,6 +182207,8 @@
               "status",
               "isManaging",
               "accessEndsAt",
+              "maxUsers",
+              "maxUsersOverflowPercentage",
               "createdAt",
               "updatedAt"
             ]
@@ -198459,12 +199020,16 @@
               },
               "canPlan": {
                 "type": "boolean"
+              },
+              "maxTracksPerPerson": {
+                "type": "integer"
               }
             },
             "required": [
               "enabled",
               "canManage",
-              "canPlan"
+              "canPlan",
+              "maxTracksPerPerson"
             ]
           }
         },
@@ -198500,17 +199065,17 @@
                   "competencies": {
                     "type": "integer"
                   },
-                  "profiles": {
+                  "tracks": {
                     "type": "integer"
                   },
-                  "assignments": {
+                  "assignedPeople": {
                     "type": "integer"
                   }
                 },
                 "required": [
                   "competencies",
-                  "profiles",
-                  "assignments"
+                  "tracks",
+                  "assignedPeople"
                 ]
               }
             },
@@ -198712,7 +199277,7 @@
                         }
                       ]
                     },
-                    "profileCount": {
+                    "trackCount": {
                       "type": "integer"
                     }
                   },
@@ -198725,7 +199290,7 @@
                     "categoryId",
                     "levels",
                     "categoryName",
-                    "profileCount"
+                    "trackCount"
                   ]
                 }
               },
@@ -198759,7 +199324,7 @@
           "data"
         ]
       },
-      "GetCompetencyProfilesResponse": {
+      "GetCompetencyTracksResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -198867,26 +199432,24 @@
                     "name": {
                       "type": "string"
                     },
-                    "profileId": {
-                      "anyOf": [
-                        {
-                          "format": "uuid",
-                          "type": "string"
+                    "tracks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "profileName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                        "required": [
+                          "id",
+                          "name"
+                        ]
+                      }
                     },
                     "profilePictureUrl": {
                       "anyOf": [
@@ -198907,7 +199470,7 @@
                     "readiness": {
                       "anyOf": [
                         {
-                          "const": "no_profile",
+                          "const": "no_track",
                           "type": "string"
                         },
                         {
@@ -198928,8 +199491,7 @@
                   "required": [
                     "id",
                     "name",
-                    "profileId",
-                    "profileName",
+                    "tracks",
                     "profilePictureUrl",
                     "metCount",
                     "requirementCount",
@@ -198962,7 +199524,7 @@
                   "all": {
                     "type": "integer"
                   },
-                  "no_profile": {
+                  "no_track": {
                     "type": "integer"
                   },
                   "missing": {
@@ -198977,7 +199539,7 @@
                 },
                 "required": [
                   "all",
-                  "no_profile",
+                  "no_track",
                   "missing",
                   "expiring",
                   "met"
@@ -199097,7 +199659,7 @@
                   "perPage"
                 ]
               },
-              "profile": {
+              "track": {
                 "type": "object",
                 "properties": {
                   "id": {
@@ -199278,7 +199840,7 @@
             "required": [
               "data",
               "pagination",
-              "profile",
+              "track",
               "competencies"
             ]
           }
@@ -199684,59 +200246,55 @@
                   }
                 ]
               },
-              "profile": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "revision": {
-                        "type": "integer"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "description": {
-                        "type": "string"
-                      },
-                      "requirements": {
-                        "type": "array",
-                        "items": {
-                          "additionalProperties": false,
-                          "type": "object",
-                          "properties": {
-                            "competencyId": {
-                              "format": "uuid",
-                              "type": "string"
-                            },
-                            "levelId": {
-                              "minLength": 1,
-                              "maxLength": 100,
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "competencyId",
-                            "levelId"
-                          ]
-                        }
-                      }
+              "tracks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
                     },
-                    "required": [
-                      "id",
-                      "revision",
-                      "name",
-                      "description",
-                      "requirements"
-                    ]
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "requirements": {
+                      "type": "array",
+                      "items": {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "competencyId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "levelId": {
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "competencyId",
+                          "levelId"
+                        ]
+                      }
+                    }
                   },
-                  {
-                    "type": "null"
-                  }
-                ]
+                  "required": [
+                    "id",
+                    "revision",
+                    "name",
+                    "description",
+                    "requirements"
+                  ]
+                }
               },
               "assessment": {
                 "anyOf": [
@@ -199747,26 +200305,24 @@
                         "format": "uuid",
                         "type": "string"
                       },
-                      "profileId": {
-                        "anyOf": [
-                          {
-                            "format": "uuid",
-                            "type": "string"
+                      "tracks": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "revision": {
+                              "type": "integer"
+                            }
                           },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "profileRevision": {
-                        "anyOf": [
-                          {
-                            "type": "number"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
+                          "required": [
+                            "id",
+                            "revision"
+                          ]
+                        }
                       },
                       "asOf": {
                         "type": "string"
@@ -199790,7 +200346,7 @@
                       "readiness": {
                         "anyOf": [
                           {
-                            "const": "no_profile",
+                            "const": "no_track",
                             "type": "string"
                           },
                           {
@@ -199830,6 +200386,13 @@
                                 "competencyId",
                                 "levelId"
                               ]
+                            },
+                            "trackIds": {
+                              "type": "array",
+                              "items": {
+                                "format": "uuid",
+                                "type": "string"
+                              }
                             },
                             "met": {
                               "type": "boolean"
@@ -200021,6 +200584,7 @@
                           },
                           "required": [
                             "requirement",
+                            "trackIds",
                             "met",
                             "expiring",
                             "standing"
@@ -200030,8 +200594,7 @@
                     },
                     "required": [
                       "subjectId",
-                      "profileId",
-                      "profileRevision",
+                      "tracks",
                       "asOf",
                       "coverage",
                       "metCount",
@@ -200653,7 +201216,7 @@
               "asOf",
               "warningDays",
               "person",
-              "profile",
+              "tracks",
               "assessment",
               "competencies",
               "standings",
@@ -201070,7 +201633,7 @@
             "type": "object",
             "properties": {
               "operation": {
-                "const": "save_profile",
+                "const": "save_track",
                 "type": "string"
               },
               "id": {
@@ -201134,7 +201697,7 @@
             "type": "object",
             "properties": {
               "operation": {
-                "const": "delete_profile",
+                "const": "delete_track",
                 "type": "string"
               },
               "id": {
@@ -201157,29 +201720,27 @@
             "type": "object",
             "properties": {
               "operation": {
-                "const": "assign_profile",
+                "const": "assign_tracks",
                 "type": "string"
               },
               "subjectId": {
                 "format": "uuid",
                 "type": "string"
               },
-              "profileId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+              "trackIds": {
+                "maxItems": 5,
+                "uniqueItems": true,
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
               }
             },
             "required": [
               "operation",
               "subjectId",
-              "profileId"
+              "trackIds"
             ]
           },
           {

@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { QuizContextProvider } from "~/modules/Courses/components/QuizContextProvider";
 import i18next from "~/utils/mocks/i18next.mock";
 
+import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 import { makeQuizQuestion, makeQuizQuestionOption } from "../testFactories";
 
 import { FillInTheBlanksDnd } from "./dnd/FillInTheBlanksDnd";
@@ -138,8 +139,11 @@ describe("FillInTheBlanks", () => {
       />,
     );
 
+    expect(screen.getByTestId("blank:answer-2")).toHaveTextContent("wrong");
     expect(screen.getByText("Correct sentence:")).toBeInTheDocument();
-    expect(screen.getByText("correct")).toBeInTheDocument();
+    expect(
+      screen.getByTestId(LEARNING_HANDLES.FILL_IN_THE_BLANKS_DND_CORRECT_SENTENCE),
+    ).toHaveTextContent("correct");
   });
 });
 

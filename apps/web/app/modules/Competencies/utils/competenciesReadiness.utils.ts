@@ -5,7 +5,7 @@ export const COMPETENCY_READINESS = {
   MET: "met",
   MISSING: "missing",
   EXPIRING: "expiring",
-  NO_PROFILE: "no_profile",
+  NO_TRACK: "no_track",
 } as const satisfies Record<string, CompetencyReadiness>;
 
 /** Translation keys under `competencies.readiness` for each readiness value. */
@@ -13,13 +13,13 @@ export const READINESS_TRANSLATION_KEYS: Record<CompetencyReadiness, string> = {
   [COMPETENCY_READINESS.MET]: "ready",
   [COMPETENCY_READINESS.MISSING]: "gaps",
   [COMPETENCY_READINESS.EXPIRING]: "expiring",
-  [COMPETENCY_READINESS.NO_PROFILE]: "noProfile",
+  [COMPETENCY_READINESS.NO_TRACK]: "noTrack",
 };
 
 export const COMPETENCIES_SETUP_STEPS = {
   CATEGORIES: "categories",
   COMPETENCIES: "competencies",
-  PROFILES: "profiles",
+  TRACKS: "tracks",
   ASSIGNMENTS: "assignments",
 } as const;
 
@@ -32,7 +32,7 @@ export function getCompetenciesSetupProgress(summary: CompetenciesSummary, categ
   return {
     [COMPETENCIES_SETUP_STEPS.CATEGORIES]: categoryCount > 0,
     [COMPETENCIES_SETUP_STEPS.COMPETENCIES]: summary.setup.competencies > 0,
-    [COMPETENCIES_SETUP_STEPS.PROFILES]: summary.setup.profiles > 0,
-    [COMPETENCIES_SETUP_STEPS.ASSIGNMENTS]: summary.setup.assignments > 0,
+    [COMPETENCIES_SETUP_STEPS.TRACKS]: summary.setup.tracks > 0,
+    [COMPETENCIES_SETUP_STEPS.ASSIGNMENTS]: summary.setup.assignedPeople > 0,
   } satisfies Record<CompetenciesSetupStep, boolean>;
 }

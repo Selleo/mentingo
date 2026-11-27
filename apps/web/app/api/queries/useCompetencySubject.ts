@@ -2,14 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
-export function useCompetencySubject(subjectId: string, profileId?: string) {
+export function useCompetencySubject(subjectId: string, trackId?: string) {
   return useQuery({
-    queryKey: ["competencies", "subject", subjectId, profileId ?? null],
+    queryKey: ["competencies", "subject", subjectId, trackId ?? null],
     queryFn: async () =>
       (
         await ApiClient.api.competenciesControllerGetCompetencySubject(
           subjectId,
-          profileId ? { profileId } : {},
+          trackId ? { trackId } : {},
         )
       ).data.data,
     enabled: Boolean(subjectId),

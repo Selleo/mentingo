@@ -18,8 +18,8 @@
   },
   "harness": {
     "config": "apps/web/playwright.recording.config.ts",
-    "node": "22.15.0",
-    "pnpm": "10.22.0",
+    "node": "24.22.3",
+    "pnpm": "10.34.9",
     "install": [
       "cd ../.. && pnpm install --frozen-lockfile",
       "cd ../.. && pnpm -w packages:build",

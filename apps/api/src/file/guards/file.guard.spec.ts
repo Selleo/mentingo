@@ -55,7 +55,13 @@ const FILE_GUARD_PROBE = `
     const disallowedType = await rejectionMessage(() =>
       FileGuard.validateFile(file, { ...options, allowedTypes: ["image/jpeg"] }),
     );
-    process.stdout.write(JSON.stringify({ detectedType, validated, mimeMismatch, disallowedType }));
+    const googleSlidesExport = require("node:fs").readFileSync(
+      "./src/file/guards/fixtures/google-slides-streamed.pptx",
+    );
+    const streamedPresentation = await FileGuard.getFileType(googleSlidesExport);
+    process.stdout.write(
+      JSON.stringify({ detectedType, validated, mimeMismatch, disallowedType, streamedPresentation }),
+    );
   })().catch(error => { console.error(error); process.exitCode = 1; });
 `;
 
@@ -65,6 +71,7 @@ describe("FileGuard with the installed file-type module", () => {
     validated: { type: { ext: string; mime: string }; size: number };
     mimeMismatch: string | null;
     disallowedType: string | null;
+    streamedPresentation: { ext: string; mime: string };
   };
 
   beforeAll(() => {
@@ -89,5 +96,12 @@ describe("FileGuard with the installed file-type module", () => {
 
   it("rejects detected types outside the allowed list", () => {
     expect(result.disallowedType).toBe("files.toast.invalidFileType");
+  });
+
+  it("detects a streamed PPTX whose content types entry follows a large image", () => {
+    expect(result.streamedPresentation).toEqual({
+      ext: "pptx",
+      mime: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    });
   });
 });

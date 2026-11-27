@@ -367,30 +367,30 @@ export class QuizRuntimeService {
             );
           })
         : []),
-      ...question.dragAndDropOptions.map((option) =>
-        this.mapDeliveryOption(
-          question.id,
-          option.targetBlankId ?? option.id,
-          option.label,
-          option.displayOrder,
-          undefined,
-          hasFeedback,
-          Boolean(blankAnswers?.some((answer) => answer.selectedDragOptionId === option.id)),
-          hasFeedback
-            ? Boolean(
-                blankAnswers?.some((answer) => {
-                  const selectedOption = question.dragAndDropOptions.find(
-                    (dragOption) => dragOption.id === option.id,
-                  );
-                  return (
-                    answer.selectedDragOptionId === option.id &&
-                    selectedOption?.targetBlankId === answer.blankId
-                  );
-                }),
-              )
-            : null,
-        ),
-      ),
+      ...question.dragAndDropOptions.map((option) => {
+        // Options of a blank carry that blank's id, so `studentAnswer` is the word the learner
+        // placed in it, which may be another option's word.
+        const placedOptionId = option.targetBlankId
+          ? blankAnswers?.find(({ blankId }) => blankId === option.targetBlankId)
+              ?.selectedDragOptionId
+          : null;
+        const placedWord =
+          question.dragAndDropOptions.find(({ id }) => id === placedOptionId)?.label ?? null;
+
+        return {
+          ...this.mapDeliveryOption(
+            question.id,
+            option.targetBlankId ?? option.id,
+            option.label,
+            option.displayOrder,
+            undefined,
+            hasFeedback,
+            Boolean(blankAnswers?.some((answer) => answer.selectedDragOptionId === option.id)),
+            hasFeedback ? placedOptionId === option.id : null,
+          ),
+          studentAnswer: hasFeedback ? placedWord : null,
+        };
+      }),
       ...question.matchingPairs.map((pair) => {
         const submittedMatch =
           matchingAnswers?.find(({ pairId }) => pairId === pair.id)?.submittedMatch ?? null;

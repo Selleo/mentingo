@@ -890,31 +890,31 @@ describe("fill in the blanks drag-and-drop mapping", () => {
     ]);
   });
 
-  it("renders completed blanks from submitted values and keeps distractors in the word bank", () => {
+  it("shows the learner's own words in completed blanks and returns unused words to the bank", () => {
     const answers = getCompletedFillInTheBlanksDndAnswers(
       [
         {
           id: "o1",
-          optionText: "went",
+          optionText: "Stop",
           displayOrder: 1,
-          isCorrect: true,
-          isStudentAnswer: true,
-          studentAnswer: "went",
+          isCorrect: false,
+          isStudentAnswer: false,
+          studentAnswer: "Report",
         },
         {
           id: "o2",
-          optionText: "went",
+          optionText: "Report",
           displayOrder: 2,
-          isCorrect: true,
-          isStudentAnswer: false,
-          studentAnswer: "go",
+          isCorrect: false,
+          isStudentAnswer: true,
+          studentAnswer: "Continue",
         },
         {
           id: "o3",
-          optionText: "go",
+          optionText: "Continue",
           displayOrder: 3,
           isCorrect: false,
-          isStudentAnswer: false,
+          isStudentAnswer: true,
           studentAnswer: null,
         },
       ],
@@ -930,9 +930,39 @@ describe("fill in the blanks drag-and-drop mapping", () => {
         isStudentAnswer,
       })),
     ).toEqual([
-      { blankId: "blank:o1", value: "went", isCorrect: true, isStudentAnswer: true },
-      { blankId: "blank:o2", value: "go", isCorrect: true, isStudentAnswer: false },
-      { blankId: "blank_preset", value: "go", isCorrect: false, isStudentAnswer: false },
+      { blankId: "blank:o1", value: "Report", isCorrect: false, isStudentAnswer: true },
+      { blankId: "blank:o2", value: "Continue", isCorrect: false, isStudentAnswer: true },
+      { blankId: "blank_preset", value: "Stop", isCorrect: false, isStudentAnswer: false },
+    ]);
+  });
+
+  it("leaves blanks the learner skipped empty instead of filling in the correct word", () => {
+    const answers = getCompletedFillInTheBlanksDndAnswers(
+      [
+        {
+          id: "o1",
+          optionText: "Stop",
+          displayOrder: 1,
+          isCorrect: true,
+          isStudentAnswer: true,
+          studentAnswer: "Stop",
+        },
+        {
+          id: "o2",
+          optionText: "Report",
+          displayOrder: 2,
+          isCorrect: false,
+          isStudentAnswer: false,
+          studentAnswer: null,
+        },
+      ],
+      ["o1", "o2"],
+      2,
+    );
+
+    expect(answers.map(({ blankId, value }) => ({ blankId, value }))).toEqual([
+      { blankId: "blank:o1", value: "Stop" },
+      { blankId: "blank_preset", value: "Report" },
     ]);
   });
 });

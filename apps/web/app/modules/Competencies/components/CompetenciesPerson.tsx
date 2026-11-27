@@ -2,8 +2,8 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCompetencyProfiles } from "~/api/queries/useCompetencyProfiles";
 import { useCompetencySubject } from "~/api/queries/useCompetencySubject";
+import { useCompetencyTracks } from "~/api/queries/useCompetencyTracks";
 import { Button } from "~/components/ui/button";
 
 import { COMPETENCIES_HANDLES } from "../../../../e2e/data/competencies/handles";
@@ -11,7 +11,7 @@ import { CompetenciesError, CompetenciesLoading } from "../CompetenciesStates";
 import { PICKER_PAGE } from "../utils/competenciesPicker.utils";
 
 import { CompetenciesDocuments } from "./CompetenciesDocuments";
-import { CompetenciesProfilePicker } from "./CompetenciesProfilePicker";
+import { CompetenciesTrackPicker } from "./CompetenciesTrackPicker";
 import { CompetencySubject } from "./CompetencySubject";
 
 export function CompetenciesPerson({
@@ -30,17 +30,17 @@ export function CompetenciesPerson({
   onBack?: () => void;
 }) {
   const { t } = useTranslation();
-  const [compareProfileId, setCompareProfileId] = useState("");
-  const hasProfiles = Boolean(
-    useCompetencyProfiles(PICKER_PAGE, canCompare).data?.pagination.totalItems,
+  const [compareTrackId, setCompareTrackId] = useState("");
+  const hasTracks = Boolean(
+    useCompetencyTracks(PICKER_PAGE, canCompare).data?.pagination.totalItems,
   );
   const { data, isPending, isError, refetch } = useCompetencySubject(
     subjectId,
-    compareProfileId || undefined,
+    compareTrackId || undefined,
   );
   useEffect(() => {
-    if (compareProfileId && isError) setCompareProfileId("");
-  }, [compareProfileId, isError]);
+    if (compareTrackId && isError) setCompareTrackId("");
+  }, [compareTrackId, isError]);
 
   return (
     <div
@@ -72,18 +72,18 @@ export function CompetenciesPerson({
             canManage={canManage}
             headerAction={
               canCompare &&
-              hasProfiles && (
-                <CompetenciesProfilePicker
-                  label={t("competencies.compareProfile")}
+              hasTracks && (
+                <CompetenciesTrackPicker
+                  label={t("competencies.compareTrack")}
                   hideLabel
-                  value={compareProfileId}
+                  value={compareTrackId}
                   emptyLabel={t("competencies.compareWithAssigned")}
-                  onChange={setCompareProfileId}
+                  onChange={setCompareTrackId}
                 />
               )
             }
           />
-          {data.profile && (
+          {data.tracks.length > 0 && (
             <CompetenciesDocuments
               key={subjectId}
               workspace={data}

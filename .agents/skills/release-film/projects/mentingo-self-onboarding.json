@@ -9008,7 +9008,7 @@
           ],
           "goal": "Manage competency categories.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9040,7 +9040,7 @@
           ],
           "goal": "Define competencies and level conditions.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9072,7 +9072,7 @@
           ],
           "goal": "Delete a disposable competency.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9084,9 +9084,9 @@
           ]
         },
         {
-          "id": "job-profiles",
-          "title": "Create and update job profiles",
-          "description": "Create and update job profiles in Mentingo.",
+          "id": "competency-tracks",
+          "title": "Create and update competency profiles",
+          "description": "Create and update competency profiles in Mentingo.",
           "audiences": [
             "administrator"
           ],
@@ -9101,13 +9101,13 @@
             "apps/web/app/modules/Competencies/**",
             "apps/api/src/competencies/**"
           ],
-          "goal": "Create and update job profiles.",
+          "goal": "Create and update competency profiles.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
-            "Create a named job profile.",
+            "Create a named competency profile.",
             "Add competencies with their required levels and save.",
             "Edit a required level and save the active profile."
           ],
@@ -9116,9 +9116,9 @@
           ]
         },
         {
-          "id": "assign-profile",
-          "title": "Assign and clear a person’s job profile",
-          "description": "Assign and clear a person’s job profile in Mentingo.",
+          "id": "assign-tracks",
+          "title": "Assign and clear a person’s competency profiles",
+          "description": "Assign and clear a person’s competency profiles in Mentingo.",
           "audiences": [
             "administrator"
           ],
@@ -9133,24 +9133,24 @@
             "apps/web/app/modules/Competencies/**",
             "apps/api/src/competencies/**"
           ],
-          "goal": "Assign and clear a person’s job profile.",
+          "goal": "Assign and clear a person’s competency profiles.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
             "Open a synthetic employee in Overview.",
-            "Assign an active job profile and inspect requirements.",
-            "Clear the profile assignment."
+            "Assign two competency profiles and inspect their combined requirements.",
+            "Clear the profile assignments."
           ],
           "outcomes": [
-            "The person’s view reflects the current assignment or its absence."
+            "The person’s view reflects the combined requirements of their current profiles or the absence of any profile."
           ]
         },
         {
-          "id": "delete-profile",
-          "title": "Delete an unassigned job profile",
-          "description": "Delete an unassigned job profile in Mentingo.",
+          "id": "delete-track",
+          "title": "Delete an unassigned competency profile",
+          "description": "Delete an unassigned competency profile in Mentingo.",
           "audiences": [
             "administrator"
           ],
@@ -9165,9 +9165,9 @@
             "apps/web/app/modules/Competencies/**",
             "apps/api/src/competencies/**"
           ],
-          "goal": "Delete an unassigned job profile.",
+          "goal": "Delete an unassigned competency profile.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9198,7 +9198,7 @@
           ],
           "goal": "Inspect personal competency requirements.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency profiles, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9230,7 +9230,7 @@
           ],
           "goal": "Submit a document for designated review.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9262,7 +9262,7 @@
           ],
           "goal": "Approve or reject assigned evidence.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9294,7 +9294,7 @@
           ],
           "goal": "Confirm an assigned observation.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9326,7 +9326,7 @@
           ],
           "goal": "Recognize prior qualifications.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9358,7 +9358,7 @@
           ],
           "goal": "Revoke an authorized confirmation.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9389,7 +9389,7 @@
           ],
           "goal": "Inspect team requirements and matrix.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9421,7 +9421,7 @@
           ],
           "goal": "Apply and restore an administrative condition override.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9453,7 +9453,7 @@
           ],
           "goal": "Configure expiry reminders.",
           "preconditions": [
-            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, profiles, people and evidence.",
+            "The isolated tenant is entitled and connected to the real competencies plugin with localized synthetic categories, competency tracks, people and evidence.",
             "The intended actor has the required permissions or verifier designation; all destructive targets are disposable. Never self-assess or record real personal documents."
           ],
           "actions": [
@@ -9477,13 +9477,13 @@
           ]
         },
         {
-          "key": "competencies.profiles",
-          "title": "Maintain and assign job profiles",
-          "description": "Maintain and assign job profiles in Mentingo.",
+          "key": "competencies.tracks",
+          "title": "Maintain and assign competency tracks",
+          "description": "Maintain and assign competency tracks in Mentingo.",
           "flowIds": [
-            "job-profiles",
-            "assign-profile",
-            "delete-profile"
+            "competency-tracks",
+            "assign-tracks",
+            "delete-track"
           ]
         },
         {

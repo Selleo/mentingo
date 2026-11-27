@@ -36,7 +36,7 @@ export function CompetenciesCatalogTable({ competencies, onEdit }: CompetenciesC
             {t("competencies.catalogTable.confirmedBy")}
           </TableHead>
           <TableHead className={cn(tableHeadClassName, "whitespace-nowrap pr-6")}>
-            {t("competencies.setupSection.profilesTitle")}
+            {t("competencies.setupSection.tracksTitle")}
           </TableHead>
         </TableRow>
       </TableHeader>
@@ -111,7 +111,7 @@ export function CompetenciesCatalogTable({ competencies, onEdit }: CompetenciesC
                   {!kinds.length && <span className="details text-neutral-700">-</span>}
                 </div>
               </TableCell>
-              <TableCell className="body-sm pr-6 text-neutral-900">{value.profileCount}</TableCell>
+              <TableCell className="body-sm pr-6 text-neutral-900">{value.trackCount}</TableCell>
             </TableRow>
           );
         })}

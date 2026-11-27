@@ -4,12 +4,16 @@ import { describe, expect, it } from "vitest";
 import { renderWith } from "~/utils/testUtils";
 
 import { LessonVideoProgressStrip } from "../LessonVideoProgressStrip";
+import { LESSON_PROGRESS_MEDIA_KIND } from "../LessonVideoProgressStrip.types";
 import {
   createLessonVideoProgressStore,
   getLessonVideoResumeTarget,
   hasStartedLessonVideo,
   parseLessonVideoProgressSegments,
+  shouldBlockRequiredMediaLeave,
 } from "../LessonVideoProgressStrip.utils";
+
+import type { LessonVideoProgressSegment } from "../LessonVideoProgressStrip.types";
 
 const lessonDescription = `
   <div>
@@ -38,6 +42,58 @@ const lessonDescription = `
     ></div>
   </div>
 `;
+
+describe("shouldBlockRequiredMediaLeave", () => {
+  const buildSegment = (
+    overrides: Partial<LessonVideoProgressSegment> = {},
+  ): LessonVideoProgressSegment => ({
+    id: "resource-one",
+    mediaKind: LESSON_PROGRESS_MEDIA_KIND.VIDEO,
+    resourceEntityId: "resource-one",
+    coveragePercent: 0,
+    isWatched: false,
+    watchedRanges: [],
+    durationSeconds: 100,
+    ...overrides,
+  });
+  const blockParams = { enabled: true, lessonCompleted: false, dismissed: false };
+
+  it("blocks leaving when a started video is not watched yet", () => {
+    const segments = [buildSegment({ coveragePercent: 0.4, watchedRanges: [[0, 40]] })];
+
+    expect(shouldBlockRequiredMediaLeave({ ...blockParams, segments })).toBe(true);
+  });
+
+  it("does not block leaving when every video is already watched", () => {
+    const segments = [
+      buildSegment({ coveragePercent: 0.95, watchedRanges: [[0, 95]] }),
+      buildSegment({
+        id: "resource-two",
+        resourceEntityId: "resource-two",
+        coveragePercent: 1,
+        isWatched: true,
+        watchedRanges: [[0, 100]],
+      }),
+    ];
+
+    expect(shouldBlockRequiredMediaLeave({ ...blockParams, segments })).toBe(false);
+  });
+
+  it("blocks leaving when one of several videos is still incomplete", () => {
+    const segments = [
+      buildSegment({ coveragePercent: 1, isWatched: true, watchedRanges: [[0, 100]] }),
+      buildSegment({ id: "resource-two", resourceEntityId: "resource-two" }),
+    ];
+
+    expect(shouldBlockRequiredMediaLeave({ ...blockParams, segments })).toBe(true);
+  });
+
+  it("does not block leaving before any video was started", () => {
+    expect(shouldBlockRequiredMediaLeave({ ...blockParams, segments: [buildSegment()] })).toBe(
+      false,
+    );
+  });
+});
 
 describe("LessonVideoProgressStrip", () => {
   it("selects the latest active incomplete video before earlier started videos", () => {
