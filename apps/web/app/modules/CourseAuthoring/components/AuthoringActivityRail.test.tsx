@@ -5,6 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 import i18next from "~/utils/mocks/i18next.mock";
 import { renderWith } from "~/utils/testUtils";
 
+import mediaRegression from "../../../../../../docs/evaluation-datasets/course-generator-media-v1.json";
+
 import { AuthoringActivityRail, AuthoringToolActivity } from "./AuthoringActivityRail";
 
 import type { AssetTaskView } from "../courseAuthoring.types";
@@ -367,41 +369,71 @@ describe("AuthoringActivityRail asset decisions", () => {
     expect(onSkipAsset).toHaveBeenCalledWith("asset-1");
   });
 
-  it("offers audio-only retry and ignores a stale omission for a failed podcast", async () => {
-    const onRetry = vi.fn();
-    const podcast: AssetTaskView = {
-      ...assetTask,
-      status: "failed",
-      action: null,
-      revision: null,
-      question: null,
-      request: {
-        ...assetTask.request,
-        purpose: "podcast",
-        altText: "Lesson discussion",
-        source: { type: "podcast", content: "Explore the trade-off" },
-      },
-    };
-    renderWith().render(
-      <AuthoringActivityRail
-        tasks={[]}
-        questions={[]}
-        assetTasks={[podcast]}
-        applications={[]}
-        connection="live"
-        omittedOptionalAssetIds={[podcast.request.assetId]}
-        onRetry={onRetry}
-        onStopRequest={vi.fn()}
-        onAnswer={vi.fn()}
-        onAssetAction={vi.fn()}
-        onSkipAsset={vi.fn()}
-      />,
-    );
+  it.each([false, true])(
+    "reviews a failed podcast separately from images (image present: %s)",
+    async (withImage) => {
+      const [fixture] = mediaRegression.features[0].items;
+      const { purpose, status, required } = fixture.input;
+      if (purpose !== "podcast" || status !== "failed") throw new Error("Invalid podcast fixture");
+      const onRetry = vi.fn();
+      const podcast: AssetTaskView = {
+        ...assetTask,
+        taskId: "task-podcast",
+        status,
+        action: null,
+        revision: null,
+        question: null,
+        request: {
+          ...assetTask.request,
+          assetId: "asset-podcast",
+          purpose,
+          required,
+          altText: "Lesson discussion",
+          source: { type: "podcast", content: "Explore the trade-off" },
+        },
+      };
+      renderWith().render(
+        <AuthoringActivityRail
+          tasks={[]}
+          questions={[]}
+          assetTasks={withImage ? [assetTask, podcast] : [podcast]}
+          applications={[]}
+          connection="live"
+          omittedOptionalAssetIds={[podcast.request.assetId]}
+          onRetry={onRetry}
+          onStopRequest={vi.fn()}
+          onAnswer={vi.fn()}
+          onAssetAction={vi.fn()}
+          onSkipAsset={vi.fn()}
+        />,
+      );
 
-    expect(screen.queryByRole("button", { name: "Skip image" })).not.toBeInTheDocument();
-    await userEvent.setup().click(screen.getByRole("button", { name: "Retry podcast" }));
-    expect(onRetry).toHaveBeenCalledWith(podcast.taskId);
-  });
+      expect(
+        screen.getByRole("heading", { name: fixture.expectedOutput.heading }),
+      ).toBeInTheDocument();
+      const podcasts = within(screen.getByRole("region", { name: fixture.expectedOutput.heading }));
+      for (const name of fixture.expectedOutput.disallowedActions) {
+        expect(podcasts.queryByRole("button", { name })).not.toBeInTheDocument();
+      }
+      const images = screen.queryByRole("region", { name: "Images to review" });
+      if (withImage) {
+        expect(images).toBeInTheDocument();
+        expect(
+          within(screen.getByRole("region", { name: "Images to review" })).queryByRole("button", {
+            name: "Retry podcast",
+          }),
+        ).not.toBeInTheDocument();
+      } else {
+        expect(images).not.toBeInTheDocument();
+      }
+      await userEvent
+        .setup()
+        .click(podcasts.getByRole("button", { name: fixture.expectedOutput.action }));
+      expect(onRetry.mock.calls.some(([taskId]) => taskId === podcast.taskId)).toBe(
+        fixture.expectedOutput.retryTargetsOriginalAsset,
+      );
+    },
+  );
 
   it("offers omission instead of retry only for a terminally failed podcast", async () => {
     const onSkipAsset = vi.fn();

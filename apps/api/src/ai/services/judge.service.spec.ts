@@ -1,5 +1,6 @@
 import { JudgeService } from "src/ai/services/judge.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
+import { MENTOR_CONDUCT_BLOCKING_ERROR } from "src/ai/utils/mentor-conduct";
 
 import type { AiJudgeRubric } from "src/ai/judge-configuration/judge-configuration.types";
 
@@ -135,6 +136,98 @@ describe("JudgeService blocking-error verification", () => {
         },
       ],
     });
+  });
+
+  it.each([true, false])(
+    "scores the built-in conduct blocker only when verified (%s)",
+    async (confirmed) => {
+      const conduct = {
+        blockingErrorRef: "B1",
+        learnerSafeFeedback: "Keep the interaction respectful.",
+      };
+      const { service, prompt, runtime } = setup([
+        { ...firstResult, triggeredBlockingErrors: [conduct] },
+        { criterionResults: [], triggeredBlockingErrors: confirmed ? [conduct] : [] },
+      ]);
+      const repository = service["aiRepository"] as unknown as {
+        findJudgeRubricByThreadId: jest.Mock;
+      };
+      repository.findJudgeRubricByThreadId.mockResolvedValueOnce({
+        lessonTitle: "Incident",
+        rubric: { ...rubric, blockingErrors: [] },
+      });
+      const messageService = service["messageService"] as unknown as {
+        findMessageHistory: jest.Mock;
+      };
+      messageService.findMessageHistory.mockResolvedValueOnce({
+        history: [{ content: confirmed ? "You're a damn idiot." : 'He called me "a damn idiot".' }],
+        userLanguage: "en",
+      });
+
+      const result = await run(service);
+
+      expect(prompt.loadPrompt).toHaveBeenCalledWith("judgeBlockingErrorVerificationPrompt", {
+        language: "en",
+        blockingError: MENTOR_CONDUCT_BLOCKING_ERROR.description,
+      });
+      const judgePromptVariables = prompt.loadPrompt.mock.calls[0][1];
+      expect(JSON.parse(judgePromptVariables.assessmentConfiguration).blockingErrors).toEqual([
+        { blockingErrorRef: "B1", description: MENTOR_CONDUCT_BLOCKING_ERROR.description },
+      ]);
+      expect(runtime.judgeMentor).toHaveBeenCalledTimes(2);
+      expect(result.data.passed).toBe(!confirmed);
+      expect(result.data.blockingErrors.map(({ blockingErrorId }) => blockingErrorId)).toEqual(
+        confirmed ? [MENTOR_CONDUCT_BLOCKING_ERROR.id] : [],
+      );
+    },
+  );
+
+  it("persists the built-in blocker as a snapshot without a lesson rule foreign key", async () => {
+    const transaction = {};
+    const repository = {
+      completeActiveThread: jest.fn().mockResolvedValue(true),
+      upsertJudgeJudgement: jest.fn().mockResolvedValue({ id: "judgement-id" }),
+      deleteJudgeCriterionJudgements: jest.fn(),
+      deleteJudgeBlockingErrorJudgements: jest.fn(),
+      insertJudgeBlockingErrorJudgements: jest.fn(),
+    };
+    const service = new JudgeService(
+      {
+        transaction: (runTransaction: (db: object) => unknown) => runTransaction(transaction),
+      } as never,
+      repository as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+    await service.persistJudgement("thread-id" as never, "en", rubric, {
+      score: 1,
+      maxScore: 1,
+      minScore: 1,
+      percentage: 100,
+      passed: false,
+      criteria: [],
+      blockingErrors: [
+        {
+          blockingErrorId: MENTOR_CONDUCT_BLOCKING_ERROR.id,
+          description: MENTOR_CONDUCT_BLOCKING_ERROR.description,
+          learnerSafeFeedback: "Keep the interaction respectful.",
+        },
+      ],
+    });
+    expect(repository.insertJudgeBlockingErrorJudgements).toHaveBeenCalledWith(
+      [
+        {
+          judgementId: "judgement-id",
+          blockingErrorId: null,
+          blockingErrorDescription: MENTOR_CONDUCT_BLOCKING_ERROR.description,
+          learnerSafeFeedback: "Keep the interaction respectful.",
+        },
+      ],
+      transaction,
+    );
   });
 
   it("does not make another model call when no blocking error was proposed", async () => {

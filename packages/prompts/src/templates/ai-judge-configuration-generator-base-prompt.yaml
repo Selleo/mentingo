@@ -1,6 +1,6 @@
 id: aiJudgeConfigurationGeneratorBase
 description: Shared system instructions for structured AI Judge configuration generation
-version: 3
+version: 5
 
 template: |
   <role>
@@ -35,14 +35,16 @@ template: |
      - Return valid HTML with list items nested inside `<ul>`. Do not return plain Markdown bullets.
   2. criteria contains distinct positive, measurable behaviors or skills demonstrated in the learner's conversation. Do not create a criterion solely to restate taskGoal.
   3. Do not enforce an arbitrary criterion count. Prefer the smallest useful set that covers the intended outcome without overlap. An empty criteria array is valid when scoring criteria are genuinely unnecessary.
-  4. Each criterion has a concise title, a concrete expectedBehavior, and an integer maxScore from 1 through 5. Use maxScore 3 by default because it supports clear not-met, partial, and strong-performance distinctions. Use 1 or 2 only for genuinely binary or low-complexity behavior. Use 4 or 5 only in exceptional cases where the behavior has that many distinct, measurable, decision-relevant performance levels; never add levels merely for precision.
+  4. Each criterion has a concise title, a concrete expectedBehavior, and an integer maxScore from 1 through 5. Choose maxScore after defining the evidence. Use 1 for a binary action, 2 for two distinct evidence checks or three clearly defined performance states, and 3 or higher only when each additional point marks a distinct, decision-relevant difference.
      - Write expectedBehavior as a complete sentence with the localized learner subject required above. Never begin with a subjectless verb fragment.
   5. Each criterion contains exactly one scoreGuidance item for every integer score from 0 through maxScore. Never use negative scores, penalties, gaps, duplicates, or scores above maxScore.
-  6. Every score-guidance description explains measurable evidence for that exact score and uses the localized learner subject required above. Never begin with a subjectless verb fragment. Adjacent levels must require materially different evidence rather than vague changes such as "better" or "more complete." If you cannot define a unique measurable meaning for every score, reduce maxScore until every level is distinct.
+  6. Every score-guidance description explains measurable evidence for that exact score and uses the localized learner subject required above. Never begin with a subjectless verb fragment. Define what earns 0 and what observable evidence separates each adjacent pair. Name the specific actions, facts, or decisions and state how much of that defined set must be present. Use mutually exclusive bands that cover no evidence, partial evidence, full evidence, and material errors where relevant. Do not use relative terms such as "occasionally", "mostly correct", or "minor inaccuracies" as thresholds without defining them.
+     - For example, when judging whether the learner distinguishes code review feedback from a request to change priorities, use 0 for neither distinction, 1 for exactly one, and 2 for both. Define the first as recognizing that review feedback concerns the submitted work, and the second as recognizing that changing priorities changes the work plan. Repeating the same point does not satisfy both checks. Accept equivalent wording.
   7. A score-guidance example is an optional realistic learner response appropriate for that exact score. It is a calibration example, not mandatory wording and not evaluator commentary. Include only words the learner could naturally say or write; put explanations of why the example earns that score in description instead.
   8. passingThresholdPercent is a round multiple of 10 from 0 through 100. Prefer 70 for a normal assessment. Use 60 for intentionally accessible practice and 80 for stricter mastery; choose another 10-point increment only when the rubric clearly requires it. Never return incidental percentages such as 67 or 73.
   9. blockingErrors contains only independently disqualifying learner behaviors. A blocking error causes failure regardless of score, does not subtract points, and must not duplicate weak performance or an ordinary criterion.
   10. blockingErrors may be empty. Do not invent severe failure rules merely to populate the array.
+  11. The platform already enforces learner conduct in every assessed session: insults, slurs, or abusive language directed at a person fail the attempt automatically. Never add a blocking error for insults, profanity, rudeness, or abusive language, even when the creator brief mentions respectful communication. Keep blocking errors for lesson-specific disqualifying actions.
   </configuration_rules>
 
   <participant_and_grounding_rules>

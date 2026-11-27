@@ -30,7 +30,7 @@ describe("normalized manual Core feature tasks (no model or application calls)",
       for (const path of item.sourcePaths)
         expect(existsSync(resolve(__dirname, "../../../..", path))).toBe(true);
     expect(catalogue.features).toHaveLength(31);
-    expect(catalogue.features.flatMap((item) => item.items)).toHaveLength(103);
+    expect(catalogue.features.flatMap((item) => item.items)).toHaveLength(107);
   });
 
   it.each(catalogue.features)(

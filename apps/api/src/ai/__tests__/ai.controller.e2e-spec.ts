@@ -8,6 +8,7 @@ import { AiPracticeService } from "src/ai/services/ai-practice.service";
 import { AiService } from "src/ai/services/ai.service";
 import { JudgeService } from "src/ai/services/judge.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
+import { MENTOR_CONDUCT_BLOCKING_ERROR } from "src/ai/utils/mentor-conduct";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -355,6 +356,79 @@ describe("AiController (e2e)", () => {
           }),
         ],
       });
+    });
+
+    it("reads back a practice judgement with the built-in conduct blocker", async () => {
+      const learner = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const [session] = await db
+        .insert(aiMentorPracticeSessions)
+        .values({
+          userId: learner.id,
+          practiceDate: "2026-09-11",
+          language: SUPPORTED_LANGUAGES.EN,
+          scenario: "Conduct read-back test",
+          status: "ready",
+        })
+        .returning();
+      const [thread] = await db
+        .insert(aiMentorThreads)
+        .values({
+          practiceSessionId: session.id,
+          userId: learner.id,
+          status: THREAD_STATUS.ACTIVE,
+        })
+        .returning();
+      const [configuration] = await db
+        .insert(aiJudgeConfigurations)
+        .values({
+          practiceSessionId: session.id,
+          taskGoal: { en: "Goal" },
+          passingThresholdPercent: 70,
+        })
+        .returning();
+
+      await app.get(JudgeService)["persistJudgement"](
+        thread.id,
+        SUPPORTED_LANGUAGES.EN,
+        {
+          configurationId: configuration.id,
+          taskGoal: "Goal",
+          passingThresholdPercent: 70,
+          criteria: [],
+          blockingErrors: [],
+        },
+        {
+          minScore: 1,
+          score: 0,
+          maxScore: 1,
+          percentage: 0,
+          passed: false,
+          criteria: [],
+          blockingErrors: [
+            {
+              blockingErrorId: MENTOR_CONDUCT_BLOCKING_ERROR.id,
+              description: MENTOR_CONDUCT_BLOCKING_ERROR.description,
+              learnerSafeFeedback: "You insulted the client.",
+            },
+          ],
+        },
+      );
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/ai/practice/${session.id}`)
+        .set("Cookie", await cookieFor(learner, app))
+        .expect(200);
+
+      expect(response.body.data.evaluation.blockingErrors).toEqual([
+        {
+          blockingErrorId: null,
+          description: MENTOR_CONDUCT_BLOCKING_ERROR.description,
+          learnerSafeFeedback: "You insulted the client.",
+        },
+      ]);
     });
   });
 

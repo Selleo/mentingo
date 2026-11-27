@@ -33,6 +33,7 @@ const contextRequestSchema = Type.Object({
   language: Type.Enum(SUPPORTED_LANGUAGES),
   lessonIds: Type.Array(Type.String({ format: "uuid" }), { maxItems: 100 }),
   targetKinds: Type.Array(Type.String()),
+  readOnly: Type.Optional(Type.Literal(true)),
   requestHash: Type.String({ minLength: 1 }),
 });
 

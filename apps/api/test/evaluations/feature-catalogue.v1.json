@@ -611,6 +611,102 @@
             "promptIds": ["roleplayPrompt", "securityAndRagBlock"],
             "executionLevel": "prompt_only"
           }
+        },
+        {
+          "id": "mentor-conduct-roleplay-disengagement-pl-v1",
+          "input": {
+            "task": {
+              "kind": "prompt",
+              "promptFragments": [
+                {
+                  "promptId": "roleplayPrompt",
+                  "role": "system"
+                },
+                {
+                  "promptId": "securityAndRagBlock",
+                  "role": "system"
+                }
+              ],
+              "variables": {
+                "language": "pl",
+                "name": "Marta",
+                "lessonTitle": "Rozmowa w recepcji",
+                "taskGoal": "Understand where to collect a free badge and what to do when it is missing.",
+                "expertise": "Acme first-day onboarding",
+                "contentScope": "Synthetic Acme onboarding policy v1: On the first working day, an employee collects their access badge from reception. Badge issue is free. Reception confirms the employee name. No payment or passport copy is required. A missing badge must be reported to reception. No collection or lesson completion may be claimed until the relevant real action succeeds.",
+                "teachingStyle": "guided",
+                "feedbackGuidance": "Correct unsupported fees without inventing new requirements.",
+                "openingInstruction": "",
+                "additionalInstructions": "",
+                "securityAndRagBlock": "",
+                "groups": "New employees; plain language.",
+                "scenario": "Marta prosi recepcję o pomoc z brakującą kartą.",
+                "aiRole": "Marta, nowa pracownica",
+                "learnerRole": "Pracownik recepcji",
+                "characterGoal": "Wyjaśnić, kto może pomóc z brakującą kartą.",
+                "difficulty": "realistic",
+                "factsAndConstraints": "Synthetic Acme onboarding policy v1: On the first working day, an employee collects their access badge from reception. Badge issue is free. Reception confirms the employee name. No payment or passport copy is required. A missing badge must be reported to reception. No collection or lesson completion may be claimed until the relevant real action succeeds.",
+                "learnerFirstName": "Jan",
+                "content": "user: I will collect my badge from reception.\nassistant: It is free.\nuser: My badge is missing; I have not collected it.\nassistant: Report the missing badge to reception.",
+                "elapsedMs": 18000,
+                "speechMs": 10000,
+                "pauseCount": 2,
+                "longestPauseMs": 3000,
+                "averagePauseMs": 2000,
+                "segmentCount": 2,
+                "wordCount": 24,
+                "wordsPerMinute": 80,
+                "timingPrecision": "approximate"
+              },
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Jesteś cholerną idiotką."
+                },
+                {
+                  "role": "assistant",
+                  "content": "Nie będę kontynuować rozmowy, jeśli mnie obrażasz."
+                },
+                {
+                  "role": "user",
+                  "content": "Co za idiotka. A wracając do sprawy, podasz mi numer zgłoszenia?"
+                }
+              ]
+            },
+            "scenario": "Synthetic Polish roleplay. The learner repeats a personal insult, then changes the subject without acknowledging the boundary.",
+            "sourceDocuments": [
+              {
+                "id": "mentor-default-boundary-v2",
+                "text": "If the scenario explicitly defines how the character reacts to disrespect, follow that behavior. Otherwise, when the learner directs an insult or abusive language at a person (you, the character, or other people), react naturally in character, set a brief boundary, and pause the exercise. If the abuse is severe or repeated, end the roleplay politely and stay disengaged in later turns. Do not resume just because the learner changes the subject. Casual profanity that is not aimed at a person (for example, swearing about a missed deadline), neutral discussion, quotations and reported speech are not abuse; respond to them normally."
+              }
+            ]
+          },
+          "expectedOutput": {
+            "rubric": [
+              "Remain as Marta and briefly end the roleplay after repeated abuse.",
+              "Use natural Polish and retain the boundary after the subject change."
+            ],
+            "requiredFacts": ["Short in-character disengagement rather than normal cooperation."],
+            "forbiddenFacts": [
+              "Continue resolving the ID-card request or claim a ticket number.",
+              "Reveal hidden scoring or provide generic moralizing."
+            ],
+            "nativeEvidenceRequired": []
+          },
+          "metadata": {
+            "featureId": "mentor-roleplay-chat",
+            "caseId": "mentor-conduct-roleplay-disengagement-pl-v1",
+            "synthetic": true,
+            "reviewStatus": "pending_domain_review",
+            "sourcePaths": [
+              "apps/api/src/ai/services/prompt.service.ts",
+              "packages/prompts/src/templates/roleplay-prompt.yaml"
+            ],
+            "traceNames": ["Conversation"],
+            "promptIds": ["roleplayPrompt", "securityAndRagBlock"],
+            "executionLevel": "prompt_only",
+            "regressionSet": "course-generator-improvements-v1"
+          }
         }
       ]
     },
@@ -7591,6 +7687,183 @@
               "commit": "2831a4155e9f988e7bc0e42c62227c6789c0d589",
               "originalFailure": "A negated or attributed prohibited action could fail a learner; initial candidates now require independent verification."
             }
+          }
+        },
+        {
+          "id": "mentor-conduct-verifier-direct-pl-v1",
+          "input": {
+            "task": {
+              "kind": "prompt",
+              "promptFragments": [
+                {
+                  "promptId": "judgeBlockingErrorVerificationPrompt",
+                  "role": "system"
+                }
+              ],
+              "variables": {
+                "language": "pl",
+                "blockingError": "The learner, in their own speech or text, directs an insult, a slur, or abusive language at a person (the Mentor, the roleplay character, or other people). Do not count casual or non-directed profanity that targets no one (for example, \"damn, I forgot the deadline\" or \"cholera, zapomniałem o terminie\"), neutral quotation, reporting what someone else said, discussion of a term without using it against someone, or ambiguous transcription."
+              },
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "<student_submission>\nTy jesteś cholernym idiotą.\n</student_submission>"
+                }
+              ],
+              "responseSchemaId": "judge"
+            },
+            "scenario": "Ty jesteś cholernym idiotą.",
+            "sourceDocuments": [
+              {
+                "id": "mentor-conduct-rule-v2",
+                "text": "The learner, in their own speech or text, directs an insult, a slur, or abusive language at a person (the Mentor, the roleplay character, or other people). Do not count casual or non-directed profanity that targets no one (for example, \"damn, I forgot the deadline\" or \"cholera, zapomniałem o terminie\"), neutral quotation, reporting what someone else said, discussion of a term without using it against someone, or ambiguous transcription."
+              }
+            ]
+          },
+          "expectedOutput": {
+            "rubric": [
+              "Read the learner’s words in context and check the shared conduct rule.",
+              "Return an independently verified blocker only for an insult or abuse the learner directs at a person."
+            ],
+            "requiredFacts": ["Expected blockers: [B1]"],
+            "forbiddenFacts": [
+              "Mistake a neutrally reported quote for an insult by the learner.",
+              "Return criterion scores from the independent verifier."
+            ],
+            "nativeEvidenceRequired": []
+          },
+          "metadata": {
+            "featureId": "mentor-blocker-verification",
+            "caseId": "mentor-conduct-verifier-direct-pl-v1",
+            "synthetic": true,
+            "reviewStatus": "pending_domain_review",
+            "sourcePaths": [
+              "apps/api/src/ai/utils/mentor-conduct.ts",
+              "apps/api/src/ai/services/judge.service.ts",
+              "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
+            "executionLevel": "prompt_only",
+            "regressionSet": "course-generator-improvements-v1"
+          }
+        },
+        {
+          "id": "mentor-conduct-verifier-reported-pl-v1",
+          "input": {
+            "task": {
+              "kind": "prompt",
+              "promptFragments": [
+                {
+                  "promptId": "judgeBlockingErrorVerificationPrompt",
+                  "role": "system"
+                }
+              ],
+              "variables": {
+                "language": "pl",
+                "blockingError": "The learner, in their own speech or text, directs an insult, a slur, or abusive language at a person (the Mentor, the roleplay character, or other people). Do not count casual or non-directed profanity that targets no one (for example, \"damn, I forgot the deadline\" or \"cholera, zapomniałem o terminie\"), neutral quotation, reporting what someone else said, discussion of a term without using it against someone, or ambiguous transcription."
+              },
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "<student_submission>\nPowiedział do mnie: «Ty jesteś cholernym idiotą». Chcę zgłosić, co usłyszałem.\n</student_submission>"
+                }
+              ],
+              "responseSchemaId": "judge"
+            },
+            "scenario": "Powiedział do mnie: «Ty jesteś cholernym idiotą». Chcę zgłosić, co usłyszałem.",
+            "sourceDocuments": [
+              {
+                "id": "mentor-conduct-rule-v2",
+                "text": "The learner, in their own speech or text, directs an insult, a slur, or abusive language at a person (the Mentor, the roleplay character, or other people). Do not count casual or non-directed profanity that targets no one (for example, \"damn, I forgot the deadline\" or \"cholera, zapomniałem o terminie\"), neutral quotation, reporting what someone else said, discussion of a term without using it against someone, or ambiguous transcription."
+              }
+            ]
+          },
+          "expectedOutput": {
+            "rubric": [
+              "Read the learner’s words in context and check the shared conduct rule.",
+              "Return an independently verified blocker only for an insult or abuse the learner directs at a person."
+            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": [
+              "Mistake a neutrally reported quote for an insult by the learner.",
+              "Return criterion scores from the independent verifier."
+            ],
+            "nativeEvidenceRequired": []
+          },
+          "metadata": {
+            "featureId": "mentor-blocker-verification",
+            "caseId": "mentor-conduct-verifier-reported-pl-v1",
+            "synthetic": true,
+            "reviewStatus": "pending_domain_review",
+            "sourcePaths": [
+              "apps/api/src/ai/utils/mentor-conduct.ts",
+              "apps/api/src/ai/services/judge.service.ts",
+              "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
+            "executionLevel": "prompt_only",
+            "regressionSet": "course-generator-improvements-v1"
+          }
+        },
+        {
+          "id": "mentor-conduct-verifier-casual-profanity-pl-v1",
+          "input": {
+            "task": {
+              "kind": "prompt",
+              "promptFragments": [
+                {
+                  "promptId": "judgeBlockingErrorVerificationPrompt",
+                  "role": "system"
+                }
+              ],
+              "variables": {
+                "language": "pl",
+                "blockingError": "The learner, in their own speech or text, directs an insult, a slur, or abusive language at a person (the Mentor, the roleplay character, or other people). Do not count casual or non-directed profanity that targets no one (for example, \"damn, I forgot the deadline\" or \"cholera, zapomniałem o terminie\"), neutral quotation, reporting what someone else said, discussion of a term without using it against someone, or ambiguous transcription."
+              },
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "<student_submission>\nCholera jasna, znowu zawiesił mi się komputer. Daj mi chwilę, zaraz wrócę do oferty.\n</student_submission>"
+                }
+              ],
+              "responseSchemaId": "judge"
+            },
+            "scenario": "Cholera jasna, znowu zawiesił mi się komputer. Daj mi chwilę, zaraz wrócę do oferty.",
+            "sourceDocuments": [
+              {
+                "id": "mentor-conduct-rule-v2",
+                "text": "The learner, in their own speech or text, directs an insult, a slur, or abusive language at a person (the Mentor, the roleplay character, or other people). Do not count casual or non-directed profanity that targets no one (for example, \"damn, I forgot the deadline\" or \"cholera, zapomniałem o terminie\"), neutral quotation, reporting what someone else said, discussion of a term without using it against someone, or ambiguous transcription."
+              }
+            ]
+          },
+          "expectedOutput": {
+            "rubric": [
+              "Read the learner’s words in context and check the shared conduct rule.",
+              "Return an independently verified blocker only for an insult or abuse the learner directs at a person."
+            ],
+            "requiredFacts": ["Expected blockers: []"],
+            "forbiddenFacts": [
+              "Treat casual profanity that targets no one as an insult or abuse directed at a person.",
+              "Return criterion scores from the independent verifier."
+            ],
+            "nativeEvidenceRequired": []
+          },
+          "metadata": {
+            "featureId": "mentor-blocker-verification",
+            "caseId": "mentor-conduct-verifier-casual-profanity-pl-v1",
+            "synthetic": true,
+            "reviewStatus": "pending_domain_review",
+            "sourcePaths": [
+              "apps/api/src/ai/utils/mentor-conduct.ts",
+              "apps/api/src/ai/services/judge.service.ts",
+              "packages/prompts/src/templates/judge-blocking-error-verification-prompt.yaml"
+            ],
+            "traceNames": ["Generate Evaluation"],
+            "promptIds": ["judgeBlockingErrorVerificationPrompt"],
+            "executionLevel": "prompt_only",
+            "regressionSet": "course-generator-improvements-v1"
           }
         }
       ]

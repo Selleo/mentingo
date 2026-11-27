@@ -8,6 +8,7 @@ import { PromptService } from "src/ai/services/prompt.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { MESSAGE_ROLE, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { evaluateAiJudgeResult } from "src/ai/utils/judgeEvaluation";
+import { MENTOR_CONDUCT_BLOCKING_ERROR } from "src/ai/utils/mentor-conduct";
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 
@@ -60,6 +61,10 @@ export class JudgeService {
       messages.history.map(({ content }) => content).join("\n"),
       "</student_submission>",
     ].join("\n");
+    const scoringRubric: AiJudgeRubric = {
+      ...rubric,
+      blockingErrors: [...rubric.blockingErrors, MENTOR_CONDUCT_BLOCKING_ERROR],
+    };
     const assessmentConfiguration = {
       taskGoal: rubric.taskGoal,
       passingThresholdPercent: rubric.passingThresholdPercent,
@@ -67,7 +72,7 @@ export class JudgeService {
         ...criterion,
         criterionRef: `C${index + 1}`,
       })),
-      blockingErrors: rubric.blockingErrors.map(({ id: _id, ...blockingError }, index) => ({
+      blockingErrors: scoringRubric.blockingErrors.map(({ id: _id, ...blockingError }, index) => ({
         ...blockingError,
         blockingErrorRef: `B${index + 1}`,
       })),
@@ -86,11 +91,11 @@ export class JudgeService {
       },
       () => this.chatService.judge(system, content),
     );
-    evaluateAiJudgeResult(judged, rubric);
+    evaluateAiJudgeResult(judged, scoringRubric);
     const verified = await Promise.all(
       judged.triggeredBlockingErrors.map(async (candidate) => {
         const index = Number(candidate.blockingErrorRef.slice(1)) - 1;
-        const blockingError = rubric.blockingErrors[index];
+        const blockingError = scoringRubric.blockingErrors[index];
         const verificationSystem = await this.promptService.loadPrompt(
           "judgeBlockingErrorVerificationPrompt",
           { language: messages.userLanguage, blockingError: blockingError.description },
@@ -105,7 +110,7 @@ export class JudgeService {
           () => this.chatService.judge(verificationSystem, content),
         );
         const checked = evaluateAiJudgeResult(verification, {
-          ...rubric,
+          ...scoringRubric,
           criteria: [],
           blockingErrors: [blockingError],
         });
@@ -121,7 +126,7 @@ export class JudgeService {
     );
     const response = evaluateAiJudgeResult(
       { ...judged, triggeredBlockingErrors: confirmedBlockingErrors },
-      rubric,
+      scoringRubric,
     );
 
     return { data: response, rubric };
@@ -184,7 +189,10 @@ export class JudgeService {
         await this.aiRepository.insertJudgeBlockingErrorJudgements(
           result.blockingErrors.map((blockingError) => ({
             judgementId: judgement.id,
-            blockingErrorId: blockingError.blockingErrorId,
+            blockingErrorId:
+              blockingError.blockingErrorId === MENTOR_CONDUCT_BLOCKING_ERROR.id
+                ? null
+                : blockingError.blockingErrorId,
             blockingErrorDescription: blockingError.description,
             learnerSafeFeedback: blockingError.learnerSafeFeedback,
           })),

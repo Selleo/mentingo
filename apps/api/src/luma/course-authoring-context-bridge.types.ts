@@ -18,6 +18,7 @@ export type CourseAuthoringContextRequest = {
   language: SupportedLanguages;
   lessonIds: UUIDType[];
   targetKinds: string[];
+  readOnly?: true;
   requestHash: string;
 };
 

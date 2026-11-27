@@ -109,7 +109,8 @@ const responseAiJudgeCriterionSchema = Type.Object({
 });
 
 const responseAiJudgeBlockingErrorSchema = Type.Object({
-  blockingErrorId: UUIDSchema,
+  // Null for the built-in Mentor conduct blocker, which has no configured row.
+  blockingErrorId: Type.Union([UUIDSchema, Type.Null()]),
   description: Type.String(),
   learnerSafeFeedback: Type.String(),
 });

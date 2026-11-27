@@ -7215,6 +7215,7 @@
       "yourAnswer": "Tu respuesta",
       "send": "Enviar",
       "assetDecisions": "Imágenes por revisar",
+      "podcastDecisions": "Pódcasts por revisar",
       "assetGuidance": "Aprueba otra generación del diagrama solo si quieres volver a intentarlo. Puedes omitir los elementos visuales opcionales.",
       "required": "Obligatorio",
       "optional": "Opcional",

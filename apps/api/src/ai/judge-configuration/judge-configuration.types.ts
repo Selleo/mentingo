@@ -62,7 +62,7 @@ export type EvaluatedAiJudgeCriterion = {
 };
 
 export type EvaluatedAiJudgeBlockingError = {
-  blockingErrorId: string;
+  blockingErrorId: string | null;
   description: string;
   learnerSafeFeedback: string;
 };
@@ -101,7 +101,7 @@ export type AiJudgeCriterionJudgementWrite = {
 
 export type AiJudgeBlockingErrorJudgementWrite = {
   judgementId: string;
-  blockingErrorId: string;
+  blockingErrorId: string | null;
   blockingErrorDescription: string;
   learnerSafeFeedback: string;
 };

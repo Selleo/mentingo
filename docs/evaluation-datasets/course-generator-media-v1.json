@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "project": "mentingo",
+  "features": [
+    {
+      "featureId": "course-authoring-media-review-ui",
+      "datasetName": "core/course-authoring-media-review-ui/v1",
+      "executionLevel": "web_component_regression",
+      "items": [
+        {
+          "id": "core-improvements-podcast-review-retry-v1",
+          "input": {
+            "purpose": "podcast",
+            "status": "failed",
+            "required": true
+          },
+          "expectedOutput": {
+            "heading": "Podcasts to review",
+            "action": "Retry podcast",
+            "disallowedActions": ["Skip image", "Retry image"],
+            "retryTargetsOriginalAsset": true
+          },
+          "metadata": {
+            "synthetic": true,
+            "regressionSet": "course-generator-improvements-v1",
+            "sourcePaths": [
+              "apps/web/app/modules/CourseAuthoring/components/AuthoringActivityRail.test.tsx"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

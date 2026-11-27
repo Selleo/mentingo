@@ -118,15 +118,12 @@ describe("PromptService learner-name personalization", () => {
       }),
     );
     expect(prompt).toBe("ROLEPLAY_PROMPT\n\nLEARNER_NAME_RULES");
-    expect(tokenService.countTokens).toHaveBeenCalledWith(
-      expect.any(String),
-      "ROLEPLAY_PROMPT\n\nLEARNER_NAME_RULES",
-    );
+    expect(tokenService.countTokens).toHaveBeenCalledWith(expect.any(String), prompt);
     expect(aiRepository.insertMessage).toHaveBeenCalledWith({
       tokenCount: 42,
       threadId,
       role: MESSAGE_ROLE.SYSTEM,
-      content: "ROLEPLAY_PROMPT\n\nLEARNER_NAME_RULES",
+      content: prompt,
     });
   });
 
@@ -269,6 +266,26 @@ describe("PromptService learner-name personalization", () => {
       const textPrompt = await service.buildPrompt(threadId, "Ile kosztuje szkolenie?");
 
       expect(textPrompt.some((message) => message.content === systemPrompt)).toBe(true);
+      for (const prompt of [textPrompt, voicePrompt]) {
+        const boundaries = prompt.find(({ content }) => content.includes("<conduct_boundaries>"));
+        expect(boundaries).toMatchObject({
+          id: "system-prompt",
+          role: MESSAGE_ROLE.SYSTEM,
+          content: systemPrompt,
+        });
+        expect(
+          prompt.filter(({ content }) => content.includes("<conduct_boundaries>")),
+        ).toHaveLength(1);
+        expect(boundaries?.content).toContain("stay disengaged in later turns");
+        expect(boundaries?.content).toContain("Casual profanity that is not aimed at a person");
+        if (type === AI_MENTOR_TYPE.TEACHER) {
+          expect(boundaries?.content).toContain(
+            "pause the lesson until the learner continues respectfully",
+          );
+        } else {
+          expect(boundaries?.content).toContain("react naturally in character");
+        }
+      }
       expect(textPrompt.some((message) => message.content === speechPolicy)).toBe(false);
     },
   );
