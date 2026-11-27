@@ -62,7 +62,7 @@ export type EvaluatedAiJudgeCriterion = {
 };
 
 export type EvaluatedAiJudgeBlockingError = {
-  blockingErrorId: string;
+  blockingErrorId: string | null;
   description: string;
   learnerSafeFeedback: string;
 };

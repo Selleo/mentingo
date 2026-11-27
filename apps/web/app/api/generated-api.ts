@@ -8101,8 +8101,7 @@ export interface GetTodayPracticeResponse {
         learnerSafeFeedback: string;
       }[];
       blockingErrors: {
-        /** @format uuid */
-        blockingErrorId: string;
+        blockingErrorId: string | null;
         description: string;
         learnerSafeFeedback: string;
       }[];
@@ -8148,8 +8147,7 @@ export interface CreatePracticeResponse {
         learnerSafeFeedback: string;
       }[];
       blockingErrors: {
-        /** @format uuid */
-        blockingErrorId: string;
+        blockingErrorId: string | null;
         description: string;
         learnerSafeFeedback: string;
       }[];
@@ -8186,8 +8184,7 @@ export interface GetPracticeResponse {
         learnerSafeFeedback: string;
       }[];
       blockingErrors: {
-        /** @format uuid */
-        blockingErrorId: string;
+        blockingErrorId: string | null;
         description: string;
         learnerSafeFeedback: string;
       }[];
@@ -8224,8 +8221,7 @@ export interface RetryPracticeResponse {
         learnerSafeFeedback: string;
       }[];
       blockingErrors: {
-        /** @format uuid */
-        blockingErrorId: string;
+        blockingErrorId: string | null;
         description: string;
         learnerSafeFeedback: string;
       }[];
@@ -8262,8 +8258,7 @@ export interface ReplayPracticeResponse {
         learnerSafeFeedback: string;
       }[];
       blockingErrors: {
-        /** @format uuid */
-        blockingErrorId: string;
+        blockingErrorId: string | null;
         description: string;
         learnerSafeFeedback: string;
       }[];
@@ -8340,8 +8335,7 @@ export interface JudgeThreadResponse {
       learnerSafeFeedback: string;
     }[];
     blockingErrors: {
-      /** @format uuid */
-      blockingErrorId: string;
+      blockingErrorId: string | null;
       description: string;
       learnerSafeFeedback: string;
     }[];

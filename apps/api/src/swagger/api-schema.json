@@ -65920,8 +65920,15 @@
                               "type": "object",
                               "properties": {
                                 "blockingErrorId": {
-                                  "format": "uuid",
-                                  "type": "string"
+                                  "anyOf": [
+                                    {
+                                      "format": "uuid",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 },
                                 "description": {
                                   "type": "string"
@@ -66237,8 +66244,15 @@
                           "type": "object",
                           "properties": {
                             "blockingErrorId": {
-                              "format": "uuid",
-                              "type": "string"
+                              "anyOf": [
+                                {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             },
                             "description": {
                               "type": "string"
@@ -66503,8 +66517,15 @@
                           "type": "object",
                           "properties": {
                             "blockingErrorId": {
-                              "format": "uuid",
-                              "type": "string"
+                              "anyOf": [
+                                {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             },
                             "description": {
                               "type": "string"
@@ -66769,8 +66790,15 @@
                           "type": "object",
                           "properties": {
                             "blockingErrorId": {
-                              "format": "uuid",
-                              "type": "string"
+                              "anyOf": [
+                                {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             },
                             "description": {
                               "type": "string"
@@ -67035,8 +67063,15 @@
                           "type": "object",
                           "properties": {
                             "blockingErrorId": {
-                              "format": "uuid",
-                              "type": "string"
+                              "anyOf": [
+                                {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             },
                             "description": {
                               "type": "string"
@@ -67498,8 +67533,15 @@
                   "type": "object",
                   "properties": {
                     "blockingErrorId": {
-                      "format": "uuid",
-                      "type": "string"
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "description": {
                       "type": "string"
