@@ -35,6 +35,7 @@ import {
   shouldRequireLearningModeForProgress,
 } from "src/common/utils/lessonLearningAccess";
 import { courseLearningContext } from "src/course-repetition/course-learning-context";
+import { CourseRepetitionService } from "src/course-repetition/course-repetition.service";
 import { LessonProgressChangedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -128,6 +129,7 @@ export class LessonService {
     private readonly quizRuntimeService: QuizRuntimeService,
     private readonly hostedVideoStatusService: HostedVideoStatusService,
     private readonly queueService: QueueService,
+    private readonly courseRepetitionService: CourseRepetitionService,
   ) {}
 
   async getLessonById(
@@ -808,6 +810,15 @@ export class LessonService {
 
     return await this.db.transaction(async (trx) => {
       try {
+        if (submissionOptions.attemptId) {
+          // Match the lesson view's lock order before modifying the attempt or learner progress.
+          await this.courseRepetitionService.lock(
+            accessCourseLessonWithDetails.courseId,
+            userId,
+            trx,
+          );
+        }
+
         const evaluationResult = submissionOptions.attemptId
           ? await this.quizRuntimeService.finalizeTimedAttempt(
               studentQuizAnswers,
