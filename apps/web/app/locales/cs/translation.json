@@ -355,7 +355,8 @@
       "forum_mention": "Uživatel zmíněn v tématu fóra",
       "discussion_reply": "Nové odpovědi v diskusi (souhrnně)",
       "tenant_user_capacity": "Upozornění na kapacitu uživatelů",
-      "content_marketplace_course_update": "Aktualizace kurzu z marketplace"
+      "content_marketplace_course_update": "Aktualizace kurzu z marketplace",
+      "admin_course_due_dates_at_risk": "Ohrožené termíny kurzů"
     },
     "errors": {
       "incompleteButton": "Zadejte popisek tlačítka a URL.",
@@ -7971,7 +7972,8 @@
       "score": "Průměrné skóre kvízů",
       "attempts": "Celkový počet pokusů v kvízech",
       "certificate": "Certifikát",
-      "lastActivity": "Poslední aktivita"
+      "lastActivity": "Poslední aktivita",
+      "dueDate": "Termín dokončení"
     },
     "operators": {
       "eq": "Je",
@@ -8339,7 +8341,8 @@
         "forum_mention": "Uživatelé zmínění v příspěvku na fóru.",
         "discussion_reply": "Účastníci vlákna nebo tématu, kteří si odpovědi v aplikaci nepřečetli.",
         "tenant_user_capacity": "Aktivní správci organizace.",
-        "content_marketplace_course_update": "Aktivní správci organizace."
+        "content_marketplace_course_update": "Aktivní správci organizace.",
+        "admin_course_due_dates_at_risk": "Uživatelé, kteří mohou spravovat zápisy do kurzů a mají zapnutá upozornění na kurzy po termínu."
       }
     },
     "mapping": {
@@ -8443,7 +8446,8 @@
       "forumUserMentioned": "Zmínka ve fóru",
       "discussionReply": "Nové odpovědi v diskusi",
       "tenantUserCapacity": "Upozornění na kapacitu uživatelů",
-      "contentMarketplaceCourseUpdate": "Aktualizace kurzu z marketplace"
+      "contentMarketplaceCourseUpdate": "Aktualizace kurzu z marketplace",
+      "courseDueDatesAtRisk": "Ohrožené termíny kurzů"
     },
     "canvas": {
       "emptyTitle": "Vaše plátno automatizace je prázdné",
@@ -8620,7 +8624,13 @@
       "marketplaceUrl": "Odkaz na marketplace",
       "coursesWithNewVersion": "Kurzy s novou verzí",
       "allCoursesWithNewVersion": "Všechny kurzy s novou verzí",
-      "coursesWithNewVersionCount": "Počet kurzů s novou verzí"
+      "coursesWithNewVersionCount": "Počet kurzů s novou verzí",
+      "overdueLearnersCount": "Počet studentů s kurzy po termínu",
+      "overdueCoursesCount": "Počet kurzů po termínu",
+      "reportUrl": "Odkaz na přehled",
+      "atRiskCoursesSummary": "Kurzy s blížícím se termínem",
+      "atRiskLearnersCount": "Počet studentů, kteří kurzy nedokončili",
+      "atRiskCoursesCount": "Počet kurzů s blížícím se termínem"
     },
     "simulation": {
       "title": "Výsledek simulace",

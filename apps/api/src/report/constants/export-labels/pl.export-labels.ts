@@ -56,6 +56,7 @@ export const PL_REPORT_EXPORT_LABELS: ReportExportLabels = {
   fieldProgress: "Postęp",
   fieldEnrolledAt: "Data zapisu",
   fieldCompletedAt: "Data ukończenia",
+  fieldDueDate: "Termin ukończenia",
   opEq: "to",
   opNeq: "to nie",
   opIn: "to dowolne z",

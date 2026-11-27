@@ -268,29 +268,8 @@ describe("EmailTemplateValidationService", () => {
       variables: {
         ...service.buildEmailPreviewVariables(definition.event),
         courses: [
-          {
-            courseTitle: "First course",
-            groups: [
-              {
-                groupName: "First group",
-                dueDate: "2026-09-01",
-                students: [
-                  { name: "Alex", email: "alex@example.com" },
-                  { name: "Sam", email: "sam@example.com" },
-                ],
-              },
-            ],
-          },
-          {
-            courseTitle: "Second course",
-            groups: [
-              {
-                groupName: "Second group",
-                dueDate: "2026-09-02",
-                students: [{ name: "Jo", email: "jo@example.com" }],
-              },
-            ],
-          },
+          { courseTitle: "First course", learnersCount: 2 },
+          { courseTitle: "Second course", learnersCount: 1 },
         ],
       },
       branding: {
@@ -299,16 +278,7 @@ describe("EmailTemplateValidationService", () => {
         logoUrl: "https://example.com/logo.png",
       },
     });
-    for (const value of [
-      "First course",
-      "Second course",
-      "First group",
-      "Second group",
-      "Alex",
-      "Sam",
-      "Jo",
-      "Acme",
-    ]) {
+    for (const value of ["First course", "Second course", "Acme"]) {
       expect(rendered.text).toContain(value);
     }
     expect(rendered.html).not.toContain("{{");

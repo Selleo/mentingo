@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
-import { and, eq, inArray, isNotNull, isNull, not, or, sql } from "drizzle-orm";
+import { and, eq, exists, gte, inArray, isNotNull, isNull, lt, not, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { DatabasePg, type UUIDType } from "src/common";
@@ -11,7 +11,6 @@ import { DB } from "src/storage/db/db.providers";
 import {
   courses,
   groupCourses,
-  groups,
   groupUsers,
   settings,
   studentCourses,
@@ -23,9 +22,10 @@ import type {
   CourseDueDateReminderDays,
   CourseDueDateReminderRecipient,
   CourseDueDateReminderWindow,
-  OverdueCoursesByLanguageRow,
-  OverdueCoursesEmailCourse,
+  CourseDueDateWindow,
+  DueDateCoursesByLanguageRow,
 } from "./course-due-date-reminder.types";
+import type { DueDateCourse } from "@repo/email-templates";
 
 @Injectable()
 export class CourseDueDateNotificationRepository {
@@ -138,142 +138,129 @@ export class CourseDueDateNotificationRepository {
       );
   }
 
-  async findOverdueCoursesByLanguage(
+  async findCoursesDueInWindowByLanguage(
     languages: SupportedLanguages[],
-  ): Promise<OverdueCoursesByLanguageRow[]> {
+    dueDateWindow: CourseDueDateWindow,
+  ): Promise<DueDateCoursesByLanguageRow[]> {
     if (languages.length === 0) return [];
-
-    const requestedLanguageValues = languages.map((language) => sql`${language}`);
 
     const requestedLanguages = this.db.$with("requested_languages").as(
       this.db
         .select({
           language: sql<SupportedLanguages>`unnest(ARRAY[${sql.join(
-            requestedLanguageValues,
+            languages.map((language) => sql`${language}`),
             sql`, `,
           )}]::text[])`.as("language"),
         })
         .from(sql`(SELECT 1) AS language_seed`),
     );
 
-    const requestedLanguage = sql<SupportedLanguages>`${requestedLanguages.language}`;
+    const unfinishedLearnerCourses = this.db
+      .$with("unfinished_learner_courses")
+      .as(this.selectUnfinishedLearnerCoursesDueIn(dueDateWindow));
 
-    const overdueRows = this.db.$with("overdue_rows").as(
-      this.db
-        .selectDistinct({
-          language: requestedLanguages.language,
-          courseId: sql<UUIDType>`${courses.id}`.as("course_id"),
-          courseTitle: this.localizationService
-            .getLocalizedSqlField(courses.title, requestedLanguage)
-            .as("course_title"),
-          groupId: sql<UUIDType>`${groups.id}`.as("group_id"),
-          groupName: this.localizationService
-            .getLocalizedSqlField(groups.name, requestedLanguage, groups)
-            .as("group_name"),
-          dueDate: sql<string>`TO_CHAR(${groupCourses.dueDate}, 'DD.MM.YYYY')`.as("due_date"),
-          studentName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`.as(
-            "student_name",
-          ),
-          studentEmail: users.email,
-        })
-        .from(groupCourses)
-        .innerJoin(requestedLanguages, sql`true`)
-        .innerJoin(courses, eq(courses.id, groupCourses.courseId))
-        .innerJoin(groups, eq(groups.id, groupCourses.groupId))
-        .innerJoin(
-          studentCourses,
-          and(
-            eq(studentCourses.courseId, courses.id),
-            or(
-              eq(studentCourses.enrolledByGroupId, groups.id),
-              and(
-                eq(groupCourses.isMandatory, true),
-                sql`EXISTS (
-                  SELECT 1
-                  FROM ${groupUsers}
-                  WHERE ${groupUsers.groupId} = ${groups.id}
-                    AND ${groupUsers.userId} = ${studentCourses.studentId}
-                    AND ${studentCourses.enrolledByGroupId} IS NULL
-                )`,
-              ),
-            ),
-          ),
-        )
-        .innerJoin(users, eq(users.id, studentCourses.studentId))
-        .where(
-          and(
-            isNotNull(groupCourses.dueDate),
-            sql`${groupCourses.dueDate} < NOW()`,
-            not(
-              userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
-                PERMISSIONS.COURSE_UPDATE,
-                PERMISSIONS.COURSE_UPDATE_OWN,
-              ]),
-            ),
-            isNull(users.deletedAt),
-            isNull(studentCourses.completedAt),
-          ),
-        ),
-    );
-
-    const groupSummaries = this.db.$with("group_summaries").as(
+    const courseLearnerCounts = this.db.$with("course_learner_counts").as(
       this.db
         .select({
-          language: overdueRows.language,
-          courseId: overdueRows.courseId,
-          courseTitle: overdueRows.courseTitle,
-          groupName: overdueRows.groupName,
-          dueDate: overdueRows.dueDate,
-          students: sql<OverdueCoursesEmailCourse["groups"][number]["students"]>`jsonb_agg(
-            jsonb_build_object(
-              'name', ${overdueRows.studentName},
-              'email', ${overdueRows.studentEmail}
-            )
-            ORDER BY ${overdueRows.studentName}, ${overdueRows.studentEmail}
-          )`.as("students"),
+          courseId: unfinishedLearnerCourses.courseId,
+          learnersCount: sql<number>`COUNT(*)::int`.as("learners_count"),
         })
-        .from(overdueRows)
-        .groupBy(
-          overdueRows.language,
-          overdueRows.courseId,
-          overdueRows.courseTitle,
-          overdueRows.groupId,
-          overdueRows.groupName,
-          overdueRows.dueDate,
-        ),
+        .from(unfinishedLearnerCourses)
+        .groupBy(unfinishedLearnerCourses.courseId),
     );
 
-    const courseSummaries = this.db.$with("course_summaries").as(
-      this.db
-        .select({
-          language: groupSummaries.language,
-          courseTitle: groupSummaries.courseTitle,
-          groups: sql<OverdueCoursesEmailCourse["groups"]>`jsonb_agg(
-            jsonb_build_object(
-              'groupName', ${groupSummaries.groupName},
-              'dueDate', ${groupSummaries.dueDate},
-              'students', ${groupSummaries.students}
-            )
-            ORDER BY ${groupSummaries.groupName}, ${groupSummaries.dueDate}
-          )`.as("groups"),
-        })
-        .from(groupSummaries)
-        .groupBy(groupSummaries.language, groupSummaries.courseId, groupSummaries.courseTitle),
+    const courseTitle = this.localizationService.getLocalizedSqlField(
+      courses.title,
+      sql<SupportedLanguages>`${requestedLanguages.language}`,
     );
 
     return this.db
-      .with(requestedLanguages, overdueRows, groupSummaries, courseSummaries)
+      .with(requestedLanguages, unfinishedLearnerCourses, courseLearnerCounts)
       .select({
-        language: courseSummaries.language,
-        courses: sql<OverdueCoursesEmailCourse[]>`jsonb_agg(
+        language: requestedLanguages.language,
+        courses: sql<DueDateCourse[]>`jsonb_agg(
           jsonb_build_object(
-            'courseTitle', ${courseSummaries.courseTitle},
-            'groups', ${courseSummaries.groups}
+            'courseTitle', ${courseTitle},
+            'learnersCount', ${courseLearnerCounts.learnersCount}
           )
-          ORDER BY ${courseSummaries.courseTitle}
+          ORDER BY ${courseLearnerCounts.learnersCount} DESC, ${courseTitle}
         )`.as("courses"),
       })
-      .from(courseSummaries)
-      .groupBy(courseSummaries.language);
+      .from(courseLearnerCounts)
+      .innerJoin(courses, eq(courses.id, courseLearnerCounts.courseId))
+      .innerJoin(requestedLanguages, sql`true`)
+      .groupBy(requestedLanguages.language);
+  }
+
+  async countLearnersWithCoursesDueInWindow(dueDateWindow: CourseDueDateWindow): Promise<number> {
+    const unfinishedLearnerCourses = this.db
+      .$with("unfinished_learner_courses")
+      .as(this.selectUnfinishedLearnerCoursesDueIn(dueDateWindow));
+
+    const [result] = await this.db
+      .with(unfinishedLearnerCourses)
+      .select({
+        learnersCount: sql<number>`COUNT(DISTINCT ${unfinishedLearnerCourses.learnerId})::int`,
+      })
+      .from(unfinishedLearnerCourses);
+
+    return result?.learnersCount ?? 0;
+  }
+
+  /**
+   * Learners who still have to finish a course whose group due date falls in the window: either the
+   * group enrolled them, or the course is mandatory for a group they belong to. Course editors are
+   * left out because they are not expected to complete courses.
+   */
+  private selectUnfinishedLearnerCoursesDueIn({ dueFrom, dueBefore }: CourseDueDateWindow) {
+    const isGroupMember = exists(
+      this.db
+        .select({ userId: groupUsers.userId })
+        .from(groupUsers)
+        .where(
+          and(
+            eq(groupUsers.groupId, groupCourses.groupId),
+            eq(groupUsers.userId, studentCourses.studentId),
+          ),
+        ),
+    );
+
+    return this.db
+      .selectDistinct({
+        courseId: sql<UUIDType>`${studentCourses.courseId}`.as("course_id"),
+        learnerId: sql<UUIDType>`${studentCourses.studentId}`.as("learner_id"),
+      })
+      .from(groupCourses)
+      .innerJoin(courses, and(eq(courses.id, groupCourses.courseId), eq(courses.isArchived, false)))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.courseId, groupCourses.courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNull(studentCourses.completedAt),
+          or(
+            eq(studentCourses.enrolledByGroupId, groupCourses.groupId),
+            and(
+              eq(groupCourses.isMandatory, true),
+              isNull(studentCourses.enrolledByGroupId),
+              isGroupMember,
+            ),
+          ),
+        ),
+      )
+      .innerJoin(users, and(eq(users.id, studentCourses.studentId), isNull(users.deletedAt)))
+      .where(
+        and(
+          isNotNull(groupCourses.dueDate),
+          dueFrom ? gte(groupCourses.dueDate, dueFrom) : undefined,
+          lt(groupCourses.dueDate, dueBefore),
+          not(
+            userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+              PERMISSIONS.COURSE_UPDATE,
+              PERMISSIONS.COURSE_UPDATE_OWN,
+            ]),
+          ),
+        ),
+      );
   }
 }

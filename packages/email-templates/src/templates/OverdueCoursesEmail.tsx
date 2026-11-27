@@ -1,24 +1,15 @@
-import { getOverdueCoursesEmailTranslations } from "translations/overdueCourses";
+import {
+  getOverdueCoursesEmailTranslations,
+  summarizeDueDateCourseTitles,
+} from "translations/dueDateCourses";
 
 import BaseEmailTemplate from "./BaseEmailTemplate";
 
+import type { DueDateCourse } from "translations/dueDateCourses";
+
 import { DefaultEmailSettings } from "types";
 
-export type OverdueCoursesEmailStudent = {
-  name: string;
-  email: string;
-};
-
-export type OverdueCoursesEmailGroup = {
-  groupName: string;
-  dueDate: string;
-  students: OverdueCoursesEmailStudent[];
-};
-
-export type OverdueCoursesEmailCourse = {
-  courseTitle: string;
-  groups: OverdueCoursesEmailGroup[];
-};
+export type OverdueCoursesEmailCourse = DueDateCourse;
 
 export type OverdueCoursesEmailProps = {
   courses: OverdueCoursesEmailCourse[];
@@ -32,7 +23,10 @@ export const OverdueCoursesEmail = ({
   companyName,
   language = "en",
 }: OverdueCoursesEmailProps) => {
-  const { heading, paragraphs, buttonText } = getOverdueCoursesEmailTranslations(language, courses);
+  const { heading, paragraphs, buttonText } = getOverdueCoursesEmailTranslations(
+    language,
+    summarizeDueDateCourseTitles(courses, language),
+  );
 
   return BaseEmailTemplate({
     heading,

@@ -17,7 +17,10 @@ import { getFinishedCourseEmailTranslations } from "./translations/finishedCours
 import { getLiveTrainingEmailButtonText } from "./translations/liveTrainingEmail";
 import { getMagicLinkEmailTranslations } from "./translations/magicLink";
 import { getNewUserEmailTranslations } from "./translations/newUser";
-import { getOverdueCoursesEmailTranslations } from "./translations/overdueCourses";
+import {
+  getCourseDueDatesAtRiskEmailTranslations,
+  getOverdueCoursesEmailTranslations,
+} from "./translations/dueDateCourses";
 import { getPasswordRecoveryEmailTranslations } from "./translations/passwordRecovery";
 import {
   getQuizAttemptGradedEmailTranslations,
@@ -411,37 +414,67 @@ export const EMAIL_TEMPLATE_DEFINITIONS = [
     variables: [
       defineEmailTemplateVariable(
         "courses",
-        "Overdue courses",
+        "Overdue courses (up to two named, then a count)",
         "collection",
         [
-          {
-            courseTitle: "Leadership essentials",
-            groups: [
-              {
-                groupName: "New managers",
-                dueDate: "2026-09-30",
-                students: [{ name: "Alex Morgan", email: "alex@example.com" }],
-              },
-            ],
-          },
+          { courseTitle: "Leadership essentials", learnersCount: 12 },
+          { courseTitle: "Phishing basics", learnersCount: 8 },
+          { courseTitle: "Data privacy", learnersCount: 3 },
+          { courseTitle: "Remote work", learnersCount: 2 },
         ],
         { required: true },
       ),
       defineEmailTemplateVariable(
         "courses_link",
-        "Courses link",
+        "Report link",
         "url",
-        "https://example.com/courses",
+        "https://example.com/reports",
         {
           required: true,
         },
       ),
     ],
-    getContent: (language) => ({
-      ...getOverdueCoursesEmailTranslations(language, []),
-      paragraphs: ["{{ courses }}"],
-    }),
+    getContent: (language) => getOverdueCoursesEmailTranslations(language, "{{ courses }}"),
     buttonUrl: "{{ courses_link }}",
+  }),
+  createEmailTemplateDefinition({
+    event: EMAIL_TEMPLATE_EVENTS.ADMIN_COURSE_DUE_DATES_AT_RISK,
+    name: EMAIL_TEMPLATE_NAMES.ADMIN_COURSE_DUE_DATES_AT_RISK,
+    description:
+      "Sent to administrators once per due date, five days before it, when learners have not completed those courses.",
+    sourceTemplate: "CourseDueDatesAtRiskEmail",
+    subject: buildNormalizedLocalizedSubjectTemplates("adminCourseDueDatesAtRiskEmail"),
+    variables: [
+      defineEmailTemplateVariable(
+        "at_risk_courses_summary",
+        "Courses with an approaching due date (up to two named, then a count)",
+        "text",
+        "Leadership essentials, Phishing basics and 2 more",
+        { required: true },
+      ),
+      defineEmailTemplateVariable(
+        "at_risk_learners_count",
+        "Number of learners who have not completed the courses",
+        "number",
+        50,
+      ),
+      defineEmailTemplateVariable(
+        "at_risk_courses_count",
+        "Number of courses with an approaching due date",
+        "number",
+        4,
+      ),
+      defineEmailTemplateVariable(
+        "report_link",
+        "Report link",
+        "url",
+        "https://example.com/reports",
+        { required: true },
+      ),
+    ],
+    getContent: (language) =>
+      getCourseDueDatesAtRiskEmailTranslations(language, "{{ at_risk_courses_summary }}"),
+    buttonUrl: "{{ report_link }}",
   }),
   createEmailTemplateDefinition({
     event: EMAIL_TEMPLATE_EVENTS.COURSE_DUE_DATE_REMINDER,

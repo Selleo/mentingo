@@ -39,6 +39,7 @@ export const EMAIL_TEMPLATE_EVENTS = {
   ADMIN_NEW_USER: "admin_new_user",
   ADMIN_FINISHED_COURSE: "admin_finished_course",
   ADMIN_OVERDUE_COURSES: "admin_overdue_courses",
+  ADMIN_COURSE_DUE_DATES_AT_RISK: "admin_course_due_dates_at_risk",
   COURSE_DUE_DATE_REMINDER: "course_due_date_reminder",
   MAGIC_LINK: "magic_link",
   COURSE_CHAT_MENTION: "course_chat_mention",

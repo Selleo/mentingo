@@ -56,6 +56,7 @@ export const CS_REPORT_EXPORT_LABELS: ReportExportLabels = {
   fieldProgress: "Pokrok",
   fieldEnrolledAt: "Datum zápisu",
   fieldCompletedAt: "Datum dokončení",
+  fieldDueDate: "Termín dokončení",
   opEq: "je",
   opNeq: "není",
   opIn: "je jedno z",

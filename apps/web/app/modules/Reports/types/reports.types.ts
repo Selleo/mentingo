@@ -20,7 +20,8 @@ export type ReportFilterField =
   | "score"
   | "attempts"
   | "certificate"
-  | "lastActivity";
+  | "lastActivity"
+  | "dueDate";
 
 export type ReportFilterOperator =
   | "eq"
