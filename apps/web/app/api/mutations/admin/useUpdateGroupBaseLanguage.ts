@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { DIRECTORY_SYNC_CONNECTION_QUERY_KEY } from "~/api/queries/admin/useDirectorySyncConnection";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
@@ -29,6 +30,7 @@ export function useUpdateGroupBaseLanguage() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
+      await queryClient.invalidateQueries({ queryKey: [DIRECTORY_SYNC_CONNECTION_QUERY_KEY] });
       await invalidateLearningPathEnrollmentData();
 
       toast({ description: t("adminGroupsView.language.baseLanguageUpdated") });

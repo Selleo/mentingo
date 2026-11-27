@@ -8,6 +8,7 @@ import { EntraIdOAuthGuard } from "src/common/guards/entra-id-oauth.guard";
 import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { SlackOAuthGuard } from "src/common/guards/slack-oauth.guard";
+import { DirectorySyncModule } from "src/directory-sync/directory-sync.module";
 import { FileModule } from "src/file/files.module";
 import { GroupModule } from "src/group/group.module";
 import { LocalizationModule } from "src/localization/localization.module";
@@ -41,6 +42,7 @@ import { TokenService } from "./token.service";
     GroupModule,
     LocalizationModule,
     PermissionsModule,
+    DirectorySyncModule,
   ],
   controllers: [AuthController],
   providers: [

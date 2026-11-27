@@ -111,7 +111,11 @@ export class GroupActivityHandler implements OutboxEventsHandlerOf<GroupEventTyp
     const { actor, source, updates, tenantId, requestedCount, updatedCount, skippedCount } =
       event.bulkAssignUsersToGroupsData;
 
-    if (source !== BULK_ASSIGN_USERS_TO_GROUPS_SOURCES.BULK_EDIT || updatedCount === 0) return;
+    const isLoggedSource =
+      source === BULK_ASSIGN_USERS_TO_GROUPS_SOURCES.BULK_EDIT ||
+      source === BULK_ASSIGN_USERS_TO_GROUPS_SOURCES.DIRECTORY_SYNC;
+
+    if (!isLoggedSource || updatedCount === 0) return;
 
     await this.activityLogsService.recordActivity({
       actor,
@@ -123,6 +127,7 @@ export class GroupActivityHandler implements OutboxEventsHandlerOf<GroupEventTyp
         updatedCount: String(updatedCount),
         skippedCount: String(skippedCount),
         memberships: JSON.stringify(updates),
+        source,
       },
     });
   }

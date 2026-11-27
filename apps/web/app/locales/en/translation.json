@@ -2345,7 +2345,8 @@
       "noUserSelected": "No user selected",
       "noGroupSelected": "Select at least one group.",
       "userMustHaveAtLeastOneRole": "User must have at least one role.",
-      "trainerRoleRequiresLiveTraining": "The Trainer role is available only when Live Training is enabled."
+      "trainerRoleRequiresLiveTraining": "The Trainer role is available only when Live Training is enabled.",
+      "lastActiveAdminRequired": "At least one active admin must remain. Assign the admin role to another active user first."
     },
     "import": {
       "toast": {
@@ -2540,7 +2541,8 @@
         "forum_topic_create": "Create forum topics.",
         "forum_post_create": "Reply in forum topics.",
         "forum_post_delete": "Delete any forum post.",
-        "forum_post_react": "React to forum posts."
+        "forum_post_react": "React to forum posts.",
+        "directory_sync_manage": "Configure Google Workspace directory sync."
       }
     },
     "dropdown": {
@@ -2756,6 +2758,10 @@
       "phishingSimulations": {
         "title": "Phishing Simulations",
         "description": "Connection to the phishing simulation service."
+      },
+      "googleWorkspaceDirectorySync": {
+        "title": "Google Workspace directory sync",
+        "description": "Service account used to read users and groups from Google Workspace."
       }
     },
     "name": "Environment Variables",
@@ -2849,7 +2855,11 @@
       "LIVEKIT_API_SECRET": {
         "label": "LiveKit API Secret"
       },
-      "save": "Save"
+      "save": "Save",
+      "DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY": {
+        "label": "Google service account key (JSON)",
+        "description": "Paste the full JSON key of the Google Cloud service account used for directory sync. Grant it domain-wide delegation in your Google Admin console."
+      }
     },
     "breadcrumbs": {
       "envs": "Environment Variables"
@@ -10274,6 +10284,217 @@
     },
     "errors": {
       "invalidUnsubscribeLink": "This link is invalid or has expired."
+    }
+  },
+  "directorySync": {
+    "title": "Google Workspace directory sync",
+    "description": "Create, update and archive users automatically based on your Google Workspace directory.",
+    "lastSuccessfulSync": "Last successful sync: {{date}}",
+    "statuses": {
+      "pending_verification": "Waiting for verification",
+      "active": "Active",
+      "failing": "Failing"
+    },
+    "setup": {
+      "title": "Grant access in Google Workspace",
+      "stepOpenAdminConsole": "In the Google Admin console, open Security → Access and data control → API controls → Manage domain-wide delegation.",
+      "stepAddClient": "Add a new client with the client ID and scopes below.",
+      "stepSaveAndVerify": "Save the settings below and click Verify connection.",
+      "clientId": "Client ID",
+      "scopes": "OAuth scopes",
+      "copy": "Copy",
+      "keyMissingTitle": "Service account key is missing",
+      "keyMissingDescription": "Add the Google service account key in environment settings before connecting your directory.",
+      "openEnvs": "Open environment settings",
+      "accessGranted": "Access granted in Google Workspace · show setup details"
+    },
+    "form": {
+      "administratorEmail": "Google Workspace administrator email",
+      "administratorEmailDescription": "Mentingo reads your directory on behalf of this administrator. Changing it requires verifying the connection again.",
+      "scope": "Users to sync",
+      "scopeTypes": {
+        "all_users": "All users",
+        "organizational_units": "Selected organizational units",
+        "groups": "Members of selected groups"
+      },
+      "organizationalUnitsPlaceholder": "Select organizational units",
+      "groupsPlaceholder": "Search groups by email",
+      "noResults": "No results",
+      "verifyToPickScope": "Verify the connection to browse your directory.",
+      "defaultRole": "Default role",
+      "defaultRolePlaceholder": "Select a role",
+      "defaultRoleDescription": "Given to synced users who are not in any mapped group.",
+      "archiveUsersOutsideScope": "Archive users who leave the sync scope",
+      "archiveUsersOutsideScopeDescription": "Synced users who are no longer in the selected users are archived. Users suspended in Google are always archived.",
+      "sendWelcomeEmail": "Send a welcome email to new users",
+      "sendWelcomeEmailDescription": "New synced users receive an invitation email. Leave this off if they sign in with Google.",
+      "archiveLimit": "Limit archiving per sync",
+      "archiveLimitDescription": "Stop a sync that would archive more than this percentage of synced users. Up to 5 users can always be archived.",
+      "administratorEmailHelp": "A Google Workspace admin in your domain (for example a Super Admin). Mentingo only reads your directory on their behalf."
+    },
+    "actions": {
+      "verify": "Verify connection",
+      "syncNow": "Sync now",
+      "disconnect": "Disconnect",
+      "more": "More actions"
+    },
+    "disconnect": {
+      "title": "Disconnect directory sync?",
+      "description": "Synced users stay in Mentingo and become manually managed. You can connect again later."
+    },
+    "roleMappings": {
+      "title": "Group to role mapping",
+      "description": "Members of a group get its role. The first matching group in the list wins; everyone else gets the default role.",
+      "addGroup": "Add a group",
+      "save": "Save mapping",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "remove": "Remove"
+    },
+    "runs": {
+      "title": "Sync history",
+      "empty": "No syncs yet.",
+      "startedAt": "Started",
+      "trigger": "Trigger",
+      "status": "Status",
+      "changes": "Changes",
+      "noChanges": "No changes",
+      "previous": "Previous",
+      "next": "Next",
+      "triggers": {
+        "schedule": "Scheduled",
+        "manual": "Manual"
+      },
+      "statuses": {
+        "queued": "Queued",
+        "running": "Running",
+        "succeeded": "Succeeded",
+        "failed": "Failed",
+        "aborted_by_safeguard": "Stopped by safeguard"
+      },
+      "counts": {
+        "created": "created: {{count}}",
+        "linked": "linked: {{count}}",
+        "roleChanged": "roles changed: {{count}}",
+        "archived": "archived: {{count}}",
+        "restored": "restored: {{count}}",
+        "skipped": "skipped: {{count}}",
+        "groupMembershipChanged": "group memberships changed: {{count}}"
+      },
+      "emptyDescription": "Runs appear here after the first sync."
+    },
+    "toast": {
+      "saveSuccess": "Directory sync settings saved.",
+      "saveError": "Could not save directory sync settings.",
+      "verifySuccess": "Connection verified.",
+      "verifyError": "Could not verify the connection.",
+      "roleMappingsSuccess": "Role mapping saved.",
+      "roleMappingsError": "Could not save the role mapping.",
+      "syncRequested": "Sync started. Results will appear in the sync history.",
+      "syncError": "Could not start the sync.",
+      "disconnectSuccess": "Directory sync disconnected.",
+      "disconnectError": "Could not disconnect directory sync.",
+      "copySuccess": "Copied to clipboard.",
+      "copyError": "Could not copy to clipboard.",
+      "groupMappingsSuccess": "Group sync saved.",
+      "groupMappingsError": "Could not save group sync.",
+      "restoreRolesSuccess": "Roles will follow Google Workspace again from the next sync.",
+      "restoreRolesError": "Could not restore directory roles.",
+      "groupsSaved": "Google groups saved.",
+      "groupsError": "Could not save Google groups."
+    },
+    "user": {
+      "groupsManagedByDirectory": "Membership in groups synced from Google Workspace is managed by directory sync.",
+      "rolesOverrideNotice": "This user's roles come from Google Workspace. Changing them here overrides directory sync for this user.",
+      "rolesOverridden": "Roles were changed manually and are no longer updated from Google Workspace.",
+      "restoreDirectoryRoles": "Restore roles from directory"
+    },
+    "errors": {
+      "invalidServiceAccountKey": "This is not a valid Google service account JSON key.",
+      "syncAlreadyInProgress": "A sync is already in progress.",
+      "connectionNotActive": "Verify the directory connection first.",
+      "connectionNotFound": "Directory sync is not set up.",
+      "serviceAccountKeyMissing": "Add the Google service account key in environment settings first.",
+      "directoryAccessDenied": "Google Workspace denied access. Check domain-wide delegation, scopes and the administrator email.",
+      "scopeNotFound": "Some selected groups or organizational units no longer exist in Google Workspace.",
+      "invalidScope": "Select at least one organizational unit or group.",
+      "invalidRole": "One of the selected roles does not exist.",
+      "duplicateRoleMapping": "Each group can be mapped only once.",
+      "duplicateGroupMapping": "Each Google group and each Mentingo group can be mapped only once.",
+      "invalidGroup": "One of the selected Mentingo groups does not exist.",
+      "groupMembershipManagedByDirectory": "Membership of users synced from Google Workspace in synced groups cannot be changed manually.",
+      "mappedGroupNotDeletable": "This group is synced from Google Workspace and cannot be deleted. Remove it from group sync first.",
+      "directoryUserNotDeletable": "Users synced from Google Workspace cannot be deleted. They are archived when they leave the directory.",
+      "userNotSynced": "This user is not synced from a directory.",
+      "disconnectWhileSyncing": "A sync is in progress. Wait for it to finish before disconnecting."
+    },
+    "groupMappings": {
+      "title": "Group sync",
+      "description": "Synced users are added to and removed from the mapped Mentingo groups based on their Google group membership. You can still add other people to these groups by hand.",
+      "addGroup": "Add a Google group",
+      "save": "Save group sync",
+      "pickGroup": "Existing Mentingo group",
+      "createsNewGroup": "Leave empty to create a new group named \"{{name}}\".",
+      "remove": "Remove",
+      "removeTitle": "Stop syncing \"{{name}}\"?",
+      "removeDescription": "Members stay in the group, but it will no longer be updated from Google Workspace, and the group can be edited and deleted manually. Changes apply after you save group sync."
+    },
+    "group": {
+      "syncedBadge": "Synced from Google Workspace",
+      "syncedTooltip": "Membership of synced users follows Google Workspace. To delete this group, first remove it from group sync in Settings → Integrations → Directory sync.",
+      "syncedNoticeDescription": "Membership of synced users follows Google Workspace. To delete this group, first remove it from group sync.",
+      "openSettings": "Open directory sync"
+    },
+    "firstSyncHint": "Automatic sync every 4 hours starts after the first sync. Review all settings and mappings, then click Sync now.",
+    "missingObjects": {
+      "title": "Some groups or organizational units no longer exist in Google Workspace",
+      "description": "Every sync fails until you update the scope or remove the mappings marked below. These IDs are missing:",
+      "mappingMissing": "No longer exists in Google Workspace"
+    },
+    "sections": {
+      "account": "Google Workspace account",
+      "usersAndRoles": "Users and roles",
+      "usersAndRolesDescription": "Choose who is synced and which role they get when no group mapping applies.",
+      "behaviour": "Sync behaviour"
+    },
+    "firstSyncTitle": "Ready for the first sync",
+    "overview": {
+      "administrator": "Administrator",
+      "lastSuccessfulSync": "Last successful sync",
+      "latestRun": "Latest run",
+      "never": "Not yet"
+    },
+    "connect": {
+      "grantAccessTitle": "Grant access in Google Workspace",
+      "connectTitle": "Connect your Google Workspace",
+      "connectButton": "Connect"
+    },
+    "tabs": {
+      "settings": "Settings",
+      "groups": "Google groups",
+      "history": "History"
+    },
+    "groups": {
+      "description": "Give members of a Google group a role, sync them into a Mentingo group, or both. If someone is in several groups, the higher one decides their role.",
+      "addPlaceholder": "Search Google groups to add…",
+      "empty": "No Google groups added yet.",
+      "noRole": "No role",
+      "columns": {
+        "googleGroup": "Google group",
+        "role": "Role",
+        "mentingoGroup": "Mentingo group",
+        "actions": "Actions"
+      },
+      "notSynced": "Not synced",
+      "createGroupOption": "Create group “{{name}}”",
+      "dragToReorder": "Drag to reorder"
+    },
+    "status": {
+      "lastSync": "Last sync {{date}}"
+    },
+    "connectionDetails": {
+      "connectedVia": "Connected via {{email}}",
+      "saveAndVerify": "Save and verify"
     }
   }
 }

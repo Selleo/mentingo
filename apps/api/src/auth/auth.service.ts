@@ -38,6 +38,7 @@ import { createUserNotificationEvent } from "src/automation-execution/utils/crea
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
+import { UserExternalIdentityRepository } from "src/directory-sync/repositories/user-external-identity.repository";
 import { LoginMethodsService } from "src/env/services/login-methods.service";
 import { UserLoginFailedEvent } from "src/events/user/user-login-failed-event";
 import { UserLoginEvent, USER_LOGIN_METHOD } from "src/events/user/user-login.event";
@@ -107,6 +108,7 @@ export class AuthService {
     private readonly notificationAccountActionService: NotificationAccountActionService,
     private readonly loginMethodsService: LoginMethodsService,
     private readonly wsGateway: WsGateway,
+    private readonly userExternalIdentityRepository: UserExternalIdentityRepository,
   ) {}
 
   public async register({
@@ -766,10 +768,7 @@ export class AuthService {
     }
 
     const { inviteOnlyRegistration } = await this.settingsService.getGlobalSettings();
-    let [user] = await this.db
-      .select()
-      .from(users)
-      .where(and(eq(users.email, userCallback.email), isNull(users.deletedAt)));
+    let user = await this.findProviderLoginUser(userCallback);
 
     if (user?.archived) {
       throw new UnauthorizedException("user.error.archived");
@@ -812,6 +811,40 @@ export class AuthService {
       );
 
     return tokens;
+  }
+
+  /**
+   * A user linked by directory sync is found by the account ID the provider verified, so an
+   * email renamed in the directory keeps signing in to the same account. An email match that is
+   * linked to another account of the same provider is refused, so a reused address cannot take
+   * over the previous owner's account.
+   */
+  private async findProviderLoginUser({ email, identity }: ProviderLoginUserType) {
+    const linkedUser = identity
+      ? await this.userExternalIdentityRepository.findUserByExternalIdentity(
+          identity.provider,
+          identity.externalId,
+        )
+      : null;
+
+    if (linkedUser) return linkedUser;
+
+    const [userWithEmail] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.email, email), isNull(users.deletedAt)));
+
+    if (!userWithEmail || !identity) return userWithEmail;
+
+    const linkedIdentity = await this.userExternalIdentityRepository.findIdentityByUserId(
+      userWithEmail.id,
+    );
+
+    if (linkedIdentity?.provider === identity.provider) {
+      throw new UnauthorizedException("common.toast.noAccess");
+    }
+
+    return userWithEmail;
   }
 
   async getSessionStatus(user: CurrentUserType) {

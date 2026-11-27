@@ -3,6 +3,7 @@ import { PERMISSIONS } from "@repo/shared";
 import { GroupService } from "./group.service";
 import { GroupMembershipAssignmentRepository } from "./repositories/group-membership-assignment.repository";
 
+import type { GroupDirectoryMembershipRepository } from "./repositories/group-directory-membership.repository";
 import type { DatabasePg } from "src/common";
 import type { CourseService } from "src/courses/course.service";
 import type { LocalizationService } from "src/localization/localization.service";
@@ -58,6 +59,9 @@ function setup(inserted = [{ groupId }]) {
     } as unknown as PermissionsService,
     localizationService,
     new GroupMembershipAssignmentRepository(trx as unknown as DatabasePg, localizationService),
+    {
+      findDirectoryManagedGroupIdsForUser: jest.fn(async () => []),
+    } as unknown as GroupDirectoryMembershipRepository,
   );
   return { service, outboxPublisher, trx };
 }

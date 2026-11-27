@@ -24,6 +24,7 @@ export const QUEUE_NAMES = {
   AI_MENTOR_CONFIGURATION_GENERATION: "ai-mentor-configuration-generation",
   MICROSOFT_CALENDAR_SYNC: "microsoft-calendar-sync",
   GOOGLE_CALENDAR_SYNC: "google-calendar-sync",
+  DIRECTORY_SYNC: "directory-sync",
   AI_MENTOR_PRACTICE: "ai-mentor-practice",
   VIDEO_METADATA: "video-metadata",
   REPORT_EXPORT: "report-export",

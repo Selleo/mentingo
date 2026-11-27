@@ -143,6 +143,11 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.LIVEKIT_API_SECRET.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY: {
+    labelKey: "adminEnvsView.form.DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY.label",
+    descriptionKey: "adminEnvsView.form.DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY.description",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
 };
 
 type SecretName = keyof typeof SECRET_METADATA;
@@ -195,6 +200,12 @@ export const ENV_GROUPS = [
     titleKey: "adminEnvsView.groups.payments.title",
     descriptionKey: "adminEnvsView.groups.payments.description",
     secretNames: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "VITE_STRIPE_PUBLISHABLE_KEY"],
+  },
+  {
+    id: "googleWorkspaceDirectorySync",
+    titleKey: "adminEnvsView.groups.googleWorkspaceDirectorySync.title",
+    descriptionKey: "adminEnvsView.groups.googleWorkspaceDirectorySync.description",
+    secretNames: ["DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY"],
   },
   {
     id: "microsoftCalendar",
@@ -257,6 +268,11 @@ export const ENV_GROUP_PRESENTATION = {
   slackSignIn: { icon: Slack, category: "signIn", services: ["slack_authorization"] },
   microsoftCalendar: { icon: CalendarSync, category: "calendar", services: ["microsoft_calendar"] },
   googleCalendar: { icon: CalendarSync, category: "calendar", services: ["google_calendar"] },
+  googleWorkspaceDirectorySync: {
+    icon: Google,
+    category: "security",
+    services: ["google_workspace_directory_sync"],
+  },
   payments: { icon: WalletCards, category: "payments", services: ["stripe"] },
   videoStreaming: { icon: Clapperboard, category: "video", services: ["bunny"] },
   artificialIntelligence: { icon: BrainCircuit, category: "ai", services: ["openAI", "luma"] },

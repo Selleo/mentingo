@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
+import { DIRECTORY_SYNC_PROVIDERS } from "@repo/shared";
 import { Strategy } from "passport-google-oauth20";
 
 import { getCallbackPath } from "src/common/configuration/callbackUrl";
@@ -78,6 +79,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
       email: profile._json.email,
       firstName: profile._json.given_name,
       lastName: profile._json.family_name || "",
+      identity: { provider: DIRECTORY_SYNC_PROVIDERS.GOOGLE_WORKSPACE, externalId: profile.id },
     };
   }
 }

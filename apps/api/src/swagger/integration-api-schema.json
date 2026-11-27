@@ -3405,6 +3405,10 @@
                 "type": "string"
               },
               {
+                "const": "DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY",
+                "type": "string"
+              },
+              {
                 "const": "LUMA_API_KEY",
                 "type": "string"
               },
@@ -3554,6 +3558,10 @@
                     },
                     {
                       "const": "ENTRA_ID_DIRECTORY_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY",
                       "type": "string"
                     },
                     {
@@ -3911,11 +3919,19 @@
                           "name"
                         ]
                       }
+                    },
+                    "isDirectoryManaged": {
+                      "type": "boolean"
+                    },
+                    "isRoleOverridden": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
                     "roleSlugs",
-                    "groups"
+                    "groups",
+                    "isDirectoryManaged",
+                    "isRoleOverridden"
                   ]
                 }
               ]
@@ -4273,6 +4289,12 @@
                   "type": "string"
                 }
               },
+              "isDirectoryManaged": {
+                "type": "boolean"
+              },
+              "isRoleOverridden": {
+                "type": "boolean"
+              },
               "groups": {
                 "type": "array",
                 "items": {
@@ -4323,6 +4345,8 @@
               "deletedAt",
               "profilePictureUrl",
               "roleSlugs",
+              "isDirectoryManaged",
+              "isRoleOverridden",
               "groups"
             ]
           }
@@ -4706,6 +4730,9 @@
                       "profilePictureUrl"
                     ]
                   }
+                },
+                "isDirectoryManaged": {
+                  "type": "boolean"
                 },
                 "createdAt": {
                   "type": "string"

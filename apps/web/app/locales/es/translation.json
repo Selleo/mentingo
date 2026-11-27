@@ -2337,7 +2337,8 @@
       "noUserSelected": "Ningún usuario seleccionado",
       "noGroupSelected": "Seleccione al menos un grupo.",
       "userMustHaveAtLeastOneRole": "El usuario debe tener al menos un rol.",
-      "trainerRoleRequiresLiveTraining": "El rol de formador está disponible solo cuando la formación en vivo está habilitada."
+      "trainerRoleRequiresLiveTraining": "El rol de formador está disponible solo cuando la formación en vivo está habilitada.",
+      "lastActiveAdminRequired": "Debe quedar al menos un administrador activo. Primero asigna el rol de administrador a otro usuario activo."
     },
     "import": {
       "toast": {
@@ -2532,7 +2533,8 @@
         "forum_topic_create": "Crear temas en el foro.",
         "forum_post_create": "Responder en los temas del foro.",
         "forum_post_delete": "Eliminar cualquier publicación del foro.",
-        "forum_post_react": "Reaccionar a las publicaciones del foro."
+        "forum_post_react": "Reaccionar a las publicaciones del foro.",
+        "directory_sync_manage": "Configurar la sincronización del directorio de Google Workspace."
       }
     },
     "dropdown": {
@@ -2748,6 +2750,10 @@
       "phishingSimulations": {
         "title": "Simulaciones de phishing",
         "description": "Conexión con el servicio de simulación de phishing."
+      },
+      "googleWorkspaceDirectorySync": {
+        "title": "Sincronización del directorio de Google Workspace",
+        "description": "Cuenta de servicio usada para leer usuarios y grupos de Google Workspace."
       }
     },
     "name": "Variables de entorno",
@@ -2841,7 +2847,11 @@
       "LIVEKIT_API_SECRET": {
         "label": "Secreto de API de LiveKit"
       },
-      "save": "Guardar"
+      "save": "Guardar",
+      "DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY": {
+        "label": "Clave de la cuenta de servicio de Google (JSON)",
+        "description": "Pega la clave JSON completa de la cuenta de servicio de Google Cloud usada para sincronizar el directorio. Concédele la delegación de todo el dominio en la consola de administración de Google."
+      }
     },
     "breadcrumbs": {
       "envs": "Variables de entorno"
@@ -10188,6 +10198,217 @@
     },
     "errors": {
       "invalidUnsubscribeLink": "Este enlace no es válido o ha caducado."
+    }
+  },
+  "directorySync": {
+    "title": "Sincronización del directorio de Google Workspace",
+    "description": "Crea, actualiza y archiva usuarios automáticamente según tu directorio de Google Workspace.",
+    "lastSuccessfulSync": "Última sincronización correcta: {{date}}",
+    "statuses": {
+      "pending_verification": "Pendiente de verificación",
+      "active": "Activa",
+      "failing": "Con errores"
+    },
+    "setup": {
+      "title": "Concede acceso en Google Workspace",
+      "stepOpenAdminConsole": "En la consola de administración de Google, abre Seguridad → Control de acceso y datos → Controles de API → Gestionar la delegación de todo el dominio.",
+      "stepAddClient": "Añade un nuevo cliente con el ID de cliente y los permisos que se indican abajo.",
+      "stepSaveAndVerify": "Guarda la configuración de abajo y haz clic en Verificar conexión.",
+      "clientId": "ID de cliente",
+      "scopes": "Permisos de OAuth",
+      "copy": "Copiar",
+      "keyMissingTitle": "Falta la clave de la cuenta de servicio",
+      "keyMissingDescription": "Añade la clave de la cuenta de servicio de Google en la configuración del entorno antes de conectar tu directorio.",
+      "openEnvs": "Abrir la configuración del entorno",
+      "accessGranted": "Acceso concedido en Google Workspace · mostrar detalles de configuración"
+    },
+    "form": {
+      "administratorEmail": "Correo del administrador de Google Workspace",
+      "administratorEmailDescription": "Mentingo lee tu directorio en nombre de este administrador. Si lo cambias, tendrás que volver a verificar la conexión.",
+      "scope": "Usuarios que sincronizar",
+      "scopeTypes": {
+        "all_users": "Todos los usuarios",
+        "organizational_units": "Unidades organizativas seleccionadas",
+        "groups": "Miembros de los grupos seleccionados"
+      },
+      "organizationalUnitsPlaceholder": "Selecciona unidades organizativas",
+      "groupsPlaceholder": "Buscar grupos por correo",
+      "noResults": "Sin resultados",
+      "verifyToPickScope": "Verifica la conexión para explorar tu directorio.",
+      "defaultRole": "Rol predeterminado",
+      "defaultRolePlaceholder": "Selecciona un rol",
+      "defaultRoleDescription": "Se asigna a los usuarios sincronizados que no pertenecen a ningún grupo asociado.",
+      "archiveUsersOutsideScope": "Archivar a los usuarios que salen del ámbito de sincronización",
+      "archiveUsersOutsideScopeDescription": "Los usuarios sincronizados que ya no forman parte de los usuarios seleccionados se archivan. Los usuarios suspendidos en Google se archivan siempre.",
+      "sendWelcomeEmail": "Enviar un correo de bienvenida a los nuevos usuarios",
+      "sendWelcomeEmailDescription": "Los nuevos usuarios sincronizados reciben una invitación por correo. Déjalo desactivado si inician sesión con Google.",
+      "archiveLimit": "Limitar el archivado por sincronización",
+      "archiveLimitDescription": "Detener una sincronización que archivaría más de este porcentaje de usuarios sincronizados. Siempre se pueden archivar hasta 5 usuarios.",
+      "administratorEmailHelp": "Un administrador de Google Workspace de tu dominio (por ejemplo, un superadministrador). Mentingo solo lee tu directorio en su nombre."
+    },
+    "actions": {
+      "verify": "Verificar conexión",
+      "syncNow": "Sincronizar ahora",
+      "disconnect": "Desconectar",
+      "more": "Más acciones"
+    },
+    "disconnect": {
+      "title": "¿Desconectar la sincronización del directorio?",
+      "description": "Los usuarios sincronizados permanecen en Mentingo y pasan a gestionarse manualmente. Puedes volver a conectarte más adelante."
+    },
+    "roleMappings": {
+      "title": "Asociación de grupos a roles",
+      "description": "Los miembros de un grupo reciben su rol. Prevalece el primer grupo coincidente de la lista; el resto recibe el rol predeterminado.",
+      "addGroup": "Añadir un grupo",
+      "save": "Guardar asociación",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "remove": "Eliminar"
+    },
+    "runs": {
+      "title": "Historial de sincronizaciones",
+      "empty": "Todavía no hay sincronizaciones.",
+      "startedAt": "Iniciada",
+      "trigger": "Origen",
+      "status": "Estado",
+      "changes": "Cambios",
+      "noChanges": "Sin cambios",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "triggers": {
+        "schedule": "Programada",
+        "manual": "Manual"
+      },
+      "statuses": {
+        "queued": "En cola",
+        "running": "En curso",
+        "succeeded": "Correcta",
+        "failed": "Fallida",
+        "aborted_by_safeguard": "Detenida por una protección"
+      },
+      "counts": {
+        "created": "creados: {{count}}",
+        "linked": "vinculados: {{count}}",
+        "roleChanged": "roles cambiados: {{count}}",
+        "archived": "archivados: {{count}}",
+        "restored": "restaurados: {{count}}",
+        "skipped": "omitidos: {{count}}",
+        "groupMembershipChanged": "pertenencias a grupos cambiadas: {{count}}"
+      },
+      "emptyDescription": "Las ejecuciones aparecerán aquí tras la primera sincronización."
+    },
+    "toast": {
+      "saveSuccess": "Configuración de la sincronización del directorio guardada.",
+      "saveError": "No se pudo guardar la configuración de la sincronización del directorio.",
+      "verifySuccess": "Conexión verificada.",
+      "verifyError": "No se pudo verificar la conexión.",
+      "roleMappingsSuccess": "Asociación de roles guardada.",
+      "roleMappingsError": "No se pudo guardar la asociación de roles.",
+      "syncRequested": "Sincronización iniciada. Los resultados aparecerán en el historial de sincronizaciones.",
+      "syncError": "No se pudo iniciar la sincronización.",
+      "disconnectSuccess": "Sincronización del directorio desconectada.",
+      "disconnectError": "No se pudo desconectar la sincronización del directorio.",
+      "copySuccess": "Copiado al portapapeles.",
+      "copyError": "No se pudo copiar al portapapeles.",
+      "groupMappingsSuccess": "Sincronización de grupos guardada.",
+      "groupMappingsError": "No se pudo guardar la sincronización de grupos.",
+      "restoreRolesSuccess": "Los roles volverán a seguir a Google Workspace a partir de la próxima sincronización.",
+      "restoreRolesError": "No se pudieron restaurar los roles del directorio.",
+      "groupsSaved": "Grupos de Google guardados.",
+      "groupsError": "No se pudieron guardar los grupos de Google."
+    },
+    "user": {
+      "groupsManagedByDirectory": "La pertenencia a los grupos sincronizados desde Google Workspace la gestiona la sincronización del directorio.",
+      "rolesOverrideNotice": "Los roles de este usuario provienen de Google Workspace. Cambiarlos aquí anula la sincronización del directorio para este usuario.",
+      "rolesOverridden": "Los roles se cambiaron manualmente y ya no se actualizan desde Google Workspace.",
+      "restoreDirectoryRoles": "Restaurar roles del directorio"
+    },
+    "errors": {
+      "invalidServiceAccountKey": "No es una clave JSON válida de cuenta de servicio de Google.",
+      "syncAlreadyInProgress": "Ya hay una sincronización en curso.",
+      "connectionNotActive": "Primero verifica la conexión con el directorio.",
+      "connectionNotFound": "La sincronización del directorio no está configurada.",
+      "serviceAccountKeyMissing": "Primero añade la clave de la cuenta de servicio de Google en la configuración del entorno.",
+      "directoryAccessDenied": "Google Workspace denegó el acceso. Revisa la delegación de todo el dominio, los permisos y el correo del administrador.",
+      "scopeNotFound": "Algunos grupos o unidades organizativas seleccionados ya no existen en Google Workspace.",
+      "invalidScope": "Selecciona al menos una unidad organizativa o un grupo.",
+      "invalidRole": "Uno de los roles seleccionados no existe.",
+      "duplicateRoleMapping": "Cada grupo solo se puede asociar una vez.",
+      "duplicateGroupMapping": "Cada grupo de Google y cada grupo de Mentingo solo se pueden asociar una vez.",
+      "invalidGroup": "Uno de los grupos de Mentingo seleccionados no existe.",
+      "groupMembershipManagedByDirectory": "La pertenencia de los usuarios sincronizados desde Google Workspace a los grupos sincronizados no se puede cambiar manualmente.",
+      "mappedGroupNotDeletable": "Este grupo se sincroniza desde Google Workspace y no se puede eliminar. Quítalo primero de la sincronización de grupos.",
+      "directoryUserNotDeletable": "Los usuarios sincronizados desde Google Workspace no se pueden eliminar. Se archivan cuando salen del directorio.",
+      "userNotSynced": "Este usuario no se sincroniza desde un directorio.",
+      "disconnectWhileSyncing": "Hay una sincronización en curso. Espera a que termine antes de desconectar."
+    },
+    "groupMappings": {
+      "title": "Sincronización de grupos",
+      "description": "Los usuarios sincronizados se añaden a los grupos de Mentingo asociados y se retiran de ellos según su pertenencia a grupos de Google. Puedes seguir añadiendo a otras personas a estos grupos manualmente.",
+      "addGroup": "Añadir un grupo de Google",
+      "save": "Guardar sincronización de grupos",
+      "pickGroup": "Grupo de Mentingo existente",
+      "createsNewGroup": "Déjalo vacío para crear un nuevo grupo llamado «{{name}}».",
+      "remove": "Eliminar",
+      "removeTitle": "¿Dejar de sincronizar «{{name}}»?",
+      "removeDescription": "Los miembros permanecen en el grupo, pero ya no se actualizará desde Google Workspace y el grupo se podrá editar y eliminar manualmente. Los cambios se aplican al guardar la sincronización de grupos."
+    },
+    "group": {
+      "syncedBadge": "Sincronizado desde Google Workspace",
+      "syncedTooltip": "La pertenencia de los usuarios sincronizados sigue a Google Workspace. Para eliminar este grupo, primero quítalo de la sincronización de grupos en Ajustes → Integraciones → Sincronización del directorio.",
+      "syncedNoticeDescription": "La pertenencia de los usuarios sincronizados sigue a Google Workspace. Para eliminar este grupo, quítalo primero de la sincronización de grupos.",
+      "openSettings": "Abrir sincronización del directorio"
+    },
+    "firstSyncHint": "La sincronización automática cada 4 horas comienza después de la primera sincronización. Revisa todos los ajustes y asociaciones y luego haz clic en Sincronizar ahora.",
+    "missingObjects": {
+      "title": "Algunos grupos o unidades organizativas ya no existen en Google Workspace",
+      "description": "Cada sincronización fallará hasta que actualices el ámbito o elimines las asociaciones marcadas abajo. Faltan estos ID:",
+      "mappingMissing": "Ya no existe en Google Workspace"
+    },
+    "sections": {
+      "account": "Cuenta de Google Workspace",
+      "usersAndRoles": "Usuarios y roles",
+      "usersAndRolesDescription": "Elige a quién se sincroniza y qué rol recibe cuando no se aplica ninguna asociación de grupos.",
+      "behaviour": "Comportamiento de la sincronización"
+    },
+    "firstSyncTitle": "Listo para la primera sincronización",
+    "overview": {
+      "administrator": "Administrador",
+      "lastSuccessfulSync": "Última sincronización correcta",
+      "latestRun": "Última ejecución",
+      "never": "Todavía no"
+    },
+    "connect": {
+      "grantAccessTitle": "Concede acceso en Google Workspace",
+      "connectTitle": "Conecta Google Workspace",
+      "connectButton": "Conectar"
+    },
+    "tabs": {
+      "settings": "Ajustes",
+      "groups": "Grupos de Google",
+      "history": "Historial"
+    },
+    "groups": {
+      "description": "Da un rol a los miembros de un grupo de Google, sincronízalos en un grupo de Mentingo o ambas cosas. Si alguien está en varios grupos, el que esté más arriba decide su rol.",
+      "addPlaceholder": "Buscar grupos de Google para añadir…",
+      "empty": "Todavía no se han añadido grupos de Google.",
+      "noRole": "Sin rol",
+      "columns": {
+        "googleGroup": "Grupo de Google",
+        "role": "Rol",
+        "mentingoGroup": "Grupo de Mentingo",
+        "actions": "Acciones"
+      },
+      "notSynced": "Sin sincronizar",
+      "createGroupOption": "Crear grupo «{{name}}»",
+      "dragToReorder": "Arrastra para reordenar"
+    },
+    "status": {
+      "lastSync": "Última sincronización {{date}}"
+    },
+    "connectionDetails": {
+      "connectedVia": "Conectado mediante {{email}}",
+      "saveAndVerify": "Guardar y verificar"
     }
   }
 }

@@ -1,5 +1,5 @@
 import { Link, useNavigate, type MetaFunction } from "@remix-run/react";
-import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS } from "@repo/shared";
+import { DIRECTORY_SYNC_ERROR_KEYS, PERMISSIONS, SYSTEM_ROLE_PERMISSIONS } from "@repo/shared";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import {
   Archive,
@@ -38,6 +38,7 @@ import { PageHeader } from "~/components/PageHeader/PageHeader";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
+import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { type DropdownItems, EditDropdown } from "~/modules/Admin/Users/components/EditDropdown";
 import { EditModal } from "~/modules/Admin/Users/components/EditModal";
@@ -93,6 +94,23 @@ const Users = () => {
   const { mutateAsync: sendPasswordEmails } = useBulkSendPasswordEmails();
 
   const [showEditModal, setShowEditModal] = useState<ModalTypes>(null);
+  const { toast } = useToast();
+
+  const hasDirectoryManagedUserSelected = userData.data.some(
+    (user) => rowSelection[user.id] && user.isDirectoryManaged,
+  );
+
+  const openDeleteModalUnlessDirectoryManaged = () => {
+    if (hasDirectoryManagedUserSelected) {
+      toast({
+        variant: "destructive",
+        description: t(DIRECTORY_SYNC_ERROR_KEYS.DIRECTORY_USER_NOT_DELETABLE),
+      });
+      return;
+    }
+
+    setShowEditModal("delete");
+  };
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isPermissionsMatrixOpen, setIsPermissionsMatrixOpen] = useState(false);
 
@@ -149,7 +167,7 @@ const Users = () => {
     {
       icon: <Trash2 className="size-4 shrink-0" />,
       translationKey: "adminUsersView.dropdown.delete",
-      action: () => setShowEditModal("delete"),
+      action: openDeleteModalUnlessDirectoryManaged,
       destructive: true,
       testId: USERS_PAGE_HANDLES.BULK_EDIT_DELETE_ACTION,
     },

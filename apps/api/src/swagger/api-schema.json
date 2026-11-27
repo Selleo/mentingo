@@ -27266,6 +27266,488 @@
         }
       }
     },
+    "/api/directory-sync/{provider}/setup": {
+      "get": {
+        "operationId": "DirectorySyncController_getDirectorySyncSetupDetails",
+        "summary": "Get the client ID and scopes to grant in the customer's directory",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "google_workspace",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDirectorySyncSetupDetailsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Directory sync management permission required."
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      }
+    },
+    "/api/directory-sync/{provider}/connection": {
+      "get": {
+        "operationId": "DirectorySyncController_getDirectorySyncConnection",
+        "summary": "Get the directory sync connection, or null when not set up",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "google_workspace",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDirectorySyncConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Directory sync management permission required."
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      },
+      "put": {
+        "operationId": "DirectorySyncController_upsertDirectorySyncConnection",
+        "summary": "Create or update the directory sync connection settings",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "google_workspace",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertDirectorySyncConnectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertDirectorySyncConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Directory sync management permission required."
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      },
+      "delete": {
+        "operationId": "DirectorySyncController_deleteDirectorySyncConnection",
+        "summary": "Disconnect directory sync; synced users stay as they are",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "google_workspace",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Directory sync management permission required."
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      }
+    },
+    "/api/directory-sync/{provider}/connection/verification": {
+      "post": {
+        "operationId": "DirectorySyncController_verifyDirectorySyncConnection",
+        "summary": "Check that Mentingo can read the customer's directory",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "google_workspace",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyDirectorySyncConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Directory sync management permission required."
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      }
+    },
+    "/api/directory-sync/{provider}/connection/organizational-units": {
+      "get": {
+        "operationId": "DirectorySyncController_listDirectorySyncOrganizationalUnits",
+        "summary": "List organizational units for the sync scope picker",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "google_workspace",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDirectorySyncOrganizationalUnitsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Directory sync management permission required."
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      }
+    },
+    "/api/directory-sync/{provider}/connection/groups": {
+      "get": {
+        "operationId": "DirectorySyncController_searchDirectorySyncGroups",
+        "summary": "Search directory groups for the scope and role mapping pickers",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "google_workspace",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchDirectorySyncGroupsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Directory sync management permission required."
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      }
+    },
+    "/api/directory-sync/{provider}/connection/role-mappings": {
+      "put": {
+        "operationId": "DirectorySyncController_replaceDirectorySyncRoleMappings",
+        "summary": "Replace the directory group to role mappings",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "google_workspace",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceDirectorySyncRoleMappingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplaceDirectorySyncRoleMappingsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Directory sync management permission required."
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      }
+    },
+    "/api/directory-sync/{provider}/connection/group-mappings": {
+      "put": {
+        "operationId": "DirectorySyncController_replaceDirectorySyncGroupMappings",
+        "summary": "Replace the directory group to Mentingo group mappings",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "google_workspace",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceDirectorySyncGroupMappingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplaceDirectorySyncGroupMappingsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Directory sync management permission required."
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      }
+    },
+    "/api/directory-sync/{provider}/connection/synchronizations": {
+      "post": {
+        "operationId": "DirectorySyncController_requestManualDirectorySync",
+        "summary": "Queue a directory sync now",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "google_workspace",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestManualDirectorySyncResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Directory sync management permission required."
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      }
+    },
+    "/api/directory-sync/{provider}/connection/runs": {
+      "get": {
+        "operationId": "DirectorySyncController_listDirectorySyncRuns",
+        "summary": "List directory sync runs, newest first",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "google_workspace",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDirectorySyncRunsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "403": {
+            "description": "Directory sync management permission required."
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      }
+    },
+    "/api/directory-sync/users/{userId}/role-override": {
+      "delete": {
+        "operationId": "DirectorySyncUserController_restoreDirectoryRoles",
+        "summary": "Let the directory manage a synced user's roles again",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Directory Sync"
+        ]
+      }
+    },
     "/api/todo-tasks": {
       "get": {
         "operationId": "TodoTasksController_list",
@@ -28520,6 +29002,10 @@
                     },
                     {
                       "const": "integration_api.use",
+                      "type": "string"
+                    },
+                    {
+                      "const": "directory_sync.manage",
                       "type": "string"
                     },
                     {
@@ -36694,11 +37180,19 @@
                           "name"
                         ]
                       }
+                    },
+                    "isDirectoryManaged": {
+                      "type": "boolean"
+                    },
+                    "isRoleOverridden": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
                     "roleSlugs",
-                    "groups"
+                    "groups",
+                    "isDirectoryManaged",
+                    "isRoleOverridden"
                   ]
                 }
               ]
@@ -36823,6 +37317,12 @@
                   "type": "string"
                 }
               },
+              "isDirectoryManaged": {
+                "type": "boolean"
+              },
+              "isRoleOverridden": {
+                "type": "boolean"
+              },
               "groups": {
                 "type": "array",
                 "items": {
@@ -36873,6 +37373,8 @@
               "deletedAt",
               "profilePictureUrl",
               "roleSlugs",
+              "isDirectoryManaged",
+              "isRoleOverridden",
               "groups"
             ]
           }
@@ -37944,6 +38446,9 @@
                     ]
                   }
                 },
+                "isDirectoryManaged": {
+                  "type": "boolean"
+                },
                 "createdAt": {
                   "type": "string"
                 },
@@ -38141,6 +38646,9 @@
                   ]
                 }
               },
+              "isDirectoryManaged": {
+                "type": "boolean"
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -38312,6 +38820,9 @@
                       "profilePictureUrl"
                     ]
                   }
+                },
+                "isDirectoryManaged": {
+                  "type": "boolean"
                 },
                 "createdAt": {
                   "type": "string"
@@ -180777,6 +181288,10 @@
                 "type": "string"
               },
               {
+                "const": "DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY",
+                "type": "string"
+              },
+              {
                 "const": "LUMA_API_KEY",
                 "type": "string"
               },
@@ -180926,6 +181441,10 @@
                     },
                     {
                       "const": "ENTRA_ID_DIRECTORY_ID",
+                      "type": "string"
+                    },
+                    {
+                      "const": "DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY",
                       "type": "string"
                     },
                     {
@@ -181629,6 +182148,9 @@
                       "profilePictureUrl"
                     ]
                   }
+                },
+                "isDirectoryManaged": {
+                  "type": "boolean"
                 },
                 "createdAt": {
                   "type": "string"
@@ -204510,6 +205032,2080 @@
       },
       "DisconnectGoogleCalendarResponse": {
         "type": "null"
+      },
+      "GetDirectorySyncSetupDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "clientId": {
+                "type": "string"
+              },
+              "scopes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "clientId",
+              "scopes"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetDirectorySyncConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "provider": {
+                    "const": "google_workspace",
+                    "type": "string"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "pending_verification",
+                        "type": "string"
+                      },
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "failing",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isVerified": {
+                    "type": "boolean"
+                  },
+                  "administratorEmail": {
+                    "type": "string"
+                  },
+                  "scopeType": {
+                    "anyOf": [
+                      {
+                        "const": "all_users",
+                        "type": "string"
+                      },
+                      {
+                        "const": "organizational_units",
+                        "type": "string"
+                      },
+                      {
+                        "const": "groups",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "scopeExternalIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "defaultRoleId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "archiveUsersOutsideScope": {
+                    "type": "boolean"
+                  },
+                  "sendWelcomeEmail": {
+                    "type": "boolean"
+                  },
+                  "archiveLimitPercentage": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "lastSuccessfulSyncAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "missingExternalIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "roleMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "externalGroupId": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "externalGroupEmail": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "roleId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "priority": {
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "externalGroupId",
+                        "externalGroupEmail",
+                        "roleId",
+                        "priority"
+                      ]
+                    }
+                  },
+                  "groupMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "externalGroupId": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "externalGroupEmail": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "groupId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "groupName": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "externalGroupId",
+                        "externalGroupEmail",
+                        "groupId",
+                        "groupName"
+                      ]
+                    }
+                  },
+                  "latestRun": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "trigger": {
+                            "anyOf": [
+                              {
+                                "const": "schedule",
+                                "type": "string"
+                              },
+                              {
+                                "const": "manual",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "status": {
+                            "anyOf": [
+                              {
+                                "const": "queued",
+                                "type": "string"
+                              },
+                              {
+                                "const": "running",
+                                "type": "string"
+                              },
+                              {
+                                "const": "succeeded",
+                                "type": "string"
+                              },
+                              {
+                                "const": "failed",
+                                "type": "string"
+                              },
+                              {
+                                "const": "aborted_by_safeguard",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "triggeredByUserId": {
+                            "anyOf": [
+                              {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "startedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "finishedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdUsersCount": {
+                            "type": "integer"
+                          },
+                          "linkedUsersCount": {
+                            "type": "integer"
+                          },
+                          "roleChangedUsersCount": {
+                            "type": "integer"
+                          },
+                          "archivedUsersCount": {
+                            "type": "integer"
+                          },
+                          "restoredUsersCount": {
+                            "type": "integer"
+                          },
+                          "groupMembershipChangedUsersCount": {
+                            "type": "integer"
+                          },
+                          "skippedUsersCount": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "trigger",
+                          "status",
+                          "triggeredByUserId",
+                          "createdAt",
+                          "startedAt",
+                          "finishedAt",
+                          "createdUsersCount",
+                          "linkedUsersCount",
+                          "roleChangedUsersCount",
+                          "archivedUsersCount",
+                          "restoredUsersCount",
+                          "groupMembershipChangedUsersCount",
+                          "skippedUsersCount"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "provider",
+                  "status",
+                  "isVerified",
+                  "administratorEmail",
+                  "scopeType",
+                  "scopeExternalIds",
+                  "defaultRoleId",
+                  "archiveUsersOutsideScope",
+                  "sendWelcomeEmail",
+                  "archiveLimitPercentage",
+                  "lastSuccessfulSyncAt",
+                  "missingExternalIds",
+                  "roleMappings",
+                  "groupMappings",
+                  "latestRun"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpsertDirectorySyncConnectionBody": {
+        "type": "object",
+        "properties": {
+          "administratorEmail": {
+            "format": "email",
+            "type": "string"
+          },
+          "scopeType": {
+            "anyOf": [
+              {
+                "const": "all_users",
+                "type": "string"
+              },
+              {
+                "const": "organizational_units",
+                "type": "string"
+              },
+              {
+                "const": "groups",
+                "type": "string"
+              }
+            ]
+          },
+          "scopeExternalIds": {
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "defaultRoleId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "archiveUsersOutsideScope": {
+            "type": "boolean"
+          },
+          "sendWelcomeEmail": {
+            "type": "boolean"
+          },
+          "archiveLimitPercentage": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "maximum": 100,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "administratorEmail",
+          "scopeType",
+          "scopeExternalIds",
+          "defaultRoleId",
+          "archiveUsersOutsideScope",
+          "sendWelcomeEmail",
+          "archiveLimitPercentage"
+        ]
+      },
+      "UpsertDirectorySyncConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "provider": {
+                    "const": "google_workspace",
+                    "type": "string"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "pending_verification",
+                        "type": "string"
+                      },
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "failing",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isVerified": {
+                    "type": "boolean"
+                  },
+                  "administratorEmail": {
+                    "type": "string"
+                  },
+                  "scopeType": {
+                    "anyOf": [
+                      {
+                        "const": "all_users",
+                        "type": "string"
+                      },
+                      {
+                        "const": "organizational_units",
+                        "type": "string"
+                      },
+                      {
+                        "const": "groups",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "scopeExternalIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "defaultRoleId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "archiveUsersOutsideScope": {
+                    "type": "boolean"
+                  },
+                  "sendWelcomeEmail": {
+                    "type": "boolean"
+                  },
+                  "archiveLimitPercentage": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "lastSuccessfulSyncAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "missingExternalIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "roleMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "externalGroupId": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "externalGroupEmail": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "roleId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "priority": {
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "externalGroupId",
+                        "externalGroupEmail",
+                        "roleId",
+                        "priority"
+                      ]
+                    }
+                  },
+                  "groupMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "externalGroupId": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "externalGroupEmail": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "groupId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "groupName": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "externalGroupId",
+                        "externalGroupEmail",
+                        "groupId",
+                        "groupName"
+                      ]
+                    }
+                  },
+                  "latestRun": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "trigger": {
+                            "anyOf": [
+                              {
+                                "const": "schedule",
+                                "type": "string"
+                              },
+                              {
+                                "const": "manual",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "status": {
+                            "anyOf": [
+                              {
+                                "const": "queued",
+                                "type": "string"
+                              },
+                              {
+                                "const": "running",
+                                "type": "string"
+                              },
+                              {
+                                "const": "succeeded",
+                                "type": "string"
+                              },
+                              {
+                                "const": "failed",
+                                "type": "string"
+                              },
+                              {
+                                "const": "aborted_by_safeguard",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "triggeredByUserId": {
+                            "anyOf": [
+                              {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "startedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "finishedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdUsersCount": {
+                            "type": "integer"
+                          },
+                          "linkedUsersCount": {
+                            "type": "integer"
+                          },
+                          "roleChangedUsersCount": {
+                            "type": "integer"
+                          },
+                          "archivedUsersCount": {
+                            "type": "integer"
+                          },
+                          "restoredUsersCount": {
+                            "type": "integer"
+                          },
+                          "groupMembershipChangedUsersCount": {
+                            "type": "integer"
+                          },
+                          "skippedUsersCount": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "trigger",
+                          "status",
+                          "triggeredByUserId",
+                          "createdAt",
+                          "startedAt",
+                          "finishedAt",
+                          "createdUsersCount",
+                          "linkedUsersCount",
+                          "roleChangedUsersCount",
+                          "archivedUsersCount",
+                          "restoredUsersCount",
+                          "groupMembershipChangedUsersCount",
+                          "skippedUsersCount"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "provider",
+                  "status",
+                  "isVerified",
+                  "administratorEmail",
+                  "scopeType",
+                  "scopeExternalIds",
+                  "defaultRoleId",
+                  "archiveUsersOutsideScope",
+                  "sendWelcomeEmail",
+                  "archiveLimitPercentage",
+                  "lastSuccessfulSyncAt",
+                  "missingExternalIds",
+                  "roleMappings",
+                  "groupMappings",
+                  "latestRun"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "VerifyDirectorySyncConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "provider": {
+                    "const": "google_workspace",
+                    "type": "string"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "pending_verification",
+                        "type": "string"
+                      },
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "failing",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isVerified": {
+                    "type": "boolean"
+                  },
+                  "administratorEmail": {
+                    "type": "string"
+                  },
+                  "scopeType": {
+                    "anyOf": [
+                      {
+                        "const": "all_users",
+                        "type": "string"
+                      },
+                      {
+                        "const": "organizational_units",
+                        "type": "string"
+                      },
+                      {
+                        "const": "groups",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "scopeExternalIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "defaultRoleId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "archiveUsersOutsideScope": {
+                    "type": "boolean"
+                  },
+                  "sendWelcomeEmail": {
+                    "type": "boolean"
+                  },
+                  "archiveLimitPercentage": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "lastSuccessfulSyncAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "missingExternalIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "roleMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "externalGroupId": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "externalGroupEmail": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "roleId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "priority": {
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "externalGroupId",
+                        "externalGroupEmail",
+                        "roleId",
+                        "priority"
+                      ]
+                    }
+                  },
+                  "groupMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "externalGroupId": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "externalGroupEmail": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "groupId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "groupName": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "externalGroupId",
+                        "externalGroupEmail",
+                        "groupId",
+                        "groupName"
+                      ]
+                    }
+                  },
+                  "latestRun": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "trigger": {
+                            "anyOf": [
+                              {
+                                "const": "schedule",
+                                "type": "string"
+                              },
+                              {
+                                "const": "manual",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "status": {
+                            "anyOf": [
+                              {
+                                "const": "queued",
+                                "type": "string"
+                              },
+                              {
+                                "const": "running",
+                                "type": "string"
+                              },
+                              {
+                                "const": "succeeded",
+                                "type": "string"
+                              },
+                              {
+                                "const": "failed",
+                                "type": "string"
+                              },
+                              {
+                                "const": "aborted_by_safeguard",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "triggeredByUserId": {
+                            "anyOf": [
+                              {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "startedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "finishedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdUsersCount": {
+                            "type": "integer"
+                          },
+                          "linkedUsersCount": {
+                            "type": "integer"
+                          },
+                          "roleChangedUsersCount": {
+                            "type": "integer"
+                          },
+                          "archivedUsersCount": {
+                            "type": "integer"
+                          },
+                          "restoredUsersCount": {
+                            "type": "integer"
+                          },
+                          "groupMembershipChangedUsersCount": {
+                            "type": "integer"
+                          },
+                          "skippedUsersCount": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "trigger",
+                          "status",
+                          "triggeredByUserId",
+                          "createdAt",
+                          "startedAt",
+                          "finishedAt",
+                          "createdUsersCount",
+                          "linkedUsersCount",
+                          "roleChangedUsersCount",
+                          "archivedUsersCount",
+                          "restoredUsersCount",
+                          "groupMembershipChangedUsersCount",
+                          "skippedUsersCount"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "provider",
+                  "status",
+                  "isVerified",
+                  "administratorEmail",
+                  "scopeType",
+                  "scopeExternalIds",
+                  "defaultRoleId",
+                  "archiveUsersOutsideScope",
+                  "sendWelcomeEmail",
+                  "archiveLimitPercentage",
+                  "lastSuccessfulSyncAt",
+                  "missingExternalIds",
+                  "roleMappings",
+                  "groupMappings",
+                  "latestRun"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ListDirectorySyncOrganizationalUnitsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "externalId": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "externalId",
+                "path",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SearchDirectorySyncGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "externalId": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "externalId",
+                "email",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ReplaceDirectorySyncRoleMappingsBody": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "externalGroupId": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "externalGroupEmail": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "roleId": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "priority": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "externalGroupId",
+            "externalGroupEmail",
+            "roleId",
+            "priority"
+          ]
+        }
+      },
+      "ReplaceDirectorySyncRoleMappingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "provider": {
+                    "const": "google_workspace",
+                    "type": "string"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "pending_verification",
+                        "type": "string"
+                      },
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "failing",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isVerified": {
+                    "type": "boolean"
+                  },
+                  "administratorEmail": {
+                    "type": "string"
+                  },
+                  "scopeType": {
+                    "anyOf": [
+                      {
+                        "const": "all_users",
+                        "type": "string"
+                      },
+                      {
+                        "const": "organizational_units",
+                        "type": "string"
+                      },
+                      {
+                        "const": "groups",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "scopeExternalIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "defaultRoleId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "archiveUsersOutsideScope": {
+                    "type": "boolean"
+                  },
+                  "sendWelcomeEmail": {
+                    "type": "boolean"
+                  },
+                  "archiveLimitPercentage": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "lastSuccessfulSyncAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "missingExternalIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "roleMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "externalGroupId": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "externalGroupEmail": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "roleId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "priority": {
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "externalGroupId",
+                        "externalGroupEmail",
+                        "roleId",
+                        "priority"
+                      ]
+                    }
+                  },
+                  "groupMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "externalGroupId": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "externalGroupEmail": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "groupId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "groupName": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "externalGroupId",
+                        "externalGroupEmail",
+                        "groupId",
+                        "groupName"
+                      ]
+                    }
+                  },
+                  "latestRun": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "trigger": {
+                            "anyOf": [
+                              {
+                                "const": "schedule",
+                                "type": "string"
+                              },
+                              {
+                                "const": "manual",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "status": {
+                            "anyOf": [
+                              {
+                                "const": "queued",
+                                "type": "string"
+                              },
+                              {
+                                "const": "running",
+                                "type": "string"
+                              },
+                              {
+                                "const": "succeeded",
+                                "type": "string"
+                              },
+                              {
+                                "const": "failed",
+                                "type": "string"
+                              },
+                              {
+                                "const": "aborted_by_safeguard",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "triggeredByUserId": {
+                            "anyOf": [
+                              {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "startedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "finishedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdUsersCount": {
+                            "type": "integer"
+                          },
+                          "linkedUsersCount": {
+                            "type": "integer"
+                          },
+                          "roleChangedUsersCount": {
+                            "type": "integer"
+                          },
+                          "archivedUsersCount": {
+                            "type": "integer"
+                          },
+                          "restoredUsersCount": {
+                            "type": "integer"
+                          },
+                          "groupMembershipChangedUsersCount": {
+                            "type": "integer"
+                          },
+                          "skippedUsersCount": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "trigger",
+                          "status",
+                          "triggeredByUserId",
+                          "createdAt",
+                          "startedAt",
+                          "finishedAt",
+                          "createdUsersCount",
+                          "linkedUsersCount",
+                          "roleChangedUsersCount",
+                          "archivedUsersCount",
+                          "restoredUsersCount",
+                          "groupMembershipChangedUsersCount",
+                          "skippedUsersCount"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "provider",
+                  "status",
+                  "isVerified",
+                  "administratorEmail",
+                  "scopeType",
+                  "scopeExternalIds",
+                  "defaultRoleId",
+                  "archiveUsersOutsideScope",
+                  "sendWelcomeEmail",
+                  "archiveLimitPercentage",
+                  "lastSuccessfulSyncAt",
+                  "missingExternalIds",
+                  "roleMappings",
+                  "groupMappings",
+                  "latestRun"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ReplaceDirectorySyncGroupMappingsBody": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              },
+              {
+                "const": "fr",
+                "type": "string"
+              }
+            ]
+          },
+          "groupMappings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "externalGroupId": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "externalGroupEmail": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "externalGroupName": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "groupId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "externalGroupId",
+                "externalGroupEmail",
+                "externalGroupName",
+                "groupId"
+              ]
+            }
+          }
+        },
+        "required": [
+          "language",
+          "groupMappings"
+        ]
+      },
+      "ReplaceDirectorySyncGroupMappingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "provider": {
+                    "const": "google_workspace",
+                    "type": "string"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "pending_verification",
+                        "type": "string"
+                      },
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "failing",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isVerified": {
+                    "type": "boolean"
+                  },
+                  "administratorEmail": {
+                    "type": "string"
+                  },
+                  "scopeType": {
+                    "anyOf": [
+                      {
+                        "const": "all_users",
+                        "type": "string"
+                      },
+                      {
+                        "const": "organizational_units",
+                        "type": "string"
+                      },
+                      {
+                        "const": "groups",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "scopeExternalIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "defaultRoleId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "archiveUsersOutsideScope": {
+                    "type": "boolean"
+                  },
+                  "sendWelcomeEmail": {
+                    "type": "boolean"
+                  },
+                  "archiveLimitPercentage": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "lastSuccessfulSyncAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "missingExternalIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "roleMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "externalGroupId": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "externalGroupEmail": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "roleId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "priority": {
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "externalGroupId",
+                        "externalGroupEmail",
+                        "roleId",
+                        "priority"
+                      ]
+                    }
+                  },
+                  "groupMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "externalGroupId": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "externalGroupEmail": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "groupId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "groupName": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "externalGroupId",
+                        "externalGroupEmail",
+                        "groupId",
+                        "groupName"
+                      ]
+                    }
+                  },
+                  "latestRun": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "trigger": {
+                            "anyOf": [
+                              {
+                                "const": "schedule",
+                                "type": "string"
+                              },
+                              {
+                                "const": "manual",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "status": {
+                            "anyOf": [
+                              {
+                                "const": "queued",
+                                "type": "string"
+                              },
+                              {
+                                "const": "running",
+                                "type": "string"
+                              },
+                              {
+                                "const": "succeeded",
+                                "type": "string"
+                              },
+                              {
+                                "const": "failed",
+                                "type": "string"
+                              },
+                              {
+                                "const": "aborted_by_safeguard",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "triggeredByUserId": {
+                            "anyOf": [
+                              {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "startedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "finishedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdUsersCount": {
+                            "type": "integer"
+                          },
+                          "linkedUsersCount": {
+                            "type": "integer"
+                          },
+                          "roleChangedUsersCount": {
+                            "type": "integer"
+                          },
+                          "archivedUsersCount": {
+                            "type": "integer"
+                          },
+                          "restoredUsersCount": {
+                            "type": "integer"
+                          },
+                          "groupMembershipChangedUsersCount": {
+                            "type": "integer"
+                          },
+                          "skippedUsersCount": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "trigger",
+                          "status",
+                          "triggeredByUserId",
+                          "createdAt",
+                          "startedAt",
+                          "finishedAt",
+                          "createdUsersCount",
+                          "linkedUsersCount",
+                          "roleChangedUsersCount",
+                          "archivedUsersCount",
+                          "restoredUsersCount",
+                          "groupMembershipChangedUsersCount",
+                          "skippedUsersCount"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "provider",
+                  "status",
+                  "isVerified",
+                  "administratorEmail",
+                  "scopeType",
+                  "scopeExternalIds",
+                  "defaultRoleId",
+                  "archiveUsersOutsideScope",
+                  "sendWelcomeEmail",
+                  "archiveLimitPercentage",
+                  "lastSuccessfulSyncAt",
+                  "missingExternalIds",
+                  "roleMappings",
+                  "groupMappings",
+                  "latestRun"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "RequestManualDirectorySyncResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "trigger": {
+                "anyOf": [
+                  {
+                    "const": "schedule",
+                    "type": "string"
+                  },
+                  {
+                    "const": "manual",
+                    "type": "string"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "queued",
+                    "type": "string"
+                  },
+                  {
+                    "const": "running",
+                    "type": "string"
+                  },
+                  {
+                    "const": "succeeded",
+                    "type": "string"
+                  },
+                  {
+                    "const": "failed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "aborted_by_safeguard",
+                    "type": "string"
+                  }
+                ]
+              },
+              "triggeredByUserId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "startedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "finishedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdUsersCount": {
+                "type": "integer"
+              },
+              "linkedUsersCount": {
+                "type": "integer"
+              },
+              "roleChangedUsersCount": {
+                "type": "integer"
+              },
+              "archivedUsersCount": {
+                "type": "integer"
+              },
+              "restoredUsersCount": {
+                "type": "integer"
+              },
+              "groupMembershipChangedUsersCount": {
+                "type": "integer"
+              },
+              "skippedUsersCount": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id",
+              "trigger",
+              "status",
+              "triggeredByUserId",
+              "createdAt",
+              "startedAt",
+              "finishedAt",
+              "createdUsersCount",
+              "linkedUsersCount",
+              "roleChangedUsersCount",
+              "archivedUsersCount",
+              "restoredUsersCount",
+              "groupMembershipChangedUsersCount",
+              "skippedUsersCount"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ListDirectorySyncRunsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "trigger": {
+                  "anyOf": [
+                    {
+                      "const": "schedule",
+                      "type": "string"
+                    },
+                    {
+                      "const": "manual",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "queued",
+                      "type": "string"
+                    },
+                    {
+                      "const": "running",
+                      "type": "string"
+                    },
+                    {
+                      "const": "succeeded",
+                      "type": "string"
+                    },
+                    {
+                      "const": "failed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "aborted_by_safeguard",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "triggeredByUserId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "startedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "finishedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdUsersCount": {
+                  "type": "integer"
+                },
+                "linkedUsersCount": {
+                  "type": "integer"
+                },
+                "roleChangedUsersCount": {
+                  "type": "integer"
+                },
+                "archivedUsersCount": {
+                  "type": "integer"
+                },
+                "restoredUsersCount": {
+                  "type": "integer"
+                },
+                "groupMembershipChangedUsersCount": {
+                  "type": "integer"
+                },
+                "skippedUsersCount": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "id",
+                "trigger",
+                "status",
+                "triggeredByUserId",
+                "createdAt",
+                "startedAt",
+                "finishedAt",
+                "createdUsersCount",
+                "linkedUsersCount",
+                "roleChangedUsersCount",
+                "archivedUsersCount",
+                "restoredUsersCount",
+                "groupMembershipChangedUsersCount",
+                "skippedUsersCount"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
       },
       "ListResponse": {
         "type": "object",

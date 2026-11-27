@@ -3784,3 +3784,4 @@ export const nativeArchiveEntityMap = pgTable(
 
 export * from "./assistant.schema";
 export * from "./gamification.schema";
+export * from "./directory-sync.schema";

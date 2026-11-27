@@ -2350,7 +2350,8 @@
       "noUserSelected": "Nebyl vybrán žádný uživatel",
       "noGroupSelected": "Vyberte alespoň jednu skupinu.",
       "userMustHaveAtLeastOneRole": "Uživatel musí mít alespoň jednu roli.",
-      "trainerRoleRequiresLiveTraining": "Role Trenér je dostupná pouze při zapnutém Živé školení."
+      "trainerRoleRequiresLiveTraining": "Role Trenér je dostupná pouze při zapnutém Živé školení.",
+      "lastActiveAdminRequired": "Musí zůstat alespoň jeden aktivní administrátor. Nejprve přiřaďte roli administrátora jinému aktivnímu uživateli."
     },
     "import": {
       "toast": {
@@ -2545,7 +2546,8 @@
         "forum_topic_create": "Může vytvářet témata ve fóru.",
         "forum_post_create": "Může odpovídat v tématech fóra.",
         "forum_post_delete": "Může mazat jakékoli příspěvky ve fóru.",
-        "forum_post_react": "Může reagovat na příspěvky ve fóru."
+        "forum_post_react": "Může reagovat na příspěvky ve fóru.",
+        "directory_sync_manage": "Konfigurace synchronizace adresáře Google Workspace."
       }
     },
     "dropdown": {
@@ -2761,6 +2763,10 @@
       "phishingSimulations": {
         "title": "Simulace phishingu",
         "description": "Připojení ke službě simulace phishingu."
+      },
+      "googleWorkspaceDirectorySync": {
+        "title": "Synchronizace adresáře Google Workspace",
+        "description": "Servisní účet používaný ke čtení uživatelů a skupin z Google Workspace."
       }
     },
     "name": "Proměnné prostředí",
@@ -2854,7 +2860,11 @@
       "LIVEKIT_API_SECRET": {
         "label": "LiveKit API Secret"
       },
-      "save": "Uložit"
+      "save": "Uložit",
+      "DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY": {
+        "label": "Klíč servisního účtu Google (JSON)",
+        "description": "Vložte celý klíč JSON servisního účtu Google Cloud používaného k synchronizaci adresáře. V konzoli pro administrátory Google mu udělte delegování v rámci celé domény."
+      }
     },
     "breadcrumbs": {
       "envs": "Proměnné prostředí"
@@ -10309,6 +10319,217 @@
     },
     "errors": {
       "invalidUnsubscribeLink": "Tento odkaz je neplatný nebo vypršel."
+    }
+  },
+  "directorySync": {
+    "title": "Synchronizace adresáře Google Workspace",
+    "description": "Automaticky vytvářejte, aktualizujte a archivujte uživatele podle adresáře Google Workspace.",
+    "lastSuccessfulSync": "Poslední úspěšná synchronizace: {{date}}",
+    "statuses": {
+      "pending_verification": "Čeká na ověření",
+      "active": "Aktivní",
+      "failing": "Chyba"
+    },
+    "setup": {
+      "title": "Udělte přístup v Google Workspace",
+      "stepOpenAdminConsole": "V konzoli pro administrátory Google otevřete Zabezpečení → Řízení přístupu a dat → Ovládací prvky API → Spravovat delegování v rámci celé domény.",
+      "stepAddClient": "Přidejte nového klienta s níže uvedeným ID klienta a rozsahy.",
+      "stepSaveAndVerify": "Uložte níže uvedená nastavení a klikněte na Ověřit připojení.",
+      "clientId": "ID klienta",
+      "scopes": "Rozsahy OAuth",
+      "copy": "Kopírovat",
+      "keyMissingTitle": "Chybí klíč servisního účtu",
+      "keyMissingDescription": "Před připojením adresáře přidejte klíč servisního účtu Google v nastavení prostředí.",
+      "openEnvs": "Otevřít nastavení prostředí",
+      "accessGranted": "Přístup v Google Workspace udělen · zobrazit podrobnosti nastavení"
+    },
+    "form": {
+      "administratorEmail": "E-mail administrátora Google Workspace",
+      "administratorEmailDescription": "Mentingo čte adresář jménem tohoto administrátora. Po změně je nutné připojení znovu ověřit.",
+      "scope": "Uživatelé k synchronizaci",
+      "scopeTypes": {
+        "all_users": "Všichni uživatelé",
+        "organizational_units": "Vybrané organizační jednotky",
+        "groups": "Členové vybraných skupin"
+      },
+      "organizationalUnitsPlaceholder": "Vyberte organizační jednotky",
+      "groupsPlaceholder": "Hledat skupiny podle e-mailu",
+      "noResults": "Žádné výsledky",
+      "verifyToPickScope": "Pro procházení adresáře ověřte připojení.",
+      "defaultRole": "Výchozí role",
+      "defaultRolePlaceholder": "Vyberte roli",
+      "defaultRoleDescription": "Přiřazuje se synchronizovaným uživatelům, kteří nejsou v žádné namapované skupině.",
+      "archiveUsersOutsideScope": "Archivovat uživatele mimo rozsah synchronizace",
+      "archiveUsersOutsideScopeDescription": "Synchronizovaní uživatelé, kteří už nepatří mezi vybrané uživatele, budou archivováni. Uživatelé pozastavení v Google jsou archivováni vždy.",
+      "sendWelcomeEmail": "Posílat novým uživatelům uvítací e-mail",
+      "sendWelcomeEmailDescription": "Noví synchronizovaní uživatelé dostanou pozvánku e-mailem. Nechte vypnuté, pokud se přihlašují přes Google.",
+      "archiveLimit": "Omezit archivaci na jednu synchronizaci",
+      "archiveLimitDescription": "Zastavit synchronizaci, která by archivovala více než toto procento synchronizovaných uživatelů. Až 5 uživatelů lze archivovat vždy.",
+      "administratorEmailHelp": "Administrátor Google Workspace ve vaší doméně (např. superadministrátor). Mentingo jeho jménem adresář pouze čte."
+    },
+    "actions": {
+      "verify": "Ověřit připojení",
+      "syncNow": "Synchronizovat nyní",
+      "disconnect": "Odpojit",
+      "more": "Další akce"
+    },
+    "disconnect": {
+      "title": "Odpojit synchronizaci adresáře?",
+      "description": "Synchronizovaní uživatelé zůstanou v Mentingo a budou spravováni ručně. Později se můžete znovu připojit."
+    },
+    "roleMappings": {
+      "title": "Mapování skupin na role",
+      "description": "Členové skupiny získají její roli. Platí první odpovídající skupina v seznamu; ostatní získají výchozí roli.",
+      "addGroup": "Přidat skupinu",
+      "save": "Uložit mapování",
+      "moveUp": "Posunout nahoru",
+      "moveDown": "Posunout dolů",
+      "remove": "Odebrat"
+    },
+    "runs": {
+      "title": "Historie synchronizací",
+      "empty": "Zatím žádné synchronizace.",
+      "startedAt": "Zahájeno",
+      "trigger": "Spuštění",
+      "status": "Stav",
+      "changes": "Změny",
+      "noChanges": "Žádné změny",
+      "previous": "Předchozí",
+      "next": "Další",
+      "triggers": {
+        "schedule": "Plánovaná",
+        "manual": "Ruční"
+      },
+      "statuses": {
+        "queued": "Ve frontě",
+        "running": "Probíhá",
+        "succeeded": "Úspěšná",
+        "failed": "Neúspěšná",
+        "aborted_by_safeguard": "Zastavena pojistkou"
+      },
+      "counts": {
+        "created": "vytvořeno: {{count}}",
+        "linked": "propojeno: {{count}}",
+        "roleChanged": "změněné role: {{count}}",
+        "archived": "archivováno: {{count}}",
+        "restored": "obnoveno: {{count}}",
+        "skipped": "přeskočeno: {{count}}",
+        "groupMembershipChanged": "změněná členství ve skupinách: {{count}}"
+      },
+      "emptyDescription": "Běhy se zde zobrazí po první synchronizaci."
+    },
+    "toast": {
+      "saveSuccess": "Nastavení synchronizace adresáře uloženo.",
+      "saveError": "Nastavení synchronizace adresáře se nepodařilo uložit.",
+      "verifySuccess": "Připojení ověřeno.",
+      "verifyError": "Připojení se nepodařilo ověřit.",
+      "roleMappingsSuccess": "Mapování rolí uloženo.",
+      "roleMappingsError": "Mapování rolí se nepodařilo uložit.",
+      "syncRequested": "Synchronizace zahájena. Výsledky se zobrazí v historii synchronizací.",
+      "syncError": "Synchronizaci se nepodařilo spustit.",
+      "disconnectSuccess": "Synchronizace adresáře odpojena.",
+      "disconnectError": "Synchronizaci adresáře se nepodařilo odpojit.",
+      "copySuccess": "Zkopírováno do schránky.",
+      "copyError": "Zkopírování do schránky se nezdařilo.",
+      "groupMappingsSuccess": "Synchronizace skupin uložena.",
+      "groupMappingsError": "Synchronizaci skupin se nepodařilo uložit.",
+      "restoreRolesSuccess": "Od příští synchronizace se role opět budou řídit Google Workspace.",
+      "restoreRolesError": "Role z adresáře se nepodařilo obnovit.",
+      "groupsSaved": "Skupiny Google uloženy.",
+      "groupsError": "Skupiny Google se nepodařilo uložit."
+    },
+    "user": {
+      "groupsManagedByDirectory": "Členství ve skupinách synchronizovaných z Google Workspace spravuje synchronizace adresáře.",
+      "rolesOverrideNotice": "Role tohoto uživatele pocházejí z Google Workspace. Jejich změnou zde přepíšete synchronizaci adresáře pro tohoto uživatele.",
+      "rolesOverridden": "Role byly změněny ručně a už se neaktualizují z Google Workspace.",
+      "restoreDirectoryRoles": "Obnovit role z adresáře"
+    },
+    "errors": {
+      "invalidServiceAccountKey": "Toto není platný klíč JSON servisního účtu Google.",
+      "syncAlreadyInProgress": "Synchronizace již probíhá.",
+      "connectionNotActive": "Nejprve ověřte připojení k adresáři.",
+      "connectionNotFound": "Synchronizace adresáře není nastavena.",
+      "serviceAccountKeyMissing": "Nejprve přidejte klíč servisního účtu Google v nastavení prostředí.",
+      "directoryAccessDenied": "Google Workspace odepřel přístup. Zkontrolujte delegování v rámci celé domény, rozsahy a e-mail administrátora.",
+      "scopeNotFound": "Některé vybrané skupiny nebo organizační jednotky už v Google Workspace neexistují.",
+      "invalidScope": "Vyberte alespoň jednu organizační jednotku nebo skupinu.",
+      "invalidRole": "Jedna z vybraných rolí neexistuje.",
+      "duplicateRoleMapping": "Každou skupinu lze namapovat jen jednou.",
+      "duplicateGroupMapping": "Každou skupinu Google a každou skupinu Mentingo lze namapovat jen jednou.",
+      "invalidGroup": "Jedna z vybraných skupin Mentingo neexistuje.",
+      "groupMembershipManagedByDirectory": "Členství uživatelů synchronizovaných z Google Workspace v synchronizovaných skupinách nelze měnit ručně.",
+      "mappedGroupNotDeletable": "Tato skupina se synchronizuje z Google Workspace a nelze ji smazat. Nejprve ji odeberte ze synchronizace skupin.",
+      "directoryUserNotDeletable": "Uživatele synchronizované z Google Workspace nelze smazat. Při odchodu z adresáře jsou archivováni.",
+      "userNotSynced": "Tento uživatel se nesynchronizuje z adresáře.",
+      "disconnectWhileSyncing": "Probíhá synchronizace. Před odpojením počkejte na její dokončení."
+    },
+    "groupMappings": {
+      "title": "Synchronizace skupin",
+      "description": "Synchronizovaní uživatelé jsou přidáváni do namapovaných skupin Mentingo a odebíráni z nich podle členství ve skupinách Google. Další osoby můžete do těchto skupin stále přidávat ručně.",
+      "addGroup": "Přidat skupinu Google",
+      "save": "Uložit synchronizaci skupin",
+      "pickGroup": "Existující skupina Mentingo",
+      "createsNewGroup": "Ponechte prázdné pro vytvoření nové skupiny s názvem „{{name}}“.",
+      "remove": "Odebrat",
+      "removeTitle": "Přestat synchronizovat „{{name}}“?",
+      "removeDescription": "Členové ve skupině zůstanou, ale už nebude aktualizována z Google Workspace a skupinu bude možné ručně upravit a smazat. Změny se projeví po uložení synchronizace skupin."
+    },
+    "group": {
+      "syncedBadge": "Synchronizováno z Google Workspace",
+      "syncedTooltip": "Členství synchronizovaných uživatelů se řídí Google Workspace. Chcete-li tuto skupinu smazat, nejprve ji odeberte ze synchronizace skupin v Nastavení → Integrace → Synchronizace adresáře.",
+      "syncedNoticeDescription": "Členství synchronizovaných uživatelů se řídí Google Workspace. Chcete-li tuto skupinu smazat, nejprve ji odeberte ze synchronizace skupin.",
+      "openSettings": "Otevřít synchronizaci adresáře"
+    },
+    "firstSyncHint": "Automatická synchronizace každé 4 hodiny začne po první synchronizaci. Zkontrolujte všechna nastavení a mapování a poté klikněte na Synchronizovat nyní.",
+    "missingObjects": {
+      "title": "Některé skupiny nebo organizační jednotky už v Google Workspace neexistují",
+      "description": "Každá synchronizace selže, dokud neupravíte rozsah nebo neodeberete níže označená mapování. Chybějící ID:",
+      "mappingMissing": "Už v Google Workspace neexistuje"
+    },
+    "sections": {
+      "account": "Účet Google Workspace",
+      "usersAndRoles": "Uživatelé a role",
+      "usersAndRolesDescription": "Vyberte, kdo se synchronizuje a jakou roli dostane, když neplatí žádné mapování skupin.",
+      "behaviour": "Chování synchronizace"
+    },
+    "firstSyncTitle": "Připraveno k první synchronizaci",
+    "overview": {
+      "administrator": "Administrátor",
+      "lastSuccessfulSync": "Poslední úspěšná synchronizace",
+      "latestRun": "Poslední běh",
+      "never": "Zatím ne"
+    },
+    "connect": {
+      "grantAccessTitle": "Udělte přístup v Google Workspace",
+      "connectTitle": "Připojte Google Workspace",
+      "connectButton": "Připojit"
+    },
+    "tabs": {
+      "settings": "Nastavení",
+      "groups": "Skupiny Google",
+      "history": "Historie"
+    },
+    "groups": {
+      "description": "Přidělte členům skupiny Google roli, synchronizujte je do skupiny Mentingo, nebo obojí. Je-li někdo ve více skupinách, o jeho roli rozhoduje skupina výše.",
+      "addPlaceholder": "Vyhledat skupiny Google k přidání…",
+      "empty": "Zatím nebyly přidány žádné skupiny Google.",
+      "noRole": "Bez role",
+      "columns": {
+        "googleGroup": "Skupina Google",
+        "role": "Role",
+        "mentingoGroup": "Skupina Mentingo",
+        "actions": "Akce"
+      },
+      "notSynced": "Nesynchronizováno",
+      "createGroupOption": "Vytvořit skupinu „{{name}}“",
+      "dragToReorder": "Přetažením změníte pořadí"
+    },
+    "status": {
+      "lastSync": "Poslední synchronizace {{date}}"
+    },
+    "connectionDetails": {
+      "connectedVia": "Připojeno přes {{email}}",
+      "saveAndVerify": "Uložit a ověřit"
     }
   }
 }

@@ -39,7 +39,7 @@ export class UserActivityHandler implements OutboxEventsHandlerOf<UserEventType>
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
       resourceId: event.userCreationData.userId,
       after: metadata.after,
-      context: metadata.context ?? null,
+      context: withChangeSource(metadata.context, event.userCreationData.source),
     });
   }
 
@@ -57,7 +57,7 @@ export class UserActivityHandler implements OutboxEventsHandlerOf<UserEventType>
       changedFields: metadata.changedFields,
       before: metadata.before,
       after: metadata.after,
-      context: metadata.context ?? null,
+      context: withChangeSource(metadata.context, event.userUpdateData.source),
     });
   }
 
@@ -74,4 +74,10 @@ export class UserActivityHandler implements OutboxEventsHandlerOf<UserEventType>
       context: before?.email ? { email: before.email } : null,
     });
   }
+}
+
+function withChangeSource(context: Record<string, string> | null | undefined, source?: string) {
+  if (!source) return context ?? null;
+
+  return { ...context, source };
 }

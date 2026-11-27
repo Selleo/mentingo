@@ -150,7 +150,7 @@ export async function addSystemRoleToUserInTests(
     });
 }
 
-async function findPermissionRoleIdInTests(
+export async function findPermissionRoleIdInTests(
   db: DatabasePg,
   tenantId: UUIDType,
   roleSlug: SystemRoleSlug,
@@ -202,4 +202,33 @@ export function userLacksPermissionCondition(
         AND ${permissionRuleSetPermissions.permission} = ${permission}
     )
   `;
+}
+
+/** Gives the user a single custom role that grants exactly the given permissions. */
+export async function assignCustomRoleToUserInTests(
+  db: DatabasePg,
+  userId: UUIDType,
+  tenantId: UUIDType,
+  permissions: PermissionKey[],
+) {
+  const slug = `custom-role-${userId}`;
+
+  const [role] = await db
+    .insert(permissionRoles)
+    .values({ tenantId, name: slug, slug })
+    .returning({ id: permissionRoles.id });
+  const [ruleSet] = await db
+    .insert(permissionRuleSets)
+    .values({ tenantId, name: slug, slug })
+    .returning({ id: permissionRuleSets.id });
+
+  await db
+    .insert(permissionRoleRuleSets)
+    .values({ tenantId, roleId: role.id, ruleSetId: ruleSet.id });
+  await db
+    .insert(permissionRuleSetPermissions)
+    .values(permissions.map((permission) => ({ tenantId, ruleSetId: ruleSet.id, permission })));
+
+  await db.delete(permissionUserRoles).where(eq(permissionUserRoles.userId, userId));
+  await db.insert(permissionUserRoles).values({ userId, roleId: role.id, tenantId });
 }

@@ -9,12 +9,23 @@ import {
 import {
   AUTOMATION_EVENT_KINDS,
   COURSE_ENROLLMENT,
+  DIRECTORY_SYNC_ERROR_KEYS,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
   isSupportedLanguage,
   type SupportedLanguages,
 } from "@repo/shared";
-import { and, countDistinct, eq, getTableColumns, inArray, isNull, or, sql } from "drizzle-orm";
+import {
+  and,
+  countDistinct,
+  eq,
+  exists,
+  getTableColumns,
+  inArray,
+  isNull,
+  or,
+  sql,
+} from "drizzle-orm";
 import { isEqual } from "lodash";
 
 import { createUserNotificationEvent } from "src/automation-execution/utils/create-user-notification-event";
@@ -39,11 +50,19 @@ import {
 } from "src/events";
 import { GROUP_ENROLLMENT_EVENT_BATCH_SIZE } from "src/group/group.constants";
 import { GroupSortFields } from "src/group/group.schema";
+import { GroupDirectoryMembershipRepository } from "src/group/repositories/group-directory-membership.repository";
 import { GroupMembershipAssignmentRepository } from "src/group/repositories/group-membership-assignment.repository";
+import { BULK_ASSIGN_USERS_TO_GROUPS_SOURCES } from "src/group/types/group-membership-assignment.types";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PermissionsService } from "src/permissions/permissions.service";
-import { groupCourses, groups, groupUsers, studentCourses } from "src/storage/schema";
+import {
+  directorySyncGroupMappings,
+  groupCourses,
+  groups,
+  groupUsers,
+  studentCourses,
+} from "src/storage/schema";
 import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
 
 import type { SQL } from "drizzle-orm";
@@ -76,6 +95,7 @@ export class GroupService {
     private readonly permissionsService: PermissionsService,
     private readonly localizationService: LocalizationService,
     private readonly groupMembershipAssignmentRepository: GroupMembershipAssignmentRepository,
+    private readonly groupDirectoryMembershipRepository: GroupDirectoryMembershipRepository,
   ) {}
 
   public async getAllGroups(
@@ -121,6 +141,7 @@ export class GroupService {
               '[]'::json
             )
           `,
+          isDirectoryManaged: this.isGroupMappedFromDirectory(),
         })
         .from(groups)
         .where(and(...conditions))
@@ -155,6 +176,7 @@ export class GroupService {
         ...getTableColumns(groups),
         name: this.getLocalizedGroupName(language),
         characteristic: this.getLocalizedGroupCharacteristic(language),
+        isDirectoryManaged: this.isGroupMappedFromDirectory(),
       })
       .from(groups)
       .where(and(eq(groups.id, groupId)));
@@ -403,6 +425,8 @@ export class GroupService {
   }
 
   public async deleteGroup(groupId: UUIDType, currentUser?: CurrentUserType) {
+    await this.assertGroupsNotMappedFromDirectory([groupId]);
+
     const existingGroup = currentUser ? await this.getGroupById(groupId) : null;
 
     const [deletedGroup] = await this.db.delete(groups).where(eq(groups.id, groupId)).returning();
@@ -427,6 +451,8 @@ export class GroupService {
       throw new BadRequestException("Groups not found");
     }
 
+    await this.assertGroupsNotMappedFromDirectory(groupIds);
+
     await this.db.delete(groups).where(inArray(groups.id, groupIds)).returning();
   }
 
@@ -443,6 +469,7 @@ export class GroupService {
         groupIds,
         userId,
         trx,
+        { isManualChange: Boolean(actor) },
       );
 
       await this.syncUserGroupEnrollment(userId, groupIdsToAssign, groupIdsToRemove, trx);
@@ -475,7 +502,9 @@ export class GroupService {
         assignments,
         async ({ userId, groupIds }) => ({
           userId,
-          ...(await this.replaceUserGroupAssignments(groupIds, userId, trx)),
+          ...(await this.replaceUserGroupAssignments(groupIds, userId, trx, {
+            isManualChange: options.source !== BULK_ASSIGN_USERS_TO_GROUPS_SOURCES.DIRECTORY_SYNC,
+          })),
         }),
         { batchSize: GROUP_ENROLLMENT_EVENT_BATCH_SIZE },
       );
@@ -506,6 +535,7 @@ export class GroupService {
     groupIds: UUIDType[],
     userId: UUIDType,
     trx: DatabasePg,
+    options: { isManualChange: boolean },
   ): Promise<UserGroupAssignmentResult> {
     const requestedGroupIds = [...new Set(groupIds)];
     const userMemberships =
@@ -536,6 +566,14 @@ export class GroupService {
     const groupIdsToRemove = [...currentGroupIds].filter(
       (groupId) => !requestedGroupIdSet.has(groupId),
     );
+
+    if (options.isManualChange) {
+      await this.assertGroupMembershipNotManagedByDirectory(
+        userId,
+        [...groupIdsToInsert, ...groupIdsToRemove],
+        trx,
+      );
+    }
 
     await this.groupMembershipAssignmentRepository.deleteUserGroupMemberships(
       userId,
@@ -572,6 +610,44 @@ export class GroupService {
       groupIdsToAssign: assignedGroupIds,
       groupIdsToRemove,
     };
+  }
+
+  private isGroupMappedFromDirectory() {
+    return sql<boolean>`${exists(
+      this.db
+        .select({ groupId: directorySyncGroupMappings.groupId })
+        .from(directorySyncGroupMappings)
+        .where(eq(directorySyncGroupMappings.groupId, groups.id)),
+    )}`;
+  }
+
+  /** A group mapped from a directory group must be unmapped in directory sync before deletion. */
+  private async assertGroupsNotMappedFromDirectory(groupIds: UUIDType[]) {
+    const mappedGroups = await this.groupDirectoryMembershipRepository.findMappedGroupIds(groupIds);
+
+    if (mappedGroups.length) {
+      throw new BadRequestException(DIRECTORY_SYNC_ERROR_KEYS.MAPPED_GROUP_NOT_DELETABLE);
+    }
+  }
+
+  /** Membership of synced users in mapped groups follows the directory, not manual edits. */
+  private async assertGroupMembershipNotManagedByDirectory(
+    userId: UUIDType,
+    changedGroupIds: UUIDType[],
+    trx: DatabasePg,
+  ) {
+    const directoryManagedGroups =
+      await this.groupDirectoryMembershipRepository.findDirectoryManagedGroupIdsForUser(
+        userId,
+        changedGroupIds,
+        trx,
+      );
+
+    if (directoryManagedGroups.length) {
+      throw new BadRequestException(
+        DIRECTORY_SYNC_ERROR_KEYS.GROUP_MEMBERSHIP_MANAGED_BY_DIRECTORY,
+      );
+    }
   }
 
   private async syncUserGroupEnrollment(

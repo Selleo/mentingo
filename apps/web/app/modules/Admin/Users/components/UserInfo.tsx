@@ -2,8 +2,10 @@ import { useEffect } from "react";
 import { type Control, Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { useRestoreDirectoryRoles } from "~/api/mutations/admin/useRestoreDirectoryRoles";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { useRoles } from "~/api/queries/admin/useRoles";
+import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import MultipleSelector from "~/components/ui/multiselect";
@@ -111,46 +113,56 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
 
         if (name === "roleSlugs") {
           return (
-            <UserMultiSelect
-              testId={USER_PAGE_HANDLES.ROLE_SELECT}
-              getOptionTestId={(option) => USER_PAGE_HANDLES.roleOption(option.value)}
-              value={(field.value as string[] | undefined) ?? []}
-              options={roles.map((role) => ({
-                value: role.slug,
-                label: getRoleLabel(role.slug, t, roles),
-              }))}
-              onChange={field.onChange}
-              placeholder={t("adminUsersView.filters.placeholder.roles")}
-            />
+            <div className="space-y-1">
+              <UserMultiSelect
+                testId={USER_PAGE_HANDLES.ROLE_SELECT}
+                getOptionTestId={(option) => USER_PAGE_HANDLES.roleOption(option.value)}
+                value={(field.value as string[] | undefined) ?? []}
+                options={roles.map((role) => ({
+                  value: role.slug,
+                  label: getRoleLabel(role.slug, t, roles),
+                }))}
+                onChange={field.onChange}
+                placeholder={t("adminUsersView.filters.placeholder.roles")}
+              />
+              {user.isDirectoryManaged && <DirectoryRoleNotice user={user} />}
+            </div>
           );
         }
 
         if (name === "groups") {
           return (
-            <MultipleSelector
-              testId={USER_PAGE_HANDLES.GROUPS_SELECT}
-              getOptionTestId={(option) => USER_PAGE_HANDLES.groupOption(option.value)}
-              commandProps={{
-                label: t("adminGroupsView.groupSelect.label"),
-                filter: filterGroups,
-              }}
-              onChange={(options) => {
-                setSelectedGroups(options);
-                field.onChange(options.map((option) => option.value));
-              }}
-              value={selectedGroups}
-              defaultOptions={options}
-              placeholder={t("adminGroupsView.groupSelect.label")}
-              hideClearAllButton
-              hidePlaceholderWhenSelected
-              emptyIndicator={<p>{t("adminGroupsView.groupSelect.noGroups")}</p>}
-              className="w-full bg-background p-2"
-              badgeClassName="bg-accent text-accent-foreground text-sm hover:bg-accent"
-              inputProps={{
-                className: "w-full outline-none py-0 body-base",
-              }}
-              checkbox={false}
-            />
+            <div className="space-y-1">
+              <MultipleSelector
+                testId={USER_PAGE_HANDLES.GROUPS_SELECT}
+                getOptionTestId={(option) => USER_PAGE_HANDLES.groupOption(option.value)}
+                commandProps={{
+                  label: t("adminGroupsView.groupSelect.label"),
+                  filter: filterGroups,
+                }}
+                onChange={(options) => {
+                  setSelectedGroups(options);
+                  field.onChange(options.map((option) => option.value));
+                }}
+                value={selectedGroups}
+                defaultOptions={options}
+                placeholder={t("adminGroupsView.groupSelect.label")}
+                hideClearAllButton
+                hidePlaceholderWhenSelected
+                emptyIndicator={<p>{t("adminGroupsView.groupSelect.noGroups")}</p>}
+                className="w-full bg-background p-2"
+                badgeClassName="bg-accent text-accent-foreground text-sm hover:bg-accent"
+                inputProps={{
+                  className: "w-full outline-none py-0 body-base",
+                }}
+                checkbox={false}
+              />
+              {user.isDirectoryManaged && (
+                <p className="body-sm text-neutral-600">
+                  {t("directorySync.user.groupsManagedByDirectory")}
+                </p>
+              )}
+            </div>
           );
         }
 
@@ -201,3 +213,33 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
     />
   );
 };
+
+function DirectoryRoleNotice({ user }: { user: GetUserByIdResponse["data"] }) {
+  const { t } = useTranslation();
+  const { mutateAsync: restoreDirectoryRoles, isPending } = useRestoreDirectoryRoles();
+
+  if (!user.isRoleOverridden) {
+    return (
+      <p className="body-sm text-neutral-600">{t("directorySync.user.rolesOverrideNotice")}</p>
+    );
+  }
+
+  return (
+    <div
+      className="flex flex-wrap items-center gap-2"
+      data-testid={USER_PAGE_HANDLES.ROLES_OVERRIDDEN_NOTICE}
+    >
+      <p className="body-sm text-neutral-600">{t("directorySync.user.rolesOverridden")}</p>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        disabled={isPending}
+        onClick={() => restoreDirectoryRoles(user.id)}
+        data-testid={USER_PAGE_HANDLES.RESTORE_DIRECTORY_ROLES_BUTTON}
+      >
+        {t("directorySync.user.restoreDirectoryRoles")}
+      </Button>
+    </div>
+  );
+}

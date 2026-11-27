@@ -290,6 +290,7 @@ export interface CurrentUserResponse {
       | "billing.manage"
       | "integration_key.manage"
       | "integration_api.use"
+      | "directory_sync.manage"
       | "tenant.manage"
       | "course.ai_generation"
       | "activity_log.read"
@@ -1837,6 +1838,8 @@ export interface GetUsersResponse {
       id: string;
       name: string;
     }[];
+    isDirectoryManaged: boolean;
+    isRoleOverridden: boolean;
   })[];
   pagination: {
     totalItems: number;
@@ -1868,6 +1871,8 @@ export interface GetUserByIdResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     roleSlugs: string[];
+    isDirectoryManaged: boolean;
+    isRoleOverridden: boolean;
     groups: {
       /** @format uuid */
       id: string;
@@ -2135,6 +2140,7 @@ export interface GetAllGroupsResponse {
       deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
+    isDirectoryManaged?: boolean;
     createdAt?: string;
     updatedAt?: string;
   }[];
@@ -2165,6 +2171,7 @@ export interface GetGroupByIdResponse {
       deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
+    isDirectoryManaged?: boolean;
     createdAt?: string;
     updatedAt?: string;
   };
@@ -2189,6 +2196,7 @@ export interface GetUserGroupsResponse {
       deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
+    isDirectoryManaged?: boolean;
     createdAt?: string;
     updatedAt?: string;
   }[];
@@ -34894,6 +34902,7 @@ export interface UpdateTenantApiKeysBody {
     | "ENTRA_ID_CLIENT_ID"
     | "ENTRA_ID_CLIENT_SECRET"
     | "ENTRA_ID_DIRECTORY_ID"
+    | "DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY"
     | "LUMA_API_KEY"
     | "LIVEKIT_URL"
     | "LIVEKIT_API_KEY"
@@ -34937,6 +34946,7 @@ export interface UpdateTenantApiKeysResponse {
       | "ENTRA_ID_CLIENT_ID"
       | "ENTRA_ID_CLIENT_SECRET"
       | "ENTRA_ID_DIRECTORY_ID"
+      | "DIRECTORY_SYNC_GOOGLE_SERVICE_ACCOUNT_KEY"
       | "LUMA_API_KEY"
       | "LIVEKIT_URL"
       | "LIVEKIT_API_KEY"
@@ -35087,6 +35097,7 @@ export interface GetGroupsResponse {
       deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
+    isDirectoryManaged?: boolean;
     createdAt?: string;
     updatedAt?: string;
   }[];
@@ -39844,6 +39855,391 @@ export interface UpdateGoogleCalendarOutboundSyncResponse {
 }
 
 export type DisconnectGoogleCalendarResponse = null;
+
+export interface GetDirectorySyncSetupDetailsResponse {
+  data: {
+    clientId: string;
+    scopes: string[];
+  };
+}
+
+export interface GetDirectorySyncConnectionResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    provider: "google_workspace";
+    status: "pending_verification" | "active" | "failing";
+    isVerified: boolean;
+    administratorEmail: string;
+    scopeType: "all_users" | "organizational_units" | "groups";
+    scopeExternalIds: string[];
+    /** @format uuid */
+    defaultRoleId: string;
+    archiveUsersOutsideScope: boolean;
+    sendWelcomeEmail: boolean;
+    archiveLimitPercentage: number | null;
+    lastSuccessfulSyncAt: string | null;
+    missingExternalIds: string[];
+    roleMappings: {
+      /** @minLength 1 */
+      externalGroupId: string;
+      /** @minLength 1 */
+      externalGroupEmail: string;
+      /** @format uuid */
+      roleId: string;
+      /** @min 0 */
+      priority: number;
+    }[];
+    groupMappings: {
+      /** @minLength 1 */
+      externalGroupId: string;
+      /** @minLength 1 */
+      externalGroupEmail: string;
+      /** @format uuid */
+      groupId: string;
+      groupName: string;
+    }[];
+    latestRun: {
+      /** @format uuid */
+      id: string;
+      trigger: "schedule" | "manual";
+      status: "queued" | "running" | "succeeded" | "failed" | "aborted_by_safeguard";
+      triggeredByUserId: string | null;
+      createdAt: string;
+      startedAt: string | null;
+      finishedAt: string | null;
+      createdUsersCount: number;
+      linkedUsersCount: number;
+      roleChangedUsersCount: number;
+      archivedUsersCount: number;
+      restoredUsersCount: number;
+      groupMembershipChangedUsersCount: number;
+      skippedUsersCount: number;
+    } | null;
+  } | null;
+}
+
+export interface UpsertDirectorySyncConnectionBody {
+  /** @format email */
+  administratorEmail: string;
+  scopeType: "all_users" | "organizational_units" | "groups";
+  scopeExternalIds: string[];
+  /** @format uuid */
+  defaultRoleId: string;
+  archiveUsersOutsideScope: boolean;
+  sendWelcomeEmail: boolean;
+  archiveLimitPercentage: number | null;
+}
+
+export interface UpsertDirectorySyncConnectionResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    provider: "google_workspace";
+    status: "pending_verification" | "active" | "failing";
+    isVerified: boolean;
+    administratorEmail: string;
+    scopeType: "all_users" | "organizational_units" | "groups";
+    scopeExternalIds: string[];
+    /** @format uuid */
+    defaultRoleId: string;
+    archiveUsersOutsideScope: boolean;
+    sendWelcomeEmail: boolean;
+    archiveLimitPercentage: number | null;
+    lastSuccessfulSyncAt: string | null;
+    missingExternalIds: string[];
+    roleMappings: {
+      /** @minLength 1 */
+      externalGroupId: string;
+      /** @minLength 1 */
+      externalGroupEmail: string;
+      /** @format uuid */
+      roleId: string;
+      /** @min 0 */
+      priority: number;
+    }[];
+    groupMappings: {
+      /** @minLength 1 */
+      externalGroupId: string;
+      /** @minLength 1 */
+      externalGroupEmail: string;
+      /** @format uuid */
+      groupId: string;
+      groupName: string;
+    }[];
+    latestRun: {
+      /** @format uuid */
+      id: string;
+      trigger: "schedule" | "manual";
+      status: "queued" | "running" | "succeeded" | "failed" | "aborted_by_safeguard";
+      triggeredByUserId: string | null;
+      createdAt: string;
+      startedAt: string | null;
+      finishedAt: string | null;
+      createdUsersCount: number;
+      linkedUsersCount: number;
+      roleChangedUsersCount: number;
+      archivedUsersCount: number;
+      restoredUsersCount: number;
+      groupMembershipChangedUsersCount: number;
+      skippedUsersCount: number;
+    } | null;
+  } | null;
+}
+
+export interface VerifyDirectorySyncConnectionResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    provider: "google_workspace";
+    status: "pending_verification" | "active" | "failing";
+    isVerified: boolean;
+    administratorEmail: string;
+    scopeType: "all_users" | "organizational_units" | "groups";
+    scopeExternalIds: string[];
+    /** @format uuid */
+    defaultRoleId: string;
+    archiveUsersOutsideScope: boolean;
+    sendWelcomeEmail: boolean;
+    archiveLimitPercentage: number | null;
+    lastSuccessfulSyncAt: string | null;
+    missingExternalIds: string[];
+    roleMappings: {
+      /** @minLength 1 */
+      externalGroupId: string;
+      /** @minLength 1 */
+      externalGroupEmail: string;
+      /** @format uuid */
+      roleId: string;
+      /** @min 0 */
+      priority: number;
+    }[];
+    groupMappings: {
+      /** @minLength 1 */
+      externalGroupId: string;
+      /** @minLength 1 */
+      externalGroupEmail: string;
+      /** @format uuid */
+      groupId: string;
+      groupName: string;
+    }[];
+    latestRun: {
+      /** @format uuid */
+      id: string;
+      trigger: "schedule" | "manual";
+      status: "queued" | "running" | "succeeded" | "failed" | "aborted_by_safeguard";
+      triggeredByUserId: string | null;
+      createdAt: string;
+      startedAt: string | null;
+      finishedAt: string | null;
+      createdUsersCount: number;
+      linkedUsersCount: number;
+      roleChangedUsersCount: number;
+      archivedUsersCount: number;
+      restoredUsersCount: number;
+      groupMembershipChangedUsersCount: number;
+      skippedUsersCount: number;
+    } | null;
+  } | null;
+}
+
+export interface ListDirectorySyncOrganizationalUnitsResponse {
+  data: {
+    externalId: string;
+    path: string;
+    name: string;
+  }[];
+}
+
+export interface SearchDirectorySyncGroupsResponse {
+  data: {
+    externalId: string;
+    email: string;
+    name: string;
+  }[];
+}
+
+export type ReplaceDirectorySyncRoleMappingsBody = {
+  /** @minLength 1 */
+  externalGroupId: string;
+  /** @minLength 1 */
+  externalGroupEmail: string;
+  /** @format uuid */
+  roleId: string;
+  /** @min 0 */
+  priority: number;
+}[];
+
+export interface ReplaceDirectorySyncRoleMappingsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    provider: "google_workspace";
+    status: "pending_verification" | "active" | "failing";
+    isVerified: boolean;
+    administratorEmail: string;
+    scopeType: "all_users" | "organizational_units" | "groups";
+    scopeExternalIds: string[];
+    /** @format uuid */
+    defaultRoleId: string;
+    archiveUsersOutsideScope: boolean;
+    sendWelcomeEmail: boolean;
+    archiveLimitPercentage: number | null;
+    lastSuccessfulSyncAt: string | null;
+    missingExternalIds: string[];
+    roleMappings: {
+      /** @minLength 1 */
+      externalGroupId: string;
+      /** @minLength 1 */
+      externalGroupEmail: string;
+      /** @format uuid */
+      roleId: string;
+      /** @min 0 */
+      priority: number;
+    }[];
+    groupMappings: {
+      /** @minLength 1 */
+      externalGroupId: string;
+      /** @minLength 1 */
+      externalGroupEmail: string;
+      /** @format uuid */
+      groupId: string;
+      groupName: string;
+    }[];
+    latestRun: {
+      /** @format uuid */
+      id: string;
+      trigger: "schedule" | "manual";
+      status: "queued" | "running" | "succeeded" | "failed" | "aborted_by_safeguard";
+      triggeredByUserId: string | null;
+      createdAt: string;
+      startedAt: string | null;
+      finishedAt: string | null;
+      createdUsersCount: number;
+      linkedUsersCount: number;
+      roleChangedUsersCount: number;
+      archivedUsersCount: number;
+      restoredUsersCount: number;
+      groupMembershipChangedUsersCount: number;
+      skippedUsersCount: number;
+    } | null;
+  } | null;
+}
+
+export interface ReplaceDirectorySyncGroupMappingsBody {
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es" | "fr";
+  groupMappings: {
+    /** @minLength 1 */
+    externalGroupId: string;
+    /** @minLength 1 */
+    externalGroupEmail: string;
+    /** @minLength 1 */
+    externalGroupName: string;
+    groupId: string | null;
+  }[];
+}
+
+export interface ReplaceDirectorySyncGroupMappingsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    provider: "google_workspace";
+    status: "pending_verification" | "active" | "failing";
+    isVerified: boolean;
+    administratorEmail: string;
+    scopeType: "all_users" | "organizational_units" | "groups";
+    scopeExternalIds: string[];
+    /** @format uuid */
+    defaultRoleId: string;
+    archiveUsersOutsideScope: boolean;
+    sendWelcomeEmail: boolean;
+    archiveLimitPercentage: number | null;
+    lastSuccessfulSyncAt: string | null;
+    missingExternalIds: string[];
+    roleMappings: {
+      /** @minLength 1 */
+      externalGroupId: string;
+      /** @minLength 1 */
+      externalGroupEmail: string;
+      /** @format uuid */
+      roleId: string;
+      /** @min 0 */
+      priority: number;
+    }[];
+    groupMappings: {
+      /** @minLength 1 */
+      externalGroupId: string;
+      /** @minLength 1 */
+      externalGroupEmail: string;
+      /** @format uuid */
+      groupId: string;
+      groupName: string;
+    }[];
+    latestRun: {
+      /** @format uuid */
+      id: string;
+      trigger: "schedule" | "manual";
+      status: "queued" | "running" | "succeeded" | "failed" | "aborted_by_safeguard";
+      triggeredByUserId: string | null;
+      createdAt: string;
+      startedAt: string | null;
+      finishedAt: string | null;
+      createdUsersCount: number;
+      linkedUsersCount: number;
+      roleChangedUsersCount: number;
+      archivedUsersCount: number;
+      restoredUsersCount: number;
+      groupMembershipChangedUsersCount: number;
+      skippedUsersCount: number;
+    } | null;
+  } | null;
+}
+
+export interface RequestManualDirectorySyncResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    trigger: "schedule" | "manual";
+    status: "queued" | "running" | "succeeded" | "failed" | "aborted_by_safeguard";
+    triggeredByUserId: string | null;
+    createdAt: string;
+    startedAt: string | null;
+    finishedAt: string | null;
+    createdUsersCount: number;
+    linkedUsersCount: number;
+    roleChangedUsersCount: number;
+    archivedUsersCount: number;
+    restoredUsersCount: number;
+    groupMembershipChangedUsersCount: number;
+    skippedUsersCount: number;
+  };
+}
+
+export interface ListDirectorySyncRunsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    trigger: "schedule" | "manual";
+    status: "queued" | "running" | "succeeded" | "failed" | "aborted_by_safeguard";
+    triggeredByUserId: string | null;
+    createdAt: string;
+    startedAt: string | null;
+    finishedAt: string | null;
+    createdUsersCount: number;
+    linkedUsersCount: number;
+    roleChangedUsersCount: number;
+    archivedUsersCount: number;
+    restoredUsersCount: number;
+    groupMembershipChangedUsersCount: number;
+    skippedUsersCount: number;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
 
 export interface ListResponse {
   data: {
@@ -52456,6 +52852,260 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/auth/google-calendar/callback`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncControllerGetDirectorySyncSetupDetails
+     * @summary Get the client ID and scopes to grant in the customer's directory
+     * @request GET:/api/directory-sync/{provider}/setup
+     */
+    directorySyncControllerGetDirectorySyncSetupDetails: (
+      provider: "google_workspace",
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDirectorySyncSetupDetailsResponse, void>({
+        path: `/api/directory-sync/${provider}/setup`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncControllerGetDirectorySyncConnection
+     * @summary Get the directory sync connection, or null when not set up
+     * @request GET:/api/directory-sync/{provider}/connection
+     */
+    directorySyncControllerGetDirectorySyncConnection: (
+      provider: "google_workspace",
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDirectorySyncConnectionResponse, void>({
+        path: `/api/directory-sync/${provider}/connection`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncControllerUpsertDirectorySyncConnection
+     * @summary Create or update the directory sync connection settings
+     * @request PUT:/api/directory-sync/{provider}/connection
+     */
+    directorySyncControllerUpsertDirectorySyncConnection: (
+      provider: "google_workspace",
+      data: UpsertDirectorySyncConnectionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpsertDirectorySyncConnectionResponse, void>({
+        path: `/api/directory-sync/${provider}/connection`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncControllerDeleteDirectorySyncConnection
+     * @summary Disconnect directory sync; synced users stay as they are
+     * @request DELETE:/api/directory-sync/{provider}/connection
+     */
+    directorySyncControllerDeleteDirectorySyncConnection: (
+      provider: "google_workspace",
+      params: RequestParams = {},
+    ) =>
+      this.request<void, void>({
+        path: `/api/directory-sync/${provider}/connection`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncControllerVerifyDirectorySyncConnection
+     * @summary Check that Mentingo can read the customer's directory
+     * @request POST:/api/directory-sync/{provider}/connection/verification
+     */
+    directorySyncControllerVerifyDirectorySyncConnection: (
+      provider: "google_workspace",
+      params: RequestParams = {},
+    ) =>
+      this.request<VerifyDirectorySyncConnectionResponse, void>({
+        path: `/api/directory-sync/${provider}/connection/verification`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncControllerListDirectorySyncOrganizationalUnits
+     * @summary List organizational units for the sync scope picker
+     * @request GET:/api/directory-sync/{provider}/connection/organizational-units
+     */
+    directorySyncControllerListDirectorySyncOrganizationalUnits: (
+      provider: "google_workspace",
+      params: RequestParams = {},
+    ) =>
+      this.request<ListDirectorySyncOrganizationalUnitsResponse, void>({
+        path: `/api/directory-sync/${provider}/connection/organizational-units`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncControllerSearchDirectorySyncGroups
+     * @summary Search directory groups for the scope and role mapping pickers
+     * @request GET:/api/directory-sync/{provider}/connection/groups
+     */
+    directorySyncControllerSearchDirectorySyncGroups: (
+      provider: "google_workspace",
+      query?: {
+        /** @maxLength 100 */
+        search?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<SearchDirectorySyncGroupsResponse, void>({
+        path: `/api/directory-sync/${provider}/connection/groups`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncControllerReplaceDirectorySyncRoleMappings
+     * @summary Replace the directory group to role mappings
+     * @request PUT:/api/directory-sync/{provider}/connection/role-mappings
+     */
+    directorySyncControllerReplaceDirectorySyncRoleMappings: (
+      provider: "google_workspace",
+      data: ReplaceDirectorySyncRoleMappingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ReplaceDirectorySyncRoleMappingsResponse, void>({
+        path: `/api/directory-sync/${provider}/connection/role-mappings`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncControllerReplaceDirectorySyncGroupMappings
+     * @summary Replace the directory group to Mentingo group mappings
+     * @request PUT:/api/directory-sync/{provider}/connection/group-mappings
+     */
+    directorySyncControllerReplaceDirectorySyncGroupMappings: (
+      provider: "google_workspace",
+      data: ReplaceDirectorySyncGroupMappingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ReplaceDirectorySyncGroupMappingsResponse, void>({
+        path: `/api/directory-sync/${provider}/connection/group-mappings`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncControllerRequestManualDirectorySync
+     * @summary Queue a directory sync now
+     * @request POST:/api/directory-sync/{provider}/connection/synchronizations
+     */
+    directorySyncControllerRequestManualDirectorySync: (
+      provider: "google_workspace",
+      params: RequestParams = {},
+    ) =>
+      this.request<RequestManualDirectorySyncResponse, void>({
+        path: `/api/directory-sync/${provider}/connection/synchronizations`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncControllerListDirectorySyncRuns
+     * @summary List directory sync runs, newest first
+     * @request GET:/api/directory-sync/{provider}/connection/runs
+     */
+    directorySyncControllerListDirectorySyncRuns: (
+      provider: "google_workspace",
+      query?: {
+        /**
+         * @min 1
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         * @default 20
+         */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListDirectorySyncRunsResponse, void>({
+        path: `/api/directory-sync/${provider}/connection/runs`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Directory Sync
+     * @name DirectorySyncUserControllerRestoreDirectoryRoles
+     * @summary Let the directory manage a synced user's roles again
+     * @request DELETE:/api/directory-sync/users/{userId}/role-override
+     */
+    directorySyncUserControllerRestoreDirectoryRoles: (
+      userId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/directory-sync/users/${userId}/role-override`,
+        method: "DELETE",
         ...params,
       }),
 
