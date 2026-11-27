@@ -7,7 +7,6 @@ import {
 
 import { PromptService } from "src/ai/services/prompt.service";
 import { MESSAGE_ROLE } from "src/ai/utils/ai.type";
-import { getMentorConductInstructions } from "src/ai/utils/mentor-conduct";
 
 import type { AiRepository } from "src/ai/repositories/ai.repository";
 import type { MessageService } from "src/ai/services/message.service";
@@ -119,16 +118,13 @@ describe("PromptService learner-name personalization", () => {
         learnerRole: "Sprzedawca",
       }),
     );
-    expect(prompt).toBe("ROLEPLAY_PROMPT\n\nLEARNER_NAME_RULES");
-    expect(tokenService.countTokens).toHaveBeenCalledWith(
-      expect.any(String),
-      "ROLEPLAY_PROMPT\n\nLEARNER_NAME_RULES",
-    );
+    expect(prompt).toContain("ROLEPLAY_PROMPT\n\nLEARNER_NAME_RULES\n\n<conduct_boundaries>");
+    expect(tokenService.countTokens).toHaveBeenCalledWith(expect.any(String), prompt);
     expect(aiRepository.insertMessage).toHaveBeenCalledWith({
       tokenCount: 42,
       threadId,
       role: MESSAGE_ROLE.SYSTEM,
-      content: "ROLEPLAY_PROMPT\n\nLEARNER_NAME_RULES",
+      content: prompt,
     });
   });
 
@@ -272,14 +268,21 @@ describe("PromptService learner-name personalization", () => {
 
       expect(textPrompt.some((message) => message.content === systemPrompt)).toBe(true);
       for (const prompt of [textPrompt, voicePrompt]) {
-        const boundaries = prompt.find(
-          ({ content }) => content === getMentorConductInstructions(type),
-        );
-        expect(boundaries?.role).toBe(MESSAGE_ROLE.SYSTEM);
+        const boundaries = prompt.find(({ content }) => content.includes("<conduct_boundaries>"));
+        expect(boundaries).toMatchObject({
+          id: "system-prompt",
+          role: MESSAGE_ROLE.SYSTEM,
+          content: systemPrompt,
+        });
+        expect(
+          prompt.filter(({ content }) => content.includes("<conduct_boundaries>")),
+        ).toHaveLength(1);
         expect(boundaries?.content).toContain("stay disengaged in later turns");
         expect(boundaries?.content).toContain("Casual profanity that is not aimed at a person");
         if (type === AI_MENTOR_TYPE.TEACHER) {
-          expect(boundaries?.content).not.toMatch(/in character|roleplay/i);
+          expect(boundaries?.content).toContain(
+            "pause the lesson until the learner continues respectfully",
+          );
         } else {
           expect(boundaries?.content).toContain("react naturally in character");
         }
@@ -287,6 +290,27 @@ describe("PromptService learner-name personalization", () => {
       expect(textPrompt.some((message) => message.content === speechPolicy)).toBe(false);
     },
   );
+
+  it("adds the appropriate policy inside the stored system message for legacy threads", async () => {
+    const { aiRepository, service } = createService(AI_MENTOR_TYPE.TEACHER);
+    aiRepository.findFirstMessageByRoleAndThread.mockResolvedValueOnce({
+      id: "stored-teacher",
+      role: MESSAGE_ROLE.SYSTEM,
+      content: "Stored lesson instructions",
+    });
+
+    const prompt = await service.buildPrompt(threadId, "Hello");
+
+    expect(prompt.filter(({ role }) => role === MESSAGE_ROLE.SYSTEM)).toEqual([
+      expect.objectContaining({
+        id: "stored-teacher",
+        content: expect.stringContaining("Stored lesson instructions\n\n<conduct_boundaries>"),
+      }),
+    ]);
+    expect(prompt[0].content).toContain(
+      "pause the lesson until the learner continues respectfully",
+    );
+  });
 
   it("adds learner delivery timing as a separate voice system message", async () => {
     const { service } = createService();

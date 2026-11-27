@@ -4,10 +4,7 @@ import { resolve } from "node:path";
 
 import { AI_MENTOR_ROLEPLAY_DIFFICULTY, AI_MENTOR_TEACHING_STYLE } from "@repo/shared";
 
-import {
-  MENTOR_CONDUCT_BLOCKING_ERROR,
-  ROLEPLAY_MENTOR_CONDUCT_INSTRUCTIONS,
-} from "src/ai/utils/mentor-conduct";
+import { MENTOR_CONDUCT_BLOCKING_ERROR } from "src/ai/utils/mentor-conduct";
 
 import { prepareFeaturePrompt } from "./feature-task";
 
@@ -351,10 +348,10 @@ describe("task-specific Core oracle regression contracts", () => {
       (item) => item.id === "mentor-conduct-roleplay-disengagement-pl-v1",
     );
     if (!disengagement) throw new Error("Missing Mentor conduct disengagement case");
-    expect(disengagement.input.task.messages?.[0]).toEqual({
-      role: "system",
-      content: ROLEPLAY_MENTOR_CONDUCT_INSTRUCTIONS,
-    });
+    const { request } = prepareFeaturePrompt(disengagement);
+    expect(request.messages[0].content).toContain("<conduct_boundaries>");
+    expect(request.messages[0].content).toContain("stay disengaged in later turns");
+    expect(disengagement.input.task.messages?.some(({ role }) => role === "system")).toBe(false);
     expect(disengagement.input.task.variables).not.toHaveProperty("blockingError");
     expect(disengagement.input.task.variables).not.toHaveProperty("assessmentConfiguration");
   });

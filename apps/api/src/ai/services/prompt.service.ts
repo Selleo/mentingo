@@ -14,7 +14,6 @@ import { MessageService } from "src/ai/services/message.service";
 import { RagService } from "src/ai/services/rag.service";
 import { TokenService } from "src/ai/services/token.service";
 import { MESSAGE_ROLE, OPENAI_MODELS } from "src/ai/utils/ai.type";
-import { getMentorConductInstructions } from "src/ai/utils/mentor-conduct";
 import { EnvService } from "src/env/services/env.service";
 import { aiMentorThreads } from "src/storage/schema";
 
@@ -26,6 +25,8 @@ import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
 import type { MessageRole } from "src/ai/utils/ai.type";
 import type { CompiledTemplate } from "src/ai/utils/prompt.type";
 import type { UUIDType } from "src/common";
+
+const mentorConductSection = /^<conduct_boundaries>\n[\s\S]+?^<\/conduct_boundaries>$/m;
 
 @Injectable()
 export class PromptService implements OnModuleInit {
@@ -94,18 +95,14 @@ export class PromptService implements OnModuleInit {
         id: systemPrompt.id,
         role: systemPrompt.role,
         userName: null,
-        content: systemPrompt.content,
+        content: mentorConductSection.test(systemPrompt.content)
+          ? systemPrompt.content
+          : this.includeMentorConduct(
+              systemPrompt.content,
+              await this.aiRepository.findMentorTypeByThreadId(threadId),
+            ),
       });
     }
-
-    metaMessages.push({
-      id: "",
-      role: MESSAGE_ROLE.SYSTEM,
-      userName: null,
-      content: getMentorConductInstructions(
-        await this.aiRepository.findMentorTypeByThreadId(threadId),
-      ),
-    });
 
     if (isVoiceMentor) {
       const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
@@ -284,8 +281,16 @@ export class PromptService implements OnModuleInit {
       });
 
     const prompt = `${mentorPrompt}\n\n${learnerNameAddon}`;
+    return mentorConductSection.test(prompt) ? prompt : this.includeMentorConduct(prompt, mode);
+  }
 
-    return prompt;
+  /** Read the policy from the base YAML for snapshots that predate the conduct section. */
+  private includeMentorConduct(prompt: string, mode: AiMentorType | null) {
+    const template = mode === AI_MENTOR_TYPE.ROLEPLAY ? "roleplayPrompt" : "teacherPrompt";
+    const section = promptTemplates[template].template.match(mentorConductSection)?.[0];
+    if (!section) throw new Error(`Missing conduct section in ${template}`);
+
+    return `${prompt}\n\n${section}`;
   }
 
   async loadPrompt<K extends keyof typeof PROMPT_MAP>(id: K, vars: Static<(typeof PROMPT_MAP)[K]>) {
