@@ -6855,6 +6855,7 @@
       "distinctTaskLabel": "{{label}} · {{number}}",
       "readingSources": "Lecture de vos sources…",
       "creatingVisual": "Création d’un visuel…",
+      "creatingPodcast": "Création d’un podcast…",
       "updatingCourse": "Mise à jour de votre cours…",
       "waiting": "Votre réponse est nécessaire",
       "failed": "Certaines tâches nécessitent votre attention",

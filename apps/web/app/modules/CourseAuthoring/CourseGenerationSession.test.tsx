@@ -871,6 +871,7 @@ describe("CourseGenerationSession proposal decisions", () => {
     "opens podcast review with a %s asset and applies only when audio is ready",
     async (status) => {
       state.groupedReview = true;
+      state.renderWork = true;
       const podcast: AssetRequestView = {
         assetId: "podcast",
         operationId: "lesson-operation",
@@ -916,6 +917,11 @@ describe("CourseGenerationSession proposal decisions", () => {
           onPreviewProposalInCurriculum={onPreviewProposalInCurriculum}
         />,
       );
+
+      if (status === "running") {
+        expect(screen.getByText("Creating a podcast…")).toBeInTheDocument();
+        expect(screen.queryByText("Creating a visual…")).not.toBeInTheDocument();
+      }
 
       const review = screen.getByRole("button", { name: "Review grouped changes" });
       expect(review).toBeEnabled();

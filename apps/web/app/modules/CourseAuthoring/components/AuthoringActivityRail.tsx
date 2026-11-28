@@ -235,6 +235,7 @@ const taskStatusKey = (status: AuthoringTask["status"]) =>
 
 /** Prefers the task kind: the phase can lag behind or describe a sibling step. */
 const taskKindKey = (task: AuthoringTask) => {
+  if (task.assetPurpose === "podcast") return "creatingPodcast";
   if (task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.REPAIRING) {
     return task.kind === AUTHORING_TASK_KIND.LESSON ? "revisingLesson" : "revisingLessonPlan";
   }
@@ -300,6 +301,7 @@ const taskKindLabel = (task: AuthoringTask, t: (key: string) => string) =>
     .with("updatingCourse", () => t("courseAuthoring.activityRail.taskKind.updatingCourse"))
     .with("understandingRequest", () => t("courseAuthoring.conversation.understandingRequest"))
     .with("preparingResponse", () => t("courseAuthoring.conversation.preparingResponse"))
+    .with("creatingPodcast", () => t("courseAuthoring.conversation.creatingPodcast"))
     .with("creatingVisual", () => t("courseAuthoring.conversation.creatingVisual"))
     .otherwise(() => t("courseAuthoring.activityRail.taskKind.working"));
 

@@ -24,6 +24,7 @@ export const authoringPhaseLabel = (
   }
   if (task.status === AUTHORING_TASK_STATUS.WAITING_AUTHOR)
     return t("courseAuthoring.conversation.waiting");
+  if (task.assetPurpose === "podcast") return t("courseAuthoring.conversation.creatingPodcast");
   if (task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.RECOVERING)
     return t("courseAuthoring.activityRail.recoveringFailedParts");
   if (task.workProgress?.stage === AUTHORING_WORK_PROGRESS_STAGE.REPAIRING) {

@@ -7119,6 +7119,7 @@
       "distinctTaskLabel": "{{label}} · {{number}}",
       "readingSources": "Čtení vašich zdrojů…",
       "creatingVisual": "Vytváření obrázku…",
+      "creatingPodcast": "Vytváření podcastu…",
       "updatingCourse": "Aktualizuje se váš kurz…",
       "waiting": "Je potřeba váš vstup",
       "failed": "Některé úlohy vyžadují pozornost",
